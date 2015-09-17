@@ -371,10 +371,9 @@ class new_:
 
             data = [data]
 
-        # Add to modulater
+        # Add to modifier
 
-        self.modf['degree'] = circular_add(self.modf['degree'], data)
-
+        self.modf['degree'] = data 
         return self
 
 
@@ -388,7 +387,7 @@ class new_:
 
          # Add to modifier
 
-        self.modf['degree'] = circular_add(self.modf['degree'], data)
+        self.modf['degree'] = data
 
         return self
 
@@ -659,6 +658,8 @@ class samples_:
         self.amp    = kwargs.get("amp",     [1])
         self.pan    = kwargs.get("pan",     [0])
         self.rate   = kwargs.get("rate",    [1])
+        self.verb   = kwargs.get("verb",  [0.2])
+        self.dist   = kwargs.get("dist",    [0])
 
         # Map pattern to buffer numbers
         
@@ -795,7 +796,9 @@ class samples_:
                       "amp"     :   asStream(self.amp),
                       "pan"     :   asStream(self.pan),
                       "rate"    :   asStream(self.rate),
-                      "buf"     :   asStream(self.buf)
+                      "buf"     :   asStream(self.buf),
+                      "verb"    :   asStream(self.verb),
+                      "dist"    :   asStream(self.dist)
                     }
 
     def now(self, attr, x=0):
