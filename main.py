@@ -60,7 +60,7 @@ class App:
 
     def __init__(self, master):     
 
-        frame = Frame(master, height=600, width=800)
+        frame = Frame(master, height=1200, width=1600)
         frame.pack()
 
         self.text = Text(frame, padx=5, pady=5)

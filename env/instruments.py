@@ -21,6 +21,17 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
 
     return scale_val + (octave * len(chroma)) + chroma[ root % len(chroma) ]
+
+
+def Chord(stream, structure=[0,2,4]):
+
+    new = []
+
+    for item in stream:
+
+        new.append([item + s for s in structure])
+
+    return new
         
 
 def Place(stream):
@@ -91,7 +102,7 @@ def asStream(data, n=" "):
         except:
             stream = [data]
 
-    return Place(stream)
+    return stream
 
 def circular_add(a, b):
     """ Adding contents of b to a """
@@ -139,7 +150,7 @@ class new_:
         self.root   = kwargs.get("root",    [0])
         self.degree = kwargs.get("degree",  degree)
         self.oct    = kwargs.get("oct",     [5])
-        self.amp    = kwargs.get("amp",     [1])
+        self.amp    = kwargs.get("amp",     [0.5])
         self.pan    = kwargs.get("pan",     [0])
         self.sus    = kwargs.get("sus",     self.dur)
         self.rate   = kwargs.get("rate",    [1])
@@ -239,7 +250,7 @@ class new_:
 
         # Calculate frequency
 
-        self.freq = [ miditofreq( midi( self.scale, self.now('oct'), self.now('degree'), self.now('root') ) ) ]
+        self.freq = [ miditofreq( midi( self.scale, self.now('oct'), DEGREE, self.now('root') ) ) for DEGREE in asStream(self.now('degree')) ]
 
         if self.glissandi:
 
@@ -334,7 +345,33 @@ class new_:
 
         except:
 
-            value = attr_value
+            # Both "chords" must have the same size or not used
+
+            if type(attr_value) in (list, tuple) and type(modf_value) in (list, tuple):
+
+                value = []
+
+                for i, v in enumerate(attr_value):
+
+                    value += [v + modf_value[i]]
+
+            # Just original is chords
+
+            elif type(attr_value) in (list, tuple) and type(modf_value) not in (list, tuple):
+
+                value = [v + modf_value for v in attr_value]
+
+            # Just modifier is chords
+
+            elif type(attr_value) not in (list, tuple) and type(modf_value) in (list, tuple):
+
+                value = [m + attr_value for m in modf_value]
+
+            # Neither are chords
+
+            else:
+
+                value = attr_value
         
         return value
 
@@ -564,19 +601,21 @@ class new_:
 
         return self
 
-    def osc_message(self):
+    def osc_message(self, freq):
 
-        message = [self.name, 0, 1, 1]
+        message = [self.name, 0, 1, 1, 'freq', freq]
 
         for key in self.attr:
 
-            val = self.now(key)
+            if key not in ('freq', 'degree'):
 
-            if key == "sus":
+                val = self.now(key)
 
-                val = val * self.metro.beat_dur()
+                if key == "sus":
 
-            message += [key, val]
+                    val = val * self.metro.beat_dur()
+
+                message += [key, val]
 
         return message
 
@@ -585,7 +624,9 @@ class new_:
 
         # Create OSC Message
 
-        self.server.play_note( self.osc_message() )
+        for f in self.freq:
+
+            self.server.play_note( self.osc_message(f) )
 
         return
 
@@ -602,6 +643,7 @@ class new_:
         self.event_n = self.metro.beat % len(self.metro) - int(self.quantise)
 
         return self
+
 
 # ---------------------------------------------- #
 # Class for for reading samples from buffers     # s = samples_("x-*-", metro=clock_, server=server_, quant=False)

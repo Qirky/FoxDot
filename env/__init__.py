@@ -73,14 +73,12 @@ def fShuf(a, b=None, size=8):
 
     return L
 
-def White(lo=0, hi=1, mode=None, size=256):
+def White(lo=0, hi=1, size=256):
 
     lo = float(lo)
     hi = float(hi)
 
-    if not mode or lo > mode or mode > hi:
-
-        mode = (lo + hi) / 2.0
+    mode = (lo + hi) / 2.0
 
     L = [random.triangular(lo, hi, mode) for n in range(size)]
 
