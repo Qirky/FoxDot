@@ -74,7 +74,7 @@ def new_player( code ):
 
     # RexEx for samples constructed using VAR $ STRING
 
-    samples = re.findall(r'\w+ \$ ".*?".*?\n', code )
+    samples = re.findall(r'\w+ \$ .*?\n', code )
 
     assignments = instruments + samples
 
@@ -136,7 +136,7 @@ def new_player( code ):
 
         if SynthDef == "sample_player":
 
-           Arguments.append( "pat=%s" % pattern )
+           Arguments.append( "pat=''.join(%s)" % pattern )
 
         # Check for any information AFTER the init
 

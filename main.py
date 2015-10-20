@@ -53,17 +53,22 @@ f.close()
 # Root Widget
 
 root = Tk()
+root.title("FoxDot - Live Coding with Python and SuperCollider")
 
 # App object
 
 class App:
 
-    def __init__(self, master):     
+    def __init__(self, master):
 
-        frame = Frame(master, height=1200, width=1600)
-        frame.pack()
+        # Create Y scrollbar
 
-        self.text = Text(frame, padx=5, pady=5)
+        self.Yscroll = Scrollbar(master)
+        self.Yscroll.pack(side=RIGHT, fill=Y)
+
+        # Create text box
+
+        self.text = Text(master, padx=5, pady=5, height=40, width=120, yscrollcommand=self.Yscroll.set)
         self.text.focus_set()
 
         # Key bindings
@@ -95,7 +100,7 @@ class App:
         self.text.tag_config("comments" , background="White", foreground="#FF3300")
         self.text.tag_config("text" ,     background="White", foreground="#000000")
 
-        self.text.pack()
+        self.text.pack(fill=BOTH, expand = 1)
 
         # Default values
 
