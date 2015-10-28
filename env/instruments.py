@@ -135,6 +135,9 @@ class new_:
         self.metro      = kwargs.get("metro", None)
         self.quantise   = kwargs.get("quantise", False)
 
+        self.stopping = False
+        self.stop_point = 0
+
         # Get server manager
 
         self.server = kwargs.get("server", None)
@@ -215,6 +218,14 @@ class new_:
         return self.name
 
     def update(self, isEvent=True):
+
+        # Kill the player if stopping
+
+        if self.stopping:
+
+            if self.metro.beat >= self.stop_point:
+
+                self.kill()
 
         # Find out the number of events in the clock before the current beat pointer
 
@@ -341,7 +352,13 @@ class new_:
 
         try:
 
-            value = attr_value + modf_value
+            if attr is "amp":
+
+                value = attr_value * modf_value
+
+            else:
+
+                value = attr_value + modf_value
 
         except:
 
@@ -392,6 +409,8 @@ class new_:
 
         self.modf = dict([(key, [0]) for key in self.attr])
 
+        self.modf['amp'] = [1]
+
         self.reset_code()
 
         return self
@@ -410,7 +429,8 @@ class new_:
 
         # Add to modifier
 
-        self.modf['degree'] = data 
+        self.modf['degree'] = data
+        
         return self
 
 
@@ -430,25 +450,15 @@ class new_:
 
     def __mul__(self, data):
 
-        # TODO Sync in the clock
+        """ Multiplying an instrument player multiplies each amp value by
+            the input, or circularly if the input is a list. The input is
+            stored here and calculated at the update stage """
 
         if type(data) in (int, float):
 
             data = [data]
 
-        size_dur  = len(self.attr['dur'])
-        size_sus  = len(self.attr['sus'])
-        size_data = len(data)
-
-        size_max = max( size_dur , size_sus, size_data)
-
-        self.dur = [ 0 for x in range(size_max) ]
-        self.sus = [ 0 for x in range(size_max) ]
-
-        for i in range( size_max ):
-
-            self.dur[i] = self.attr['dur'][i % size_dur] * (1.0 / data[i % size_data])
-            self.sus[i] = self.attr['sus'][i % size_sus] * (1.0 / data[i % size_data])
+        self.modf['amp'] = data
 
         return self
 
@@ -458,19 +468,7 @@ class new_:
 
             data = [data]
 
-        size_dur  = len(self.attr['dur'])
-        size_sus  = len(self.attr['sus'])
-        size_data = len(data)
-
-        size_max = max( size_dur , size_sus, size_data)
-
-        self.dur = [ 0 for x in range(size_max) ]
-        self.sus = [ 0 for x in range(size_max) ]
-
-        for i in range( size_max ):
-
-            self.dur[i] = self.attr['dur'][i % size_dur] / (1.0 / data[i % size_data])
-            self.sus[i] = self.attr['sus'][i % size_sus] / (1.0 / data[i % size_data])
+        self.modf['amp'] = [1 / d for d in data]
 
         return self            
 
@@ -587,11 +585,27 @@ class new_:
 
         return self
 
-    def stop(self):
-        
+    def kill(self):
+
         self.isplaying = False
         self.event_n = 0
         self.metro.playing.remove(self)
+
+        return self
+
+    def stop(self, N=0):
+        
+        """ Removes the player from the Tempo clock and changes its internal
+            playing state to False in N bars time
+            - When N is 0 it stops immediately"""
+
+        self.stopping = True
+        
+        self.stop_point = self.metro.beat
+
+        if N > 0:
+
+            self.stop_point += self.metro.til_next_bar() + ((N-1) * self.metro.bar_length())
 
         return self
 
@@ -642,6 +656,14 @@ class new_:
 
         self.event_n = self.metro.beat % len(self.metro) - int(self.quantise)
 
+        self.stopping = False
+
+        return self
+
+    def start(self):
+
+        self.play()
+
         return self
 
 
@@ -684,6 +706,8 @@ class samples_:
 
         self.metro      = kwargs.get("metro", None)
         self.quantise   = kwargs.get("quantise", False)
+        self.stopping   = False
+        self.stop_point = 0
 
         # Get server manager
 
@@ -757,6 +781,14 @@ class samples_:
 
     def update(self, isEvent=True):
 
+        # Kill the player if stopping
+
+        if self.stopping:
+
+            if self.metro.beat >= self.stop_point:
+
+                self.kill()
+                
         # Find out the number of events in the clock before the current beat pointer
 
         count = 0
@@ -775,7 +807,7 @@ class samples_:
 
         # Add to aggregate counter for when events go past the clock scope
 
-        if self.metro.beat == len(self.metro):
+        if self.metro.beat % len(self.metro) == 0:
 
             self.event_agg += self.event_n
 
@@ -1088,17 +1120,34 @@ class samples_:
         return
 
     def stutter(self, n=4):
+        
         """ repeats each value in each stream n times """
 
         self.pat = stutter_stream(self.pat, n)
 
         return self
 
-    def stop(self):
-        
+    def kill(self):
+
         self.isplaying = False
         self.event_n = 0
         self.metro.playing.remove(self)
+
+        return self
+
+    def stop(self, N=0):
+        
+        """ Removes the player from the Tempo clock and changes its internal
+            playing state to False in N bars time
+            - When N is 0 it stops immediately"""
+
+        self.stopping = True
+        
+        self.stop_point = self.metro.beat
+
+        if N > 0:
+
+            self.stop_point += self.metro.til_next_bar() + ((N-1) * self.metro.bar_length())
 
         return self
 
@@ -1140,5 +1189,13 @@ class samples_:
         # Quantise
 
         self.event_n = self.metro.beat % len(self.metro) - int(self.quantise)
+
+        self.stopping = False
+
+        return self
+
+    def start(self):
+
+        self.play()
 
         return self

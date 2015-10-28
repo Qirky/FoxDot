@@ -63,6 +63,10 @@ class TempoClock:
 
         return float( self.beat_dur() / self.steps )
 
+    def til_next_bar(self):
+
+        return (len(self)-self.now()) % self.bar_length()
+
     def beatsPerBar(self):
 
         return self.timeSig[0]
@@ -97,9 +101,9 @@ class TempoClock:
 
             for player in self.queue[self.now()]:
 
-                player.update()
-
                 if player.isplaying:
+
+                    player.update()
 
                     player.send()
 
@@ -137,7 +141,7 @@ class TempoClock:
         while len(self.playing) != 0:
             
             p = self.playing[0]
-            p.stop()
+            p.kill()
 
         self.queue = [[] for n in range( len(self) ) ]
 
