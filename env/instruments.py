@@ -468,7 +468,7 @@ class new_:
 
             data = [data]
 
-        self.modf['amp'] = [1 / d for d in data]
+        self.modf['amp'] = [1.0 / d for d in data]
 
         return self            
 

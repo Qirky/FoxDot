@@ -24,7 +24,7 @@ def execute(code):
 
     except Exception as e:
 
-        print "Error:", e
+        print "Error:" , e
 
 
 
@@ -42,17 +42,15 @@ def toPython( live_code ):
 
     # 3. Convert any references to "self" to the attached player
 
-    #print repr(live_code)
-
     live_code = remove_self( live_code )
 
     if not live_code: return ""
 
     # Convert to python code to be executed
 
-    # Can we extract any imbedded code and create a list?
+    print ">>> %s" % "\n>>> ".join(live_code.split("\n")[:-1])
 
-    print_code(live_code)
+    # Can we extract any imbedded code and create a list?
 
     raw_python = compile(live_code, '<string>', 'exec')
 

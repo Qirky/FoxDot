@@ -12,6 +12,9 @@ from time import sleep as wait
 from env import foxdot
 from design import *
 
+import sys
+import traceback
+
 # Function for getting index in an easier way
 
 def index(index1, index2=None):
@@ -30,7 +33,7 @@ def load(fn=None):
     if fn:
         string += ""
     else:
-        string += "from env import *"
+        string += "from env import *\n"
     return string
 
 
@@ -55,6 +58,37 @@ f.close()
 root = Tk()
 root.title("FoxDot - Live Coding with Python and SuperCollider")
 
+class console:
+
+    def __init__(self, master, w=None):
+
+        self.text = StringVar()
+        
+        self.widget = Label(master, padx=5, pady=5,
+                            height=10, width=120,
+                            bg="Black", fg="White",
+                            justify=LEFT, anchor=SW,
+                            font=("Ubuntu Mono", 12),
+                            wraplength=1000,
+                            textvariable=self.text)
+        
+        self.widget.pack(fill=BOTH, expand=1)
+
+    def __str__(self):
+
+        return self.text.get()        
+
+    def write(self, string):
+
+        self.text.set( str(self) + string)
+
+        return
+
+    def read(self):
+
+        return str(self)
+        
+
 # App object
 
 class App:
@@ -66,9 +100,16 @@ class App:
         self.Yscroll = Scrollbar(master)
         self.Yscroll.pack(side=RIGHT, fill=Y)
 
-        # Create text box
+        # Create text box for code
 
-        self.text = Text(master, padx=5, pady=5, height=40, width=120, yscrollcommand=self.Yscroll.set)
+        self.text = Text(master,
+                         padx=5, pady=5,
+                         height=25, width=120,
+                         bg = "#140000", fg="White",
+                         insertbackground="White",
+                         font = ("Ubuntu Mono", 12),
+                         yscrollcommand=self.Yscroll.set)
+        
         self.text.focus_set()
 
         # Key bindings
@@ -101,6 +142,12 @@ class App:
         self.text.tag_config("text" ,     background="White", foreground="#000000")
 
         self.text.pack(fill=BOTH, expand = 1)
+
+        # Create lable for console
+
+        self.console = console(master)
+
+        #sys.stdout = self.console
 
         # Default values
 
@@ -213,8 +260,8 @@ class App:
 
         """ Handles code execution and name space management """
 
-        foxdot.execute( code_str )        
-            
+        foxdot.execute( code_str )
+    
         return
 
     def get_code(self, event):
@@ -401,7 +448,7 @@ class App:
 
     def killall(self, event):
 
-        self.send_to_env("clock_.clear()")
+        self.send_to_env("clock_.clear()\n")
         
         return "break"
   
@@ -410,8 +457,16 @@ if __name__ == "__main__":
 
     # Instantiate App
 
+    def kill():
+
+        root.destroy()
+
+        sys.exit("Quit successful")
+        
     app = App(root)
 
     # Run
 
-    root.mainloop()
+    root.protocol("WM_DELETE_WINDOW", kill )
+
+    root.mainloop()    

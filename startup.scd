@@ -206,13 +206,13 @@ SynthDef.new( \rev,
 
 		var osc, env;
 
-		amp = amp / 4;
+		amp = amp;
 
-		osc =  SinOsc.ar(freq, mul:amp);
+		osc =  SinOsc.ar(freq, mul:amp/2);// + SinOsc.ar(freq + 5, mul:amp/2);
 
-		env = EnvGen.ar(Env(times:[0.9 * sus, 0.1 * sus], curve:20), doneAction:2);
+		env = EnvGen.ar(Env(times:[0.99 * sus, 0.01 * sus], curve:20), doneAction:2);
 
-		Out.ar(0,Pan2.ar( osc * env , pan));
+		Out.ar(0,Pan2.ar(FreeVerb.ar( osc * env ) , pan));
 		} ).add;
 
 SynthDef.new( \organ,
