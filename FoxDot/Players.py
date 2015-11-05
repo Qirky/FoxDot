@@ -1,8 +1,17 @@
+"""
+    Copyright Ryan Kirkbride 2015
+
+    This module contains the objects for Instrument Players (those that send musical
+    information to SuperCollider) and Sample Players (those that send buffer IDs to
+    playback specific samples located in the Samples directory).
+
+"""
+
 from OSC import OSCClient, OSCMessage, OSCBundle
-from time import sleep, time
+from Patterns import *
+
 import Scale
-import threading
-import foxdot
+import Code
 
 # Functions for converting to frequency etc
 
@@ -21,65 +30,6 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
 
     return scale_val + (octave * len(chroma)) + chroma[ root % len(chroma) ]
-
-
-def Chord(stream, structure=[0,2,4]):
-
-    new = []
-
-    for item in stream:
-
-        new.append([item + s for s in structure])
-
-    return new
-        
-
-def Place(stream):
-    """ nested streams are stretched
-        e.g. [[1,0],0,1,0] would be returned as [1,0,1,0,0,0,1,0] """
-
-    # If no nested values, return original stream
-
-    try:
-
-        largest_sub = max([len(a) for a in stream if type(a) == list])
-
-    except:
-
-        return stream
-
-    new_stream = []
-
-    for i in range( largest_sub ):
-
-        for j in range(len(stream)):
-
-            item = stream[j]
-
-            if type(item) == list:
-
-                item = item[i % len(item)]
-
-            new_stream.append(item)
-    
-    return new_stream
-
-def stutter_stream(stream, n):
-
-    if type(n) == int:
-
-        n = [n for i in stream]
-
-    new_stream = []
-
-    for i, item in enumerate(stream):
-
-        for j in range(n[i]):
-
-            new_stream.append( item )
-
-    return new_stream    
-
 
 # Converts data to list format
 
@@ -251,7 +201,7 @@ class new_:
 
         for code in self.mod_code:
             
-            foxdot.execute(code)
+            Code.execute(code)
 
         # Check if the player is following another
 
@@ -581,7 +531,7 @@ class new_:
 
         # if n is a list, stutter each degree[i] by n[i] times
 
-        self.degree = stutter_stream(self.degree, n)
+        self.degree = Stutter(self.degree, n)
 
         return self
 
@@ -817,7 +767,7 @@ class samples_:
 
             if self.metro.beat % (self.metro.beatsPerBar() * self.metro.steps) == (when - 1) * self.metro.steps:
 
-                foxdot.execute(code)
+                Code.execute(code)
 
         # Update dictionary to contain only streams
 
@@ -1123,7 +1073,7 @@ class samples_:
         
         """ repeats each value in each stream n times """
 
-        self.pat = stutter_stream(self.pat, n)
+        self.pat = Stutter(self.pat, n)
 
         return self
 

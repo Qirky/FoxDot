@@ -1,45 +1,65 @@
-"""
-
-This is the module that combines all the other modules as if it were the live
-environment. The main.py application execute() method sends the string over to
-this module, which is analysed and sent back as the raw python code to execute.
-
-This module also handles the time keeping aspect. There is a constant tempo
-clock running that has a queue and plays the items accordingly
-
-"""
-
-### Note: The code below IS executed in the Environment and can be accessed by the user!
-
-import foxdot
-from TempoClock import *
-from ServerManager import *
-from instruments import *
-
-import Scale
-
-# Python stlib
-
-from random import choice as choose
 import random
-
-
-# --------------------- Handling Clock
-        
-server_ = ServerManager()
-
-clock_ = TempoClock()
-
-# Define global variables
-
-default_scale = Scale.Scale("major")
 
 # Define python functions that can be used in the live code
 
 # Shuffling lists / create shuffled lists etc
 
-from instruments import Place
-from instruments import stutter_stream as Stutter
+def Chord(stream, structure=[0,2,4]):
+
+    new = []
+
+    for item in stream:
+
+        new.append([item + s for s in structure])
+
+    return new
+        
+
+def Place(stream):
+    """ nested streams are stretched
+        e.g. [[1,0],0,1,0] would be returned as [1,0,1,0,0,0,1,0] """
+
+    # If no nested values, return original stream
+
+    try:
+
+        largest_sub = max([len(a) for a in stream if type(a) == list])
+
+    except:
+
+        return stream
+
+    new_stream = []
+
+    for i in range( largest_sub ):
+
+        for j in range(len(stream)):
+
+            item = stream[j]
+
+            if type(item) == list:
+
+                item = item[i % len(item)]
+
+            new_stream.append(item)
+    
+    return new_stream
+
+def Stutter(stream, n):
+
+    if type(n) == int:
+
+        n = [n for i in stream]
+
+    new_stream = []
+
+    for i, item in enumerate(stream):
+
+        for j in range(n[i]):
+
+            new_stream.append( item )
+
+    return new_stream 
 
 def Shuf(a, b=None, size=None):
 
@@ -198,11 +218,3 @@ def Rhythm(string, step=0.5):
             dur += step
 
     return stream[1:]
-
-            
-
-        
-
-
-    
-

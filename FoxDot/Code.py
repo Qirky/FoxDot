@@ -46,11 +46,11 @@ def toPython( live_code ):
 
     if not live_code: return ""
 
-    # Convert to python code to be executed
+    # 4. Print out the code to the console
 
-    print ">>> %s" % "\n>>> ".join(live_code.split("\n")[:-1])
+    print stdout( live_code ) 
 
-    # Can we extract any imbedded code and create a list?
+    # 5. Convert to python code to be executed
 
     raw_python = compile(live_code, '<string>', 'exec')
 
@@ -111,7 +111,7 @@ def new_player( code ):
 
         # Re-format arguments to include metronome
         
-        Arguments.append("metro=clock_")
+        Arguments.append("metro=Clock")
         Arguments.append("server=server_")
 
         # See if a scale has been specified, if not, use global default
@@ -281,16 +281,11 @@ def enclosing_brackets(string):
     return arguments, close
 
 
-# New Instrument
+# Imitates the Python IDE output style
 
+def stdout(code):
 
+    console_text = code.strip().split("\n")
 
-# Basic foxdot to python code
+    return ">>> %s" % "\n>>> ".join(console_text)
 
-def print_code(code):
-
-    for line in code.strip().split('\n'):
-
-        print ">>>" , line
-
-    return
