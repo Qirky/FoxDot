@@ -4,7 +4,7 @@ import random
 
 # Shuffling lists / create shuffled lists etc
 
-def Chord(stream, structure=[0,2,4]):
+def Chord(stream=[0], structure=[0,2,4]):
 
     new = []
 

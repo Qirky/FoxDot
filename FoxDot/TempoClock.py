@@ -19,19 +19,17 @@ class TempoClock:
 
         # Create queue based on loop and steps
 
-        self.queue = [[] for n in range( len(self) ) ]
+        self.queue = self.new_queue()
 
         self.beat = 0
 
         self.playing = []
 
         self.ticking = False
-        
-        threading.Thread(target=self.start).start()
 
     def __str__(self):
 
-        return "clock"
+        return "TempoClock Object @ %.2f bpm, %d/%d" % (self.bpm, self.timeSig[0], self.timeSig[1])
 
     def __iter__(self):
 
@@ -42,6 +40,16 @@ class TempoClock:
     def __len__(self):
 
         return int( self.steps * self.beats() )
+
+    def new_queue(self):
+
+        try:
+
+            return [n for n in self.queue][:len(self)] + [[] for n in range(abs(len(self)-len(self.queue))) ]
+
+        except:
+
+            return [[] for n in range( len(self) ) ]
 
     def beats(self):
 
@@ -77,10 +85,20 @@ class TempoClock:
 
     def start(self):
 
+        threading.Thread(target=self.run).start()
+
+        return
+
+    def run(self):
+
         self.ticking = True
 
-        # Increases the timer by 8th beats
-        
+        old_steps   = self.steps
+        old_timeSig = self.timeSig
+        old_bars    = self.bars
+
+        # Increases the timer by 8th (default) beats
+  
         while self.ticking:
 
             # Iterate through any players in the queues current set
@@ -112,6 +130,20 @@ class TempoClock:
             sleep( self.step_dur() )
 
             self.beat += 1
+
+            # Check if the time signature, steps, or bars values have been changed
+
+            if old_steps != self.steps or old_timeSig != self.timeSig or old_bars != self.bars:
+
+                # Change the queue size
+
+                self.queue = self.new_queue()
+
+                # Update our "old" values
+
+                old_steps   = self.steps
+                old_timeSig = self.timeSig
+                old_bars    = self.bars
 
         return self
 

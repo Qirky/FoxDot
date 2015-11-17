@@ -109,14 +109,14 @@ def new_player( code ):
 
         Arguments, index = enclosing_brackets( data )
 
-        # Re-format arguments to include metronome
+        # Set the default server manager
         
-        Arguments.append("metro=Clock")
         Arguments.append("server=server_")
 
-        # See if a scale has been specified, if not, use global default
+        # See if a scale and metronome has been specified, if not, use global default
 
         default_scale = True
+        default_metro = True
 
         for arg in Arguments:
 
@@ -124,11 +124,17 @@ def new_player( code ):
         
                 default_scale = False
                 
-                break
+            if "metro" in arg:
+
+                default_metro = False
 
         if default_scale:
 
             Arguments.append("scale=default_scale")
+
+        if default_metro:
+
+            Arguments.append("metro=Clock")
 
         # Add the sample player pattern
 

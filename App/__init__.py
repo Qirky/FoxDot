@@ -158,7 +158,7 @@ class App:
 
         self.console = console(self.root)
 
-        #sys.stdout = self.console
+        sys.stdout = self.console
 
         # Default values
 
@@ -166,6 +166,8 @@ class App:
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
+
+        print "Welcome to FoxDot!"
 
         self.root.mainloop()
 
@@ -308,11 +310,17 @@ class App:
 
         # Highlight text to execute
 
-        Thread(target=self.highlight, args=(a,b)).start()
+        #hl = Thread(target=self.highlight, args=(a,b)).start()
+
+        self.highlight(a, b)
 
         # Execute the python code
         
         self.submit( self.text.get( a , b ) )
+
+        # Unhighlight the line of text
+
+        Thread(target=self.unhighlight).start()
 
         return "break"
 
@@ -334,13 +342,13 @@ class App:
         
         self.text.tag_config("code", background="Red", foreground="White")
 
+        return
+
+    def unhighlight(self):
+
         # Hold highlight
         
         wait(0.2)
-
-        # Unhighlight
-        
-        self.text.tag_config("code", background="White", foreground="Black")
 
         # Remove labels
 
@@ -456,15 +464,19 @@ class App:
         return 'break'
 
     def killall(self, event):
-
         """ Ctrl+. function to be defined by the user """
         
         return
 
+    def terminate(self):
+        """ To be overridden by user to be called on window close """
+
+        return
+
     def kill(self):
 
-        self.root.destroy()
+        self.terminate()
 
-        sys.exit("Quit successful")
+        self.root.destroy()
 
         return

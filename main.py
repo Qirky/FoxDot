@@ -19,9 +19,10 @@ if __name__ == "__main__":
 
     # Load FoxDot Modules into the environment
 
-    Code.execute( "from FoxDot import *" )
-
     class interface(App):
+
+        Code.execute( "from FoxDot import *" )
+        Code.execute( "Clock.start()" )
 
         def submit(self, code_str):
             
@@ -36,11 +37,19 @@ if __name__ == "__main__":
 
         def killall(self, event):
 
-            self.submit("Clock.clear()")
+            Code.execute("Clock.clear()")
         
             return "break"
+
+        def terminate(self):
+
+            """ Overrides the close window event to make sure
+                the TempoClock thread is properly stopped """
+
+            Code.execute("Clock.stop()")
+
+            return
         
     a = interface()
 
     a.run()
-   

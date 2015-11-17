@@ -300,6 +300,29 @@ class new_:
 
         modf_value = self.modf[attr][(modifier_event_n + x) % len(self.modf[attr])]
 
+
+        # Make sure values are numbers
+
+        if attr is not "root":
+
+            try:
+
+                attr_value = float(attr_value)
+
+            except:
+
+                attr_value = tuple(float(v) for v in attr_value)
+
+            try:
+
+                modf_value = float(modf_value)
+
+            except:
+
+                modf_value = tuple(float(v) for v in modf_value)
+
+        # Combine the attribute "real" values with the modifiers
+
         try:
 
             if attr is "amp":
@@ -621,12 +644,12 @@ class new_:
 # Class for for reading samples from buffers     # s = samples_("x-*-", metro=clock_, server=server_, quant=False)
 # ---------------------------------------------- #
 
+# Table of characters to buffers
 
-class samples_:
+#f = open("../samples/.symbols")
 
-    # Table of characters to buffers
 
-    symbols = { 'x' : 1,    # Bass drum
+_symbols =  {   'x' : 1,    # Bass drum
                 'X' : 2,    # Bass drum 2
                 'o' : 3,    # Snare drum
                 'O' : 4,    # Snare drum 2
@@ -647,6 +670,11 @@ class samples_:
                 '#' : 17,   # Crash
                 'Y' : 18,   # Swoop
              }
+
+
+class samples_:
+
+
 
     def __init__(self, pat=' ', speed=[1], **kwargs):
 
@@ -1006,16 +1034,16 @@ class samples_:
 
         for char in self.pat:
 
-            if char in self.symbols.keys():
+            if char in _symbols.keys():
 
                 if in_br:
 
-                    self.buf[i].append( self.symbols[char] )
+                    self.buf[i].append( _symbols[char] )
                     self.dur[i].append( this_dur )
 
                 else:
 
-                    self.buf[i] = self.symbols[char]
+                    self.buf[i] = _symbols[char]
 
             # When we reach a [ divide duration by 2
 
