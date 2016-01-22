@@ -41,6 +41,11 @@ class TempoClock:
 
         return int( self.steps * self.beats() )
 
+    def change_steps(self, new=8):
+
+        self.steps = new
+        self.queue = self.new_queue()
+
     def new_queue(self):
 
         try:
@@ -65,7 +70,7 @@ class TempoClock:
 
     def beat_dur(self):
 
-        return float( 60.0 / self.bpm )
+        return float( 60.0 / float(self.bpm) )
 
     def step_dur(self):
 

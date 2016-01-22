@@ -15,7 +15,16 @@ import Code
 
 # Functions for converting to frequency etc
 
+def modi(array, i):
+    """ Returns the modular index i.e. modi([0,1,2],4) will return 1 """
+    try:
+        return array[i % len(array)]
+    except:
+        return array
+    
+
 def miditofreq(midinote):
+    """ Converts a midi number to frequency """
     return 440 * (2 ** ((midinote - 69.0)/12.0))
 
 def midi(scale, octave, degree, root=0, stepsPerOctave=12):
@@ -31,29 +40,6 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
 
     return scale_val + (octave * len(chroma)) + chroma[ root % len(chroma) ]
 
-# Converts data to list format
-
-def asStream(data, n=" "):
-
-    stream = None
-    
-    if   type(data) == list:
-        stream = data
-    elif type(data) == tuple:
-        stream = list(data)
-    elif type(data) == str:
-        stream = list(data)
-    else:
-        try:
-            if data.__type__ == "scale":
-                stream = data
-            else:
-                stream = [data]
-        except:
-            stream = [data]
-
-    return stream
-
 def circular_add(a, b):
     """ Adding contents of b to a """
     if len(b) > len(a):
@@ -68,6 +54,31 @@ def circular_add(a, b):
         tmp.append( a[i] + b[i % len(b)] )
 
     return tmp
+
+
+###### Object used to perform basic methods on a multiple of players
+
+class group:
+
+    def __init__(self, *args):
+
+        self.players = args
+
+    def __len__(self):
+
+        return len(self.players)
+
+    def stop(self, n=0):
+
+        for item in self.players:
+
+            item.stop(n)
+
+    def play(self):
+
+        for item in self.players:
+
+            item.play()
 
 ###### Object for creating instruments
 
@@ -129,7 +140,13 @@ class new_:
         self.freq1  = [0]
 
         # Dictionary to read now() values from
-        self.attr = {}
+
+        self.attr = kwargs
+
+        for key in ['metro', 'server', 'quantise', 'glissandi']:
+            if key in self.attr:
+                del self.attr[key]
+                
         self.update_dict()
 
         # Modifier dict
@@ -147,37 +164,37 @@ class new_:
         self.old_dur = None
         self.isplaying = False
 
+        self.metro.playing.append(self)
+
+        self.update_clock()
+
         # reset beat counter
 
         # self.event_n = self.metro.beat % len(self.metro)
 
-        if self.metro:
+        #if self.metro:
             
-            self.update(isEvent=False)
+        #    self.update(isEvent=False)
 
-            if self.quantise:
+        #    if self.quantise:
 
-                self.metro.playing.append(self)
+        #        self.metro.playing.append(self)
 
-            else:
+        #    else:
 
-                self.play()
+        #        self.play()
 
     def __str__(self):
 
         return self.name
 
-    def update(self, isEvent=True):
+    def update2(self, isEvent=True):
 
         # Kill the player if stopping
+        
+        if self.stopping and self.metro.beat >= self.stop_point:
 
-        if self.stopping:
-
-            if self.metro.beat >= self.stop_point:
-
-                self.kill()
-
-        # Find out the number of events in the clock before the current beat pointer
+            self.kill()
 
         count = 0
 
@@ -187,9 +204,11 @@ class new_:
 
                 count += 1
 
-        # This player's event index is the number of occurences in the clock plus the number of occurences in previous clock loops
+        self.event_n = count
 
-        self.event_n = count + self.event_agg
+        # If the durations have been changed, re-calculate where it is in the passage
+
+        # This player's event index is the number of occurences in the clock plus the number of occurences in previous clock loops
 
         # Add to aggregate counter for when events go past the clock scope
 
@@ -201,7 +220,7 @@ class new_:
 
         for code in self.mod_code:
             
-            Code.execute(code)
+            Code.execute(code, verbose=False)
 
         # Check if the player is following another
 
@@ -221,7 +240,7 @@ class new_:
 
         self.update_dict()
 
-        # If duration values changes, update the metronome
+         # If duration values changes, update the metronome
 
         if self.attr['dur'] != self.old_dur or self.off != self.old_off:
 
@@ -232,7 +251,76 @@ class new_:
 
         return
 
-    def update_clock(self):
+    def update(self, isEvent=True):
+
+        # Kill the player if stopping
+        
+        if self.stopping and self.metro.beat >= self.stop_point:
+
+            self.kill()
+
+        if self.dur_updated():
+
+            self.update_clock()
+
+        else:
+
+            self.event_n += int(isEvent)
+
+        # Add to aggregate counter for when events go past the clock scope
+
+        #if self.metro.beat == len(self.metro):
+
+        #    self.event_agg += self.event_n
+
+        # Execute any code in the mod_code list on desired beat
+
+        for code in self.mod_code:
+            
+            Code.execute(code, verbose=False)
+
+        # Check if the player is following another
+
+        if self.following:
+
+            self.degree = asStream( self.following.now('degree') )
+
+        # Calculate frequency
+
+        #self.freq = [ miditofreq( midi( self.scale, self.now('oct'), DEGREE, self.now('root') ) ) for DEGREE in asStream(self.now('degree')) ]
+
+        # Find which has the greater length tuples in
+
+        now_degree, now_oct = [asStream(self.now(attr)) for attr in ['degree', 'oct']]
+
+        size = max( len(now_degree), len(now_oct) ) 
+
+        self.freq = []
+
+        for i in range(size):
+
+            midinum = midi( self.scale, modi(now_oct, i), modi(now_degree, i) , self.now('root') )
+
+            self.freq.append( miditofreq(midinum) )
+            
+
+        if self.glissandi:
+
+            self.freq1.append(self.freq[-1])
+
+        # Update dictionary to contain only streams
+
+        self.update_dict()
+
+        return
+
+    def dur_updated(self):
+
+        return self.attr['dur'] != self.old_dur or self.off != self.old_off 
+
+    def update_clock2(self):
+
+        # Could be done in 1 loop
 
         # Initial step, delete from the clock
 
@@ -252,33 +340,90 @@ class new_:
 
                 self.metro.add2q(self, n)
 
-                i = int(dur * self.metro.steps)                
+                i = int(dur * self.metro.steps)
 
                 n += i
 
-        # Aggregate event counter will be affected, so reset
+        return
 
-        self.event_agg = 0
+    def update_clock(self):
+
+        # Initial location is the offset (if any)
+
+        next_step = int(self.off * self.metro.steps)
+
+        self.event_n = 0
+
+        count = 0
+
+        # Go through each clock step
+
+        for i, step in enumerate(self.metro):
+
+            # If step should contain self
+
+            if i == next_step:
+
+                # Add self if not already there
+
+                if self not in step:
+
+                    # Add player to clock
+
+                    self.metro.add2q(self, i)
+
+                # Work out duration of the 
+
+                #dur = self.attr['dur'][count % len(self.attr['dur'])]
+
+                dur = modi(self.attr['dur'], count)
+
+                next_step += int(float(dur) * self.metro.steps)
+
+                # Increase duration counter
+
+                count += 1
+
+                # Increase event counter until NOW
+
+                if i < self.metro.now():
+
+                    self.event_n += 1
+
+            # If step shouldn't contain self, remove it if it is in there
+
+            else:
+
+                if self in step:
+
+                    step.remove(self)
+
+          #self.event_agg = 0
+
+        self.old_dur = self.attr['dur']
+        self.old_off = self.off
 
         return
 
     def update_dict(self):
+
+        # Update the standard arguments
         
-        self.attr = {
-                      "scale"   :   asStream(self.scale),
-                      "root"    :   asStream(self.root),
-                      "degree"  :   asStream(self.degree),
-                      "oct"     :   asStream(self.oct),
-                      "sus"     :   asStream(self.sus),
-                      "dur"     :   asStream(self.dur),
-                      "amp"     :   asStream(self.amp),
-                      "freq"    :   asStream(self.freq),
-                      "freq1"   :   asStream(self.freq1),
-                      "pan"     :   asStream(self.pan),
-                      "rate"    :   asStream(self.rate),
-                      "buf"     :   asStream(self.buf),
-                      "pos"     :   asStream(self.pos)
-                    }
+        self.attr.update( {
+                              "scale"   :   asStream(self.scale),
+                              "root"    :   asStream(self.root),
+                              "degree"  :   asStream(self.degree),
+                              "oct"     :   asStream(self.oct),
+                              "sus"     :   asStream(self.sus),
+                              "dur"     :   asStream(self.dur),
+                              "amp"     :   asStream(self.amp),
+                              "freq"    :   asStream(self.freq),
+                              "freq1"   :   asStream(self.freq1),
+                              "pan"     :   asStream(self.pan),
+                              "rate"    :   asStream(self.rate),
+                              "buf"     :   asStream(self.buf),
+                              "pos"     :   asStream(self.pos)
+                        } )
 
     def now(self, attr, x=0):
 
@@ -296,10 +441,9 @@ class new_:
 
             modifier_event_n = self.event_n
 
-            attr_value = self.attr[attr][(self.event_n + x) % len(self.attr[attr])]
+            attr_value = modi(self.attr[attr], self.event_n + x)
 
-        modf_value = self.modf[attr][(modifier_event_n + x) % len(self.modf[attr])]
-
+        modf_value = modi(self.modf[attr], modifier_event_n + x)
 
         # Make sure values are numbers
 
@@ -328,6 +472,10 @@ class new_:
             if attr is "amp":
 
                 value = attr_value * modf_value
+
+            elif (type(attr_value) == type(modf_value) == tuple):
+
+                raise
 
             else:
 
@@ -396,18 +544,16 @@ class new_:
 
     def __add__(self, data):
 
-        if type(data) == int or type(data) == float:
+        """ Change the degree modifier stream """
 
-            data = [data]
-
-        # Add to modifier
-
-        self.modf['degree'] = data
+        self.modf['degree'] = asStream(data)
         
         return self
 
 
     def __sub__(self, data):
+
+        # Set a state to add / sub? TODO
 
         if type(data) == int or type(data) == float:
 
@@ -417,7 +563,7 @@ class new_:
 
          # Add to modifier
 
-        self.modf['degree'] = data
+        self.modf['degree'] = asStream(data)
 
         return self
 
@@ -431,7 +577,7 @@ class new_:
 
             data = [data]
 
-        self.modf['amp'] = data
+        self.modf['amp'] = asStream(data)
 
         return self
 
@@ -588,15 +734,15 @@ class new_:
 
         return self
 
-    def osc_message(self, freq):
+    def osc_message(self, index):
 
-        message = [self.name, 0, 1, 1, 'freq', freq]
+        message = [self.name, 0, 1, 1, 'freq', modi(self.freq, index)]
 
         for key in self.attr:
 
             if key not in ('freq', 'degree'):
 
-                val = self.now(key)
+                val = modi(self.now(key), index)
 
                 if key == "sus":
 
@@ -609,11 +755,31 @@ class new_:
     def send(self):
         """ Sends the current event data to SuperCollder """
 
+        # 1. Find out the largest tuple in the kwargs and its length
+
+        size = len(self.freq)
+
+        for stream in self.attr.values():
+
+            for value in stream:
+
+                try:
+
+                    if len(value) > size:
+
+                        size = len(value)
+
+                except:
+
+                    pass
+
         # Create OSC Message
 
-        for f in self.freq:
+        #for f in self.freq:
+        
+        for i in range(size):
 
-            self.server.play_note( self.osc_message(f) )
+            self.server.play_note( self.osc_message( i )  )       
 
         return
 
@@ -698,7 +864,10 @@ class samples_:
         # Define any variables that are used in the OSC message (make sure they are in the attr dict)
 
         self.pat    = pat
+        self.old_pat = ""
+        
         self.dur    = kwargs.get("dur",   [0.5])
+        self.new    = self.dur # "new" value after brackets
         self.amp    = kwargs.get("amp",     [1])
         self.pan    = kwargs.get("pan",     [0])
         self.rate   = kwargs.get("rate",    [1])
@@ -735,6 +904,7 @@ class samples_:
         # Used for checking clock updates
         
         self.old_dur = None
+        self.old_new = None
         self.isplaying = False
 
         # reset beat counter
@@ -781,7 +951,14 @@ class samples_:
 
         self.event_n = count + self.event_agg
 
-        self.pat_to_buf()
+        # If the pattern has changed, update values
+
+        if self.pat != self.old_pat or self.dur != self.old_dur:
+
+            self.old_pat = self.pat
+            self.old_dur = self.dur
+
+            self.pat_to_buf()
 
         # Add to aggregate counter for when events go past the clock scope
 
@@ -803,11 +980,11 @@ class samples_:
 
         # If duration values changes, update the metronome
 
-        if self.attr['dur'] != self.old_dur:
+        if self.attr['new'] != self.old_new:
 
             self.update_clock()
 
-            self.old_dur = self.attr['dur']
+            self.old_new = self.attr['new']
 
         return
 
@@ -827,11 +1004,11 @@ class samples_:
 
         while n < len(self.metro):
 
-            for dur in self.attr['dur']:
+            for dur in self.attr['new']:
 
                 self.metro.add2q(self, n)
 
-                i = int(dur * self.metro.steps)                
+                i = int(float(dur) * self.metro.steps)                
 
                 n += i
 
@@ -843,15 +1020,16 @@ class samples_:
 
     def update_dict(self):
         
-        self.attr = {
+        self.attr.update( {
                       "dur"     :   asStream(self.dur),
+                      "new"     :   asStream(self.new),
                       "amp"     :   asStream(self.amp),
                       "pan"     :   asStream(self.pan),
                       "rate"    :   asStream(self.rate),
                       "buf"     :   asStream(self.buf),
                       "verb"    :   asStream(self.verb),
                       "dist"    :   asStream(self.dist)
-                    }
+                    } )
 
     def now(self, attr, x=0):
 
@@ -859,9 +1037,9 @@ class samples_:
 
         modifier_event_n = self.event_n
 
-        attr_value = self.attr[attr][(self.event_n + x) % len(self.attr[attr])]
+        attr_value = float(self.attr[attr][(self.event_n + x) % len(self.attr[attr])])
 
-        modf_value = self.modf[attr][(modifier_event_n + x) % len(self.modf[attr])]
+        modf_value = float(self.modf[attr][(modifier_event_n + x) % len(self.modf[attr])])
 
         try:
 
@@ -957,18 +1135,15 @@ class samples_:
             data = [data]
 
         size_dur  = len(self.attr['dur'])
-        size_sus  = len(self.attr['sus'])
         size_data = len(data)
 
-        size_max = max( size_dur , size_sus, size_data)
+        size_max = max( size_dur , size_data)
 
         self.dur = [ 0 for x in range(size_max) ]
-        self.sus = [ 0 for x in range(size_max) ]
 
         for i in range( size_max ):
 
             self.dur[i] = self.attr['dur'][i % size_dur] / (1.0 / data[i % size_data])
-            self.sus[i] = self.attr['sus'][i % size_sus] / (1.0 / data[i % size_data])
 
         return self            
 
@@ -1006,7 +1181,7 @@ class samples_:
 
     # Drum methods
 
-    def pat_to_buf2(self):
+    def pat_to_buf3(self):
 
         self.buf = [self.symbols[char] for char in self.pat]
 
@@ -1018,82 +1193,80 @@ class samples_:
             Items in a () are laced
         """
 
-        self.dur = [max(self.dur) for char in self.pat]
+        if not len(self.pat) > 0:
 
-        self.buf = [0 for char in self.pat]
+            self.pat = " "
 
-        this_dur = 0
+        self.new = asStream(self.dur)
+
+        new_dur  = [modi(self.new, i) for i, char in enumerate(self.pat) if char not in "[](){}"]
+
+        self.buf = [0 for char in self.pat if char not in "[](){}"]
 
         # Go through pattern
 
         i = 0
 
-        in_sq = False
+        this_dur = modi(self.new, i)
+
+        in_sq = 0
         in_br = False
         in_wi = False
 
         for char in self.pat:
 
-            if char in _symbols.keys():
-
-                if in_br:
-
-                    self.buf[i].append( _symbols[char] )
-                    self.dur[i].append( this_dur )
-
-                else:
-
-                    self.buf[i] = _symbols[char]
-
             # When we reach a [ divide duration by 2
 
-            if   char == '[':
+            if char == '[':
 
-                in_sq = True
+                in_sq += 1
 
             elif char == ']':
 
-                in_sq = False
+                in_sq -= 1
 
-            elif in_sq:
-
-                if in_br:
-
-                    self.dur[i].append(this_dur / 2.0)
-
-                else:
-
-                    self.dur[i] = self.dur[i] / 2.0
-
+            # When we reach a ( create a list to add entries to
+            
             elif char == '(':
 
                 in_br = True
 
-                this_dur = self.dur[i]
-
                 self.buf[i] = []
-                self.dur[i] = []
+                new_dur[i] = []
 
             elif char == ')':
 
                 in_br = False
+                i = i+1
+
+            # Add the buffer number -> is 0 if not in _symbols
+            
+            else:
+
+                # Normal brackets indicate a group to be laced
+
+                if in_br:
+
+                    self.buf[i].append( _symbols.get(char, 0) )
+                    new_dur[i].append( this_dur / (2.0**in_sq) )
+
+                else:
+
+                    self.buf[i] = _symbols.get(char, 0)
+                    new_dur[i] = this_dur / (2.0**in_sq)
 
             # When we reach a ( don't increase i until )
 
-            if not in_br and char not in "[]":
+            if not in_br and char not in "[]()":
 
                 i += 1
 
+                this_dur = modi(self.new, i)
+
         # Adjust for extra chars
 
-##        print self.buf[:i]
-##        print Place(self.buf[:i])
-##
-##        print self.dur[:i]
-##        print Place(self.dur[:i])
-
         self.buf = Place(self.buf[:i])
-        self.dur = Place(self.dur[:i])
+        self.new = Place(new_dur[:i])
 
         return
 

@@ -37,6 +37,10 @@ def directory():
 
     return scale_types.keys()
 
+def Object():
+
+    return 
+
 class Scale:
 
     def __init__(self, s=None):
@@ -74,6 +78,20 @@ class Scale:
     def __getitem__(self, key):
 
         return self.steps[key]
+
+    def __call__(self, *args):
+
+        self.change(args[0])
+
+        return self
+
+    def __eq__(self, other):
+
+        return other == Object
+
+    def __ne__(self, other):
+
+        return other != Object
 
     def change(self, new):
 

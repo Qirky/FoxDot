@@ -1,8 +1,55 @@
 import random
+import Scale
+
+# Used to determine if an instance is timevar
+def TimeVar():
+    return
+
+# Converts data to list format
+
+def asStream2(data, n=" "):
+
+    stream = None
+    
+    if   type(data) == list:
+        stream = data
+    elif type(data) == tuple:
+        stream = list(data)
+    elif type(data) == str:
+        stream = list(data)
+    else:
+        try:
+            if data.__type__ == "scale":
+                stream = data
+            else:
+                stream = [data]
+        except:
+            stream = [data]
+
+    return stream
+
+def asStream(data, n=" "):
+    """ Makes sure that any data is converted into an iterable and mutable form """
+
+    stream = None
+
+    if data == Scale.Object or data == TimeVar:
+
+        return data
+    
+    try:
+
+        stream = list(data)
+
+    except:
+        
+        stream = [data]
+
+    # Lists within lists are laced but tuples are unaffected
+
+    return Place(stream)
 
 # Define python functions that can be used in the live code
-
-# Shuffling lists / create shuffled lists etc
 
 def Chord(stream=[0], structure=[0,2,4]):
 

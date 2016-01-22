@@ -1,42 +1,36 @@
-"""
-
-This is the module that combines all the other modules as if it were the live
-environment. The main.py application execute() method sends the string over to
-this module, which is analysed and sent back as the raw python code to execute.
-
-"""
-
 import re
+from traceback import format_exc as error_stack
 
 # --------------------- Handling Code
 
-def execute(code):
+def execute(code, verbose=True):
 
-    # Takes a string of foxdot code and converts to python
-
-    code = toPython( code )
-
-    # Attempt to execute
+    """ Takes a string of foxdot code and calls toPython()
+`       and exectues the returned python string in our
+        global namespace """
 
     try:
 
+        code = toPython( code, verbose )
+
         exec code in globals()
 
-    except Exception as e:
+    except:
+        
+        print error_stack()
 
-        print "Error:" , e
+    return
 
 
+def toPython( live_code, verbose ):
 
-# Converts any FoxDot code to Python
-
-def toPython( live_code ):
+    """ Converts any FoxDot code to its equivalent in Python """
 
     # 1. Look for FoxDot syntax for new players
 
     live_code, new_player_data = new_player( live_code )
 
-    # 2. Convert any "new" players already playing to updates
+    # 2. Convert any "new" players already playing to update methods
     
     live_code = override_attempt( live_code, new_player_data )
 
@@ -44,11 +38,17 @@ def toPython( live_code ):
 
     live_code = remove_self( live_code )
 
+    # 4. Make sure any integer divisions are converted to floats e.g. 1/2 -> 1/2.0
+
+    live_code = int_div_to_float( live_code )
+
     if not live_code: return ""
 
     # 4. Print out the code to the console
 
-    print stdout( live_code ) 
+    if verbose:
+
+        print stdout( live_code ) 
 
     # 5. Convert to python code to be executed
 
@@ -164,11 +164,11 @@ def new_player( code ):
 
         if SynthDef == "sample_player":
 
-            new_code = "%s = samples_( %s )\n%s" % (var, ",".join(Arguments), Methods)
+            new_code = "\n%s = samples_( %s )\n%s" % (var, ",".join(Arguments), Methods)
 
         else:
 
-            new_code = "%s = new_('%s','%s', %s )%s\n" % (var, var, SynthDef, ",".join(Arguments), Methods)
+            new_code = "\n%s = new_('%s','%s', %s )%s\n" % (var, var, SynthDef, ",".join(Arguments), Methods)
 
         players[new_code] = (var, SynthDef, Arguments, Methods)
 
@@ -176,7 +176,7 @@ def new_player( code ):
 
     return code, players
 
-# --------------------- Formatting and cleaning code
+# Formatting and cleaning code funcrtions below
 
 def override_attempt(code, new_players):
 
@@ -184,27 +184,35 @@ def override_attempt(code, new_players):
 
     ns = globals()
 
-    for string, values in new_players.items():
+    for string, values in new_players.items(): # TODO any assignments
 
         name, function = string.split()[0:2]
 
-        if name in ns and function == '=' and ns[name].isplaying:
+        try:
+
+            isplaying = ns[name].isplaying
+
+        except:
+
+            continue
+
+        if name in ns and function == '=' and isplaying:
 
             # Rearrange code so the values are just assigned
 
             new_code = ""
 
-            # 1. Get variable name etc
+            # 1a. Get variable name etc
 
             var, synth, args, methods = values
 
-            # 1. Check if the first argument is degree or not
+            # 1b. Check if the first argument is degree or not
 
             degree_stated = int("=" not in args[0] or "degree=" in args[0])
 
             if degree_stated:
 
-                new_code += "%s.%s=%s\n" % (var, "degree", args[0].replace("degree=",""))
+                new_code += "\n%s.%s=%s" % (var, "degree", args[0].replace("degree=",""))
 
             #if synth == "sample_player":
 
@@ -216,19 +224,21 @@ def override_attempt(code, new_players):
 
                 if "metro" not in a or "server" not in a:
 
-                    new_code += "%s.%s\n" % (var, a)
+                    new_code += "\n%s.%s" % (var, a)
 
-            # 3. Check any extra methods
-
-            print methods
+            # 3. Check any extra methods - shows users what their code is REALLY doing
 
             if methods:
+
+                if methods.startswith("\n"):
+
+                    methods = methods[1:]
 
                 if methods.startswith(var):
 
                     methods = methods[len(var):]
 
-                new_code += "%s%s" % (var, methods.replace("self", var))
+                new_code += "\n%s%s" % (var, methods.replace("self", var))
 
             # Replace code and return :)
 
@@ -240,6 +250,23 @@ def override_attempt(code, new_players):
 def remove_self( code ):
 
     return code
+
+def float_div(match):
+    """ Function used in re.sub to find any integer
+        divisions and replaces them so they return floats """
+    sub = match.group(0)
+
+    if "." in sub:
+
+        return sub
+
+    else:
+
+        return sub + ".0"
+
+def int_div_to_float( code ):
+
+    return re.sub(r'\d+/\d+\.?', float_div , code)
 
 def enclosing_brackets(string):
 

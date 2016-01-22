@@ -1,0 +1,7 @@
+plaintext=#ffffff
+functions=#ffff00
+key_types=#9900FF
+user_defn=#0000FF
+comments=#FF3300
+numbers=#FF9900
+strings=#00ff00

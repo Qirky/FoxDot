@@ -1,39 +1,9 @@
-# Define types of keywords (as regex?)
-
-functions = ["if","elif","else","return","def",
-             "and","or","not","is","in","for "," as ",
-             "while ", "class ", "import " ]
-
-key_types = ["str","int","float","type","repr",
-             "range","open","len","sorted","set",
-             "None","True","False","bool" ]
-
-user_defn = ["foxdot"]
-
-comments =  ["#"]
-
-# Dictionary of keywords to their appropriate colours
-
-python_kw =   { 'functions' : functions,
-                'key_types' : key_types,
-                'user_defn' : user_defn,
-                'comments'  : comments }
-
-python_kw_chars = []
-
-for a, b in python_kw.items():
-    for word in b:
-        for char in word:
-            if char not in python_kw_chars:
-                python_kw_chars.append(char)
-
-
 from Tkinter import *
 from threading import Thread
 from time import sleep as wait
+from formatting import *
 
 import sys
-import traceback
 
 # Function for getting index in an easier way
 
@@ -46,38 +16,43 @@ def index(index1, index2=None):
 def empty(string):
     return len(string.replace(' ','')) == 0
 
+def isDelete(char):
+    return char == "\x08"
+
+def isHex(char):
+    return len(repr(char)) > 3
+    
+
 
 # DEFINE KEY VARIABLES
 
 # Keywords
 
-keywords = ['def','while','for','class']
-
 whitespace = " \t\n\r\f\v"
 
 SC_Location = "C:\Program Files (x86)\SuperCollider-3.6.6"
 
-f = open('startup.scd')
-SynthDefs = f.read()
-f.close()
 
 # DEFINE 
 
 class console:
 
-    def __init__(self, master, w=None):
+    def __init__(self, master):
 
-        self.text = StringVar()
+        self.Yscroll = Scrollbar(master)
+        self.Yscroll.pack(side=RIGHT, fill=Y)        
         
-        self.widget = Label(master, padx=5, pady=5,
+        self.text = Text( master, padx=5, pady=5,
                             height=10, width=120,
                             bg="Black", fg="White",
-                            justify=LEFT, anchor=SW,
                             font=("Ubuntu Mono", 12),
-                            wraplength=1000,
-                            textvariable=self.text)
-        
-        self.widget.pack(fill=BOTH, expand=1)
+                            yscrollcommand=self.Yscroll.set)
+
+        self.Yscroll.config(command=self.text.yview)
+
+        self.text.bind("<Key>", lambda e: "break")
+
+        self.text.pack(fill=BOTH, expand=1)
 
     def __str__(self):
 
@@ -85,7 +60,11 @@ class console:
 
     def write(self, string):
 
-        self.text.set( str(self) + string)
+        # Add text
+        self.text.insert( END, string )
+
+        # Scroll down
+        self.text.see(END)
 
         return
 
@@ -115,11 +94,14 @@ class App:
 
         self.text = Text(self.root,
                          padx=5, pady=5,
-                         height=25, width=120,
-                         bg = "#140000", fg="White",
+                         height=20, width=100,
+                         bg = "#140000",
+                         fg=colour_map['plaintext'],
                          insertbackground="White",
                          font = ("Ubuntu Mono", 12),
                          yscrollcommand=self.Yscroll.set)
+
+        self.Yscroll.config(command=self.text.yview)
         
         self.text.focus_set()
 
@@ -130,10 +112,11 @@ class App:
         self.text.bind("<Return>", self.newline)
         self.text.bind("<BackSpace>", self.delete)
         self.text.bind("<Tab>", self.tab)
-
-        #self.text.bind("<Key>", self.update)
+        self.text.bind("<Key>", self.keypress)
 
         # Automatic brackets
+
+        self.separators = py_separators
 
         self.left_brackets  = ["(","[","{","'",'"']
         self.right_brackets = [")","]","}","'",'"']
@@ -146,11 +129,10 @@ class App:
 
         # Set tag names and config for specific colours
 
-        self.text.tag_config("functions", background="White", foreground="#FF9900")
-        self.text.tag_config("key_types", background="White", foreground="#9900FF")
-        self.text.tag_config("user_defn", background="White", foreground="#0000FF")
-        self.text.tag_config("comments" , background="White", foreground="#FF3300")
-        self.text.tag_config("text" ,     background="White", foreground="#000000")
+        for name, colour in colour_map.items():
+            self.text.tag_config(name, foreground=colour)
+
+        # Pack the text box
 
         self.text.pack(fill=BOTH, expand = 1)
 
@@ -171,63 +153,144 @@ class App:
 
         self.root.mainloop()
 
+    def keypress(self, event=None):
+        """ Handles any keypress """
+
+        # Return normally for non-string char
+
+        if not event.char:
+
+            return
+
+        elif isHex(event.char):
+
+            return
+        
+        else: # Add character to text box
+
+            self.text.insert(self.text.index(INSERT), event.char)
+
+            self.update(event)
+
+        return "break"
+
+
     def update(self, event=None):
         """ Update the IDE on a keypress """
 
-        if event.char not in python_kw_chars + ['(']: return
+        # TODO account for newline
 
-        # Get index and walk backwards until we ge a whitespace or column = 0
+        # Get cursor pos
 
         end = self.text.index(INSERT)
 
-        self.text.insert(end, event.char)        
+        positions = []
 
-        line, column = index(end)
+        # If char is a separator, we may have TWO words <-char->
 
-        while column > 0:
+        if event.char in self.separators or isDelete(event.char):
 
-            column -= 1
+            # Word 1. Walk backword until we get a separator or column = 0
 
-            if self.text.get(index(line, column)) in whitespace + '(':
+            line, column = index(self.text.index(INSERT))
 
-                break
+            start_col = end_col = column - 1 + int(isDelete(event.char))    
 
-        # Now we have our for word start
+            while start_col > 0:
 
-        start = index(line, column)
+                start_col -= 1
 
-        # Get colour marker and set colour
-
-        word = self.text.get(start, end)
-
-        is_text = True
-
-        for kw_type, word_set in python_kw.items():
-
-            for word in word_set:
-
-                line, column = index(end)
-
-                #print word, self.text.get(start, index(line, column + 1))
-
-                if self.text.get(start, index(line, column + 1)) == word:
-
-                    self.text.tag_add(kw_type, start, end)
-
-                    is_text = False
+                if self.text.get(index(line, start_col)) in self.separators:
 
                     break
 
-        if is_text:
+            start = index(line, start_col)
+            end   = index(line, end_col)
 
-            # Remove tags
+            positions.append((start, end))
 
-            for tag in python_kw:
+            # Word 2. Walk forward until we get a separator
+
+            start_col = end_col = column
+
+            while True:
+
+                if self.text.get(index(line, end_col)) in self.separators:
+
+                    break
+                
+                end_col += 1
+
+            # Now we have our for word start & end
+
+            start = index(line, start_col)
+            end   = index(line, end_col)
+
+            positions.append((start, end))
+            
+
+        else:
+
+            # ALPHANUMBERIC or DELETE
+                      
+            # 1. Walk backword until we get a separator or column = 0
+
+            line, column = index(self.text.index(INSERT))
+
+            start_col = end_col = column
+
+            while start_col > 0:
+
+                start_col -= 1
+
+                if self.text.get(index(line, start_col - 1)) in self.separators:
+
+                    break
+                
+            # 2. Walk forward until we get a separator
+
+            while True:
+
+                if self.text.get(index(line, end_col)) in self.separators:
+
+                    break
+                
+                end_col += 1
+
+            # Now we have our for word start & end
+
+            start = index(line, start_col)
+            end   = index(line, end_col)
+
+            positions.append((start, end))
+
+        # Loop through pairs of start & end points for words
+
+        # !!!
+
+        # Get colour marker and set colour
+
+        for start, end in positions:
+
+            word = self.text.get(start, end)
+
+            print repr(word)
+
+            # For each style type, see if the word fits the regex and add the appropriate tag
+
+            tag_name = styletype(word)
+
+            tags = self.text.tag_names(start)
+
+            for tag in tags:
 
                 self.text.tag_remove(tag, start, end)
 
-            self.text.tag_add('text', start, end)
+            if tag_name:
 
+                self.text.tag_add(tag_name, start, end)
+
+      
         return "break"
                     
 
@@ -266,6 +329,10 @@ class App:
         # Add originally typed bracket
 
         self.text.insert(self.text.index(INSERT), event.char)
+
+        # Update any colour
+
+        self.update(event)
 
         return "break"
 
@@ -309,8 +376,6 @@ class App:
         a, b = ("%d.0" % n for n in block)
 
         # Highlight text to execute
-
-        #hl = Thread(target=self.highlight, args=(a,b)).start()
 
         self.highlight(a, b)
 
@@ -410,6 +475,9 @@ class App:
 
         # Add whitespace
         self.text.insert(self.text.index(INSERT), " " * whitespace)
+
+        # Update IDE
+        self.update(event)
         
         return "break"
 
@@ -436,26 +504,35 @@ class App:
         tab = index(i,j-self.tabsize)
         cur = index(i,j)
         char_l = self.text.get(index(i,j-1))
-        char_r = self.text.get(index(i,j+1))  
-        
+        char_r = self.text.get(index(i,j+1))
+      
         # Check if there's a tab
         if self.text.get(tab,cur) == self.tabspace():
             self.text.delete(tab, cur)
-            return "break"
-
+        
         # Check if in a set of empty brackets and delete both
         elif char_l in self.left_brackets:
             for b in self.left_brackets:
                 if b == self.text.get(index(i,j-1)) and self.all_brackets[b] == self.text.get(cur):
                     self.text.delete(index(i, j-1), index(i,j+1))
-                    return "break"
-                
-                
+
+                elif b == self.text.get(index(i,j-1)):
+                    self.text.delete(index(i, j-1))
+
         # Delete 1 char
         elif j > 0:
+
             self.text.delete(index(i, j-1))
-            self.update(event)            
-            return "break"
+
+        else:
+
+            # Backspace as normal
+            self.update(event)
+            return
+
+        # Update the IDE
+        self.update(event)
+        return "break"
 
     def selectall(self, event):
         self.text.tag_add(SEL, "1.0", END)
