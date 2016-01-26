@@ -80,6 +80,8 @@ class group:
 
             item.play()
 
+Group = group
+
 ###### Object for creating instruments
 
 class new_:

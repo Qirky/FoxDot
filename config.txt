@@ -1,7 +1,11 @@
 plaintext=#ffffff
-functions=#ffff00
-key_types=#9900FF
-user_defn=#0000FF
+background=#4d4d4d
+functions=#66ff99
+key_types=#66ccff
+user_defn=#ff9999
 comments=#FF3300
 numbers=#FF9900
-strings=#00ff00
+strings=#ffff99
+dollar=#cc33ff
+arrow=#ffff99
+players=#cc33ff

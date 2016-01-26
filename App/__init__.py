@@ -19,23 +19,65 @@ def empty(string):
 def isDelete(char):
     return char == "\x08"
 
+def isReturn(char):
+    return char == "\r"
+
 def isHex(char):
     return len(repr(char)) > 3
+
+def indented(s):
+    for i, char in enumerate(s):
+        if char != " ":
+            break
+    return i
+
+def open_bracket(text):
+
+    count = dict([(l,0) for l in left_b])
+
+    for i, char in enumerate(text):
+
+        if   char in left_b:
+
+            count[char] += 1
+
+        elif char in right_b:
+
+            count[brackets[char]] -= 1
+
+    open_br = [b for b in count.keys() if (count[b] >= max(count.values()) > 0) and (count[b] % 2 == 1) ]
+
+    pos = [text.rfind( b ) for b in open_br]
+
+    if pos:
+
+        return max(pos) + 1
+
+def function(text):
+
+    tokens = text.strip()
+
+    if tokens[-1] != ":":
+
+        return
+
+    tokens = tokens[:-1]
     
+    for b in left_b + right_b:
+        
+        tokens = tokens.replace(b," ")
 
+    tokens = tokens.split()
 
-# DEFINE KEY VARIABLES
+    for kw in py_indent_kw:
 
-# Keywords
+        if kw in tokens:
 
-whitespace = " \t\n\r\f\v"
-
-SC_Location = "C:\Program Files (x86)\SuperCollider-3.6.6"
-
-
-# DEFINE 
+            return indented(text) + tabsize
+ 
 
 class console:
+    """ Console widget that displays the true Python input """
 
     def __init__(self, master):
 
@@ -95,7 +137,7 @@ class App:
         self.text = Text(self.root,
                          padx=5, pady=5,
                          height=20, width=100,
-                         bg = "#140000",
+                         bg = colour_map['background'],
                          fg=colour_map['plaintext'],
                          insertbackground="White",
                          font = ("Ubuntu Mono", 12),
@@ -111,6 +153,7 @@ class App:
         self.text.bind("<Control-.>", self.killall)
         self.text.bind("<Return>", self.newline)
         self.text.bind("<BackSpace>", self.delete)
+        self.text.bind("<Delete>", self.delete2)
         self.text.bind("<Tab>", self.tab)
         self.text.bind("<Key>", self.keypress)
 
@@ -142,10 +185,6 @@ class App:
 
         sys.stdout = self.console
 
-        # Default values
-
-        self.tabsize = 4
-
     def run(self):
         """ Starts the Tk mainloop for the master widget """
 
@@ -168,129 +207,44 @@ class App:
         
         else: # Add character to text box
 
+            self.delete_selection()
+
             self.text.insert(self.text.index(INSERT), event.char)
 
             self.update(event)
 
         return "break"
 
-
     def update(self, event=None):
-        """ Update the IDE on a keypress """
 
-        # TODO account for newline
+        # 1. Get the contents of the current line
 
-        # Get cursor pos
+        cur = self.text.index(INSERT)
 
-        end = self.text.index(INSERT)
+        line, column = index(cur)
 
-        positions = []
+        # -- check current and last line if return key
 
-        # If char is a separator, we may have TWO words <-char->
+        lines = [line] + [line-1] * int(isReturn(event.char))
 
-        if event.char in self.separators or isDelete(event.char):
+        for line in lines:
 
-            # Word 1. Walk backword until we get a separator or column = 0
+            start, end = index(line,0), index(line,"end")
 
-            line, column = index(self.text.index(INSERT))
+            thisline = self.text.get(start, end)
 
-            start_col = end_col = column - 1 + int(isDelete(event.char))    
+            # 2. Remove tags at current point
 
-            while start_col > 0:
+            for tag_name in self.text.tag_names():
 
-                start_col -= 1
+                self.text.tag_remove(tag_name, start, end)
 
-                if self.text.get(index(line, start_col)) in self.separators:
+            # 3. Update IDE
 
-                    break
+            for tag_name, start, end in findstyles(thisline):
 
-            start = index(line, start_col)
-            end   = index(line, end_col)
+                self.text.tag_add(tag_name, index(line, start), index(line, end))
 
-            positions.append((start, end))
-
-            # Word 2. Walk forward until we get a separator
-
-            start_col = end_col = column
-
-            while True:
-
-                if self.text.get(index(line, end_col)) in self.separators:
-
-                    break
-                
-                end_col += 1
-
-            # Now we have our for word start & end
-
-            start = index(line, start_col)
-            end   = index(line, end_col)
-
-            positions.append((start, end))
-            
-
-        else:
-
-            # ALPHANUMBERIC or DELETE
-                      
-            # 1. Walk backword until we get a separator or column = 0
-
-            line, column = index(self.text.index(INSERT))
-
-            start_col = end_col = column
-
-            while start_col > 0:
-
-                start_col -= 1
-
-                if self.text.get(index(line, start_col - 1)) in self.separators:
-
-                    break
-                
-            # 2. Walk forward until we get a separator
-
-            while True:
-
-                if self.text.get(index(line, end_col)) in self.separators:
-
-                    break
-                
-                end_col += 1
-
-            # Now we have our for word start & end
-
-            start = index(line, start_col)
-            end   = index(line, end_col)
-
-            positions.append((start, end))
-
-        # Loop through pairs of start & end points for words
-
-        # !!!
-
-        # Get colour marker and set colour
-
-        for start, end in positions:
-
-            word = self.text.get(start, end)
-
-            print repr(word)
-
-            # For each style type, see if the word fits the regex and add the appropriate tag
-
-            tag_name = styletype(word)
-
-            tags = self.text.tag_names(start)
-
-            for tag in tags:
-
-                self.text.tag_remove(tag, start, end)
-
-            if tag_name:
-
-                self.text.tag_add(tag_name, start, end)
-
-      
         return "break"
                     
 
@@ -310,7 +264,7 @@ class App:
 
         # If a left bracket, automatically add the right
 
-        if event.char in self.left_brackets and self.text.get(self.text.index(INSERT)) in list(whitespace) + self.left_brackets + self.right_brackets:
+        if event.char in self.left_brackets and self.text.get(self.text.index(INSERT)) in py_whitespace + self.left_brackets + self.right_brackets:
             
             # Insert closed brackets
 
@@ -420,88 +374,96 @@ class App:
         self.text.tag_delete("code")
 
         return
-                
+
     def newline(self, event):
-        """ Elegantly goes to the next line """
-        left  = list("({[")
-        right = list(")}]") 
-        
-        # Look for last open bracket character
+
+        # Remove any highlighted text
+
+        self.delete_selection()
+
+        # Get the text from this line
+
         i, j = index(self.text.index(INSERT))
         line = self.text.get("%d.0" % i, "%d.end" % i)
 
-        n = 0
-        enclosed = 0
+        # Add newline
 
-        for n in range(len(line)-1,-1,-1):
-            char = line[n]
-            if char in right:
-                enclosed += 1
-            if char in left and enclosed:
-                enclosed -= 1
-            elif char in left and not enclosed: # look for spaces
-                n+=1
-                try:
-                    while line[n] == " ":
-                        n+=1
-                except:
-                    pass
-                break
-
-        # If n = 0, check for leading whitespace to keep in line
-        
-        if n == 0 and not enclosed and not empty(line):
-            while line[n:].startswith(' '):
-                n+=1
-
-        # Keywords to tab with
-
-        try:
-
-            if line.split()[0] in keywords and j == len(line):
-                n += self.tabsize
-
-        except:
-
-            pass
-            
-        
-        # Add the amount of whitespace
-
-        whitespace = n
-
-        # Add new line
         self.text.insert(self.text.index(INSERT), "\n")
 
-        # Add whitespace
-        self.text.insert(self.text.index(INSERT), " " * whitespace)
+        pos = 0 # amount of whitespace to add
 
-        # Update IDE
+        while True:
+
+            # Case 1. Unindented or indented but empty
+
+            if line.strip() == "": break
+
+            # Case 2. Open Bracket
+
+            pos = open_bracket(line)
+
+            if pos: break
+
+            # Case 2. Keyword with ending ':'
+
+            pos = function(line)
+
+            if pos: break
+
+            # Case 3. Indented line
+
+            pos = indented(line)
+
+            if pos: break
+
+            # Any other possibilities
+
+            pos = 0
+            
+            break
+
+        # Add the necessary whitespace
+
+        self.text.insert(self.text.index(INSERT), " " * pos )
+
+        # Update the IDE colours
+
         self.update(event)
-        
-        return "break"
 
+        return "break"
+    
     def tab(self, event):
         # TODO tab forward a whole selection
         self.text.insert(self.text.index(INSERT), self.tabspace())
         return "break"
     
     def tabspace(self):
-        return " " * self.tabsize
+        return " " * tabsize
 
-    def delete(self, event):
-        # If there is a selected area, delete that
+    def delete_selection(self):
+        """ If an area is selected, it is deleted and returns True """
         try:
             self.text.delete(SEL_FIRST, SEL_LAST)
-            return "break"
+            return True
+        
         except:
-            pass
+            return False
+
+    def delete2(self, event):
+        self.update(event)
+        return
+    
+    def delete(self, event):
+        # If there is a selected area, delete that
+        if self.delete_selection():
+            return "break"
+        
 
         # Else, work out if there is a tab to delete
         
         i, j = index(self.text.index(INSERT))
 
-        tab = index(i,j-self.tabsize)
+        tab = index(i,j-tabsize)
         cur = index(i,j)
         char_l = self.text.get(index(i,j-1))
         char_r = self.text.get(index(i,j+1))
