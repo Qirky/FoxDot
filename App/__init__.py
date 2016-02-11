@@ -197,11 +197,7 @@ class App:
 
         # Return normally for non-string char
 
-        if not event.char:
-
-            return
-
-        elif isHex(event.char):
+        if not event.char or isHex(event.char):
 
             return
         
@@ -216,6 +212,10 @@ class App:
         return "break"
 
     def update(self, event=None):
+
+        # Move the window to view the current line
+
+        self.text.see(INSERT)
 
         # 1. Get the contents of the current line
 

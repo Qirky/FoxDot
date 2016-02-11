@@ -16,8 +16,10 @@ def execute(code, verbose=True):
         exec code in globals()
 
     except:
-        
+
         print error_stack()
+
+        raise # raise the error to any foxdot code that executes foxdot code
 
     return
 
@@ -26,13 +28,19 @@ def toPython( live_code, verbose ):
 
     """ Converts any FoxDot code to its equivalent in Python """
 
+    as_typed = live_code
+
+    # 0. Look for any 'when' statements
+
+    live_code = when_statements( live_code )
+
     # 1. Look for FoxDot syntax for new players
 
-    live_code, new_player_data = new_player( live_code )
+    live_code = overwrite_code( live_code )
 
     # 2. Convert any "new" players already playing to update methods
     
-    live_code = override_attempt( live_code, new_player_data )
+    live_code = override_attempt( live_code )
 
     # 3. Convert any references to "self" to the attached player
 
@@ -52,19 +60,25 @@ def toPython( live_code, verbose ):
 
     # 5. Convert to python code to be executed
 
-    raw_python = compile(live_code, '<string>', 'exec')
+    raw_python = compile(live_code, 'FoxDot', 'exec')
 
     return raw_python
 
+def when_statements( code ):
+    """ Finds any when statements and converts them to a string that creates TempoClock.When objects """
 
-def new_player( code ):
-    """ Defining a new instrument / player is done using a double arrow
-        >> followed by the name of the SynthDef as if it were a python class
-        so that we can look it up and create a new player """
+    statements = [ match[0] for match in re.findall(r'(when .*:(\n(else:\s*?\n)?(    )+\S.*)+)', code) ]
+    
+    for s in statements:
+        key = re.search(r'when (.*?):', s).group(1).replace('"','\"')
+        new = s.replace("when ", "if ").replace('"','\"').split("\n")
+        when = "Clock.when(\"%s\", %s )\n" % (key,str(new))
+        code = code.replace(s, when)
 
-    # Dictionary players[code_str] = variablename, synthdef, init_args, extra methods and data
+    return code
 
-    players = {}
+def overwrite_code( code ):
+    """ Replaces any FoxDot code with Python code """
 
     # RegEx for instruments constructed using VAR >> INSTRUMENT()
 
@@ -90,7 +104,6 @@ def new_player( code ):
 
             var, op, pattern  = assignments[n].replace("\n","").split(' ', 2)
 
-
         # Find the object arguments and the index of the string at which it ends
 
         start = code.index(assignments[n]) + len(assignments[n]) - 1
@@ -109,38 +122,11 @@ def new_player( code ):
 
         Arguments, index = enclosing_brackets( data )
 
-        # Set the default server manager
-        
-        Arguments.append("server=server_")
-
-        # See if a scale and metronome has been specified, if not, use global default
-
-        default_scale = True
-        default_metro = True
-
-        for arg in Arguments:
-
-            if "scale" in arg:
-        
-                default_scale = False
-                
-            if "metro" in arg:
-
-                default_metro = False
-
-        if default_scale:
-
-            Arguments.append("scale=default_scale")
-
-        if default_metro:
-
-            Arguments.append("metro=Clock")
-
         # Add the sample player pattern
 
         if SynthDef == "sample_player":
 
-           Arguments.append( "pat=''.join(%s)" % pattern )
+           Arguments.append( pattern )
 
         # Check for any information AFTER the init
 
@@ -148,15 +134,15 @@ def new_player( code ):
 
         # Check if the player should start at the next loop (!)
 
-        if Methods.endswith('!'):
-
-            Arguments.append( "quantise=False" )
-
-            Methods = Methods[:-1]
-
-        else:
-
-            Arguments.append( "quantise=True" )
+##        if Methods.endswith('!'):
+##
+##            Arguments.append( "quantise=False" )
+##
+##            Methods = Methods[:-1]
+##
+##        else:
+##
+##            Arguments.append( "quantise=True" )
            
         # Replace "old" code with new
 
@@ -164,85 +150,60 @@ def new_player( code ):
 
         if SynthDef == "sample_player":
 
-            new_code = "\n%s = samples_( %s )\n%s" % (var, ",".join(Arguments), Methods)
+            new_code = "%s = SamplePlayer( %s )\n%s\n" % (var, ", ".join(Arguments), Methods)
 
         else:
 
-            new_code = "\n%s = new_('%s','%s', %s )%s\n" % (var, var, SynthDef, ",".join(Arguments), Methods)
-
-        players[new_code] = (var, SynthDef, Arguments, Methods)
+            new_code = "%s = Player('%s', %s )%s\n" % (var, SynthDef, ", ".join(Arguments), Methods)
 
         code = code.replace(old_code, new_code)
 
-    return code, players
+    return code
 
 # Formatting and cleaning code funcrtions below
 
-def override_attempt(code, new_players):
-
+def override_attempt( code ):
     """ Finds any attempt to re-assign a player while playing and reformats the arguments """
 
     ns = globals()
 
-    for string, values in new_players.items(): # TODO any assignments
+    # look for any lines starting with a = b
 
-        name, function = string.split()[0:2]
+    lines = code.split("\n")
 
-        try:
+    new_code = []
 
-            isplaying = ns[name].isplaying
+    for line in lines:
 
-        except:
+        assignment = re.match(r".*=.*", line.strip())
 
-            continue
+        if assignment:
 
-        if name in ns and function == '=' and isplaying:
+            var = line.split('=', 1)[0].strip()
 
-            # Rearrange code so the values are just assigned
+            # See if A is a Player instance
+            
+            try:
 
-            new_code = ""
+                if ns[var].isplaying:
 
-            # 1a. Get variable name etc
+                    # Re-Format #
 
-            var, synth, args, methods = values
+                    before = line                    
 
-            # 1b. Check if the first argument is degree or not
+                    after = line = re.sub(r"%s\s*=\s*(Sample)?Player\(" % var ,"%s.update(" % var, line)
 
-            degree_stated = int("=" not in args[0] or "degree=" in args[0])
+                    if before == after:
 
-            if degree_stated:
+                        raise RuntimeWarning("Variable '%s' can only be assigned to a Player or SamplePlayer object while playing" % var)
 
-                new_code += "\n%s.%s=%s" % (var, "degree", args[0].replace("degree=",""))
+            except KeyError, AttributeError:
 
-            #if synth == "sample_player":
+                pass
 
-            #    new_code += "%s.%s=%s\n" % (var, "pat", args[0])
+        new_code.append( line )
 
-            # 2. Iterate over the remaining arguments (except clock and servers) and format
-
-            for a in args[degree_stated:]:
-
-                if "metro" not in a or "server" not in a:
-
-                    new_code += "\n%s.%s" % (var, a)
-
-            # 3. Check any extra methods - shows users what their code is REALLY doing
-
-            if methods:
-
-                if methods.startswith("\n"):
-
-                    methods = methods[1:]
-
-                if methods.startswith(var):
-
-                    methods = methods[len(var):]
-
-                new_code += "\n%s%s" % (var, methods.replace("self", var))
-
-            # Replace code and return :)
-
-            code = code.replace( string, new_code )
+    code = "\n".join(new_code)
 
     return code
 

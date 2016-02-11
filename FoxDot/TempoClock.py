@@ -27,6 +27,10 @@ class TempoClock:
 
         self.ticking = False
 
+        # List of "code" objects
+
+        self.when_statements = []
+
     def __str__(self):
 
         return "TempoClock Object @ %.2f bpm, %d/%d" % (self.bpm, self.timeSig[0], self.timeSig[1])
@@ -45,6 +49,14 @@ class TempoClock:
 
         self.steps = new
         self.queue = self.new_queue()
+
+    def polyrhythm(self, a, b):
+
+        self.timeSig = (a,b)
+
+        self.change_steps( a*b )
+
+        return        
 
     def new_queue(self):
 
@@ -106,6 +118,20 @@ class TempoClock:
   
         while self.ticking:
 
+            # Execute any When statements
+
+            for code in self.when_statements:
+
+                if code % self.beat:
+
+                    try:
+
+                        code.run()
+
+                    except:
+
+                        self.when_statements.remove(code)
+
             # Iterate through any players in the queues current set
 
             if self.beat % self.bar_length() == 0 :
@@ -122,16 +148,18 @@ class TempoClock:
 
             # Update and play players
 
-            for player in self.queue[self.now()]:
+            step = self.queue[self.now()]
+
+            for player in step:
 
                 if player.isplaying:
 
-                    player.update()
+                    player.update_state()
 
                     player.send()
 
-                # print self.beat % self.bar_length(),  player.now("degree"), player.event_n
-
+            # Rest
+            
             sleep( self.step_dur() )
 
             self.beat += 1
@@ -164,6 +192,22 @@ class TempoClock:
 
         return
 
+    def when(self, a, b):
+
+        when = When(a, b)
+
+        if when not in self.when_statements:
+
+            self.when_statements.append( when )
+
+        else:
+
+            i = self.when_statements.index( when )
+
+            self.when_statements[i].update( when.code )
+
+        return
+
     def stop(self):
 
         self.ticking = False
@@ -180,8 +224,51 @@ class TempoClock:
             p = self.playing[0]
             p.kill()
 
+        while len(self.when_statements) != 0:
+
+            del self.when_statements[0]
+
         self.queue = [[] for n in range( len(self) ) ]
 
         self.beat = 0
 
         return
+
+
+import Code
+line = "\n"
+
+class When:
+
+    def __init__(self, test, code, step=0.25):
+        """ code is exectuted. test is evaluated every quarter beat by default """
+
+        if type(code) in (list, tuple):
+            code = line.join(code)
+
+        self.test = test
+        self.code = code
+        self.step = step
+        
+        # Test for syntax errors
+        compile(code, "FoxDot" , 'exec')
+        
+    def __mod__(self, n):
+        """ Returns 1 if n % 1/step is 0 """
+        return int( (n % (1.0 / self.step)) == 0 )
+
+    def __str__(self):
+        return self.test
+
+    def __eq__(self, other):
+        return str(self) == str(other)
+
+    def update(self, new):
+        self.code = new
+        return
+
+    def run(self):
+        Code.execute(self.code, verbose=False)
+        return
+
+    

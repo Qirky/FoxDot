@@ -1,55 +1,40 @@
 import random
-import Scale
 
-# Used to determine if an instance is timevar
-def TimeVar():
-    return
+# Circular add and get
 
-# Converts data to list format
-
-def asStream2(data, n=" "):
-
-    stream = None
-    
-    if   type(data) == list:
-        stream = data
-    elif type(data) == tuple:
-        stream = list(data)
-    elif type(data) == str:
-        stream = list(data)
-    else:
-        try:
-            if data.__type__ == "scale":
-                stream = data
-            else:
-                stream = [data]
-        except:
-            stream = [data]
-
-    return stream
-
-def asStream(data, n=" "):
-    """ Makes sure that any data is converted into an iterable and mutable form """
-
-    stream = None
-
-    if data == Scale.Object or data == TimeVar:
-
-        return data
-    
+def modi(array, i):
+    """ Returns the modular index i.e. modi([0,1,2],4) will return 1 """
     try:
-
-        stream = list(data)
-
+        return array[i % len(array)]
     except:
+        return array
+
+def circular_add(a, b):
+    """ Adding contents of b to a """
+    if len(b) > len(a):
+        tmp = b
+        b = a
+        a =tmp
         
-        stream = [data]
+    tmp = []
+    
+    for i in range(len(a)):
 
-    # Lists within lists are laced but tuples are unaffected
+        tmp.append( float(a[i]) + float(b[i % len(b)]) )
 
-    return Place(stream)
+    return tmp
 
 # Define python functions that can be used in the live code
+
+def irange(start, stop=None, step=0.1):
+    r = []
+    if not stop:
+        stop = start
+        start = 0
+    while start <= stop:
+        r.append( start )
+        start += step
+    return r
 
 def Chord(stream=[0], structure=[0,2,4]):
 
@@ -190,6 +175,14 @@ def Geom(n, lo=1, hi=None):
 
     return [n**i for i in range(lo, hi+1)]
 
+def GeomFill(arr, N=2):
+    """ GeomFill(arr) -> new_arr such that sum(new_list) is power of N """
+    nums  = arr
+    total = 1
+    while sum(nums) >= total:
+        total *= N
+    nums.append( total - sum(nums) )
+    return nums
 
 def Rand(a, b=None, size=256):
 
@@ -220,6 +213,11 @@ def Sine(size=16):
 
     return a + b
 
+def Stretch(stream, size):
+    out = []
+    for n in range(size):
+        out.append( modi(stream, n) )
+    return out
 
 def Rhythm(string, step=0.5):
 

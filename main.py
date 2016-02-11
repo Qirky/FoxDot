@@ -29,11 +29,13 @@ if __name__ == "__main__":
             """ Overwrites the empty method to send a piece of
                 FoxDot code to the environment. """
 
-            # Executes a string of code in the environment
+            try:
+                    
+                Code.execute( code_str )
 
-            Code.execute( code_str )
+            except:
 
-            return
+                return
 
         def killall(self, event):
 

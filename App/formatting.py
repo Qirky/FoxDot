@@ -9,7 +9,7 @@ strings   = r"\".*?\"|\'.*?\'"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
 
-foxdot_kw = ["var","Var","Clock","default_scale", "group", "Group", "Scale"]
+foxdot_kw = ["var","Var","Clock","default_scale", "group", "Group", "Scale","inf","Inf"]
 
 def findstyles(line, *args):
     """ Finds any locations of any regex and returns the name
@@ -67,15 +67,16 @@ except:
 
 # Python keywords used in RegEx Group 2
 
-py_indent_kw = ["for","if","elif","else","def","while","class","try","except"]
+py_indent_kw = ["for","if","elif","else","def","while","class","try","except","when"]
 
-py_functions = ["if","elif","else","return","def","print",
+py_functions = ["if","elif","else","return","def","print","when",
                  "and","or","not","is","in","for","as","with",
                  "while", "class", "import", "try","except"]
 
 py_key_types = foxdot_kw + ["str","int","float","type","repr",
                              "range","open","len","sorted","set",
-                             "None","True","False","bool","chr"] 
+                             "None","True","False","bool","chr",
+                             "help","exit","xrange","isintstance"] 
 
 py_separators = list("[](){},./*+=- \t\n")
 py_whitespace = list(" \t\n\r\f\v")

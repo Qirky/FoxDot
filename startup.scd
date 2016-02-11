@@ -1,7 +1,3 @@
-
-
-Stethoscope(s);
-
 (
 // Below we outline the buffer numbers for each sample
 
@@ -38,15 +34,18 @@ Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/ryan/pass.wav", 
 
 SynthDef.new( \sample_player,
 	{
-		arg buf=0,amp=1,pan=0,rate=1, sus=1, verb=0.2, dist=0;
+		arg buf=0,amp=1,pan=0,rate=1, sus=1, verb=0.2, gain=0, slow=1, slide=0;
 		var sound;
+
+		rate = (slide * LFPar.kr(slide / 4)) + rate - slide;
 
 		sound = FreeVerb.ar( PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate) * amp * 2 , verb, 0.1);
 
 		sound = sound * EnvGen.ar(Env([0,1,1,0],[0 ,sus * 2, 0]), doneAction:2);
 
-		sound = sound + (Saw.ar(0, sound * 0.05) * (dist/10));
+		sound = sound + (Saw.ar(0, sound * 0.05 * gain) * (gain/100));
 
+		// sound = Decay2.ar(sound);
 
 		Out.ar(0,Pan2.ar( sound, pan));
 		} ).add;
@@ -69,7 +68,7 @@ SynthDef.new( \crunch,
 
 		var osc, env;
 
-		osc = LFNoise0.ar(Crackle.kr(1.95) * 6000, mul: amp);
+		osc = LFNoise0.ar(Crackle.kr(1.95) * freq * 15, mul: amp);
 
 		env = EnvGen.ar(Env.perc(0.01,0.1,amp / 2), doneAction:2);
 
@@ -89,16 +88,15 @@ SynthDef.new( \rave,
 		Out.ar(0,Pan2.ar( osc * env , pan));
 } ).add;
 
-SynthDef(\technobass, { |freq = 440, gate = 1, amp = 0.5, slideTime = 0.17, ffreq = 1100, width = 0.15,
-	detune = 1.005, preamp = 4|
-	var    sig,
-	env = Env.adsr(0.01, 0.3, 0.4, 0.1);
-	freq = Lag.kr(freq, slideTime);
-	sig = Mix(VarSaw.ar([freq, freq * detune], 0, width, preamp)).distort * amp
-	* EnvGen.kr(env, gate, doneAction: 2);
-	sig = LPF.ar(sig, ffreq);
-	Out.ar(0, sig ! 2)
-}).add;
+// SynthDef(\technobass, { |freq = 440, gate = 1, amp = 0.5, slideTime = 0.17, ffreq = 1100, width = 0.15,sus=1,
+// 	detune = 1.005, preamp = 4|
+// 	var    sig,
+// 	env = Env.adsr(0.01, 0.3, 0.4, 0.1);
+// 	freq = Lag.kr(freq, slideTime);
+// 	sig = Mix(VarSaw.ar([freq, freq * detune], 0, width, preamp)).distort * amp	;
+// 	sig = LPF.ar(sig, ffreq);
+// 	Out.ar(0, sig * EnvGen.ar(Env.perc(0.01,sus,amp), doneAction:2))
+// }).add;
 
 
 SynthDef.new( \pads,
@@ -130,7 +128,7 @@ SynthDef.new( \banjo,
 
 SynthDef.new( \bell,
 	{
-		|freq=465, strength=1, decay=3, sus=1,amp=1,verb=0.33|
+		|freq=465, strength=1, decay=3, sus=1,amp=1,verb=0.33,pan=0|
 		var son;
 		son = Klank.ar(`[
 			// frequency ratios
@@ -146,7 +144,7 @@ SynthDef.new( \bell,
 
 		son = FreeVerb.ar(son, verb);
 
-		Out.ar(0, Pan2.ar(son));
+		Out.ar(0, Pan2.ar(son, pan));
 }).add;
 
 SynthDef.new( \soprano,
@@ -208,7 +206,7 @@ SynthDef.new( \rev,
 
 		amp = amp;
 
-		osc =  SinOsc.ar(freq, mul:amp/2);// + SinOsc.ar(freq + 5, mul:amp/2);
+		osc =  SinOsc.ar(freq, mul:amp);
 
 		env = EnvGen.ar(Env(times:[0.99 * sus, 0.01 * sus], curve:20), doneAction:2);
 
@@ -411,14 +409,12 @@ SynthDef.new( \soprano2,
 
 		env = EnvGen.ar(Env([0,amp / 2,0],[sus / 2, sus / 2]), doneAction:2);
 
-
-
-    // harmonics
+		// harmonics
 		harm = [1,2,3,4];
-    // amplitudes
-    a = Array.fill(4, 0.5);
-    // ring times
-    ring =  Array.fill(4, 2);
+		// amplitudes
+		a = Array.fill(4, 0.5);
+		// ring times
+		ring =  Array.fill(4, 2);
 
 		//{ClipNoise.ar(0.003)}.dup
 
@@ -427,7 +423,7 @@ SynthDef.new( \soprano2,
 		klank = klank * EnvGen.ar(Env([0,amp,0],[0.5 * sus, 0.5 * sus]),doneAction:2);
 
 		Out.ar(0,Pan2.ar( FreeVerb.ar((osc * env) + klank, verb) , pan));
-		} ).add;
+} ).add;
 
 
 
@@ -439,7 +435,7 @@ SynthDef(\pluck, {|freq = 440, dur = 1, sus=1, amp=1, pan=1|
 	note = freq.cpsmidi;
 	note = note + (LFNoise2.ar(20).range(-1,1) * (1/8));
 	klang = SinOsc.ar((note * [1,1.002]).midicps, phase: VarSaw.ar(note.midicps, width: Line.ar(1,0.2,dur))) * 0.3;
-	klang = klang * XLine.ar(amp,(amp)/10000,sus,doneAction:2) * 0.3;
+	klang = klang * XLine.ar(amp,(amp)/10000,sus*4,doneAction:2) * 0.3;
 	Out.ar(0, Pan2.ar( klang , pan));
 }).add;
 
@@ -539,9 +535,40 @@ SynthDef(\grind, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 	son  = LFPulse.ar(Crackle.ar(2) * freq, 0.99, 0.2).lagud(0.4 / freq, 0.6 / freq) * 2 - 1;
 	son = BPF.ar(son.clip2(0.2), 1500, 1/4) * 4;
 
-	// delay and reverb, to simulate the environment in which we hear the siren
 	son = son + DelayC.ar(son, 0.1, 0.1, 0.3);
 	son = son + FreeVerb.ar(son);
+
+	son = son * EnvGen.ar(Env.perc(0.1, sus, curve:-10), doneAction:2);
+
+
+	Out.ar(0, Pan2.ar(son * amp, pan));
+}).add;
+
+
+SynthDef(\synth, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
+
+	var son;
+
+	son  = LFPulse.ar(Crackle.ar(1/4) * freq, 0.99, 0.3) + LFSaw.ar(Crackle.ar(1/4) * freq + 1 * 2, 0.99, 0.3);
+	son = BPF.ar(son.clip2(0.2), 3000, 1) * 2;
+
+	son = son + DelayC.ar(son, 0.1, 0.01, 0.3);
+	son = son + FreeVerb.ar(son);
+
+	son = son * EnvGen.ar(Env.perc(0.1, sus, curve:-10), doneAction:2);
+
+
+	Out.ar(0, Pan2.ar(son * amp, pan));
+}).add;
+
+SynthDef(\woop, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
+
+	var son;
+
+	son  = LFTri.ar(Vibrato.kr(freq, rate, 1, rateVariation:1, depthVariation:0.5)) * LFPar.ar(Vibrato.kr(freq + 2, rate, 1, rateVariation:0.5, depthVariation:1)) * 1/5;
+
+	son = son + DelayC.ar(son, 0.1, 1, 0.3);
+	son = son + FreeVerb.ar(son,1,0.5);
 
 	son = son * EnvGen.ar(Env.perc(0.1, sus, curve:-10), doneAction:2);
 

@@ -14,147 +14,112 @@
 """
 
 from re import match
+from random import choice as choose
 
 from TempoClock import *
 from ServerManager import *
 from Players import *
 from Patterns import *
 from Code import *
+from TimeVar import *
 import Scale
 
-# Trailing underscore indicates a variable that is not necessarily intended for use
-        
-server_ = ServerManager()
-
 # Define default variables - these are used in Code.new_player() DO NOT CHANGE
+        
+Server = ServerManager()
 
 Clock = TempoClock()
 
-default_scale = Scale.Scale("major")
+DefaultScale = Scale.Scale("major")
 
 # Clock dependant variable - stream / inherit float / allow float/int methods and change code
 
-class var:
+class var(TimeVar):
 
     def __init__(self, values, dur=4):
 
-        # Initiate values and clock
+        TimeVar.__init__(self, values, dur, Clock)
 
-        self.metro  = Clock
-        self.seq    = values
-        self.values = None
-        self.dur    = dur
+Var = var # Allow caps
 
-        self.update(values, dur)
+# FoxDot Class that is used to return types of players easily
 
-        return
-
-    def __str__(self):
-
-        a = [str(i) for i in self.seq]
-        b = [str(i) for i in self.dur]
-
-        return "var([%s],[%s]) -> %s" % (",".join(a), ",".join(b), str(self.now()))
-
-    def length(self):
-
-        return sum(self.dur)
-
-    def __len__(self):
-
-        try:
-
-            return len(self.now())
-
-        except:
-
-            return 1
-
-    def __int__(self):
-
-        return int(self.now())
-
-    def __add__(self, n):
-
-        return var([val+n for val in self.seq], self.dur)
-
-    def __sub__(self, n):
-
-        return var([val-n for val in self.seq], self.dur)
-
-    def __float__(self):
-
-        return float(self.now())
-
-    def __eq__(self, other):
-
-        return other == TimeVar
-
-    def __ne__(self, other):
-
-        return other != TimeVar
-
-    def __iter__(self):
-
-        try:
-
-            for x in self.now():
-
-                yield x
-
-        except:
-
-            yield self.now()
-
-    def update(self, values, dur=None):
-
-        """ Changes the values for any player using this var """
-
-        if dur:
-
-            self.dur = asStream(dur)
-
-        # Update seq values
-
-        self.seq = asStream(values)
-
-        dur = self.dur
-        values = self.seq
-
-        lv = len(values)
-        ld = len(dur)
-
-        stream = []
-
-        for i in range(max(lv, ld)):
-            stream += [values[i % lv]]*int((dur[i % ld]*self.metro.steps))
-
-        self.values = stream
-
-        return
+class Player(new_):
     
-    def now(self):
-        """ Returns the value at the current clock time """
+    CREATED = False
 
-        i = self.metro.now() % len(self.values)
+    def __init__(self, SynthDef, degree=[0], **kwargs):
+        new_.__init__(self, SynthDef, degree, **kwargs)
+        self.metro = Clock
+        self.server = Server
+        self.scale = kwargs.get("scale", DefaultScale)
+        self.begin()
+        self.CREATED = True
 
-        return self.values[i]
+    def begin(self):
+        self.metro.playing.append(self)
+        self.update_clock()
+        return
 
-    def durs(self):
+    def __setattr__(self, name, value):
+        self.__dict__[name] = value
+        if self.CREATED and type(value) != str:
+            self.attr[name] = value
+        return
 
-        return self.dur
 
-    def vals(self):
+class SamplePlayer(samples_):
 
-        return self.seq
+    CREATED = False
 
-Var = var # Can be capitalised or not
+    def __init__(self, string, **kwargs):
+        samples_.__init__(self, ''.join(Place(string)), **kwargs)
+        self.metro = Clock
+        self.server = Server
+        self.begin()
+        self.CREATED = True
 
-patt = r'SynthDef.*?\\(.*?),'
+    def begin(self):
+        self.metro.playing.append(self)
+        self.update_clock()
+        return
 
-def SynthDefs():
-    """ Returns a list of all the available SynthDefs in startup.scd """
-    f = open('startup.scd')
-    sc = f.readlines()    
-    f.close()
-    return [match(patt, line).group(1) for line in sc if "SynthDef" in line]
+# Misc. Functions
+
+def Ramp(start=0, end=1, t=8):
+    """ Returns a timevar that increase from start to end in time t then back to start """
+    step = 0.25
+    size = t / step
+    dur = [step] * int(size) + [inf]
+    val = irange(start, end, (end-start)/size)[:int(size)] + [start]
+    return var(val, dur)
+
+class SuperColliderSynthDefs:
+
+    with open('startup.scd') as f:
+        sc = f.readlines()    
+    patt = r'SynthDef.*?\\(.*?)'
+
+    names = [match(patt, line).group(1) for line in sc if "SynthDef" in line and not line.startswith("/")]
+
+    def __init__(self):
+        pass
+    def __str__(self):
+        return str(self.names)
+    def __repr__(self):
+        return str(self.names)
+    def __len__(self):
+        return len(self.names)
+    def __iter__(self):
+        for x in self.names:
+            yield x
+    def __getitem__(self, key):
+        return self.names[key]
+    def __setitem__(self, name, value):
+        raise AttributeError("SynthDefs cannot be altered using FoxDot code")
+    def __call__(self):
+        return self.names
+    def choose(self):
+        return choose(self.names)
+
+SynthDefs = SuperColliderSynthDefs() 
