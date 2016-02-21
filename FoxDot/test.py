@@ -1,7 +1,18 @@
-import re
+class test:
+    def __init__(self):
+        self.x = 10
+    def increase(self, x):
+        self.x += x
+    def do(self, cmd, *args):
+        self.cmd(args)
 
-var = "p"
+increase = test.increase
 
-line = "p = Player('pads')"
+a = test()
+a.do(increase, 10)
+print a.x
 
-print re.sub(r"%s\s*=\s*(Sample)?Player\(" % var ,"ryan.update(", line)
+
+
+
+        

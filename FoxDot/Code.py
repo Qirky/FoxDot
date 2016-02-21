@@ -1,7 +1,12 @@
 import re
+from types import CodeType
+func_type = type(lambda: None)
 from traceback import format_exc as error_stack
 
 # --------------------- Handling Code
+
+def toCompile(expression):
+    return expression, "FoxDot", "exec"
 
 def execute(code, verbose=True):
 
@@ -11,7 +16,9 @@ def execute(code, verbose=True):
 
     try:
 
-        code = toPython( code, verbose )
+        if type(code) != CodeType:
+
+            code = toPython( code, verbose )
 
         exec code in globals()
 

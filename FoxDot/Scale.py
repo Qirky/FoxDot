@@ -81,7 +81,9 @@ class Scale:
 
     def __call__(self, *args):
 
-        self.change(args[0])
+        if len(args) > 0:
+
+            self.change(args[0])
 
         return self
 
@@ -105,4 +107,5 @@ class Scale:
 
         return self
 
-        
+
+default = Scale("major")  

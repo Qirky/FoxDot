@@ -122,7 +122,7 @@ class TempoClock:
 
             for code in self.when_statements:
 
-                if code % self.beat:
+                if self.beat % code(self.steps) == 0:
 
                     try:
 
@@ -142,7 +142,9 @@ class TempoClock:
 
                     if not player.isplaying:
 
-                        player.event_n = 0
+                        # Player is updated BEFORE first OSC msg, so event_n is set to -1 to compensate
+
+                        player.event_n = -1
 
                         player.play()
 
@@ -192,9 +194,15 @@ class TempoClock:
 
         return
 
-    def when(self, a, b):
+    def when(self, a, b, step=None):
 
-        when = When(a, b)
+        if step is not None:
+
+            when = When(a, b, step)
+
+        else:
+
+            when = When(a, b)
 
         if when not in self.when_statements:
 
@@ -234,7 +242,6 @@ class TempoClock:
 
         return
 
-
 import Code
 line = "\n"
 
@@ -247,15 +254,23 @@ class When:
             code = line.join(code)
 
         self.test = test
-        self.code = code
         self.step = step
-        
+    
         # Test for syntax errors
-        compile(code, "FoxDot" , 'exec')
+        if type(code) == str:
+            self.code = compile(code, "FoxDot" , 'exec')
+        else:
+            self.code = code
         
     def __mod__(self, n):
         """ Returns 1 if n % 1/step is 0 """
         return int( (n % (1.0 / self.step)) == 0 )
+
+    def __call__(self, steps_per_beat):
+        return int(self.step * steps_per_beat)
+
+    def __repr__(self):
+        return "< 'When %s'>" % str(self)
 
     def __str__(self):
         return self.test
@@ -268,7 +283,10 @@ class When:
         return
 
     def run(self):
-        Code.execute(self.code, verbose=False)
+        if type(self.code) == Code.func_type:
+            self.code()
+        else:
+            Code.execute(self.code, verbose=False)
         return
 
     

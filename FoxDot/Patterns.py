@@ -263,3 +263,38 @@ def Rhythm(string, step=0.5):
             dur += step
 
     return stream[1:]
+
+# Used for converting streams and frequencies
+
+def miditofreq(midinote):
+    """ Converts a midi number to frequency """
+    return 440 * (2 ** ((midinote - 69.0)/12.0))
+
+def midi(scale, octave, degree, root=0, stepsPerOctave=12):
+
+    lo = int(degree)
+    hi = lo + 1
+
+    octave = octave + (lo / len(scale))
+
+    chroma = range(stepsPerOctave)
+
+    scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
+
+    return scale_val + (octave * len(chroma)) + chroma[ root % len(chroma) ]
+
+# These patterns take Player objects as arguments, change their state, and return None
+
+def rev(player):
+    player.reverse()
+
+def lshift(player):
+    player.lshift()
+
+def rshift(player):
+    player.rshift()
+
+def shuf(player):
+    player.degree = Shuf(player.degree)
+
+

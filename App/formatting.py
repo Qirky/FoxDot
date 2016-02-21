@@ -9,7 +9,7 @@ strings   = r"\".*?\"|\'.*?\'"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
 
-foxdot_kw = ["var","Var","Clock","default_scale", "group", "Group", "Scale","inf","Inf"]
+foxdot_kw = ["var","Var","Clock", "group", "Group", "Scale","inf","Inf"]
 
 def findstyles(line, *args):
     """ Finds any locations of any regex and returns the name
@@ -71,12 +71,13 @@ py_indent_kw = ["for","if","elif","else","def","while","class","try","except","w
 
 py_functions = ["if","elif","else","return","def","print","when",
                  "and","or","not","is","in","for","as","with",
-                 "while", "class", "import", "try","except"]
+                 "while", "class", "import", "try","except",
+                 "True", "False", "None", "self"]		
 
-py_key_types = foxdot_kw + ["str","int","float","type","repr",
-                             "range","open","len","sorted","set",
-                             "None","True","False","bool","chr",
-                             "help","exit","xrange","isintstance"] 
+
+py_key_types = ["abs","divmod","input","open","staticmethod","all","enumerate","int","ord","str","any","eval","isinstance", "pow","sum","basestring","execfile","issubclass","super","bin","file","iter","property","tuple","bool", "filter","len","range","type","bytearray","float","list","raw_input","unichr","callable","format","locals","reduce","unicode","chr","frozenset","long","reload","vars","classmethod","getattr","map","repr","xrange","cmp","globals","max","reversed","zip","compile","hasattr","memoryview","round","__import__","complex","hash","min","set","delattr","help","next","setattr","dict","hex","object","slice","dir","id","oct","sorted"]
+
+py_key_types = foxdot_kw + py_key_types
 
 py_separators = list("[](){},./*+=- \t\n")
 py_whitespace = list(" \t\n\r\f\v")

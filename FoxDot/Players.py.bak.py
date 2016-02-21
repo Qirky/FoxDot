@@ -1,0 +1,1248 @@
+"""
+    Copyright Ryan Kirkbride 2015
+
+    This module contains the objects for Instrument Players (those that send musical
+    information to SuperCollider) and Sample Players (those that send buffer IDs to
+    playback specific samples located in the Samples directory).
+
+"""
+
+from OSC import OSCClient, OSCMessage, OSCBundle
+from Patterns import *
+
+import Scale, Code
+from TimeVar import TimeVar
+
+##### Function returns data as stream / list
+
+def asStream(data, n=" "):
+    """ Makes sure that any data is converted into an iterable and mutable form """
+    stream = None
+    if isinstance(data, (Scale.Scale, TimeVar)):
+        return data
+    try:
+        stream = list(data)
+    except:
+        stream = [data]
+    # Lists within lists are laced but tuples are unaffected
+    return Place(stream)
+
+
+###### Object used to perform basic methods on a multiple of players
+
+class group:
+
+    def __init__(self, *args):
+
+        self.players = args
+
+    def __len__(self):
+
+        return len(self.players)
+
+    def __setattr__(self, name, value):
+
+        try:
+            
+            for p in self.players:
+
+                try:
+
+                    setattr(p, name, value)
+
+                except:
+
+                    print "AttributeError: '%s' object has no attribute '%s'" % (str(p), name)
+        except:
+
+            self.__dict__[name] = value 
+
+        return self
+
+    def stop(self, n=0):
+
+        for item in self.players:
+
+            item.stop(n)
+
+    def play(self):
+
+        for item in self.players:
+
+            item.play()
+
+Group = group
+
+###### Object for creating instruments
+
+class new_:
+
+    # Could create class variable that are shared by all instances?
+
+    def __init__(self, SynthDef, degree=[0], **kwargs):
+
+        self.SynthDef = SynthDef
+
+        # Get metronome clock
+
+        self.metro      = kwargs.get("metro", None)
+        self.quantise   = kwargs.get("quantise", False)
+
+        self.stopping = False
+        self.stop_point = 0
+
+        # Get server manager
+
+        self.server = kwargs.get("server", None)
+
+        # Points to a player to follow notes
+
+        self.following = None
+
+        # Define any variables that are used in the OSC message (make sure they are in the attr dict)
+
+        self.dur    = kwargs.get("dur",     [1])
+        self.scale  = kwargs.get("scale",   Scale.major)
+        self.root   = kwargs.get("root",    [0])
+        self.degree = kwargs.get("degree",  degree)
+        self.oct    = kwargs.get("oct",     [5])
+        self.amp    = kwargs.get("amp",     [0.5])
+        self.pan    = kwargs.get("pan",     [0])
+        self.sus    = kwargs.get("sus",     self.dur)
+        self.rate   = kwargs.get("rate",    [1])
+        self.pos    = kwargs.get("pos",     [0])
+        self.buf    = kwargs.get("buf",     [0])
+
+        # Modifiers
+
+        self.mod_degree = [0]
+        self.mod_code = []
+        self.reversing = False
+
+        # Sets the clock off a beat amount
+
+        self.off = 0
+        self.old_off = 0
+        
+        # Is calculated at each step
+        self.freq   = [0]
+
+        # Used to create glissandi on "slide"
+        self.glissandi = bool(kwargs.get("glissandi", False))
+        self.freq1  = [0]
+
+        # Dictionary to read now() values from
+
+        self.attr = kwargs
+
+        for key in ['metro', 'server', 'quantise', 'glissandi']:
+            if key in self.attr:
+                del self.attr[key]
+                
+        self.update_dict()
+
+        # Modifier dict
+        self.modf = {}
+        self.reset() # This method is used to 'reset' the modifiers
+
+        # In case events go on past the scope of the clock, keep an aggregate that get's reset on clock updates
+
+        self.event_agg = 0
+        self.event_n   = 0
+        self.event     = []
+
+        # Used for checking clock updates
+        
+        self.old_dur = None
+        self.isplaying = False
+
+    def update(self, SynthDef, degree=[0], **kwargs):
+        """ Updates the values of this Player """
+
+        setattr(self, "SynthDef", SynthDef)
+        setattr(self, "degree", degree)
+
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+
+        return self
+
+    def update_state(self, isEvent=True):
+
+        # Kill the player if stopping
+
+        if self.stopping and self.metro.beat >= self.stop_point:
+
+            self.kill()
+
+        if self.dur_updated():
+
+            self.update_clock()
+
+        else:
+
+            self.event_n += int(isEvent)
+
+        # Calculate frequency
+        
+        self.freq = self.calculate_freq()
+    
+        # Update dictionary to contain only streams
+
+        self.update_dict()
+
+        return
+
+    def calculate_freq(self):
+        
+        now_degree, now_oct = [asStream(self.now(attr)) for attr in ['degree', 'oct']]
+
+        size = max( len(now_degree), len(now_oct) ) 
+
+        f = []
+
+        for i in range(size):
+
+            midinum = midi( self.scale, modi(now_oct, i), modi(now_degree, i) , self.now('root') )
+
+            f.append( miditofreq(midinum) )
+
+        return f
+
+    def dur_updated(self):
+
+        return self.attr['dur'] != self.old_dur or self.off != self.old_off 
+
+    def update_clock(self):
+
+        # Initial location is the offset (if any)
+
+        next_step = int(self.off * self.metro.steps)
+
+        self.event_n = 0
+
+        count = 0
+
+        # Go through each clock step
+
+        for i, step in enumerate(self.metro):
+
+            # If step should contain self
+
+            if i == next_step:
+
+                # Add self if not already there
+
+                if self not in step:
+
+                    # Add player to clock
+
+                    self.metro.add2q(self, i)
+
+                # Work out duration of the 
+
+                dur = modi(self.attr['dur'], count)
+
+                next_step += int(float(dur) * self.metro.steps)
+
+                # Increase duration counter
+
+                count += 1
+
+                # Increase event counter until NOW
+
+                if i < self.metro.now():
+
+                    self.event_n += 1
+
+            # If step shouldn't contain self, remove it if it is in there
+
+            else:
+
+                if self in step:
+
+                    step.remove(self)
+
+        self.old_dur = self.attr['dur']
+        self.old_off = self.off
+
+        return
+
+    def update_dict(self):
+
+        # Update the standard arguments
+        
+        self.attr.update( {
+                              "scale"   :   asStream(self.scale),
+                              "root"    :   asStream(self.root),
+                              "degree"  :   asStream(self.degree),
+                              "oct"     :   asStream(self.oct),
+                              "sus"     :   asStream(self.sus),
+                              "dur"     :   asStream(self.dur),
+                              "amp"     :   asStream(self.amp),
+                              "freq"    :   asStream(self.freq),
+                              "freq1"   :   asStream(self.freq1),
+                              "pan"     :   asStream(self.pan),
+                              "rate"    :   asStream(self.rate),
+                              "buf"     :   asStream(self.buf),
+                              "pos"     :   asStream(self.pos)
+                        } )
+
+    def now(self, attr, x=0):
+
+        # Accomodate for send being BEFORE the update
+
+        x = x - 1
+
+        # Get which instrument is leading
+
+        if self.following and attr is 'degree':
+
+            attr_value = self.following.now('degree')
+
+            modifier_event_n = self.event_n
+
+        else:
+
+            # Get the attr value + modifider value
+
+            modifier_event_n = self.event_n
+
+            attr_value = modi(self.attr[attr], self.event_n + x)
+
+        # If attr isn't in modf, use 0
+
+        try:
+
+            modf_value = modi(self.modf[attr], modifier_event_n + x)
+
+        except:
+
+            modf_value = 0
+
+        # Make sure values are numbers
+
+        if attr is not "root":
+
+            try:
+
+                attr_value = float(attr_value)
+
+            except:
+
+                attr_value = tuple(float(v) for v in attr_value)
+
+            try:
+
+                modf_value = float(modf_value)
+
+            except:
+
+                modf_value = tuple(float(v) for v in modf_value)
+
+        # Combine the attribute "real" values with the modifiers
+
+        try:
+
+            if attr is "amp":
+
+                value = attr_value * modf_value
+
+            elif (type(attr_value) == type(modf_value) == tuple):
+
+                raise
+
+            else:
+
+                value = attr_value + modf_value
+
+        except:
+
+            # Both "chords" must have the same size or not used
+
+            if type(attr_value) in (list, tuple) and type(modf_value) in (list, tuple):
+
+                value = []
+
+                for i, v in enumerate(attr_value):
+
+                    value += [v + modf_value[i]]
+
+            # Just original is chords
+
+            elif type(attr_value) in (list, tuple) and type(modf_value) not in (list, tuple):
+
+                value = [v + modf_value for v in attr_value]
+
+            # Just modifier is chords
+
+            elif type(attr_value) not in (list, tuple) and type(modf_value) in (list, tuple):
+
+                value = [m + attr_value for m in modf_value]
+
+            # Neither are chords
+
+            else:
+
+                value = attr_value
+        
+        return value
+
+    def add(self, degree):
+        """ Adds another copy of the event to the message with different degrees """
+
+        self.event.append(degree)
+
+        return self
+
+    def pop(self):
+
+        self.event = self.event[:-1]
+
+        return self
+
+    def reset(self):
+
+        self.modf = dict([(key, [0]) for key in self.attr])
+
+        self.modf['amp'] = 0.5
+
+        self.reset_code()
+
+        return self
+
+    def reset_code(self):
+
+        self.mod_code = []
+
+        return self
+
+    def lshift(self, n=1):
+        self.event_n -= n
+        return self
+
+    def rshift(self, n=1):
+        self.event_n += n
+        return self
+
+    def follow(self, lead):
+        """ Takes a now object and then follows the notes """
+
+        self.following = lead
+
+        return self
+
+    def solo(self):
+
+        self.following = None
+
+        return self
+
+    def copy(self, player):
+
+        """ Copies the attr dict of player to self """
+
+        self.dur    = player.attr['dur']
+        self.scale  = player.attr['scale']
+        self.root   = player.attr['root']
+        self.degree = player.attr['degree']
+        self.oct    = player.attr['oct']
+        self.amp    = player.attr['amp']
+        self.pan    = player.attr['pan']
+        self.sus    = player.attr['sus']
+        self.rate   = player.attr['rate']
+        self.pos    = player.attr['pos']
+        self.buf    = player.attr['buf']
+
+        return self
+
+    def f(self, data):
+
+        """ adds value to frequency modifier """
+
+        if type(data) == int:
+
+            data = [data]
+
+        # Add to modulator
+
+        self.modf['freq'] = circular_add(self.modf['freq'], data)
+
+        return self
+
+    def every(self, n, cmd, *args):
+
+        args = ",".join([str(s) for s in args])
+
+        expr = "%s(%s%s)" % (cmd.__name__, self.__name__(), args)
+
+        self.metro.when("True", compile(*Code.toCompile(expr)), n)
+
+        return self
+
+    def offbeat(self, beat_len=0.5):
+        """ Adds a 0 amplitude note to the start of the player"""
+
+        self.off = beat_len
+
+        return self
+
+    def reverse(self):
+        """ Sets flag to reverse streams """
+
+        self.dur.reverse()
+        self.root.reverse()
+        self.oct.reverse()
+        self.amp.reverse()
+        self.pan.reverse()
+        self.sus.reverse()
+
+        self.degree.reverse()
+
+    # Methods affecting other players - every n times, do a random thing?
+
+    def bother(self, other):
+
+        return self
+
+    def stutter(self, n=4):
+        """ repeats each value in each stream n times """
+
+        # if n is a list, stutter each degree[i] by n[i] times
+
+        self.degree = Stutter(self.degree, n)
+
+        return self
+
+    def kill(self):
+
+        self.isplaying = False
+        self.event_n = 0
+        self.metro.playing.remove(self)
+        for step in self.metro:
+            if self in step:
+                step.remove(self)
+        
+        return self
+
+    def stop(self, N=0):
+        
+        """ Removes the player from the Tempo clock and changes its internal
+            playing state to False in N bars time
+            - When N is 0 it stops immediately"""
+
+        self.stopping = True
+        
+        self.stop_point = self.metro.beat
+
+        if N > 0:
+
+            self.stop_point += self.metro.til_next_bar() + ((N-1) * self.metro.bar_length())
+
+        return self
+
+    def pause(self):
+
+        self.isplaying = False
+
+        return self
+
+    # Methods for preparing and sending OSC messages to SuperCollider
+
+    def osc_message(self, index):
+
+        message = [self.SynthDef, 0, 1, 1, 'freq', modi(self.freq, index)]
+
+        for key in self.attr:
+
+            if key not in ('freq', 'degree'):
+
+                val = modi(self.now(key), index)
+
+                if key == "sus":
+
+                    val = val * self.metro.beat_dur()
+
+                message += [key, val]
+
+        return message
+
+    def send(self):
+        """ Sends the current event data to SuperCollder """
+
+        # 1. Find out the largest tuple in the kwargs and its length
+
+        size = len(self.freq)
+
+        for stream in self.attr.values():
+
+            for value in asStream(stream):
+
+                try:
+
+                    if len(value) > size:
+
+                        size = len(value)
+
+                except:
+
+                    pass
+
+        # Create OSC Message
+        
+        for i in range(size):
+
+            self.server.play_note( self.osc_message( i )  )       
+
+        return
+
+    def play(self):
+
+        if self not in self.metro.playing:
+
+            self.metro.playing.append(self)
+
+        self.isplaying = True
+
+        # Quantise
+
+        self.event_n = self.metro.beat % len(self.metro) - int(self.quantise)
+
+        self.stopping = False
+
+        return self
+
+    def start(self):
+
+        self.play()
+
+        return self
+
+    # Special object methods
+
+    def __name__(self):
+        for name, var in globals().items():
+            if self == var:
+                return name
+
+    def __repr__(self):
+        return "<Player Object ('%s')>" % self.SynthDef
+
+    def __str__(self):
+        return self.SynthDef
+
+    def __int__(self):
+        return int(self.now('degree'))
+
+    def __float__(self):
+        return float(self.now('degree'))
+
+    def __add__(self, data):
+        """ Change the degree modifier stream """
+        self.modf['degree'] = asStream(data)
+        return self
+
+    def __iadd__(self, data):
+        """ Increment the degree modifier stream """
+        self.modf['degree'] = circular_add(self.modf['degree'], asStream(data))
+        return self
+
+    def __sub__(self, data):
+        """ Change the degree modifier stream """
+        data = asStream(data)
+        data = [d * -1 for d in data]
+        self.modf['degree'] = data
+        return self
+
+    def __isub__(self, data):
+        """ de-increment the modifier stream """
+        data = asStream(data)
+        data = [d * -1 for d in data]
+        self.modf['degree'] = circular_add(self.modf['degree'], data)
+        return self
+
+    def __mul__(self, data):
+
+        """ Multiplying an instrument player multiplies each amp value by
+            the input, or circularly if the input is a list. The input is
+            stored here and calculated at the update stage """
+
+        if type(data) in (int, float):
+
+            data = [data]
+
+        self.modf['amp'] = asStream(data)
+
+        return self
+
+    def __div__(self, data):
+
+        if type(data) in (int, float):
+
+            data = [data]
+
+        self.modf['amp'] = [1.0 / d for d in data]
+
+        return self
+
+    def __cmp__(self, other):
+        if isinstance(other, new_):
+            return int( self is not other ) * -1
+        # Used for comparing to numbers etc
+        if self.now('degree') > other:
+            return 1
+        if self.now('degree') < other:
+            return -1
+        if self.now('degree') == other:
+            return 0
+
+
+# ---------------------------------------------- #
+# Class for for reading samples from buffers     # s = samples_("x-*-", metro=clock_, server=server_, quant=False)
+# ---------------------------------------------- #
+
+# Table of characters to buffers
+
+#f = open("../samples/.symbols")
+
+
+_symbols =  {   'x' : 1,    # Bass drum
+                'X' : 2,    # Bass drum 2
+                'o' : 3,    # Snare drum
+                'O' : 4,    # Snare drum 2
+                '*' : 5,    # Clap
+                '-' : 6,    # Hi Hat Closed
+                '=' : 7,    # Hi Hat Open
+                'T' : 8,    # Cowbell
+                '+' : 9,    # Cross stick
+                'H' : 10,   # Noise burst
+                'h' : 10,   # Noise burst
+                'v' : 11,   # Kick drum
+                'V' : 12,   # Kick drum 2
+                's' : 13,   # Shaker
+                'S' : 13,   # Shaker (it would be nice for a shaker 2)
+                '~' : 14,   # Ride cymbal
+                ':' : 15,   # Clicks
+                '^' : 16,   # Tom tom
+                '#' : 17,   # Crash
+                'Y' : 18,   # Swoop
+             }
+
+_bufnum = dict([(num,sym) for sym, num in _symbols.items()])
+
+
+class samples_:
+
+    def __init__(self, pat=' ', speed=[1], **kwargs):
+
+        self.name = "sample_player"
+
+        # Get metronome clock
+
+        self.metro      = kwargs.get("metro", None)
+        self.quantise   = kwargs.get("quantise", True)
+        self.stopping   = False
+        self.stop_point = 0
+
+        # Get server manager
+
+        self.server = kwargs.get("server", None)
+
+        # Points to a player to follow notes
+
+        self.following = None
+
+        # Define any variables that are used in the OSC message (make sure they are in the attr dict)
+
+        self.pat    = pat
+        self.old_pat = ""
+        
+        self.dur    = kwargs.get("dur",   [0.5])
+        self.new    = self.dur # "new" value after brackets
+        self.amp    = kwargs.get("amp",     [1])
+        self.pan    = kwargs.get("pan",     [0])
+        self.rate   = kwargs.get("rate",    [1])
+        self.verb   = kwargs.get("verb",  [0.2])
+        self.gain   = kwargs.get("gain",    [0])
+        self.slide  = kwargs.get("slide",   [0])
+        self.blip   = kwargs.get("blip",    [0])
+        self.lpf    = kwargs.get("lpf",     [0])
+
+        # Map pattern to buffer numbers
+        
+        self.buf    = kwargs.get("buf", [0])
+
+        # Modifiers
+        
+        self.mod_code = []
+        self.reversing = False
+
+        # Dictionary to read now() values from
+        self.attr = {}
+        self.update_dict()   
+
+        # Modifier dict
+        self.modf = {}
+        self.reset() # This method is used to 'reset' the modifiers
+
+        # In case events go on past the scope of the clock, keep an aggregate that get's reset on clock updates
+
+        self.event_agg = 0
+        self.event_n = 0
+        self.event   = []
+
+        # Used for checking clock updates
+        
+        self.old_dur = None
+        self.old_new = None
+        self.isplaying = False
+##
+##        if self.metro:
+##            
+##            self.update_state(isEvent=False)
+##
+##            if self.quantise:
+##
+##                self.metro.playing.append(self)
+##
+##            else:
+##
+##                self.play()
+
+    def __str__(self):
+
+        return self.name
+
+    def update(self, string):
+
+        self.pat = string
+        self.update_clock()
+
+        return self
+
+    def update_state(self, isEvent=True):
+
+        self.update_dict()
+
+        # Kill the player if stopping
+
+        if self.stopping and self.metro.beat >= self.stop_point:
+
+            self.kill()
+
+        # Update this player's location in the clock if it has been modified
+
+        if self.dur_updated():
+
+            self.update_clock()
+
+        else:
+
+            self.event_n += ( int(isEvent) * self.direction() )
+
+        return
+        
+    def dur_updated(self):
+        return self.pat != self.old_pat or self.dur != self.old_dur
+
+    def update_clock(self):
+        
+        # Calculate the new durations
+
+        self.pat_to_buf()
+
+        next_step = 0
+
+        self.event_n = 0
+
+        count = 0
+
+        # Go through each clock step
+
+        for i, step in enumerate(self.metro):
+
+            # If step should contain self
+
+            if i == next_step:
+
+                # Add self if not already there
+
+                if self not in step:
+
+                    # Add player to clock
+
+                    self.metro.add2q(self, i)
+
+                # Work out duration of the 
+
+                dur = modi(self.attr['new'], count)
+
+                next_step += int(float(dur) * self.metro.steps)
+
+                # Increase duration counter
+
+                count += 1
+
+                # Increase event counter until NOW
+
+                if i < self.metro.now():
+
+                    self.event_n += 1
+
+            # If step shouldn't contain self, remove it if it is in there
+
+            else:
+
+                if self in step:
+
+                    step.remove(self)
+
+        self.old_pat = self.pat
+        self.old_dur = self.dur
+
+        return
+
+    def pat_to_buf(self):
+        """ Converts s (a string) to a basic drum pattern.
+            Items in a [] half half duration
+            Items in a () are laced
+        """
+
+        if not len(self.pat) > 0:
+
+            self.pat = " "
+
+        self.new = asStream(self.dur)
+
+        new_dur  = [modi(self.new, i) for i, char in enumerate(self.pat) if char not in "[](){}"]
+
+        self.buf = [0 for char in self.pat if char not in "[](){}"]
+
+        # Go through pattern
+
+        i = 0
+
+        this_dur = modi(self.new, i)
+
+        in_sq = 0
+        in_br = False
+        in_wi = False
+
+        for char in self.pat:
+
+            # When we reach a [ divide duration by 2
+
+            if char == '[':
+
+                in_sq += 1
+
+            elif char == ']':
+
+                in_sq -= 1
+
+            # When we reach a ( create a list to add entries to
+            
+            elif char == '(':
+
+                in_br = True
+
+                self.buf[i] = []
+                new_dur[i] = []
+
+            elif char == ')':
+
+                in_br = False
+                i = i+1
+
+            # Add the buffer number -> is 0 if not in _symbols
+            
+            else:
+
+                # Normal brackets indicate a group to be laced
+
+                if in_br:
+
+                    self.buf[i].append( _symbols.get(char, 0) )
+                    new_dur[i].append( this_dur / (2.0**in_sq) )
+
+                else:
+
+                    self.buf[i] = _symbols.get(char, 0)
+                    new_dur[i] = this_dur / (2.0**in_sq)
+
+            # When we reach a ( don't increase i until )
+
+            if not in_br and char not in "[]()":
+
+                i += 1
+
+                this_dur = modi(self.new, i)
+
+        # Adjust for extra chars
+
+        self.attr['buf'] = self.buf = Place(self.buf[:i])
+        self.attr['new'] = self.new = Place(new_dur[:i])
+
+        return
+
+    def update_dict(self):
+        
+        self.attr.update( {
+                      "dur"     :   asStream(self.dur),
+                      "new"     :   asStream(self.new),
+                      "amp"     :   asStream(self.amp),
+                      "pan"     :   asStream(self.pan),
+                      "rate"    :   asStream(self.rate),
+                      "buf"     :   asStream(self.buf),
+                      "verb"    :   asStream(self.verb),
+                      "gain"    :   asStream(self.gain),
+                      "slide"   :   asStream(self.slide),
+                      "blip"    :   asStream(self.blip),
+                      "lpf"     :   asStream(self.lpf)
+                    } )
+
+    def now(self, attr, x=0):
+
+        # Get the attr value + modifider value
+
+        modifier_event_n = self.event_n
+        
+        attr_value = float(modi(self.attr[attr], self.event_n + x))
+
+        modf_value = float(modi(self.modf[attr], modifier_event_n + x))
+
+        try:
+
+            value = attr_value + modf_value
+
+        except:
+
+            value = attr_value
+        
+        return value
+
+    def reset(self):
+
+        self.modf = dict([(key, [0]) for key in self.attr])
+
+        self.reset_code()
+
+        return self
+
+    def reset_code(self):
+
+        self.mod_code = []
+
+        return self
+
+    def __add__(self, data):
+
+        if type(data) == int:
+
+            self.amp = [a + data for a in self.amp]
+
+            return self
+
+        if type(data) == str:
+
+            self.pat += data
+
+        if type(data) == list:
+
+            try:
+
+                self.pat = ''.join(data)
+
+            except:
+
+                pass
+
+        return self
+
+
+    def __sub__(self, data):
+
+        if type(data) == int:
+
+            data = [data]
+
+        data = [d * -1 for d in data]
+
+         # Add to modifier
+
+        self.modf['degree'] = circular_add(self.modf['degree'], data)
+
+        return self
+
+    def __mul__(self, data):
+
+        # TODO Sync in the clock
+
+        if type(data) in (int, float):
+
+            data = [data]
+
+        size_dur  = len(self.attr['dur'])
+        size_sus  = len(self.attr['sus'])
+        size_data = len(data)
+
+        size_max = max( size_dur , size_sus, size_data)
+
+        self.dur = [ 0 for x in range(size_max) ]
+        self.sus = [ 0 for x in range(size_max) ]
+
+        for i in range( size_max ):
+
+            self.dur[i] = self.attr['dur'][i % size_dur] * (1.0 / data[i % size_data])
+            self.sus[i] = self.attr['sus'][i % size_sus] * (1.0 / data[i % size_data])
+
+        return self
+
+    def __div__(self, data):
+
+        if type(data) in (int, float):
+
+            data = [data]
+
+        size_dur  = len(self.attr['dur'])
+        size_data = len(data)
+
+        size_max = max( size_dur , size_data)
+
+        self.dur = [ 0 for x in range(size_max) ]
+
+        for i in range( size_max ):
+
+            self.dur[i] = self.attr['dur'][i % size_dur] / (1.0 / data[i % size_data])
+
+        return self
+
+    def char(self, other=None):
+        if other is not None:
+            try:
+                if type(other) == str and len(other) == 1: #char
+                    return _bufnum[self.now('buf')] == other
+                raise TypeError("Argument should be a one character string")
+            except:
+                return False
+        else:
+            try:
+                return _bufnum[self.now('buf')]
+            except:
+                return None
+
+    def every(self, n, code):
+        """ Every n beats, execute code """
+
+        # Check code?
+
+        if (n, code) not in self.mod_code:
+
+            self.mod_code.append( (n, code) )
+
+        return self
+
+    def coarse(self, n=3):
+        self.blip=n
+        return self
+
+    def reverse(self):
+        """ Sets flag to reverse streams """
+
+        self.event_n -= 1
+
+        self.reversing = not self.reversing
+
+        return self
+
+    def direction(self):
+        """ Returns 1 if self.event_n is increasing, and -1 if it is decreasing """
+        if self.reversing:
+            return -1
+        else:
+            return 1
+
+    # Methods affecting other players
+
+    def bother(self, other):
+
+        return self
+    
+    def stutter(self, n=4):
+        
+        """ repeats each value in each stream n times """
+
+        self.pat = Stutter(self.pat, n)
+
+        return self
+
+    def kill(self):
+
+        self.isplaying = False
+        self.event_n = 0
+        self.metro.playing.remove(self)
+
+        return self
+
+    def stop(self, N=0):
+        
+        """ Removes the player from the Tempo clock and changes its internal
+            playing state to False in N bars time
+            - When N is 0 it stops immediately"""
+
+        self.stopping = True
+        
+        self.stop_point = self.metro.beat
+
+        if N > 0:
+
+            self.stop_point += self.metro.til_next_bar() + ((N-1) * self.metro.bar_length())
+
+        return self
+
+    def pause(self):
+
+        self.isplaying = False
+
+        return self
+
+    def osc_message(self):
+
+        message = [self.name, 0, 1, 1]
+
+        for key in self.attr:
+
+            message += [key, self.now(key)]
+
+        return message
+
+    def send(self):
+        """ Sends the current event data to SuperCollder """
+
+        # Create OSC Message
+
+        self.server.play_note( self.osc_message() )
+
+        return
+
+    def play(self):
+
+        if self not in self.metro.playing:
+
+            self.metro.playing.append(self)
+
+        self.isplaying = True
+
+        # Quantise
+
+        self.event_n = self.metro.beat % len(self.metro) - int(self.quantise)
+
+        self.stopping = False
+
+        return self
+
+    def start(self):
+
+        self.play()
+
+        return self

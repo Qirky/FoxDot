@@ -34,10 +34,12 @@ Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/ryan/pass.wav", 
 
 SynthDef.new( \sample_player,
 	{
-		arg buf=0,amp=1,pan=0,rate=1, sus=1, verb=0.2, gain=0, slow=1, slide=0;
+		arg buf=0,amp=1,pan=0,rate=1, sus=1, verb=0.2, gain=0, slow=1, scrub=0, lpf=0, grain=0;
 		var sound;
 
-		rate = (slide * LFPar.kr(slide / 4)) + rate - slide;
+		rate = (scrub * LFPar.kr(scrub / 4)) + rate - scrub;
+
+		amp = amp * Blip.ar(2 ** grain, 0, 0.5, 0.5);
 
 		sound = FreeVerb.ar( PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate) * amp * 2 , verb, 0.1);
 
@@ -45,7 +47,7 @@ SynthDef.new( \sample_player,
 
 		sound = sound + (Saw.ar(0, sound * 0.05 * gain) * (gain/100));
 
-		// sound = Decay2.ar(sound);
+		sound = LPF.ar(sound, 10000 / (1 + lpf**2));
 
 		Out.ar(0,Pan2.ar( sound, pan));
 		} ).add;
@@ -121,6 +123,21 @@ SynthDef.new( \banjo,
 		osc = Formant.ar(freq, mul:amp/2) + LFSaw.ar(freq, mul:amp/25);
 
 		env = EnvGen.ar(Env.perc(0.01, sus), doneAction:2);
+
+		Out.ar(0,Pan2.ar( osc * env , pan));
+} ).add;
+
+SynthDef.new( \charm,
+	{
+		arg amp=0,sus=1,pan=0,freq=0, delay=0, rate=1;
+
+		var osc, env;
+
+		osc = SinOsc.ar([freq, freq + 2 *2], mul:amp / 4) + VarSaw.ar(freq * 8, 10, mul:amp/8);
+
+		osc = LPF.ar(osc, SinOsc.ar(Line.ar(1,rate*4, sus/8),0,freq*2,freq*2 + 10 ));
+
+		env = EnvGen.ar(Env.perc(0.01, sus).delay(delay), doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
 } ).add;
@@ -376,6 +393,8 @@ SynthDef(\klank,
 		arg pan=0, freq=440, sus=1,amp=1;
     var klank, n, harm, a, ring;
 
+		sus=sus*1.5;
+
     // harmonics
 		harm = [1,2,3,4];
     // amplitudes
@@ -393,7 +412,7 @@ SynthDef(\klank,
 }).add;
 
 
-SynthDef.new( \soprano2,
+SynthDef.new( \soprano,
 	{
 		arg amp=0,sus=1,pan=0,freq=0,verb=0.5;
 
@@ -435,8 +454,46 @@ SynthDef(\pluck, {|freq = 440, dur = 1, sus=1, amp=1, pan=1|
 	note = freq.cpsmidi;
 	note = note + (LFNoise2.ar(20).range(-1,1) * (1/8));
 	klang = SinOsc.ar((note * [1,1.002]).midicps, phase: VarSaw.ar(note.midicps, width: Line.ar(1,0.2,dur))) * 0.3;
-	klang = klang * XLine.ar(amp,(amp)/10000,sus*4,doneAction:2) * 0.3;
+	klang = klang * XLine.ar(amp,(amp)/10000,sus*4) * 0.3;
+
+	klang = klang * EnvGen.ar(Env([0,1,1,0],[0,sus*1.5,0]), doneAction:2);
+
 	Out.ar(0, Pan2.ar( klang , pan));
+}).add;
+
+SynthDef(\creep, {|freq = 440, dur = 1, sus=1, amp=1, pan=1|
+	var klang,note;
+	dur = dur * 2;
+	amp = amp + 0.00001;
+	note = freq.cpsmidi;
+	note = note + (LFNoise2.ar(20).range(-1,1) * (1/8));
+	klang = SinOsc.ar((note * [1,1.002]).midicps, phase: VarSaw.ar(note.midicps, width: Line.ar(1,0.2,dur)));
+	// klang = klang * XLine.ar(amp,(amp)/10000,sus*4) * 0.3;
+
+	klang = LPF.ar(klang, SinOsc.ar(freq));
+
+	klang = klang * EnvGen.ar(Env([0,1,1,0],[0,sus,0]), doneAction:2) * amp * 5;
+
+	Out.ar(0, Pan2.ar( klang , pan));
+}).add;
+
+SynthDef(\arm, {|freq = 440, dur = 1, sus=1, amp=1, pan=1,rate=1|
+	var klang,note,spin;
+	dur = dur * 2;
+
+	freq = freq;
+
+	note = freq.cpsmidi;
+	note = note + (LFNoise2.ar(20).range(-1,1) * (1/8));
+	klang = LFSaw.ar((note * [1,1.002]).midicps);
+
+	spin = SinOsc.ar(rate, mul:(freq/2), add:(freq));
+
+	klang = LPF.ar(klang, spin);
+
+	klang = klang * EnvGen.ar(Env.perc(releaseTime:sus,curve:4), doneAction:2) * (amp / 8);
+
+	Out.ar(0, Pan2.ar( klang , SinOsc.ar(rate)));
 }).add;
 
 // From the default synth
@@ -545,17 +602,19 @@ SynthDef(\grind, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 }).add;
 
 
-SynthDef(\synth, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
+SynthDef(\sweep, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 
 	var son;
 
-	son  = LFPulse.ar(Crackle.ar(1/4) * freq, 0.99, 0.3) + LFSaw.ar(Crackle.ar(1/4) * freq + 1 * 2, 0.99, 0.3);
-	son = BPF.ar(son.clip2(0.2), 3000, 1) * 2;
+	son  = LFPulse.ar(Crackle.ar(1/4) * freq, 0, Line.ar(0,1,sus*2), 0.2) + VarSaw.ar(Crackle.ar(1/4) * freq + 1 * 2, 2, 2, 0.2, 0.3);
 
-	son = son + DelayC.ar(son, 0.1, 0.01, 0.3);
+	// son = BPF.ar(son, 300, 10) * 2; SinOsc.ar(0.25 ,mul:freq*4,add:freq*5)
+
+	son = LPF.ar([son, son + Crackle.ar()], XLine.ar(freq / 4, freq * 4, sus / 4) ) / 2;
+
 	son = son + FreeVerb.ar(son);
 
-	son = son * EnvGen.ar(Env.perc(0.1, sus, curve:-10), doneAction:2);
+	son = son * EnvGen.ar(Env.perc(sus / 16, sus * 2.5, curve:-10), doneAction:2);
 
 
 	Out.ar(0, Pan2.ar(son * amp, pan));
