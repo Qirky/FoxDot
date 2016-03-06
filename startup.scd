@@ -1,35 +1,4 @@
 (
-// Below we outline the buffer numbers for each sample
-
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/bd1.wav", bufnum: 1); // Bass drum 1
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/bd2.wav", bufnum: 2); // Bass drum 2
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/sd1.wav", bufnum: 3); // Snare drum 1
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/sd2.wav", bufnum: 4); // Snare drum 2
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/cp1.wav", bufnum: 5); // Clap
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/hhc.wav", bufnum: 6); // hi hat closed
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/hho.wav", bufnum: 7); // hi hat open
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/cb1.wav", bufnum: 8); // Cowbell
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/cs1.wav", bufnum: 9); // Cross stick
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/no1.wav", bufnum: 10); // Noise burst
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/kk1.wav", bufnum: 11); // House kick 1
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/kk2.wav", bufnum: 12); // House kick 2
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/sh1.wav", bufnum: 13); // Shaker (tambourine)
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/rd1.wav", bufnum: 14); // Ride
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/ck1.wav", bufnum: 15); // Clicks
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/tm1.wav", bufnum: 16); // Tom tom
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/cr1.wav", bufnum: 17); // Crash
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/foxdot/sw1.wav", bufnum: 18); // Swoop
-
-// Buffers for the toplap manifesto draft
-
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/ryan/this.wav", bufnum: 50);
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/ryan/too.wav", bufnum: 51);
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/ryan/shall.wav", bufnum: 52);
-Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/ryan/pass.wav", bufnum: 53);
-// Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/toplap/fest.wav", bufnum: 54);
-// Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/toplap/o.wav", bufnum: 55);
-// Buffer.read(s,thisProcess.nowExecutingPath.dirname +/+ "samples/toplap/draft.wav", bufnum: 56);
-
 // Create sample player synth
 
 SynthDef.new( \sample_player,
@@ -59,7 +28,7 @@ SynthDef.new( \words,
 		var buf;
 		buf = 50 + pos;
 		Out.ar(0,Pan2.ar( PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate, doneAction:2) * amp * 2 , pan));
-		} ).add;
+		} ).writeDefFile;
 
 
 // Create synthdef with musical input
@@ -75,7 +44,7 @@ SynthDef.new( \crunch,
 		env = EnvGen.ar(Env.perc(0.01,0.1,amp / 2), doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \rave,
 	{
@@ -88,17 +57,7 @@ SynthDef.new( \rave,
 		env = EnvGen.ar(Env.perc(0.01, sus), doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-} ).add;
-
-// SynthDef(\technobass, { |freq = 440, gate = 1, amp = 0.5, slideTime = 0.17, ffreq = 1100, width = 0.15,sus=1,
-// 	detune = 1.005, preamp = 4|
-// 	var    sig,
-// 	env = Env.adsr(0.01, 0.3, 0.4, 0.1);
-// 	freq = Lag.kr(freq, slideTime);
-// 	sig = Mix(VarSaw.ar([freq, freq * detune], 0, width, preamp)).distort * amp	;
-// 	sig = LPF.ar(sig, ffreq);
-// 	Out.ar(0, sig * EnvGen.ar(Env.perc(0.01,sus,amp), doneAction:2))
-// }).add;
+} ).writeDefFile;
 
 
 SynthDef.new( \pads,
@@ -107,12 +66,12 @@ SynthDef.new( \pads,
 
 		var osc, env;
 
-		osc = SinOsc.ar(freq, mul:amp / 2) + SinOsc.ar(freq + 2, mul:amp / 8) ;
+		osc = SinOsc.ar(freq, mul:amp / 2) + SinOsc.ar(freq + 2, mul:amp / 8);
 
 		env = EnvGen.ar(Env.perc(0.01, sus), doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-} ).add;
+} ).writeDefFile;
 
 SynthDef.new( \banjo,
 	{
@@ -125,7 +84,7 @@ SynthDef.new( \banjo,
 		env = EnvGen.ar(Env.perc(0.01, sus), doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-} ).add;
+} ).writeDefFile;
 
 SynthDef.new( \charm,
 	{
@@ -140,7 +99,7 @@ SynthDef.new( \charm,
 		env = EnvGen.ar(Env.perc(0.01, sus).delay(delay), doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-} ).add;
+} ).writeDefFile;
 
 
 SynthDef.new( \bell,
@@ -162,7 +121,7 @@ SynthDef.new( \bell,
 		son = FreeVerb.ar(son, verb);
 
 		Out.ar(0, Pan2.ar(son, pan));
-}).add;
+}).writeDefFile;
 
 SynthDef.new( \soprano,
 	{
@@ -179,9 +138,28 @@ SynthDef.new( \soprano,
 		env = EnvGen.ar(Env([0,amp / 2,0],[sus / 2, sus / 2]), doneAction:2);
 
 		Out.ar(0,Pan2.ar( FreeVerb.ar(osc * env, verb) , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \bass,
+	{
+		arg amp=0,sus=1,pan=0,freq=0, dist=0, verb=0.25;
+
+		var osc, env;
+
+		freq = freq / 4;
+
+		amp = amp / 3;
+
+		osc = LFTri.ar(freq, mul:amp) + VarSaw.ar(freq, width:0.85, mul: amp) + SinOscFB.ar(freq, mul: amp/2);
+
+		// osc = osc + LPF.ar(Saw.ar(freq,mul:0.1),4000);
+
+		env = EnvGen.ar(Env.perc(0.01, sus),doneAction:2);
+
+		Out.ar(0,Pan2.ar( FreeVerb.ar(osc * env, mix:verb) , pan));
+		} ).writeDefFile;
+
+SynthDef.new( \dub,
 	{
 		arg amp=0,sus=1,pan=0,freq=0;
 
@@ -191,12 +169,12 @@ SynthDef.new( \bass,
 
 		amp = amp / 3;
 
-		osc = LFTri.ar(freq, mul:amp) + SinOscFB.ar(freq,mul: amp) + LFSaw.ar(freq, mul: amp);
+		osc = LFTri.ar(freq, mul:amp) + SinOscFB.ar(freq,mul: amp);
 
-		env = EnvGen.ar(Env.perc(0.01, sus),doneAction:2);
+		env = EnvGen.ar(Env.sine(sus),doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \soft,
 	{
@@ -213,7 +191,7 @@ SynthDef.new( \soft,
 		env = EnvGen.ar(Env.perc(0.025, sus, curve:25 - (440/freq)),doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \rev,
 	{
@@ -228,7 +206,7 @@ SynthDef.new( \rev,
 		env = EnvGen.ar(Env(times:[0.99 * sus, 0.01 * sus], curve:20), doneAction:2);
 
 		Out.ar(0,Pan2.ar(FreeVerb.ar( osc * env ) , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \organ,
 	{
@@ -241,7 +219,7 @@ SynthDef.new( \organ,
 		env = EnvGen.ar(Env.perc(atk * sus, (1 - atk) * sus),doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \sine,
 	{
@@ -254,7 +232,7 @@ SynthDef.new( \sine,
 		env = EnvGen.ar(Env.perc(atk * sus, (1 - atk) * sus),doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \viola,
 	{
@@ -271,7 +249,7 @@ SynthDef.new( \viola,
 		out = FreeVerb.ar(out, verb);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \distort,
 	{
@@ -294,7 +272,7 @@ SynthDef.new( \distort,
 	  out = FreeVerb.ar((osc * env) + tmp, 0.33,0.75);
 
 		Out.ar(0,Pan2.ar( out , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \wiggle,
 	{
@@ -307,7 +285,7 @@ SynthDef.new( \wiggle,
 		env = EnvGen.ar(Env(Array.series(15,0,1/15)++[0],Array.fill(14,sus/14)++[0]),doneAction:2);
 
 		Out.ar(0,Pan2.ar(  osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \slide,
 	{
@@ -322,7 +300,7 @@ SynthDef.new( \slide,
 		env = EnvGen.ar(Env(times:(sus * 0.5)!2),doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 SynthDef.new( \scratchy,
 	{
@@ -335,7 +313,7 @@ SynthDef.new( \scratchy,
 		env = EnvGen.ar(Env([0,amp / 16,0], [ sus, 0 ]), doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).add;
+		} ).writeDefFile;
 
 
 SynthDef.new( \speech2,
@@ -368,7 +346,7 @@ SynthDef.new( \speech2,
 		out = FreeVerb.ar(out, verb);
 
 		Out.ar(0,Pan2.ar( out, pan));
-		} ).add;
+		} ).writeDefFile;
 
 
 SynthDef.new( \tone,
@@ -385,7 +363,7 @@ SynthDef.new( \tone,
 
 		Out.ar(0,Pan2.ar( out , pan));
 
-} ).add;
+} ).writeDefFile;
 
 
 SynthDef(\klank,
@@ -409,7 +387,7 @@ SynthDef(\klank,
 		klank = klank * EnvGen.ar(Env([0,amp,0],[0.5 * sus, 0.5 * sus]),doneAction:2);
 
     Out.ar(0,Pan2.ar( klank , pan));
-}).add;
+}).writeDefFile;
 
 
 SynthDef.new( \soprano,
@@ -442,7 +420,7 @@ SynthDef.new( \soprano,
 		klank = klank * EnvGen.ar(Env([0,amp,0],[0.5 * sus, 0.5 * sus]),doneAction:2);
 
 		Out.ar(0,Pan2.ar( FreeVerb.ar((osc * env) + klank, verb) , pan));
-} ).add;
+} ).writeDefFile;
 
 
 
@@ -459,7 +437,7 @@ SynthDef(\pluck, {|freq = 440, dur = 1, sus=1, amp=1, pan=1|
 	klang = klang * EnvGen.ar(Env([0,1,1,0],[0,sus*1.5,0]), doneAction:2);
 
 	Out.ar(0, Pan2.ar( klang , pan));
-}).add;
+}).writeDefFile;
 
 SynthDef(\creep, {|freq = 440, dur = 1, sus=1, amp=1, pan=1|
 	var klang,note;
@@ -475,7 +453,7 @@ SynthDef(\creep, {|freq = 440, dur = 1, sus=1, amp=1, pan=1|
 	klang = klang * EnvGen.ar(Env([0,1,1,0],[0,sus,0]), doneAction:2) * amp * 5;
 
 	Out.ar(0, Pan2.ar( klang , pan));
-}).add;
+}).writeDefFile;
 
 SynthDef(\arm, {|freq = 440, dur = 1, sus=1, amp=1, pan=1,rate=1|
 	var klang,note,spin;
@@ -512,7 +490,7 @@ SynthDef(\piano, { arg out=0, freq=440, amp=0.1, pan=0, gate=1, sus=1;
 	z = z * EnvGen.ar(Env.perc(0.01, sus * 1.25,1,-4), doneAction:2);
 
 	OffsetOut.ar(out, Pan2.ar(z, pan, amp / 2));
-}, [\ir]).add;
+}, [\ir]).writeDefFile;
 
 SynthDef(\siren, { |rate=1, sus = 1, freq=300|
 
@@ -532,7 +510,7 @@ SynthDef(\siren, { |rate=1, sus = 1, freq=300|
 	son = son * EnvGen.ar(Env([0,1,1,0],[0,sus/2,sus/2,0]),doneAction:2);
 
 	Out.ar(0, Pan2.ar(son * 0.4));
-}).add;
+}).writeDefFile;
 
 SynthDef(\horn, { |rate=1, sus = 1, freq=300, pan=0|
 
@@ -563,7 +541,7 @@ SynthDef(\horn, { |rate=1, sus = 1, freq=300, pan=0|
 	osc1 = osc1 + osc2;
 
 	Out.ar(0, Pan2.ar(osc1 * 0.6, pan));
-}).add;
+}).writeDefFile;
 
 SynthDef(\jazzbass, { |rate=1, sus = 1, freq=300,amp=1|
 
@@ -583,7 +561,7 @@ SynthDef(\jazzbass, { |rate=1, sus = 1, freq=300,amp=1|
 	osc2 = osc2 * EnvGen.ar(Env.perc(0.05, sus, curve:-10), doneAction:2);
 
 	Out.ar(0, Pan2.ar(osc2 * 0.4 * amp));
-}).add;
+}).writeDefFile;
 
 SynthDef(\grind, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 
@@ -599,7 +577,7 @@ SynthDef(\grind, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 
 
 	Out.ar(0, Pan2.ar(son * amp, pan));
-}).add;
+}).writeDefFile;
 
 
 SynthDef(\sweep, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
@@ -618,7 +596,7 @@ SynthDef(\sweep, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 
 
 	Out.ar(0, Pan2.ar(son * amp, pan));
-}).add;
+}).writeDefFile;
 
 SynthDef(\woop, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 
@@ -633,7 +611,7 @@ SynthDef(\woop, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 
 
 	Out.ar(0, Pan2.ar(son * amp, pan));
-}).add;
+}).writeDefFile;
 
 
 )

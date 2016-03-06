@@ -1,5 +1,10 @@
 import re
 
+from os.path import abspath, join, dirname
+
+def path(fn):
+    return abspath(join(dirname(__file__), fn))
+
 # RegEx Group 1
 user_defn = r"(?<=def )(\w+)"
 players   = r"(?<=>> )(\w+)"
@@ -48,7 +53,7 @@ def userdefined(line):
 
 try:
     
-    with open("FoxDot/Patterns.py") as f:
+    with open(path("../FoxDot/Patterns.py")) as f:
 
         data = f.readlines()
 
@@ -82,8 +87,8 @@ py_key_types = foxdot_kw + py_key_types
 py_separators = list("[](){},./*+=- \t\n")
 py_whitespace = list(" \t\n\r\f\v")
 
-left_b = list("([{")
-right_b = list(")]}")
+left_b = list("([{'\"")
+right_b = list(")]}'\"")
 brackets = dict([(right_b[i],left_b[i]) for i in range(3)])
 tabsize = 4
 

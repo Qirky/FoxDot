@@ -3,6 +3,8 @@ from types import CodeType
 func_type = type(lambda: None)
 from traceback import format_exc as error_stack
 
+debug = 4
+
 # --------------------- Handling Code
 
 def toCompile(expression):
@@ -24,7 +26,7 @@ def execute(code, verbose=True):
 
     except:
 
-        print error_stack()
+        print error_stack(debug)
 
         raise # raise the error to any foxdot code that executes foxdot code
 
@@ -192,6 +194,8 @@ def override_attempt( code ):
             
             try:
 
+                # Case 1: Object is Player
+
                 if ns[var].isplaying:
 
                     # Re-Format #
@@ -204,9 +208,23 @@ def override_attempt( code ):
 
                         raise RuntimeWarning("Variable '%s' can only be assigned to a Player or SamplePlayer object while playing" % var)
 
-            except KeyError, AttributeError:
+                # Case 2: Object is TimeVar
 
-                pass
+                if ns[var].isTimeVar:
+
+                    # Re-Format #
+
+                    before = line                    
+
+                    after = line = re.sub(r"%s\s*=\s*[Vv]ar\(" % var ,"%s.update(" % var, line)
+
+                    if before == after:
+
+                        raise RuntimeWarning("Variable '%s' can only be assigned to a new TimeVar object" % var)
+
+            except (KeyError, AttributeError):
+
+                pass # Object isn't a Player / TimeVar
 
         new_code.append( line )
 

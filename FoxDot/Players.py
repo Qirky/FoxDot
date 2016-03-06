@@ -7,10 +7,12 @@
 
 """
 
+from os.path import dirname
+
 from OSC import OSCClient, OSCMessage, OSCBundle
 from Patterns import *
 
-import Scale, Code
+import Scale, Code, Buffers
 from TimeVar import TimeVar
 
 ##################### "STREAM" DATA #####################
@@ -659,32 +661,34 @@ class synth_(_player):
 
 # Table of characters to buffers
 
-#f = open("../samples/.symbols")
+BufferManager = Buffers.BufferManager().load()
 
+#print BufferManager.symbols
 
-_symbols =  {   'x' : 1,    # Bass drum
-                'X' : 2,    # Bass drum 2
-                'o' : 3,    # Snare drum
-                'O' : 4,    # Snare drum 2
-                '*' : 5,    # Clap
-                '-' : 6,    # Hi Hat Closed
-                '=' : 7,    # Hi Hat Open
-                'T' : 8,    # Cowbell
-                '+' : 9,    # Cross stick
-                'H' : 10,   # Noise burst
-                'h' : 10,   # Noise burst
-                'v' : 11,   # Kick drum
-                'V' : 12,   # Kick drum 2
-                's' : 13,   # Shaker
-                'S' : 13,   # Shaker (it would be nice for a shaker 2)
-                '~' : 14,   # Ride cymbal
-                ':' : 15,   # Clicks
-                '^' : 16,   # Tom tom
-                '#' : 17,   # Crash
-                'Y' : 18,   # Swoop
-             }
-
-_bufnum = dict([(num,sym) for sym, num in _symbols.items()])
+##
+##_symbols =  {   'x' : 1,    # Bass drum
+##                'X' : 2,    # Bass drum 2
+##                'o' : 3,    # Snare drum
+##                'O' : 4,    # Snare drum 2
+##                '*' : 5,    # Clap
+##                '-' : 6,    # Hi Hat Closed
+##                '=' : 7,    # Hi Hat Open
+##                'T' : 8,    # Cowbell
+##                '+' : 9,    # Cross stick
+##                'H' : 10,   # Noise burst
+##                'h' : 10,   # Noise burst
+##                'v' : 11,   # Kick drum
+##                'V' : 12,   # Kick drum 2
+##                's' : 13,   # Shaker
+##                'S' : 13,   # Shaker (it would be nice for a shaker 2)
+##                '~' : 14,   # Ride cymbal
+##                ':' : 15,   # Clicks
+##                '^' : 16,   # Tom tom
+##                '#' : 17,   # Crash
+##                'Y' : 18,   # Swoop
+##             }
+##
+##_bufnum = dict([(num,sym) for sym, num in _symbols.items()])
 
 
 class samples_(_player):
@@ -781,12 +785,12 @@ class samples_(_player):
 
                 if in_br:
 
-                    self.buf[i].append( _symbols.get(char, 0) )
+                    self.buf[i].append( BufferManager.symbols.get(char, 0) )
                     new_dur[i].append( this_dur / (2.0**in_sq) )
 
                 else:
 
-                    self.buf[i] = _symbols.get(char, 0)
+                    self.buf[i] = BufferManager.symbols.get(char, 0)
                     new_dur[i] = this_dur / (2.0**in_sq)
 
             # When we reach a ( don't increase i until )
@@ -890,18 +894,18 @@ class samples_(_player):
         if other is not None:
             try:
                 if type(other) == str and len(other) == 1: #char
-                    return _bufnum[self.now('buf')] == other
+                    return BufferManager.bufnum(self.now('buf')) == other
                 raise TypeError("Argument should be a one character string")
             except:
                 return False
         else:
             try:
-                return _bufnum[self.now('buf')]
+                return BufferManager.bufnum(self.now('buf'))
             except:
                 return None
 
     def coarse(self, n=3):
-        self.blip=n
+        self.grain=n
         return self
 
 ###### GROUP OBJECT

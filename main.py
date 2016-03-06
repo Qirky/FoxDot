@@ -24,6 +24,11 @@ if __name__ == "__main__":
         Code.execute( "from FoxDot import *" )
         Code.execute( "Clock.start()" )
 
+        def __init__(self):
+
+            App.__init__(self, "FoxDot - Live Coding with Python and SuperCollider")
+            print "Welcome to FoxDot!"
+
         def submit(self, code_str):
             
             """ Overwrites the empty method to send a piece of
@@ -39,6 +44,8 @@ if __name__ == "__main__":
 
         def killall(self, event):
 
+            """ Triggered by a Ctrl-. event """
+            
             Code.execute("Clock.clear()")
         
             return "break"
@@ -51,6 +58,8 @@ if __name__ == "__main__":
             Code.execute("Clock.stop()")
 
             return
+
+    #################################################################
         
     a = interface()
 

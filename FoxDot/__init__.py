@@ -30,6 +30,9 @@ Server = ServerManager()
 
 Clock = TempoClock()
 
+BufferManager = BufferManager(Server) # From Players NOT Buffers
+BufferManager.sendToServer()
+
 # Clock dependant variable - stream / inherit float / allow float/int methods and change code
 
 class var(TimeVar):
@@ -52,7 +55,6 @@ class Player(synth_):
         self.scale = kwargs.get( "scale", Scale.default() )
         self.dur = self.attr['dur'] = 1
         self.sus = self.attr['sus'] = 1
-        
         # Add to clock and update with keyword arguments
         self.begin()
         self.update(SynthDef, degree, **kwargs)
@@ -65,7 +67,6 @@ class SamplePlayer(samples_):
         self.metro = Clock
         self.server = Server
         self.dur = self.attr['dur'] = self.dur_val = self.attr['dur_val'] = 0.5
-        
         # Add to clock and update
         self.begin()
         self.update(self.degree)
@@ -79,33 +80,3 @@ def Ramp(start=0, end=1, dur=8, step=0.25):
 def iRamp(start=0, end=1, dur=8, step=0.25):
     size = dur/float(step)
     return var([start + end * n/size for n in range(int(size))] + [end], [step]*int(size)+[inf])
-
-class SuperColliderSynthDefs:
-
-    with open('startup.scd') as f:
-        sc = f.readlines()    
-    patt = r'SynthDef.*?\\(.*?)'
-
-    names = [match(patt, line).group(1) for line in sc if "SynthDef" in line and not line.startswith("/")]
-
-    def __init__(self):
-        pass
-    def __str__(self):
-        return str(self.names)
-    def __repr__(self):
-        return str(self.names)
-    def __len__(self):
-        return len(self.names)
-    def __iter__(self):
-        for x in self.names:
-            yield x
-    def __getitem__(self, key):
-        return self.names[key]
-    def __setitem__(self, name, value):
-        raise AttributeError("SynthDefs cannot be altered using FoxDot code")
-    def __call__(self):
-        return self.names
-    def choose(self):
-        return choose(self.names)
-
-SynthDefs = SuperColliderSynthDefs() 

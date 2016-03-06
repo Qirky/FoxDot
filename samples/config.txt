@@ -1,0 +1,23 @@
+V /foxdot/kk2.wav
+v /foxdot/kk1.wav
+# /foxdot/cr1.wav
++ /foxdot/cs1.wav
+* /foxdot/cp1.wav
+- /foxdot/hhc.wav
+o /foxdot/sd1.wav
+Y /foxdot/sw1.wav
+s /foxdot/sh1.wav
+~ /foxdot/rd1.wav
+O /foxdot/sd2.wav
+X /foxdot/bd2.wav
+: /foxdot/ck1.wav
+x /foxdot/bd1.wav
+^ /foxdot/tm1.wav
+h /foxdot/no1.wav
+= /foxdot/hho.wav
+T /foxdot/cb1.wav
+
+
+
+
+

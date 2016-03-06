@@ -24,6 +24,15 @@ def circular_add(a, b):
 
     return tmp
 
+def GreedyZip(a, b):
+    """ Greedy version of zip """
+    exp = max(len(a), len(b))
+    
+    a = Stretch(a, exp)
+    b = Stretch(b, exp)
+
+    return zip(a, b)
+
 # Define python functions that can be used in the live code
 
 def irange(start, stop=None, step=0.1):

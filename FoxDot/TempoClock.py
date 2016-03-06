@@ -20,7 +20,7 @@ class TempoClock:
         # Create queue based on loop and steps
 
         self.queue = self.new_queue()
-
+        
         self.beat = 0
 
         self.playing = []
@@ -60,13 +60,18 @@ class TempoClock:
 
     def new_queue(self):
 
-        try:
+        return [[] for n in range( len(self) ) ]
 
-            return [n for n in self.queue][:len(self)] + [[] for n in range(abs(len(self)-len(self.queue))) ]
+    def reset(self):
 
-        except:
+        self.queue = self.new_queue()
 
-            return [[] for n in range( len(self) ) ]
+        for p in self.playing:
+
+            p.update_clock()
+
+        return
+        
 
     def beats(self):
 
@@ -168,17 +173,17 @@ class TempoClock:
 
             # Check if the time signature, steps, or bars values have been changed
 
-            if old_steps != self.steps or old_timeSig != self.timeSig or old_bars != self.bars:
+            if old_steps != self.steps: # or old_timeSig != self.timeSig or old_bars != self.bars:
 
                 # Change the queue size
 
-                self.queue = self.new_queue()
+                self.reset()
 
                 # Update our "old" values
 
                 old_steps   = self.steps
-                old_timeSig = self.timeSig
-                old_bars    = self.bars
+                #old_timeSig = self.timeSig
+                #old_bars    = self.bars
 
         return self
 

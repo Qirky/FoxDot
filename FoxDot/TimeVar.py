@@ -1,14 +1,17 @@
-from Patterns import Place, GeomFill, modi, Stretch
+from Patterns import *
 
 # Function that does a similar job to Players.asStream but stops the rec
 def asStream(data):
     """ Returns data as a list """
-    if type(data) not in (list, tuple):
-
-        data = [data]
-
-    return Place(data)
-
+    if isinstance(data, TimeVar):
+        return data
+    if isinstance(data, list):
+        return Place(data)
+    if isinstance(data, tuple):
+        return [data]
+    else:
+        return [data]
+    
 # Used to determine if an instance is timevar
 def Object():
     return
@@ -17,6 +20,10 @@ def InfinityObj():
     return
 
 class TimeVar:
+
+    # Used for syntax checking
+    isTimeVar = True
+    isplaying = False
 
     def __init__(self, values, dur=4, metro=None):
 
@@ -27,12 +34,19 @@ class TimeVar:
         self.has_inf = False
         self.inf     = False
         self.inf_val = None
+
+        self.modifier = 0
+        self.multiplier = 1
         
         self.update(values, dur)
 
     def __str__(self):
 
-        return str(self.now())
+        return "TimeVar -> " + str(self.now())
+
+    def __repr__(self):
+
+        return "var(%s, %s)" % (repr(self.values()), repr(self.durs()))
 
     def __len__(self):
 
@@ -48,17 +62,27 @@ class TimeVar:
 
         return int(self.now())
 
-    def __add__(self, n):
-
-        return TimeVar([val[0]+n for val in self.data], self.dur)
-
-    def __sub__(self, n):
-
-        return TimeVar([val[0]-n for val in self.data], self.dur)
-
     def __float__(self):
 
         return float(self.now())
+
+    def __add__(self, n):
+        
+        new = TimeVar(asStream(n), self.dur, self.metro)
+
+        new.modifier = self
+        new.multiplier = 1
+        
+        return new
+
+    def __sub__(self, n):
+
+        new = TimeVar(asStream(n), self.dur, self.metro)
+
+        new.modifier = self
+        new.multiplier = -1
+        
+        return new                
 
     def __eq__(self, other):
 
@@ -79,6 +103,20 @@ class TimeVar:
         except:
 
             yield self.now()
+
+    def chain(self, *args):
+        """ Appends a TimeVar """
+        if len(args) is 1:
+            # Must be a var
+            var = args[0]
+            if type(var) == type(self):
+                pass
+            return self
+        if len(args) is 2:
+            # Must be two lists: values  and durs
+            pass
+        else:
+            raise ValueError("Innapropriate argument value")
 
     def length(self):
         return self.data[-1][2] + 1
@@ -117,10 +155,25 @@ class TimeVar:
     
             self.data.append((val, a, b))
 
-        return
+        return self
+
+    def single(self, val):
+        """ Returns val as calculated by internal modifiers """
+        return float(self.multiplier) * float(val) + float(self.modifier)
+
+    def group(self, val):
+
+        mul = self.multiplier
+
+        # 1. Make sure we get both val and mod as lists
+        val = [float(n) * mul for n in val]
+        mod = [float(m) for m in asStream(self.modifier)]
+
+        # 2. Use GreedyZip to add them together
+        return [sum(n) for n in GreedyZip(val, mod)]       
 
     def now(self):
-        """ Returns the value from self.val for time t in self.metro """
+        """ Returns the value from self.data for time t in self.metro """
 
         if self.inf:
             return self.inf_value
@@ -137,7 +190,15 @@ class TimeVar:
                     self.inf = True
                     self.inf_value = val
 
-                return val
+                # Return a calculated list if val is a group
+
+                try:
+                    
+                    return self.single(val)
+
+                except:
+
+                    return self.group(val)
                    
     def durs(self):
 
