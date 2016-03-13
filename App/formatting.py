@@ -5,6 +5,11 @@ from os.path import abspath, join, dirname
 def path(fn):
     return abspath(join(dirname(__file__), fn))
 
+def classes(module):
+    """ Returns a list of class names defined in module """
+    return [name for name, data in vars(module).items() if type(data) == type(type)]
+            
+
 # RegEx Group 1
 user_defn = r"(?<=def )(\w+)"
 players   = r"(?<=>> )(\w+)"
@@ -50,25 +55,10 @@ def userdefined(line):
     
 
 # Use our regex to read patterns.py and add all the functions to key_types
-
-try:
     
-    with open(path("../FoxDot/Patterns.py")) as f:
+from FoxDot import Patterns
 
-        data = f.readlines()
-
-    for line in data:
-
-        match = userdefined(line)
-
-        if match:
-
-            foxdot_kw.append(match)
-            
-except:
-
-    pass
-
+foxdot_kw += classes(Patterns)
 
 # Python keywords used in RegEx Group 2
 

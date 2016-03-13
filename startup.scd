@@ -148,7 +148,7 @@ SynthDef.new( \bass,
 
 		freq = freq / 4;
 
-		amp = amp / 3;
+		amp = amp * 2;
 
 		osc = LFTri.ar(freq, mul:amp) + VarSaw.ar(freq, width:0.85, mul: amp) + SinOscFB.ar(freq, mul: amp/2);
 

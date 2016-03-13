@@ -1,5 +1,6 @@
-chromatic   = range(12)
+from Patterns.Base import Pattern
 
+chromatic       = [0,1,2,3,4,5,6,7,8,9,10,11,12]
 major           = [0,2,4,5,7,9,11]
 majorPentatonic = [0,2,4,7,9]
 minor           = [0,2,3,5,7,8,10]
@@ -41,43 +42,25 @@ def Object():
 
     return 
 
-class Scale:
+class Scale(Pattern):
 
-    def __init__(self, s=None):
+    def __init__(self, data=None):
 
         self.__type__ = "scale"
 
-        if not s:
+        if data is None:
 
-            self.steps = major
+            self.data = major
 
         else:
 
-            if type(s) == str:
+            if type(data) is str:
 
-                self.steps = scale_types[s]
+                self.data = scale_types[data]
 
             else:
 
-                self.steps = s
-
-    def __len__(self):
-
-        return len(self.steps)
-
-    def __str__(self):
-
-        return str(self.steps)
-
-    def __iter__(self):
-
-        for item in self.steps:
-
-            yield item
-
-    def __getitem__(self, key):
-
-        return self.steps[key]
+                self.data = data
 
     def __call__(self, *args):
 
@@ -99,11 +82,11 @@ class Scale:
 
         if type(new) == str:
 
-            self.steps = scale_types[new]
+            self.data = scale_types[new]
 
         elif type(new) == list:
 
-            self.steps = new
+            self.data = new
 
         return self
 

@@ -12,7 +12,6 @@
     Note: The code below IS executed in the Environment and can be accessed by the user!
 
 """
-
 from re import match
 from random import choice as choose
 
@@ -21,7 +20,6 @@ from ServerManager import *
 from Players import *
 from Patterns import *
 from Code import *
-from TimeVar import *
 import Scale
 
 # Default server connection and metronome

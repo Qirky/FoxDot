@@ -1,0 +1,7 @@
+App.consolewidget module
+========================
+
+.. automodule:: App.consolewidget
+    :members:
+    :undoc-members:
+    :show-inheritance:

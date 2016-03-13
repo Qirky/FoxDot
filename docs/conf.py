@@ -288,3 +288,7 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+# -- Path to Python files
+
+sys.path.insert(0,"D:\\Google Drive\\GitHub\\FoxDotCode\\")

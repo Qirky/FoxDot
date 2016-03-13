@@ -1,0 +1,685 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>FoxDot.Patterns package &mdash; FoxDot 1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="FoxDot 1 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> FoxDot
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="simple">
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">FoxDot</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>FoxDot.Patterns package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/FoxDot.Patterns.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="foxdot-patterns-package">
+<h1>FoxDot.Patterns package<a class="headerlink" href="#foxdot-patterns-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-FoxDot.Patterns.Base">
+<span id="foxdot-patterns-base-module"></span><h2>FoxDot.Patterns.Base module<a class="headerlink" href="#module-FoxDot.Patterns.Base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="FoxDot.Patterns.Base.PGroup">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Base.</code><code class="descname">PGroup</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.PGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+<p>Class to represent any groupings of notes as denoted by brackets</p>
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Base.PGroup.BRACKETS">
+<code class="descname">BRACKETS</code><em class="property"> = '(%s)'</em><a class="headerlink" href="#FoxDot.Patterns.Base.PGroup.BRACKETS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Base.PGroup.NEST_ME">
+<code class="descname">NEST_ME</code><em class="property"> = False</em><a class="headerlink" href="#FoxDot.Patterns.Base.PGroup.NEST_ME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.PGroup.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.PGroup.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a new PGroup with self.data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.PGroup.make">
+<code class="descname">make</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.PGroup.make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overrides the Pattern.make() method to allow PGroup to invert nesting:</p>
+<p>i.e. (0,[1,2]) -&gt; [(0,1),(0,2)] and NEST_ME flag is set to False
+i.e. (0,[1,2],[3,4]) -&gt; [(0,1,3),(0,2,4)]</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Base.Pattern">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Base.</code><code class="descname">Pattern</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern.list" title="FoxDot.Patterns.Base.Pattern.list"><code class="xref py py-class docutils literal"><span class="pre">list</span></code></a></p>
+<p>Abstract pattern class.</p>
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Base.Pattern.BRACKETS">
+<code class="descname">BRACKETS</code><em class="property"> = '[%s]'</em><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.BRACKETS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Base.Pattern.NEST_ME">
+<code class="descname">NEST_ME</code><em class="property"> = True</em><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.NEST_ME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.all">
+<code class="descname">all</code><span class="sig-paren">(</span><em>func=&lt;function &lt;lambda&gt; at 0x0000000003EA4CF8&gt;</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if all of the patterns contents satisfies func(x) - default is nonzero</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.append" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.contains_nest">
+<code class="descname">contains_nest</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.contains_nest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if the</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.fromString">
+<code class="descname">fromString</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.fromString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Used to convert a string of characters into a pattern.</p>
+<p>Rather unintuitively: Characters in square brackets, [], are
+placed in a tuple - and then become PGroups - and characters
+in round brackets, (), are added into a nested list</p>
+<p>&#8220;x-o(-[oo])&#8221; -&gt; [&#8220;x&#8221;,&#8221;-&#8221;,&#8221;o&#8221;,&#8221;-&#8221;,&#8221;x&#8221;,&#8221;-&#8221;,&#8221;o&#8221;,(&#8220;o&#8221;,&#8221;o&#8221;)]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.items">
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.items" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.list">
+<code class="descname">list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.make">
+<code class="descname">make</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.make" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method automatically laces and groups the data</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.pipe">
+<code class="descname">pipe</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.pipe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatonates this patterns stream with another</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.stretch">
+<code class="descname">stretch</code><span class="sig-paren">(</span><em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.stretch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stretches (repeats) the contents until len(Pattern) == size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.Base.Pattern.string">
+<code class="descname">string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Pattern.string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a string made up of all the values:</p>
+<p>PSeq([1,&#8221;x&#8221;,(1,1),(&#8220;x&#8221;,&#8221;x&#8221;)]).string() -&gt; &#8220;1x11xx&#8221;</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Base.Pgroup">
+<code class="descclassname">FoxDot.Patterns.Base.</code><code class="descname">Pgroup</code><a class="headerlink" href="#FoxDot.Patterns.Base.Pgroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PGroup</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Base.PGroup" title="FoxDot.Patterns.Base.PGroup"><code class="xref py py-class docutils literal"><span class="pre">PGroup</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Base.Place">
+<code class="descclassname">FoxDot.Patterns.Base.</code><code class="descname">Place</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.Place" title="Permalink to this definition">¶</a></dt>
+<dd><p>nested patterns are stretched
+e.g. [[1,0],0,1,0] would be returned as [1,0,1,0,0,0,1,0]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Base.asStream">
+<code class="descclassname">FoxDot.Patterns.Base.</code><code class="descname">asStream</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.asStream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Forces any data into a pattern form</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Base.contains_nest">
+<code class="descclassname">FoxDot.Patterns.Base.</code><code class="descname">contains_nest</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.contains_nest" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true if any items in data are &#8216;nest-able&#8217; patterns</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Base.nested">
+<code class="descclassname">FoxDot.Patterns.Base.</code><code class="descname">nested</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Base.nested" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns true is data is any kind of pattern (inc. lists) EXCEPT PGroups or TimeVars</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Patterns.Feeders">
+<span id="foxdot-patterns-feeders-module"></span><h2>FoxDot.Patterns.Feeders module<a class="headerlink" href="#module-FoxDot.Patterns.Feeders" title="Permalink to this headline">¶</a></h2>
+<p>Function in this module take a single Player object as its arguments, changes their state, and return None</p>
+<p>These are to be used in a Player Object&#8217;s every(n, function) method and create a function that is called every n beats</p>
+<dl class="function">
+<dt id="FoxDot.Patterns.Feeders.lshift">
+<code class="descclassname">FoxDot.Patterns.Feeders.</code><code class="descname">lshift</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Feeders.lshift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Feeders.rev">
+<code class="descclassname">FoxDot.Patterns.Feeders.</code><code class="descname">rev</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Feeders.rev" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Feeders.rshift">
+<code class="descclassname">FoxDot.Patterns.Feeders.</code><code class="descname">rshift</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Feeders.rshift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Feeders.shuf">
+<code class="descclassname">FoxDot.Patterns.Feeders.</code><code class="descname">shuf</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Feeders.shuf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Patterns.Operations">
+<span id="foxdot-patterns-operations-module"></span><h2>FoxDot.Patterns.Operations module<a class="headerlink" href="#module-FoxDot.Patterns.Operations" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="FoxDot.Patterns.Operations.PAdd">
+<code class="descclassname">FoxDot.Patterns.Operations.</code><code class="descname">PAdd</code><span class="sig-paren">(</span><em>A</em>, <em>B</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Operations.PAdd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the vector addition of A and B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Operations.PDiv">
+<code class="descclassname">FoxDot.Patterns.Operations.</code><code class="descname">PDiv</code><span class="sig-paren">(</span><em>A</em>, <em>B</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Operations.PDiv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the array calculated by multiplying each value in A by the corresponding value in B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Operations.PMul">
+<code class="descclassname">FoxDot.Patterns.Operations.</code><code class="descname">PMul</code><span class="sig-paren">(</span><em>A</em>, <em>B</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Operations.PMul" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the array calculated by multiplying each value in A by the corresponding value in B</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Operations.POperand">
+<code class="descclassname">FoxDot.Patterns.Operations.</code><code class="descname">POperand</code><span class="sig-paren">(</span><em>A</em>, <em>B</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Operations.POperand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepares two Patterns, A &amp; B, for correct use in operands</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Operations.PSub">
+<code class="descclassname">FoxDot.Patterns.Operations.</code><code class="descname">PSub</code><span class="sig-paren">(</span><em>A</em>, <em>B</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Operations.PSub" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the vector subraction of B from A</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Operations.max_length">
+<code class="descclassname">FoxDot.Patterns.Operations.</code><code class="descname">max_length</code><span class="sig-paren">(</span><em>*patterns</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Operations.max_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the largest length pattern</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Operations.modi">
+<code class="descclassname">FoxDot.Patterns.Operations.</code><code class="descname">modi</code><span class="sig-paren">(</span><em>array</em>, <em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Operations.modi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the modular index i.e. modi([0,1,2],4) will return 1</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Patterns.Sequences">
+<span id="foxdot-patterns-sequences-module"></span><h2>FoxDot.Patterns.Sequences module<a class="headerlink" href="#module-FoxDot.Patterns.Sequences" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.Chord">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Chord</code><span class="sig-paren">(</span><em>stream=[0], structure=[0, 2, 4]</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.Chord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.Geom">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Geom</code><span class="sig-paren">(</span><em>n</em>, <em>lo=1</em>, <em>hi=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.Geom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.GeomFill">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">GeomFill</code><span class="sig-paren">(</span><em>arr</em><span class="sig-paren">)</span> &rarr; new_arr such that sum(new_list) is power of N<a class="headerlink" href="#FoxDot.Patterns.Sequences.GeomFill" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PRand">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PRand</code><span class="sig-paren">(</span><em>a</em>, <em>b=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PRand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+<p>Prand(iterable) -&gt; Returns a stream of random elements
+Prand(lo, hi) -&gt; Returns a stream of random elements between lo and hi</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PRange">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PRange</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PRange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PRhythm">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PRhythm</code><span class="sig-paren">(</span><em>s</em>, <em>dur=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PRhythm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PSeq">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PSeq</code><span class="sig-paren">(</span><em>iterable</em><span class="sig-paren">)</span> &rarr; Normal sequence, similar to Python list<a class="headerlink" href="#FoxDot.Patterns.Sequences.PSeq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PShuf">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PShuf</code><span class="sig-paren">(</span><em>seq</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PShuf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PSine">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PSine</code><span class="sig-paren">(</span><em>size=16</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PSine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PStretch">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PStretch</code><span class="sig-paren">(</span><em>data</em>, <em>size</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PStretch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PStutter">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PStutter</code><span class="sig-paren">(</span><em>pattern</em>, <em>n) -&gt; Creates a pattern such that each item in the array is repeated n times (can be a pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PStutter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PSum">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PSum</code><span class="sig-paren">(</span><em>n</em>, <em>total</em><span class="sig-paren">)</span> &rarr; Pattern of length n that sums to equal total<a class="headerlink" href="#FoxDot.Patterns.Sequences.PSum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+<dl class="docutils">
+<dt>e.g. PSum(3,8) -&gt; [3,3,2]</dt>
+<dd>PSum(5,4) -&gt; [1,0.75,0.75,0.75,0.75]</dd>
+</dl>
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.PSum.lim">
+<code class="descname">lim</code><em class="property"> = 0.125</em><a class="headerlink" href="#FoxDot.Patterns.Sequences.PSum.lim" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PTri">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PTri</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PTri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.Sequences.PWhite">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">PWhite</code><span class="sig-paren">(</span><em>lo=0</em>, <em>hi=1</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.PWhite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Prand">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Prand</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Prand" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PRand</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PRand" title="FoxDot.Patterns.Sequences.PRand"><code class="xref py py-class docutils literal"><span class="pre">PRand</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Prange">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Prange</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Prange" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PRange" title="FoxDot.Patterns.Sequences.PRange"><code class="xref py py-class docutils literal"><span class="pre">PRange</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Pseq">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Pseq</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Pseq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PSeq()</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PSeq" title="FoxDot.Patterns.Sequences.PSeq"><code class="xref py py-class docutils literal"><span class="pre">PSeq</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Pshuf">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Pshuf</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Pshuf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PShuf()</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PShuf" title="FoxDot.Patterns.Sequences.PShuf"><code class="xref py py-class docutils literal"><span class="pre">PShuf</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Psine">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Psine</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Psine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PSine</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PSine" title="FoxDot.Patterns.Sequences.PSine"><code class="xref py py-class docutils literal"><span class="pre">PSine</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Pstretch">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Pstretch</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Pstretch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PStretch" title="FoxDot.Patterns.Sequences.PStretch"><code class="xref py py-class docutils literal"><span class="pre">PStretch</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Pstutter">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Pstutter</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Pstutter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PStutter()</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PStutter" title="FoxDot.Patterns.Sequences.PStutter"><code class="xref py py-class docutils literal"><span class="pre">PStutter</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Psum">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Psum</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Psum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PSum</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PSum" title="FoxDot.Patterns.Sequences.PSum"><code class="xref py py-class docutils literal"><span class="pre">PSum</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Ptri">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Ptri</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Ptri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for PTri</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PTri" title="FoxDot.Patterns.Sequences.PTri"><code class="xref py py-class docutils literal"><span class="pre">PTri</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.Sequences.Pwhite">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Pwhite</code><a class="headerlink" href="#FoxDot.Patterns.Sequences.Pwhite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias</p>
+<p>alias of <a class="reference internal" href="#FoxDot.Patterns.Sequences.PWhite" title="FoxDot.Patterns.Sequences.PWhite"><code class="xref py py-class docutils literal"><span class="pre">PWhite</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.Rhythm">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Rhythm</code><span class="sig-paren">(</span><em>string</em>, <em>step=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.Rhythm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.Rint">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Rint</code><span class="sig-paren">(</span><em>a</em>, <em>b=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.Rint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.Sparse">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Sparse</code><span class="sig-paren">(</span><em>arr=[0, 1], hi=8</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.Sparse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.Walk">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">Walk</code><span class="sig-paren">(</span><em>hi=8</em>, <em>variation=1</em>, <em>size=256</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.Walk" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.fShuf">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">fShuf</code><span class="sig-paren">(</span><em>a</em>, <em>b=None</em>, <em>size=8</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.fShuf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Patterns.Sequences.irange">
+<code class="descclassname">FoxDot.Patterns.Sequences.</code><code class="descname">irange</code><span class="sig-paren">(</span><em>start</em>, <em>stop=None</em>, <em>step=0.1</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.Sequences.irange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Patterns.TimeVar">
+<span id="foxdot-patterns-timevar-module"></span><h2>FoxDot.Patterns.TimeVar module<a class="headerlink" href="#module-FoxDot.Patterns.TimeVar" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="FoxDot.Patterns.TimeVar.InfinityObj">
+<code class="descclassname">FoxDot.Patterns.TimeVar.</code><code class="descname">InfinityObj</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.InfinityObj" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar">
+<em class="property">class </em><code class="descclassname">FoxDot.Patterns.TimeVar.</code><code class="descname">TimeVar</code><span class="sig-paren">(</span><em>values</em>, <em>dur=4</em>, <em>metro=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+<dl class="attribute">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.NEST_ME">
+<code class="descname">NEST_ME</code><em class="property"> = False</em><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.NEST_ME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Signal to Base.Pattern not to treat as nested</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.chain">
+<code class="descname">chain</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends a TimeVar</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.copy" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.durs">
+<code class="descname">durs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.durs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.isTimeVar">
+<code class="descname">isTimeVar</code><em class="property"> = True</em><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.isTimeVar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.isplaying">
+<code class="descname">isplaying</code><em class="property"> = False</em><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.isplaying" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.length">
+<code class="descname">length</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.now">
+<code class="descname">now</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.now" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the value from self.data for time t in self.metro</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.single">
+<code class="descname">single</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.single" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns val as calculated by internal modifiers</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>values</em>, <em>dur=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the TimeVar with new values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Patterns.TimeVar.TimeVar.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Patterns.TimeVar.TimeVar.values" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Patterns">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-FoxDot.Patterns" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ryan Kirkbride.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

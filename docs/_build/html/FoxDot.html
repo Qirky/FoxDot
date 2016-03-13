@@ -1,0 +1,1907 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>FoxDot package &mdash; FoxDot 1 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="FoxDot 1 documentation" href="index.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> FoxDot
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="simple">
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">FoxDot</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>FoxDot package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/FoxDot.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="foxdot-package">
+<h1>FoxDot package<a class="headerlink" href="#foxdot-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="FoxDot.Patterns.html">FoxDot.Patterns package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.Patterns.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.Patterns.html#module-FoxDot.Patterns.Base">FoxDot.Patterns.Base module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.Patterns.html#module-FoxDot.Patterns.Feeders">FoxDot.Patterns.Feeders module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.Patterns.html#module-FoxDot.Patterns.Operations">FoxDot.Patterns.Operations module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.Patterns.html#module-FoxDot.Patterns.Sequences">FoxDot.Patterns.Sequences module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.Patterns.html#module-FoxDot.Patterns.TimeVar">FoxDot.Patterns.TimeVar module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.Patterns.html#module-FoxDot.Patterns">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="FoxDot.debug.html">FoxDot.debug package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="FoxDot.debug.html#module-FoxDot.debug">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-FoxDot.Buffers">
+<span id="foxdot-buffers-module"></span><h2>FoxDot.Buffers module<a class="headerlink" href="#module-FoxDot.Buffers" title="Permalink to this headline">¶</a></h2>
+<p>This module manages the allocation of buffer numbers and samples</p>
+<dl class="class">
+<dt id="FoxDot.Buffers.BufferManager">
+<em class="property">class </em><code class="descclassname">FoxDot.Buffers.</code><code class="descname">BufferManager</code><a class="headerlink" href="#FoxDot.Buffers.BufferManager" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="FoxDot.Buffers.BufferManager.bufnum">
+<code class="descname">bufnum</code><span class="sig-paren">(</span><em>char</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Buffers.BufferManager.bufnum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Buffers.BufferManager.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>configFile='../Samples/config.txt'</em>, <em>offset=0</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Buffers.BufferManager.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads in a config file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Buffers.BufferManager.sendToServer">
+<code class="descname">sendToServer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Buffers.BufferManager.sendToServer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Buffers.BufferManager.setServer">
+<code class="descname">setServer</code><span class="sig-paren">(</span><em>server</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Buffers.BufferManager.setServer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Buffers.path">
+<code class="descclassname">FoxDot.Buffers.</code><code class="descname">path</code><span class="sig-paren">(</span><em>fn</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Buffers.path" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Code">
+<span id="foxdot-code-module"></span><h2>FoxDot.Code module<a class="headerlink" href="#module-FoxDot.Code" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="FoxDot.Code.enclosing_brackets">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">enclosing_brackets</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.enclosing_brackets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.execute">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">execute</code><span class="sig-paren">(</span><em>code</em>, <em>verbose=True</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.execute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a string of foxdot code and calls toPython()
+`       and exectues the returned python string in our</p>
+<blockquote>
+<div>global namespace</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.override_attempt">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">override_attempt</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.override_attempt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds any attempt to re-assign a player while playing and reformats the arguments</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.overwrite_code">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">overwrite_code</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.overwrite_code" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replaces any FoxDot code with Python code</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.remove_self">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">remove_self</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.remove_self" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.stdout">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">stdout</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.stdout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.toCompile">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">toCompile</code><span class="sig-paren">(</span><em>expression</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.toCompile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.toPython">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">toPython</code><span class="sig-paren">(</span><em>live_code</em>, <em>verbose</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.toPython" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts any FoxDot code to its equivalent in Python</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Code.when_statements">
+<code class="descclassname">FoxDot.Code.</code><code class="descname">when_statements</code><span class="sig-paren">(</span><em>code</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Code.when_statements" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds any when statements and converts them to a string that creates TempoClock.When objects</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Midi">
+<span id="foxdot-midi-module"></span><h2>FoxDot.Midi module<a class="headerlink" href="#module-FoxDot.Midi" title="Permalink to this headline">¶</a></h2>
+<p>Module sed for converting streams and frequencies</p>
+<dl class="function">
+<dt id="FoxDot.Midi.midi">
+<code class="descclassname">FoxDot.Midi.</code><code class="descname">midi</code><span class="sig-paren">(</span><em>scale</em>, <em>octave</em>, <em>degree</em>, <em>root=0</em>, <em>stepsPerOctave=12</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Midi.midi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates a midinote from a scale, octave, degree, and root</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Midi.miditofreq">
+<code class="descclassname">FoxDot.Midi.</code><code class="descname">miditofreq</code><span class="sig-paren">(</span><em>midinote</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Midi.miditofreq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a midi number to frequency</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.OSC">
+<span id="foxdot-osc-module"></span><h2>FoxDot.OSC module<a class="headerlink" href="#module-FoxDot.OSC" title="Permalink to this headline">¶</a></h2>
+<p>This module contains an OpenSoundControl implementation (in Pure Python), based
+(somewhat) on the good old &#8216;SimpleOSC&#8217; implementation by Daniel Holth &amp; Clinton
+McChesney.</p>
+<p>This implementation is intended to still be &#8216;simple&#8217; to the user, but much more
+complete (with OSCServer &amp; OSCClient classes) and much more powerful (the
+OSCMultiClient supports subscriptions &amp; message-filtering, OSCMessage &amp;
+OSCBundle are now proper container-types)</p>
+<div class="section" id="opensoundcontrol">
+<h3>OpenSoundControl<a class="headerlink" href="#opensoundcontrol" title="Permalink to this headline">¶</a></h3>
+<p>OpenSoundControl is a network-protocol for sending (small) packets of addressed
+data over network sockets. This OSC-implementation supports the classical 
+UDP/IP protocol for sending and receiving packets but provides as well support
+for TCP/IP streaming, whereas the message size is prepended as int32 (big
+endian) before each message/packet.</p>
+<p>OSC-packets come in two kinds:</p>
+<blockquote>
+<div><ul class="simple">
+<li>OSC-messages consist of an &#8216;address&#8217;-string (not to be confused with a</li>
+</ul>
+<p>(host:port) network-address!), followed by a string of &#8216;typetags&#8217;
+associated with the message&#8217;s arguments (ie. &#8216;payload&#8217;), and finally the
+arguments themselves, encoded in an OSC-specific way. The OSCMessage class
+makes it easy to create &amp; manipulate OSC-messages of this kind in a
+&#8216;pythonesque&#8217; way (that is, OSCMessage-objects behave a lot like lists)</p>
+<ul class="simple">
+<li>OSC-bundles are a special type of OSC-message containing only</li>
+</ul>
+<p>OSC-messages as &#8216;payload&#8217;. Recursively. (meaning; an OSC-bundle could
+contain other OSC-bundles, containing OSC-bundles etc.)</p>
+</div></blockquote>
+<p>OSC-bundles start with the special keyword &#8216;#bundle&#8217; and do not have an
+OSC-address (but the OSC-messages a bundle contains will have OSC-addresses!).
+Also, an OSC-bundle can have a timetag, essentially telling the receiving
+server to &#8216;hold&#8217; the bundle until the specified time. The OSCBundle class
+allows easy cration &amp; manipulation of OSC-bundles.</p>
+<p>For further information see also <a class="reference external" href="http://opensoundcontrol.org/spec-1_0">http://opensoundcontrol.org/spec-1_0</a></p>
+<hr class="docutils" />
+<p>To send OSC-messages, you need an OSCClient, and to receive OSC-messages you
+need an OSCServer.</p>
+<p>The OSCClient uses an &#8216;AF_INET / SOCK_DGRAM&#8217; type socket (see the &#8216;socket&#8217;
+module) to send binary representations of OSC-messages to a remote host:port
+address.</p>
+<p>The OSCServer listens on an &#8216;AF_INET / SOCK_DGRAM&#8217; type socket bound to a local
+port, and handles incoming requests. Either one-after-the-other (OSCServer) or
+in a multi-threaded / multi-process fashion (ThreadingOSCServer/
+ForkingOSCServer). If the Server has a callback-function (a.k.a. handler)
+registered to &#8216;deal with&#8217; (i.e. handle) the received message&#8217;s OSC-address,
+that function is called, passing it the (decoded) message.</p>
+<p>The different OSCServers implemented here all support the (recursive) un-
+bundling of OSC-bundles, and OSC-bundle timetags.</p>
+<p>In fact, this implementation supports:</p>
+<blockquote>
+<div><ul class="simple">
+<li>OSC-messages with &#8216;i&#8217; (int32), &#8216;f&#8217; (float32), &#8216;d&#8217; (double), &#8216;s&#8217; (string) and</li>
+</ul>
+<p>&#8216;b&#8217; (blob / binary data) types
+- OSC-bundles, including timetag-support
+- OSC-address patterns including &#8216;*&#8217;, &#8216;?&#8217;, &#8216;{,}&#8217; and &#8216;[]&#8217; wildcards.</p>
+</div></blockquote>
+<p>(please <em>do</em> read the OSC-spec! <a class="reference external" href="http://opensoundcontrol.org/spec-1_0">http://opensoundcontrol.org/spec-1_0</a> it
+explains what these things mean.)</p>
+<dl class="docutils">
+<dt>In addition, the OSCMultiClient supports:</dt>
+<dd><ul class="first last simple">
+<li>Sending a specific OSC-message to multiple remote servers</li>
+<li>Remote server subscription / unsubscription (through OSC-messages, of course)</li>
+<li>Message-address filtering.</li>
+</ul>
+</dd>
+</dl>
+<dl class="docutils">
+<dt>pyOSC:</dt>
+<dd>Copyright (c) 2008-2010, Artem Baguinski &lt;<a class="reference external" href="mailto:artm&#37;&#52;&#48;v2&#46;nl">artm<span>&#64;</span>v2<span>&#46;</span>nl</a>&gt; et al., Stock, V2_Lab, Rotterdam, Netherlands.</dd>
+<dt>Streaming support (OSC over TCP):</dt>
+<dd>Copyright (c) 2010 Uli Franke &lt;<a class="reference external" href="mailto:uli&#46;franke&#37;&#52;&#48;weiss&#46;ch">uli<span>&#46;</span>franke<span>&#64;</span>weiss<span>&#46;</span>ch</a>&gt;, Weiss Engineering, Uster, Switzerland.</dd>
+</dl>
+<div class="section" id="changelog">
+<h4>Changelog:<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h4>
+<dl class="docutils">
+<dt>v0.3.0  - 27 Dec. 2007</dt>
+<dd>Started out to extend the &#8216;SimpleOSC&#8217; implementation (v0.2.3) by Daniel Holth &amp; Clinton McChesney.
+Rewrote OSCMessage
+Added OSCBundle</dd>
+<dt>v0.3.1  - 3 Jan. 2008</dt>
+<dd>Added OSClient
+Added OSCRequestHandler, loosely based on the original CallbackManager 
+Added OSCServer
+Removed original CallbackManager
+Adapted testing-script (the &#8216;if __name__ == &#8220;__main__&#8221;:&#8217; block at the end) to use new Server &amp; Client</dd>
+<dt>v0.3.2  - 5 Jan. 2008</dt>
+<dd><p class="first">Added &#8216;container-type emulation&#8217; methods (getitem(), setitem(), __iter__() &amp; friends) to OSCMessage
+Added ThreadingOSCServer &amp; ForkingOSCServer</p>
+<blockquote>
+<div><ul class="simple">
+<li>6 Jan. 2008</li>
+</ul>
+</div></blockquote>
+<p class="last">Added OSCMultiClient
+Added command-line options to testing-script (try &#8216;python OSC.py &#8211;help&#8217;)</p>
+</dd>
+<dt>v0.3.3  - 9 Jan. 2008</dt>
+<dd>Added OSC-timetag support to OSCBundle &amp; OSCRequestHandler
+Added ThreadingOSCRequestHandler</dd>
+<dt>v0.3.4  - 13 Jan. 2008</dt>
+<dd>Added message-filtering to OSCMultiClient
+Added subscription-handler to OSCServer
+Added support fon numpy/scipy int &amp; float types. (these get converted to &#8216;standard&#8217; 32-bit OSC ints / floats!)
+Cleaned-up and added more Docstrings</dd>
+<dt>v0.3.5 - 14 aug. 2008</dt>
+<dd>Added OSCServer.reportErr(...) method</dd>
+<dt>v0.3.6 - 19 April 2010</dt>
+<dd><p class="first">Added Streaming support (OSC over TCP)
+Updated documentation
+Moved pattern matching stuff into separate class (OSCAddressSpace) to</p>
+<blockquote>
+<div>facilitate implementation of different server and client architectures.
+Callbacks feature now a context (object oriented) but dynamic function
+inspection keeps the code backward compatible</div></blockquote>
+<p class="last">Moved testing code into separate testbench (testbench.py)</p>
+</dd>
+</dl>
+</div>
+<div class="section" id="original-comments">
+<h4>Original Comments<a class="headerlink" href="#original-comments" title="Permalink to this headline">¶</a></h4>
+<p>&gt; Open SoundControl for Python
+&gt; Copyright (C) 2002 Daniel Holth, Clinton McChesney
+&gt; 
+&gt; This library is free software; you can redistribute it and/or modify it under
+&gt; the terms of the GNU Lesser General Public License as published by the Free
+&gt; Software Foundation; either version 2.1 of the License, or (at your option) any
+&gt; later version.
+&gt; 
+&gt; This library is distributed in the hope that it will be useful, but WITHOUT ANY
+&gt; WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+&gt; PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+&gt; details.
+&gt;
+&gt; You should have received a copy of the GNU Lesser General Public License along
+&gt; with this library; if not, write to the Free Software Foundation, Inc., 59
+&gt; Temple Place, Suite 330, Boston, MA  02111-1307  USA
+&gt;
+&gt; For questions regarding this module contact Daniel Holth &lt;<a class="reference external" href="mailto:dholth&#37;&#52;&#48;stetson&#46;edu">dholth<span>&#64;</span>stetson<span>&#46;</span>edu</a>&gt;
+&gt; or visit <a class="reference external" href="http://www.stetson.edu/~ProctoLogic/">http://www.stetson.edu/~ProctoLogic/</a>
+&gt;
+&gt; Changelog:
+&gt; 15 Nov. 2001:
+&gt;       Removed dependency on Python 2.0 features.
+&gt;       - dwh
+&gt; 13 Feb. 2002:
+&gt;       Added a generic callback handler.
+&gt;       - dwh</p>
+<dl class="class">
+<dt id="FoxDot.OSC.ForkingOSCServer">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">ForkingOSCServer</code><span class="sig-paren">(</span><em>server_address</em>, <em>client=None</em>, <em>return_port=0</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.ForkingOSCServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SocketServer.ForkingMixIn</span></code>, <a class="reference internal" href="#FoxDot.OSC.OSCServer" title="FoxDot.OSC.OSCServer"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCServer</span></code></a></p>
+<p>An Asynchronous OSCServer.
+This server forks a new process to handle each incoming request.</p>
+<dl class="attribute">
+<dt id="FoxDot.OSC.ForkingOSCServer.RequestHandlerClass">
+<code class="descname">RequestHandlerClass</code><a class="headerlink" href="#FoxDot.OSC.ForkingOSCServer.RequestHandlerClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#FoxDot.OSC.ThreadingOSCRequestHandler" title="FoxDot.OSC.ThreadingOSCRequestHandler"><code class="xref py py-class docutils literal"><span class="pre">ThreadingOSCRequestHandler</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="FoxDot.OSC.NoCallbackError">
+<em class="property">exception </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">NoCallbackError</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.NoCallbackError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCServerError" title="FoxDot.OSC.OSCServerError"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCServerError</span></code></a></p>
+<p>This error is raised (by an OSCServer) when an OSCMessage with an &#8216;unmatched&#8217; address-pattern
+is received, and no &#8216;default&#8217; handler is registered.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="FoxDot.OSC.NotSubscribedError">
+<em class="property">exception </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">NotSubscribedError</code><span class="sig-paren">(</span><em>addr</em>, <em>prefix=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.NotSubscribedError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCClientError" title="FoxDot.OSC.OSCClientError"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCClientError</span></code></a></p>
+<p>This error is raised (by an OSCMultiClient) when an attempt is made to unsubscribe a host
+that isn&#8217;t subscribed.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCAddressSpace">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCAddressSpace</code><a class="headerlink" href="#FoxDot.OSC.OSCAddressSpace" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="FoxDot.OSC.OSCAddressSpace.addMsgHandler">
+<code class="descname">addMsgHandler</code><span class="sig-paren">(</span><em>address</em>, <em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCAddressSpace.addMsgHandler" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Register a handler for an OSC-address</dt>
+<dd><ul class="first last simple">
+<li>&#8216;address&#8217; is the OSC address-string.</li>
+</ul>
+</dd>
+<dt>the address-string should start with &#8216;/&#8217; and may not contain &#8216;*&#8217;</dt>
+<dd><ul class="first last simple">
+<li>&#8216;callback&#8217; is the function called for incoming OSCMessages that match &#8216;address&#8217;.</li>
+</ul>
+</dd>
+</dl>
+<p>The callback-function will be called with the same arguments as the &#8216;msgPrinter_handler&#8217; below</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCAddressSpace.delMsgHandler">
+<code class="descname">delMsgHandler</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCAddressSpace.delMsgHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the registered handler for the given OSC-address</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCAddressSpace.dispatchMessage">
+<code class="descname">dispatchMessage</code><span class="sig-paren">(</span><em>pattern</em>, <em>tags</em>, <em>data</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCAddressSpace.dispatchMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attmept to match the given OSC-address pattern, which may contain &#8216;*&#8217;,
+against all callbacks registered with the OSCServer.
+Calls the matching callback and returns whatever it returns.
+If no match is found, and a &#8216;default&#8217; callback is registered, it calls that one,
+or raises NoCallbackError if a &#8216;default&#8217; callback is not registered.</p>
+<blockquote>
+<div><ul class="simple">
+<li>pattern (string):  The OSC-address of the receied message</li>
+<li>tags (string):  The OSC-typetags of the receied message&#8217;s arguments, without &#8216;,&#8217;</li>
+<li>data (list):  The message arguments</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCAddressSpace.getOSCAddressSpace">
+<code class="descname">getOSCAddressSpace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCAddressSpace.getOSCAddressSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list containing all OSC-addresses registerd with this Server.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.OSCArgument">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCArgument</code><span class="sig-paren">(</span><em>next</em>, <em>typehint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCArgument" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert some Python types to their
+OSC binary representations, returning a
+(typetag, data) tuple.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.OSCBlob">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCBlob</code><span class="sig-paren">(</span><em>next</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBlob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a string into an OSC Blob.
+An OSC-Blob is a binary encoded block of data, prepended by a &#8216;size&#8217; (int32).
+The size is always a mutiple of 4 bytes. 
+The blob ends with 0 to 3 zero-bytes (&#8216;&#8217;)</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCBundle">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCBundle</code><span class="sig-paren">(</span><em>address=''</em>, <em>time=0</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBundle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCMessage" title="FoxDot.OSC.OSCMessage"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCMessage</span></code></a></p>
+<p>Builds a &#8216;bundle&#8217; of OSC messages.</p>
+<p>OSCBundle objects are container objects for building OSC-bundles of OSC-messages.
+An OSC-bundle is a special kind of OSC-message which contains a list of OSC-messages
+(And yes, OSC-bundles may contain other OSC-bundles...)</p>
+<dl class="docutils">
+<dt>OSCBundle objects behave much the same as OSCMessage objects, with these exceptions:</dt>
+<dd><ul class="first simple">
+<li>if an item or items to be appended or inserted are not OSCMessage objects,</li>
+</ul>
+<p class="last">OSCMessage objectss are created to encapsulate the item(s)
+- an OSC-bundle does not have an address of its own, only the contained OSC-messages do.
+The OSCBundle&#8217;s &#8216;address&#8217; is inherited by any OSCMessage the OSCBundle object creates.
+- OSC-bundles have a timetag to tell the receiver when the bundle should be processed.
+The default timetag value (0) means &#8216;immediately&#8217;</p>
+</dd>
+</dl>
+<dl class="method">
+<dt id="FoxDot.OSC.OSCBundle.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>argument</em>, <em>typehint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBundle.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends data to the bundle, creating an OSCMessage to encapsulate
+the provided argument unless this is already an OSCMessage.
+Any newly created OSCMessage inherits the OSCBundle&#8217;s address at the time of creation.
+If &#8216;argument&#8217; is an iterable, its elements will be encapsuated by a single OSCMessage.
+Finally, &#8216;argument&#8217; can be (or contain) a dict, which will be &#8216;converted&#8217; to an OSCMessage;</p>
+<blockquote>
+<div><ul class="simple">
+<li>if &#8216;addr&#8217; appears in the dict, its value overrides the OSCBundle&#8217;s address</li>
+<li>if &#8216;args&#8217; appears in the dict, its value(s) become the OSCMessage&#8217;s arguments</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCBundle.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBundle.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a deep copy of this OSCBundle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCBundle.getBinary">
+<code class="descname">getBinary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBundle.getBinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the binary representation of the message</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCBundle.getTimeTagStr">
+<code class="descname">getTimeTagStr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBundle.getTimeTagStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the TimeTag as a human-readable string</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCBundle.setTimeTag">
+<code class="descname">setTimeTag</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBundle.setTimeTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set or change the OSCBundle&#8217;s TimeTag
+In &#8216;Python Time&#8217;, that&#8217;s floating seconds since the Epoch</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCBundle.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCBundle.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the OSCMessages appended so far</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCClient">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCClient</code><span class="sig-paren">(</span><em>server=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Simple OSC Client. Handles the sending of OSC-Packets (OSCMessage or OSCBundle) via a UDP-socket</p>
+<dl class="method">
+<dt id="FoxDot.OSC.OSCClient.address">
+<code class="descname">address</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClient.address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a (host,port) tuple of the remote server this client is
+connected to or None if not connected to any server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCClient.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClient.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Disconnect &amp; close the Client&#8217;s socket</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCClient.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClient.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bind to a specific OSC server:
+the &#8216;address&#8217; argument is a (host, port) tuple</p>
+<blockquote>
+<div><ul class="simple">
+<li>host:  hostname of the remote OSC server,</li>
+<li>port:  UDP-port the remote OSC server listens to.</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCClient.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>msg</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClient.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send the given OSCMessage.
+The Client must be already connected.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">msg:  OSCMessage (or OSCBundle) to be sent</p>
+</li>
+<li><dl class="first docutils">
+<dt>timeout:  A timeout value for attempting to send. If timeout == None,</dt>
+<dd><p class="first last">this call blocks until socket is available for writing.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Raises OSCClientError when timing out while waiting for the socket,
+or when the Client isn&#8217;t connected to a remote server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCClient.sendto">
+<code class="descname">sendto</code><span class="sig-paren">(</span><em>msg</em>, <em>address</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClient.sendto" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Send the given OSCMessage to the specified address.</dt>
+<dd><ul class="first last">
+<li><p class="first">msg:  OSCMessage (or OSCBundle) to be sent</p>
+</li>
+<li><p class="first">address:  (host, port) tuple specifing remote server to send the message to</p>
+</li>
+<li><dl class="first docutils">
+<dt>timeout:  A timeout value for attempting to send. If timeout == None,</dt>
+<dd><p class="first last">this call blocks until socket is available for writing.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>Raises OSCClientError when timing out while waiting for the socket.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCClient.setServer">
+<code class="descname">setServer</code><span class="sig-paren">(</span><em>server</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClient.setServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associate this Client with given server.
+The Client will send from the Server&#8217;s socket.
+The Server will use this Client instance to send replies.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCClient.sndbuf_size">
+<code class="descname">sndbuf_size</code><em class="property"> = 32768</em><a class="headerlink" href="#FoxDot.OSC.OSCClient.sndbuf_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="FoxDot.OSC.OSCClientError">
+<em class="property">exception </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCClientError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCClientError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCError" title="FoxDot.OSC.OSCError"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCError</span></code></a></p>
+<p>Class for all OSCClient errors</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="FoxDot.OSC.OSCError">
+<em class="property">exception </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+<p>Base Class for all OSC-related errors</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCMessage">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCMessage</code><span class="sig-paren">(</span><em>address=''</em>, <em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Builds typetagged OSC messages.</p>
+<p>OSCMessage objects are container objects for building OSC-messages.
+On the &#8216;front&#8217; end, they behave much like list-objects, and on the &#8216;back&#8217; end
+they generate a binary representation of the message, which can be sent over a network socket.
+OSC-messages consist of an &#8216;address&#8217;-string (not to be confused with a (host, port) IP-address!),
+followed by a string of &#8216;typetags&#8217; associated with the message&#8217;s arguments (ie. &#8216;payload&#8217;), 
+and finally the arguments themselves, encoded in an OSC-specific way.</p>
+<p>On the Python end, OSCMessage are lists of arguments, prepended by the message&#8217;s address.
+The message contents can be manipulated much like a list:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">=</span> <span class="n">OSCMessage</span><span class="p">(</span><span class="s2">&quot;/my/osc/address&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;something&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;something else&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;entirely&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mf">3.</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span> <span class="o">+=</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mf">6.</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">del</span> <span class="n">msg</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">msg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+<span class="go">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="n">msg</span>
+<span class="go">/my/osc/address [&#39;something else&#39;, &#39;entirely&#39;, 1, 6.0]</span>
+</pre></div>
+</div>
+<p>OSCMessages can be concatenated with the + operator. In this case, the resulting OSCMessage
+inherits its address from the left-hand operand. The right-hand operand&#8217;s address is ignored.
+To construct an &#8216;OSC-bundle&#8217; from multiple OSCMessage, see OSCBundle!</p>
+<p>Additional methods exist for retreiving typetags or manipulating items as (typetag, value) tuples.</p>
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>argument</em>, <em>typehint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appends data to the message, updating the typetags based on
+the argument&#8217;s type. If the argument is a blob (counted
+string) pass in &#8216;b&#8217; as typehint.
+&#8216;argument&#8217; may also be a list or tuple, in which case its elements
+will get appended one-by-one, all using the provided typehint</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><em>address=''</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear (or set a new) OSC-address and clear any arguments appended so far</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.clearData">
+<code class="descname">clearData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.clearData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear any arguments appended so far</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a deep copy of this OSCMessage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.count">
+<code class="descname">count</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of times the given value occurs in the OSCMessage&#8217;s arguments</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.extend">
+<code class="descname">extend</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Append the contents of &#8216;values&#8217; to this OSCMessage.
+&#8216;values&#8217; can be another OSCMessage, or a list/tuple of ints/floats/strings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.getBinary">
+<code class="descname">getBinary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.getBinary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the binary representation of the message</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.index">
+<code class="descname">index</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the index of the first occurence of the given value in the OSCMessage&#8217;s arguments.
+Raises ValueError if val isn&#8217;t found</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.insert">
+<code class="descname">insert</code><span class="sig-paren">(</span><em>i</em>, <em>val</em>, <em>typehint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.insert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert given value (with optional typehint) into the OSCMessage
+at the given index.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.items">
+<code class="descname">items</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of (typetag, value) tuples for 
+the arguments appended so far</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.iteritems">
+<code class="descname">iteritems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.iteritems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterator of the OSCMessage&#8217;s arguments as
+(typetag, value) tuples</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.itertags">
+<code class="descname">itertags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.itertags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterator of the OSCMessage&#8217;s arguments&#8217; typetags</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.itervalues">
+<code class="descname">itervalues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.itervalues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an iterator of the OSCMessage&#8217;s arguments</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.pop">
+<code class="descname">pop</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.pop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the indicated argument from the OSCMessage, and return it.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.popitem">
+<code class="descname">popitem</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.popitem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the indicated argument from the OSCMessage, and return it
+as a (typetag, value) tuple.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.remove">
+<code class="descname">remove</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the first argument with the given value from the OSCMessage.
+Raises ValueError if val isn&#8217;t found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.reverse">
+<code class="descname">reverse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverses the arguments of the OSCMessage (in place)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.setAddress">
+<code class="descname">setAddress</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.setAddress" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set or change the OSC-address</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.setItem">
+<code class="descname">setItem</code><span class="sig-paren">(</span><em>i</em>, <em>val</em>, <em>typehint=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.setItem" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set indicated argument to a new value (with typehint)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.tags">
+<code class="descname">tags</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of typetags of the appended arguments</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMessage.values">
+<code class="descname">values</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMessage.values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of the arguments appended so far</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCMultiClient">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCMultiClient</code><span class="sig-paren">(</span><em>server=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCClient" title="FoxDot.OSC.OSCClient"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCClient</span></code></a></p>
+<p>&#8216;Multiple-Unicast&#8217; OSC Client. Handles the sending of OSC-Packets (OSCMessage or OSCBundle) via a UDP-socket
+This client keeps a dict of &#8216;OSCTargets&#8217;. and sends each OSCMessage to each OSCTarget
+The OSCTargets are simply (host, port) tuples, and may be associated with an OSC-address prefix.
+the OSCTarget&#8217;s prefix gets prepended to each OSCMessage sent to that target.</p>
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.clearOSCTargets">
+<code class="descname">clearOSCTargets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.clearOSCTargets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Erases all OSCTargets from the Client&#8217;s dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.connect" title="Permalink to this definition">¶</a></dt>
+<dd><p>The OSCMultiClient isn&#8217;t allowed to connect to any specific
+address.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.delOSCTarget">
+<code class="descname">delOSCTarget</code><span class="sig-paren">(</span><em>address</em>, <em>prefix=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.delOSCTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the specified OSCTarget from the Client&#8217;s dict.
+the &#8216;address&#8217; argument can be a ((host, port) tuple), or a hostname.
+If the &#8216;prefix&#8217; argument is given, the Target is only deleted if the address and prefix match.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.getOSCTarget">
+<code class="descname">getOSCTarget</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.getOSCTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the OSCTarget matching the given address as a ((host, port), [prefix, filters]) tuple.
+&#8216;address&#8217; can be a (host, port) tuple, or a &#8216;host&#8217; (string), in which case the first matching OSCTarget is returned
+Returns (None, [&#8216;&#8217;,{}]) if address not found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.getOSCTargetStr">
+<code class="descname">getOSCTargetStr</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.getOSCTargetStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the OSCTarget matching the given address as a (&#8216;osc://&lt;host&gt;:&lt;port&gt;[&lt;prefix&gt;]&#8217;, [&#8216;&lt;filter-string&gt;&#8217;, ...])&#8217; tuple.
+&#8216;address&#8217; can be a (host, port) tuple, or a &#8216;host&#8217; (string), in which case the first matching OSCTarget is returned
+Returns (None, []) if address not found.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.getOSCTargetStrings">
+<code class="descname">getOSCTargetStrings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.getOSCTargetStrings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a list of all OSCTargets as (&#8216;osc://&lt;host&gt;:&lt;port&gt;[&lt;prefix&gt;]&#8217;, [&#8216;&lt;filter-string&gt;&#8217;, ...])&#8217; tuples.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.getOSCTargets">
+<code class="descname">getOSCTargets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.getOSCTargets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the dict of OSCTargets: {addr:[prefix, filters], ...}</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.hasOSCTarget">
+<code class="descname">hasOSCTarget</code><span class="sig-paren">(</span><em>address</em>, <em>prefix=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.hasOSCTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if the given OSCTarget exists in the Client&#8217;s dict.
+the &#8216;address&#8217; argument can be a ((host, port) tuple), or a hostname.
+If the &#8216;prefix&#8217; argument is given, the return-value is only True if the address and prefix match.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>msg</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.send" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Send the given OSCMessage to all subscribed OSCTargets</dt>
+<dd><ul class="first last">
+<li><p class="first">msg:  OSCMessage (or OSCBundle) to be sent</p>
+</li>
+<li><dl class="first docutils">
+<dt>timeout:  A timeout value for attempting to send. If timeout == None,</dt>
+<dd><p class="first last">this call blocks until socket is available for writing.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+<p>Raises OSCClientError when timing out while waiting for the socket.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.sendto">
+<code class="descname">sendto</code><span class="sig-paren">(</span><em>msg</em>, <em>address</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.sendto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send the given OSCMessage.
+The specified address is ignored. Instead this method calls send() to
+send the message to all subscribed clients.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">msg:  OSCMessage (or OSCBundle) to be sent</p>
+</li>
+<li><p class="first">address:  (host, port) tuple specifing remote server to send the message to</p>
+</li>
+<li><dl class="first docutils">
+<dt>timeout:  A timeout value for attempting to send. If timeout == None,</dt>
+<dd><p class="first last">this call blocks until socket is available for writing.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+<p>Raises OSCClientError when timing out while waiting for the socket.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.setOSCTarget">
+<code class="descname">setOSCTarget</code><span class="sig-paren">(</span><em>address</em>, <em>prefix=None</em>, <em>filters=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.setOSCTarget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add (i.e. subscribe) a new OSCTarget, or change the prefix for an existing OSCTarget.
+the &#8216;address&#8217; argument can be a ((host, port) tuple) : The target server address &amp; UDP-port</p>
+<blockquote>
+<div>or a &#8216;host&#8217; (string) : The host will be looked-up</div></blockquote>
+<ul class="simple">
+<li>prefix (string): The OSC-address prefix prepended to the address of each OSCMessage</li>
+</ul>
+<p>sent to this OSCTarget (optional)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.setOSCTargetFromStr">
+<code class="descname">setOSCTargetFromStr</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.setOSCTargetFromStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds or modifies a subscribed OSCTarget from the given string, which should be in the
+&#8216;&lt;host&gt;:&lt;port&gt;[/&lt;prefix&gt;] [+/&lt;filter&gt;]|[-/&lt;filter&gt;] ...&#8217; format.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCMultiClient.updateOSCTargets">
+<code class="descname">updateOSCTargets</code><span class="sig-paren">(</span><em>dict</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCMultiClient.updateOSCTargets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the Client&#8217;s OSCTargets dict with the contents of &#8216;dict&#8217;
+The given dict&#8217;s items MUST be of the form</p>
+<blockquote>
+<div>{ (host, port):[prefix, filters], ... }</div></blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCRequestHandler">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCRequestHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCRequestHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SocketServer.DatagramRequestHandler</span></code></p>
+<p>RequestHandler class for the OSCServer</p>
+<dl class="method">
+<dt id="FoxDot.OSC.OSCRequestHandler.finish">
+<code class="descname">finish</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCRequestHandler.finish" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finish handling OSCMessage.
+Send any reply returned by the callback(s) back to the originating client
+as an OSCMessage or OSCBundle</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCRequestHandler.handle">
+<code class="descname">handle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCRequestHandler.handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle incoming OSCMessage</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCRequestHandler.setup">
+<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCRequestHandler.setup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepare RequestHandler.
+Unpacks request as (packet, source socket address)
+Creates an empty list for replies.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCServer">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCServer</code><span class="sig-paren">(</span><em>server_address</em>, <em>client=None</em>, <em>return_port=0</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SocketServer.UDPServer</span></code>, <a class="reference internal" href="#FoxDot.OSC.OSCAddressSpace" title="FoxDot.OSC.OSCAddressSpace"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCAddressSpace</span></code></a></p>
+<p>A Synchronous OSCServer
+Serves one request at-a-time, until the OSCServer is closed.
+The OSC address-pattern is matched against a set of OSC-adresses
+that have been registered to the server with a callback-function.
+If the adress-pattern of the message machtes the registered address of a callback,
+that function is called.</p>
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCServer.RequestHandlerClass">
+<code class="descname">RequestHandlerClass</code><a class="headerlink" href="#FoxDot.OSC.OSCServer.RequestHandlerClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#FoxDot.OSC.OSCRequestHandler" title="FoxDot.OSC.OSCRequestHandler"><code class="xref py py-class docutils literal"><span class="pre">OSCRequestHandler</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.addDefaultHandlers">
+<code class="descname">addDefaultHandlers</code><span class="sig-paren">(</span><em>prefix=''</em>, <em>info_prefix='/info'</em>, <em>error_prefix='/error'</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.addDefaultHandlers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a default set of OSC-address handlers with this Server:
+- &#8216;default&#8217; -&gt;  noCallback_handler
+the given prefix is prepended to all other callbacks registered by this method:
+- &#8216;&lt;prefix&gt;&lt;info_prefix&#8217; -&gt;  serverInfo_handler
+- &#8216;&lt;prefix&gt;&lt;error_prefix&gt; -&gt;  msgPrinter_handler
+- &#8216;&lt;prefix&gt;/print&#8217; -&gt;  msgPrinter_handler
+and, if the used Client supports it;
+- &#8216;&lt;prefix&gt;/subscribe&#8217; -&gt; subscription_handler
+- &#8216;&lt;prefix&gt;/unsubscribe&#8217; -&gt; subscription_handler</p>
+<p>Note: the given &#8216;error_prefix&#8217; argument is also set as default &#8216;error_prefix&#8217; for error-messages
+<em>sent from</em> this server. This is ok, because error-messages generally do not elicit a reply from the receiver.</p>
+<p>To do this with the serverInfo-prefixes would be a bad idea, because if a request received on &#8216;/info&#8217; (for example)
+would send replies to &#8216;/info&#8217;, this could potentially cause a never-ending loop of messages!
+Do <em>not</em> set the &#8216;info_prefix&#8217; here (for incoming serverinfo requests) to the same value as given to
+the setSrvInfoPrefix() method (for <em>replies</em> to incoming serverinfo requests).
+For example, use &#8216;/info&#8217; for incoming requests, and &#8216;/inforeply&#8217; or &#8216;/serverinfo&#8217; or even just &#8216;/print&#8217; as the 
+info-reply prefix.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.address">
+<code class="descname">address</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a (host,port) tuple of the local address this server is bound to,
+or None if not bound to any address.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.close" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stops serving requests, closes server (socket), closes used client</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.handle_error">
+<code class="descname">handle_error</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.handle_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle an exception in the Server&#8217;s callbacks gracefully.
+Writes the error to sys.stderr and, if the error_prefix (see setSrvErrorPrefix()) is set,
+sends the error-message as reply to the client</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.msgPrinter_handler">
+<code class="descname">msgPrinter_handler</code><span class="sig-paren">(</span><em>addr</em>, <em>tags</em>, <em>data</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.msgPrinter_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message</p>
+<blockquote>
+<div>(the &#8216;addr&#8217; string has already been matched against the handler&#8217;s registerd OSC-address,
+but may contain &#8216;*&#8217;s &amp; such)</div></blockquote>
+<ul class="simple">
+<li>tags (string):  The OSC-typetags of the received message&#8217;s arguments. (without the preceding comma)</li>
+<li>data (list): The OSCMessage&#8217;s arguments
+Note that len(tags) == len(data)</li>
+<li>client_address ((host, port) tuple): the host &amp; port this message originated from.</li>
+</ul>
+<p>a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.</p>
+<p>This handler prints the received message.
+Returns None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.noCallback_handler">
+<code class="descname">noCallback_handler</code><span class="sig-paren">(</span><em>addr</em>, <em>tags</em>, <em>data</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.noCallback_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message</p>
+<blockquote>
+<div>(the &#8216;addr&#8217; string has already been matched against the handler&#8217;s registerd OSC-address,
+but may contain &#8216;*&#8217;s &amp; such)</div></blockquote>
+<ul class="simple">
+<li>tags (string):  The OSC-typetags of the received message&#8217;s arguments. (without the preceding comma)</li>
+<li>data (list): The OSCMessage&#8217;s arguments
+Note that len(tags) == len(data)</li>
+<li>client_address ((host, port) tuple): the host &amp; port this message originated from.</li>
+</ul>
+<p>a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.</p>
+<p>This handler prints a &#8220;No callback registered to handle ...&#8221; message.
+Returns None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.printErr">
+<code class="descname">printErr</code><span class="sig-paren">(</span><em>txt</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.printErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes &#8216;OSCServer: txt&#8217; to sys.stderr</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCServer.print_tracebacks">
+<code class="descname">print_tracebacks</code><em class="property"> = False</em><a class="headerlink" href="#FoxDot.OSC.OSCServer.print_tracebacks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.reportErr">
+<code class="descname">reportErr</code><span class="sig-paren">(</span><em>txt</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.reportErr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Writes &#8216;OSCServer: txt&#8217; to sys.stderr
+If self.error_prefix is defined, sends &#8216;txt&#8217; as an OSC error-message to the client(s)
+(see printErr() and sendOSCerror())</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.sendOSCerror">
+<code class="descname">sendOSCerror</code><span class="sig-paren">(</span><em>txt</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.sendOSCerror" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends &#8216;txt&#8217;, encapsulated in an OSCMessage to the default &#8216;error_prefix&#8217; OSC-addres.
+Message is sent to the given client_address, with the default &#8216;return_port&#8217; overriding
+the client_address&#8217; port, if defined.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.sendOSCinfo">
+<code class="descname">sendOSCinfo</code><span class="sig-paren">(</span><em>txt</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.sendOSCinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends &#8216;txt&#8217;, encapsulated in an OSCMessage to the default &#8216;info_prefix&#8217; OSC-addres.
+Message is sent to the given client_address, with the default &#8216;return_port&#8217; overriding
+the client_address&#8217; port, if defined.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.serve_forever">
+<code class="descname">serve_forever</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.serve_forever" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle one request at a time until server is closed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.serverInfo_handler">
+<code class="descname">serverInfo_handler</code><span class="sig-paren">(</span><em>addr</em>, <em>tags</em>, <em>data</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.serverInfo_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message</p>
+<blockquote>
+<div>(the &#8216;addr&#8217; string has already been matched against the handler&#8217;s registerd OSC-address,
+but may contain &#8216;*&#8217;s &amp; such)</div></blockquote>
+<ul class="simple">
+<li>tags (string):  The OSC-typetags of the received message&#8217;s arguments. (without the preceding comma)</li>
+<li>data (list): The OSCMessage&#8217;s arguments
+Note that len(tags) == len(data)</li>
+<li>client_address ((host, port) tuple): the host &amp; port this message originated from.</li>
+</ul>
+<p>a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.</p>
+<p>This handler returns a reply to the client, which can contain various bits of information
+about this server, depending on the first argument of the received OSC-message:
+- &#8216;help&#8217; | &#8216;info&#8217; :  Reply contains server type &amp; version info, plus a list of</p>
+<blockquote>
+<div>available &#8216;commands&#8217; understood by this handler</div></blockquote>
+<ul class="simple">
+<li>&#8216;list&#8217; | &#8216;ls&#8217; :  Reply is a bundle of &#8216;address &lt;string&gt;&#8217; messages, listing the server&#8217;s 
+OSC address-space.</li>
+<li>&#8216;clients&#8217; | &#8216;targets&#8217; :  Reply is a bundle of &#8216;target osc://&lt;host&gt;:&lt;port&gt;[&lt;prefix&gt;] [&lt;filter&gt;] [...]&#8217;
+messages, listing the local Client-instance&#8217;s subscribed remote clients.</li>
+</ul>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.setClient">
+<code class="descname">setClient</code><span class="sig-paren">(</span><em>client</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.setClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Associate this Server with a new local Client instance, closing the Client this Server is currently using.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.setReturnPort">
+<code class="descname">setReturnPort</code><span class="sig-paren">(</span><em>port</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.setReturnPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the destination UDP-port for replies returning from this server to the remote client</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.setSrvErrorPrefix">
+<code class="descname">setSrvErrorPrefix</code><span class="sig-paren">(</span><em>pattern=''</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.setSrvErrorPrefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the OSC-address (pattern) this server will use to report errors occuring during
+received message handling to the remote client.</p>
+<p>If pattern is empty (default), server-errors are not reported back to the client.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.setSrvInfoPrefix">
+<code class="descname">setSrvInfoPrefix</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.setSrvInfoPrefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set the first part of OSC-address (pattern) this server will use to reply to server-info requests.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCServer.socket_timeout">
+<code class="descname">socket_timeout</code><em class="property"> = 1</em><a class="headerlink" href="#FoxDot.OSC.OSCServer.socket_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCServer.subscription_handler">
+<code class="descname">subscription_handler</code><span class="sig-paren">(</span><em>addr</em>, <em>tags</em>, <em>data</em>, <em>client_address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServer.subscription_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle &#8216;subscribe&#8217; / &#8216;unsubscribe&#8217; requests from remote hosts,
+if the local Client supports this (i.e. OSCMultiClient).</p>
+<p>Supported commands:
+- &#8216;help&#8217; | &#8216;info&#8217; :  Reply contains server type &amp; version info, plus a list of</p>
+<blockquote>
+<div>available &#8216;commands&#8217; understood by this handler</div></blockquote>
+<ul class="simple">
+<li>&#8216;list&#8217; | &#8216;ls&#8217; :  Reply is a bundle of &#8216;target osc://&lt;host&gt;:&lt;port&gt;[&lt;prefix&gt;] [&lt;filter&gt;] [...]&#8217;
+messages, listing the local Client-instance&#8217;s subscribed remote clients.</li>
+<li>&#8216;[subscribe | listen | sendto | target] &lt;url&gt; [&lt;filter&gt; ...] :  Subscribe remote client/server at &lt;url&gt;,
+and/or set message-filters for messages being sent to the subscribed host, with the optional &lt;filter&gt;
+arguments. Filters are given as OSC-addresses (or &#8216;*&#8217;) prefixed by a &#8216;+&#8217; (send matching messages) or
+a &#8216;-&#8216; (don&#8217;t send matching messages). The wildcard &#8216;*&#8217;, &#8216;+*&#8217; or &#8216;+/<em>&#8216; means &#8216;send all&#8217; / &#8216;filter none&#8217;,
+and &#8216;-</em>&#8216; or &#8216;-/<a href="#id1"><span class="problematic" id="id2">*</span></a>&#8216; means &#8216;send none&#8217; / &#8216;filter all&#8217; (which is not the same as unsubscribing!)
+Reply is an OSCMessage with the (new) subscription; &#8216;target osc://&lt;host&gt;:&lt;port&gt;[&lt;prefix&gt;] [&lt;filter&gt;] [...]&#8217;</li>
+<li>&#8216;[unsubscribe | silence | nosend | deltarget] &lt;url&gt; :  Unsubscribe remote client/server at &lt;url&gt;
+If the given &lt;url&gt; isn&#8217;t subscribed, a NotSubscribedError-message is printed (and possibly sent)</li>
+</ul>
+<p>The &lt;url&gt; given to the subscribe/unsubscribe handler should be of the form:
+&#8216;[osc://][&lt;host&gt;][:&lt;port&gt;][&lt;prefix&gt;]&#8217;, where any or all components can be omitted.</p>
+<p>If &lt;host&gt; is not specified, the IP-address of the message&#8217;s source is used.
+If &lt;port&gt; is not specified, the &lt;host&gt; is first looked up in the list of subscribed hosts, and if found,
+the associated port is used.
+If &lt;port&gt; is not specified and &lt;host&gt; is not yet subscribed, the message&#8217;s source-port is used.
+If &lt;prefix&gt; is specified on subscription, &lt;prefix&gt; is prepended to the OSC-address of all messages
+sent to the subscribed host.
+If &lt;prefix&gt; is specified on unsubscription, the subscribed host is only unsubscribed if the host, 
+port and prefix all match the subscription.
+If &lt;prefix&gt; is not specified on unsubscription, the subscribed host is unsubscribed if the host and port 
+match the subscription.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="FoxDot.OSC.OSCServerError">
+<em class="property">exception </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCServerError</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCServerError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCError" title="FoxDot.OSC.OSCError"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCError</span></code></a></p>
+<p>Class for all OSCServer errors</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCStreamRequestHandler">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCStreamRequestHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamRequestHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SocketServer.StreamRequestHandler</span></code>, <a class="reference internal" href="#FoxDot.OSC.OSCAddressSpace" title="FoxDot.OSC.OSCAddressSpace"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCAddressSpace</span></code></a></p>
+<p>This is the central class of a streaming OSC server. If a client
+connects to the server, the server instantiates a OSCStreamRequestHandler
+for each new connection. This is fundamentally different to a packet
+oriented server which has a single address space for all connections.
+This connection based (streaming) OSC server maintains an address space
+for each single connection, because usually tcp server spawn a new thread
+or process for each new connection. This would generate severe
+multithreading synchronization problems when each thread would operate on
+the same address space object. Therefore: To implement a streaming/TCP OSC
+server a custom handler must be implemented which implements the
+setupAddressSpace member in which it creates its own address space for this
+very connection. This has been done within the testbench and can serve as
+inspiration.</p>
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamRequestHandler.finish">
+<code class="descname">finish</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamRequestHandler.finish" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamRequestHandler.handle">
+<code class="descname">handle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamRequestHandler.handle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle a connection.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamRequestHandler.sendOSC">
+<code class="descname">sendOSC</code><span class="sig-paren">(</span><em>oscData</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamRequestHandler.sendOSC" title="Permalink to this definition">¶</a></dt>
+<dd><p>This member can be used to transmit OSC messages or OSC bundles
+over the client/server connection. It is thread save.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamRequestHandler.setup">
+<code class="descname">setup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamRequestHandler.setup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamRequestHandler.setupAddressSpace">
+<code class="descname">setupAddressSpace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamRequestHandler.setupAddressSpace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Override this function to customize your address space.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCStreamingClient">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCStreamingClient</code><a class="headerlink" href="#FoxDot.OSC.OSCStreamingClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCAddressSpace" title="FoxDot.OSC.OSCAddressSpace"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCAddressSpace</span></code></a></p>
+<p>OSC streaming client.
+A streaming client establishes a connection to a streaming server but must
+be able to handle replies by the server as well. To accomplish this the
+receiving takes place in a secondary thread, because no one knows if we
+have to expect a reply or not, i.e. synchronous architecture doesn&#8217;t make
+much sense.
+Replies will be matched against the local address space. If message
+handlers access code of the main thread (where the client messages are sent
+to the server) care must be taken e.g. by installing sychronization
+mechanisms or by using an event dispatcher which can handle events
+originating from other threads.</p>
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamingClient.close">
+<code class="descname">close</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingClient.close" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamingClient.connect">
+<code class="descname">connect</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingClient.connect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCStreamingClient.rcvbuf_size">
+<code class="descname">rcvbuf_size</code><em class="property"> = 32768</em><a class="headerlink" href="#FoxDot.OSC.OSCStreamingClient.rcvbuf_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamingClient.sendOSC">
+<code class="descname">sendOSC</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingClient.sendOSC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send an OSC message or bundle to the server. Returns True on success.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCStreamingClient.sndbuf_size">
+<code class="descname">sndbuf_size</code><em class="property"> = 32768</em><a class="headerlink" href="#FoxDot.OSC.OSCStreamingClient.sndbuf_size" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCStreamingServer">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCStreamingServer</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SocketServer.TCPServer</span></code></p>
+<p>A connection oriented (TCP/IP) OSC server.</p>
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCStreamingServer.RequestHandlerClass">
+<code class="descname">RequestHandlerClass</code><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServer.RequestHandlerClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#FoxDot.OSC.OSCStreamRequestHandler" title="FoxDot.OSC.OSCStreamRequestHandler"><code class="xref py py-class docutils literal"><span class="pre">OSCStreamRequestHandler</span></code></a></p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamingServer.broadcastToClients">
+<code class="descname">broadcastToClients</code><span class="sig-paren">(</span><em>oscData</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServer.broadcastToClients" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send OSC message or bundle to all connected clients.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamingServer.serve_forever">
+<code class="descname">serve_forever</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServer.serve_forever" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handle one request at a time until server is closed.
+Had to add this since 2.5 does not support server.shutdown()</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.OSC.OSCStreamingServer.socket_timeout">
+<code class="descname">socket_timeout</code><em class="property"> = 1</em><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServer.socket_timeout" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamingServer.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServer.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the server thread.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.OSC.OSCStreamingServer.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServer.stop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stop the server thread and close the socket.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.OSCStreamingServerThreading">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCStreamingServerThreading</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCStreamingServerThreading" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SocketServer.ThreadingMixIn</span></code>, <a class="reference internal" href="#FoxDot.OSC.OSCStreamingServer" title="FoxDot.OSC.OSCStreamingServer"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCStreamingServer</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.OSCString">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCString</code><span class="sig-paren">(</span><em>next</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a string into a zero-padded OSC String.
+The length of the resulting string is always a multiple of 4 bytes.
+The string ends with 1 to 4 zero-bytes (&#8216;&#8217;)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.OSCTimeTag">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">OSCTimeTag</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.OSCTimeTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert a time in floating seconds to its
+OSC binary representation</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.ThreadingOSCRequestHandler">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">ThreadingOSCRequestHandler</code><span class="sig-paren">(</span><em>request</em>, <em>client_address</em>, <em>server</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.ThreadingOSCRequestHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.OSC.OSCRequestHandler" title="FoxDot.OSC.OSCRequestHandler"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCRequestHandler</span></code></a></p>
+<p>Multi-threaded OSCRequestHandler;
+Starts a new RequestHandler thread for each unbundled OSCMessage</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.OSC.ThreadingOSCServer">
+<em class="property">class </em><code class="descclassname">FoxDot.OSC.</code><code class="descname">ThreadingOSCServer</code><span class="sig-paren">(</span><em>server_address</em>, <em>client=None</em>, <em>return_port=0</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.ThreadingOSCServer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">SocketServer.ThreadingMixIn</span></code>, <a class="reference internal" href="#FoxDot.OSC.OSCServer" title="FoxDot.OSC.OSCServer"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.OSC.OSCServer</span></code></a></p>
+<p>An Asynchronous OSCServer.
+This server starts a new thread to handle each incoming request.</p>
+<dl class="attribute">
+<dt id="FoxDot.OSC.ThreadingOSCServer.RequestHandlerClass">
+<code class="descname">RequestHandlerClass</code><a class="headerlink" href="#FoxDot.OSC.ThreadingOSCServer.RequestHandlerClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#FoxDot.OSC.ThreadingOSCRequestHandler" title="FoxDot.OSC.ThreadingOSCRequestHandler"><code class="xref py py-class docutils literal"><span class="pre">ThreadingOSCRequestHandler</span></code></a></p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.decodeOSC">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">decodeOSC</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.decodeOSC" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a binary OSC message to a Python list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.getFilterStr">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">getFilterStr</code><span class="sig-paren">(</span><em>filters</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.getFilterStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the given &#8216;filters&#8217; dict as a list of
+&#8216;+&lt;addr&gt;&#8217; | &#8216;-&lt;addr&gt;&#8217; filter-strings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.getRegEx">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">getRegEx</code><span class="sig-paren">(</span><em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.getRegEx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compiles and returns a &#8216;regular expression&#8217; object for the given address-pattern.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.getUrlStr">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">getUrlStr</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.getUrlStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert provided arguments to a string in &#8216;host:port/prefix&#8217; format
+Args can be:</p>
+<blockquote>
+<div><ul class="simple">
+<li>(host, port)</li>
+<li>(host, port), prefix</li>
+<li>host, port</li>
+<li>host, port, prefix</li>
+</ul>
+</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.hexDump">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">hexDump</code><span class="sig-paren">(</span><em>bytes</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.hexDump" title="Permalink to this definition">¶</a></dt>
+<dd><p>Useful utility; prints the string in hexadecimal.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.parseFilterStr">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">parseFilterStr</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.parseFilterStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Message-Filter settings in &#8216;+&lt;addr&gt; -&lt;addr&gt; ...&#8217; format to a dict of the form
+{ &#8216;&lt;addr&gt;&#8217;:True, &#8216;&lt;addr&gt;&#8217;:False, ... } 
+Returns a list: [&#8216;&lt;prefix&gt;&#8217;, filters]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.OSC.parseUrlStr">
+<code class="descclassname">FoxDot.OSC.</code><code class="descname">parseUrlStr</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.OSC.parseUrlStr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert provided string in &#8216;host:port/prefix&#8217; format to it&#8217;s components
+Returns ((host, port), prefix)</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="module-FoxDot.Players">
+<span id="foxdot-players-module"></span><h2>FoxDot.Players module<a class="headerlink" href="#module-FoxDot.Players" title="Permalink to this headline">¶</a></h2>
+<p>Copyright Ryan Kirkbride 2015</p>
+<p>This module contains the objects for Instrument Players (those that send musical
+information to SuperCollider) and Sample Players (those that send buffer IDs to
+playback specific samples located in the Samples directory).</p>
+<dl class="attribute">
+<dt id="FoxDot.Players.Group">
+<code class="descclassname">FoxDot.Players.</code><code class="descname">Group</code><a class="headerlink" href="#FoxDot.Players.Group" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#FoxDot.Players.group" title="FoxDot.Players.group"><code class="xref py py-class docutils literal"><span class="pre">group</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Players.group">
+<em class="property">class </em><code class="descclassname">FoxDot.Players.</code><code class="descname">group</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.group" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="FoxDot.Players.group.play">
+<code class="descname">play</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.group.play" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.group.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><em>n=0</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.group.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Players.samples_">
+<em class="property">class </em><code class="descclassname">FoxDot.Players.</code><code class="descname">samples_</code><span class="sig-paren">(</span><em>pat=' ', speed=[1], **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.samples_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">FoxDot.Players._player</span></code></p>
+<dl class="attribute">
+<dt id="FoxDot.Players.samples_.SPECIAL_CHARS">
+<code class="descname">SPECIAL_CHARS</code><em class="property"> = ' []()'</em><a class="headerlink" href="#FoxDot.Players.samples_.SPECIAL_CHARS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.samples_.char">
+<code class="descname">char</code><span class="sig-paren">(</span><em>other=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.samples_.char" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.samples_.coarse">
+<code class="descname">coarse</code><span class="sig-paren">(</span><em>n=3</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.samples_.coarse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.samples_.pat_to_buf">
+<code class="descname">pat_to_buf</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.samples_.pat_to_buf" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.samples_.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>degree=' '</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.samples_.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the values of this Player</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Players.synth_">
+<em class="property">class </em><code class="descclassname">FoxDot.Players.</code><code class="descname">synth_</code><span class="sig-paren">(</span><em>SynthDef, degree=[0], **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">FoxDot.Players._player</span></code></p>
+<dl class="method">
+<dt id="FoxDot.Players.synth_.bother">
+<code class="descname">bother</code><span class="sig-paren">(</span><em>other</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.bother" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.calculate_freq">
+<code class="descname">calculate_freq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.calculate_freq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.copy">
+<code class="descname">copy</code><span class="sig-paren">(</span><em>player</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copies the attr dict of player to self</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.f">
+<code class="descname">f</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.f" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds value to frequency modifier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.follow">
+<code class="descname">follow</code><span class="sig-paren">(</span><em>lead</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.follow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a now object and then follows the notes</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.lshift">
+<code class="descname">lshift</code><span class="sig-paren">(</span><em>n=1</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.lshift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.offbeat">
+<code class="descname">offbeat</code><span class="sig-paren">(</span><em>beat_len=0.5</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.offbeat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a 0 amplitude note to the start of the player</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.rshift">
+<code class="descname">rshift</code><span class="sig-paren">(</span><em>n=1</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.rshift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.solo">
+<code class="descname">solo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.solo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.stutter">
+<code class="descname">stutter</code><span class="sig-paren">(</span><em>n=4</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.stutter" title="Permalink to this definition">¶</a></dt>
+<dd><p>repeats each value in each stream n times</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.Players.synth_.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>SynthDef, degree=[0], **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Players.synth_.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the values of this Player</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.Scale">
+<span id="foxdot-scale-module"></span><h2>FoxDot.Scale module<a class="headerlink" href="#module-FoxDot.Scale" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="FoxDot.Scale.Object">
+<code class="descclassname">FoxDot.Scale.</code><code class="descname">Object</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Scale.Object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.Scale.Scale">
+<em class="property">class </em><code class="descclassname">FoxDot.Scale.</code><code class="descname">Scale</code><span class="sig-paren">(</span><em>data=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Scale.Scale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="FoxDot.Patterns.html#FoxDot.Patterns.Base.Pattern" title="FoxDot.Patterns.Base.Pattern"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.Base.Pattern</span></code></a></p>
+<dl class="method">
+<dt id="FoxDot.Scale.Scale.change">
+<code class="descname">change</code><span class="sig-paren">(</span><em>new</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Scale.Scale.change" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Scale.directory">
+<code class="descclassname">FoxDot.Scale.</code><code class="descname">directory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Scale.directory" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.ServerManager">
+<span id="foxdot-servermanager-module"></span><h2>FoxDot.ServerManager module<a class="headerlink" href="#module-FoxDot.ServerManager" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="FoxDot.ServerManager.ServerManager">
+<em class="property">class </em><code class="descclassname">FoxDot.ServerManager.</code><code class="descname">ServerManager</code><a class="headerlink" href="#FoxDot.ServerManager.ServerManager" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="FoxDot.ServerManager.ServerManager.bufferRead">
+<code class="descname">bufferRead</code><span class="sig-paren">(</span><em>bufnum</em>, <em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.ServerManager.ServerManager.bufferRead" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.ServerManager.ServerManager.free_node">
+<code class="descname">free_node</code><span class="sig-paren">(</span><em>node</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.ServerManager.ServerManager.free_node" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.ServerManager.ServerManager.nextnodeID">
+<code class="descname">nextnodeID</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.ServerManager.ServerManager.nextnodeID" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.ServerManager.ServerManager.play_note">
+<code class="descname">play_note</code><span class="sig-paren">(</span><em>packet</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.ServerManager.ServerManager.play_note" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.ServerManager.ServerManager.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.ServerManager.ServerManager.send" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot.TempoClock">
+<span id="foxdot-tempoclock-module"></span><h2>FoxDot.TempoClock module<a class="headerlink" href="#module-FoxDot.TempoClock" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="FoxDot.TempoClock.TempoClock">
+<em class="property">class </em><code class="descclassname">FoxDot.TempoClock.</code><code class="descname">TempoClock</code><span class="sig-paren">(</span><em>bpm=120.0</em>, <em>bars=16</em>, <em>steps=8</em>, <em>timeSig=(4</em>, <em>4)</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.add2q">
+<code class="descname">add2q</code><span class="sig-paren">(</span><em>player</em>, <em>beat=0</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.add2q" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.bar_length">
+<code class="descname">bar_length</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.bar_length" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.beat_dur">
+<code class="descname">beat_dur</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.beat_dur" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.beats">
+<code class="descname">beats</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.beats" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.beatsPerBar">
+<code class="descname">beatsPerBar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.beatsPerBar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.change_steps">
+<code class="descname">change_steps</code><span class="sig-paren">(</span><em>new=8</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.change_steps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.clear">
+<code class="descname">clear</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.clear" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove players from clock</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.new_queue">
+<code class="descname">new_queue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.new_queue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.now">
+<code class="descname">now</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.now" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.polyrhythm">
+<code class="descname">polyrhythm</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.polyrhythm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.real_beat">
+<code class="descname">real_beat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.real_beat" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.reset">
+<code class="descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.reset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.start" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.step_dur">
+<code class="descname">step_dur</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.step_dur" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.til_next_bar">
+<code class="descname">til_next_bar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.til_next_bar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.TempoClock.when">
+<code class="descname">when</code><span class="sig-paren">(</span><em>a</em>, <em>b</em>, <em>step=None</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.TempoClock.when" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.TempoClock.When">
+<em class="property">class </em><code class="descclassname">FoxDot.TempoClock.</code><code class="descname">When</code><span class="sig-paren">(</span><em>test</em>, <em>code</em>, <em>step=0.25</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.When" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="FoxDot.TempoClock.When.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.When.run" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="FoxDot.TempoClock.When.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>new</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.TempoClock.When.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-FoxDot">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-FoxDot" title="Permalink to this headline">¶</a></h2>
+<p>Copyright Ryan Kirkbride 2015</p>
+<p>This is the module that combines all the other modules as if it were the live
+environment. The main.py application execute() method sends the string over to
+this module, which is analysed and sent back as the raw python code to execute.</p>
+<p>This module also handles the time keeping aspect. There is a constant tempo
+clock running that has a queue and plays the items accordingly</p>
+<p>Note: The code below IS executed in the Environment and can be accessed by the user!</p>
+<dl class="class">
+<dt id="FoxDot.Player">
+<em class="property">class </em><code class="descclassname">FoxDot.</code><code class="descname">Player</code><span class="sig-paren">(</span><em>SynthDef, degree=[0], **kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Player" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Players.synth_" title="FoxDot.Players.synth_"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Players.synth_</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.Ramp">
+<code class="descclassname">FoxDot.</code><code class="descname">Ramp</code><span class="sig-paren">(</span><em>start=0</em>, <em>end=1</em>, <em>dur=8</em>, <em>step=0.25</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.Ramp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.SamplePlayer">
+<em class="property">class </em><code class="descclassname">FoxDot.</code><code class="descname">SamplePlayer</code><span class="sig-paren">(</span><em>string</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.SamplePlayer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#FoxDot.Players.samples_" title="FoxDot.Players.samples_"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Players.samples_</span></code></a></p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="FoxDot.Var">
+<code class="descclassname">FoxDot.</code><code class="descname">Var</code><a class="headerlink" href="#FoxDot.Var" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#FoxDot.var" title="FoxDot.var"><code class="xref py py-class docutils literal"><span class="pre">var</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="FoxDot.iRamp">
+<code class="descclassname">FoxDot.</code><code class="descname">iRamp</code><span class="sig-paren">(</span><em>start=0</em>, <em>end=1</em>, <em>dur=8</em>, <em>step=0.25</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.iRamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="FoxDot.var">
+<em class="property">class </em><code class="descclassname">FoxDot.</code><code class="descname">var</code><span class="sig-paren">(</span><em>values=[0], dur=4</em><span class="sig-paren">)</span><a class="headerlink" href="#FoxDot.var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="FoxDot.Patterns.html#FoxDot.Patterns.TimeVar.TimeVar" title="FoxDot.Patterns.TimeVar.TimeVar"><code class="xref py py-class docutils literal"><span class="pre">FoxDot.Patterns.TimeVar.TimeVar</span></code></a></p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2016, Ryan Kirkbride.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

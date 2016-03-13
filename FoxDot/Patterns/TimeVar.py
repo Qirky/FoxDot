@@ -1,34 +1,19 @@
-from Patterns import *
-
-# Function that does a similar job to Players.asStream but stops the rec
-def asStream(data):
-    """ Returns data as a list """
-    if isinstance(data, TimeVar):
-        return data
-    if isinstance(data, list):
-        return Place(data)
-    if isinstance(data, tuple):
-        return [data]
-    else:
-        return [data]
-    
-# Used to determine if an instance is timevar
-def Object():
-    return
-
-def InfinityObj():
-    return
-
-class TimeVar:
+from Base import Pattern, asStream
+from Operations import modi
+   
+class TimeVar(Pattern):
 
     # Used for syntax checking
     isTimeVar = True
     isplaying = False
 
+    NEST_ME = False #: Signal to Base.Pattern not to treat as nested
+
     def __init__(self, values, dur=4, metro=None):
 
         self.metro  = metro
         self.data   = values
+        self.time   = []
         self.dur    = dur
         
         self.has_inf = False
@@ -40,6 +25,8 @@ class TimeVar:
         
         self.update(values, dur)
 
+        self.make()
+
     def __str__(self):
 
         return "TimeVar -> " + str(self.now())
@@ -48,36 +35,38 @@ class TimeVar:
 
         return "var(%s, %s)" % (repr(self.values()), repr(self.durs()))
 
-    def __len__(self):
-
-        try:
-
-            return len(self.now())
-
-        except:
-
-            return 1
-
     def __int__(self):
 
-        return int(self.now())
+        return int(self[0])
 
     def __float__(self):
 
-        return float(self.now())
+        return float(self[0])
 
-    def __add__(self, n):
-        
-        new = TimeVar(asStream(n), self.dur, self.metro)
+    def __add__(self, other):
+
+        if isinstance(other, self.__class__):
+
+            new = other
+
+        else:     
+
+            new = TimeVar(asStream(other), self.dur, self.metro)
 
         new.modifier = self
         new.multiplier = 1
         
         return new
 
-    def __sub__(self, n):
+    def __sub__(self, other):
 
-        new = TimeVar(asStream(n), self.dur, self.metro)
+        if isinstance(other, self.__class__):
+
+            new = other
+
+        else:
+
+            new = TimeVar(asStream(other), self.dur, self.metro)
 
         new.modifier = self
         new.multiplier = -1
@@ -92,17 +81,13 @@ class TimeVar:
 
         return other != self.now()
 
+    def __getitem__(self, key):
+
+        return self.now()
+
     def __iter__(self):
 
-        try:
-
-            for x in self.now():
-
-                yield x
-
-        except:
-
-            yield self.now()
+        yield self
 
     def chain(self, *args):
         """ Appends a TimeVar """
@@ -119,7 +104,7 @@ class TimeVar:
             raise ValueError("Innapropriate argument value")
 
     def length(self):
-        return self.data[-1][2] + 1
+        return self.time[-1][1] + 1
 
     def update(self, values, dur=None):
         """ Updates the TimeVar with new values """
@@ -153,24 +138,14 @@ class TimeVar:
             a = b + 1
             b = a + (self.metro.steps * this_dur) - 1
     
-            self.data.append((val, a, b))
+            self.data.append( val )
+            self.time.append((a,b))
 
         return self
 
     def single(self, val):
         """ Returns val as calculated by internal modifiers """
-        return float(self.multiplier) * float(val) + float(self.modifier)
-
-    def group(self, val):
-
-        mul = self.multiplier
-
-        # 1. Make sure we get both val and mod as lists
-        val = [float(n) * mul for n in val]
-        mod = [float(m) for m in asStream(self.modifier)]
-
-        # 2. Use GreedyZip to add them together
-        return [sum(n) for n in GreedyZip(val, mod)]       
+        return float(self.multiplier) * float(val) + float(self.modifier)     
 
     def now(self):
         """ Returns the value from self.data for time t in self.metro """
@@ -182,23 +157,19 @@ class TimeVar:
 
         for i in range(len(self.data)):
             
-            if self.data[i][1] <= t <= self.data[i][2]:
+            if self.time[i][0] <= t <= self.time[i][1]:
 
-                val = self.data[i][0]
+                val = self.data[i]
 
                 if modi(self.dur, i) == InfinityObj:
                     self.inf = True
                     self.inf_value = val
 
-                # Return a calculated list if val is a group
+                return val * self.multiplier + float(self.modifier)
 
-                try:
-                    
-                    return self.single(val)
-
-                except:
-
-                    return self.group(val)
+    def copy(self):
+        new = TimeVar(self.data, self.dur, self.metro)
+        return new
                    
     def durs(self):
 
@@ -206,8 +177,10 @@ class TimeVar:
 
     def values(self):
 
-        return [val[0] for val in self.data]
+        return self.data
 
+def InfinityObj():
+    return
 
 class _infinity:
     """ Used in TimeVars to stay on certain values until re-evaluated """

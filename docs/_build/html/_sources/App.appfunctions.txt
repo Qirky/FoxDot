@@ -1,0 +1,7 @@
+App.appfunctions module
+=======================
+
+.. automodule:: App.appfunctions
+    :members:
+    :undoc-members:
+    :show-inheritance:

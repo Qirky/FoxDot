@@ -9,44 +9,12 @@
 
 from os.path import dirname
 
-from OSC import OSCClient, OSCMessage, OSCBundle
 from Patterns import *
+from Midi import *
+from Scale import Scale
 
-import Scale, Code, Buffers
-from TimeVar import TimeVar
-
-##################### "STREAM" DATA #####################
-
-def asStream(data, n=" "):
-    """ Makes sure that any data is converted into an iterable and mutable form """
-    stream = None
-    if isinstance(data, (Scale.Scale, TimeVar)):
-        return data
-    elif isinstance(data, list):
-        return Place(data)
-    elif isinstance(data, str):
-        return list(data)
-    else:
-        return [data]
-    # Lists within lists are laced but tuples are unaffected
-    # return Place(stream)
-
-
-class asStream2(list):
-
-    def __init__(self, *args):
-
-        # Args may already be a list
-
-        if len(args) > 1:
-
-            list.__init__(self, args)
-
-        else:
-
-            list.__init__(self, args[0])
-
-##################### EQ FUNCTIONS #####################
+import Code
+import Buffers
 
 _PLAYER_TYPE  = 0
 _SYNTH_TYPE   = 1
@@ -234,6 +202,7 @@ class _player:
                         size = len(value)
                 except:
                     pass
+
         return size       
 
     # --- Methods for preparing and sending OSC messages to SuperCollider
@@ -251,11 +220,9 @@ class _player:
 
         else:
 
-            # Get the attr value + modifider value
-
             attr_value = modi(self.attr[attr], self.event_n + x)
 
-        # If attr isn't in modf, use 0
+        # If the attribute isn't in the modf dictionary, default to 0
 
         try:
 
@@ -264,72 +231,22 @@ class _player:
         except:
 
             modf_value = 0
-            
-        # Make sure values are numbers
-
-        if attr is not "root":
-
-            try:
-
-                attr_value = float(attr_value)
-
-            except:
-
-                attr_value = tuple(float(v) for v in attr_value)
-
-            try:
-
-                modf_value = float(modf_value)
-
-            except:
-
-                modf_value = tuple(float(v) for v in modf_value)
-
-        # Combine the attribute "real" values with the modifiers
 
         try:
+
+            # Amp is multiplied, not added
 
             if attr is "amp":
 
                 value = attr_value * modf_value
 
-            elif (type(attr_value) == type(modf_value) == tuple):
-
-                raise
-
             else:
-
+        
                 value = attr_value + modf_value
 
         except:
 
-            # Both "chords" must have the same size or not used
-
-            if type(attr_value) in (list, tuple) and type(modf_value) in (list, tuple):
-
-                value = []
-
-                for i, v in enumerate(attr_value):
-
-                    value += [v + modi(modf_value, i)]
-
-            # Just original is chords
-
-            elif type(attr_value) in (list, tuple) and type(modf_value) not in (list, tuple):
-
-                value = [v + modf_value for v in attr_value]
-
-            # Just modifier is chords
-
-            elif type(attr_value) not in (list, tuple) and type(modf_value) in (list, tuple):
-
-                value = [m + attr_value for m in modf_value]
-
-            # Neither are chords
-
-            else:
-
-                value = attr_value
+            value = attr_value
         
         return value
 
@@ -360,7 +277,7 @@ class _player:
 
         return
 
-    # --- Methods for stop/starting players
+    #: Methods for stop/starting players
 
     def kill(self):
 
@@ -663,37 +580,10 @@ class synth_(_player):
 
 BufferManager = Buffers.BufferManager().load()
 
-#print BufferManager.symbols
-
-##
-##_symbols =  {   'x' : 1,    # Bass drum
-##                'X' : 2,    # Bass drum 2
-##                'o' : 3,    # Snare drum
-##                'O' : 4,    # Snare drum 2
-##                '*' : 5,    # Clap
-##                '-' : 6,    # Hi Hat Closed
-##                '=' : 7,    # Hi Hat Open
-##                'T' : 8,    # Cowbell
-##                '+' : 9,    # Cross stick
-##                'H' : 10,   # Noise burst
-##                'h' : 10,   # Noise burst
-##                'v' : 11,   # Kick drum
-##                'V' : 12,   # Kick drum 2
-##                's' : 13,   # Shaker
-##                'S' : 13,   # Shaker (it would be nice for a shaker 2)
-##                '~' : 14,   # Ride cymbal
-##                ':' : 15,   # Clicks
-##                '^' : 16,   # Tom tom
-##                '#' : 17,   # Crash
-##                'Y' : 18,   # Swoop
-##             }
-##
-##_bufnum = dict([(num,sym) for sym, num in _symbols.items()])
-
-
 class samples_(_player):
 
     _TYPE = _SAMPLES_TYPE
+    SPECIAL_CHARS = " []()"
 
     def __init__(self, pat=' ', speed=[1], **kwargs):
 
@@ -725,88 +615,21 @@ class samples_(_player):
         return self
 
     def pat_to_buf(self):
-        """ Converts s (a string) to a basic drum pattern.
-            Items in a [] half half duration
-            Items in a () are laced
-        """
 
-        if not len(self.degree) > 0:
-            self.degree = " "
-            
-        self.degree = "".join(asStream(self.degree))
+        self.attr['dur_val'] = self.dur_val = PRhythm(self.degree, self.dur)
 
-        self.dur_val = asStream(self.dur)
+        new_string = Pseq().fromString(self.degree).string()
 
-        new_dur  = [modi(self.dur, i) for i, char in enumerate(self.degree) if char not in "[](){}"]
+        buf = []
 
-        self.buf = [0 for char in self.degree if char not in "[](){}"]
+        for char in new_string:
+            if char not in self.SPECIAL_CHARS:
+                buf.append(BufferManager.symbols.get(char, 0))
 
-        # Go through pattern
-
-        i = 0
-
-        this_dur = modi(self.dur_val, i)
-
-        in_sq = 0
-        in_br = False
-        in_wi = False
-
-        for char in self.degree:
-
-            # When we reach a [ divide duration by 2
-
-            if char == '[':
-
-                in_sq += 1
-
-            elif char == ']':
-
-                in_sq -= 1
-
-            # When we reach a ( create a list to add entries to
-            
-            elif char == '(':
-
-                in_br = True
-
-                self.buf[i] = []
-                new_dur[i] = []
-
-            elif char == ')':
-
-                in_br = False
-                i = i+1
-
-            # Add the buffer number -> is 0 if not in _symbols
-            
-            else:
-
-                # Normal brackets indicate a group to be laced
-
-                if in_br:
-
-                    self.buf[i].append( BufferManager.symbols.get(char, 0) )
-                    new_dur[i].append( this_dur / (2.0**in_sq) )
-
-                else:
-
-                    self.buf[i] = BufferManager.symbols.get(char, 0)
-                    new_dur[i] = this_dur / (2.0**in_sq)
-
-            # When we reach a ( don't increase i until )
-
-            if not in_br and char not in "[]()":
-
-                i += 1
-
-                this_dur = modi(self.dur_val, i)
-
-        # Adjust for extra chars
-
-        self.attr['buf'] = self.buf = Place(self.buf[:i])
-        self.attr['dur_val'] = self.dur_val = Place(new_dur[:i])
+        self.attr['buf'] = self.buf = buf
 
         return
+        
 
     def __add__(self, data):
 

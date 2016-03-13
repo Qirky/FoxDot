@@ -1,0 +1,7 @@
+FoxDot.Buffers module
+=====================
+
+.. automodule:: FoxDot.Buffers
+    :members:
+    :undoc-members:
+    :show-inheritance:

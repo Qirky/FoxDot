@@ -1,9 +1,11 @@
+from __future__ import division
+
 import re
 from types import CodeType
 func_type = type(lambda: None)
 from traceback import format_exc as error_stack
 
-debug = 4
+debug = -1
 
 # --------------------- Handling Code
 
@@ -26,7 +28,7 @@ def execute(code, verbose=True):
 
     except:
 
-        print error_stack(debug)
+        print error_stack()
 
         raise # raise the error to any foxdot code that executes foxdot code
 
@@ -54,10 +56,6 @@ def toPython( live_code, verbose ):
     # 3. Convert any references to "self" to the attached player
 
     live_code = remove_self( live_code )
-
-    # 4. Make sure any integer divisions are converted to floats e.g. 1/2 -> 1/2.0
-
-    live_code = int_div_to_float( live_code )
 
     if not live_code: return ""
 
@@ -140,19 +138,7 @@ def overwrite_code( code ):
         # Check for any information AFTER the init
 
         Methods = data[index:].rstrip()
-
-        # Check if the player should start at the next loop (!)
-
-##        if Methods.endswith('!'):
-##
-##            Arguments.append( "quantise=False" )
-##
-##            Methods = Methods[:-1]
-##
-##        else:
-##
-##            Arguments.append( "quantise=True" )
-           
+          
         # Replace "old" code with new
 
         old_code = code[code.index(assignments[n]):end]
@@ -236,23 +222,6 @@ def override_attempt( code ):
 def remove_self( code ):
 
     return code
-
-def float_div(match):
-    """ Function used in re.sub to find any integer
-        divisions and replaces them so they return floats """
-    sub = match.group(0)
-
-    if "." in sub:
-
-        return sub
-
-    else:
-
-        return sub + ".0"
-
-def int_div_to_float( code ):
-
-    return re.sub(r'\d+/\d+\.?', float_div , code)
 
 def enclosing_brackets(string):
 

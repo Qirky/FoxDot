@@ -1,0 +1,7 @@
+FoxDot.ServerManager module
+===========================
+
+.. automodule:: FoxDot.ServerManager
+    :members:
+    :undoc-members:
+    :show-inheritance:

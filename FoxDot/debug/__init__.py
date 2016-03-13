@@ -1,9 +1,12 @@
-import re
+class test:
 
-var = "a"
+    def __init__(self, val):
+        self.x = val
+    def val(self):
+        return self.x
 
-line = "a = var([0,2])"
+a = test(10)
+b = test(20)
+c = test(5)
 
-after = line = re.sub(r"%s\s*=\s*[Vv]ar\(" % var ,"%s.update(" % var, line)
-
-print after
+print min(a,b,c, key=lambda x:x.val()).val()
