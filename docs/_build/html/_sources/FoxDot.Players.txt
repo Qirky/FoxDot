@@ -1,7 +1,0 @@
-FoxDot.Players module
-=====================
-
-.. automodule:: FoxDot.Players
-    :members:
-    :undoc-members:
-    :show-inheritance:

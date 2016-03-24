@@ -1,7 +1,0 @@
-App.formatting module
-=====================
-
-.. automodule:: App.formatting
-    :members:
-    :undoc-members:
-    :show-inheritance:

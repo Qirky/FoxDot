@@ -1,12 +1,18 @@
 class test:
 
-    def __init__(self, val):
-        self.x = val
-    def val(self):
-        return self.x
+    def __init__(self, x, y):
 
-a = test(10)
-b = test(20)
-c = test(5)
+        self.x = x
+        self.y = y
 
-print min(a,b,c, key=lambda x:x.val()).val()
+        self.values = lambda: self.x*self.y
+
+
+a = test(10,20)
+
+print a.values()
+
+a.x = 2
+a.y = 5
+
+print a.values()

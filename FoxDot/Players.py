@@ -11,10 +11,12 @@ from os.path import dirname
 
 from Patterns import *
 from Midi import *
+
 from Scale import Scale
 
 import Code
 import Buffers
+import Effects
 
 _PLAYER_TYPE  = 0
 _SYNTH_TYPE   = 1
@@ -36,11 +38,11 @@ class _player:
         self.quantise = False
         self.stopping = False
         self.stop_point = 0
-        self.following = None
-
-        self.attr = {}
+        self.following = None        
 
         # Define any standard variables that are used in the OSC message (make sure they are in the attr dict)
+
+        self.attr = {}
 
         self.dur    = self.attr['dur']      =  [0]
         self.root   = self.attr['root']     =  [0]
@@ -53,6 +55,10 @@ class _player:
         self.buf    = self.attr['buf']      =  [0]
 
         self.freq   = [0]
+
+        # Dictionary to store any effect arguments
+
+        self.fx = Effects.Handler()
 
         # Sets the clock off a beat amount
 
@@ -203,7 +209,7 @@ class _player:
                 except:
                     pass
 
-        return size       
+        return size
 
     # --- Methods for preparing and sending OSC messages to SuperCollider
 
@@ -221,7 +227,7 @@ class _player:
         else:
 
             attr_value = modi(self.attr[attr], self.event_n + x)
-
+        
         # If the attribute isn't in the modf dictionary, default to 0
 
         try:
@@ -251,8 +257,11 @@ class _player:
         return value
 
     def osc_message(self, index=0):
+        """ Creates an OSC packet to play a SynthDef in SuperCollider """
 
-        message = [self.SynthDef, 0, 1, 1, 'freq', modi(self.freq, index)]
+        nodeID = 0
+
+        message = [self.SynthDef, nodeID, 1, 1, 'freq', modi(self.freq, index)]
 
         for key in self.attr:
 
@@ -268,12 +277,41 @@ class _player:
 
         return message
 
+    def osc_effect(self, effect):
+        """ If there are any effects added, send them to the server. Sets the default sustain to twice the currently set sustain """
+
+        nodeID = 0
+        
+        message = [effect, nodeID, 1, 1]
+
+        if "sus" in message:
+
+            pass
+
+        else:
+
+            message += ["sus", self.now("sus") * 2]
+
+        for arg, val in self.fx[effect].items():
+
+            message += [arg, val]
+
+        return message
+
     def send(self):
         """ Sends the current event data to SuperCollder """
 
-        # Create OSC Message
+        # Create OSC Message and play
+        
         for i in range(self.tupleN()):
-            self.server.play_note( self.osc_message( i )  )       
+            
+            self.server.sendOSC( self.osc_message( i )  )
+
+            # Add any effects
+            
+            for fx in self.fx:
+
+                self.server.sendOSC( self.osc_effect( fx ) )
 
         return
 
@@ -410,7 +448,7 @@ class synth_(_player):
         """ Updates the values of this Player """
 
         setattr(self, "SynthDef", SynthDef)
-        setattr(self, "degree", degree)
+        setattr(self, "degree", asStream(degree))
 
         for name, value in kwargs.items():
             setattr(self, name, value)
@@ -422,11 +460,26 @@ class synth_(_player):
 
     def calculate_freq(self):
         """ Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider """
-        now_degree, now_oct = [asStream(self.now(attr)) for attr in ['degree', 'oct']]
-        size = max( len(now_degree), len(now_oct) ) 
+
+        now = {}
+        for attr in ('degree', 'oct'):
+
+            try:
+
+                now[attr] = asStream(self.now(attr).now()) # If it is a TimeVar
+
+            except:
+
+                now[attr] = asStream(self.now(attr))
+
+        #now_degree, now_oct = [asStream(self.now(attr)) for attr in ['degree', 'oct']]
+                
+        size = max( len(now['oct']), len(now['degree']) ) 
+
         f = []
+
         for i in range(size):
-            midinum = midi( self.scale, modi(now_oct, i), modi(now_degree, i) , self.now('root') )
+            midinum = midi( self.scale, modi(now['oct'], i), modi(now['degree'], i) , self.now('root') )
             f.append( miditofreq(midinum) )
         return f
     
@@ -583,7 +636,9 @@ BufferManager = Buffers.BufferManager().load()
 class samples_(_player):
 
     _TYPE = _SAMPLES_TYPE
+    
     SPECIAL_CHARS = " []()"
+    REST = SPECIAL_CHARS[0]
 
     def __init__(self, pat=' ', speed=[1], **kwargs):
 
@@ -618,11 +673,15 @@ class samples_(_player):
 
         self.attr['dur_val'] = self.dur_val = PRhythm(self.degree, self.dur)
 
-        new_string = Pseq().fromString(self.degree).string()
+        new_string = P().fromString(self.degree).string()
 
         buf = []
 
-        for char in new_string:
+        for i, char in enumerate(new_string):
+            # If the string starts with a rest, point to an empty buffer
+            if i is 0 and char == self.REST:
+                buf.append(0)
+            # Any characters not in brackets or rest
             if char not in self.SPECIAL_CHARS:
                 buf.append(BufferManager.symbols.get(char, 0))
 

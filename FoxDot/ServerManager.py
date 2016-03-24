@@ -1,4 +1,10 @@
-# Server Manager
+"""
+    ServerManager.py
+
+    Handles OSC messages being sent to SuperCollider
+
+"""
+
 from OSC import *
 
 client = OSCClient()
@@ -7,31 +13,19 @@ client.connect( ("localhost", 57110) )
 class ServerManager:
 
     def __init__(self):
+        
         self.node = 1000
 
-        message = OSCMessage("/dumpOSC")
-        message.append(1)
-        #client.send( message )
-
     def nextnodeID(self):
-
-        # After xx nodes, we start to free
-
-        xx = 50
-
-        #if self.node >= 1000 + xx:
-
-        #    self.free_node( self.node - xx )
-        
         self.node += 1
-
         return self.node
 
-    def play_note(self, packet):
+    def sendOSC(self, packet):
+        """ Compiles and sends an OSC message for SuperCollider """
         message = OSCMessage("/s_new")
         packet[1] = self.nextnodeID()
         message.append(packet)
-        client.send( message )
+        client.send( message )        
 
     def send(self, message):
         client.send(OSCMessage(message))

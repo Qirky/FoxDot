@@ -9,16 +9,11 @@ import Operations as op
 
 MAX_SIZE = 2048
  
-class PSeq(Base.Pattern):
-    """ PSeq(iterable) -> Normal sequence, similar to Python list """
-    def __init__(self, data=[], loop=1):
-        self.data = []
-        for n in range(loop):
-            for item in Base.asStream(data):
-                self.data.append(item)
+class P(Base.Pattern):
+    """ P(iterable) -> User-defined pattern """
+    def __init__(self, data=[]):
+        self.data = data
         self.make()
-
-Pseq = PSeq #: Alias for PSeq()
 
 class PStutter(Base.Pattern):
     """ PStutter(pattern, n) -> Creates a pattern such that each item in the array is repeated n times (can be a pattern) """
@@ -131,8 +126,6 @@ class PTri(Base.Pattern):
         B = [x + step for x in reversed(A)]
         
         self.data = A + B
-        
-        self.make()
 
 Ptri = PTri #: Alias for PTri
 
@@ -151,7 +144,7 @@ class PStretch(Base.Pattern):
         try:
             self.data = data.stretch(size)
         except:
-            self.data = PSeq(data).stretch(size)
+            self.data = P(data).stretch(size)
 
 Pstretch = PStretch #: Alias
 
@@ -161,7 +154,10 @@ class PRhythm(Base.Pattern):
 
         self.data = []
         
-        chars = PSeq().fromString(s)
+        chars = P().fromString(s)
+
+        if chars.startswith(" "):
+            chars[0] = "." # Make sure any opening rests are counted
         
         for i, char in chars.items():
 
@@ -182,8 +178,35 @@ class PRhythm(Base.Pattern):
                 else:
 
                     self.data.append(dur)
-                
 
+Prhythm = PRhythm #: Alias                    
+
+class PChords(Base.Pattern):
+
+    def __init__(self, seq, struct=(0,2,4), stepsPerOctave=7):
+
+        # 1. Try just adding seq and struct
+
+        try:
+
+            self.data = P(seq + struct)
+
+        except:
+
+            self.data = seq
+            self.make()
+
+            struct = Base.PGroup(struct)
+
+            chords = []
+            
+            for item in self.data:
+                val = (struct + item) % stepsPerOctave
+                chords.append(val.sorted())
+
+            self.data = chords
+
+Pchords = PChords #: Alias
 
 #### ---- Testing
 

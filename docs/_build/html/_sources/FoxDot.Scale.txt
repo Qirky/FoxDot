@@ -1,7 +1,0 @@
-FoxDot.Scale module
-===================
-
-.. automodule:: FoxDot.Scale
-    :members:
-    :undoc-members:
-    :show-inheritance:

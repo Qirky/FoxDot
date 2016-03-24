@@ -1,14 +1,15 @@
+from __future__ import division
 import Base
 
 """
     Module for key operations on Python lists or FoxDot Patterns
 """
 
-def modi(array, i):
+def modi(array, i, debug=0):
     """ Returns the modular index i.e. modi([0,1,2],4) will return 1 """
     try:
         return array[i % len(array)]
-    except:
+    except:        
         return array
 
 def max_length(*patterns):
@@ -17,75 +18,65 @@ def max_length(*patterns):
 
 #: The following return operand patterns
 
-def POperand(A, B):
-    """ Prepares two Patterns, A & B, for correct use in operands"""
-    try:
-        A = A.copy() # Make a copy of A
-    except:
-        pass
+class POperand:
 
-    if not isinstance(A, Base.Pattern):
-        A = Base.Pattern(A)
-    if not isinstance(B, Base.Pattern):
-        B = Base.Pattern(B)
+    def __init__(self, func):
         
-    Length = max_length(A, B)
+        self.operate = func
+        self.call = self.__call__
 
-    A.stretch(Length)
-    B.stretch(Length)
+    def __call__(self, A, B):
 
-    #: If B is a PGroup, A is returned as a PGroup
-    if isinstance(B, Base.PGroup):
-        A = Base.PGroup(A)
+        pat1, pat2 = self.setup(A, B)
 
-    return A, B
+        for i, item in pat1.items():
 
-def PAdd(A, B):
-    """ Returns the vector addition of A and B """
+            try:
 
-    pat1, pat2 = POperand(A, B)
+                # Perform the operation
 
-    for i, item in pat1.items():
+                pat1[i] = self.operate(item, pat2[i])
 
-        pat1[i] = item + pat2[i]            
-    
-    return pat1
+            except ZeroDivisionError:
 
-def PSub(A, B):
-    """ Returns the vector subraction of B from A """
+                # Numbers divided by 0 are set to 0
 
-    pat1, pat2 = POperand(A, B)
+                pat1[i] = 0
 
-    for i, item in pat1.items():
+        return pat1
 
-        pat1[i] = item - pat2[i]            
-    
-    return pat1
-    
-
-def PMul(A, B):
-    """ Returns the array calculated by multiplying each value in A by the corresponding value in B """
-
-    pat1, pat2 = POperand(A, B)
-
-    for i, item in pat1.items():
-
-        pat1[i] = item * pat2[i]
-    
-    return pat1
-
-def PDiv(A, B):
-    """ Returns the array calculated by multiplying each value in A by the corresponding value in B """
-    pat1, pat2 = POperand(A, B)
-
-    for i, item in pat1.items():    
-
+    @staticmethod
+    def setup(A, B):
+        """ Prepares two Patterns, A & B, for correct use in operands"""
         try:
-
-            pat1[i] = float(item) / pat2[i]
-
+            A = A.copy() # Make a copy of A
         except:
+            pass
 
-            pat1[i] = item / pat2[i]
-    
-    return pat1
+        if not isinstance(A, Base.Pattern):
+            A = Base.Pattern(A)
+        if not isinstance(B, Base.Pattern):
+            B = Base.Pattern(B)
+            
+        Length = max_length(A, B)
+
+        A.stretch(Length)
+        B.stretch(Length)
+
+        #: If B is a PGroup, A is returned as a PGroup
+        if isinstance(B, Base.PGroup):
+            A = Base.PGroup(A)
+
+        return A, B
+
+
+PAdd = POperand(lambda a, b: a + b)
+PSub = POperand(lambda a, b: a - b)
+PMul = POperand(lambda a, b: a * b)
+PDiv = POperand(lambda a, b: a / b)
+PMod = POperand(lambda a, b: a % b)
+PPow = POperand(lambda a, b: a ** b) # a ^ b also calls this
+
+
+
+

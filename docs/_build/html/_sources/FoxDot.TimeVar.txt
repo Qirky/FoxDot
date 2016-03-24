@@ -1,7 +1,0 @@
-FoxDot.TimeVar module
-=====================
-
-.. automodule:: FoxDot.TimeVar
-    :members:
-    :undoc-members:
-    :show-inheritance:

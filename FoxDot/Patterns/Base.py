@@ -1,3 +1,4 @@
+from random import choice
 from Operations import *
 
 class Pattern(list):
@@ -14,7 +15,7 @@ class Pattern(list):
         #: Forces data to be iterable and mutable
         if not isinstance(data, (list, str)):
             data = [data]
-            
+
         self.data = data
         self.make()
         
@@ -27,6 +28,8 @@ class Pattern(list):
             return "".join(self.data)
         else:
             return self.BRACKETS % str(self.data)[1:-1]
+    def __repr__(self):
+        return str(self)
     def string(self):
         """ Returns a string made up of all the values:
 
@@ -40,10 +43,6 @@ class Pattern(list):
         return string
     def list(self):
         return [item for item in self.data]
-    def __repr__(self):
-        return str(self)
-    def __list__(self):
-        return [item for item in self.data]
     #: Container methods
     def __getitem__(self, key):
         return self.data[key]
@@ -53,7 +52,7 @@ class Pattern(list):
         for data in self.data:
             yield data
     def __getslice__(self, i, j):
-        return self.data[i:j]
+        return Pattern( self.data[i:j] )
     def __setslice__(self, i, j, item):
         self.data[i:j] = item
     #: Operators
@@ -70,10 +69,27 @@ class Pattern(list):
         return PMul(self, other)
     def __rmul__(self, other):
         return PMul(other, self)
+    def __truediv__(self, other):
+        return PDiv(self, other)
+    def __rtruediv__(self, other):
+        return PDiv(other, self)
     def __div__(self, other):
         return PDiv(self, other)
     def __rdiv__(self, other):
         return PDiv(other, self)
+    def __mod__(self, other):
+        return PMod(self, other)
+    def __rmod__(self, other):
+        return PMod(other, self)
+    def __pow__(self, other):
+        return PPow(self, other)
+    def __rpow__(self, other):
+        return PPow(other, self)
+    def __xor__(self, other):
+        return PPow(self, other)
+    def __rxor__(self, other):
+        return PPow(other, self)
+    #: Piping patterns
     def __or__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return Pattern(self.pipe(other))
@@ -96,7 +112,8 @@ class Pattern(list):
     
     #: Non-Python special methods
     def contains_nest(self):
-        """ Returns true if the  """
+        """ Returns true if the pattern contains a nest """
+        pass
     def stretch(self, size):
         """ Stretches (repeats) the contents until len(Pattern) == size """
         new = []
@@ -104,6 +121,9 @@ class Pattern(list):
             new.append( modi(self.data, n) )
         self.data = new
         return self
+
+    def startswith(self, prefix):
+        return self.data[0] == prefix
 
     def fromString(self, string):
         """
@@ -205,6 +225,21 @@ class Pattern(list):
         for item in pattern:
             data.append(item)
         return Pattern(data)
+
+    def loop(self, n):
+        """ Repeats this pattern n times """
+        data = []
+        for i in range(n):
+            data += self.list()
+        return Pattern(data)
+
+    def sorted(self):
+        """ Used in place of sorted(pattern) to force type """
+        return self.__class__(sorted(self.data))
+
+    def choose(self):
+        """ Returns one randomly selected item """
+        return choice(self.data)
 
     def make(self):
         """ This method automatically laces and groups the data """

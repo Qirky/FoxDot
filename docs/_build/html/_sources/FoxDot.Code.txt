@@ -1,7 +1,0 @@
-FoxDot.Code module
-==================
-
-.. automodule:: FoxDot.Code
-    :members:
-    :undoc-members:
-    :show-inheritance:

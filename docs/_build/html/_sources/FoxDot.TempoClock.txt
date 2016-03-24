@@ -1,7 +1,0 @@
-FoxDot.TempoClock module
-========================
-
-.. automodule:: FoxDot.TempoClock
-    :members:
-    :undoc-members:
-    :show-inheritance:

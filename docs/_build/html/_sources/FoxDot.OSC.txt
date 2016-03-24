@@ -1,7 +1,0 @@
-FoxDot.OSC module
-=================
-
-.. automodule:: FoxDot.OSC
-    :members:
-    :undoc-members:
-    :show-inheritance:
