@@ -23,8 +23,6 @@ from Code import *
 from TimeVar import *
 import Scale
 
-print P([2]) / 2
-
 # Default server connection and metronome
         
 Server = ServerManager()

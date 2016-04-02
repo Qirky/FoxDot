@@ -5,6 +5,7 @@ from os.path import abspath, join, dirname
 def path(fn):
     return abspath(join(dirname(__file__), fn))
 
+
 def classes(module):
     """ Returns a list of class names defined in module """
     return [name for name, data in vars(module).items() if type(data) == type(type)]
@@ -15,7 +16,7 @@ user_defn = r"(?<=def )(\w+)"
 players   = r"(?<=>> )(\w+)"
 comments  = r"#.*"
 numbers   = r"(?<![a-zA-Z])\d+"
-strings   = r"\".*?\"|\'.*?\'"
+strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
 
@@ -66,11 +67,19 @@ py_indent_kw = ["for","if","elif","else","def","while","class","try","except","w
 
 py_functions = ["if","elif","else","return","def","print","when",
                  "and","or","not","is","in","for","as","with",
-                 "while", "class", "import", "try","except",
-                 "True", "False", "None", "self"]		
+                 "while", "class", "import", "try","except"]
 
+py_bool_vals = ["True", "False", "None", "self"]
 
-py_key_types = ["abs","divmod","input","open","staticmethod","all","enumerate","int","ord","str","any","eval","isinstance", "pow","sum","basestring","execfile","issubclass","super","bin","file","iter","property","tuple","bool", "filter","len","range","type","bytearray","float","list","raw_input","unichr","callable","format","locals","reduce","unicode","chr","frozenset","long","reload","vars","classmethod","getattr","map","repr","xrange","cmp","globals","max","reversed","zip","compile","hasattr","memoryview","round","__import__","complex","hash","min","set","delattr","help","next","setattr","dict","hex","object","slice","dir","id","oct","sorted"]
+py_key_types = ["abs","divmod","input","open","staticmethod","all","enumerate","int",
+                "ord","str","any","eval","isinstance", "pow","sum","basestring",
+                "execfile","issubclass","super","bin","file","iter","property","tuple",
+                "bool", "filter","len","range","type","bytearray","float","list",
+                "raw_input","unichr","callable","format","locals","reduce","unicode",
+                "chr","frozenset","long","reload","vars","classmethod","getattr","map",
+                "repr","xrange","cmp","globals","max","reversed","zip","compile","hasattr",
+                "memoryview","round","__import__","complex","hash","min","set","delattr",
+                "help","next","setattr","dict","hex","object","slice","dir","id","sorted"]
 
 py_key_types = foxdot_kw + py_key_types
 
@@ -86,6 +95,7 @@ tabsize = 4
 
 functions = r"(?<![a-zA-Z])(" + "|".join(py_functions) + ")(?![a-zA-Z])"
 key_types = r"(?<![a-zA-Z])(" + "|".join(py_key_types) + ")(?![a-zA-Z])"
+bool_vals = r"(?<![a-zA-Z])(" + "|".join(py_bool_vals) + ")(?![a-zA-Z])"
 
 # Load Default Colour Values
 
@@ -102,6 +112,7 @@ except:
             "functions=#66ff99",
             "key_types=#66ccff",
             "user_defn=#ff9999",
+            "bool_vals=#ff99ff",
             "comments=#FF3300",
             "numbers=#FF9900",
             "strings=#ffff99",
@@ -116,10 +127,18 @@ colour_map = dict([line.replace("\n","").split("=") for line in data])
 re_patterns = {  'functions' : functions,
                  'key_types' : key_types,
                  'user_defn' : user_defn,
+                 'bool_vals' : bool_vals,
                  'comments'  : comments,
                  'numbers'   : numbers,
                  'strings'   : strings,
                  'dollar'    : dollar,
                  'arrow'     : arrow,
                  'players'   : players }
-    
+
+
+# Weightings (heavier get checked last)
+
+re_weights = [ ['numbers'],
+               ['key_types','functions','user_defn','bool_vals','dollar','arrow','players'],
+               ['comments'],
+               ['strings']]

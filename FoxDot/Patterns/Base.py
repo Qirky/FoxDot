@@ -1,6 +1,14 @@
 from random import choice
 from Operations import *
 
+class meta(type):
+    def __instancecheck__(cls, instance):
+        """ Returns False for any PGroup Patterns """
+        if type(instance) == PGroup:
+            return False
+        if issubclass(type(instance), cls):
+            return True
+
 class Pattern(list):
     """
         Abstract pattern class. 
@@ -10,10 +18,12 @@ class Pattern(list):
     NEST_ME = True
     BRACKETS = "[%s]"
 
+    #__metaclass__ = meta
+
     def __init__(self, data):
 
-        #: Forces data to be iterable and mutable
-        if not isinstance(data, (list, str)):
+        #: Forces data to be iterable and mutable (PGroups are items within patterns)
+        if not isinstance(data, (list, str)) or isinstance(data, PGroup):
             data = [data]
 
         self.data = data
@@ -41,8 +51,6 @@ class Pattern(list):
             except:
                 string += str(item)
         return string
-    def list(self):
-        return [item for item in self.data]
     #: Container methods
     def __getitem__(self, key):
         return self.data[key]
@@ -57,7 +65,6 @@ class Pattern(list):
         self.data[i:j] = item
     #: Operators
     def __add__(self, other):
-        """ Circular / Vector add 2 Patterns """
         return PAdd(self, other)
     def __radd__(self, other):
         return PAdd(self, other)
@@ -138,8 +145,10 @@ class Pattern(list):
         """
 
         self.data = []
-        
-        if type(string) != str:
+
+        try:
+            string = str(string)
+        except: 
             raise TypeError("Argument must be a string")
 
         # Loop through string
@@ -221,7 +230,7 @@ class Pattern(list):
         
     def pipe(self, pattern):
         """ Concatonates this patterns stream with another """
-        data = self.list()
+        data = list(self)
         for item in pattern:
             data.append(item)
         return Pattern(data)
@@ -230,7 +239,7 @@ class Pattern(list):
         """ Repeats this pattern n times """
         data = []
         for i in range(n):
-            data += self.list()
+            data += list(self)
         return Pattern(data)
 
     def sorted(self):
@@ -261,9 +270,11 @@ class Pattern(list):
         
         return self
 
-class PGroup(Pattern):
+class PGroup(object):
     """
-        Class to represent any groupings of notes as denoted by brackets
+        Class to represent any groupings of notes as denoted by brackets.
+        PGroups should only be found within a Pattern object.
+        
     """
 
     NEST_ME = False
@@ -272,8 +283,60 @@ class PGroup(Pattern):
     def __init__(self, data):
         self.data = data
         self.make()
+    def __str__(self):
+        """ If the contents are strings, return as one string """
+        if all([item for item in self if type(item) is str]):
+            return "".join(self.data)
+        return repr(self)
     def __repr__(self):
-        return str(self)
+        return self.BRACKETS % str(self.data)[1:-1]
+    def __len__(self):
+        return len(self.data)
+    #: Container methods
+    def __getitem__(self, key):
+        return self.data[key]
+    def __setitem__(self, key, value):
+        self.data[key] = value
+    def __iter__(self):
+        for data in self.data:
+            yield data
+    def __getslice__(self, i, j):
+        return Pattern( self.data[i:j] )
+    def __setslice__(self, i, j, item):
+        self.data[i:j] = item
+    #: Operators
+    def __add__(self, other):
+        return PAdd(self, other)
+    def __radd__(self, other):
+        return PAdd(self, other)
+    def __sub__(self, other):
+        return PSub(self, other)
+    def __rsub__(self, other):
+        return PSub(other, self)
+    def __mul__(self, other):
+        return PMul(self, other)
+    def __rmul__(self, other):
+        return PMul(other, self)
+    def __truediv__(self, other):
+        return PDiv(self, other)
+    def __rtruediv__(self, other):
+        return PDiv(other, self)
+    def __div__(self, other):
+        return PDiv(self, other)
+    def __rdiv__(self, other):
+        return PDiv(other, self)
+    def __mod__(self, other):
+        return PMod(self, other)
+    def __rmod__(self, other):
+        return PMod(other, self)
+    def __pow__(self, other):
+        return PPow(self, other)
+    def __rpow__(self, other):
+        return PPow(other, self)
+    def __xor__(self, other):
+        return PPow(self, other)
+    def __rxor__(self, other):
+        return PPow(other, self)
     def copy(self):
         """ Returns a new PGroup with self.data """
         new = self.data
@@ -345,12 +408,28 @@ def Place(data):
          #: If the pattern doesn't need lacing, return original
         return data
 
+
 # Used to force any non-pattern data into a Pattern
 
 def asStream(data):
     """ Forces any data into a pattern form """
-
     if isinstance(data, Pattern):
         return data
-
     return Pattern(data)
+
+def Convert(*args):
+    """ Returns tuples/PGroups as PGroups, and anything else as Patterns """
+    PatternTypes = []
+    for val in args:
+        if isinstance(val, (Pattern, PGroup)):
+            PatternTypes.append(val)
+        elif isinstance(val, tuple):
+            PatternTypes.append(PGroup(val))
+        else:
+            PatternTypes.append(Pattern(val))
+    return PatternTypes
+
+
+
+
+    

@@ -7,6 +7,10 @@ def miditofreq(midinote):
 def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     """ Calculates a midinote from a scale, octave, degree, and root """
 
+    # Force float
+    degree = float(degree)
+
+    # Floor val
     lo = int(degree)
     hi = lo + 1
 

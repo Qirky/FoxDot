@@ -12,7 +12,7 @@ class console:
         self.Yscroll.pack(side=RIGHT, fill=Y)        
         
         self.text = Text( master, padx=5, pady=5,
-                            height=10, width=120,
+                            height=10,
                             bg="Black", fg="White",
                             font=("Ubuntu Mono", 12),
                             yscrollcommand=self.Yscroll.set)

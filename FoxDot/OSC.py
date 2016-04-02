@@ -280,11 +280,11 @@ class OSCMessage(object):
 			raise TypeError("Can only append 'OSCMessage' to 'OSCBundle'")
 		
 		if hasattr(argument, '__iter__'):
-			for arg in argument:
-				self.append(arg, typehint)
-			
-			return
-		
+                        for arg in argument:
+                                self.append(arg, typehint)
+                        
+                        return
+        
 		if typehint == 'b':
 			binary = OSCBlob(argument)
 			tag = 'b'

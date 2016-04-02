@@ -55,6 +55,34 @@ class PRand(Base.Pattern):
 
 Prand = PRand #: Alias for PRand
 
+class PxRand(Base.Pattern):
+    """
+        PxRand(iterable)
+        PxRand(lo, hi)
+
+        Differs from PRand() in that PxRand returns a random element
+        of a given list or range(lo, hi) each time it is accessed as
+        opposed to a predetermined list of random numbers/elements
+
+    """
+
+    def __init__(self, a, b=None):
+        if isinstance(a, list):
+            self.data = a
+        else:
+            self.data = range(a,b)
+        self.make()
+    def __iter__(self):
+        for item in self.data:
+            yield self.choose()
+    def __getitem__(self, key):
+        return self.choose()
+    def __getslice__(self, start, end):
+        return PxRand([self.choose() for n in range(start, end)])
+
+Pxrand = PxRand #: Alias for PxRand
+
+
 class PSum(Base.Pattern):
     """
         PSum(n, total) -> Pattern of length n that sums to equal total
@@ -150,14 +178,18 @@ Pstretch = PStretch #: Alias
 
 class PRhythm(Base.Pattern):
 
+    # TODO - dict of note/rest -> duration
+
     def __init__(self, s, dur=0.5):
 
         self.data = []
         
         chars = P().fromString(s)
 
+        # Make sure any opening rests are counted
+        
         if chars.startswith(" "):
-            chars[0] = "." # Make sure any opening rests are counted
+            chars[0] = "."
         
         for i, char in chars.items():
 
@@ -172,7 +204,7 @@ class PRhythm(Base.Pattern):
 
                     div = float(len(char))
 
-                    this_dur = PRhythm(str(char), dur / div).list()
+                    this_dur = list(PRhythm(str(char), dur / div))
                     self.data += this_dur
                     
                 else:

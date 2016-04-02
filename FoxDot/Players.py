@@ -8,6 +8,7 @@
 """
 
 from os.path import dirname
+from copy import deepcopy # used to copy player attr dicts to stop sending them to SC TODO
 
 from Patterns import *
 from Midi import *
@@ -58,7 +59,7 @@ class _player:
 
         # Dictionary to store any effect arguments
 
-        self.fx = Effects.Handler()
+        self.fx = Effects.Handler(self)
 
         # Sets the clock off a beat amount
 
@@ -220,7 +221,7 @@ class _player:
 
         # Get which instrument is leading
 
-        if self.following and attr is 'degree':
+        if self.following and attr == 'degree':
 
             attr_value = self.following.now('degree')
 
@@ -242,7 +243,7 @@ class _player:
 
             # Amp is multiplied, not added
 
-            if attr is "amp":
+            if attr == "amp":
 
                 value = attr_value * modf_value
 
@@ -273,7 +274,7 @@ class _player:
 
                     val = val * self.metro.beat_dur()
 
-                message += [key, val]
+                message += [key, float(val)]
 
         return message
 
@@ -462,19 +463,20 @@ class synth_(_player):
         """ Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider """
 
         now = {}
+        
         for attr in ('degree', 'oct'):
+
+            now[attr] = self.now(attr)
 
             try:
 
-                now[attr] = asStream(self.now(attr).now()) # If it is a TimeVar
+                now[attr] = list(now[attr])
 
             except:
 
-                now[attr] = asStream(self.now(attr))
-
-        #now_degree, now_oct = [asStream(self.now(attr)) for attr in ['degree', 'oct']]
+                now[attr] = [now[attr]]
                 
-        size = max( len(now['oct']), len(now['degree']) ) 
+        size = max( len(now['oct']), len(now['degree']) )
 
         f = []
 

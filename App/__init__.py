@@ -1,18 +1,24 @@
 #!/usr/bin/python
 
 """ Tkinter interface made for Live Coding with Python syntax highlighting """
+import sys
 
-
+# Tkinter Interface
 from Tkinter import *
+import tkFont
+
+# stdlib threading
 from threading import Thread
 from time import sleep as wait
+
+# Custom app modules
 from formatting import *
 from appfunctions import *
 from consolewidget import console
-
-import sys
  
 # App object
+
+DEFAULT_FONT = "Ubuntu Mono"
 
 class App:
 
@@ -29,16 +35,36 @@ class App:
         self.Yscroll = Scrollbar(self.root)
         self.Yscroll.pack(side=RIGHT, fill=Y)
 
+        # Font Settings
+
+        self.font = tkFont.Font(font=(DEFAULT_FONT, 12), name="CodeFont")
+        self.font.configure(**tkFont.nametofont("CodeFont").configure())
+
+        # Root widget container
+
+        self.container = Frame(self.root,
+                               borderwidth=1,
+                               relief="sunken",
+                               width=960,
+                               height=400 )
+
+        self.container.grid_propagate(False)
+        self.container.pack(side="top", fill="both", expand=True)
+
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
         # Create text box for code
 
-        self.text = Text(self.root,
+        self.text = Text(self.container,
                          padx=5, pady=5,
-                         height=20, width=100,
                          bg = colour_map['background'],
                          fg=colour_map['plaintext'],
                          insertbackground="White",
-                         font = ("Ubuntu Mono", 12),
+                         font = "CodeFont",
                          yscrollcommand=self.Yscroll.set)
+
+        self.text.grid(row=0, column=0, stick="nsew")
 
         self.Yscroll.config(command=self.text.yview)
         
@@ -55,14 +81,16 @@ class App:
         self.text.bind("<Tab>", self.tab)
         self.text.bind("<Control-]>", self.indent)
         self.text.bind("<Control-[>", self.unindent)
+        self.text.bind("<Control-=>", self.zoom_in)
+        self.text.bind("<Control-minus>", self.zoom_out)
         self.text.bind("<Key>", self.keypress)
 
         # Automatic brackets
 
         self.separators = py_separators
 
-        self.left_brackets  = left_b #["(","[","{","'",'"']
-        self.right_brackets = right_b #[")","]","}","'",'"']
+        self.left_brackets  = left_b
+        self.right_brackets = right_b
 
         self.all_brackets = dict(zip(self.left_brackets, self.right_brackets))
         self.bracket_q = []
@@ -74,10 +102,6 @@ class App:
 
         for name, colour in colour_map.items():
             self.text.tag_config(name, foreground=colour)
-
-        # Pack the text box
-
-        self.text.pack(fill=BOTH, expand = 1)
 
         # Create lable for console
 
@@ -137,11 +161,21 @@ class App:
 
                 self.text.tag_remove(tag_name, start, end)
 
-            # 3. Update IDE
+            # 3. Get tags
 
-            for tag_name, start, end in findstyles(thisline):
+            matched_tags = dict([(tag_name, (start, end)) for tag_name, start, end in findstyles(thisline)])
 
-                self.text.tag_add(tag_name, index(line, start), index(line, end))
+            # 4. Update IDE in order of style 'weights'
+
+            for styles in re_weights:
+
+                for tag_name in styles:
+
+                    if tag_name in matched_tags:
+
+                        self.text.tag_add(tag_name,
+                                          index(line, matched_tags[tag_name][0]), # start
+                                          index(line, matched_tags[tag_name][1])) # end
 
         return "break"
                     
@@ -346,6 +380,12 @@ class App:
         
         i, j = index(self.text.index(INSERT))
 
+        # If we are at the start of a line, delete that
+
+        if j == 0:
+            self.update(event)
+            return
+
         tab = index(i,j-tabsize)
         cur = index(i,j)
         char_l = self.text.get(index(i,j-1))
@@ -408,6 +448,24 @@ class App:
         self.text.mark_set(INSERT, "1.0")
         self.text.see(INSERT)
         return 'break'
+
+    def zoom_in(self, event):
+        """ Ctrl+= increases text size """
+
+        font = tkFont.nametofont("CodeFont")
+        size = font.actual()["size"]+2
+        font.configure(size=size)
+
+        return 'break'
+
+    def zoom_out(self, event):
+        """ Ctrl+- decreases text size (minimum of 8) """
+
+        font = tkFont.nametofont("CodeFont")
+        size = max(8, font.actual()["size"]-2)
+        font.configure(size=size)
+
+        return  'break'
 
 
     # --- Placeholders

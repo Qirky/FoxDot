@@ -35,43 +35,38 @@ def execute(code, verbose=True):
     return
 
 
-def toPython( live_code, verbose ):
+def toPython( code, verbose ):
 
-    """ Converts any FoxDot code to its equivalent in Python """
+    """ Converts any FoxDot code to its equivalent in Python.
+        Prints the code to the console if the verbose flag is set to True """
 
-    as_typed = live_code
+    # Look for any 'when' statements
 
-    # 0. Look for any 'when' statements
+    code = GetWhenStatements( code )
 
-    live_code = when_statements( live_code )
+    # Look for FoxDot syntax for new players
 
-    # 1. Look for FoxDot syntax for new players
+    code = GetPlayerAssignments( code )
 
-    live_code = overwrite_code( live_code )
-
-    # 2. Convert any "new" players already playing to update methods
+    # Convert any re-assignment of players already playing to update methods
     
-    live_code = override_attempt( live_code )
+    code = GetAssignmentsAsUpdates( code )
 
-    # 3. Convert any references to "self" to the attached player
+    if not code: return ""
 
-    live_code = remove_self( live_code )
-
-    if not live_code: return ""
-
-    # 4. Print out the code to the console
+    # Print out the code to the console
 
     if verbose:
 
-        print stdout( live_code ) 
+        print stdout( code ) 
 
     # 5. Convert to python code to be executed
 
-    raw_python = compile(live_code, 'FoxDot', 'exec')
+    raw_python = compile(code, 'FoxDot', 'exec')
 
     return raw_python
 
-def when_statements( code ):
+def GetWhenStatements( code ):
     """ Finds any when statements and converts them to a string that creates TempoClock.When objects """
 
     statements = [ match[0] for match in re.findall(r'(when .*:(\n(else:\s*?\n)?(    )+\S.*)+)', code) ]
@@ -84,7 +79,7 @@ def when_statements( code ):
 
     return code
 
-def overwrite_code( code ):
+def GetPlayerAssignments( code ):
     """ Replaces any FoxDot code with Python code """
 
     # RegEx for instruments constructed using VAR >> INSTRUMENT()
@@ -157,7 +152,7 @@ def overwrite_code( code ):
 
 # Formatting and cleaning code funcrtions below
 
-def override_attempt( code ):
+def GetAssignmentsAsUpdates( code ):
     """ Finds any attempt to re-assign a player while playing and reformats the arguments """
 
     ns = globals()
@@ -215,11 +210,6 @@ def override_attempt( code ):
         new_code.append( line )
 
     code = "\n".join(new_code)
-
-    return code
-
-
-def remove_self( code ):
 
     return code
 

@@ -1,5 +1,21 @@
 from Patterns import Pattern, asStream
 from Patterns.Operations import modi
+import Patterns.Operations as op
+
+def fetch(func):
+    """ Function to wrap basic lambda operators for TimeVars  """
+    def eval_now(a, b):
+        try:
+            a = a.now()
+        except:
+            pass
+        try:
+            b = b.now()
+        except:
+            pass
+        return func(a, b)
+    return eval_now
+
    
 class TimeVar(object):
 
@@ -13,119 +29,104 @@ class TimeVar(object):
         self.data   = values
         self.time   = []
         self.dur    = dur
-        
+
+        # Used to stop cycling
         self.has_inf = False
         self.inf     = False
         self.inf_val = None
 
-        self.modifier = 0
-        self.multiplier = 1
+        # New method for calculating values
+        self.evaluate = fetch(op.Nil)
+        self.dependency = 1
         
         self.update(values, dur)
 
-
     # Standard Methods
     def __str__(self):
-        return str(self.now())
+        return  str(self.now())
     def __repr__(self):
-        return "TimeVar(%s, %s)" % (repr(self.values()), repr(self.durs()))
+        return "<TimeVar(%s, %s)>" % (repr(self.values()), repr(self.durs()))
     def __len__(self):
         return len(self.now())
     def __int__(self):
         return int(self.now())
     def __float__(self):
         return float(self.now())
+        
+    # Mathematical Operators
+
+    # + 
     def __add__(self, other):
-
-        if isinstance(other, self.__class__):
-
-            new = other
-            new.modifier = self
-            new.multiplier = 1
-
-        else:     
-
-            #new = self.now() + other
-
-            new = TimeVar(self.data + other, self.dur,self.metro)
-        
+        new = self.new(other)
+        new.evaluate = fetch(op.Add)
         return new
+    def __radd__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.Add)
+        return new 
 
+    # -
     def __sub__(self, other):
-
-        if isinstance(other, self.__class__):
-
-            new = other
-            new.modifier = self
-            new.multiplier = -1
-
-        else:     
-
-            new = self.now() - other
-        
+        new = self.new(other)
+        new.evaluate = fetch(op.rSub)
+        return new
+    def __rsub__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.Sub)
         return new
 
+    # *
     def __mul__(self, other):
-
-        if isinstance(other, self.__class__):
-
-            new = other
-            new.modifier = self
-            new.multiplier = 1
-
-        else:     
-
-            new = self.now() * other
-
+        new = self.new(other)
+        new.evaluate = fetch(op.Mul)
+        return new
+    def __rmul__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.Mul)
+        return new
+    
+    # /
+    def __truediv__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.rDiv)
+        return new
+    def __rtruediv__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.Div)
         return new
 
-    def __div__(self, other):
-
-        if isinstance(other, self.__class__):
-
-            new = other
-            new.modifier = self
-            new.multiplier = 1
-
-        else:     
-
-            new = self.now() / other
-
-        return new
+    #  Comparisons
 
     def __eq__(self, other):
-
         return other == self.now()
 
     def __ne__(self, other):
-
         return other != self.now()
 
-    def __getitem__(self, key):
+    # Emulating container types 
 
+    def __getitem__(self, key):
         return self.now()[key]
 
     def __iter__(self):
-
         for item in self.now():
-
             yield item
 
-    def chain(self, *args):
-        """ Appends a TimeVar """
-        if len(args) is 1:
-            # Must be a var
-            var = args[0]
-            if type(var) == type(self):
-                pass
-            return self
-        if len(args) is 2:
-            # Must be two lists: values  and durs
-            pass
-        else:
-            raise ValueError("Innapropriate argument value")
+    # Update methods
+
+    def new(self, other):
+        """ Returns a new TimeVar object """
+        if isinstance(other, self.__class__):
+            new = other
+        else:     
+            new = TimeVar(other, self.dur, self.metro)
+
+        new.dependency = self
+        
+        return new
 
     def length(self):
+        """ Returns the duration of one full cycle in beats """
         return self.time[-1][1] + 1
 
     def update(self, values, dur=None):
@@ -139,6 +140,9 @@ class TimeVar(object):
                 raise
             else:
                 self.has_inf = True
+
+        if isinstance(values, str):
+            values = [values]
 
         self.data = []
         a, b = 0, -1
@@ -169,31 +173,36 @@ class TimeVar(object):
 
         return self
 
-    def single(self, val):
-        """ Returns val as calculated by internal modifiers """
-        return float(self.multiplier) * float(val) + float(self.modifier)     
+    # Evaluation methods
+ 
+    def calculate(self, val):
+        """ Returns val as modified by its dependencies """
+        return self.evaluate(val, self.dependency)
+
 
     def now(self):
-        """ Returns the value from self.data for time t in self.metro.
-
-            -> Should always be a float or PGroup """
+        """ Returns the value from self.data for time t in self.metro """
 
         if self.inf:
             return self.inf_value
 
         t = self.metro.now() % self.length()
 
+        val = 0
+
         for i in range(len(self.data)):
+
+            val = self.data[i]
             
             if self.time[i][0] <= t <= self.time[i][1]:
 
-                val = self.data[i]
-
+                break
+                
                 if modi(self.dur, i) == InfinityObj:
                     self.inf = True
                     self.inf_value = val
 
-                return val * self.multiplier + float(self.modifier)
+        return self.calculate(val)
 
     def copy(self):
         new = TimeVar(self.data, self.dur, self.metro)

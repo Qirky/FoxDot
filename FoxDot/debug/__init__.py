@@ -1,18 +1,11 @@
-class test:
+def show(func):
+    def func_wrapper(x, y):
+        return func(x, y) * 2
+    return func_wrapper
 
-    def __init__(self, x, y):
+@show
+def add(a,b):
+    return a + b
 
-        self.x = x
-        self.y = y
+print add(2,4)
 
-        self.values = lambda: self.x*self.y
-
-
-a = test(10,20)
-
-print a.values()
-
-a.x = 2
-a.y = 5
-
-print a.values()

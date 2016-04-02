@@ -7,8 +7,9 @@
 
 class Handler:
 
-    def __init__(self):
+    def __init__(self, owner):
 
+        self.owner = owner
         self.data = {}
 
     def __str__(self):
@@ -45,4 +46,4 @@ class Handler:
 
         self.data[name] = kwargs
 
-        return
+        return self.owner
