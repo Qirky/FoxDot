@@ -3,8 +3,7 @@
 
     Checks if any variables that are being assigned a value are already
     in the global namespace. If so, then replaces the assignment with an
-    update method. If the update method doesn't exist, or fails, it
-    assigns the variable anyway
+    update method. 
 
 """
 
@@ -29,7 +28,23 @@ def check(code, namespace):
 
                 if hasattr(namespace[name], "foxdot_object"):
 
-                    line = re.sub(parse.re_sub_foxdot_assignment % name, "%s.update(" % name, line )
+                    # 1. Get contents of any brackets (if any)
+
+                    if re.search(r"\s*=\s*\w*?\(", line):
+
+                        pattern = parse.re_new_instance
+                        sub     = "%s.update("
+                        end     = ""
+
+                    else:
+
+                        pattern = parse.re_new_reference
+                        sub     = "%s.update("
+                        end     = ")"
+
+                    # print parse.re_sub_foxdot_assignment % name
+
+                    line = re.sub(pattern % name, sub % name, line ) + end
 
         new_code.append(line)
 

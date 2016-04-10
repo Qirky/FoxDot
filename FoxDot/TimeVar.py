@@ -140,6 +140,11 @@ class TimeVar(Code.LiveObject):
     def update(self, values, dur=None):
         """ Updates the TimeVar with new values """
 
+        #: If updated with a TimeVar object, copy the attribute dict
+        if isinstance(values, self.__class__):
+            self.__dict__ = values.__dict__
+            return self
+
         if dur is not None:
             self.dur=asStream(dur)
 
