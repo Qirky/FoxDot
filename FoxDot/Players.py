@@ -8,7 +8,6 @@
 """
 
 from os.path import dirname
-from copy import deepcopy # used to copy player attr dicts to stop sending them to SC TODO
 
 from Patterns import *
 from Midi import *
@@ -26,9 +25,10 @@ _SAMPLES_TYPE = 2
 
 ##################### ROOT PLAYER OBJECT #####################
 
-class _player:
+class PLAYER(Code.LiveObject):
 
-    CREATED = False
+    _VARS = []
+    _INIT = False
     _TYPE = _PLAYER_TYPE
 
     def __init__( self, name ):
@@ -41,22 +41,6 @@ class _player:
         self.stop_point = 0
         self.following = None        
 
-        # Define any standard variables that are used in the OSC message (make sure they are in the attr dict)
-
-        self.attr = {}
-
-        self.dur    = self.attr['dur']      =  [0]
-        self.root   = self.attr['root']     =  [0]
-        self.degree = self.attr['degree']   =  [0]
-        self.oct    = self.attr['oct']      =  [5]
-        self.amp    = self.attr['amp']      =  [0.5]
-        self.pan    = self.attr['pan']      =  [0]
-        self.sus    = self.attr['sus']      =  [1]
-        self.rate   = self.attr['rate']     =  [1]
-        self.buf    = self.attr['buf']      =  [0]
-
-        self.freq   = [0]
-
         # Dictionary to store any effect arguments
 
         self.fx = Effects.Handler(self)
@@ -68,21 +52,37 @@ class _player:
 
         # Modifiers
         
-        self.reversing = False
-
-        # Modifier dict
-        
-        self.modf = {}
-        self.reset() # This method is used to 'reset' the modifiers
+        self.reversing = False    
 
         # Keeps track of which note to play etc
         
-        self.event_n   = 0
+        self.event_n = 0
+        self.event = {}
 
         # Used for checking clock updates
         
         self.old_dur = None
         self.isplaying = False
+
+        # These dicts contain the attribute and modifier values that are sent to SuperCollider
+
+        self.attr = {}
+        self.modf = {}
+        
+        # List the internal variables we don't want to send to SuperCollider
+
+        self._VARS = self.__dict__.keys()
+
+        self.dur    = self.attr['dur']      =  [0]
+        self.root   = self.attr['root']     =  [0]
+        self.degree = self.attr['degree']   =  [0]
+        self.oct    = self.attr['oct']      =  [5]
+        self.amp    = self.attr['amp']      =  [0.5]
+        self.pan    = self.attr['pan']      =  [0]
+        self.sus    = self.attr['sus']      =  [1]
+        self.rate   = self.attr['rate']     =  [1]
+        self.buf    = self.attr['buf']      =  [0]
+        self.freq   = [0]
 
     # --- Startup methods
 
@@ -91,19 +91,7 @@ class _player:
         self.modf['amp'] = 0.5
         return self    
 
-    def begin(self):
-        self.metro.playing.append(self)
-        self.update_clock()
-        self.CREATED = True
-        return
-
     # --- Update methods
-
-    def update_dict(self):
-        """ Update attr dict with Streams """
-        for a in self.attr:
-            self.attr[a] = asStream( self.__dict__[a] )
-        return
 
     def update_clock(self):
 
@@ -149,44 +137,37 @@ class _player:
 
                 # Increase event counter until NOW
 
-                if i < self.metro.now():
-
-                    self.event_n += 1
+                if i < self.metro.now(): self.event_n += 1
 
             # If step shouldn't contain self, remove it if it is in there
 
-            else:
+            elif self in step: step.remove(self)
 
-                if self in step:
-
-                    step.remove(self)
+        # Store the current durations to check at the next update steps
 
         self.old_dur = self.attr['dur']
         self.old_off = self.off
-        
-        if self._TYPE is _SAMPLES_TYPE:
-            self.old_dur_val = self.dur_val
 
         return
 
     def update_state(self, isEvent=True):
 
         # Kill the player if stopping
-        if self.stopping and self.metro.beat >= self.stop_point:
-            self.kill()
-        # Update the clock if the duration values have changed
-        if self.dur_updated():
-            self.pat_to_buf()
-            self.update_clock()
-        # Go to the next event
-        else:
-            self.event_n += ( int(isEvent) * self.direction() )
+        
+        if self.stopping and self.metro.beat >= self.stop_point: self.kill()
+            
+        # Check for changes
+        
+        if self.dur_updated(): self.update_clock()
+        else: self.event_n += ( int(isEvent) * (-1 if self.reversing else 1) )
 
-        # Calculate frequency 
-        self.freq = self.calculate_freq()
-    
-        # Update dictionary to contain only streams
-        self.update_dict()
+        return
+
+    def update(self):
+        
+        if self.isplaying is False:
+
+            self.restart()
 
         return
     
@@ -199,11 +180,13 @@ class _player:
 
     # --- Data methods
 
-    def tupleN(self):
+    def tupleN(self, exclude=None):
         """ Returns the length of the largest nested tuple in the attr dict """
+
         size = len(self.freq)
-        for stream in self.attr.values() + self.modf.values():
-            for value in asStream(stream):
+        
+        for attr, value in self.event.items():
+            if attr != exclude:
                 try:
                     if len(value) > size:
                         size = len(value)
@@ -214,7 +197,7 @@ class _player:
 
     # --- Methods for preparing and sending OSC messages to SuperCollider
 
-    def now(self, attr, x=0):
+    def now(self, attr="degree", x=0):
         """ Calculates the values for each attr to send to the server at the current clock time """
 
         modifier_event_n = self.event_n
@@ -239,6 +222,26 @@ class _player:
 
             modf_value = 0
 
+        # If any values are time-dependant, get the now values
+
+        try:
+
+            attr_value = attr_value.now()
+
+        except:
+
+            pass
+
+        try:
+
+            modf_value = modf_value.now()
+
+        except:
+
+            pass
+
+        # Combine attribute and modifier values
+
         try:
 
             # Amp is multiplied, not added
@@ -247,8 +250,8 @@ class _player:
 
                 value = attr_value * modf_value
 
-            else:
-        
+            else:              
+            
                 value = attr_value + modf_value
 
         except:
@@ -257,18 +260,30 @@ class _player:
         
         return value
 
-    def osc_message(self, index=0):
+    def get_event(self):
+        """ Returns a dictionary of attr -> now values """
+
+        self.event = {}
+        
+        for key in self.attr:
+
+            self.event[key] = self.now(key)
+
+        return self
+            
+
+    def osc_message(self, index=0, head=[]):
         """ Creates an OSC packet to play a SynthDef in SuperCollider """
 
-        nodeID = 0
+        # nodeID = 0
 
-        message = [self.SynthDef, nodeID, 1, 1, 'freq', modi(self.freq, index)]
+        message = [self.SynthDef, 0, 1, 1] + head
 
         for key in self.attr:
 
-            if key not in ('freq', 'degree', 'following'):
-
-                val = modi(self.now(key), index)
+            if key not in ('degree', 'oct', 'freq', 'dur'):
+                
+                val = modi(self.event[key], index)
 
                 if key == "sus":
 
@@ -279,19 +294,11 @@ class _player:
         return message
 
     def osc_effect(self, effect):
-        """ If there are any effects added, send them to the server. Sets the default sustain to twice the currently set sustain """
+        """ If there are any effects added, send them to the server """
 
-        nodeID = 0
+        # nodeID = 0
         
-        message = [effect, nodeID, 1, 1]
-
-        if "sus" in message:
-
-            pass
-
-        else:
-
-            message += ["sus", self.now("sus") * 2]
+        message = [effect, 0, 1, 1]
 
         for arg, val in self.fx[effect].items():
 
@@ -302,7 +309,9 @@ class _player:
     def send(self):
         """ Sends the current event data to SuperCollder """
 
-        # Create OSC Message and play
+        # Get the current state in a dict
+
+        self.get_event()
         
         for i in range(self.tupleN()):
             
@@ -319,6 +328,7 @@ class _player:
     #: Methods for stop/starting players
 
     def kill(self):
+        """ Removes this object from the Clock """
 
         self.isplaying = False
         self.event_n = 0
@@ -326,9 +336,8 @@ class _player:
         for step in self.metro:
             if self in step:
                 step.remove(self)
+        return
         
-        return self
-
     def stop(self, N=0):
         
         """ Removes the player from the Tempo clock and changes its internal
@@ -362,25 +371,51 @@ class _player:
 
         return self
 
-    def start(self):
+    def restart(self):
 
-        self.play()
+        if self not in self.metro.playing:
+
+            self.metro.playing.append(self)
+
+        self.stopping = False
+        self.update_clock()
 
         return self
+        
 
-    # --- Modifying functions
+    """
+        Feeder Methods
+        --------------
+
+        These methods are used in conjunction with Patterns.Feeders functions.
+        They change the state of the Player Object and return the object.
+
+        See 'Player.Feeders' for more info on how to use
+
+    """
+
+    def lshift(self, n=1):
+        self.event_n -= (n+1)
+        return self
+
+    def rshift(self, n=1):
+        self.event_n += n
+        return self
 
     def reverse(self):
         """ Sets flag to reverse streams """
         self.reversing = not self.reversing
         return self
 
-    def direction(self):
-        """ Returns 1 if self.event_n is increasing, and -1 if it is decreasing """
-        if self.reversing:
-            return -1
-        else:
-            return 1
+    """
+
+        Feeding Methods
+        ---------------
+
+        These methods will execute a Patterns.Feeders function (which use
+        Player feeder methods) at points in time; regular or otherwise.
+
+    """
 
     def every(self, n, cmd, *args):
 
@@ -391,6 +426,17 @@ class _player:
 
         return self
 
+    """
+
+        DirectFx Methods
+        ----------------
+
+        Rather than add dynamic effects to the Player Object through
+        its 'fx' attribute, use these methods to add 'smart' effects
+        that do any calculations for you.
+
+    """
+
     def strum(self, dur=0.025):
         """ Adds a delay to a Synth Envelope """
         x = self.tupleN()
@@ -398,14 +444,21 @@ class _player:
             self.delay = asStream([tuple(a * dur for a in range(x))])
         else:
             self.delay = asStream(dur)
-        return self 
+        return self
 
-    # Special object methods
+
+    """
+
+        Python's Magic Methods
+        ----------------------
+
+        Standard object operation methods
+
+    """
 
     def __name__(self):
         for name, var in globals().items():
-            if self == var:
-                return name
+            if self == var: return name
 
     def __repr__(self):
         return "<Player ('%s')>" % self.SynthDef
@@ -414,22 +467,15 @@ class _player:
         return self.SynthDef
 
     def __setattr__(self, name, value):
-        if self.CREATED and type(value) != str:
-            self.attr[name] = value
+        if self._INIT:
+            if name not in self._VARS:
+                value = asStream(value)
+                self.attr[name] = value
         self.__dict__[name] = value
-        return
 
-    # Placeholder methods
+##################### SYNTH PLAYERS #####################
 
-    def pat_to_buf(self):
-        return
-
-    def calculate_freq(self):
-        return [0]
-
-##################### SYNTHESISER PLAYERS #####################
-
-class synth_(_player):
+class SYNTH_PLAYER(PLAYER):
 
     _TYPE = _SYNTH_TYPE
 
@@ -437,16 +483,17 @@ class synth_(_player):
 
         # Inherit key methods
 
-        _player.__init__(self, SynthDef)
+        PLAYER.__init__(self, SynthDef)
 
         # Update self with kwargs
         
         self.attr.update(kwargs)
-        self.update_dict()
         self.reset()
 
     def update(self, SynthDef, degree=[0], **kwargs):
         """ Updates the values of this Player """
+
+        PLAYER.update(self)
 
         setattr(self, "SynthDef", SynthDef)
         setattr(self, "degree", asStream(degree))
@@ -481,17 +528,22 @@ class synth_(_player):
         f = []
 
         for i in range(size):
+            
             midinum = midi( self.scale, modi(now['oct'], i), modi(now['degree'], i) , self.now('root') )
-            f.append( miditofreq(midinum) )
-        return f
-    
-    def lshift(self, n=1):
-        self.event_n -= (n+1)
-        return self
 
-    def rshift(self, n=1):
-        self.event_n += n
-        return self
+            f.append( miditofreq(midinum) )
+            
+        return f
+
+    def update_state(self):
+        """ Calls the parent class update state then calculates frequency """
+        PLAYER.update_state(self)
+        self.freq = self.calculate_freq()
+
+    def osc_message(self, index=0, head=[]):
+        """ Attaches the frequency to the osc message """
+        msg_head = ['freq', modi(self.freq, index)]
+        return PLAYER.osc_message(self, index, msg_head)
 
     def follow(self, lead):
         """ Takes a now object and then follows the notes """
@@ -548,11 +600,7 @@ class synth_(_player):
 
     # Methods affecting other players - every n times, do a random thing?
 
-    def bother(self, other):
-
-        return self
-
-    def stutter(self, n=4):
+    def stutter(self, n=2):
         """ repeats each value in each stream n times """
 
         # if n is a list, stutter each degree[i] by n[i] times
@@ -616,7 +664,7 @@ class synth_(_player):
         return self
 
     def __cmp__(self, other):
-        if isinstance(other, _player):
+        if isinstance(other, PLAYER):
             return int( self is not other ) * -1
         # Used for comparing to numbers etc
         if self.now('degree') > other:
@@ -633,9 +681,9 @@ class synth_(_player):
 
 # Table of characters to buffers
 
-BufferManager = Buffers.BufferManager().load()
+BufferManager = Buffers.BufferManager().from_file()
 
-class samples_(_player):
+class SAMPLE_PLAYER(PLAYER):
 
     _TYPE = _SAMPLES_TYPE
     
@@ -644,7 +692,7 @@ class samples_(_player):
 
     def __init__(self, pat=' ', speed=[1], **kwargs):
 
-        _player.__init__(self, "sample_player")
+        PLAYER.__init__(self, "sample_player")
 
         # Degree is the string of characters
         self.degree  = pat
@@ -657,10 +705,12 @@ class samples_(_player):
         self.amp = self.attr['amp'] = 1
 
         self.attr.update(kwargs)
-        self.update_dict()
+        self.reset()
 
     def update(self, degree=" ", **kwargs):
         """ Updates the values of this Player """
+
+        PLAYER.update(self)
 
         setattr(self, "degree", degree)
 
@@ -671,25 +721,25 @@ class samples_(_player):
 
         return self
 
+    def update_clock(self):
+        """ String -> buffer numbers before clock update """
+        self.pat_to_buf()
+        PLAYER.update_clock(self)
+        self.old_dur_val = self.dur_val
+
     def pat_to_buf(self):
+        """ Calculates the durations and buffer numbers based on the characters in the degree attribute """
+        rhythm = PRhythm(self.degree, self.dur)
 
-        self.attr['dur_val'] = self.dur_val = PRhythm(self.degree, self.dur)
-
-        new_string = P().fromString(self.degree).string()
-
-        buf = []
-
-        for i, char in enumerate(new_string):
-            # If the string starts with a rest, point to an empty buffer
-            if i is 0 and char == self.REST:
-                buf.append(0)
-            # Any characters not in brackets or rest
-            if char not in self.SPECIAL_CHARS:
-                buf.append(BufferManager.symbols.get(char, 0))
-
-        self.attr['buf'] = self.buf = buf
+        self.attr['dur_val'] = self.dur_val = rhythm
+ 
+        self.attr['buf'] = self.buf = [BufferManager.symbols.get(char, 0) for char in rhythm.chars]
 
         return
+
+    def tupleN(self):
+        """ Forces the tupleN method to skip out the degree attr when calculating the largest tuple """
+        return PLAYER.tupleN(self, exclude='degree')
         
 
     def __add__(self, data):
@@ -794,7 +844,7 @@ class samples_(_player):
 
 ###### GROUP OBJECT
 
-class group:
+class Group:
 
     def __init__(self, *args):
 
@@ -814,6 +864,10 @@ class group:
             self.__dict__[name] = value 
         return self
 
+    def call(self, method, args):
+        for p in self.players:
+            p.__dict__[method].__call__(*args)
+
     def stop(self, n=0):
         for item in self.players:
             item.stop(n)
@@ -824,4 +878,4 @@ class group:
             item.play()
         return self
 
-Group = group
+group = Group

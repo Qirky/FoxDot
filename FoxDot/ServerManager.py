@@ -1,14 +1,29 @@
 """
     ServerManager.py
 
-    Handles OSC messages being sent to SuperCollider
+    Handles OSC messages being sent to SuperCollider. Will try and
+    read data from Settings/server.txt which should contain the IP
+    address and port separated by a single space. If not it defaults
+    to SuperCollider's defaults.
 
 """
 
 from OSC import *
-
 client = OSCClient()
-client.connect( ("localhost", 57110) )
+
+try:
+
+    with open("Settings/server_address.txt") as f:
+        info = f.readlines()[0].split()
+        
+    ADDRESS, PORT = (str(info[0]), int(info[1]))
+    
+except:
+    
+    ADDRESS, PORT = "localhost", 57110
+
+
+client.connect( (ADDRESS, PORT) )
 
 class ServerManager:
 
@@ -25,20 +40,24 @@ class ServerManager:
         message = OSCMessage("/s_new")
         packet[1] = self.nextnodeID()
         message.append(packet)
-        client.send( message )        
+        client.send( message )
+        return
 
     def send(self, message):
         client.send(OSCMessage(message))
+        return
 
     def free_node(self, node):
         message = OSCMessage("/n_free")
         message.append(node)
         client.send( message )
+        return
 
     def bufferRead(self, bufnum, path):
         message = OSCMessage("/b_allocRead")
         message.append([bufnum, path])
         client.send( message )
+        return
 
 #####
 

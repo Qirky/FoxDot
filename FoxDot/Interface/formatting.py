@@ -101,7 +101,7 @@ bool_vals = r"(?<![a-zA-Z])(" + "|".join(py_bool_vals) + ")(?![a-zA-Z])"
 
 try:
 
-    with open("config.txt") as f:
+    with open(path("../Settings/text_colour.txt")) as f:
 
         data = f.readlines()
 
@@ -138,7 +138,11 @@ re_patterns = {  'functions' : functions,
 
 # Weightings (heavier get checked last)
 
-re_weights = [ ['numbers'],
+tag_weights = [['numbers'],
                ['key_types','functions','user_defn','bool_vals','dollar','arrow','players'],
                ['comments'],
                ['strings']]
+
+# Font Data
+
+DEFAULT_FONT = "Ubuntu Mono"

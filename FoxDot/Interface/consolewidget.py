@@ -1,5 +1,6 @@
 from Tkinter import Scrollbar, Text
 from Tkinter import RIGHT, LEFT, BOTH, END, INSERT, Y, X
+from formatting import DEFAULT_FONT
 
 #!/usr/bin/python
 """ Console widget that displays the true Python input """
@@ -14,7 +15,7 @@ class console:
         self.text = Text( master, padx=5, pady=5,
                             height=10,
                             bg="Black", fg="White",
-                            font=("Ubuntu Mono", 12),
+                            font=(DEFAULT_FONT, 12),
                             yscrollcommand=self.Yscroll.set)
 
         self.Yscroll.config(command=self.text.yview)

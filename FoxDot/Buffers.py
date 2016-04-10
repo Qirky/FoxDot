@@ -21,7 +21,7 @@ class BufferManager:
         self.buffers = {}
         
         
-    def load(self, configFile="../Samples/config.txt", offset=0):
+    def from_file(self, configFile="./Settings/sample_names.txt", offset=0):
         """ Reads in a config file """
         with open(path(configFile)) as f:
             lines = f.readlines()
@@ -37,15 +37,12 @@ class BufferManager:
         return self
 
     def __call__(self, server):
-        self.setServer(server)
+        self.server = server 
         return self
 
-    def setServer(self, server):
-        self.server = server        
-
-    def sendToServer(self):
+    def load(self):
         for buf, fn in self.buffers.items():
-            self.server.bufferRead(buf, path("../Samples/" + fn))
+            self.server.bufferRead(buf, path("./Samples/" + fn))
 
     def bufnum(self, char):
         b = 0

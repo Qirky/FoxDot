@@ -11,9 +11,7 @@ MAX_SIZE = 2048
  
 class P(Base.Pattern):
     """ P(iterable) -> User-defined pattern """
-    def __init__(self, data=[]):
-        self.data = data
-        self.make()
+    pass
 
 class PStutter(Base.Pattern):
     """ PStutter(pattern, n) -> Creates a pattern such that each item in the array is repeated n times (can be a pattern) """
@@ -178,40 +176,42 @@ Pstretch = PStretch #: Alias
 
 class PRhythm(Base.Pattern):
 
-    # TODO - dict of note/rest -> duration
-
     def __init__(self, s, dur=0.5):
 
+        character = []
+        durations = []
+
+        if type(s) is str:
+            s = P().fromString(s)
+            
+        dur = s.dur(dur)
         self.data = []
         
-        chars = P().fromString(s)
-
-        # Make sure any opening rests are counted
-        
-        if chars.startswith(" "):
-            chars[0] = "."
-        
-        for i, char in chars.items():
-
-            dur = op.modi(dur, i)
-
-            if char == " ":
-                self.data[-1] += dur
-
+        for i, char in s.items():
+            # Recursively get rhythms
+            if isinstance(char, Base.PGroup):
+                character += list(char)
+                durations += list(self.__class__(char, dur))
             else:
+                character.append(char)
+                durations.append(dur)
+                
+        # After recursive collection of durations, adjust for rests (spaces)
 
-                if len(char) > 1:
+        self.chars = []
+        
+        for i, dur in enumerate(durations):
+            if character[i] == ' ' and i > 0:
+                self.data[-1] += dur                    
+            else:
+                self.data.append(dur)
+                self.chars.append(character[i])
 
-                    div = float(len(char))
+    def rest(self, n=0):
+        """ Returns true if self.chars[n] contains a space """
+        return self.chars[n] == ' '
 
-                    this_dur = list(PRhythm(str(char), dur / div))
-                    self.data += this_dur
-                    
-                else:
-
-                    self.data.append(dur)
-
-Prhythm = PRhythm #: Alias                    
+Prhythm = PRhythm #: Alias
 
 class PChords(Base.Pattern):
 

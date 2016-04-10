@@ -1,6 +1,7 @@
 from Patterns import Pattern, asStream
 from Patterns.Operations import modi
 import Patterns.Operations as op
+import Code
 
 def fetch(func):
     """ Function to wrap basic lambda operators for TimeVars  """
@@ -16,12 +17,19 @@ def fetch(func):
         return func(a, b)
     return eval_now
 
-   
-class TimeVar(object):
+# Misc. Functions
 
-    # Used for syntax checking
-    isTimeVar = True
-    isplaying = False
+def Ramp(start=0, end=1, dur=8, step=0.25):
+    size = dur/float(step)
+    return var([start + end * n/size for n in range(int(size))], step)
+
+def iRamp(start=0, end=1, dur=8, step=0.25):
+    size = dur/float(step)
+    return var([start + end * n/size for n in range(int(size))] + [end], [step]*int(size)+[inf])
+
+
+   
+class TimeVar(Code.LiveObject):
 
     def __init__(self, values, dur=4, metro=None):
 
@@ -35,7 +43,7 @@ class TimeVar(object):
         self.inf     = False
         self.inf_val = None
 
-        # New method for calculating values
+        # Dynamic method for calculating values
         self.evaluate = fetch(op.Nil)
         self.dependency = 1
         
@@ -145,6 +153,7 @@ class TimeVar(object):
             values = [values]
 
         self.data = []
+        self.time = []
         a, b = 0, -1
 
         for i, val in enumerate(asStream(values)):

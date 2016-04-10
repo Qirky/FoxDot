@@ -1,11 +1,11 @@
-def show(func):
-    def func_wrapper(x, y):
-        return func(x, y) * 2
-    return func_wrapper
+class dad:
 
-@show
-def add(a,b):
-    return a + b
+    def __init__(self, x):
+        self.x = x
+        self.y = -1 if self.x > 10 else 1
 
-print add(2,4)
+a = dad(11)
+print a.x, a.y
 
+b = dad(9)
+print b.x, b.y

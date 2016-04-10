@@ -73,6 +73,21 @@ SynthDef.new( \pads,
 		Out.ar(0,Pan2.ar( osc * env , pan));
 } ).writeDefFile;
 
+SynthDef.new( \scatter,
+	{
+		arg amp=0,sus=1,pan=0,freq=0,rate=0;
+
+		var osc, env;
+
+		osc = Saw.ar( freq , mul:amp / 8) + VarSaw.ar([freq + 2,freq +1], mul:amp/8);
+
+		osc = osc * LFNoise0.ar(rate);
+
+		env = EnvGen.ar(Env.linen(0.01, sus/2, sus/2), doneAction:2);
+
+		Out.ar(0,Pan2.ar( osc * env , pan));
+} ).writeDefFile;
+
 SynthDef.new( \banjo,
 	{
 		arg amp=0,sus=1,pan=0,freq=0;
@@ -167,14 +182,12 @@ SynthDef.new( \dub,
 
 		freq = freq / 4;
 
-		amp = amp / 3;
-
-		osc = LFTri.ar(freq, mul:amp) + SinOscFB.ar(freq,mul: amp);
+	   osc = LFTri.ar(freq, mul:amp) + SinOscFB.ar(freq,mul: amp);
 
 		env = EnvGen.ar(Env.sine(sus),doneAction:2);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
-		} ).writeDefFile;
+		} ).add;
 
 SynthDef.new( \soft,
 	{
@@ -512,20 +525,21 @@ SynthDef(\siren, { |rate=1, sus = 1, freq=300|
 	Out.ar(0, Pan2.ar(son * 0.4));
 }).writeDefFile;
 
-SynthDef(\horn, { |rate=1, sus = 1, freq=300, pan=0|
+SynthDef(\quack, { |rate=1, sus = 1, freq=300, pan=0, amp=0.5|
 
 	var osc1;
 	var osc2;
 	var new_rate = rate/10;
 
-	osc1  = LFPulse.ar(Vibrato.kr(freq, freq / 5, 0.05), 0.99, 0.2).lagud(0.4 / freq, 0.6 / freq) * 2 - 1;
+	osc1  = LFPulse.ar(Vibrato.kr(freq, freq / 3, 0.05), 0.99, 0.1);
 
-	osc2 = LFPulse.ar(freq/2, 0.5, 0.2).lagud(0.4 / freq, 0.6 / freq) * 2 - 1;
+	osc2 = LFPulse.ar(Vibrato.kr(freq/2, 3, 0.02), 0.5, 0.2);
+
 
 
 	// This filtering is a simple approximation of the plastic horn acoustics:
-	osc1 = BPF.ar(osc1.clip2(0.2), 750, 1/4) * 4;
-	osc2 = BPF.ar(osc2.clip2(0.8), 750, 1/4) * 4;
+	osc1 = BPF.ar(osc1, Line.ar(750, 1500, 0.1 ), 1/4) * 4;
+	osc2 = BPF.ar(osc2, 750, 1/4) * 4;
 
 	// delay and reverb, to simulate the environment in which we hear the siren
 	osc1 = osc1 + DelayC.ar(osc1, 0.1, 0.1, 0.3);
@@ -533,15 +547,31 @@ SynthDef(\horn, { |rate=1, sus = 1, freq=300, pan=0|
 	osc2 = osc2 + DelayC.ar(osc2, 0.1, 0.1, 0.3);
 	osc2 = osc2 + FreeVerb.ar(osc2);
 
-	//son = son * EnvGen.ar(Env([0,1,0],[sus/2,sus/2,0]),doneAction:2);
 
-	osc1 = osc1 * EnvGen.ar(Env.perc(0.1, sus, curve:-10), doneAction:2);
-	osc2 = osc2 * EnvGen.ar(Env([0,1,0],[sus * 0.3, sus * 0.7])) * 0.5;
+	osc1 = osc1 * EnvGen.ar(Env.perc(0.1, 1, curve:-10));
+	osc2 = osc2 * EnvGen.ar(Env.perc(sus/4, sus, curve:-10), doneAction:2) * 0.5;
 
 	osc1 = osc1 + osc2;
 
-	Out.ar(0, Pan2.ar(osc1 * 0.6, pan));
-}).writeDefFile;
+	Out.ar(0, Pan2.ar(osc1 * 0.6 * amp, pan));
+}).add;
+
+SynthDef(\ripple, { |rate=1, sus = 1, freq=300, pan=0, amp=0.5|
+
+	var osc;
+	var env;
+
+	osc = Pulse.ar([freq/4, freq/4+1],0.2,0.25) + Pulse.ar([freq+2,freq],0.5,0.5);
+
+	osc = osc * SinOsc.ar(rate/ sus,0,0.5,1);
+
+	env = EnvGen.ar(Env(times:[sus * 0.55,sus * 0.55]),doneAction:2);
+
+	osc = osc * env * amp * 0.25;
+
+	Out.ar(0, Pan2.ar(osc, pan));
+
+}).add;
 
 SynthDef(\jazzbass, { |rate=1, sus = 1, freq=300,amp=1|
 
@@ -612,6 +642,35 @@ SynthDef(\woop, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
 
 	Out.ar(0, Pan2.ar(son * amp, pan));
 }).writeDefFile;
+
+SynthDef(\orient, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
+
+	var son;
+
+	son  = LFPulse.ar([freq,freq+1], [0.5,1], [0.25,0.1]);
+
+	son = son * EnvGen.ar(Env.perc(0.01, sus, curve:-4), doneAction:2);
+
+	son = FreeVerb.ar(son, 0.7, room:10);
+
+
+	Out.ar(0, Pan2.ar(son * amp * 0.5, pan));
+}).add;
+
+SynthDef(\py, { |rate=1, sus = 1, freq=300, amp=1, pan=0|
+
+	var son;
+
+	son  = LFCub.ar([freq,freq+1], [0.5,1], [0.25,0.1]) * 2;
+
+	son = son * EnvGen.ar(Env.perc(0.01, sus, curve:-4), doneAction:2);
+
+	son = FreeVerb.ar(son, 0.7, room:10);
+
+
+	Out.ar(0, Pan2.ar(son * amp, pan));
+}).add;
+
 
 
 )

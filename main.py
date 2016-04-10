@@ -1,10 +1,10 @@
-    #!/usr/bin/python
+#!/usr/bin/python
 
 """
     Copyright Ryan Kirkbride 2015
 
     This is a very simple way to import FoxDot and combine it with the Tk
-    interface module located in the App folder.
+    interface module located in the Interface folder.
 
     Overwriting the App.submit() method is how you connect the app to the
     FoxDot environment. Any other methods that involve communicating with
@@ -15,7 +15,7 @@
 if __name__ == "__main__":
 
     from FoxDot import Code
-    from App import App
+    from FoxDot.Interface import App
 
     # Load FoxDot Modules into the environment
 

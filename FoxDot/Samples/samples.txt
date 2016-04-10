@@ -72,8 +72,3 @@ _
 >
 , /foxdot/ting.wav
 . /foxdot/pop.mp3
-
-
-
-
-

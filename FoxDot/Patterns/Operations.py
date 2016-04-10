@@ -5,17 +5,6 @@ import Base
     Module for key operations on Python lists or FoxDot Patterns
 """
 
-def modi(array, i, debug=0):
-    """ Returns the modular index i.e. modi([0,1,2],4) will return 1 """
-    try:
-        return array[i % len(array)]
-    except:        
-        return array
-
-def max_length(*patterns):
-    """ Returns the largest length pattern """
-    return max([len(p) for p in patterns])
-
 #: The following return operand patterns
 
 class POperand:
@@ -26,9 +15,9 @@ class POperand:
 
     def __call__(self, A, B):
 
-        # Trivial case
+        # Adding a non-pattern
 
-        if isinstance(B, (int, float)):
+        if not isinstance(B, Base.metaPattern):
 
             return A.__class__([self.operate(a, B) for a in A])
 
@@ -113,6 +102,18 @@ PPow = POperand(Pow) # a ^ b also calls this
 #
 #
 #
-#
+
+#: Misc. Operations
+
+def modi(array, i, debug=0):
+    """ Returns the modular index i.e. modi([0,1,2],4) will return 1 """
+    try:
+        return array[i % len(array)]
+    except:        
+        return array
+
+def max_length(*patterns):
+    """ Returns the largest length pattern """
+    return max([len(p) for p in patterns])  
 
 

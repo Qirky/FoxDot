@@ -18,8 +18,6 @@ from consolewidget import console
  
 # App object
 
-DEFAULT_FONT = "Ubuntu Mono"
-
 class App:
 
     def __init__(self, widget_title):
@@ -71,19 +69,19 @@ class App:
         self.text.focus_set()
 
         # Key bindings
-        self.text.bind("<Control-Return>", self.get_code)
-        self.text.bind("<Control-a>", self.selectall)
-        self.text.bind("<Control-.>", self.killall)
-        self.text.bind("<Control-v>", self.paste)
-        self.text.bind("<Return>", self.newline)
-        self.text.bind("<BackSpace>", self.delete)
-        self.text.bind("<Delete>", self.delete2)
-        self.text.bind("<Tab>", self.tab)
-        self.text.bind("<Control-]>", self.indent)
-        self.text.bind("<Control-[>", self.unindent)
-        self.text.bind("<Control-=>", self.zoom_in)
-        self.text.bind("<Control-minus>", self.zoom_out)
-        self.text.bind("<Key>", self.keypress)
+        self.text.bind("<Control-Return>",  self.get_code)
+        self.text.bind("<Control-a>",       self.selectall)
+        self.text.bind("<Control-.>",       self.killall)
+        self.text.bind("<Control-v>",       self.paste)
+        self.text.bind("<Return>",          self.newline)
+        self.text.bind("<BackSpace>",       self.delete)
+        self.text.bind("<Delete>",          self.delete2)
+        self.text.bind("<Tab>",             self.tab)
+        self.text.bind("<Control-]>",       self.indent)
+        self.text.bind("<Control-[>",       self.unindent)
+        self.text.bind("<Control-=>",       self.zoom_in)
+        self.text.bind("<Control-minus>",   self.zoom_out)
+        self.text.bind("<Key>",             self.keypress)
 
         # Automatic brackets
 
@@ -100,8 +98,11 @@ class App:
 
         # Set tag names and config for specific colours
 
-        for name, colour in colour_map.items():
-            self.text.tag_config(name, foreground=colour)
+        for tier in tag_weights:
+
+            for tag_name in tier:
+
+                self.text.tag_config(tag_name, foreground=colour_map[tag_name])
 
         # Create lable for console
 
@@ -161,21 +162,11 @@ class App:
 
                 self.text.tag_remove(tag_name, start, end)
 
-            # 3. Get tags
+            # 3. Re-apply tags
 
-            matched_tags = dict([(tag_name, (start, end)) for tag_name, start, end in findstyles(thisline)])
-
-            # 4. Update IDE in order of style 'weights'
-
-            for styles in re_weights:
-
-                for tag_name in styles:
-
-                    if tag_name in matched_tags:
-
-                        self.text.tag_add(tag_name,
-                                          index(line, matched_tags[tag_name][0]), # start
-                                          index(line, matched_tags[tag_name][1])) # end
+            for tag_name, start, end in findstyles(thisline):
+                
+                self.text.tag_add(tag_name, index(line, start), index(line, end))
 
         return "break"
                     
