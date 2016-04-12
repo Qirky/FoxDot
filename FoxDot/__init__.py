@@ -118,9 +118,3 @@ class Var(TimeVar):
         TimeVar.__init__(self, values, dur, Clock)
 
 var = Var
-
-
-
-
-
-

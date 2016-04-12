@@ -1,5 +1,5 @@
+from sys import maxint as MAX_SIZE
 from Patterns import Pattern, asStream
-from Patterns.Operations import modi
 import Patterns.Operations as op
 import Code
 
@@ -31,6 +31,22 @@ def iRamp(start=0, end=1, dur=8, step=0.25):
    
 class TimeVar(Code.LiveObject):
 
+    """
+        Time-Dependent Variable Base Class
+        ==================================
+
+        - Function of time
+        - Duck typing
+
+        - Explain inf stages: 0, 1, 2, 3
+
+            - Stage 0: No inf value present
+            - Stage 1: inf value is present but other values haven't been accessed yet
+            - Stage 2: Starting values have been accessed so we are free to return a value for inf duration
+            - State 3: Returning the inf value
+
+    """
+
     def __init__(self, values, dur=4, metro=None):
 
         self.metro  = metro
@@ -38,12 +54,11 @@ class TimeVar(Code.LiveObject):
         self.time   = []
         self.dur    = dur
 
-        # Used to stop cycling
-        self.has_inf = False
-        self.inf     = False
-        self.inf_val = None
+        self.inf_found = _inf.zero
+        self.inf_value = None
 
         # Dynamic method for calculating values
+
         self.evaluate = fetch(op.Nil)
         self.dependency = 1
         
@@ -141,39 +156,32 @@ class TimeVar(Code.LiveObject):
         """ Updates the TimeVar with new values """
 
         #: If updated with a TimeVar object, copy the attribute dict
+        
         if isinstance(values, self.__class__):
             self.__dict__ = values.__dict__
             return self
-
-        if dur is not None:
-            self.dur=asStream(dur)
-
-        if InfinityObj in self.dur:
-            if self.dur[-1] != InfinityObj:
-                raise
-            else:
-                self.has_inf = True
-
-        if isinstance(values, str):
-            values = [values]
+        
+        # if isinstance(values, str): values = [values]
 
         self.data = []
         self.time = []
         a, b = 0, -1
 
+        #: Update the durations of each state
+        
+        self.dur = self.dur if dur is None else asStream(dur)
+
+        if dur is not None:
+
+            if any([isinstance(i, _inf) for i in dur]):
+
+                self.inf_found = _inf.here
+
+            self.dur = dur
+
         for i, val in enumerate(asStream(values)):
-
-            if isinstance(modi(self.dur,i), _infinity):
-
-                # Replace infinity with a reasonable amount of time
-                
-                this_dur = GeomFill(Stretch(self.dur, i))[-1]
-                
-            else:
-
-                # Get the duration for this value
-                
-                this_dur = modi(self.dur, i)
+              
+            this_dur = op.modi(self.dur, i)
 
             a = b + 1
             b = a + (self.metro.steps * this_dur) - 1
@@ -197,25 +205,36 @@ class TimeVar(Code.LiveObject):
     def now(self):
         """ Returns the value from self.data for time t in self.metro """
 
-        if self.inf:
-            return self.inf_value
+        if self.inf_found == 3:
 
-        t = self.metro.now() % self.length()
+            val = self.inf_value
 
-        val = 0
+        else:
 
-        for i in range(len(self.data)):
+            t = self.metro.now() % self.length()
 
-            val = self.data[i]
-            
-            if self.time[i][0] <= t <= self.time[i][1]:
+            val = 0
 
-                break
+            for i in range(len(self.data)):                
+
+                val = self.data[i]
                 
-                if modi(self.dur, i) == InfinityObj:
-                    self.inf = True
-                    self.inf_value = val
+                if self.time[i][0] <= t <= self.time[i][1]:
 
+                    if isinstance(op.modi(self.dur, i), _inf):
+
+                        if self.inf_found == _inf.wait:
+
+                            self.inf_found = _inf.done
+
+                            self.inf_value = val
+
+                    elif self.inf_found == _inf.here:
+
+                        self.inf_found = _inf.wait
+
+                    break            
+                
         return self.calculate(val)
 
     def copy(self):
@@ -230,25 +249,14 @@ class TimeVar(Code.LiveObject):
 
         return self.data
 
-def InfinityObj():
-    return
 
-class _infinity:
+class _inf(int):
     """ Used in TimeVars to stay on certain values until re-evaluated """
+    zero = 0
+    here = 1
+    wait = 2
+    done = 3
+    def __new__(cls):
+        return int.__new__(cls, MAX_SIZE)
 
-    def __init__(self):
-
-        pass
-
-    def __str__(self):
-        return "<TimeVar.Infinity Object>"
-
-    def __eq__(self, other):
-
-        return other == InfinityObj
-
-    def __ne__(self, other):
-
-        return other != InfinityObj
-
-inf = Inf = _infinity()
+inf = _inf()

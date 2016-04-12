@@ -247,10 +247,32 @@ class TempoClock:
 
         return
 
+class Infinity(int):
+    """
+        Infinity Object
+        ===============
+
+        Is the length of time of one clock cycle
+
+    """
+
+    def __new__(cls, metro):
+
+        return int.__new__(cls, len(metro))
+
+
 import Code
 line = "\n"
 
 class When:
+    """
+
+        When Statements
+        ===============
+
+        TODO
+
+    """
 
     def __init__(self, test, code, step=0.25):
         """ code is exectuted. test is evaluated every quarter beat by default """

@@ -17,4 +17,5 @@ setup(name='FoxDot',
       package_data={'FoxDot':['Settings/*',
                               'SuperCollider/*',
                               'Samples/*',
-                              'Samples/foxdot/*'] } )
+                              'Samples/foxdot/*',
+                              'Interface/*.ttf'] } )
