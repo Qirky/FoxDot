@@ -1,5 +1,6 @@
 from sys import maxint as MAX_SIZE
 from Patterns import Pattern, asStream
+import Patterns.Sequences as pat
 import Patterns.Operations as op
 import Code
 
@@ -20,8 +21,13 @@ def fetch(func):
 # Misc. Functions
 
 def Ramp(start=0, end=1, dur=8, step=0.25):
+    # Return var(P(range(32))/32 | [0],[1/2]*32 + [inf])
     size = dur/float(step)
     return var([start + end * n/size for n in range(int(size))], step)
+
+
+    
+    
 
 def iRamp(start=0, end=1, dur=8, step=0.25):
     size = dur/float(step)
@@ -168,16 +174,14 @@ class TimeVar(Code.LiveObject):
         a, b = 0, -1
 
         #: Update the durations of each state
-        
-        self.dur = self.dur if dur is None else asStream(dur)
 
         if dur is not None:
 
-            if any([isinstance(i, _inf) for i in dur]):
+            self.dur = asStream(dur)
+
+            if any([isinstance(i, _inf) for i in self.dur]):
 
                 self.inf_found = _inf.here
-
-            self.dur = dur
 
         for i, val in enumerate(asStream(values)):
               
@@ -189,9 +193,9 @@ class TimeVar(Code.LiveObject):
             self.data.append( val )
             self.time.append((a,b))
 
-            # The contained data should be a Pattern
+        # The contained data should be a Pattern
 
-            self.data = asStream( self.data )
+        self.data = asStream( self.data )
 
         return self
 
@@ -250,6 +254,38 @@ class TimeVar(Code.LiveObject):
         return self.data
 
 
+# Functions that return a new TimeVar
+
+def Line(var, n=8):
+    """
+
+        Adds interval steps to a TimeVar
+
+        Line(var([0,4],1), 4)  -> var([0,1,2,3,4,3,2,1],[1/4])
+
+    """
+
+    #Return var(P(range(0,32,1))/32 | [0],[1/2]*32 + [inf])
+
+    # 1. Iterate over the pairs of values
+
+    size = len(var.data)
+
+    data = pat.P()
+
+    for i in range(size):
+        a = var.data[i]
+        b = var.data[(i + 1) if i < (size-1) else 0]
+            
+        data = data | pat.Prange(a * n, b * n, (b-a)) / n
+
+    dur = pat.P()
+    for d in var.dur:
+        dur |= pat.P(d).loop(n) / n
+
+    return TimeVar(data, dur, var.metro)    
+
+
 class _inf(int):
     """ Used in TimeVars to stay on certain values until re-evaluated """
     zero = 0
@@ -258,5 +294,21 @@ class _inf(int):
     done = 3
     def __new__(cls):
         return int.__new__(cls, MAX_SIZE)
+    def __add__(self, other):
+        return self
+    def __radd__(self,other):
+        return self
+    def __sub__(self, other):
+        return self
+    def __rsub__(self, other):
+        return self
+    def __mul__(self, other):
+        return self
+    def __rmul__(self, other):
+        return self
+    def __div__(self, other):
+        return self
+    def __rdiv__(self, other):
+        return 0
 
 inf = _inf()

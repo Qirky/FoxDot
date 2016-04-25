@@ -182,8 +182,8 @@ class metaPattern(object):
         return self.data[0] == prefix
 
     def copy(self):
-        new = self.data
-        return self.__class__(new)
+        new = [item for item in self.data]
+        return Pattern(new)
     
     def items(self):
         for i, data in enumerate(self.data):
@@ -209,18 +209,18 @@ class metaPattern(object):
         data = list(self)
         for item in pattern:
             data.append(item)
-        return self.__class__(data)
+        return Pattern(data)
 
     def loop(self, n):
         """ Repeats this pattern n times """
         data = []
         for i in range(n):
             data += list(self)
-        return self.__class__(data)
+        return Pattern(data)
 
     def sort(self):
         """ Used in place of sorted(pattern) to force type """
-        return self.__class__(sorted(self.data))
+        return Pattern(sorted(self.data))
 
     def choose(self):
         """ Returns one randomly selected item """

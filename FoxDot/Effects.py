@@ -44,6 +44,8 @@ class Handler:
     def add(self, name, **kwargs):
         """ Add an effect SynthDef """
 
+        kwargs["sus"] = kwargs["sus"] if "sus" in kwargs else self.owner.sus
+
         self.data[name] = kwargs
 
         return self.owner

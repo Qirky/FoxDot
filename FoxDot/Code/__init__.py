@@ -1,5 +1,5 @@
 from __future__ import division
-from types import CodeType
+from types import CodeType, FunctionType
 from traceback import format_exc as error_stack
 import when_statements, player_objects, sample_players
 import assignments

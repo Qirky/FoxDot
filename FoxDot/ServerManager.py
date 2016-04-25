@@ -9,7 +9,7 @@
 """
 
 from OSC import *
-client = OSCClient()
+
 
 try:
 
@@ -23,12 +23,16 @@ except:
     ADDRESS, PORT = "localhost", 57110
 
 
-client.connect( (ADDRESS, PORT) )
-
 class ServerManager:
 
-    def __init__(self):
-        
+    def __init__(self, addr=ADDRESS, port=PORT):
+
+        self.addr = addr
+        self.port = port
+
+        self.client = OSCClient()
+        self.client.connect( (self.addr, self.port) )        
+
         self.node = 1000
 
     def nextnodeID(self):
@@ -40,24 +44,36 @@ class ServerManager:
         message = OSCMessage("/s_new")
         packet[1] = self.nextnodeID()
         message.append(packet)
-        client.send( message )
+        self.client.send( message )
         return
 
     def send(self, message):
-        client.send(OSCMessage(message))
+        self.client.send(OSCMessage(message))
         return
 
     def free_node(self, node):
         message = OSCMessage("/n_free")
         message.append(node)
-        client.send( message )
+        self.client.send( message )
         return
 
     def bufferRead(self, bufnum, path):
         message = OSCMessage("/b_allocRead")
         message.append([bufnum, path])
-        client.send( message )
+        self.client.send( message )
         return
+
+
+class SclangManager(ServerManager):
+    def __init__(self, addr=ADDRESS, port=PORT+10):
+        ServerManager.__init__(self, addr, port)
+    def sendsclang(self, code, cmd='/foxdot'):
+        msg = OSCMessage()
+        msg.setAddress(cmd)
+        msg.append(code)
+        self.client.send(msg)
+        return
+
 
 #####
 

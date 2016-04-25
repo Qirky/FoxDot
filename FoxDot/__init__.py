@@ -14,6 +14,7 @@
 """
 from random import choice as choose
 
+from SuperCollider import *
 from TempoClock import *
 from ServerManager import *
 from Players import *
@@ -36,9 +37,12 @@ import Scale
 """
         
 Server = ServerManager()
+Sclang = SclangManager()
 Clock = TempoClock()
 Buffers = BufferManager(Server)
 Buffers.load()
+SynthDefs = SynthDefManager(Sclang)
+SynthDefs.load()
 
 """
     Below are the classes for the three main aspects of FoxDot:

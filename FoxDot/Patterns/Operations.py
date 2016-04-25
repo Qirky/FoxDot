@@ -19,7 +19,7 @@ class POperand:
 
         if not isinstance(B, Base.metaPattern):
 
-            return A.__class__([self.operate(a, B) for a in A])
+            return Base.Pattern([self.operate(a, B) for a in A])
 
         # Multiple patterns
 

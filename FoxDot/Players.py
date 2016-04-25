@@ -300,9 +300,17 @@ class PLAYER(Code.LiveObject):
         
         message = [effect, 0, 1, 1]
 
-        for arg, val in self.fx[effect].items():
+        for key, val in self.fx[effect].items():
 
-            message += [arg, val]
+            # Get any values if using a list / pattern
+
+            val = modi(val, self.event_n)
+
+            if key == "sus":
+
+                val = val * self.metro.beat_dur()
+
+            message += [key, float(val)]
 
         return message
 

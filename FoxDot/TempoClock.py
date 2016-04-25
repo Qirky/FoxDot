@@ -201,6 +201,8 @@ class TempoClock:
 
     def when(self, a, b, step=None):
 
+        print a, b
+
         if step is not None:
 
             when = When(a, b, step)
@@ -208,6 +210,8 @@ class TempoClock:
         else:
 
             when = When(a, b)
+
+        print when in self.when_statements
 
         if when not in self.when_statements:
 
@@ -310,7 +314,7 @@ class When:
         return
 
     def run(self):
-        if type(self.code) == Code.func_type:
+        if type(self.code) == Code.FunctionType:
             self.code()
         else:
             Code.execute(self.code, verbose=False)
