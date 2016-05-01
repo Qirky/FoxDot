@@ -39,11 +39,7 @@ class PLAYER(Code.LiveObject):
         self.quantise = False
         self.stopping = False
         self.stop_point = 0
-        self.following = None        
-
-        # Dictionary to store any effect arguments
-
-        self.fx = Effects.Handler(self)
+        self.following = None
 
         # Sets the clock off a beat amount
 
@@ -77,11 +73,12 @@ class PLAYER(Code.LiveObject):
         self.root   = self.attr['root']     =  [0]
         self.degree = self.attr['degree']   =  [0]
         self.oct    = self.attr['oct']      =  [5]
-        self.amp    = self.attr['amp']      =  [0.5]
+        self.amp    = self.attr['amp']      =  [1]
         self.pan    = self.attr['pan']      =  [0]
         self.sus    = self.attr['sus']      =  [1]
         self.rate   = self.attr['rate']     =  [1]
         self.buf    = self.attr['buf']      =  [0]
+        self.echo   = self.attr['echo']     =  [0]
         self.freq   = [0]
 
     # --- Startup methods
@@ -129,7 +126,13 @@ class PLAYER(Code.LiveObject):
                     
                     dur = modi(self.attr['dur_val'], count)
 
-                next_step += int(float(dur) * self.metro.steps)
+                try:
+
+                    next_step += int(float(dur) * self.metro.steps)
+
+                except:
+
+                    print self, dur
 
                 # Increase duration counter
 
@@ -275,21 +278,27 @@ class PLAYER(Code.LiveObject):
     def osc_message(self, index=0, head=[]):
         """ Creates an OSC packet to play a SynthDef in SuperCollider """
 
-        # nodeID = 0
+        # Initial message plus custom head and echo variable
 
-        message = [self.SynthDef, 0, 1, 1] + head
+        message = [self.SynthDef, 0, 1, 1] + head + ['echoON', int(self.attr['echo'] > 0)]
 
         for key in self.attr:
 
             if key not in ('degree', 'oct', 'freq', 'dur'):
-                
-                val = modi(self.event[key], index)
 
-                if key == "sus":
+                try:
+                    
+                    val = modi(self.event[key], index)
 
-                    val = val * self.metro.beat_dur()
+                    if key == "sus":
 
-                message += [key, float(val)]
+                        val = val * self.metro.beat_dur()
+
+                    message += [key, float(val)]
+
+                except:
+
+                    pass
 
         return message
 
@@ -324,12 +333,6 @@ class PLAYER(Code.LiveObject):
         for i in range(self.tupleN()):
             
             self.server.sendOSC( self.osc_message( i )  )
-
-            # Add any effects
-            
-            for fx in self.fx:
-
-                self.server.sendOSC( self.osc_effect( fx ) )
 
         return
 
@@ -720,7 +723,7 @@ class SAMPLE_PLAYER(PLAYER):
 
         PLAYER.update(self)
 
-        setattr(self, "degree", degree)
+        setattr(self, "degree", degree if len(degree) > 0 else " ")
 
         self.pat_to_buf()
 
@@ -737,7 +740,7 @@ class SAMPLE_PLAYER(PLAYER):
 
     def pat_to_buf(self):
         """ Calculates the durations and buffer numbers based on the characters in the degree attribute """
-        rhythm = PRhythm(self.degree, self.dur)
+        rhythm = PDur(self.degree, self.dur)
 
         self.attr['dur_val'] = self.dur_val = rhythm
  
@@ -862,15 +865,36 @@ class Group:
         return len(self.players)
 
     def __setattr__(self, name, value):
+        """ Updates the the attributes for all player in the group. If value is iterable,
+            each value in the list is applied to the players in turn. To set an attribute
+            to a pattern, either enclose the pattern in brackets or use Group.setall()"""
         try:
-            for p in self.players:
+            for i, p in enumerate(self.players):
+                try:
+                    if type(value) is tuple:
+                        setattr(p, name, value)
+                    else:
+                        setattr(p, name, modi(value, i))
+                except:
+                    print "AttributeError: '%s' object has no attribute '%s'" % (str(p), name)
+        except:
+            self.__dict__[name] = value 
+        return self
+
+    def setall(self, name, value):
+        try:
+            for i, p in enumerate(self.players):
                 try:
                     setattr(p, name, value)
                 except:
                     print "AttributeError: '%s' object has no attribute '%s'" % (str(p), name)
         except:
             self.__dict__[name] = value 
-        return self
+        return self        
+
+    def __getattr__(self, name):
+        """ Returns a Pattern object containing the desired attribute for each player in the group  """
+        return P([player.__dict__[name] for player in self.players])
 
     def call(self, method, args):
         for p in self.players:

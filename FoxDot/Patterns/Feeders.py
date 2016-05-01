@@ -14,5 +14,14 @@ def lshift(player):
 def rshift(player):
     player.rshift()
 
-def shuf(player):
-    player.degree = Shuf(player.degree)
+def shuffle(player):
+
+    player.degree = player.degree.shuf()
+
+    try:
+
+        player.pat_to_buf()
+
+    except:
+
+        pass

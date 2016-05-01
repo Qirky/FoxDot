@@ -201,8 +201,6 @@ class TempoClock:
 
     def when(self, a, b, step=None):
 
-        print a, b
-
         if step is not None:
 
             when = When(a, b, step)
@@ -210,8 +208,6 @@ class TempoClock:
         else:
 
             when = When(a, b)
-
-        print when in self.when_statements
 
         if when not in self.when_statements:
 
@@ -221,7 +217,7 @@ class TempoClock:
 
             i = self.when_statements.index( when )
 
-            self.when_statements[i].update( when.code )
+            self.when_statements[i].update( when.code, when.step )
 
         return
 
@@ -286,12 +282,12 @@ class When:
 
         self.test = test
         self.step = step
-    
-        # Test for syntax errors
-        if type(code) == str:
-            self.code = compile(code, "FoxDot" , 'exec')
-        else:
-            self.code = code
+        self.code = self.check(code)
+
+    @staticmethod
+    def check(code):
+        """ Test for syntax errors """
+        return compile(code, "FoxDot" , 'exec') if type(code) == str else code
         
     def __mod__(self, n):
         """ Returns 1 if n % 1/step is 0 """
@@ -309,8 +305,13 @@ class When:
     def __eq__(self, other):
         return str(self) == str(other)
 
-    def update(self, new):
-        self.code = new
+    def update(self, new, step=0.25):
+        if isinstance(new, When):
+            self.code = self.check(new.code)
+            self.step = new.step
+        else:
+            self.code = self.check(new)
+            self.step = step
         return
 
     def run(self):

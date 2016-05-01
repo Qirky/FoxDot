@@ -105,6 +105,21 @@ PPow = POperand(Pow) # a ^ b also calls this
 
 #: Misc. Operations
 
+def LCM(*args):
+    """ Lowest Common Multiple """
+    # Base case
+    if len(args) == 1: return args[0]
+
+    X = list(args)
+    
+    while any([X[0]!=K for K in X]):
+
+        i = X.index(min(X))
+        X[i] += args[i]        
+
+    return X[0]
+
+
 def modi(array, i, debug=0):
     """ Returns the modular index i.e. modi([0,1,2],4) will return 1 """
     try:

@@ -256,24 +256,22 @@ class TimeVar(Code.LiveObject):
 
 # Functions that return a new TimeVar
 
-def Line(var, n=8):
+def Line(var, n=8, circular=False):
     """
 
         Adds interval steps to a TimeVar
 
-        Line(var([0,4],1), 4)  -> var([0,1,2,3,4,3,2,1],[1/4])
+        Grade(var([0,4],1), 4)  -> var([0,1,2,3,4,3,2,1],[1/4])
 
     """
-
-    #Return var(P(range(0,32,1))/32 | [0],[1/2]*32 + [inf])
-
+    
     # 1. Iterate over the pairs of values
 
     size = len(var.data)
 
     data = pat.P()
 
-    for i in range(size):
+    for i in range(size - int(not circular)):
         a = var.data[i]
         b = var.data[(i + 1) if i < (size-1) else 0]
             
@@ -283,7 +281,8 @@ def Line(var, n=8):
     for d in var.dur:
         dur |= pat.P(d).loop(n) / n
 
-    return TimeVar(data, dur, var.metro)    
+    return TimeVar(data, dur, var.metro)
+
 
 
 class _inf(int):
