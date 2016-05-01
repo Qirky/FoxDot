@@ -1,12 +1,13 @@
-class Parent:
-    s = [0,0]
-        
-class Child(Parent):
-    self.s[1] = 2
+def LCM(*args):
+    """ Lowest Common Multiple """
+    # Base case
+    if len(args) == 1: return args[0]
 
-a = Child()
+    X = list(args)
+    
+    while any([X[0]!=K for K in X]):
 
-class Girl(Parent):
-    s[1] = 2
+        i = X.index(min(X))
+        X[i] += args[i]        
 
-print Girl.s
+    return X[0]

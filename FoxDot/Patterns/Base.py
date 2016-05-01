@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, shuffle
 from Operations import *
 from ..Code.parse import brackets, closing_brackets
 
@@ -165,8 +165,11 @@ class metaPattern(object):
     def dur(self, val):
         """ Returns a duration value relative to the type of pattern. Most patterns return val unchanged """
         return val               
-                
-        return PGroup([val for x in self])
+
+    def shuf(self):
+        shuffle(self.data)
+        return self
+    
     def contains_nest(self):
         """ Returns true if the pattern contains a nest """
         pass
@@ -327,7 +330,8 @@ def Place(data):
 
         #: Works out the largest sub-patterns and loops the overall pattern until it is stretched out
         
-        sub = max([len(item) for item in data if nested(item)])
+        #sub = max([len(item) for item in data if nested(item)])
+        sub = LCM(*[len(item) for item in data if nested(item)])
         new = []
 
         for i in range( sub ):

@@ -15,24 +15,32 @@ class SynthDef:
 
     def __init__(self):
 
-        self.default = {    "amp"   : 0,
-                            "sus"   : 1,
-                            "pan"   : 0,
-                            "freq"  : 0,
-                            "rate"  : 0,
-                            "lpf"   : 20000,
-                            "hpf"   : 0,
-                            "delay" : 0,
-                            "verb"  : 0.25,
-                            "room"  : 0.5,
-                            "vib"   : 0,
-                            "depth" : 0,
-                            "slide" : 0,
+        # Default behaviour
+        
+        self.init = [ ("freq","Line.ar(freq * slidefrom, freq * (1 + slide), sus)"),
+                      ("freq","Vibrato.kr(freq, rate: vib, depth: depth, delay:vibDelay, rateVariation: vibVar, depthVariation: depthVar)")]
+
+        self.default = {    "amp"       : 1,
+                            "sus"       : 1,
+                            "pan"       : 0,
+                            "freq"      : 0,
+                            "rate"      : 0,
+                            "lpf"       : 20000,
+                            "hpf"       : 0,
+                            "delay"     : 0,
+                            "verb"      : 0.25,
+                            "echo"      : 0,
+                            "echoON"    : 0,
+                            "room"      : 0.5,
+                            "vib"       : 0,
+                            "vibDelay"  : 0,
+                            "vibVar"    : 0.04,
+                            "depthVar"  : 0.1,
+                            "depth"     : 0.02,
+                            "slide"     : 0,
                             "slidefrom" : 1 }    
 
-        self.arg = {    "osc"  : [],
-                        "freq" : ["Line.ar(freq * slidefrom, freq * (1 + slide), sus)",
-                                  "Vibrato.kr(freq, rate: vib)"] }
+        self.arg =  { "osc"  : [] }
         
         self.env = Env.perc()
 
@@ -58,8 +66,9 @@ class SynthDef:
 
         # Default frequency modulation
 
-        s += "freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);"
-        s += "freq = Vibrato.kr(freq, rate: vib);"
+        for key, default in self.init:
+
+            s += "%s = %s;" % (key, default)
 
         # Add any changes to arguments first
 
@@ -87,15 +96,25 @@ class SynthDef:
 
         s += "osc = HPF.ar(osc, hpf);"
 
-        s += "osc = LPF.ar(osc, lpf);"
+        s += "osc = LPF.ar(osc, lpf + 1);"
 
         # Get the envelope
+
+        s += "sus = sus + echo;"
             
         s += "env = %s;" % str(self.env)
 
+        s += "osc = osc * env;"
+
+        # Echo
+
+        #s += "echoON = (echo > 0).asInteger;"
+
+        s += "osc = osc + (echoON * CombN.ar(osc, echo * 0.1, echo * 0.1, (echo * 0.5) * sus, 1));"
+        
         # Set the pan and reverb and get it playing!
 
-        s += "Out.ar(0,Pan2.ar( %s, pan));" % "FreeVerb.ar(osc * env, verb, room)" if self.default["verb"] > 0 else "osc * env"
+        s += "Out.ar(0,Pan2.ar( %s, pan));" % "FreeVerb.ar(osc, verb, room)"
 
         s += "} ).add;"
 
@@ -109,7 +128,7 @@ class EnvGen:
     """ SuperCollider EnvGen """
     def __init__(self, string):
         self.env = string
-    def __call__(self, lvl="amp", sus=(1/2,1/2), curve="'lin'"):
+    def __call__(self, lvl="amp", sus=(1/2,1/2), curve="\lin"):
         return self.env % ("Env([0,%s,0],[sus * %s, sus * %s], %s)" % (str(lvl), str(sus[0]), str(sus[1]), str(curve)))
     def sclang(self, raw):
         return self.env % ("Env(%s)" % raw)
@@ -120,9 +139,42 @@ class EnvGen:
     def sine(self, sus="sus"):
         return self.env % ("Env.sine(%s)" % str(sus))
     def block(self, lvl="amp", sus="sus"):
-        return self.env % ("Env([0,%s,%s,0],[0,%s,0])" % (str(lvl),str(lvl),str(sus)))
+        return self.env % ("Env([0,%s,%s,0],[0,%s,0])" % (str(lvl), str(lvl), str(sus)))
+    def reverse(self, lvl="amp", sus="sus"):
+        return self.env % ("Env([0.001,%s,0.01],[%s,0], \exp)" % (str(lvl), str(sus)))
 
 Env = EnvGen("EnvGen.ar(%s.delay(delay), doneAction:2)")
+
+class sample_player(SynthDef):
+    """ Used for playing back samples """
+    def __init__(self):
+        SynthDef.__init__(self)
+
+        # Define new defaults for sample player
+        self.init = []
+        
+        self.default["buf"]   = 0
+        self.default["scrub"] = 0
+        self.default["grain"] = 0
+        self.default["room"]  = 0.1
+        self.default["rate"]  = 1
+
+        # Imitates "scratching" of a vinyl record
+        
+        self.arg["rate"] = "(scrub * LFPar.kr(scrub / 4)) + rate - scrub"
+
+        # Breaks up the sample into smaller chunks
+
+        #self.arg["amp"] = "amp * Blip.ar(2 ** grain, 0, 0.5, 0.5) * 3"
+        self.arg["amp"] = "amp * 3"
+
+        # Loads the sample
+
+        self.arg["osc"] = "PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate) * amp"
+
+        # Set the envelope to account for any effects on the buffer
+
+        self.env = Env.block(sus="sus * 2")
 
 class bass(SynthDef):
     def __init__(self):
@@ -152,7 +204,7 @@ class rave(SynthDef):
 class pads(SynthDef):
     def __init__(self):
         SynthDef.__init__(self)
-        self.arg["osc"] = "SinOsc.ar(freq, mul:amp / 2) + SinOsc.ar(freq + 2, mul:amp / 8)"
+        self.arg["osc"] = "SinOsc.ar(freq, mul:amp) + SinOsc.ar(freq + 2, mul:amp)"
 
 class scatter(SynthDef):
     def __init__(self):
@@ -175,6 +227,7 @@ class bell(SynthDef):
     def __init__(self):
         SynthDef.__init__(self)
         self.arg["amp"] = "amp*4"
+        self.arg["sus"] = "sus*2.5"
         self.arg["osc"] =  """Klank.ar(`[
                                 // frequency ratios
                                 [0.501, 1, 0.7,   2.002, 3, 9.6,   2.49, 11, 2.571,  3.05, 6.242, 12.49, 13, 16, 24],
@@ -187,7 +240,7 @@ class bell(SynthDef):
 
                                 #osc = osc * EnvGen.ar(Env([0,1,1,0],[0, 2, 0]), doneAction:2) * amp * 8"""
 
-        self.default["verb"] = 0.33
+        self.default["verb"] = 0.5
         self.env = Env.block()
 
 class soprano(SynthDef):
@@ -207,21 +260,16 @@ class dub(SynthDef):
         self.arg["osc"] = "LFTri.ar(freq, mul:amp) + SinOscFB.ar(freq,mul: amp)"
         self.env = Env.sine()
 
-class rev(SynthDef):
-    def __init__(self):
-        SynthDef.__init__(self)
-        self.arg["amp"] = "amp * 2"
-        self.arg["osc"] = "SinOsc.ar(freq)"
-        self.env = Env(sus=(0.9,0.1), curve=20)
-
 
 class viola(SynthDef):
     def __init__(self):
         SynthDef.__init__(self)
-        self.default["verb"] = 0.75
-        self.arg["osc"] = "PMOsc.ar(freq, Vibrato.kr(freq, rate:vib, depth:0.008, delay: sus/8), 10, mul:amp / 8)"
-        self.env = Env.perc("1/4 * sus", "2 * sus")
-
+        self.init=[]
+        self.default["verb"] = 0.33
+        self.default["vib"] = 6
+        self.arg["osc"] = "PMOsc.ar(freq, Vibrato.kr(freq, rate:vib, depth:0.008, delay: sus * 0.25), 10, mul:amp / 2)"
+        self.env = Env.perc("1/4 * sus", "2.5 * sus")
+        
 ##class distort(SynthDef):
 ##    def __init__(self):
 ##        SynthDef.__init__(self)
@@ -262,10 +310,11 @@ class pluck(SynthDef):
     def __init__(self):
         SynthDef.__init__(self)
         self.arg["amp"] = "(amp*2) + 0.00001"
-        self.arg["freq"] = ["freq.cpsmidi","freq + (LFNoise2.ar(20).range(-1,1) * (1/8))"]
-        self.arg["osc"] = ["SinOsc.ar((freq * [1,1.002]).midicps, phase: VarSaw.ar(freq.midicps, width: Line.ar(1,0.2,2))) * 0.3",
+        self.arg["freq"] = ["freq","freq + (LFNoise2.ar(50).range(-2,2))"]
+        self.arg["osc"] = ["SinOsc.ar((freq * [1,1.002]), phase: VarSaw.ar(freq, width: Line.ar(1,0.2,2))) * 0.3",
                            "osc * XLine.ar(amp,(amp)/10000,sus*4) * 0.3"]
         self.env = Env.block(sus="sus*1.5")
+        #print self.SynthDef()
 
 class siren(SynthDef):
     """ Credit: Unknown (Thor?) """
@@ -284,10 +333,17 @@ class siren(SynthDef):
 class ripple(SynthDef):
     def __init__(self):
         SynthDef.__init__(self)
-        self.arg["amp"] = "amp/4"
+        self.arg["amp"] = "amp/6"
         self.arg["osc"] = ["Pulse.ar([freq/4, freq/4+1],0.2,0.25) + Pulse.ar([freq+2,freq],0.5,0.5)",
                            "osc * SinOsc.ar(rate/ sus,0,0.5,1)"]
         self.env = Env(sus=(0.55,0.55))
+
+class rev(SynthDef):
+    def __init__(self):
+        SynthDef.__init__(self)
+        self.arg["amp"] = "amp / 4"
+        self.arg["osc"] = "PMOsc.ar(freq, freq * 2 , 10)"
+        self.env = Env.reverse()
 
 class sweep(SynthDef):
     def __init__(self):
@@ -308,4 +364,13 @@ class py(orient):
     def __init__(self):
         orient.__init__(self)
         self.arg["osc"] = "LFCub.ar([freq,freq+1], [0.5,1], [0.25,0.1]) * 2"
+
+class zap(SynthDef):
+    def __init__(self):
+        SynthDef.__init__(self)
+        self.default["room"]=0
+        self.default["verb"]=0
+        self.arg["amp"] = "amp / 10"
+        self.arg["osc"] = "Saw.ar( freq * [1,1.01] + LFNoise2.ar(50).range(-2,2) ) + VarSaw.ar( freq + LFNoise2.ar(50).range(-2,2), 1 ) "
+        self.env = Env.perc(atk=0.025, curve=-10)
         

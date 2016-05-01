@@ -10,7 +10,7 @@ SynthDef.new( \sample_player,
 
 		amp = amp * Blip.ar(2 ** grain, 0, 0.5, 0.5);
 
-		sound = FreeVerb.ar( PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate) * amp * 2 , verb, 0.1);
+		sound = FreeVerb.ar( PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate) * amp * 4 , verb, 0.1);
 
 		sound = sound * EnvGen.ar(Env([0,1,1,0],[0 ,sus * 2, 0]), doneAction:2);
 
@@ -20,6 +20,8 @@ SynthDef.new( \sample_player,
 
 		Out.ar(0,Pan2.ar( sound, pan));
 		} ).add;
+
+
 
 
 SynthDef.new( \words,
@@ -268,6 +270,9 @@ SynthDef.new( \sine,
 		Out.ar(0,Pan2.ar( osc * env , pan));
 		} ).add;
 
+
+XLine.ar(w,
+
 SynthDef.new( \viola,
 	{
 		arg amp=0,sus=1,pan=0,freq=0,atk=0.25, vib=6, depth=0.008, verb=0.75;
@@ -280,10 +285,17 @@ SynthDef.new( \viola,
 
 		out = env * osc;
 
-		out = FreeVerb.ar(out, verb);
+		out = FreeVerb.ar(out, verb,);
 
 		Out.ar(0,Pan2.ar( osc * env , pan));
 		} ).add;
+
+SynthDef.new( \viola,
+	{
+		arg vib=4,rate=0,verb=0.75,amp=0,freq=0,room=0.5,slide=0,delay=0,depth=0,sus=1,slidefrom=1,lpf=20000,hpf=0,pan=0;
+		var osc, env;
+
+		osc = PMOsc.ar(freq, Vibrato.kr(freq, rate:vib, depth:0.008, delay: sus * 0.25), 10, mul:amp);osc = HPF.ar(osc, hpf);osc = LPF.ar(osc, lpf);env = EnvGen.ar(Env.perc(1/4 * sus,2.5 * sus,amp,-4).delay(delay), doneAction:2);Out.ar(0,Pan2.ar( FreeVerb.ar(osc * env, verb, room), pan));} ).add;
 
 SynthDef.new( \distort,
 	{

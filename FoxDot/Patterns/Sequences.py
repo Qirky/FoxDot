@@ -18,11 +18,19 @@ class PStutter(Base.Pattern):
 
     def __init__(self, data, n=1):
 
+        n = P(n)
+
+        lrg = max(len(data), len(n))
+
         self.data = []
 
-        for i, item in enumerate(data):
+        for i in range(lrg):
             for j in range(op.modi(n,i)):
-                self.data.append( item )
+                self.data.append(op.modi(data,i))
+
+##        for i, item in enumerate(data):
+##            for j in range(op.modi(n,i)):
+##                self.data.append( item )
 
         self.make()
 
@@ -79,6 +87,11 @@ class PxRand(Base.Pattern):
         return PxRand([self.choose() for n in range(start, end)])
 
 Pxrand = PxRand #: Alias for PxRand
+
+class PSq(Base.Pattern):
+    def __init__(self, a=1, b=2, c=3):
+        self.data = [x*b for x in range(a,a+c)]
+        self.make()
 
 
 class PSum(Base.Pattern):
@@ -212,6 +225,37 @@ class PRhythm(Base.Pattern):
         return self.chars[n] == ' '
 
 Prhythm = PRhythm #: Alias
+
+class PDur(Base.Pattern):
+
+    def __init__(self, s, dur=0.5):
+
+        self.chars = []
+        self.data  = []
+
+        if type(s) is str:
+            s = P().fromString(s)
+            print s
+            
+        dur = s.dur(dur)
+        self.data = []
+        
+        for i, char in s.items():
+            # Recursively get rhythms
+            if isinstance(char, Base.PGroup):
+                dur_group = self.__class__(char, dur)
+                self.chars += list(dur_group.chars)
+                self.data  += list(dur_group.data)
+            else:
+                self.chars.append(char)
+                self.data.append(dur)
+
+Pdur = PDur #: Alias
+
+test = PDur("x-o-[x[xx]]-o{----}")
+print test.data, test.chars
+
+                
 
 class PChords(Base.Pattern):
 
