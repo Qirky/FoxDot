@@ -289,7 +289,7 @@ class PGroup(metaPattern):
 
             step = len(self.data)
 
-            self.data = [PGroup(sub[n:n+step]) for n in range(0, len(sub), step)]
+            self.data = [self.__class__(sub[n:n+step]) for n in range(0, len(sub), step)]
 
             # Make this a pseudo-normal pattern          
             self.NEST_ME = True

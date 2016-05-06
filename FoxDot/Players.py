@@ -16,7 +16,6 @@ from Scale import Scale
 
 import Code
 import Buffers
-import Effects
 
 _PLAYER_TYPE  = 0
 _SYNTH_TYPE   = 1
@@ -30,6 +29,7 @@ class PLAYER(Code.LiveObject):
     _VARS = []
     _INIT = False
     _TYPE = _PLAYER_TYPE
+    _DUR  = 'dur'
 
     def __init__( self, name ):
 
@@ -41,17 +41,13 @@ class PLAYER(Code.LiveObject):
         self.stop_point = 0
         self.following = None
 
-        # Sets the clock off a beat amount
-
-        self.off = 0
-        self.old_off = 0
-
         # Modifiers
         
         self.reversing = False    
 
         # Keeps track of which note to play etc
-        
+
+        self.event_index = 0
         self.event_n = 0
         self.event = {}
 
@@ -59,6 +55,7 @@ class PLAYER(Code.LiveObject):
         
         self.old_dur = None
         self.isplaying = False
+        self.last_offset = 0
 
         # These dicts contain the attribute and modifier values that are sent to SuperCollider
 
@@ -68,6 +65,8 @@ class PLAYER(Code.LiveObject):
         # List the internal variables we don't want to send to SuperCollider
 
         self._VARS = self.__dict__.keys()
+
+        # Default attribute dictionary
 
         self.dur    = self.attr['dur']      =  [0]
         self.root   = self.attr['root']     =  [0]
@@ -79,6 +78,7 @@ class PLAYER(Code.LiveObject):
         self.rate   = self.attr['rate']     =  [1]
         self.buf    = self.attr['buf']      =  [0]
         self.echo   = self.attr['echo']     =  [0]
+        self.offset = self.attr['offset']   =  [0]
         self.freq   = [0]
 
     # --- Startup methods
@@ -90,81 +90,69 @@ class PLAYER(Code.LiveObject):
 
     # --- Update methods
 
-    def update_clock(self):
+    def update_state(self):
 
-        # Initial location is the offset (if any)
+        if self.stopping and self.metro.beat >= self.stop_point: self.kill()
 
-        next_step = int(self.off * self.metro.steps)
+        index = None
 
-        self.event_n = 0
+        if self.dur_updated(): self.event_n, index = self.count()
 
-        count = 0
+        # Get the current state
 
-        # Go through each clock step
+        self.get_event()
 
-        for i, step in enumerate(self.metro):
+        # Get next occurence
 
-            # If step should contain self
+        now    = self.metro.now()
 
-            if i == next_step:
+        dur    = int((self.event[self._DUR]) * self.metro.steps)
 
-                # Add self if not already there
+        index  = int(index if index is not None else now)
 
-                if self not in step:
+        offset = int((self.event["offset"] - self.last_offset) * self.metro.steps)
 
-                    # Add player to clock
+        # Schedule the next event
 
-                    self.metro.add2q(self, i)
+        self.event_index = index + dur + (offset if (index + dur + offset) > now else 0)
+        
+        self.metro.add2q(self, self.event_index)
 
-                # Work out duration of the note
+        # Store any offset
 
-                if self._TYPE is _SYNTH_TYPE:
+        self.last_offset = self.event["offset"]
 
-                    dur = modi(self.attr['dur'], count)
+        return
 
-                elif self._TYPE is _SAMPLES_TYPE:
-                    
-                    dur = modi(self.attr['dur_val'], count)
+    def count(self):
 
-                try:
+        # Count the events that should have taken place between 0 and now()
 
-                    next_step += int(float(dur) * self.metro.steps)
+        n = 0
+        acc = 0
+        dur = 0
+        now = self.metro.now()
 
-                except:
+        while True:
+            
+            dur = int(modi(self.attr[self._DUR], n) * self.metro.steps)
 
-                    print self, dur
+            if acc + dur > now:
 
-                # Increase duration counter
+                break
 
-                count += 1
+            else:
+                
+                acc += dur
+                n += 1
 
-                # Increase event counter until NOW
-
-                if i < self.metro.now(): self.event_n += 1
-
-            # If step shouldn't contain self, remove it if it is in there
-
-            elif self in step: step.remove(self)
-
-        # Store the current durations to check at the next update steps
+        # Store duration times
 
         self.old_dur = self.attr['dur']
-        self.old_off = self.off
 
-        return
+        # Returns value for self.event_n and self.event_index
 
-    def update_state(self, isEvent=True):
-
-        # Kill the player if stopping
-        
-        if self.stopping and self.metro.beat >= self.stop_point: self.kill()
-            
-        # Check for changes
-        
-        if self.dur_updated(): self.update_clock()
-        else: self.event_n += ( int(isEvent) * (-1 if self.reversing else 1) )
-
-        return
+        return n, acc
 
     def update(self):
         
@@ -173,13 +161,9 @@ class PLAYER(Code.LiveObject):
             self.restart()
 
         return
-    
+
     def dur_updated(self):
-        """ Returns true if the duration has changed since the last update """
-        if self._TYPE is _SYNTH_TYPE:
-            return self.attr['dur'] != self.old_dur or self.off != self.old_off
-        if self._TYPE is _SAMPLES_TYPE:
-            return self.attr['dur'] != self.old_dur or self.attr['dur_val'] != self.old_dur_val
+        return self.attr['dur'] != self.old_dur
 
     # --- Data methods
 
@@ -280,11 +264,12 @@ class PLAYER(Code.LiveObject):
 
         # Initial message plus custom head and echo variable
 
-        message = [self.SynthDef, 0, 1, 1] + head + ['echoON', int(self.attr['echo'] > 0)]
+        message = [self.SynthDef, 0, 1, 1,
+                   'echoON', int(self.event['echo'] > 0)] + head
 
         for key in self.attr:
 
-            if key not in ('degree', 'oct', 'freq', 'dur'):
+            if key not in ('degree', 'oct', 'freq', 'dur', 'offset'):
 
                 try:
                     
@@ -302,51 +287,27 @@ class PLAYER(Code.LiveObject):
 
         return message
 
-    def osc_effect(self, effect):
-        """ If there are any effects added, send them to the server """
-
-        # nodeID = 0
-        
-        message = [effect, 0, 1, 1]
-
-        for key, val in self.fx[effect].items():
-
-            # Get any values if using a list / pattern
-
-            val = modi(val, self.event_n)
-
-            if key == "sus":
-
-                val = val * self.metro.beat_dur()
-
-            message += [key, float(val)]
-
-        return message
-
     def send(self):
         """ Sends the current event data to SuperCollder """
 
         # Get the current state in a dict
-
-        self.get_event()
         
         for i in range(self.tupleN()):
             
             self.server.sendOSC( self.osc_message( i )  )
+
+        self.event_n += 1
 
         return
 
     #: Methods for stop/starting players
 
     def kill(self):
-        """ Removes this object from the Clock """
-
+        """ Removes this object from the Clock and resets itself"""
         self.isplaying = False
         self.event_n = 0
+        self.offset = self.attr['offset'] = 0
         self.metro.playing.remove(self)
-        for step in self.metro:
-            if self in step:
-                step.remove(self)
         return
         
     def stop(self, N=0):
@@ -389,7 +350,6 @@ class PLAYER(Code.LiveObject):
             self.metro.playing.append(self)
 
         self.stopping = False
-        self.update_clock()
 
         return self
         
@@ -439,14 +399,19 @@ class PLAYER(Code.LiveObject):
 
     """
 
-        DirectFx Methods
+        Modifier Methods
         ----------------
 
-        Rather than add dynamic effects to the Player Object through
-        its 'fx' attribute, use these methods to add 'smart' effects
-        that do any calculations for you.
+        Other modifiers for affecting the playback of Players
 
     """
+
+    def offbeat(self, dur=0.5):
+        """ Off sets the next event occurence """
+
+        self.offset = self.attr['offset'] = dur
+
+        return self
 
     def strum(self, dur=0.025):
         """ Adds a delay to a Synth Envelope """
@@ -602,13 +567,6 @@ class SYNTH_PLAYER(PLAYER):
 
         return self
 
-    def offbeat(self, beat_len=0.5):
-        """ Adds a 0 amplitude note to the start of the player"""
-
-        self.off = beat_len
-
-        return self
-
     # Methods affecting other players - every n times, do a random thing?
 
     def stutter(self, n=2):
@@ -616,7 +574,7 @@ class SYNTH_PLAYER(PLAYER):
 
         # if n is a list, stutter each degree[i] by n[i] times
 
-        self.degree = Stutter(self.degree, n)
+        self.degree = PStutter(self.degree, n)
 
         return self
 
@@ -697,6 +655,7 @@ BufferManager = Buffers.BufferManager().from_file()
 class SAMPLE_PLAYER(PLAYER):
 
     _TYPE = _SAMPLES_TYPE
+    _DUR  = 'dur_val'
     
     SPECIAL_CHARS = " []()"
     REST = SPECIAL_CHARS[0]
@@ -717,13 +676,13 @@ class SAMPLE_PLAYER(PLAYER):
 
         self.attr.update(kwargs)
         self.reset()
-
+        
     def update(self, degree=" ", **kwargs):
         """ Updates the values of this Player """
 
         PLAYER.update(self)
 
-        setattr(self, "degree", degree if len(degree) > 0 else " ")
+        setattr(self, "degree", str(degree).replace("."," ") if len(degree) > 0 else " ")
 
         self.pat_to_buf()
 
@@ -732,11 +691,13 @@ class SAMPLE_PLAYER(PLAYER):
 
         return self
 
-    def update_clock(self):
+    def update_state(self):
         """ String -> buffer numbers before clock update """
-        self.pat_to_buf()
-        PLAYER.update_clock(self)
+        PLAYER.update_state(self)
         self.old_dur_val = self.dur_val
+
+    def dur_updated(self):
+        return self.attr['dur'] != self.old_dur or self.attr['dur_val'] != self.old_dur_val
 
     def pat_to_buf(self):
         """ Calculates the durations and buffer numbers based on the characters in the degree attribute """
@@ -751,89 +712,6 @@ class SAMPLE_PLAYER(PLAYER):
     def tupleN(self):
         """ Forces the tupleN method to skip out the degree attr when calculating the largest tuple """
         return PLAYER.tupleN(self, exclude='degree')
-        
-
-    def __add__(self, data):
-
-        if type(data) == int:
-
-            self.amp = [a + data for a in self.amp]
-
-            return self
-
-        if type(data) == str:
-
-            self.degree += data
-
-        if type(data) == list:
-
-            try:
-
-                self.pat = ''.join(data)
-
-            except:
-
-                pass
-
-        return self
-
-
-    def __sub__(self, data):
-
-        if type(data) == int:
-
-            data = [data]
-
-        data = [d * -1 for d in data]
-
-         # Add to modifier
-
-        self.modf['degree'] = circular_add(self.modf['degree'], data)
-
-        return self
-
-    def __mul__(self, data):
-
-        # TODO Sync in the clock
-
-        if type(data) in (int, float):
-
-            data = [data]
-
-        size_dur  = len(self.attr['dur'])
-        size_sus  = len(self.attr['sus'])
-        size_data = len(data)
-
-        size_max = max( size_dur , size_sus, size_data)
-
-        self.dur = [ 0 for x in range(size_max) ]
-        self.sus = [ 0 for x in range(size_max) ]
-
-        for i in range( size_max ):
-
-            self.dur[i] = self.attr['dur'][i % size_dur] * (1.0 / data[i % size_data])
-            self.sus[i] = self.attr['sus'][i % size_sus] * (1.0 / data[i % size_data])
-
-        return self
-
-    def __div__(self, data):
-
-        if type(data) in (int, float):
-
-            data = [data]
-
-        size_dur  = len(self.attr['dur'])
-        size_data = len(data)
-
-        size_max = max( size_dur , size_data)
-
-        self.dur = [ 0 for x in range(size_max) ]
-
-        for i in range( size_max ):
-
-            self.dur[i] = self.attr['dur'][i % size_dur] / (1.0 / data[i % size_data])
-
-        return self
 
     def char(self, other=None):
         if other is not None:
@@ -865,23 +743,6 @@ class Group:
         return len(self.players)
 
     def __setattr__(self, name, value):
-        """ Updates the the attributes for all player in the group. If value is iterable,
-            each value in the list is applied to the players in turn. To set an attribute
-            to a pattern, either enclose the pattern in brackets or use Group.setall()"""
-        try:
-            for i, p in enumerate(self.players):
-                try:
-                    if type(value) is tuple:
-                        setattr(p, name, value)
-                    else:
-                        setattr(p, name, modi(value, i))
-                except:
-                    print "AttributeError: '%s' object has no attribute '%s'" % (str(p), name)
-        except:
-            self.__dict__[name] = value 
-        return self
-
-    def setall(self, name, value):
         try:
             for i, p in enumerate(self.players):
                 try:

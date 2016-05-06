@@ -235,7 +235,6 @@ class PDur(Base.Pattern):
 
         if type(s) is str:
             s = P().fromString(s)
-            print s
             
         dur = s.dur(dur)
         self.data = []
@@ -250,12 +249,7 @@ class PDur(Base.Pattern):
                 self.chars.append(char)
                 self.data.append(dur)
 
-Pdur = PDur #: Alias
-
-test = PDur("x-o-[x[xx]]-o{----}")
-print test.data, test.chars
-
-                
+Pdur = PDur #: Alias                
 
 class PChords(Base.Pattern):
 

@@ -73,7 +73,6 @@ class Player(SYNTH_PLAYER):
         # Add to clock and update with keyword arguments
         
         self.metro.playing.append(self)
-        self.update_clock()
         self._INIT = True
 
         # Update attributes
@@ -94,7 +93,6 @@ class SamplePlayer(SAMPLE_PLAYER):
 
         # Add to clock and update
         self.metro.playing.append(self)
-        self.update_clock()
         self._INIT = True
 
         # Update attributes

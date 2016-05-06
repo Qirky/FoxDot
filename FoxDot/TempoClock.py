@@ -66,9 +66,9 @@ class TempoClock:
 
         self.queue = self.new_queue()
 
-        for p in self.playing:
+        #for p in self.playing:
 
-            p.update_clock()
+        #    p.update_state()
 
         return
         
@@ -137,33 +137,35 @@ class TempoClock:
 
                         self.when_statements.remove(code)
 
-            # Iterate through any players in the queues current set
+            # Start any quantised players at new bar
+
+            now = self.now()
 
             if self.beat % self.bar_length() == 0 :
-
-                # Start any quantised players at new bar
 
                 for player in self.playing:
 
                     if not player.isplaying:
 
-                        # Player is updated BEFORE first OSC msg, so event_n is set to -1 to compensate
+                        player.event_n = 0
 
-                        player.event_n = -1
+                        self.queue[now].append(player)
 
                         player.play()
 
             # Update and play players
 
-            step = self.queue[self.now()]
-
-            for player in step:
+            for player in self.queue[now]:
 
                 if player.isplaying:
 
                     player.update_state()
 
                     player.send()
+
+            # Clear current step
+
+            self.queue[now] = []
 
             # Rest
             
@@ -175,13 +177,15 @@ class TempoClock:
 
             if old_steps != self.steps: # or old_timeSig != self.timeSig or old_bars != self.bars:
 
+                pass
+
                 # Change the queue size
 
-                self.reset()
+                #self.reset()
 
                 # Update our "old" values
 
-                old_steps   = self.steps
+                #old_steps   = self.steps
                 #old_timeSig = self.timeSig
                 #old_bars    = self.bars
 
@@ -192,6 +196,10 @@ class TempoClock:
         # Adds a player to the queue (default beat is 0)
 
         index = beat % len(self)
+
+        if index > len(self.queue):
+
+            print index, beat, len(self), len(self.queue)
 
         if player not in self.queue[index]:
 
