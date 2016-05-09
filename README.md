@@ -7,6 +7,8 @@ FoxDot - Live Coding with Python v0.1.1
 
 ## Installation and startup
 
+**Please Note:** FoxDot is still in early development and has only been tested with Python 2.7, SuperCollider 3.6.6, with Windows 7 and Windows 8.
+
 FoxDot uses the sound synthesis engine, SuperCollider, to make music so you'll need to make sure it's installed before using FoxDot. Currently, all you need to do is download the `.zip` file from this page and extract the contents. To start using FoxDot, first make sure you have a SuperCollider server instance running on your local machine (open SuperCollider and press `Ctrl+b`) then run `main.py` from the FoxDot folder. FoxDot can access any `SynthDef` that's stored on the server but it comes with some built-in definitions that are written in Python (more on that later). To use these, execute the following snippet of code (also found in `foxdot.scd`) or, better yet, add it to your `startup.scd` file that's located in your SuperCollider installation folder so that it's automatically executed when you boot SuperCollider.
 
 ```java
