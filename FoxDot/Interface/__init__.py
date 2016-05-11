@@ -70,17 +70,25 @@ class App:
 
         # Key bindings
         self.text.bind("<Control-Return>",  self.get_code)
+        self.text.bind("<Command-Return>",  self.get_code)
         self.text.bind("<Control-a>",       self.selectall)
+        self.text.bind("<Command-a>",       self.selectall)
         self.text.bind("<Control-.>",       self.killall)
+        self.text.bind("<Command-.>",       self.killall)
         self.text.bind("<Control-v>",       self.paste)
+        self.text.bind("<Command-v>",       self.paste)
         self.text.bind("<Return>",          self.newline)
         self.text.bind("<BackSpace>",       self.delete)
         self.text.bind("<Delete>",          self.delete2)
         self.text.bind("<Tab>",             self.tab)
         self.text.bind("<Control-]>",       self.indent)
+        self.text.bind("<Command-]>",       self.indent)
         self.text.bind("<Control-[>",       self.unindent)
+        self.text.bind("<Command-[>",       self.unindent)
         self.text.bind("<Control-=>",       self.zoom_in)
+        self.text.bind("<Command-=>",       self.zoom_in)
         self.text.bind("<Control-minus>",   self.zoom_out)
+        self.text.bind("<Command-minus>",   self.zoom_out)
         self.text.bind("<Key>",             self.keypress)
 
         # Automatic brackets

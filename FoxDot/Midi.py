@@ -20,4 +20,4 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
 
     scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
 
-    return scale_val + (octave * len(chroma)) + chroma[ root % len(chroma) ]
+    return scale_val + (octave * len(chroma)) + root

@@ -302,6 +302,7 @@ class PGroup(metaPattern):
 Pgroup = PGroup #: Alias for PGroup
 
 class Shared_Time_PGroup(PGroup):
+    BRACKETS = "{%s}"
     def dur(self, val):
         return val / len(self)
 

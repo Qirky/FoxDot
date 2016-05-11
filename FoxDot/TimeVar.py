@@ -1,4 +1,5 @@
 from sys import maxint as MAX_SIZE
+from math import modf
 from Patterns import Pattern, asStream
 import Patterns.Sequences as pat
 import Patterns.Operations as op
@@ -24,9 +25,6 @@ def Ramp(start=0, end=1, dur=8, step=0.25):
     # Return var(P(range(32))/32 | [0],[1/2]*32 + [inf])
     size = dur/float(step)
     return var([start + end * n/size for n in range(int(size))], step)
-
-
-    
     
 
 def iRamp(start=0, end=1, dur=8, step=0.25):
@@ -156,7 +154,7 @@ class TimeVar(Code.LiveObject):
 
     def length(self):
         """ Returns the duration of one full cycle in beats """
-        return self.time[-1][1] + 1
+        return self.time[-1][1]
 
     def update(self, values, dur=None):
         """ Updates the TimeVar with new values """
@@ -171,7 +169,7 @@ class TimeVar(Code.LiveObject):
 
         self.data = []
         self.time = []
-        a, b = 0, -1
+        a, b = 0, 0
 
         #: Update the durations of each state
 
@@ -187,8 +185,8 @@ class TimeVar(Code.LiveObject):
               
             this_dur = op.modi(self.dur, i)
 
-            a = b + 1
-            b = a + (self.metro.steps * this_dur) - 1
+            a = b
+            b = a + this_dur
     
             self.data.append( val )
             self.time.append((a,b))
@@ -223,7 +221,7 @@ class TimeVar(Code.LiveObject):
 
                 val = self.data[i]
                 
-                if self.time[i][0] <= t <= self.time[i][1]:
+                if self.time[i][0] <= t < self.time[i][1]:
 
                     if isinstance(op.modi(self.dur, i), _inf):
 
@@ -237,7 +235,7 @@ class TimeVar(Code.LiveObject):
 
                         self.inf_found = _inf.wait
 
-                    break            
+                    break
                 
         return self.calculate(val)
 

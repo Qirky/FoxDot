@@ -43,7 +43,8 @@ class PLAYER(Code.LiveObject):
 
         # Modifiers
         
-        self.reversing = False    
+        self.reversing = False
+        self.when_statements = []
 
         # Keeps track of which note to play etc
 
@@ -55,6 +56,7 @@ class PLAYER(Code.LiveObject):
         
         self.old_dur = None
         self.isplaying = False
+        self.isAlive = True
         self.last_offset = 0
 
         # These dicts contain the attribute and modifier values that are sent to SuperCollider
@@ -90,13 +92,13 @@ class PLAYER(Code.LiveObject):
 
     # --- Update methods
 
-    def update_state(self):
+    def __call__(self):
 
-        if self.stopping and self.metro.beat >= self.stop_point: self.kill()
+        if self.stopping and self.metro.now() >= self.stop_point:
+            self.kill()
+            return
 
-        index = None
-
-        if self.dur_updated(): self.event_n, index = self.count()
+        if self.dur_updated(): self.event_n, self.event_index = self.count()
 
         # Get the current state
 
@@ -104,23 +106,23 @@ class PLAYER(Code.LiveObject):
 
         # Get next occurence
 
-        now    = self.metro.now()
+        dur    = self.event[self._DUR]
 
-        dur    = int((self.event[self._DUR]) * self.metro.steps)
-
-        index  = int(index if index is not None else now)
-
-        offset = int((self.event["offset"] - self.last_offset) * self.metro.steps)
+        offset = self.event["offset"] - self.last_offset
 
         # Schedule the next event
 
-        self.event_index = index + dur + (offset if (index + dur + offset) > now else 0)
+        self.event_index = self.event_index + dur + offset
         
-        self.metro.add2q(self, self.event_index)
+        self.metro.Schedule(self, self.event_index)
 
         # Store any offset
 
         self.last_offset = self.event["offset"]
+
+        # Change internal marker
+
+        self.event_n += 1 if not self.reversing else -1
 
         return
 
@@ -135,7 +137,7 @@ class PLAYER(Code.LiveObject):
 
         while True:
             
-            dur = int(modi(self.attr[self._DUR], n) * self.metro.steps)
+            dur = modi(self.attr[self._DUR], n)
 
             if acc + dur > now:
 
@@ -296,8 +298,6 @@ class PLAYER(Code.LiveObject):
             
             self.server.sendOSC( self.osc_message( i )  )
 
-        self.event_n += 1
-
         return
 
     #: Methods for stop/starting players
@@ -305,9 +305,9 @@ class PLAYER(Code.LiveObject):
     def kill(self):
         """ Removes this object from the Clock and resets itself"""
         self.isplaying = False
+        self.isAlive = False
         self.event_n = 0
         self.offset = self.attr['offset'] = 0
-        self.metro.playing.remove(self)
         return
         
     def stop(self, N=0):
@@ -316,13 +316,12 @@ class PLAYER(Code.LiveObject):
             playing state to False in N bars time
             - When N is 0 it stops immediately"""
 
-        self.stopping = True
-        
+        self.stopping = True        
         self.stop_point = self.metro.beat
 
         if N > 0:
 
-            self.stop_point += self.metro.til_next_bar() + ((N-1) * self.metro.bar_length())
+            self.stop_point += self.metro.NextBar() + ((N-1) * self.metro.Bar())
 
         return self
 
@@ -334,21 +333,17 @@ class PLAYER(Code.LiveObject):
 
     def play(self):
 
-        if self not in self.metro.playing:
-
-            self.metro.playing.append(self)
-
         self.isplaying = True
         self.stopping = False
+        self.isAlive = True
+
+        self.__call__()
 
         return self
 
     def restart(self):
 
-        if self not in self.metro.playing:
-
-            self.metro.playing.append(self)
-
+        self.isAlive = True
         self.stopping = False
 
         return self
@@ -393,7 +388,15 @@ class PLAYER(Code.LiveObject):
         # Creates an expression unique to this object and function
         e = "'{0}'=='{0}' and '{1}'=='{1}'".format(cmd.__name__, id(self))
 
-        self.metro.when(e, lambda: cmd(self), n)
+        if e not in self.when_statements:
+
+            self.when_statements.append(e)
+
+            self.metro.When(e, lambda: cmd(self), n, nextBar=True)
+
+        else:
+
+            self.metro.when_statements[e].step = n 
 
         return self
 
@@ -489,7 +492,7 @@ class SYNTH_PLAYER(PLAYER):
         
         for attr in ('degree', 'oct'):
 
-            now[attr] = self.now(attr)
+            now[attr] = self.event[attr]
 
             try:
 
@@ -511,10 +514,11 @@ class SYNTH_PLAYER(PLAYER):
             
         return f
 
-    def update_state(self):
+    def __call__(self):
         """ Calls the parent class update state then calculates frequency """
-        PLAYER.update_state(self)
+        PLAYER.__call__(self)
         self.freq = self.calculate_freq()
+        self.send()
 
     def osc_message(self, index=0, head=[]):
         """ Attaches the frequency to the osc message """
@@ -691,13 +695,18 @@ class SAMPLE_PLAYER(PLAYER):
 
         return self
 
-    def update_state(self):
+    def __call__(self):
         """ String -> buffer numbers before clock update """
-        PLAYER.update_state(self)
+        PLAYER.__call__(self)
         self.old_dur_val = self.dur_val
+        self.send()
 
     def dur_updated(self):
         return self.attr['dur'] != self.old_dur or self.attr['dur_val'] != self.old_dur_val
+
+    def count(self):
+        self.pat_to_buf()
+        return PLAYER.count(self)        
 
     def pat_to_buf(self):
         """ Calculates the durations and buffer numbers based on the characters in the degree attribute """

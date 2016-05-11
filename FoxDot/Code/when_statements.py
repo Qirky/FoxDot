@@ -20,7 +20,7 @@ def find( text ):
         
         new = s.replace("when ", "if ").replace('"','\"').split("\n")
         
-        when = "Clock.when(\"%s\", %s )\n" % (key, str(new))
+        when = "Clock.When(%s, [%s] )\n" % (repr(key), (",\n" + " "*(17+len(key))).join([repr(n) for n in new]))
         
         text = text.replace(s, when)
 
