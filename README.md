@@ -7,6 +7,8 @@ FoxDot - Live Coding with Python v0.1
 
 ## Installation and startup
 
+*Note: FoxDot is still in early development and has only been tested with Python 2.7, SuperCollider 3.6.6, with Windows 7 and Windows 8.*
+
 Currently, all you need to do is download the `.zip` file from this page and extract the contents. To start using FoxDot, first make sure you have a SuperCollider server instance running on your local machine then run `main.py` from the FoxDotCode folder. FoxDot can use any `SynthDef` that's stored on the server but there are some examples in `SuperCollider/startup.scd` that demonstrate some of the best practices for combining FoxDot with SuperCollider.
 
 ## Basics
