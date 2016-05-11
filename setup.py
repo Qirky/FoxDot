@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='FoxDot',
-      version='0.1.2',
+      version='0.1.1',
       description='Musical Live Coding Environment',
       author='Ryan Kirkbride',
       author_email='sc10rpk@leeds.ac.uk',

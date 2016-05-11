@@ -1,39 +1,33 @@
 # Clock management
 
+from Patterns import asStream
+from Patterns.Operations import modi
 import threading
-from time import sleep
+from time import sleep, time
+from sys import maxint as MAXINT
 
 class TempoClock:
 
-    def __init__(self, bpm=120.0, bars=16, steps=8, timeSig=(4,4)):
+    def __init__(self, bpm=120.0, time_signature=(4,4)):
 
         self.bpm = bpm
 
-        # How many steps per beat, default is 8
+        self.start_time = time()
 
-        self.bars    = bars
-
-        self.timeSig = timeSig
+        self.time_signature = time_signature
         
-        self.steps   = steps
-
-        # Create queue based on loop and steps
-
-        self.queue = self.new_queue()
-        
-        self.beat = 0
-
-        self.playing = []
+        self.queue = []
 
         self.ticking = False
 
-        # List of "code" objects
+        # Keeps track of the when statements and players
 
-        self.when_statements = []
+        self.when_statements = {}
+        self.playing = []
 
     def __str__(self):
 
-        return "TempoClock Object @ %.2f bpm, %d/%d" % (self.bpm, self.timeSig[0], self.timeSig[1])
+        return str(self.queue)
 
     def __iter__(self):
 
@@ -43,67 +37,23 @@ class TempoClock:
 
     def __len__(self):
 
-        return int( self.steps * self.beats() )
+        return len(self.queue)
 
-    def change_steps(self, new=8):
-
-        self.steps = new
-        self.queue = self.new_queue()
-
-    def polyrhythm(self, a, b):
-
-        self.timeSig = (a,b)
-
-        self.change_steps( a*b )
-
-        return        
-
-    def new_queue(self):
-
-        return [[] for n in range( len(self) ) ]
-
-    def reset(self):
-
-        self.queue = self.new_queue()
-
-        for p in self.playing:
-
-            p.update_clock()
-
-        return
-        
-
-    def beats(self):
-
-        return int(self.timeSig[0] * self.bars)
-
-    def real_beat(self):
-
-        return self.beat / self.steps
-
-    def bar_length(self):
-
-        return int(self.timeSig[0] * self.steps)
+    def Bar(self):
+        """ Returns the length of a bar in terms of beats """
+        return (float(self.time_signature[0]) / self.time_signature[1]) * 4
 
     def beat_dur(self):
 
         return float( 60.0 / float(self.bpm) )
-
-    def step_dur(self):
-
-        return float( self.beat_dur() / self.steps )
-
-    def til_next_bar(self):
-
-        return (len(self)-self.now()) % self.bar_length()
 
     def beatsPerBar(self):
 
         return self.timeSig[0]
 
     def now(self):
-
-        return self.beat % len(self.queue)
+        """ Returns the current counter in beats """
+        return (self.bpm  / 60.0) * (time() - self.start_time)
 
     def start(self):
 
@@ -114,110 +64,86 @@ class TempoClock:
     def run(self):
 
         self.ticking = True
-
-        old_steps   = self.steps
-        old_timeSig = self.timeSig
-        old_bars    = self.bars
-
-        # Increases the timer by 8th (default) beats
-  
+ 
         while self.ticking:
+                        
+            # Update and play players at next event
 
-            # Execute any When statements
+            if self.now() >= self.NextEvent():
 
-            for code in self.when_statements:
+                event = self.queue.pop()
 
-                if self.beat % code(self.steps) == 0:
+                for player in event[0]:
 
-                    try:
+                    player()
 
-                        code.run()
-
-                    except:
-
-                        self.when_statements.remove(code)
-
-            # Iterate through any players in the queues current set
-
-            if self.beat % self.bar_length() == 0 :
-
-                # Start any quantised players at new bar
-
-                for player in self.playing:
-
-                    if not player.isplaying:
-
-                        # Player is updated BEFORE first OSC msg, so event_n is set to -1 to compensate
-
-                        player.event_n = -1
-
-                        player.play()
-
-            # Update and play players
-
-            step = self.queue[self.now()]
-
-            for player in step:
-
-                if player.isplaying:
-
-                    player.update_state()
-
-                    player.send()
-
-            # Rest
-            
-            sleep( self.step_dur() )
-
-            self.beat += 1
-
-            # Check if the time signature, steps, or bars values have been changed
-
-            if old_steps != self.steps: # or old_timeSig != self.timeSig or old_bars != self.bars:
-
-                # Change the queue size
-
-                self.reset()
-
-                # Update our "old" values
-
-                old_steps   = self.steps
-                #old_timeSig = self.timeSig
-                #old_bars    = self.bars
-
+            self.beat = int(self.now())
+                
         return self
 
-    def add2q(self, player, beat = 0):
+    def Schedule(self, player, beat):
+        """ Add a player / event to the queue """
 
-        # Adds a player to the queue (default beat is 0)
+        # Go through queue and add in order
 
-        index = beat % len(self)
+        for i in range(len(self.queue)):
 
-        if player not in self.queue[index]:
+            # If another event is happening at the same time, schedule together
 
-            self.queue[index].append(player)
+            if beat == self.queue[i][1]:
 
+                self.queue[i][0].append(player)
+
+                break
+
+            if beat > self.queue[i][1]:
+
+                self.queue.insert(i, ([player], beat))
+
+                break
+            
+        else:
+            
+            self.queue.append(([player], beat))
+            
         return
 
-    def when(self, a, b, step=None):
+    def NextBar(self):
+        """ Returns the beat value for the start of the next bar """
+        beat = self.now()
+        return beat + (self.time_signature[0] - (beat % self.time_signature[0]))
 
-        if step is not None:
+    def NextEvent(self):
+        """ Returns the beat index for the next event to be called """
+        try:    return self.queue[-1][1]
+        except: return MAXINT
+        
 
-            when = When(a, b, step)
+    def When(self, a, b, step=0.125, nextBar=False):
+        """
+
+            When Statements
+            ===============
+
+            Clock.When(a, b[,step])
+
+            When 'a' is true, do 'b'. Check this every step.
+
+        """
+
+        if nextBar:
+
+            start = self.NextBar()
 
         else:
 
-            when = When(a, b)
+            start = self.now() + step
 
-        if when not in self.when_statements:
+        w = When(a, b, step, self)
+        
+        self.Schedule(w, start)
 
-            self.when_statements.append( when )
-
-        else:
-
-            i = self.when_statements.index( when )
-
-            self.when_statements[i].update( when.code, when.step )
+        self.when_statements[a] = w
 
         return
 
@@ -231,19 +157,16 @@ class TempoClock:
 
     def clear(self):
         """ Remove players from clock """
-        
-        while len(self.playing) != 0:
-            
-            p = self.playing[0]
-            p.kill()
 
-        while len(self.when_statements) != 0:
+        for event in self.queue:
 
-            del self.when_statements[0]
+            for player in event[0]:
 
-        self.queue = [[] for n in range( len(self) ) ]
+                player.kill()
 
-        self.beat = 0
+        self.queue = []
+
+        self.start_time = time()
 
         return
 
@@ -264,7 +187,7 @@ class Infinity(int):
 import Code
 line = "\n"
 
-class When:
+class When(Code.LiveObject):
     """
 
         When Statements
@@ -274,27 +197,32 @@ class When:
 
     """
 
-    def __init__(self, test, code, step=0.25):
-        """ code is exectuted. test is evaluated every quarter beat by default """
+    def __init__(self, test, code, step, clock):
 
         if type(code) in (list, tuple):
             code = line.join(code)
 
-        self.test = test
-        self.step = step
-        self.code = self.check(code)
+        self.metro = clock
+        self.test  = test
+        self.step  = step
+        self.code  = self.check(code)
+        self.n     = 0
 
     @staticmethod
     def check(code):
         """ Test for syntax errors """
         return compile(code, "FoxDot" , 'exec') if type(code) == str else code
-        
-    def __mod__(self, n):
-        """ Returns 1 if n % 1/step is 0 """
-        return int( (n % (1.0 / self.step)) == 0 )
 
-    def __call__(self, steps_per_beat):
-        return int(self.step * steps_per_beat)
+    def __call__(self, *args):
+        if type(self.code) == Code.FunctionType:
+            self.code()
+        else:
+            Code.execute(self.code, verbose=False)
+
+        self.metro.Schedule(self, self.metro.now() + modi(self.step, self.n))
+        self.n += 1
+        
+        return
 
     def __repr__(self):
         return "< 'When %s'>" % str(self)
@@ -312,13 +240,6 @@ class When:
         else:
             self.code = self.check(new)
             self.step = step
-        return
-
-    def run(self):
-        if type(self.code) == Code.FunctionType:
-            self.code()
-        else:
-            Code.execute(self.code, verbose=False)
-        return
+        return        
 
     

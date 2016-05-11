@@ -235,27 +235,22 @@ class PDur(Base.Pattern):
 
         if type(s) is str:
             s = P().fromString(s)
-            print s
             
         dur = s.dur(dur)
         self.data = []
         
         for i, char in s.items():
             # Recursively get rhythms
+            val = op.modi(dur,i)
             if isinstance(char, Base.PGroup):
-                dur_group = self.__class__(char, dur)
+                dur_group = self.__class__(char, val)
                 self.chars += list(dur_group.chars)
                 self.data  += list(dur_group.data)
             else:
                 self.chars.append(char)
-                self.data.append(dur)
+                self.data.append(val)
 
-Pdur = PDur #: Alias
-
-test = PDur("x-o-[x[xx]]-o{----}")
-print test.data, test.chars
-
-                
+Pdur = PDur #: Alias                
 
 class PChords(Base.Pattern):
 
