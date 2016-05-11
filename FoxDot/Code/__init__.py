@@ -4,7 +4,12 @@ from traceback import format_exc as error_stack
 import when_statements, player_objects, sample_players
 import assignments
 
-class LiveObject: foxdot_object = True
+class LiveObject:
+    foxdot_object = True
+    isAlive = True
+    def kill(self):
+        self.isAlive = False
+        return self
 
 FoxDotSyntax = [ when_statements,
                  player_objects,

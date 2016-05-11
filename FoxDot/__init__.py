@@ -22,6 +22,7 @@ from Patterns import *
 from Code import *
 from TimeVar import *
 import Scale
+import Root
 
 """
     These define 'global' defaults:
@@ -67,18 +68,26 @@ class Player(SYNTH_PLAYER):
         self.metro = Clock
         self.server = Server
         self.scale = kwargs.get( "scale", Scale.default() )
+        self.root = self.attr['root']  = kwargs.get( "root",  Root.default() )
         self.dur = self.attr['dur'] = 1
         self.sus = self.attr['sus'] = 1
+
+        # Finish init (any assigned attributes not go in the Player.attr dict
         
-        # Add to clock and update with keyword arguments
-        
-        self.metro.playing.append(self)
-        self.update_clock()
         self._INIT = True
 
         # Update attributes
         
         self.update(SynthDef, degree, **kwargs)
+        
+        # Add to clock and update with keyword arguments
+        
+        self.isplaying = True
+        self.event_index = self.metro.NextBar()
+        self.event_n = 0
+        self.metro.Schedule(self, self.event_index)
+
+        
         
 class SamplePlayer(SAMPLE_PLAYER):
 
@@ -92,14 +101,19 @@ class SamplePlayer(SAMPLE_PLAYER):
         self.dur     = self.attr['dur']     = 0.5
         self.dur_val = self.attr['dur_val'] = 0.5
 
-        # Add to clock and update
-        self.metro.playing.append(self)
-        self.update_clock()
+        # Finish init
+
         self._INIT = True
 
         # Update attributes
         
         self.update(self.degree)
+
+        # Add to clock and update
+
+        self.isplaying = True
+        self.event_index = self.metro.NextBar()
+        self.metro.Schedule(self, self.event_index)
 
 class Var(TimeVar):
 
