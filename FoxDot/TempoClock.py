@@ -12,13 +12,14 @@ class TempoClock:
 
         self.bpm = bpm
 
-        self.start_time = time()
+        self.time = 0
+        self.mark = time()
 
         self.time_signature = time_signature
         
         self.queue = []
 
-        self.ticking = False
+        self.ticking = False        
 
         # Keeps track of the when statements and players
 
@@ -43,31 +44,37 @@ class TempoClock:
         """ Returns the length of a bar in terms of beats """
         return (float(self.time_signature[0]) / self.time_signature[1]) * 4
 
-    def beat_dur(self):
-
-        return float( 60.0 / float(self.bpm) )
-
-    def beatsPerBar(self):
-
-        return self.timeSig[0]
+    def BeatDuration(self):
+        """ Returns the length in seconds of one beat """
+        return 60.0 / self.bpm
 
     def now(self):
-        """ Returns the current counter in beats """
-        return (self.bpm  / 60.0) * (time() - self.start_time)
-
+        """ Adds to the current counter and returns its value """
+        now = time()
+        self.time += (now - self.mark) * (self.bpm  / 60.0)
+        self.mark = now
+        return self.time
+        
     def start(self):
-
+        """ Starts the clock thread """
         threading.Thread(target=self.run).start()
-
         return
 
     def run(self):
+        """ Main loop """        
 
         self.ticking = True
+        self.beat = 0
  
         while self.ticking:
                         
             # Update and play players at next event
+
+            now = self.now()
+
+            if int(now) > self.beat:
+
+                self.beat = int(now)
 
             if self.now() >= self.NextEvent():
 
@@ -77,8 +84,6 @@ class TempoClock:
 
                     player()
 
-            self.beat = int(self.now())
-                
         return self
 
     def Schedule(self, player, beat):
@@ -167,6 +172,8 @@ class TempoClock:
         self.queue = []
 
         self.start_time = time()
+
+        self.beat = 0
 
         return
 

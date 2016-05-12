@@ -311,7 +311,7 @@ class pluck(SynthDef):
         SynthDef.__init__(self)
         self.arg["amp"] = "(amp*2) + 0.00001"
         self.arg["freq"] = ["freq","freq + (LFNoise2.ar(50).range(-2,2))"]
-        self.arg["osc"] = ["SinOsc.ar((freq * [1,1.002]), phase: VarSaw.ar(freq, width: Line.ar(1,0.2,2))) * 0.3",
+        self.arg["osc"] = ["SinOsc.ar(freq * 1.002, phase: VarSaw.ar(freq, width: Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase: VarSaw.ar(freq, width: Line.ar(1,0.2,2))) * 0.3 ",
                            "osc * XLine.ar(amp,(amp)/10000,sus*4) * 0.3"]
         self.env = Env.block(sus="sus*1.5")
         #print self.SynthDef()

@@ -279,7 +279,7 @@ class PLAYER(Code.LiveObject):
 
                     if key == "sus":
 
-                        val = val * self.metro.beat_dur()
+                        val = val * self.metro.BeatDuration()
 
                     message += [key, float(val)]
 
