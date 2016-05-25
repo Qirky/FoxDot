@@ -1,2 +1,1 @@
-from SynthDef import *
-from SynthDefManager import *
+from SCLang import *

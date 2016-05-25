@@ -266,8 +266,7 @@ class PLAYER(Code.LiveObject):
 
         # Initial message plus custom head and echo variable
 
-        message = [self.SynthDef, 0, 1, 1,
-                   'echoON', int(self.event['echo'] > 0)] + head
+        message = ['echoOn', int(self.event['echo'] > 0)] + head
 
         for key in self.attr:
 
@@ -296,7 +295,7 @@ class PLAYER(Code.LiveObject):
         
         for i in range(self.tupleN()):
             
-            self.server.sendOSC( self.osc_message( i )  )
+            self.server.sendNote( self.SynthDef, self.osc_message( i )  )
 
         return
 
@@ -383,7 +382,12 @@ class PLAYER(Code.LiveObject):
 
     """
 
-    def every(self, n, cmd, *args):
+    def every(self, n, cmd, args=()):
+        obj = self.metro.call(lambda: cmd(self, *args), n)
+        self.metro.Schedule(obj, self.metro.NextBar() - 0.1)
+        return self
+
+    def _every(self, n, cmd, *args):
 
         # Creates an expression unique to this object and function
         e = "'{0}'=='{0}' and '{1}'=='{1}'".format(cmd.__name__, id(self))

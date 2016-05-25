@@ -3,13 +3,33 @@ from types import CodeType, FunctionType
 from traceback import format_exc as error_stack
 import when_statements, player_objects, sample_players
 import assignments
+from ..Patterns.Operations import modi
 
 class LiveObject:
+
     foxdot_object = True
     isAlive = True
+    
+    metro = None
+    step  = None
+    n     = 0
+    
     def kill(self):
         self.isAlive = False
         return self
+
+    def __call__(self):
+        self.metro.Schedule(self, self.metro.now() + modi(self.step, self.n))
+        self.n += 1
+        return self
+
+"""
+    FoxDot Syntax Checking
+    ----------------------
+
+    - Check for "When Statements"
+    - Check for creation of "Player" and "Sample Player" objects
+"""
 
 FoxDotSyntax = [ when_statements,
                  player_objects,

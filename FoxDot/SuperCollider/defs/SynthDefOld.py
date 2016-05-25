@@ -314,7 +314,6 @@ class pluck(SynthDef):
         self.arg["osc"] = ["SinOsc.ar(freq * 1.002, phase: VarSaw.ar(freq, width: Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase: VarSaw.ar(freq, width: Line.ar(1,0.2,2))) * 0.3 ",
                            "osc * XLine.ar(amp,(amp)/10000,sus*4) * 0.3"]
         self.env = Env.block(sus="sus*1.5")
-        #print self.SynthDef()
 
 class siren(SynthDef):
     """ Credit: Unknown (Thor?) """
@@ -374,3 +373,9 @@ class zap(SynthDef):
         self.arg["osc"] = "Saw.ar( freq * [1,1.01] + LFNoise2.ar(50).range(-2,2) ) + VarSaw.ar( freq + LFNoise2.ar(50).range(-2,2), 1 ) "
         self.env = Env.perc(atk=0.025, curve=-10)
         
+class marimba(SynthDef):
+    def __init__(self):
+        SynthDef.__init__(self)
+        self.arg["osc"] = "Klank.ar(`[[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,  1]], PinkNoise.ar([0.007, 0.007]), [freq, freq], [0,2])"
+        self.arg["sus"] = "sus * 1.5"
+        self.env = Env.perc(atk=0.001, curve=-6)

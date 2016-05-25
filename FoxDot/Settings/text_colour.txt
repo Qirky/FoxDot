@@ -1,9 +1,9 @@
 plaintext=#ffffff
 background=#4d4d4d
-functions=#66ff99
+functions=#ff9999
 key_types=#66ccff
-user_defn=#ff9999
-bool_vals=#ff99ff
+user_defn=#ff99ff
+other_kws=#66ff99
 comments=#ff0000
 numbers=#FF9900
 strings=#ffff99

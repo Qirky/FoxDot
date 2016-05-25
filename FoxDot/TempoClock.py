@@ -1,10 +1,20 @@
-# Clock management
+"""
+
+    TempoClock.py
+    =============
+    
+    Clock management
+
+"""
 
 from Patterns import asStream
 from Patterns.Operations import modi
-import threading
 from time import sleep, time
 from sys import maxint as MAXINT
+import threading
+import inspect
+import Code
+line = "\n"
 
 class TempoClock:
 
@@ -72,22 +82,36 @@ class TempoClock:
 
             now = self.now()
 
-            if int(now) > self.beat:
-
-                self.beat = int(now)
+##            if int(now) > self.beat:
+##
+##                self.beat = int(now)
 
             if self.now() >= self.NextEvent():
 
                 event = self.queue.pop()
 
-                for player in event[0]:
+                for obj in event[0]:
 
-                    player()
+                    if callable(obj): obj()
+
+            sleep(0.00001)
 
         return self
 
-    def Schedule(self, player, beat):
+    def Schedule(self, obj, beat=None):
         """ Add a player / event to the queue """
+
+        # Default is next bar
+
+        if beat is None:
+
+            beat = self.NextBar()
+
+        # Keep track of objects in the Clock
+
+        if obj not in self.playing:
+
+            self.playing.append(obj)
 
         # Go through queue and add in order
 
@@ -97,19 +121,19 @@ class TempoClock:
 
             if beat == self.queue[i][1]:
 
-                self.queue[i][0].append(player)
+                self.queue[i][0].append(obj)
 
                 break
 
             if beat > self.queue[i][1]:
 
-                self.queue.insert(i, ([player], beat))
+                self.queue.insert(i, ([obj], beat))
 
                 break
             
         else:
             
-            self.queue.append(([player], beat))
+            self.queue.append(([obj], beat))
             
         return
 
@@ -122,7 +146,10 @@ class TempoClock:
         """ Returns the beat index for the next event to be called """
         try:    return self.queue[-1][1]
         except: return MAXINT
-        
+
+    def call(self, obj, dur, args=()):
+        """ Returns a 'schedulable' wrapper for any callable object """
+        return Wrapper(self, obj, dur, args)
 
     def When(self, a, b, step=0.125, nextBar=False):
         """
@@ -177,22 +204,39 @@ class TempoClock:
 
         return
 
-class Infinity(int):
+
+class Wrapper(Code.LiveObject):
     """
-        Infinity Object
-        ===============
+        TempoClock.Wrapper Class
+        ========================
 
-        Is the length of time of one clock cycle
-
+        Wraps any callable object as a self-scheduling object
+        like a When() or Player() object.
+        
     """
+    def __init__(self, metro, obj, dur, args=()):
+        self.args  = asStream(args)
+        self.obj   = obj
+        self.step  = dur
+        self.metro = metro
+        self.n     = 0
+        self.s     = self.obj.__class__.__name__
 
-    def __new__(cls, metro):
+    def __str__(self):
+        return "<Scheduled Call '%s'>" % self.s
 
-        return int.__new__(cls, len(metro))
+    def __repr__(self):
+        return  str(self)
 
+    def __call__(self):
+        """ Call the wrapped object and re-schedule """
+        args = modi(self.args, self.n)
+        try:
+            self.obj.__call__(*args)
+        except:
+            self.obj.__call__(args)
+        Code.LiveObject.__call__(self)
 
-import Code
-line = "\n"
 
 class When(Code.LiveObject):
     """
@@ -226,8 +270,7 @@ class When(Code.LiveObject):
         else:
             Code.execute(self.code, verbose=False)
 
-        self.metro.Schedule(self, self.metro.now() + modi(self.step, self.n))
-        self.n += 1
+        Code.LiveObject.__call__(self)
         
         return
 

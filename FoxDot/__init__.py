@@ -14,13 +14,13 @@
 """
 from random import choice as choose
 
-from SuperCollider import *
 from TempoClock import *
 from ServerManager import *
 from Players import *
 from Patterns import *
 from Code import *
 from TimeVar import *
+from SuperCollider import *
 import Scale
 import Root
 
@@ -33,17 +33,31 @@ import Root
 
         - Sample Buffers
 
-        - Default Scale (loaded from Scale)
-
 """
+##############
+""" SERVER """
+
+# Connect to server
         
 Server = ServerManager()
-Sclang = SclangManager()
-Clock = TempoClock()
+
+# Set the SCLang interpreter server
+
+SCLang.SynthDef.server = SCLangManager()
+
+# Import existing SynthDefs
+
+import SuperCollider.SynthDefs as SynthDefs
+
+# Set up the SuperCollider Buffers
+
 Buffers = BufferManager(Server)
 Buffers.load()
-SynthDefs = SynthDefManager(Sclang)
-SynthDefs.load()
+
+
+""" CLOCK """
+
+Clock = TempoClock()
 
 """
     Below are the classes for the three main aspects of FoxDot:

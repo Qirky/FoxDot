@@ -60,7 +60,8 @@ class App:
                          fg=colour_map['plaintext'],
                          insertbackground="White",
                          font = "CodeFont",
-                         yscrollcommand=self.Yscroll.set)
+                         yscrollcommand=self.Yscroll.set,
+                         maxundo=25 )
 
         self.text.grid(row=0, column=0, stick="nsew")
 

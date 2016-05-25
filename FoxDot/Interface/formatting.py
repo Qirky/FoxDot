@@ -1,6 +1,6 @@
 import re
-
 from os.path import abspath, join, dirname
+from types import FunctionType, TypeType
 
 def path(fn):
     return abspath(join(dirname(__file__), fn))
@@ -8,7 +8,11 @@ def path(fn):
 
 def classes(module):
     """ Returns a list of class names defined in module """
-    return [name for name, data in vars(module).items() if type(data) == type(type)]
+    return [name for name, data in vars(module).items() if type(data) == TypeType]
+
+def functions(module):
+    """ Returns a list of function names defined in module """
+    return [name for name, data in vars(module).items() if type(data) == FunctionType]
             
 
 # RegEx Group 1
@@ -19,8 +23,6 @@ numbers   = r"(?<![a-zA-Z])\d+"
 strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
-
-foxdot_kw = ["var","Var","Clock", "group", "Group", "Scale","inf","Inf"]
 
 def findstyles(line, *args):
     """ Finds any locations of any regex and returns the name
@@ -57,9 +59,11 @@ def userdefined(line):
 
 # Use our regex to read patterns.py and add all the functions to key_types
     
-from FoxDot import Patterns
+from ..Patterns import Sequences, Feeders
 
-foxdot_kw += classes(Patterns)
+foxdot_kw = ["var","Var","Clock","group","Group","Scale","inf","Inf","Root"]
+
+foxdot_funcs = classes(Sequences) + functions(Feeders)
 
 # Python keywords used in RegEx Group 2
 
@@ -69,7 +73,7 @@ py_functions = ["if","elif","else","return","def","print","when",
                  "and","or","not","is","in","for","as","with",
                  "while", "class", "import", "try","except"]
 
-py_bool_vals = ["True", "False", "None", "self"]
+py_other_kws = foxdot_kw + ["True", "False", "None", "self"]
 
 py_key_types = ["abs","divmod","input","open","staticmethod","all","enumerate","int",
                 "ord","str","any","eval","isinstance", "pow","sum","basestring",
@@ -81,7 +85,7 @@ py_key_types = ["abs","divmod","input","open","staticmethod","all","enumerate","
                 "memoryview","round","__import__","complex","hash","min","set","delattr",
                 "help","next","setattr","dict","hex","object","slice","dir","id","sorted"]
 
-py_key_types = foxdot_kw + py_key_types
+py_key_types = foxdot_funcs + py_key_types
 
 py_separators = list("[](){},./*+=- \t\n")
 py_whitespace = list(" \t\n\r\f\v")
@@ -95,7 +99,7 @@ tabsize = 4
 
 functions = r"(?<![a-zA-Z])(" + "|".join(py_functions) + ")(?![a-zA-Z])"
 key_types = r"(?<![a-zA-Z])(" + "|".join(py_key_types) + ")(?![a-zA-Z])"
-bool_vals = r"(?<![a-zA-Z])(" + "|".join(py_bool_vals) + ")(?![a-zA-Z])"
+other_kws = r"(?<![a-zA-Z])(" + "|".join(py_other_kws) + ")(?![a-zA-Z])"
 
 # Load Default Colour Values
 
@@ -112,7 +116,7 @@ except:
             "functions=#66ff99",
             "key_types=#66ccff",
             "user_defn=#ff9999",
-            "bool_vals=#ff99ff",
+            "other_kws=#ff99ff",
             "comments=#FF3300",
             "numbers=#FF9900",
             "strings=#ffff99",
@@ -127,7 +131,7 @@ colour_map = dict([line.replace("\n","").split("=") for line in data])
 re_patterns = {  'functions' : functions,
                  'key_types' : key_types,
                  'user_defn' : user_defn,
-                 'bool_vals' : bool_vals,
+                 'other_kws' : other_kws,
                  'comments'  : comments,
                  'numbers'   : numbers,
                  'strings'   : strings,
@@ -139,7 +143,7 @@ re_patterns = {  'functions' : functions,
 # Weightings (heavier get checked last)
 
 tag_weights = [['numbers'],
-               ['key_types','functions','user_defn','bool_vals','dollar','arrow','players'],
+               ['key_types','functions','user_defn','other_kws','dollar','arrow','players'],
                ['comments'],
                ['strings']]
 

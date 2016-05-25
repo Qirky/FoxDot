@@ -56,16 +56,50 @@ To have samples play simultaneously, just create a new 'Sample Player' object fo
 
 Grouping characters in round brackets laces the pattern so that on each play through of the sequence of samples, the next character in the group's sample is played. The sequence `(xo)---` would be played back as if it were entered `x---o---`. Characters in square brackets are played twice as fast (half the duration) of one character by itself, and characters in curly brackets (`{}`) are played in the same time span as one character. Example: `{oo}` would play two snare hits at a quarter beat each but `{ooo}` would play three snare hits at 3/8 beats each.
 
-## Best Practices
+## Writing your own Synth Definitions
 
-### SuperCollider SynthDefs
+FoxDot can access any `SynthDef` stored on the SuperCollider server but you may want to write (or edit) your own during run-time in FoxDot. This is done using the `SCLang` module (the contents are imported on startup). All FoxDot `SynthDef` objects inherit the base-class behaviour, such as low- and high-pass filters and vibrato, but these can be overridden or updated easily. The `SCLang` module also provides an easy-to-use API to the SCLang used in SuperCollider
 
-Custom `SynthDefs` written in SuperCollider should contain the following keyword arguments:
+Example:
 
-* `amp` - A value between 0 (silent) and 1 (loud)
-* `pan` - A value between -1 (left) and 1 (right) 
-* `sus` - The duration of a note, and should be included in an `EnvGen`
-* `freq` - The frequency of the sound
+```python
+# Create a SynthDef named 'example'
+ex = SynthDef("example")			
+
+# Add a custom argument named 'pow'
+ex.defaults.update(pow=1)			
+
+# Create our oscillator using a sine wave that oscillates at the given frequency to power of 'pow'
+ex.osc = SinOsc.ar(freq ^ ex.pow)	
+
+# Using a percussive sound envelope
+ex.env = Env.perc()					
+
+# Add to the server
+ex.add()							
+```
+
+*This is equivalent to the following SynthDef that inherits from the base-class (it's a little nicer isn't it?)*
+
+```java
+SynthDef.new( \example,
+	{ |vib=0, vibVar=0.04, pow=1, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, hpf=0, pan=0, scrub=0, verb=0.25, amp=1, freq=0, buf=0, echoOn=0, room=0.5, rate=0, depth=0.02, grain=0, lpf=20000, slidefrom=1|
+
+	var osc, env;
+
+	freq=Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth);
+
+	osc=LPF.ar(HPF.ar(SinOsc.ar((freq ** pow)), hpf), lpf);
+
+	env=EnvGen.ar(Env.perc(level: amp, releaseTime: sus).delay(delay), doneAction: 2);
+
+	Out.ar(0, Pan2.ar(FreeVerb.ar(((osc + (echoOn * CombN.ar(osc, (echo * 0.1), (echo * 0.1), ((echo * 0.5) * sus), 1))) * env), verb, room), pan))}).add;
+```
+
+The attribute `env` is set to `Env.perc()` by default, so as long as you set `osc` to a valid SuperCollider UGen, you'll be making noise in no time! Once the `SynthDef` has been added to the server, you'll be able to use it using the basic FoxDot syntax like so:
+
+	out >> example([0,1,2,3], pow=[1,1.5])
+
 
 ## Undocumented Items
 

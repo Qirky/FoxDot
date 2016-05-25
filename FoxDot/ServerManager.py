@@ -47,6 +47,11 @@ class ServerManager:
         self.client.send( message )
         return
 
+    def sendNote(self, SynthDef, packet):
+        packet = [SynthDef, 0, 1, 1] + packet
+        self.sendOSC(packet)
+        return
+
     def send(self, message):
         self.client.send(OSCMessage(message))
         return
@@ -64,7 +69,7 @@ class ServerManager:
         return
 
 
-class SclangManager(ServerManager):
+class SCLangManager(ServerManager):
     def __init__(self, addr=ADDRESS, port=PORT+10):
         ServerManager.__init__(self, addr, port)
     def sendsclang(self, code, cmd='/foxdot'):
@@ -73,36 +78,3 @@ class SclangManager(ServerManager):
         msg.append(code)
         self.client.send(msg)
         return
-
-
-#####
-
-##class SuperColliderSynthDefs:
-##
-##    with open('startup.scd') as f:
-##        sc = f.readlines()    
-##    patt = r'SynthDef.*?\\(.*?)'
-##
-##    names = [match(patt, line).group(1) for line in sc if "SynthDef" in line and not line.startswith("/")]
-##
-##    def __init__(self):
-##        pass
-##    def __str__(self):
-##        return str(self.names)
-##    def __repr__(self):
-##        return str(self.names)
-##    def __len__(self):
-##        return len(self.names)
-##    def __iter__(self):
-##        for x in self.names:
-##            yield x
-##    def __getitem__(self, key):
-##        return self.names[key]
-##    def __setitem__(self, name, value):
-##        raise AttributeError("SynthDefs cannot be altered using FoxDot code")
-##    def __call__(self):
-##        return self.names
-##    def choose(self):
-##        return choose(self.names)
-##
-##SynthDefs = SuperColliderSynthDefs() 
