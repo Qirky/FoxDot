@@ -35,6 +35,12 @@ class ServerManager:
 
         self.node = 1000
 
+    def __str__(self):
+        return "FoxDot ServerManager Instance -> {}:{}".format(self.addr, self.port)
+
+    def __repr__(self):
+        return str(self)
+
     def nextnodeID(self):
         self.node += 1
         return self.node

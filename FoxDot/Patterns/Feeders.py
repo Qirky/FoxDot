@@ -5,25 +5,7 @@
 
 """
 
-##from ..Code import LiveObject
-##
-##class Feeder(LiveObject):
-##    def __init__(self, player, metro, step):
-##        self.metro = metro
-##        self.player = player
-##        self.step = step
-##        self.__call__()
-##    def __call__(self):
-##        self.do()
-##        LiveObject.__call__(self)
-##    def do(self):
-##        pass
-##
-##class rev(Feeder):
-##    def do(self):
-
-
-def rev(player):
+def reverse(player):
     player.reverse()
 
 def lshift(player):

@@ -15,7 +15,7 @@
 if __name__ == "__main__":
 
     from FoxDot import Code
-    from FoxDot.Interface import App
+    from FoxDot.Interface import App, index
 
     # Load FoxDot Modules into the environment
 
@@ -27,7 +27,12 @@ if __name__ == "__main__":
         def __init__(self):
 
             App.__init__(self, "FoxDot - Live Coding with Python and SuperCollider")
+
             print "Welcome to FoxDot!"
+
+        def update_prompt(self):
+            """ Remove this """
+            return
 
         def submit(self, code_str):
             
@@ -41,6 +46,20 @@ if __name__ == "__main__":
             except:
 
                 return
+
+        def check_namespace(self):
+
+            obj = Code.namespace(self.last_word)
+
+            if obj:
+
+                if obj.__doc__ is not None:
+
+                    self.prompt.set(obj.__doc__)
+
+                else:
+
+                    self.promptlbl.place(x=9999, y=9999)
 
         def killall(self, event):
 

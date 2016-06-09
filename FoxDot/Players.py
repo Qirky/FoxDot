@@ -12,30 +12,22 @@ from os.path import dirname
 from Patterns import *
 from Midi import *
 
-from Scale import Scale
-
 import Code
 import Buffers
 
-_PLAYER_TYPE  = 0
-_SYNTH_TYPE   = 1
-_SAMPLES_TYPE = 2
-
-
 ##################### ROOT PLAYER OBJECT #####################
 
-class PLAYER(Code.LiveObject):
+class PlayerObject(Code.LiveObject):
 
     _VARS = []
     _INIT = False
-    _TYPE = _PLAYER_TYPE
-    _DUR  = 'dur'
+
+    metro = None
+    server = None
 
     def __init__( self, name ):
 
         self.SynthDef = name
-        self.metro = None
-        self.server = None
         self.quantise = False
         self.stopping = False
         self.stop_point = 0
@@ -63,6 +55,10 @@ class PLAYER(Code.LiveObject):
 
         self.attr = {}
         self.modf = {}
+
+        # Hold a list of any schedule methods
+
+        self.scheduled_events = {}
         
         # List the internal variables we don't want to send to SuperCollider
 
@@ -71,7 +67,7 @@ class PLAYER(Code.LiveObject):
         # Default attribute dictionary
 
         self.dur    = self.attr['dur']      =  [0]
-        self.root   = self.attr['root']     =  [0]
+        #self.root   = self.attr['root']     =  [0]
         self.degree = self.attr['degree']   =  [0]
         self.oct    = self.attr['oct']      =  [5]
         self.amp    = self.attr['amp']      =  [1]
@@ -98,23 +94,25 @@ class PLAYER(Code.LiveObject):
             self.kill()
             return
 
-        if self.dur_updated(): self.event_n, self.event_index = self.count()
+        if self.dur_updated():
 
+            self.event_n, self.event_index = self.count()
+        
         # Get the current state
 
         self.get_event()
 
         # Get next occurence
 
-        dur    = self.event[self._DUR]
+        dur = float(self.event['dur'])
 
-        offset = self.event["offset"] - self.last_offset
+        offset = float(self.event["offset"]) - self.last_offset
 
         # Schedule the next event
 
         self.event_index = self.event_index + dur + offset
         
-        self.metro.Schedule(self, self.event_index)
+        self.metro.schedule(self, self.event_index)
 
         # Store any offset
 
@@ -135,9 +133,13 @@ class PLAYER(Code.LiveObject):
         dur = 0
         now = self.metro.now()
 
+        durations = self.rhythm()
+ 
+        acc = now - (now % sum(durations))
+
         while True:
             
-            dur = modi(self.attr[self._DUR], n)
+            dur = float(modi(durations, n))
 
             if acc + dur > now:
 
@@ -166,6 +168,9 @@ class PLAYER(Code.LiveObject):
 
     def dur_updated(self):
         return self.attr['dur'] != self.old_dur
+
+    def rhythm(self):
+        return asStream(self.attr['dur'])
 
     # --- Data methods
 
@@ -196,9 +201,9 @@ class PLAYER(Code.LiveObject):
         if self.following and attr == 'degree':
 
             attr_value = self.following.now('degree')
-
+            
         else:
-
+    
             attr_value = modi(self.attr[attr], self.event_n + x)
         
         # If the attribute isn't in the modf dictionary, default to 0
@@ -382,9 +387,22 @@ class PLAYER(Code.LiveObject):
 
     """
 
-    def every(self, n, cmd, args=()):
-        obj = self.metro.call(lambda: cmd(self, *args), n)
-        self.metro.Schedule(obj, self.metro.NextBar() - 0.1)
+    def every(self, n, cmd, args=(), id=1):
+        if not callable(cmd):
+            return self
+        # Get unique name
+        name = cmd.__name__ + str(id)
+        # See if we have a reference to it
+        if name in self.scheduled_events:
+            # Update
+            pass
+        else:
+            # Create new schedulable event
+            obj = self.metro.call(lambda: cmd(self, *args), n)
+            # Add to clock
+            self.metro.schedule(obj, self.metro.NextBar() - 0.1)
+            # Store reference
+            self.scheduled_events[name] = obj
         return self
 
     def _every(self, n, cmd, *args):
@@ -444,10 +462,16 @@ class PLAYER(Code.LiveObject):
             if self == var: return name
 
     def __repr__(self):
-        return "<Player ('%s')>" % self.SynthDef
+        return "<Player Instance ('%s')>" % self.SynthDef
 
     def __str__(self):
-        return self.SynthDef
+        s = "Player Instance using '%s' \n\n" % self.SynthDef
+        s += "ATTRIBUTES\n"
+        s += "----------\n\n"
+        for attr, val in self.attr.items():
+            s += "\t{}\t:{}\n".format(attr, val)
+        return s
+        
 
     def __setattr__(self, name, value):
         if self._INIT:
@@ -458,25 +482,50 @@ class PLAYER(Code.LiveObject):
 
 ##################### SYNTH PLAYERS #####################
 
-class SYNTH_PLAYER(PLAYER):
+class Player(PlayerObject):
 
-    _TYPE = _SYNTH_TYPE
+    default_scale = None
+    default_root  = None
 
     def __init__(self, SynthDef, degree=[0], **kwargs):
 
         # Inherit key methods
 
-        PLAYER.__init__(self, SynthDef)
+        self.parent = super(self.__class__, self)
+
+        self.parent.__init__(SynthDef)
 
         # Update self with kwargs
         
         self.attr.update(kwargs)
         self.reset()
 
+        # Set key attribute default settings
+
+        self.scale = kwargs.get( "scale", Player.default_scale )
+        self.root = self.attr['root']  = asStream(kwargs.get( "root",  Player.default_root ))
+        self.dur  = self.attr['dur']   = asStream(1)
+        self.sus  = self.attr['sus']   = asStream(1)
+
+        # Finish init (any assigned attributes now go in the Player.attr dict
+        
+        self._INIT = True
+
+        # Update attributes
+        
+        self.update(SynthDef, degree, **kwargs)
+        
+        # Add to clock and update with keyword arguments
+        
+        self.isplaying = True
+        self.event_index = self.metro.NextBar()
+        self.event_n = 0
+        self.metro.schedule(self, self.event_index)
+
     def update(self, SynthDef, degree=[0], **kwargs):
         """ Updates the values of this Player """
 
-        PLAYER.update(self)
+        self.parent.update()
 
         setattr(self, "SynthDef", SynthDef)
         setattr(self, "degree", asStream(degree))
@@ -511,8 +560,15 @@ class SYNTH_PLAYER(PLAYER):
         f = []
 
         for i in range(size):
-            
-            midinum = midi( self.scale, modi(now['oct'], i), modi(now['degree'], i) , self.now('root') )
+
+            try:
+                
+                midinum = midi( self.scale, modi(now['oct'], i), modi(now['degree'], i) , self.now('root') )
+
+            except:
+
+                print self.event
+                raise
 
             f.append( miditofreq(midinum) )
             
@@ -520,14 +576,14 @@ class SYNTH_PLAYER(PLAYER):
 
     def __call__(self):
         """ Calls the parent class update state then calculates frequency """
-        PLAYER.__call__(self)
+        self.parent.__call__()
         self.freq = self.calculate_freq()
         self.send()
 
     def osc_message(self, index=0, head=[]):
         """ Attaches the frequency to the osc message """
         msg_head = ['freq', modi(self.freq, index)]
-        return PLAYER.osc_message(self, index, msg_head)
+        return self.parent.osc_message(index, msg_head)
 
     def follow(self, lead):
         """ Takes a now object and then follows the notes """
@@ -641,7 +697,7 @@ class SYNTH_PLAYER(PLAYER):
         return self
 
     def __cmp__(self, other):
-        if isinstance(other, PLAYER):
+        if isinstance(other, self.parent.__thisclass__):
             return int( self is not other ) * -1
         # Used for comparing to numbers etc
         if self.now('degree') > other:
@@ -659,72 +715,97 @@ class SYNTH_PLAYER(PLAYER):
 # Table of characters to buffers
 
 BufferManager = Buffers.BufferManager().from_file()
+BufferManager.load()
 
-class SAMPLE_PLAYER(PLAYER):
+class SamplePlayer(PlayerObject):
 
-    _TYPE = _SAMPLES_TYPE
-    _DUR  = 'dur_val'
-    
-    SPECIAL_CHARS = " []()"
-    REST = SPECIAL_CHARS[0]
+    def __init__(self, string='', **kwargs):
 
-    def __init__(self, pat=' ', speed=[1], **kwargs):
+        # Inherit from base class
 
-        PLAYER.__init__(self, "sample_player")
+        self.parent = super(self.__class__, self)
+
+        self.parent.__init__("sample_player")
 
         # Degree is the string of characters
-        self.degree  = pat
+        self.degree     = string
         self.old_degree = ""
-
-        # Real value of each sample duration
-        self.dur_val = self.attr['dur_val'] = self.old_dur_val = None
-
-        # Set samples a little louder
-        self.amp = self.attr['amp'] = 1
 
         self.attr.update(kwargs)
         self.reset()
+
+        # Set defaults
+        
+        self.dur = self.attr['dur'] = asStream(0.5)
+        self.old_pattern_dur = self.dur
+
+        # Finish init
+
+        self._INIT = True
+
+        # Update attributes
+        
+        self.update(self.degree)
+
+        # Add to clock and update
+
+        self.isplaying = True
+        self.event_index = self.metro.NextBar()
+        self.metro.schedule(self, self.event_index)
         
     def update(self, degree=" ", **kwargs):
         """ Updates the values of this Player """
 
-        PLAYER.update(self)
+        self.parent.update()
 
-        setattr(self, "degree", str(degree).replace("."," ") if len(degree) > 0 else " ")
+        setattr(self, "degree", str(degree) if len(degree) > 0 else " ")
 
-        self.pat_to_buf()
+        #self.pat_to_buf()
 
         for name, value in kwargs.items():
+            
             setattr(self, name, value)
 
         return self
 
     def __call__(self):
         """ String -> buffer numbers before clock update """
-        PLAYER.__call__(self)
-        self.old_dur_val = self.dur_val
+        self.parent.__call__()
         self.send()
 
+    def get_event(self):
+
+        # Un-nest any PGroups
+        self.attr['degree'] = self.attr['degree'].flat()
+        
+        # Get the current event
+        self.parent.get_event()
+
+        # Get the buffer number to play
+        self.event['buf'] = BufferManager.symbols.get(self.event['degree'].char, 0)
+
+        # Apply any duration ratio changes
+        self.event['dur'] *= self.event['degree'].dur
+
+        return self
+
     def dur_updated(self):
-        return self.attr['dur'] != self.old_dur or self.attr['dur_val'] != self.old_dur_val
+        """ Returns true if the base duration or the pattern has changed """
+        return (self.pattern_rhythm_updated() or self.parent.dur_updated())
 
-    def count(self):
-        self.pat_to_buf()
-        return PLAYER.count(self)        
+    def pattern_rhythm_updated(self):
+        r = self.rhythm()
+        if self.old_pattern_dur != r:
+            self.old_pattern_dur = r
+            return True
+        return False
 
-    def pat_to_buf(self):
-        """ Calculates the durations and buffer numbers based on the characters in the degree attribute """
-        rhythm = PDur(self.degree, self.dur)
-
-        self.attr['dur_val'] = self.dur_val = rhythm
- 
-        self.attr['buf'] = self.buf = [BufferManager.symbols.get(char, 0) for char in rhythm.chars]
-
-        return
+    def rhythm(self):
+        return self.parent.rhythm() * [char.dur for char in self.attr['degree'].flat()]
 
     def tupleN(self):
         """ Forces the tupleN method to skip out the degree attr when calculating the largest tuple """
-        return PLAYER.tupleN(self, exclude='degree')
+        return self.parent.tupleN(exclude='degree')
 
     def char(self, other=None):
         if other is not None:

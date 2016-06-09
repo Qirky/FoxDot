@@ -1,7 +1,8 @@
 """
-    SCLang.py (experimental)
+    SCLang.py
 """
 
+from ..ServerManager  import SCLangManager
 from copy import copy
 
 def format_args(args=[], kwargs={}, delim=': '):
@@ -206,13 +207,21 @@ class EnvGen(instance):
         
 Env = EnvGen("Env")
 
-# SynthDef Base Class
+# Container for SynthDefs
 
-SynthDefs = []
+class SynthDict(dict):
+    def __init__(self, **kwargs):
+        dict.__init__(self, kwargs)
+    def __str__(self):
+        return str(self.keys())        
+
+SynthDefs = SynthDict()
+
+# SynthDef Base Class
 
 class SynthDef:
 
-    server = None
+    server = SCLangManager()
     var = ['osc', 'env']
 
     def __init__(self, name):
@@ -255,14 +264,14 @@ class SynthDef:
         if key in self.defaults:
             return instance(key)
         else:
-            raise AttributeError("Attribute '{}' not found" % key)
+            raise AttributeError("Attribute '{}' not found".format(key))
     
     def add(self):
         self.osc = HPF.ar(self.osc, hpf)
-        self.osc = LPF.ar(self.osc, lpf)
+        self.osc = LPF.ar(self.osc, lpf + 1)
         try:
             SynthDef.server.sendsclang(str(self))
-            SynthDefs.append(self)
+            SynthDefs[self.name] = str(self)
         except:
             print "SynthDef '{}' could not be added to the server".format(self.name)
 
@@ -292,6 +301,13 @@ class SynthDef:
 
     def __repr__(self):
         return str(self.name)
+
+    def __add__(self, other):
+        if not isinstance(other, SynthDef):
+            raise TypeError("Warning: '{}' is not a SynthDef".format(str(other)))
+        new = copy(self)
+        new.osc = self.osc + other.osc
+        return new
 
 # Array manipulation emulator functions
 

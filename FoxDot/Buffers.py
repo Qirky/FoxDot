@@ -3,6 +3,7 @@
 """ This module manages the allocation of buffer numbers and samples """
 
 from os.path import abspath, join, dirname
+from ServerManager import ServerManager
 
 def path(fn):
     return abspath(join(dirname(__file__), fn))
@@ -12,7 +13,7 @@ class BufferManager:
     def __init__(self):
 
         # ServerManager Object
-        self.server = None
+        self.server = ServerManager()
 
         # Dictionary of characters to respective buffer number
         self.symbols = {}

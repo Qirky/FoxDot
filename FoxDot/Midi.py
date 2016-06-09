@@ -8,7 +8,11 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     """ Calculates a midinote from a scale, octave, degree, and root """
 
     # Force float
-    degree = float(degree)
+    try:
+        degree = float(degree)
+    except Exception as e:
+        print degree, type(degree)
+        raise Exception(e)
 
     # Floor val
     lo = int(degree)
@@ -20,4 +24,4 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
 
     scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
 
-    return scale_val + (octave * len(chroma)) + root
+    return scale_val + (octave * len(chroma)) + float(root)

@@ -2,6 +2,18 @@ from random import choice, shuffle
 from Operations import *
 from ..Code.parse import brackets, closing_brackets
 
+class PCHAR(object):
+    def __init__(self, char, dur=1):
+        self.char = str(char[0])
+        self.dur=dur
+    def __getitem__(self, key):
+        return self.char
+    def __str__(self):
+        return self.char
+    def __repr__(self):
+        return self.char
+        
+
 class metaPattern(object):
     """
         Abstract pattern class
@@ -52,38 +64,22 @@ class metaPattern(object):
     def __setslice__(self, i, j, item):
         self.data[i:j] = item
     #: Operators
-    def __add__(self, other):
-        return PAdd(self, other)
-    def __radd__(self, other):
-        return PAdd(self, other)
-    def __sub__(self, other):
-        return PSub(self, other)
-    def __rsub__(self, other):
-        return PSub(other, self)
-    def __mul__(self, other):
-        return PMul(self, other)
-    def __rmul__(self, other):
-        return PMul(other, self)
-    def __truediv__(self, other):
-        return PDiv(self, other)
-    def __rtruediv__(self, other):
-        return PDiv(other, self)
-    def __div__(self, other):
-        return PDiv(self, other)
-    def __rdiv__(self, other):
-        return PDiv(other, self)
-    def __mod__(self, other):
-        return PMod(self, other)
-    def __rmod__(self, other):
-        return PMod(other, self)
-    def __pow__(self, other):
-        return PPow(self, other)
-    def __rpow__(self, other):
-        return PPow(other, self)
-    def __xor__(self, other):
-        return PPow(self, other)
-    def __rxor__(self, other):
-        return PPow(other, self)
+    def __add__(self, other):  return PAdd(self, other)
+    def __radd__(self, other): return PAdd(self, other)
+    def __sub__(self, other):  return PSub(self, other)
+    def __rsub__(self, other): return PSub(other, self)
+    def __mul__(self, other):  return PMul(self, other)
+    def __rmul__(self, other): return PMul(other, self)
+    def __div__(self, other):  return PDiv(self, other)
+    def __rdiv__(self, other): return PDiv(other, self)
+    def __mod__(self, other):  return PMod(self, other)
+    def __rmod__(self, other): return PMod(other, self)
+    def __pow__(self, other):  return PPow(self, other)
+    def __rpow__(self, other): return PPow(other, self)
+    def __xor__(self, other):  return PPow(self, other)
+    def __rxor__(self, other): return PPow(other, self)
+    def __truediv__(self, other):  return PDiv(self, other)
+    def __rtruediv__(self, other): return PDiv(other, self)
     #: Piping patterns
     def __or__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
@@ -104,37 +100,67 @@ class metaPattern(object):
         except:
             return self.data != other
 
-    #: Non-Python special methods
-    def fromString(self, string):
-        """
-            Used to convert a string of characters into a pattern, either 
 
-            Characters can be PGrouped in brackets and each group have their
-            own set of behaviours.
+##    #: Non-Python special methods
+##    def fromString(self, string):
+##        """
+##            Used to convert a string of characters into a pattern, either 
+##
+##            Characters can be PGrouped in brackets and each group have their
+##            own set of behaviours.
+##
+##            Half-Time Groups
+##            ----------------
+##
+##            [] - Puts the characters into Half_Time_PGroups
+##
+##            Laced Groups
+##            ------------
+##
+##            () - Put into a list and become nested
+##
+##            Shared-Time Groups
+##            ------------------
+##
+##            {} - Put into a Single_Time_PGroup 
+##
+##            Rather unintuitively: Characters in square brackets, [], are
+##            placed in a tuple - and then become PGroups - and characters
+##            in round brackets, (), are added into a nested list
+##
+##            "x-o(-[oo])" -> ["x","-","o","-","x","-","o",("o","o")]
+##        
+##        """
+##
+##        i = 0
+##        self.data = []
+##        
+##        bracket_styles = {"()" : Pattern,
+##                          "[]" : PGroup,
+##                          "{}" : Shared_Time_PGroup }
+##
+##        while i < len(string):
+##
+##            char = string[i]
+##
+##            if char in "([{":
+##                
+##                a, b = brackets(string, i, closing_brackets[char])
+##
+##                char = bracket_styles[string[a]+string[b-1]](string[a+1:b-1])
+##
+##                i = b - 1
+##
+##            self.data.append(char)
+##
+##            i += 1
+##
+##        self.make()
+##
+##        return self
 
-            Half-Time Groups
-            ----------------
-
-            [] - Puts the characters into Half_Time_PGroups
-
-            Laced Groups
-            ------------
-
-            () - Put into a list and become nested
-
-            Shared-Time Groups
-            ------------------
-
-            {} - Put into a Single_Time_PGroup 
-
-            Rather unintuitively: Characters in square brackets, [], are
-            placed in a tuple - and then become PGroups - and characters
-            in round brackets, (), are added into a nested list
-
-            "x-o(-[oo])" -> ["x","-","o","-","x","-","o",("o","o")]
+    def fromString(self, string, dur=1):
         
-        """
-
         i = 0
         self.data = []
         
@@ -147,20 +173,43 @@ class metaPattern(object):
             char = string[i]
 
             if char in "([{":
-                
+
+                # Get the characters in brackets
+
                 a, b = brackets(string, i, closing_brackets[char])
 
-                char = bracket_styles[string[a]+string[b-1]](string[a+1:b-1])
+                # Apply appropriate pattern type
+
+                PatternCls, s = bracket_styles[string[a]+string[b-1]], string[a+1:b-1]
+
+                # Apply any duration ratios
+
+                char = PatternCls().fromString(s, self.dur(dur))
 
                 i = b - 1
+
+            else:
+
+                char = PCHAR(char, dur=self.dur(dur))
 
             self.data.append(char)
 
             i += 1
 
         self.make()
-            
+
         return self
+
+    def flat(self):
+        """ p.flat() -> un-nested pattern """
+        new = []
+        for item in self.data:
+            try:
+                item = item.flat()
+                new += [i for i in item]
+            except:
+                new.append(item)
+        return Pattern(new)
     
     def dur(self, val):
         """ Returns a duration value relative to the type of pattern. Most patterns return val unchanged """
@@ -184,9 +233,9 @@ class metaPattern(object):
     def startswith(self, prefix):
         return self.data[0] == prefix
 
-    def copy(self):
-        new = [item for item in self.data]
-        return Pattern(new)
+##    def copy(self):
+##        new = [item for item in self.data]
+##        return asPattern(new)
     
     def items(self):
         for i, data in enumerate(self.data):
@@ -261,6 +310,15 @@ class Pattern(metaPattern):
     NEST_ME = True
     BRACKETS = "[%s]"
 
+class PatternContainer(metaPattern):
+    NEST_ME = False
+    BRACKETS = "[%s]"
+    def make(self):
+        return self
+    def __str__(self):
+        return str(["%s()" % item.__class__.__name__ for item in self.data])
+    def __repr__(self):
+        return str(self)
     
 
 class PGroup(metaPattern):
@@ -272,6 +330,14 @@ class PGroup(metaPattern):
 
     NEST_ME = False
     BRACKETS = "(%s)"
+
+    def __init__(self, data=[], *args):
+        if not args:
+            if type(data) is tuple:
+                data = list(data)
+        else:
+            data = [data] + list(args)
+        metaPattern.__init__(self, data)
     
     def make(self):
         """
@@ -281,6 +347,10 @@ class PGroup(metaPattern):
             i.e. (0,[1,2],[3,4]) -> [(0,1,3),(0,2,4)]
 
         """
+
+        if not isinstance(self.data, (list, metaPattern)):
+    
+            self.data = [self.data]
 
         #: Inverts the nested and grouped data if PGroup has a nested Pattern
         if contains_nest(self.data):
@@ -292,7 +362,8 @@ class PGroup(metaPattern):
             self.data = [self.__class__(sub[n:n+step]) for n in range(0, len(sub), step)]
 
             # Make this a pseudo-normal pattern          
-            self.NEST_ME = True
+            self.NEST_ME  = Pattern.NEST_ME
+            self.BRACKETS = Pattern.BRACKETS
             
         return self
 
@@ -331,7 +402,6 @@ def Place(data):
 
         #: Works out the largest sub-patterns and loops the overall pattern until it is stretched out
         
-        #sub = max([len(item) for item in data if nested(item)])
         sub = LCM(*[len(item) for item in data if nested(item)])
         new = []
 
@@ -351,12 +421,19 @@ def Place(data):
 
 
 # Used to force any non-pattern data into a Pattern
-
+                
 def asStream(data):
-    """ Forces any data into a pattern form """
+    """ Forces any data into a [pattern] form """
     if isinstance(data, Pattern):
         return data
     return Pattern(data)
+
+def Dominant(*patterns):
+    for p in patterns:
+        if isinstance(p, (Pattern, list)):
+           return Pattern 
+    return PGroup
+        
 
 def Convert(*args):
     """ Returns tuples/PGroups as PGroups, and anything else as Patterns """

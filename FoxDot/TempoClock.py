@@ -36,6 +36,9 @@ class TempoClock:
         self.when_statements = {}
         self.playing = []
 
+        # TO UPDATE
+        self.Schedule = self.schedule
+
     def __str__(self):
 
         return str(self.queue)
@@ -82,23 +85,21 @@ class TempoClock:
 
             now = self.now()
 
-##            if int(now) > self.beat:
-##
-##                self.beat = int(now)
-
             if self.now() >= self.NextEvent():
 
                 event = self.queue.pop()
 
                 for obj in event[0]:
 
-                    if callable(obj): obj()
+                    if callable(obj):
+
+                        obj()
 
             sleep(0.00001)
 
         return self
 
-    def Schedule(self, obj, beat=None):
+    def schedule(self, obj, beat=None):
         """ Add a player / event to the queue """
 
         # Default is next bar
@@ -182,7 +183,14 @@ class TempoClock:
     def stop(self):
 
         self.ticking = False
+        self.reset()
 
+        return
+
+    def reset(self):
+
+        self.time = 0
+        self.mark = time()
         self.beat = 0
 
         return
@@ -198,9 +206,7 @@ class TempoClock:
 
         self.queue = []
 
-        self.start_time = time()
-
-        self.beat = 0
+        self.reset()
 
         return
 

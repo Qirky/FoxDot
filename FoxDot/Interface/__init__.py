@@ -69,6 +69,15 @@ class App:
         
         self.text.focus_set()
 
+        # Docstring prompt label
+
+        self.prompt = StringVar()
+        self.promptlbl = Label(self.text, textvariable=self.prompt)
+        self.promptlbl.place(x=9999, y=9999)
+        self.last_word = ""
+        self.prompt.set("")
+        
+
         # Key bindings
         self.text.bind("<Control-Return>",  self.get_code)
         self.text.bind("<Command-Return>",  self.get_code)
@@ -93,6 +102,8 @@ class App:
         self.text.bind("<Key>",             self.keypress)
 
         # Automatic brackets
+
+        self.inbrackets = False
 
         self.separators = py_separators
 
@@ -130,6 +141,10 @@ class App:
 
         if not event.char or isHex(event.char):
 
+            self.inbrackets = False
+
+            self.update_prompt()
+
             return
         
         else: # Add character to text box
@@ -141,6 +156,32 @@ class App:
             self.update(event)
 
         return "break"
+
+    def update_prompt(self):        
+
+        if self.inbrackets:
+
+            # Show prompt
+
+            line, column = index(self.text.index(INSERT))
+            text = self.text.get(index(line, 0), index(line, column))
+
+            x = self.font.measure(text)
+            y = self.font.metrics("linespace") * line
+
+            self.promptlbl.place(x=x, y=y)
+
+            # If cursor is in between brackets that follow a type word
+
+            self.check_namespace()
+
+        else:
+
+            # Hide prompt
+
+            self.promptlbl.place(x=9999, y=9999)
+
+        #self.prompt.set("cheese")
 
     def update(self, event=None, row=0):
         """ Updates the the colours of the IDE """
@@ -177,6 +218,8 @@ class App:
                 
                 self.text.tag_add(tag_name, index(line, start), index(line, end))
 
+        self.update_prompt()
+
         return "break"
                     
 
@@ -198,7 +241,11 @@ class App:
         # If a left bracket, automatically add the right
 
         if event.char in self.left_brackets and self.text.get(self.text.index(INSERT)) in py_whitespace + self.left_brackets + self.right_brackets:
-            
+
+            # Get the last word
+
+            self.get_last_word()
+
             # Insert closed brackets
 
             self.text.insert(self.text.index(INSERT), self.all_brackets[event.char])
@@ -217,11 +264,39 @@ class App:
 
         self.text.insert(self.text.index(INSERT), event.char)
 
+        self.inbrackets = True
+        
         # Update any colour
 
         self.update(event)
 
         return "break"
+
+    def get_last_word(self):
+
+        line, column = index(self.text.index(INSERT))
+
+        string = ""
+
+        while True:
+
+            char = self.text.get(index(line, column-1))
+
+            if char.isalpha():
+
+                string = char + string
+
+            else:
+
+                break
+
+            column -= 1
+
+            if column == 0:
+
+                break
+
+        self.last_word = string        
 
     # --- Key-binded functions
 

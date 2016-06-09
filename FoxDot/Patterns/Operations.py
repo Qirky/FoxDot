@@ -1,4 +1,5 @@
 from __future__ import division
+from copy import copy
 import Base
 
 """
@@ -14,12 +15,6 @@ class POperand:
         self.operate = func
 
     def __call__(self, A, B):
-
-        # Adding a non-pattern
-
-        if not isinstance(B, Base.metaPattern):
-
-            return Base.Pattern([self.operate(a, B) for a in A])
 
         # Multiple patterns
 
@@ -44,25 +39,15 @@ class POperand:
     @staticmethod
     def setup(A, B):
         """ Prepares two Patterns, A & B, for correct use in operands"""
-        try:
-            A = A.copy() # Make a copy of A
-        except:
-            pass
+        #A, B = copy(A), copy(B)
+        cls = Base.Dominant(A, B)
 
-        A, B = Base.Convert(A, B)
-        
-        # If at least one is a 'true' pattern, convert the other
-        if isinstance(A, Base.Pattern):
-            B = Base.asStream(B)
-        elif isinstance(B, Base.Pattern):
-            A = Base.asStream(A)
+        A, B = cls(A), cls(B)
 
-        # If we have two 
+        length = LCM(len(A), len(B))
 
-        Length = max_length(A, B)
-
-        A.stretch(Length)
-        B.stretch(Length)
+        A.stretch(length)
+        B.stretch(length)
         
         return A, B
 
@@ -76,6 +61,7 @@ Mod  = lambda a, b: a % b
 Pow  = lambda a, b: a ** b
 rDiv = lambda a, b: b / a
 rSub = lambda a, b: b - a
+rMod = lambda a, b: b % a
 
 # Pattern operations
 PAdd = POperand(Add)
@@ -118,6 +104,9 @@ def LCM(*args):
         X[i] += args[i]        
 
     return X[0]
+
+def patternclass(a, b):
+    return Base.PGroup if isinstance(a, Base.PGroup) and isinstance(b, Base.PGroup) else Base.Pattern
 
 
 def modi(array, i, debug=0):

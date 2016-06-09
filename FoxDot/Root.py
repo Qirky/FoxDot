@@ -1,4 +1,5 @@
 from Patterns.Operations import modi
+import TimeVar
 
 CHROMATIC_NOTES = ["C"," ","D"," ","E","F"," ","G"," ","A"," ","B"]
 
@@ -10,6 +11,12 @@ class Note:
         self.num  = None
 
         self.change(index)
+
+    def __str__(self):
+        return str(self.num)
+
+    def __repr__(self):
+        return str(self.num)
 
     def change(self, index):
 
@@ -38,6 +45,11 @@ class Note:
 
             self.num = index
             self.char = "<Micro-Tuned>"
+
+        if isinstance(index, TimeVar.Var):
+
+            self.num = index
+            self.char = "<Time-Varying>"
 
     def __add__(self, other):
         return self.num + other

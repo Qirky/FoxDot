@@ -6,7 +6,7 @@ from SCLang import *
 
 sp = SynthDef("sample_player")
 sp.defaults.update(room=0.1 ,rate=1)
-sp.scrub = scrub * LFPar.kr(scrub / 4) + rate - scrub
+sp.rate = scrub * LFPar.kr(scrub / 4) + rate - scrub
 sp.osc = PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate) * amp * 3
 sp.env = Env.block(sus=sus*2)
 sp.add()
@@ -94,7 +94,8 @@ klank.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, 
 klank.env = Env()
 klank.add()
 
-# sing = (soprano + klank).rename("sing")
+sing = (soprano + klank).rename("sing")
+sing.add()
 
 pluck = SynthDef("pluck")
 pluck.amp = amp * 2 + 0.00001

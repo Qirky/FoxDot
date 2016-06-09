@@ -26,6 +26,8 @@ class Scale(Pattern):
 
                 self.data = data
 
+        self.pentatonic = PentatonicScale(self)
+
     def __call__(self, *args):
 
         if len(args) > 0:
@@ -54,6 +56,39 @@ class Scale(Pattern):
 
         return self
 
+class PentatonicScale(Scale):
+
+    def __init__(self, scale):
+
+        self.data = scale
+
+    def __len__(self):
+        return 5
+
+    @staticmethod
+    def values(scale):
+
+        shift = ((scale[2]-scale[0]) % 2) * 2
+
+        return sorted([scale[(i+shift)%len(scale)] for i in range(0,5*4,4)])
+
+    def __str__(self):
+        return str(self.values(self.data))
+
+    def __repr__(self):
+        return str(self)
+
+    def __iter__(self):
+
+        for note in self.values(self.data):
+
+            yield note
+
+    def __getitem__(self, key):
+
+        return self.values(self.data)[key]
+
+
 #: Define scales
 
 chromatic       = Scale([0,1,2,3,4,5,6,7,8,9,10,11,12])
@@ -72,7 +107,6 @@ justMinor       = Scale([ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 
 fib = [0,1]
 for n in range(2,11):
     fib.append(fib[n-1]+fib[n-2])
-
     
 fibonacci = []
 for n in range(3, len(fib)-1):

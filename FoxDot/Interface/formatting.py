@@ -5,10 +5,13 @@ from types import FunctionType, TypeType
 def path(fn):
     return abspath(join(dirname(__file__), fn))
 
-
 def classes(module):
     """ Returns a list of class names defined in module """
     return [name for name, data in vars(module).items() if type(data) == TypeType]
+
+def instances(module, cls):
+    """ Returns a list of instances of cls from module """
+    return [name for name, data in vars(module).items() if isinstance(data, cls)]
 
 def functions(module):
     """ Returns a list of function names defined in module """
@@ -60,10 +63,11 @@ def userdefined(line):
 # Use our regex to read patterns.py and add all the functions to key_types
     
 from ..Patterns import Sequences, Feeders
+from ..SuperCollider import SCLang
 
 foxdot_kw = ["var","Var","Clock","group","Group","Scale","inf","Inf","Root"]
 
-foxdot_funcs = classes(Sequences) + functions(Feeders)
+foxdot_funcs = classes(Sequences) + functions(Feeders) + instances(SCLang, SCLang.cls) + instances(SCLang, SCLang.EnvGen)
 
 # Python keywords used in RegEx Group 2
 

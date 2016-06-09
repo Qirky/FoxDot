@@ -1,3 +1,6 @@
-from __future__ import division
 
-print "hi"
+
+
+a = d(name='Ryan')
+
+print a

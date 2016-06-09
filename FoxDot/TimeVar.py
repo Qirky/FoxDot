@@ -1,6 +1,22 @@
+"""
+    Time-Dependent Variable Base Class
+    ==================================
+
+    - Function of time
+    - Duck typing
+
+    - Explain inf stages: 0, 1, 2, 3
+
+        - Stage 0: No inf value present
+        - Stage 1: inf value is present but other values haven't been accessed yet
+        - Stage 2: Starting values have been accessed so we are free to return a value for inf duration
+        - State 3: Returning the inf value
+
+"""
+
 from sys import maxint as MAX_SIZE
 from math import modf
-from Patterns import Pattern, asStream
+from Patterns import Pattern, asStream, PatternContainer
 import Patterns.Sequences as pat
 import Patterns.Operations as op
 import Code
@@ -33,27 +49,13 @@ def iRamp(start=0, end=1, dur=8, step=0.25):
 
 
    
-class TimeVar(Code.LiveObject):
+class Var(Code.LiveObject):
+    """ Var(values [,durs=4]) """
 
-    """
-        Time-Dependent Variable Base Class
-        ==================================
+    metro = None
 
-        - Function of time
-        - Duck typing
+    def __init__(self, values, dur=4):
 
-        - Explain inf stages: 0, 1, 2, 3
-
-            - Stage 0: No inf value present
-            - Stage 1: inf value is present but other values haven't been accessed yet
-            - Stage 2: Starting values have been accessed so we are free to return a value for inf duration
-            - State 3: Returning the inf value
-
-    """
-
-    def __init__(self, values, dur=4, metro=None):
-
-        self.metro  = metro
         self.data   = values
         self.time   = []
         self.dur    = dur
@@ -68,17 +70,24 @@ class TimeVar(Code.LiveObject):
         
         self.update(values, dur)
 
+    def stream(self, values):
+        return asStream(values)
+
     # Standard Methods
     def __str__(self):
-        return  str(self.now())
+        return str(self.now())
     def __repr__(self):
-        return "<TimeVar(%s, %s)>" % (repr(self.values()), repr(self.durs()))
+        return str(self.now())
     def __len__(self):
         return len(self.now())
     def __int__(self):
         return int(self.now())
     def __float__(self):
         return float(self.now())
+
+    # For printing the details
+    def info(self):
+        return "<TimeVar(%s, %s)>" % (repr(self.values()), repr(self.durs()))
         
     # Mathematical Operators
 
@@ -113,6 +122,14 @@ class TimeVar(Code.LiveObject):
         return new
     
     # /
+    def __div__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.rDiv)
+        return new
+    def __rdiv__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.Div)
+        return new
     def __truediv__(self, other):
         new = self.new(other)
         new.evaluate = fetch(op.rDiv)
@@ -121,6 +138,22 @@ class TimeVar(Code.LiveObject):
         new = self.new(other)
         new.evaluate = fetch(op.Div)
         return new
+
+    # %
+    def __mod__(self, other):
+        return float(self.now()) % other
+
+    def __rmod__(self, other):
+        return other % float(self.now())
+    
+####        new = self.new(other)
+####        new.evaulate = fetch(op.rMod)
+####        return new
+##
+##    def __rmod__(self, other): #works
+##        new = self.new(other)
+##        new.evaluate = fetch(op.Mod)
+##        return new
 
     #  Comparisons
 
@@ -146,7 +179,7 @@ class TimeVar(Code.LiveObject):
         if isinstance(other, self.__class__):
             new = other
         else:     
-            new = TimeVar(other, self.dur, self.metro)
+            new = self.__class__(other, self.dur)
 
         new.dependency = self
         
@@ -181,7 +214,7 @@ class TimeVar(Code.LiveObject):
 
                 self.inf_found = _inf.here
 
-        for i, val in enumerate(asStream(values)):
+        for i, val in enumerate(self.stream(values)):
               
             this_dur = op.modi(self.dur, i)
 
@@ -193,7 +226,7 @@ class TimeVar(Code.LiveObject):
 
         # The contained data should be a Pattern
 
-        self.data = asStream( self.data )
+        self.data = self.stream( self.data )
 
         return self
 
@@ -251,6 +284,16 @@ class TimeVar(Code.LiveObject):
 
         return self.data
 
+var = Var
+
+class PVar(Var, Pattern):
+    """ Pvar([pat1, pat2], durs) """
+    stream = PatternContainer
+    def __init__(self, values, dur=4):
+        Var.__init__(self, [asStream(val) for val in values], dur)
+
+Pvar = PVar
+
 
 # Functions that return a new TimeVar
 
@@ -279,7 +322,7 @@ def Line(var, n=8, circular=False):
     for d in var.dur:
         dur |= pat.P(d).loop(n) / n
 
-    return TimeVar(data, dur, var.metro)
+    return Var(data, dur)
 
 
 

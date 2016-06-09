@@ -5,7 +5,7 @@ import when_statements, player_objects, sample_players
 import assignments
 from ..Patterns.Operations import modi
 
-class LiveObject:
+class LiveObject(object):
 
     foxdot_object = True
     isAlive = True
@@ -76,6 +76,9 @@ def execute(code, verbose=True):
         raise # raise the error to any foxdot code that executes foxdot code
 
     return
+
+def namespace(obj):
+    return globals().get(obj, None)
 
 
 def stdout(code):
