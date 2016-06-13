@@ -6,12 +6,16 @@ class PCHAR(object):
     def __init__(self, char, dur=1):
         self.char = str(char[0])
         self.dur=dur
+    def scale_dur(self, scale):
+        self.dur = self.dur * scale
     def __getitem__(self, key):
         return self.char
     def __str__(self):
         return self.char
     def __repr__(self):
         return self.char
+    def __len__(self):
+        return 1
         
 
 class metaPattern(object):
@@ -59,6 +63,9 @@ class metaPattern(object):
     def __iter__(self):
         for data in self.data:
             yield data
+    def items(self):
+        for i, data in enumerate(self.data):
+            yield i, data
     def __getslice__(self, i, j):
         return Pattern( self.data[i:j] )
     def __setslice__(self, i, j, item):
@@ -100,66 +107,8 @@ class metaPattern(object):
         except:
             return self.data != other
 
-
-##    #: Non-Python special methods
-##    def fromString(self, string):
-##        """
-##            Used to convert a string of characters into a pattern, either 
-##
-##            Characters can be PGrouped in brackets and each group have their
-##            own set of behaviours.
-##
-##            Half-Time Groups
-##            ----------------
-##
-##            [] - Puts the characters into Half_Time_PGroups
-##
-##            Laced Groups
-##            ------------
-##
-##            () - Put into a list and become nested
-##
-##            Shared-Time Groups
-##            ------------------
-##
-##            {} - Put into a Single_Time_PGroup 
-##
-##            Rather unintuitively: Characters in square brackets, [], are
-##            placed in a tuple - and then become PGroups - and characters
-##            in round brackets, (), are added into a nested list
-##
-##            "x-o(-[oo])" -> ["x","-","o","-","x","-","o",("o","o")]
-##        
-##        """
-##
-##        i = 0
-##        self.data = []
-##        
-##        bracket_styles = {"()" : Pattern,
-##                          "[]" : PGroup,
-##                          "{}" : Shared_Time_PGroup }
-##
-##        while i < len(string):
-##
-##            char = string[i]
-##
-##            if char in "([{":
-##                
-##                a, b = brackets(string, i, closing_brackets[char])
-##
-##                char = bracket_styles[string[a]+string[b-1]](string[a+1:b-1])
-##
-##                i = b - 1
-##
-##            self.data.append(char)
-##
-##            i += 1
-##
-##        self.make()
-##
-##        return self
-
     def fromString(self, string, dur=1):
+        """ Converts a string of characters to a pattern based on bracket syntax """
         
         i = 0
         self.data = []
@@ -184,13 +133,13 @@ class metaPattern(object):
 
                 # Apply any duration ratios
 
-                char = PatternCls().fromString(s, self.dur(dur))
+                char = PatternCls().fromString(s, dur)
 
                 i = b - 1
 
             else:
 
-                char = PCHAR(char, dur=self.dur(dur))
+                char = PCHAR(char, dur=dur)
 
             self.data.append(char)
 
@@ -201,7 +150,7 @@ class metaPattern(object):
         return self
 
     def flat(self):
-        """ p.flat() -> un-nested pattern """
+        """ P.flat() -> un-nested pattern """
         new = []
         for item in self.data:
             try:
@@ -211,17 +160,22 @@ class metaPattern(object):
                 new.append(item)
         return Pattern(new)
     
-    def dur(self, val):
+    def coeff(self):
         """ Returns a duration value relative to the type of pattern. Most patterns return val unchanged """
-        return val               
+        return 1.0
+
+    # Methods that return augmented versions of original
 
     def shuf(self):
-        shuffle(self.data)
-        return self
+        new = asStream(self.data)
+        shuffle(new.data)
+        return new
+
+    def shift(self, n=1):
+        """ Rotates the pattern left by n steps """
+        new = self.data[n:len(self.data)] + self.data[0:n]
+        return asStream(new)
     
-    def contains_nest(self):
-        """ Returns true if the pattern contains a nest """
-        pass
     def stretch(self, size):
         """ Stretches (repeats) the contents until len(Pattern) == size """
         new = []
@@ -230,16 +184,33 @@ class metaPattern(object):
         self.data = new
         return self
 
+    def loop(self, n):
+        """ Repeats this pattern n times """
+        new = []
+        for i in range(n):
+            new += list(self)
+        return Pattern(new)
+
+    def sort(self):
+        """ Used in place of sorted(pattern) to force type """
+        return Pattern(sorted(self.data))
+
+    def append(self, item):
+        self[len(self):] = [item]
+        return self
+
+    def reverse(self):
+        new = [self.data[i-1] for i in range(len(self.data), 0, -1)]
+        return Pattern(new)
+
+    # Boolean tests
+
+    def contains_nest(self):
+        """ Returns true if the pattern contains a nest """
+        pass
+
     def startswith(self, prefix):
         return self.data[0] == prefix
-
-##    def copy(self):
-##        new = [item for item in self.data]
-##        return asPattern(new)
-    
-    def items(self):
-        for i, data in enumerate(self.data):
-            yield i, data
     
     def all(self, func=(lambda x: bool(x))):
         """ Returns true if all of the patterns contents satisfies func(x) - default is nonzero """
@@ -250,11 +221,6 @@ class metaPattern(object):
             if not func(item):
                 return False
         return True
-
-    def append(self, item):
-        self[len(self):] = [item]
-        #self.data.append(item)
-        return self
         
     def pipe(self, pattern):
         """ Concatonates this patterns stream with another """
@@ -263,20 +229,13 @@ class metaPattern(object):
             data.append(item)
         return Pattern(data)
 
-    def loop(self, n):
-        """ Repeats this pattern n times """
-        data = []
-        for i in range(n):
-            data += list(self)
-        return Pattern(data)
-
-    def sort(self):
-        """ Used in place of sorted(pattern) to force type """
-        return Pattern(sorted(self.data))
+    # Returns individual elements
 
     def choose(self):
         """ Returns one randomly selected item """
         return choice(self.data)
+
+    # Automatic expansion of nested patterns
 
     def make(self):
         """ This method automatically laces and groups the data """
@@ -367,15 +326,26 @@ class PGroup(metaPattern):
             
         return self
 
-    def dur(self, val):
-        return val * 0.5
+    def coeff(self):
+        return 0.5
+
+    def scale_dur(self, n):
+        """ Scales the dur values for all the items in self.data by n """
+        for item in self.data:
+            item.scale_dur(n)
+        return
+
+    def fromString(self, s, dur=1):
+        metaPattern.fromString(self, s, dur)
+        self.scale_dur(self.coeff())
+        return self
 
 Pgroup = PGroup #: Alias for PGroup
 
 class Shared_Time_PGroup(PGroup):
     BRACKETS = "{%s}"
-    def dur(self, val):
-        return val / len(self)
+    def coeff(self):
+        return 1.0 / len(self)
 
 
 # Functions used to separate Groups and Nests from within Patterns

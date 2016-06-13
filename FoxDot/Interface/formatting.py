@@ -1,22 +1,9 @@
 import re
 from os.path import abspath, join, dirname
-from types import FunctionType, TypeType
+from ..Code import classes, functions, instances
 
 def path(fn):
     return abspath(join(dirname(__file__), fn))
-
-def classes(module):
-    """ Returns a list of class names defined in module """
-    return [name for name, data in vars(module).items() if type(data) == TypeType]
-
-def instances(module, cls):
-    """ Returns a list of instances of cls from module """
-    return [name for name, data in vars(module).items() if isinstance(data, cls)]
-
-def functions(module):
-    """ Returns a list of function names defined in module """
-    return [name for name, data in vars(module).items() if type(data) == FunctionType]
-            
 
 # RegEx Group 1
 user_defn = r"(?<=def )(\w+)"

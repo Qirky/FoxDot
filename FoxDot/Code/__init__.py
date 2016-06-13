@@ -1,5 +1,5 @@
 from __future__ import division
-from types import CodeType, FunctionType
+from types import CodeType, FunctionType, TypeType
 from traceback import format_exc as error_stack
 import when_statements, player_objects, sample_players
 import assignments
@@ -87,3 +87,17 @@ def stdout(code):
     console_text = code.strip().split("\n")
 
     return ">>> %s" % "\n>>> ".join(console_text)
+
+""" These functions return information about an imported module """
+
+def classes(module):
+    """ Returns a list of class names defined in module """
+    return [name for name, data in vars(module).items() if type(data) == TypeType]
+
+def instances(module, cls):
+    """ Returns a list of instances of cls from module """
+    return [name for name, data in vars(module).items() if isinstance(data, cls)]
+
+def functions(module):
+    """ Returns a list of function names defined in module """
+    return [name for name, data in vars(module).items() if type(data) == FunctionType]

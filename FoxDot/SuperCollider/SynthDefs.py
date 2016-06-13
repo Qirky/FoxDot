@@ -20,7 +20,7 @@ pads.add()
 
 bass = SynthDef("bass")
 bass.amp = amp * 2
-bass.freq = freq / 4
+bass.freq = bass.freq / 4
 bass.osc = LFTri.ar(freq, mul=amp) + VarSaw.ar(freq, width=0.85, mul=amp) + SinOscFB.ar(freq, mul=amp/2)
 bass.env = Env.perc()
 bass.add()

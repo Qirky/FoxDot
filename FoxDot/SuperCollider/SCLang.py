@@ -213,7 +213,9 @@ class SynthDict(dict):
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
     def __str__(self):
-        return str(self.keys())        
+        return str(self.keys())
+    def __call__(self, name):
+        return self[name]
 
 SynthDefs = SynthDict()
 
