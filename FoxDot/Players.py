@@ -15,6 +15,13 @@ from Midi import *
 import Code
 import Buffers
 
+#### Methods
+
+##shuffle = 'shuffle'
+##lshift  = 'lshift'
+##rshift  = 'rshift'
+##reverse = 'reverse'
+
 ##################### ROOT PLAYER OBJECT #####################
 
 class PlayerObject(Code.LiveObject):
@@ -67,7 +74,6 @@ class PlayerObject(Code.LiveObject):
         # Default attribute dictionary
 
         self.dur    = self.attr['dur']      =  [0]
-        #self.root   = self.attr['root']     =  [0]
         self.degree = self.attr['degree']   =  [0]
         self.oct    = self.attr['oct']      =  [5]
         self.amp    = self.attr['amp']      =  [1]
@@ -376,6 +382,20 @@ class PlayerObject(Code.LiveObject):
         """ Sets flag to reverse streams """
         self.reversing = not self.reversing
         return self
+
+##    def shuffle(self, attr=None):
+##        """ Shuffles """
+##        if True:
+##            return
+##        else:
+##            if attr is None:
+##                for attr in self.attr:
+##                    shuffle(attr)
+##            elif attr in self.attr:
+##                shuffle(self.attr[attr])
+##            else:
+##                print "Player Object has no attribute '{}'".format(attr)
+                
 
     """
 

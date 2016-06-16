@@ -25,7 +25,7 @@ class TempoClock:
         self.time = 0
         self.mark = time()
 
-        self.time_signature = time_signature
+        self.ts = time_signature
         
         self.queue = []
 
@@ -55,7 +55,7 @@ class TempoClock:
 
     def Bar(self):
         """ Returns the length of a bar in terms of beats """
-        return (float(self.time_signature[0]) / self.time_signature[1]) * 4
+        return (float(self.ts[0]) / self.ts[1]) * 4
 
     def BeatDuration(self):
         """ Returns the length in seconds of one beat """
@@ -82,9 +82,7 @@ class TempoClock:
         while self.ticking:
                         
             # Update and play players at next event
-
-            now = self.now()
-
+            
             if self.now() >= self.NextEvent():
 
                 event = self.queue.pop()
@@ -94,8 +92,6 @@ class TempoClock:
                     if callable(obj):
 
                         obj()
-
-            sleep(0.00001)
 
         return self
 
@@ -141,7 +137,7 @@ class TempoClock:
     def NextBar(self):
         """ Returns the beat value for the start of the next bar """
         beat = self.now()
-        return beat + (self.time_signature[0] - (beat % self.time_signature[0]))
+        return beat + (self.ts[0] - (beat % self.ts[0]))
 
     def NextEvent(self):
         """ Returns the beat index for the next event to be called """

@@ -6,7 +6,7 @@ class test:
     def __init__(self, x):
         self.x = x
     def method(self, func):
-        getattr(self, func.__name__).__call__()
+        self.x += 10
     
         
 

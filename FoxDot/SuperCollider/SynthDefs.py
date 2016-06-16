@@ -1,5 +1,4 @@
 from __future__ import division
-
 from SCLang import *
 
 # Sample Player
@@ -7,7 +6,7 @@ from SCLang import *
 sp = SynthDef("sample_player")
 sp.defaults.update(room=0.1 ,rate=1)
 sp.rate = scrub * LFPar.kr(scrub / 4) + rate - scrub
-sp.osc = PlayBuf.ar(1, buf, BufRateScale.ir(buf) * rate) * amp * 3
+sp.osc = PlayBuf.ar(BufChannels.kr(buf), buf, BufRateScale.ir(buf) * rate) * amp * 3
 sp.env = Env.block(sus=sus*2)
 sp.add()
 
@@ -26,14 +25,18 @@ bass.env = Env.perc()
 bass.add()
 
 dirt = SynthDef("dirt")
-dirt.freq = freq / 4
 dirt.osc  = LFSaw.ar(freq, mul=amp) + VarSaw.ar(freq + 1, width=0.85, mul=amp) + SinOscFB.ar(freq - 1, mul=amp/2)
 dirt.env  = Env.perc()
 dirt.add()
 
+##with SynthDef("dirt") as dirt:
+##    dirt.freq = freq / 4
+##    dirt.osc  = LFSaw.ar(dirt.freq)      
+    
+
 crunch = SynthDef("crunch")
 crunch.osc = LFNoise0.ar(Crackle.kr(1.95) * freq * 15, mul=amp)
-crunch.env = Env.perc(0.01,0.1, amp / 2)
+crunch.env = Env.perc(0.01,0.1, amp / 4)
 crunch.add()
 
 rave = SynthDef("rave")
@@ -98,7 +101,7 @@ sing = (soprano + klank).rename("sing")
 sing.add()
 
 pluck = SynthDef("pluck")
-pluck.amp = amp * 2 + 0.00001
+pluck.amp = amp + 0.00001
 pluck.freq = [freq, freq + LFNoise2.ar(50).range(-2,2)]
 pluck.osc = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
 pluck.osc = pluck.osc * XLine.ar(amp, amp/10000, sus * 4) * 0.3

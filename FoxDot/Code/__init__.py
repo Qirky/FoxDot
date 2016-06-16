@@ -1,9 +1,19 @@
 from __future__ import division
 from types import CodeType, FunctionType, TypeType
 from traceback import format_exc as error_stack
+from ..Patterns.Operations import modi
+
 import when_statements, player_objects, sample_players
 import assignments
-from ..Patterns.Operations import modi
+
+
+"""
+    Live Object
+    ===========
+
+    Base for any self-scheduling objects
+
+"""
 
 class LiveObject(object):
 
@@ -22,6 +32,48 @@ class LiveObject(object):
         self.metro.Schedule(self, self.metro.now() + modi(self.step, self.n))
         self.n += 1
         return self
+
+"""
+    FoxCode
+    =======
+    Handles the execution of FoxDot code
+    
+"""
+
+class FoxCode:
+    namespace={}
+    def __call__(self, code, verbose=True):
+        """ Takes a string of FoxDot code and executes as Python """
+
+        ns = self.namespace
+
+        try:
+
+            if type(code) != CodeType:
+
+                code = process(code, ns)
+
+                if verbose: print stdout(code)
+
+                if not code:
+
+                    return
+
+                else:
+
+                    code = compile(code, "FoxDot", "exec")
+
+            exec code in ns
+
+        except:
+
+            print error_stack()
+
+            raise # raise the error to any foxdot code that executes foxdot code
+
+        return
+
+execute = FoxCode()
 
 """
     FoxDot Syntax Checking
@@ -46,38 +98,7 @@ def process(text, ns={}):
 
     return text
 
-def execute(code, verbose=True):
-    """ Takes a string of FoxDot code and executes as Python """
-
-    namespace = globals()
-
-    try:
-
-        if type(code) != CodeType:
-
-            code = process(code, namespace)
-
-            if verbose: print stdout(code)
-
-            if not code:
-
-                return
-
-            else:
-
-                code = compile(code, "FoxDot", "exec")
-
-        exec code in namespace
-
-    except:
-
-        print error_stack()
-
-        raise # raise the error to any foxdot code that executes foxdot code
-
-    return
-
-def namespace(obj):
+def _namespace(obj):
     return globals().get(obj, None)
 
 

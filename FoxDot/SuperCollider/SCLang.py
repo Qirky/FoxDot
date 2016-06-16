@@ -146,6 +146,7 @@ Crackle  = cls("Crackle")
 
 ClipNoise    = cls("ClipNoise")
 BufRateScale = cls("BufRateScale")
+BufChannels  = cls("BufChannels")
 
 # Default Arguments
     
