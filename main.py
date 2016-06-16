@@ -7,14 +7,7 @@
 
 if __name__ == "__main__":
 
-    try:
+    import FoxDot
 
-        import FoxDot
+    FoxDot.start()
 
-        FoxDot.start()
-
-    except Exception as e:
-
-        print e
-
-        raw_input("")

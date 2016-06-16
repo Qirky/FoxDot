@@ -3,6 +3,9 @@
 """ Tkinter interface made for Live Coding with Python syntax highlighting """
 import sys
 
+# Check for OS
+os = sys.platform
+
 # Tkinter Interface
 from Tkinter import *
 import tkFont
@@ -15,17 +18,20 @@ from time import sleep as wait
 from formatting import *
 from appfunctions import *
 from consolewidget import console
+
+# Code execution
+from ..Code import execute
  
 # App object
 
-class App:
+class FoxDot:
 
-    def __init__(self, widget_title):
+    def __init__(self):
 
         # Set up master widget  
 
         self.root = Tk()
-        self.root.title(widget_title)
+        self.root.title("FoxDot - Live Coding with Python and SuperCollider")
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
         # Create Y scrollbar
@@ -75,32 +81,38 @@ class App:
         self.promptlbl = Label(self.text, textvariable=self.prompt)
         self.promptlbl.place(x=9999, y=9999)
         self.last_word = ""
-        self.prompt.set("")
-        
+        self.prompt.set("")        
 
         # Key bindings
-        self.text.bind("<Control-Return>",  self.get_code)
-        self.text.bind("<Command-Return>",  self.get_code)
-        self.text.bind("<Control-a>",       self.selectall)
-        self.text.bind("<Command-a>",       self.selectall)
-        self.text.bind("<Control-period>",       self.killall)
-        self.text.bind("<Command-period>",       self.killall)
-        self.text.bind("<Control-v>",       self.paste)
-        self.text.bind("<Command-v>",       self.paste)
+        
         self.text.bind("<Return>",          self.newline)
         self.text.bind("<BackSpace>",       self.delete)
         self.text.bind("<Delete>",          self.delete2)
         self.text.bind("<Tab>",             self.tab)
-        self.text.bind("<Control-bracketright>",       self.indent)
-        self.text.bind("<Command-bracketright>",       self.indent)
-        self.text.bind("<Control-bracketleft>",       self.unindent)
-        self.text.bind("<Command-bracketleft>",       self.unindent)
-        self.text.bind("<Control-equal>",       self.zoom_in)
-        self.text.bind("<Command-equal>",       self.zoom_in)
-        self.text.bind("<Control-minus>",   self.zoom_out)
-        self.text.bind("<Command-minus>",   self.zoom_out)
         self.text.bind("<Key>",             self.keypress)
+        
+        # Windows
+        if os.startswith('win'): 
+            self.text.bind("<Control-Return>",          self.get_code)
+            self.text.bind("<Control-a>",               self.selectall)
+            self.text.bind("<Control-period>",          self.killall)
+            self.text.bind("<Control-v>",               self.paste)
+            self.text.bind("<Control-bracketright>",    self.indent)
+            self.text.bind("<Control-bracketleft>",     self.unindent)
+            self.text.bind("<Control-equal>",           self.zoom_in)
+            self.text.bind("<Control-minus>",           self.zoom_out)
 
+        # Mac
+        elif os.startswith('darwin'):
+            self.text.bind("<Command-Return>",          self.get_code)
+            self.text.bind("<Command-a>",               self.selectall)
+            self.text.bind("<Command-period>",          self.killall)
+            self.text.bind("<Command-v>",               self.paste)
+            self.text.bind("<Command-bracketright>",    self.indent)
+            self.text.bind("<Command-bracketleft>",     self.unindent)
+            self.text.bind("<Command-equal>",           self.zoom_in)
+            self.text.bind("<Command-minus>",           self.zoom_out)
+        
         # Automatic brackets
 
         self.inbrackets = False
@@ -128,6 +140,11 @@ class App:
 
         self.console = console(self.root)
         sys.stdout = self.console
+
+        # Say Hello to the user
+
+        print "Welcome to FoxDot!"
+        execute("Clock.start()", verbose=False)
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
@@ -157,7 +174,10 @@ class App:
 
         return "break"
 
-    def update_prompt(self):        
+    def update_prompt(self):
+        return
+
+    def update_prompt2(self):        
 
         if self.inbrackets:
 
@@ -182,6 +202,21 @@ class App:
             self.promptlbl.place(x=9999, y=9999)
 
         #self.prompt.set("cheese")
+
+    def check_namespace(self):
+        """ Sets the label """
+
+        obj = namespace(self.last_word)
+
+        if obj:
+
+            if obj.__doc__ is not None:
+
+                self.prompt.set(obj.__doc__)
+
+            else:
+
+                self.promptlbl.place(x=9999, y=9999)
 
     def update(self, event=None, row=0):
         """ Updates the the colours of the IDE """
@@ -543,11 +578,15 @@ class App:
         return  'break'
 
 
-    # --- Placeholders
-
     def submit(self, code_str):
-        """ Placeholder method """
-        return
+        """ Runs the chunk of code through FoxDot processing and execute """
+        try:
+                
+            execute( code_str )
+
+        except:
+
+            return
 
     def get_code(self, event):
         """ Method to highlight block of code and execute """
@@ -642,9 +681,11 @@ class App:
         return " " * tabsize
 
     def killall(self, event):
-        """ Ctrl+. function to be defined by the user """
-        return
+        """ Stops all player objects """
+        execute("Clock.clear()")
+        return "break"
 
     def terminate(self):
-        """ To be overridden by user to be called on window close """
+        """ Called on window close. Ends Clock thread process """
+        execute("Clock.stop()")
         return
