@@ -10,9 +10,11 @@
 
 from OSC import *
 from subprocess import Popen
-from subprocess import SW_HIDE as HIDE
 from time import sleep
 import os
+
+ROOT = os.path.realpath('.')
+os.chdir(ROOT)
 
 try:
 
@@ -29,8 +31,6 @@ except:
 class ServerManager:
 
     def __init__(self, addr=ADDRESS, port=PORT):
-
-        #HIDE = 0x00000008
 
         self.addr = addr
         self.port = port
@@ -93,17 +93,17 @@ class ServerManager:
 
     def boot(self):
         if not self.booted:
-            home = os.path.realpath('.')
+            conf = ROOT + "/foxdot.scd"
             path = "C:/Program Files (x86)/SuperCollider-3.6.6/"
             exe  = "sclang.exe"
             os.chdir(path)
             print "Booting SuperCollider Server...",
-            self.daemon = Popen([exe, '-D'], creationflags=HIDE)
-            sleep(1)
+            self.daemon = Popen([exe, '-D', conf], creationflags=HIDE)
+            sleep(3)
             self.sendsclang('s.boot;')
             sleep(2)
             print "Done!"
-            os.chdir(home)
+            os.chdir(ROOT)
             self.booted=True
         else:
             print "Warning: SuperCollider already booted"
