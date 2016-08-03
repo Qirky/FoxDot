@@ -52,17 +52,17 @@ def userdefined(line):
 from ..Patterns import Sequences, Feeders
 from ..SuperCollider import SCLang
 
-foxdot_kw = ["var","Var","Clock","group","Group","Scale","inf","Inf","Root"]
+foxdot_kw = ["Clock","Group","group","Scale","Server","Root","BufferManager"] + ["var","Pvar","linvar","inf"]
 
-foxdot_funcs = classes(Sequences) + functions(Feeders) + instances(SCLang, SCLang.cls) + instances(SCLang, SCLang.EnvGen)
+foxdot_funcs = classes(Sequences) #+ functions(Feeders) + instances(SCLang, SCLang.cls) + instances(SCLang, SCLang.EnvGen)
 
 # Python keywords used in RegEx Group 2
 
 py_indent_kw = ["for","if","elif","else","def","while","class","try","except","when"]
 
-py_functions = ["if","elif","else","return","def","print","when",
-                 "and","or","not","is","in","for","as","with",
-                 "while", "class", "import", "try","except"]
+py_functions = ["if","elif","else","return","def","print","when","from",
+                 "and","or","not","is","in","for","as","with","lambda",
+                 "while", "class", "import", "try","except","from"]
 
 py_other_kws = foxdot_kw + ["True", "False", "None", "self"]
 
@@ -73,7 +73,7 @@ py_key_types = ["abs","divmod","input","open","staticmethod","all","enumerate","
                 "raw_input","unichr","callable","format","locals","reduce","unicode",
                 "chr","frozenset","long","reload","vars","classmethod","getattr","map",
                 "repr","xrange","cmp","globals","max","reversed","zip","compile","hasattr",
-                "memoryview","round","__import__","complex","hash","min","set","delattr",
+                "memoryview","round","__import__","complex","hash","min","delattr","set",
                 "help","next","setattr","dict","hex","object","slice","dir","id","sorted"]
 
 py_key_types = foxdot_funcs + py_key_types
@@ -88,9 +88,9 @@ tabsize = 4
 
 # RegEx Group 2
 
-functions = r"(?<![a-zA-Z])(" + "|".join(py_functions) + ")(?![a-zA-Z])"
-key_types = r"(?<![a-zA-Z])(" + "|".join(py_key_types) + ")(?![a-zA-Z])"
-other_kws = r"(?<![a-zA-Z])(" + "|".join(py_other_kws) + ")(?![a-zA-Z])"
+functions = r"(?<![a-zA-Z.])(" + "|".join(py_functions) + ")(?![a-zA-Z])"
+key_types = r"(?<![a-zA-Z.])(" + "|".join(py_key_types) + ")(?![a-zA-Z])"
+other_kws = r"(?<![a-zA-Z.])(" + "|".join(py_other_kws) + ")(?![a-zA-Z])"
 
 # Load Default Colour Values
 

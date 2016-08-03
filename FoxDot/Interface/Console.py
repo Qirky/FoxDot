@@ -1,6 +1,6 @@
 from Tkinter import Scrollbar, Text
 from Tkinter import RIGHT, LEFT, BOTH, END, INSERT, Y, X
-from formatting import DEFAULT_FONT
+from Format import DEFAULT_FONT
 
 #!/usr/bin/python
 """ Console widget that displays the true Python input """

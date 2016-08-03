@@ -9,7 +9,10 @@
 """
 
 from OSC import *
-
+from subprocess import Popen
+from subprocess import SW_HIDE as HIDE
+from time import sleep
+import os
 
 try:
 
@@ -27,13 +30,20 @@ class ServerManager:
 
     def __init__(self, addr=ADDRESS, port=PORT):
 
+        #HIDE = 0x00000008
+
         self.addr = addr
         self.port = port
-
+        
         self.client = OSCClient()
-        self.client.connect( (self.addr, self.port) )        
+        self.client.connect( (self.addr, self.port) )
+
+        self.sclang = OSCClient()
+        self.sclang.connect( (self.addr, self.port + 10) ) # TODO
 
         self.node = 1000
+
+        self.booted=False
 
     def __str__(self):
         return "FoxDot ServerManager Instance -> {}:{}".format(self.addr, self.port)
@@ -74,13 +84,38 @@ class ServerManager:
         self.client.send( message )
         return
 
-
-class SCLangManager(ServerManager):
-    def __init__(self, addr=ADDRESS, port=PORT+10):
-        ServerManager.__init__(self, addr, port)
     def sendsclang(self, code, cmd='/foxdot'):
         msg = OSCMessage()
         msg.setAddress(cmd)
         msg.append(code)
-        self.client.send(msg)
+        self.sclang.send(msg)
         return
+
+    def boot(self):
+        if not self.booted:
+            home = os.path.realpath('.')
+            path = "C:/Program Files (x86)/SuperCollider-3.6.6/"
+            exe  = "sclang.exe"
+            os.chdir(path)
+            print "Booting SuperCollider Server...",
+            self.daemon = Popen([exe, '-D'], creationflags=HIDE)
+            sleep(1)
+            self.sendsclang('s.boot;')
+            sleep(2)
+            print "Done!"
+            os.chdir(home)
+            self.booted=True
+        else:
+            print "Warning: SuperCollider already booted"
+        return
+
+    def quit(self):
+        if self.booted:
+            print "Quitting SuperCollider Server"
+            self.sendsclang('s.quit;')
+            sleep(0.5)
+            self.daemon.terminate()
+        return
+    
+
+Server = ServerManager()

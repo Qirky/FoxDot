@@ -22,6 +22,20 @@ import Buffers
 ##rshift  = 'rshift'
 ##reverse = 'reverse'
 
+class MethodCall:
+    def __init__(self, player, method, n, args=()):
+        self.player = player
+        self.name = method
+        self.when = asStream(n)
+        self.i    = 0
+        self.next = self.when[self.i]
+        self.args = args
+    def __call__(self):
+        self.i += 1
+        self.next = modi(self.when, self.i)
+        getattr(self.player, self.name).__call__(*self.args)    
+        
+
 ##################### ROOT PLAYER OBJECT #####################
 
 class PlayerObject(Code.LiveObject):
@@ -45,10 +59,16 @@ class PlayerObject(Code.LiveObject):
         self.reversing = False
         self.when_statements = []
 
+        # Keeps track of echo effects
+
+        self.echo_on = False
+        self.echo_fx = {}
+
         # Keeps track of which note to play etc
 
         self.event_index = 0
         self.event_n = 0
+        self.notes_played = 0
         self.event = {}
 
         # Used for checking clock updates
@@ -83,6 +103,7 @@ class PlayerObject(Code.LiveObject):
         self.buf    = self.attr['buf']      =  [0]
         self.echo   = self.attr['echo']     =  [0]
         self.offset = self.attr['offset']   =  [0]
+        #self.bpm = ...
         self.freq   = [0]
 
     # --- Startup methods
@@ -127,6 +148,15 @@ class PlayerObject(Code.LiveObject):
         # Change internal marker
 
         self.event_n += 1 if not self.reversing else -1
+        self.notes_played += 1
+
+        # Call any player methods
+
+        for cmd in self.scheduled_events.values():
+
+            # Call the MethodCall
+            
+            if (self.notes_played + 1) % cmd.next == 0: cmd()
 
         return
 
@@ -161,6 +191,8 @@ class PlayerObject(Code.LiveObject):
         self.old_dur = self.attr['dur']
 
         # Returns value for self.event_n and self.event_index
+
+        self.notes_played = n
 
         return n, acc
 
@@ -305,8 +337,34 @@ class PlayerObject(Code.LiveObject):
         # Get the current state in a dict
         
         for i in range(self.tupleN()):
+
+            osc_msg = self.osc_message(i)
             
-            self.server.sendNote( self.SynthDef, self.osc_message( i )  )
+            self.server.sendNote( self.SynthDef, osc_msg )
+
+##            # If echo flag has been set to True - schedule echo decay
+##
+##            if self.echo_on:
+##
+##                index = self.event_index
+##
+##                i = osc_msg.index('amp') + 1
+##
+##                a = amp = osc_msg[i]
+##
+##                while amp > 0:
+##                    
+##                    index += self.echo_fx['delay']
+##
+##                    amp = amp - (a / self.echo_fx['decay'])
+##
+##                    i = osc_msg.index('amp') + 1
+##
+##                    osc_msg[i] = amp
+##                    
+##                    self.metro.schedule(lambda: self.server.sendNote(self.SynthDef, osc_msg), index )
+##
+##                print z
 
         return
 
@@ -327,7 +385,7 @@ class PlayerObject(Code.LiveObject):
             - When N is 0 it stops immediately"""
 
         self.stopping = True        
-        self.stop_point = self.metro.beat
+        self.stop_point = self.metro.now()
 
         if N > 0:
 
@@ -395,19 +453,8 @@ class PlayerObject(Code.LiveObject):
 ##                shuffle(self.attr[attr])
 ##            else:
 ##                print "Player Object has no attribute '{}'".format(attr)
-                
 
-    """
-
-        Feeding Methods
-        ---------------
-
-        These methods will execute a Patterns.Feeders function (which use
-        Player feeder methods) at points in time; regular or otherwise.
-
-    """
-
-    def every(self, n, cmd, args=(), id=1):
+    def _every(self, n, cmd, args=(), id=1):
         if not callable(cmd):
             return self
         # Get unique name
@@ -425,22 +472,33 @@ class PlayerObject(Code.LiveObject):
             self.scheduled_events[name] = obj
         return self
 
-    def _every(self, n, cmd, *args):
-
-        # Creates an expression unique to this object and function
-        e = "'{0}'=='{0}' and '{1}'=='{1}'".format(cmd.__name__, id(self))
-
-        if e not in self.when_statements:
-
-            self.when_statements.append(e)
-
-            self.metro.When(e, lambda: cmd(self), n, nextBar=True)
-
-        else:
-
-            self.metro.when_statements[e].step = n 
-
+    def every(self, n, cmd, args=()):
+        try:
+            method = getattr(self, cmd)
+            assert callable(method)
+        except:
+            print "Warning: {} is not a valid player method".format(cmd.__name__)
+            return self
+        self.scheduled_events[cmd] = MethodCall(self, cmd, n, args)
         return self
+            
+
+##    def _every(self, n, cmd, *args):
+##
+##        # Creates an expression unique to this object and function
+##        e = "'{0}'=='{0}' and '{1}'=='{1}'".format(cmd.__name__, id(self))
+##
+##        if e not in self.when_statements:
+##
+##            self.when_statements.append(e)
+##
+##            self.metro.When(e, lambda: cmd(self), n, nextBar=True)
+##
+##        else:
+##
+##            self.metro.when_statements[e].step = n 
+##
+##        return self
 
     """
 
@@ -450,6 +508,17 @@ class PlayerObject(Code.LiveObject):
         Other modifiers for affecting the playback of Players
 
     """
+
+##    def echo(self, stop=False, delay=0.5, decay=10):
+##        """ Schedules the current event to repeat and decay """
+##        if stop:
+##            self.echo_on = False
+##        else:
+##            self.echo_on = True
+##            self.echo_fx['delay'] = delay
+##            self.echo_fx['decay'] = decay
+##        return self
+        
 
     def offbeat(self, dur=0.5):
         """ Off sets the next event occurence """
@@ -492,13 +561,13 @@ class PlayerObject(Code.LiveObject):
             s += "\t{}\t:{}\n".format(attr, val)
         return s
         
-
     def __setattr__(self, name, value):
         if self._INIT:
             if name not in self._VARS:
                 value = asStream(value)
                 self.attr[name] = value
         self.__dict__[name] = value
+        return
 
 ##################### SYNTH PLAYERS #####################
 
@@ -548,7 +617,7 @@ class Player(PlayerObject):
         self.parent.update()
 
         setattr(self, "SynthDef", SynthDef)
-        setattr(self, "degree", asStream(degree))
+        setattr(self, "degree", degree)
 
         for name, value in kwargs.items():
             setattr(self, name, value)
@@ -751,13 +820,13 @@ class SamplePlayer(PlayerObject):
         self.degree     = string
         self.old_degree = ""
 
-        self.attr.update(kwargs)
-        self.reset()
-
         # Set defaults
         
         self.dur = self.attr['dur'] = asStream(0.5)
         self.old_pattern_dur = self.dur
+
+        self.attr.update(kwargs)
+        self.reset()
 
         # Finish init
 

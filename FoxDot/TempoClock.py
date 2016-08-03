@@ -18,16 +18,17 @@ line = "\n"
 
 class TempoClock:
 
-    def __init__(self, bpm=120.0, time_signature=(4,4)):
+    def __init__(self, bpm=120.0, meter=(4,4)):
 
         self.bpm = bpm
 
         self.time = 0
         self.mark = time()
 
-        self.ts = time_signature
+        self.ts = meter
         
         self.queue = []
+        self.nextEvent = None
 
         self.ticking = False        
 
@@ -35,9 +36,6 @@ class TempoClock:
 
         self.when_statements = {}
         self.playing = []
-
-        # TO UPDATE
-        self.Schedule = self.schedule
 
     def __str__(self):
 
@@ -73,7 +71,7 @@ class TempoClock:
         threading.Thread(target=self.run).start()
         return
 
-    def run(self):
+    def _run(self):
         """ Main loop """        
 
         self.ticking = True
@@ -95,8 +93,44 @@ class TempoClock:
 
         return self
 
+    def run(self):
+
+        self.ticking = True
+
+        # Wait until there's something in the queue
+
+        while len(self.queue) == 0:
+
+            pass
+
+        # Sleep until next event
+
+        while self.ticking:
+
+            if self.now() >= self.nextEvent:
+
+                event = self.queue.pop()
+
+                for item in event[0]:
+
+                    if callable(item): item()
+
+            if len(self.queue) == 0:
+
+                self.nextEvent = MAXINT
+
+        # Stop ticking when not in use
+
+        self.ticking = False
+
+        return
+
     def schedule(self, obj, beat=None):
         """ Add a player / event to the queue """
+
+        if self.ticking == False:
+
+            self.start()
 
         # Default is next bar
 
@@ -131,6 +165,10 @@ class TempoClock:
         else:
             
             self.queue.append(([obj], beat))
+
+        # Set next event time
+
+        self.nextEvent = self.queue[-1][1]
             
         return
 
@@ -177,18 +215,13 @@ class TempoClock:
         return
 
     def stop(self):
-
         self.ticking = False
         self.reset()
-
         return
 
     def reset(self):
-
         self.time = 0
         self.mark = time()
-        self.beat = 0
-
         return
 
     def clear(self):
@@ -198,24 +231,32 @@ class TempoClock:
 
             for player in event[0]:
 
-                player.kill()
+                try:
+
+                    player.kill()
+
+                except:
+
+                    pass
 
         self.queue = []
-
+        self.ticking = False
         self.reset()
 
         return
 
-
-class Wrapper(Code.LiveObject):
-    """
+###############################################################
+""" 
         TempoClock.Wrapper Class
         ========================
 
         Wraps any callable object as a self-scheduling object
         like a When() or Player() object.
         
-    """
+"""
+
+class Wrapper(Code.LiveObject):
+    
     def __init__(self, metro, obj, dur, args=()):
         self.args  = asStream(args)
         self.obj   = obj

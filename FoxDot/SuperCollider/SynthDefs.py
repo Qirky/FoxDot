@@ -3,144 +3,135 @@ from SCLang import *
 
 # Sample Player
 
-sp = SynthDef("sample_player")
-sp.defaults.update(room=0.1 ,rate=1)
-sp.rate = scrub * LFPar.kr(scrub / 4) + rate - scrub
-sp.osc = PlayBuf.ar(BufChannels.kr(buf), buf, BufRateScale.ir(buf) * rate) * amp * 3
-sp.env = Env.block(sus=sus*2)
-sp.add()
+with SynthDef("sample_player") as sd:
+    sd.defaults.update(room=0.1 ,rate=1)
+    sd.rate = sd.scrub * LFPar.kr(sd.scrub / 4) + sd.rate - sd.scrub
+    sd.osc  = PlayBuf.ar(1, sd.buf, BufRateScale.ir(sd.buf) * sd.rate) * sd.amp * 3
+    sd.env  = Env.block(sus=sd.sus*2)
 
 # Synth Players
 
-pads = SynthDef("pads")
-pads.osc = SinOsc.ar(freq, mul=amp) +  SinOsc.ar(freq + 2, mul=amp)
-pads.env = Env.perc()
-pads.add()
+with SynthDef("pads") as p:
+    p.osc = SinOsc.ar(p.freq, mul=p.amp) +  SinOsc.ar(p.freq + 2, mul=p.amp)
+    p.env = Env.perc()
 
-bass = SynthDef("bass")
-bass.amp = amp * 2
-bass.freq = bass.freq / 4
-bass.osc = LFTri.ar(freq, mul=amp) + VarSaw.ar(freq, width=0.85, mul=amp) + SinOscFB.ar(freq, mul=amp/2)
-bass.env = Env.perc()
-bass.add()
+with SynthDef("bass") as sd:
+    sd.amp  = sd.amp * 2
+    sd.freq = sd.freq / 2
+    sd.osc  = LFTri.ar(sd.freq, mul=sd.amp) + VarSaw.ar(sd.freq, width=0.85, mul=sd.amp) + SinOscFB.ar(sd.freq, mul=sd.amp/2)
+    sd.env  = Env.perc()
 
-dirt = SynthDef("dirt")
-dirt.osc  = LFSaw.ar(freq, mul=amp) + VarSaw.ar(freq + 1, width=0.85, mul=amp) + SinOscFB.ar(freq - 1, mul=amp/2)
-dirt.env  = Env.perc()
-dirt.add()
+with SynthDef("dirt") as sd:
+    sd.amp  = sd.amp * 0.8
+    sd.freq = sd.freq / 2
+    sd.osc  = LFSaw.ar(sd.freq, mul=sd.amp) + VarSaw.ar(sd.freq + 1, width=0.85, mul=sd.amp) + SinOscFB.ar(sd.freq - 1, mul=sd.amp/2)
+    sd.env  = Env.perc()
 
-##with SynthDef("dirt") as dirt:
-##    dirt.freq = freq / 4
-##    dirt.osc  = LFSaw.ar(dirt.freq)      
-    
+with SynthDef("crunch") as sd:
+    sd.amp = sd.amp * 0.5
+    sd.osc = LFNoise0.ar(Crackle.kr(1.95) * sd.freq * 15, mul=sd.amp)
+    sd.env = Env.perc(0.01,0.1, sd.amp / 4)
 
-crunch = SynthDef("crunch")
-crunch.osc = LFNoise0.ar(Crackle.kr(1.95) * freq * 15, mul=amp)
-crunch.env = Env.perc(0.01,0.1, amp / 4)
-crunch.add()
+with SynthDef("rave") as sd:
+    sd.osc = Gendy1.ar(sd.rate-1, mul=sd.amp/2, minfreq=sd.freq, maxfreq=sd.freq*2)
+    sd.env = Env.perc()
 
-rave = SynthDef("rave")
-rave.osc = Gendy1.ar(rate-1, mul=amp/2, minfreq=freq, maxfreq=freq*2)
-rave.env = Env.perc()
-rave.add()
+with SynthDef("scatter") as sd:
+    sd.osc = (Saw.ar( sd.freq , mul=sd.amp / 8) + VarSaw.ar([sd.freq + 2,sd.freq +1], mul=sd.amp/8)) * LFNoise0.ar(sd.rate)
+    sd.env = Env.linen(0.01, sd.sus/2, sd.sus/2)
 
-scatter = SynthDef("scatter")
-scatter.osc = (Saw.ar( freq , mul=amp / 8) + VarSaw.ar([freq + 2,freq +1], mul=amp/8)) * LFNoise0.ar(rate)
-scatter.env = Env.linen(0.01, sus/2, sus/2)
-scatter.add()
+with SynthDef("charm") as sdef:
+    sdef.osc = SinOsc.ar([sdef.freq, sdef.freq + 2 * 2], mul=sdef.amp / 4) + VarSaw.ar(sdef.freq * 8, 10, mul=sdef.amp/8)
+    sdef.osc = LPF.ar(sdef.osc, SinOsc.ar(Line.ar(1,sdef.rate*4, sdef.sus/8),0,sdef.freq*2,sdef.freq*2 + 10 ))
 
-charm = SynthDef("charm")
-charm.osc = SinOsc.ar([freq, freq + 2 * 2], mul=amp / 4) + VarSaw.ar(freq * 8, 10, mul=amp/8)
-charm.osc = LPF.ar(charm.osc, SinOsc.ar(Line.ar(1,rate*4, sus/8),0,freq*2,freq*2 + 10 ))
-charm.env = Env.perc()
+with SynthDef("bell") as b:
+    b.defaults.update(verb = 0.5)
+    b.amp = b.amp * 4
+    b.sus = 2.5
+    b.osc = Klank.ar([ [0.501, 1, 0.7,   2.002, 3, 9.6,   2.49, 11, 2.571,  3.05, 6.242, 12.49, 13, 16, 24],
+                       [0.002,0.02,0.001, 0.008,0.02,0.004, 0.02,0.04,0.02, 0.005,0.05,0.05, 0.02, 0.03, 0.04],
+                       stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.25), b.freq, 0, 3)
+    b.env = Env.block()
 
-bell = SynthDef("bell")
-bell.defaults.update(verb = 0.5)
-bell.amp = amp * 4
-bell.sus = 2.5
-bell.osc = Klank.ar([ [0.501, 1, 0.7,   2.002, 3, 9.6,   2.49, 11, 2.571,  3.05, 6.242, 12.49, 13, 16, 24],
-                      [0.002,0.02,0.001, 0.008,0.02,0.004, 0.02,0.04,0.02, 0.005,0.05,0.05, 0.02, 0.03, 0.04],
-                      stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.25), freq, 0, 3)
-bell.env = Env.block()
-bell.add()
+with SynthDef("soprano") as s:
+    s.defaults.update(vib=5, verb=0.5)
+    s.amp = s.amp / 2
+    s.osc = SinOsc.ar(s.freq * 3, mul=s.amp) + SinOscFB.ar(s.freq * 3, mul=s.amp / 2)
+    s.env = Env()
 
-soprano = SynthDef("soprano")
-soprano.defaults.update(vib=5, verb=0.5)
-soprano.amp = amp / 2
-soprano.osc = SinOsc.ar(freq * 3, mul=amp) + SinOscFB.ar(freq * 3, mul=amp / 2)
-soprano.env = Env()
-soprano.add()
+with SynthDef("dub") as d:
+    d.freq = d.freq / 4
+    d.amp  = d.amp * 2
+    d.osc  = LFTri.ar(d.freq, mul=d.amp) + SinOscFB.ar(d.freq, mul=d.amp)
+    d.env  = Env.sine(dur=d.sus)
 
-dub = SynthDef("dub")
-dub.freq = freq / 4
-dub.amp = amp * 2
-dub.osc = LFTri.ar(freq, mul=amp) + SinOscFB.ar(freq, mul=amp)
-dub.env = Env.sine(dur=sus)
-dub.add()
+with SynthDef("viola") as v:
+    v.defaults.update(verb=0.33, vib=6)
+    v.osc = PMOsc.ar(v.freq, Vibrato.kr(v.freq, rate=v.vib, depth=0.008, delay=v.sus*0.25), 10, mul=v.amp / 2)
+    v.env = Env.perc( 1/4 * v.sus, 5/2 * v.sus )
 
-viola = SynthDef("viola")
-viola.defaults.update(verb=0.33, vib=6)
-viola.osc = PMOsc.ar(freq, Vibrato.kr(freq, rate=vib, depth=0.008, delay=sus*0.25), 10, mul=amp / 2)
-viola.env = Env.perc( 1/4 * sus, 5/2 * sus )
-viola.add()
+with SynthDef("scratch") as s:
+    s.defaults.update(depth=0.5, rate=0.04)
+    s.freq = s.freq * Crackle.ar(1.5)
+    s.osc  = SinOsc.ar(Vibrato.kr(s.freq, 2, 3, rateVariation=s.rate, depthVariation=s.depth), mul=s.amp )
+    s.env  = Env()
 
-scratch = SynthDef("scratch")
-scratch.defaults.update(depth=0.5, rate=0.04)
-scratch.freq = freq * Crackle.ar(1.5)
-scratch.osc  = SinOsc.ar(Vibrato.kr(freq, 2, 3, rateVariation=rate, depthVariation=depth), mul=amp )
-scratch.env  = Env()
-scratch.add()
+with SynthDef("klank") as k:
+    k.sus = k.sus * 1.5
+    k.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, k.freq)
+    k.env = Env()
 
-klank = SynthDef("klank")
-klank.sus = sus * 1.5
-klank.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, freq)
-klank.env = Env()
-klank.add()
+with SynthDef("pluck") as p:
+    freq = instance('freq')
+    p.amp  = p.amp + 0.00001
+    p.freq = [p.freq, p.freq + LFNoise2.ar(50).range(-2,2)]
+    p.osc  = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
+    p.osc  = p.osc * XLine.ar(p.amp, p.amp/10000, p.sus * 4) * 0.3
+    p.env  = Env.block(sus=p.sus*1.5)
 
-sing = (soprano + klank).rename("sing")
-sing.add()
 
-pluck = SynthDef("pluck")
-pluck.amp = amp + 0.00001
-pluck.freq = [freq, freq + LFNoise2.ar(50).range(-2,2)]
-pluck.osc = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
-pluck.osc = pluck.osc * XLine.ar(amp, amp/10000, sus * 4) * 0.3
-pluck.env = Env.block(sus=sus*1.5)
-pluck.add()
+r = SynthDef("ripple")
+r.amp = r.amp / 6
+r.osc = Pulse.ar([r.freq/4, r.freq/4+1 ],0.2,0.25) + Pulse.ar([r.freq+2,r.freq],0.5,0.5)
+r.osc = r.osc * SinOsc.ar(r.rate/r.sus,0,0.5,1)
+r.env = Env(sus=[0.55,0.55])
+r.add()
 
-ripple = SynthDef("ripple")
-ripple.amp = amp / 6
-ripple.osc = Pulse.ar([freq/4, freq/4+1 ],0.2,0.25) + Pulse.ar([freq+2,freq],0.5,0.5)
-ripple.osc = ripple.osc * SinOsc.ar(rate/sus,0,0.5,1)
-ripple.env = Env(sus=[0.55,0.55])
-ripple.add()
+r = SynthDef("rev")
+r.amp = r.amp / 4
+r.osc = PMOsc.ar(r.freq, r.freq * 2, 10)
+r.env = Env.reverse()
+r.add()
 
-rev = SynthDef("rev")
-rev.amp = amp / 4
-rev.osc = PMOsc.ar(freq, freq * 2, 10)
-#rev.env = Env.reverse()
-rev.add()
-
-orient = SynthDef("orient")
-orient.defaults.update(room=10, verb=0.7)
-orient.osc = LFPulse.ar([freq,freq+1], [0.5,1], [0.25,0.1], 1/4)
-orient.env = Env.perc()
-orient.add()
-
-# Psuedo Inheritance
-py = orient.rename("py")
-py.osc = LFCub.ar([freq,freq+1], [0.5,1], [0.25,0.1]) * 2
-py.add()
+o = SynthDef("orient")
+o.defaults.update(room=10, verb=0.7)
+o.osc = LFPulse.ar(o.freq, 0.5, 0.25, 1/4) + LFPulse.ar(o.freq, 1, 0.1, 1/4)
+o.env = Env.perc()
+o.add()
 
 zap = SynthDef("zap")
 zap.defaults.update(room=0, verb=0)
-zap.amp = amp / 10
-zap.osc = Saw.ar( freq * [1, 1.01] + LFNoise2.ar(50).range(-2,2) ) + VarSaw.ar( freq + LFNoise2.ar(50).range(-2,2), 1 )
+zap.amp = zap.amp / 10
+zap.osc = Saw.ar( zap.freq * [1, 1.01] + LFNoise2.ar(50).range(-2,2) ) + VarSaw.ar( zap.freq + LFNoise2.ar(50).range(-2,2), 1 )
 zap.env = Env.perc(atk=0.025, curve=-10)
 zap.add()
 
 marimba = SynthDef("marimba")
-marimba.osc = Klank.ar([[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,1]], PinkNoise.ar([0.007, 0.007]), [freq, freq], [0,2])
+marimba.osc = Klank.ar([[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,1]], PinkNoise.ar([0.007, 0.007]), [marimba.freq, marimba.freq], [0,2])
 marimba.sus = 1
 marimba.env = Env.perc(atk=0.001, curve=-6)
 marimba.add()
+
+
+test = SynthDef("fuzz")
+test.freq = test.freq / 2
+test.amp = test.amp / 6
+test.osc = LFSaw.ar(LFSaw.kr(test.freq,0,test.freq,test.freq * 2))
+test.env = Env.block()
+test.add()
+
+a = SynthDef("bug")
+a.amp = a.amp / 4
+a.osc = Pulse.ar([a.freq, a.freq * 1.0001], width=[0.09,0.16,0.25]) * SinOsc.ar(a.rate * 4)
+a.env = Env.perc(a.sus * 1.5)
+a.add()

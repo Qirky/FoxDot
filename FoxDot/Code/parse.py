@@ -9,7 +9,7 @@
 re_player_object  = r'\w+ >> \w+\('
 re_sample_player  = r'\w+ \$ .*?\n'
 re_when_statement = r'(when .*:(\n(else:\s*?\n)?(    )+\S.*)+)'
-re_any_assignment = r".*=.*"
+re_any_assignment = r"^\w+ *=.*"
 
 re_new_instance  = r"%s\s*=\s*\w*?\("
 re_new_reference = r"%s\s*=\s*"

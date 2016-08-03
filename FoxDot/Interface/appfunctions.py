@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """ Collection of functions used in the App package """
 
-from formatting import *
+from Format import *
 
 def index(index1, index2=None):
     if type(index1) == str and index2 == None:

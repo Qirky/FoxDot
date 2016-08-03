@@ -35,30 +35,18 @@ def fetch(func):
         return func(a, b)
     return eval_now
 
-# Misc. Functions
-
-def Ramp(start=0, end=1, dur=8, step=0.25):
-    # Return var(P(range(32))/32 | [0],[1/2]*32 + [inf])
-    size = dur/float(step)
-    return var([start + end * n/size for n in range(int(size))], step)
-    
-
-def iRamp(start=0, end=1, dur=8, step=0.25):
-    size = dur/float(step)
-    return var([start + end * n/size for n in range(int(size))] + [end], [step]*int(size)+[inf])
-
-
-   
+  
 class Var(Code.LiveObject):
-    """ Var(values [,durs=4]) """
+    """ Var(values [,durs=[4]]) """
 
     metro = None
 
-    def __init__(self, values, dur=4):
+    def __init__(self, values, dur=4, **kwargs):
 
         self.data   = values
         self.time   = []
         self.dur    = dur
+        self.bpm    = kwargs.get('bpm', None)
 
         self.inf_found = _inf.zero
         self.inf_value = None
@@ -70,7 +58,8 @@ class Var(Code.LiveObject):
         
         self.update(values, dur)
 
-    def stream(self, values):
+    @staticmethod
+    def stream(values):
         return asStream(values)
 
     # Standard Methods
@@ -98,7 +87,7 @@ class Var(Code.LiveObject):
         return new
     def __radd__(self, other):
         new = self.new(other)
-        new.evaluate = fetch(op.Add)
+        new.evaluate = fetch(op.rAdd)
         return new 
 
     # -
@@ -165,8 +154,14 @@ class Var(Code.LiveObject):
 
     # Emulating container types 
 
-    def __getitem__(self, key):
-        return self.now()[key]
+    def __getitem__(self, other):
+        new = self.new(other)
+        new.dependency = self
+        new.evaluate = fetch(op.rGet)
+        return new
+
+    def __index__(self):
+        return int(self)
 
     def __iter__(self):
         for item in self.now():
@@ -176,10 +171,11 @@ class Var(Code.LiveObject):
 
     def new(self, other):
         """ Returns a new TimeVar object """
-        if isinstance(other, self.__class__):
+            
+        if isinstance(other, Var):
             new = other
         else:     
-            new = self.__class__(other, self.dur)
+            new = Var(other, self.dur, bpm=self.bpm)
 
         new.dependency = self
         
@@ -189,8 +185,10 @@ class Var(Code.LiveObject):
         """ Returns the duration of one full cycle in beats """
         return self.time[-1][1]
 
-    def update(self, values, dur=None):
+    def update(self, values, dur=None, **kwargs):
         """ Updates the TimeVar with new values """
+
+        self.bpm = kwargs.get('bpm', self.bpm)
 
         #: If updated with a TimeVar object, copy the attribute dict
         
@@ -214,7 +212,18 @@ class Var(Code.LiveObject):
 
                 self.inf_found = _inf.here
 
-        for i, val in enumerate(self.stream(values)):
+        # Make equal size
+
+        values = self.stream(values)
+
+        length = max(len(values), len(self.dur))
+
+        values.stretch(length)
+        self.dur.stretch(length)
+
+        # Loop over the values and define time frame
+
+        for i, val in enumerate(values):
               
             this_dur = op.modi(self.dur, i)
 
@@ -236,6 +245,14 @@ class Var(Code.LiveObject):
         """ Returns val as modified by its dependencies """
         return self.evaluate(val, self.dependency)
 
+    def current_time(self):
+        """ Returns the current beat value """
+        beat = self.metro.now()
+        if self.bpm is not None:
+            beat *= (self.bpm / self.metro.bpm)
+        t = beat % self.length()
+        return t
+
 
     def now(self):
         """ Returns the value from self.data for time t in self.metro """
@@ -246,7 +263,9 @@ class Var(Code.LiveObject):
 
         else:
 
-            t = self.metro.now() % self.length()
+            # If using a different bpm to the clock
+
+            t = self.current_time()
 
             val = 0
 
@@ -277,12 +296,36 @@ class Var(Code.LiveObject):
         return new
                    
     def durs(self):
-
         return self.dur        
 
     def values(self):
-
         return self.data
+
+    # Methods that do cool stuff
+
+    def invert(self):
+        new = self.new(self.data)
+        lrg = float(max(new.data))
+        for i, item in enumerate(new.data):
+            new.data[i] = (((item / lrg) * -1) + 1) * lrg
+        return new
+
+    def lshift(self, duration):
+        time = [self.dur[0]-duration] + list(self.dur[1:]) + [duration]
+        return self.__class__(self.data, time)        
+
+    def rshift(self, duration):
+        time = [duration] + list(self.dur[:-1]) + [self.dur[-1]-duration]
+        data = [self.data[-1]] + list(self.data)
+        return self.__class__(data, time)
+
+    def extend(self, values, dur=None):
+        data = list(self.data) + list(values)
+        durs = self.dur if not dur else list(self.dur) + list(asStream(dur))
+        return self.__class__(data, durs)
+
+    def shuf(self):
+        pass
 
 var = Var
 
@@ -294,36 +337,34 @@ class PVar(Var, Pattern):
 
 Pvar = PVar
 
-
-# Functions that return a new TimeVar
-
-def Line(var, n=8, circular=False):
-    """
-
-        Adds interval steps to a TimeVar
-
-        Grade(var([0,4],1), 4)  -> var([0,1,2,3,4,3,2,1],[1/4])
-
-    """
+class linvar(Var):
     
-    # 1. Iterate over the pairs of values
+    def now(self):
 
-    size = len(var.data)
+        t = self.current_time()
 
-    data = pat.P()
+        for i in range(len(self.data)):
 
-    for i in range(size - int(not circular)):
-        a = var.data[i]
-        b = var.data[(i + 1) if i < (size-1) else 0]
+            val = self.data[i]
             
-        data = data | pat.Prange(a * n, b * n, (b-a)) / n
+            if self.time[i][0] <= t < self.time[i][1]:
 
-    dur = pat.P()
-    for d in var.dur:
-        dur |= pat.P(d).loop(n) / n
+                break
 
-    return Var(data, dur)
+        # Proportion of the way between values
+        
+        p = (float(t) - self.time[i][0]) / (self.time[i][1] - self.time[i][0])
 
+        # Next value
+
+        q = op.modi(self.data, i + 1)
+
+        # Calculate and add dependencies
+
+        val = (val * (1-p)) + (q * p)
+
+        return self.calculate(val)
+    
 
 
 class _inf(int):
@@ -352,3 +393,32 @@ class _inf(int):
         return 0
 
 inf = _inf()
+
+class const:
+    """ A number value that cannot be changed """
+    def __init__(self, value):
+        self.value=value
+    def __int__(self):
+        return int(self.value)
+    def __float__(self):
+        return float(self.value)
+    def __str__(self):
+        return str(self.value)
+    def __repr__(self):
+        return str(self.value)
+    def __add__(self, other):
+        return self.value
+    def __radd__(self, other):
+        return self.value
+    def __sub__(self, other):
+        return self.value
+    def __rsub__(self, other):
+        return self.value
+    def __mul__(self, other):
+        return self.value
+    def __rmul__(self, other):
+        return self.value
+    def __div__(self, other):
+        return self.value
+    def __rdiv__(self, other):
+        return self.value

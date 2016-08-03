@@ -2,7 +2,7 @@
     SCLang.py
 """
 
-from ..ServerManager  import SCLangManager
+from ..ServerManager import Server
 from copy import copy
 
 def format_args(args=[], kwargs={}, delim=': '):
@@ -116,6 +116,10 @@ LFNoise0  = cls("LFNoise0")
 LFNoise1  = cls("LFNoise1")
 LFNoise2  = cls("LFNoise2")
 Gendy1    = cls("Gendy1")
+Gendy2    = cls("Gendy2")
+Gendy3    = cls("Gendy3")
+Gendy4    = cls("Gendy4")
+Gendy5    = cls("Gendy5")
 Formant   = cls("Formant")
 Pulse     = cls("Pulse")
 LFPulse   = cls("LFPulse")
@@ -150,32 +154,32 @@ BufChannels  = cls("BufChannels")
 
 # Default Arguments
     
-freq        = instance("freq")
-output      = instance("output")
-sus         = instance("sus")
-amp         = instance("amp")
-pan         = instance("pan")
-rate        = instance("rate")
-lpf         = instance("lpf")
-hpf         = instance("hpf")
-delay       = instance("delay")
-verb        = instance("verb")
-echo        = instance("echo")
-echoOn      = instance("echoOn")
-room        = instance("room")
-vib         = instance("vib")
-vibDelay    = instance("vibDelay")
-vibVar      = instance("vibVar")
-depthVar    = instance("depthVar")
-depth       = instance("depth")
-slide       = instance("slide")
-slidefrom   = instance("slidefrom")
-buf         = instance("buf")
-scrub       = instance("scrub")
-grain       = instance("grain")
+##freq        = instance("freq")
+##output      = instance("output")
+##sus         = instance("sus")
+##amp         = instance("amp")
+##pan         = instance("pan")
+##rate        = instance("rate")
+##lpf         = instance("lpf")
+##hpf         = instance("hpf")
+##delay       = instance("delay")
+##verb        = instance("verb")
+##echo        = instance("echo")
+##echoOn      = instance("echoOn")
+##room        = instance("room")
+##vib         = instance("vib")
+##vibDelay    = instance("vibDelay")
+##vibVar      = instance("vibVar")
+##depthVar    = instance("depthVar")
+##depth       = instance("depth")
+##slide       = instance("slide")
+##slidefrom   = instance("slidefrom")
+##buf         = instance("buf")
+##scrub       = instance("scrub")
+##grain       = instance("grain")
 
-osc = instance("osc")
-env = instance("env")
+##osc = instance("osc")
+##env = instance("env")
 
 
 """
@@ -188,23 +192,29 @@ class EnvGen(instance):
     shortarg = { 'attackTime'  : 'atk',
                  'releaseTime' : 'sus',
                  'level'       : 'lvl' }
+
+    sus = instance('sus')
+    amp = instance('amp')
     
     defaults = { 'releaseTime' : sus,
-                 'level' : amp }
+                 'level'       : amp }
     
     def __init__(self, string):
         self.value = str(string)
     def __call__(self, *args, **kwargs):
         if not self.ismethod():
-            kwargs['levels'] = args[0] if args else kwargs.get('levels', [0,amp,0])
-            kwargs['times']  = args[1] if args else kwargs.get('times', [sus / 2,sus / 2])
+            kwargs['levels'] = args[0] if args else kwargs.get('levels', [0,self.amp,0])
+            kwargs['times']  = args[1] if args else kwargs.get('times', [self.sus / 2] * 2)
         return instance.__call__(self, *args, **kwargs)
     def ismethod(self):
         return '.' in self.value
     def __str__(self):
-        return str( cls("EnvGen").ar(instance(self.value).delay(delay), doneAction=2))
+        return str( cls("EnvGen").ar(instance(self.value).delay(instance('delay')), doneAction=2))
+    """ Custom Envelopes """
     def block(self, *args, **kwargs):
-        return self.__call__([0,amp,amp,0],[0,kwargs.get("sus",sus),0])
+        return self.__call__([0,self.amp,self.amp,0],[0,kwargs.get("sus", self.sus),0])
+    def reverse(self, *args, **kwargs):
+        return self.__call__(levels=[0.001, self.amp, 0.001], times=[kwargs.get("sus", self.sus), 0.001], curve="'exp'")
         
 Env = EnvGen("Env")
 
@@ -224,10 +234,38 @@ SynthDefs = SynthDict()
 
 class SynthDef:
 
-    server = SCLangManager()
+    server = Server
     var = ['osc', 'env']
 
+    osc = instance("osc")
+    env = instance("env")
+    
+    freq        = instance("freq")
+    output      = instance("output")
+    sus         = instance("sus")
+    amp         = instance("amp")
+    pan         = instance("pan")
+    rate        = instance("rate")
+    lpf         = instance("lpf")
+    hpf         = instance("hpf")
+    delay       = instance("delay")
+    verb        = instance("verb")
+    echo        = instance("echo")
+    echoOn      = instance("echoOn")
+    room        = instance("room")
+    vib         = instance("vib")
+    vibDelay    = instance("vibDelay")
+    vibVar      = instance("vibVar")
+    depthVar    = instance("depthVar")
+    depth       = instance("depth")
+    slide       = instance("slide")
+    slidefrom   = instance("slidefrom")
+    buf         = instance("buf")
+    scrub       = instance("scrub")
+    grain       = instance("grain")
+
     def __init__(self, name):
+        self.name = name
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
                             "pan"       : 0,
@@ -250,16 +288,21 @@ class SynthDef:
                             "buf"       : 0,
                             "scrub"     : 0,
                             "grain"     : 0 }
-                
-        self.name = name
-        self.osc = osc
-        self.env = env
+
         self.base()
+
+    # Context Manager
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.add()
 
     def base(self):
         # Base-class behaviour
-        self.freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus)
-        self.freq = Vibrato.kr(self.freq, rate=vib, depth=depth, delay=vibDelay, rateVariation=vibVar, depthVariation=depthVar)
+        self.freq = Line.ar(self.freq * self.slidefrom, self.freq * (1 + self.slide), self.sus)
+        self.freq = Vibrato.kr(self.freq, rate=self.vib, depth=self.depth, delay=self.vibDelay, rateVariation=self.vibVar, depthVariation=self.depthVar)
         self.env  = Env.perc()
         return
 
@@ -270,13 +313,16 @@ class SynthDef:
             raise AttributeError("Attribute '{}' not found".format(key))
     
     def add(self):
-        self.osc = HPF.ar(self.osc, hpf)
-        self.osc = LPF.ar(self.osc, lpf + 1)
-        try:
+
+        self.osc = HPF.ar(self.osc, self.hpf)
+        self.osc = LPF.ar(self.osc, self.lpf + 1)
+        
+        if 1:#try:
             SynthDef.server.sendsclang(str(self))
-            SynthDefs[self.name] = str(self)
-        except:
+            SynthDefs[self.name] = self
+        else:
             print "SynthDef '{}' could not be added to the server".format(self.name)
+        
 
     def modify(self):
         string = "var {};\n".format(",".join(self.var)) if self.var else ""
@@ -290,16 +336,15 @@ class SynthDef:
         new.name = str(newname)
         return new
 
-    @staticmethod
-    def echo_effect():
-        return echoOn * CombN.ar(osc, echo * 0.1, echo * 0.1, (echo * 0.5) * sus, 1)
+    def echo_effect(self):
+        return self.echoOn * CombN.ar(self.osc, self.echo * 0.1, self.echo * 0.1, (self.echo * 0.5) * self.sus, 1)
 
     def __str__(self):
         name     = str(self.name)
         defaults = str(format_args(kwargs=self.defaults, delim='='))
         mod      = str(self.modify())
-        snd      = osc + SynthDef.echo_effect()
-        sound    = str(Out.ar(0, Pan2.ar(FreeVerb.ar(snd * env, verb, room), pan)))
+        snd      = self.osc + self.echo_effect()
+        sound    = str(Out.ar(0, Pan2.ar(FreeVerb.ar('osc * env', self.verb, self.room), self.pan)))
         return "SynthDef.new( \%s,{|%s|%s%s}).add;" % (name, defaults, mod, sound)
 
     def __repr__(self):

@@ -3,21 +3,27 @@
     Copyright Ryan Kirkbride 2015
 
 """
+
+""" SERVER """
+
+from ServerManager import Server
+
+#Server.boot()
+
+""" IMPORTS """
+
 from random import choice as choose
 
 from TempoClock import *
-from ServerManager import *
 from Players import *
 from Patterns import *
 from Code import *
 from TimeVar import *
-from SuperCollider import *
+from SuperCollider.SCLang import SynthDefs
+
+import SuperCollider.SynthDefs
 import Scale
 import Root
-
-""" SERVER """
-     
-Server = ServerManager()
 
 """ CLOCK """
 
@@ -32,5 +38,14 @@ FoxCode.namespace=globals()
 """ IDE """
 
 def start():
+
     from Interface import FoxDot
-    FoxDot().run()
+    
+    try:
+        
+        FoxDot().run()
+        
+    except KeyboardInterrupt, SystemExit:
+
+        Clock.stop()
+        Server.quit()

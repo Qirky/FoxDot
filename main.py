@@ -6,8 +6,7 @@
 """
 
 if __name__ == "__main__":
-
+    
     import FoxDot
 
     FoxDot.start()
-

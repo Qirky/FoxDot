@@ -1,7 +1,11 @@
-FoxDot - Live Coding with Python v0.1.2
+FoxDot - Live Coding with Python v0.1.3
 =======================================
 
 *FoxDot is a pre-processed Python-based programming language that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box and no fiddling around with config files; all you need is Python and SuperCollider and you're ready to go!*
+
+### v0.1.3 fixes and updates
+- Key bindings for Linux, Mac, and Windows 10 fixed
+- Fixed freeze on keyboard interrupt exit
 
 ---
 

@@ -32,7 +32,7 @@ class Scale(Pattern):
 
         if len(args) > 0:
 
-            self.change(args[0])
+            self.set(args[0])
 
         return self
 
@@ -44,15 +44,19 @@ class Scale(Pattern):
 
         return other != Object
 
-    def change(self, new):
+    def set(self, new):
 
         if type(new) == str:
 
             self.data = scale_types[new]
 
-        elif type(new) == list:
+        elif isinstance(new, (list, Pattern)):
 
             self.data = new
+
+        else:
+
+            print "Warning: {} is not a valid scale".format(new)       
 
         return self
 
@@ -101,6 +105,7 @@ melodicMinor    = Scale([0,2,3,5,7,9,11])
 harmonicMinor   = Scale([0,2,3,5,7,8,11])
 justMajor       = Scale([ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
 justMinor       = Scale([ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
+dorian          = Scale([0,2,3,5,7,9,10])
 
 # Custom made fibonacci tuning
 
@@ -122,7 +127,8 @@ scale_types = { "chromatic"         : chromatic,
                 "minorPentatonic"   : minorPentatonic,
                 "justMajor"         : justMajor,
                 "justMinor"         : justMinor,
-                "fibonacci"         : fibonacci }
+                "fibonacci"         : fibonacci,
+                "dorian"            : dorian}
 
 
 default = Scale("major")  

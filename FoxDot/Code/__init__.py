@@ -29,7 +29,7 @@ class LiveObject(object):
         return self
 
     def __call__(self):
-        self.metro.Schedule(self, self.metro.now() + modi(self.step, self.n))
+        self.metro.schedule(self, self.metro.now() + float(modi(self.step, self.n)))
         self.n += 1
         return self
 

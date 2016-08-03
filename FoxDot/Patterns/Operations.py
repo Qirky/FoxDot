@@ -54,6 +54,7 @@ class POperand:
 # General operations
 Nil  = lambda a, b: a
 Add  = lambda a, b: a + b
+rAdd = lambda a, b: b + a
 Sub  = lambda a, b: a - b
 Mul  = lambda a, b: a * b
 Div  = lambda a, b: a / b
@@ -62,6 +63,8 @@ Pow  = lambda a, b: a ** b
 rDiv = lambda a, b: b / a
 rSub = lambda a, b: b - a
 rMod = lambda a, b: b % a
+Get  = lambda a, b: a[b]
+rGet = lambda a, b: b[a]
 
 # Pattern operations
 PAdd = POperand(Add)
@@ -70,6 +73,8 @@ PMul = POperand(Mul)
 PDiv = POperand(Div)
 PMod = POperand(Mod)
 PPow = POperand(Pow) # a ^ b also calls this
+PGet = POperand(Get)
+
 
 
 
@@ -110,7 +115,7 @@ def patternclass(a, b):
 
 
 def modi(array, i, debug=0):
-    """ Returns the modular index i.e. modi([0,1,2],4) will return 1 """
+    """ Returns the modulo index i.e. modi([0,1,2],4) will return 1 """
     try:
         return array[i % len(array)]
     except:        

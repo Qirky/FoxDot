@@ -203,6 +203,16 @@ class metaPattern(object):
         new = [self.data[i-1] for i in range(len(self.data), 0, -1)]
         return Pattern(new)
 
+    def invert(self):
+        new = []
+        lrg = float(max(self.data))
+        for item in self.data:
+            try:
+                new.append(item.invert())
+            except:
+                new.append((((item / lrg) * -1) + 1) * lrg)
+        return Pattern(new)
+
     # Boolean tests
 
     def contains_nest(self):
@@ -402,8 +412,7 @@ def Dominant(*patterns):
     for p in patterns:
         if isinstance(p, (Pattern, list)):
            return Pattern 
-    return PGroup
-        
+    return PGroup      
 
 def Convert(*args):
     """ Returns tuples/PGroups as PGroups, and anything else as Patterns """
@@ -416,3 +425,6 @@ def Convert(*args):
         else:
             PatternTypes.append(Pattern(val))
     return PatternTypes
+
+
+

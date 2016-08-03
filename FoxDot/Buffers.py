@@ -21,8 +21,7 @@ class BufferManager:
         # Dictionary of buffer numbers to character
         self.buffers = {}
         
-        
-    def from_file(self, configFile="./Settings/sample_names.txt", offset=0):
+    def from_file(self, configFile="./Settings/samplelib.csv", offset=0):
         """ Reads in a config file """
         with open(path(configFile)) as f:
             lines = f.readlines()
@@ -30,7 +29,7 @@ class BufferManager:
         for bufnum, line in enumerate(lines):
             bufnum = bufnum + offset + 1 # 0 is the empty buffer
             try:
-                char, fn = line.strip().split()
+                char, fn, desc       = line.strip().split(',')
                 self.symbols[char]   = bufnum 
                 self.buffers[bufnum] = fn
             except:
