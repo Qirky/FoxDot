@@ -130,7 +130,12 @@ class PRange(Base.Pattern):
 
     def __init__(self, *args):
 
-        self.data = range(*args)
+        if len(args) == 1 and isinstance(args[0], (list, Base.Pattern)):
+            self.data = []
+            for n in args[0]:
+                self.data += range(n)
+        else:
+            self.data = range(*args)
         self.make()
 
 Prange = PRange #: Alias

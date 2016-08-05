@@ -13,8 +13,9 @@ from subprocess import Popen
 from time import sleep
 import os
 
-ROOT = os.path.realpath('.')
-os.chdir(ROOT)
+SC_DIRECTORY = "C:/Program Files (x86)/SuperCollider-3.6.6/"
+USER_CWD     = os.path.realpath(".")
+FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../")
 
 try:
 
@@ -93,17 +94,16 @@ class ServerManager:
 
     def boot(self):
         if not self.booted:
-            conf = ROOT + "/foxdot.scd"
-            path = "C:/Program Files (x86)/SuperCollider-3.6.6/"
+            conf = os.path.realpath(FOXDOT_ROOT + "/foxdot.scd")
             exe  = "sclang.exe"
-            os.chdir(path)
+            os.chdir(SC_DIRECTORY)
             print "Booting SuperCollider Server...",
-            self.daemon = Popen([exe, '-D', conf], creationflags=HIDE)
+            self.daemon = Popen([exe, '-D', conf])#, creationflags=HIDE)
             sleep(3)
             self.sendsclang('s.boot;')
             sleep(2)
             print "Done!"
-            os.chdir(ROOT)
+            os.chdir(USER_CWD)
             self.booted=True
         else:
             print "Warning: SuperCollider already booted"

@@ -6,7 +6,7 @@ from SCLang import *
 with SynthDef("sample_player") as sd:
     sd.defaults.update(room=0.1 ,rate=1)
     sd.rate = sd.scrub * LFPar.kr(sd.scrub / 4) + sd.rate - sd.scrub
-    sd.osc  = PlayBuf.ar(1, sd.buf, BufRateScale.ir(sd.buf) * sd.rate) * sd.amp * 3
+    sd.osc  = PlayBuf.ar(1, sd.buf, BufRateScale.ir(sd.buf) * sd.rate, trigger=LFPar.kr(sd.grain), startPos=Line.kr(0,BufFrames.kr(sd.buf)*0.75,sd.sus*2)) * sd.amp * 3
     sd.env  = Env.block(sus=sd.sus*2)
 
 # Synth Players
@@ -135,3 +135,15 @@ a.amp = a.amp / 4
 a.osc = Pulse.ar([a.freq, a.freq * 1.0001], width=[0.09,0.16,0.25]) * SinOsc.ar(a.rate * 4)
 a.env = Env.perc(a.sus * 1.5)
 a.add()
+
+p = SynthDef("pulse")
+p.amp = p.amp / 4
+p.osc = Pulse.ar(p.freq)
+p.env = Env.block()
+p.add()
+
+p = SynthDef("saw")
+p.amp = p.amp / 4
+p.osc = Saw.ar(p.freq)
+p.env = Env.block()
+p.add()

@@ -7,6 +7,7 @@
 
 """
 
+from Players import PlayerObject
 from Patterns import asStream
 from Patterns.Operations import modi
 from time import sleep, time
@@ -111,7 +112,9 @@ class TempoClock:
 
                 event = self.queue.pop()
 
-                for item in event[0]:
+                for n in range(len(event[0])-1, -1, -1):
+
+                    item = event[0][n]
 
                     if callable(item): item()
 
@@ -152,7 +155,13 @@ class TempoClock:
 
             if beat == self.queue[i][1]:
 
-                self.queue[i][0].append(obj)
+                if isinstance(obj, PlayerObject):
+
+                    self.queue[i][0].append(obj)
+
+                else:
+
+                    self.queue[i][0].insert(0, obj)
 
                 break
 
@@ -186,6 +195,12 @@ class TempoClock:
         """ Returns a 'schedulable' wrapper for any callable object """
         return Wrapper(self, obj, dur, args)
 
+    # Every n beats, do...
+
+    def every(self, n, cmd, args=()):
+        self.schedule(self.call(cmd, n, args))
+        return
+
     def When(self, a, b, step=0.125, nextBar=False):
         """
 
@@ -208,7 +223,7 @@ class TempoClock:
 
         w = When(a, b, step, self)
         
-        self.Schedule(w, start)
+        self.schedule(w, start)
 
         self.when_statements[a] = w
 
@@ -227,6 +242,16 @@ class TempoClock:
     def clear(self):
         """ Remove players from clock """
 
+        for player in self.playing:
+
+                try:
+
+                    player.kill()
+
+                except:
+
+                    pass
+
         for event in self.queue:
 
             for player in event[0]:
@@ -240,6 +265,7 @@ class TempoClock:
                     pass
 
         self.queue = []
+        self.playing = []
         self.ticking = False
         self.reset()
 

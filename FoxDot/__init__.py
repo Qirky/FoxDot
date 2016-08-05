@@ -8,8 +8,6 @@
 
 from ServerManager import Server
 
-#Server.boot()
-
 """ IMPORTS """
 
 from random import choice as choose
@@ -28,7 +26,6 @@ import Root
 """ CLOCK """
 
 Clock = TempoClock()
-
 Var.metro = Clock
 PlayerObject.metro, PlayerObject.server = Clock, Server
 Player.default_scale = Scale.default()
@@ -37,11 +34,16 @@ FoxCode.namespace=globals()
 
 """ IDE """
 
-def start():
+def start(*args):
 
     from Interface import FoxDot
     
     try:
+
+        if "-boot" in args:
+
+            Server.boot()
+            BufferManager.load()
         
         FoxDot().run()
         

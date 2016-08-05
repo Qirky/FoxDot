@@ -10,10 +10,12 @@ class console:
     def __init__(self, master):
 
         self.Yscroll = Scrollbar(master)
-        self.Yscroll.pack(side=RIGHT, fill=Y)        
+        #self.Yscroll.pack(side=RIGHT, fill=Y)
+        self.Yscroll.grid(column=1, sticky='nsew')
+        self.height = 10
         
         self.text = Text( master, padx=5, pady=5,
-                            height=10,
+                            height=self.height,
                             bg="Black", fg="White",
                             font=(DEFAULT_FONT, 12),
                             yscrollcommand=self.Yscroll.set)
@@ -22,7 +24,8 @@ class console:
 
         self.text.bind("<Key>", lambda e: "break")
 
-        self.text.pack(fill=BOTH, expand=1)
+        #self.text.pack(fill=BOTH, expand=1)
+        self.text.grid(row=1, column=0, sticky="nsew")
 
     def __str__(self):
         """ str(s) -> string """
@@ -37,3 +40,14 @@ class console:
     def read(self):
         """ Returns contents of the console widget """
         return str(self)
+
+    def hide(self):
+        """ Removes console from interface """
+        self.text.grid_remove()
+        self.Yscroll.grid_remove()
+        return
+
+    def show(self):
+        self.text.grid()
+        self.Yscroll.grid()
+        return

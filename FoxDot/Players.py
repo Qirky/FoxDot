@@ -8,6 +8,7 @@
 """
 
 from os.path import dirname
+from random import shuffle
 
 from Patterns import *
 from Midi import *
@@ -441,18 +442,14 @@ class PlayerObject(Code.LiveObject):
         self.reversing = not self.reversing
         return self
 
-##    def shuffle(self, attr=None):
-##        """ Shuffles """
-##        if True:
-##            return
-##        else:
-##            if attr is None:
-##                for attr in self.attr:
-##                    shuffle(attr)
-##            elif attr in self.attr:
-##                shuffle(self.attr[attr])
-##            else:
-##                print "Player Object has no attribute '{}'".format(attr)
+    def shuffle(self, attr=None):
+        """ Shuffles """
+        if attr is None:
+            shuffle(self.attr['degree'])
+        elif attr in self.attr:
+            shuffle(self.attr[attr])
+        else:
+            print "Player Object has no attribute '{}'".format(attr)
 
     def _every(self, n, cmd, args=(), id=1):
         if not callable(cmd):
@@ -477,7 +474,7 @@ class PlayerObject(Code.LiveObject):
             method = getattr(self, cmd)
             assert callable(method)
         except:
-            print "Warning: {} is not a valid player method".format(cmd.__name__)
+            print "Warning: {} is not a valid player method".format(cmd)
             return self
         self.scheduled_events[cmd] = MethodCall(self, cmd, n, args)
         return self

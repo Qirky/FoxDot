@@ -33,12 +33,16 @@ class FoxDot:
 
         self.root = Tk()
         self.root.title("FoxDot - Live Coding with Python and SuperCollider")
+        #self.root.config(height=120, width=25)
+        self.root.columnconfigure(0, weight=1)
+        self.root.rowconfigure(0, weight=2)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
         # Create Y scrollbar
 
         self.Yscroll = Scrollbar(self.root)
-        self.Yscroll.pack(side=RIGHT, fill=Y)
+        #self.Yscroll.pack(side=RIGHT, fill=Y)
+        self.Yscroll.grid(row=0, column=1, sticky='nsew')
 
         # Font Settings
 
@@ -47,33 +51,28 @@ class FoxDot:
 
         # Root widget container
 
-        self.container = Frame(self.root,
-                               borderwidth=1,
-                               relief="sunken",
-                               width=960,
-                               height=400 )
+        #self.container = Frame(self.root,
+        #                       borderwidth=5,
+        #                       relief="sunken")
 
-        self.container.grid_propagate(False)
-        self.container.pack(side="top", fill="both", expand=True)
-
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
+        #self.container.pack(side="top", fill="both", expand=True)
+        #self.container.grid(row=0, column=0, sticky='nsew')
+        #self.container.grid_rowconfigure(0, weight=4)
+        #self.container.grid_columnconfigure(0, weight=1)
 
         # Create text box for code
 
-        self.text = Text(self.container,
+        self.text = Text(self.root,
                          padx=5, pady=5,
-                         bg = colour_map['background'],
+                         bg=colour_map['background'],
                          fg=colour_map['plaintext'],
                          insertbackground="White",
                          font = "CodeFont",
                          yscrollcommand=self.Yscroll.set,
-                         maxundo=25 )
+                         width=120, height=20)
 
-        self.text.grid(row=0, column=0, stick="nsew")
-
+        self.text.grid(row=0, column=0, sticky="nsew")
         self.Yscroll.config(command=self.text.yview)
-        
         self.text.focus_set()
 
         # Docstring prompt label
@@ -95,7 +94,6 @@ class FoxDot:
 
         # Use command key on Mac (Temporary)
         
-        
         ctrl = "Command" if os.startswith('darwin') else "Control"
             
         self.text.bind("<{}-Return>".format(ctrl),          self.get_code)
@@ -108,6 +106,8 @@ class FoxDot:
         self.text.bind("<{}-minus>".format(ctrl),           self.zoom_out)
         self.text.bind("<{}-z>".format(ctrl),               self.undo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
+        self.text.bind("<{}-h>".format(ctrl),               self.help)
+        self.text.bind("<{}-#>".format(ctrl),               self.toggle_console)
 
         # Automatic brackets
 
@@ -139,11 +139,13 @@ class FoxDot:
         # Create lable for console
 
         self.console = console(self.root)
+        self.console_visible = True
         sys.stdout = self.console
 
         # Say Hello to the user
 
-        print "Welcome to FoxDot!"
+        print "Welcome to FoxDot! Press Ctrl+H for help."
+        print "-----------------------------------------"
         
         #execute("Clock.start()", verbose=False)
 
@@ -187,6 +189,9 @@ class FoxDot:
 
         return "break"
 
+    # Undo action: Ctrl+Z
+    #--------------------
+
     def undo(self, event=None):
         """ Ctrl+z: Remove the last character pressed """
 
@@ -197,8 +202,42 @@ class FoxDot:
             
         return
 
+    # Help feature: Ctrl+H
+    #---------------------
+
+    def help(self, event=None):
+        print "FoxDot Help:"
+        print "--------------------------------------------"
+        print "Ctrl+Return  : Execute code"
+        print "Ctrl+.       : Stop all sound"
+        print "Ctrl+=       : Zoom in"
+        print "Ctrl+-       : Zoom out"
+        print "Ctrl+S       : Save your work"
+        print "Ctrl+O       : Open a file"
+        print "Ctrl+#       : Toggle console window" 
+        print "--------------------------------------------"
+        print "Please visit foxdot.org for more information"
+        print "--------------------------------------------"
+        return "break"
+
+    # Save the current text: Ctrl+s
+    #------------------------------
+
     def save(self, event=None):
         """ Saves the contents of the text editor """
+        return
+
+    # Toggle console: Ctrl+#
+    #-----------------------------
+    def toggle_console(self,event=None):
+        if self.console_visible:
+            self.console.hide()
+            self.text.config(height=self.text.cget('height')+self.console.height)
+            self.console_visible = False
+        else:
+            self.console.show()
+            self.text.config(height=self.text.cget('height')-self.console.height)
+            self.console_visible = True
         return
     
     def paste(self, event=None):
@@ -219,6 +258,9 @@ class FoxDot:
         self.update(event, n_rows)
         
         return "break"
+
+    # Newline
+    #--------
 
     def newline(self, event):
         """ Adds whitespace to newlines where necessary """
@@ -278,6 +320,9 @@ class FoxDot:
 
         return "break"
 
+    # Tab
+    #----
+
     def tab(self, event):
         """ Move selected text forward 4 spaces """
         try: # Move any selected lines forwards
@@ -294,6 +339,9 @@ class FoxDot:
         # Update IDE
         self.update(event)
         return "break"
+
+    # Indent: Ctrl+]
+    #---------------
 
     def indent(self, event):
         """ Indent the current line or selected text """
@@ -321,6 +369,9 @@ class FoxDot:
             
         return "break"
 
+    # Un-inden: Ctrl+[
+    #-----------------
+
     def unindent(self, event):
         """ Moves the current row or selected text back by 4 spaces """
         if not self.text_selected():
@@ -344,7 +395,10 @@ class FoxDot:
 
         self.text.tag_add(SEL, sel_a, sel_b)
         
-        return "break"        
+        return "break"
+
+    # Deletion
+    #---------
 
     def delete(self, event):
         """ Deletes a character or selected area """
@@ -450,7 +504,7 @@ class FoxDot:
 
     def zoom_in(self, event):
         """ Ctrl+= increases text size """
-
+        self.root.grid_propagate(False)
         font = tkFont.nametofont("CodeFont")
         size = font.actual()["size"]+2
         font.configure(size=size)
@@ -461,11 +515,10 @@ class FoxDot:
 
     def zoom_out(self, event):
         """ Ctrl+- decreases text size (minimum of 8) """
-
+        self.root.grid_propagate(False)
         font = tkFont.nametofont("CodeFont")
         size = max(8, font.actual()["size"]-2)
         font.configure(size=size)
-
         return  'break'
 
 

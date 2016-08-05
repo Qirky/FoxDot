@@ -5,23 +5,23 @@
 
 """
 
-def reverse(player):
-    player.reverse()
-
-def lshift(player):
-    player.lshift()
-
-def rshift(player):
-    player.rshift()
-
-def shuffle(player):
-
-    player.degree = player.degree.shuf()
-
-    try:
-
-        player.pat_to_buf()
-
-    except:
-
-        pass
+##def reverse(player):
+##    player.reverse()
+##
+##def lshift(player):
+##    player.lshift()
+##
+##def rshift(player):
+##    player.rshift()
+##
+##def shuffle(player):
+##
+##    player.degree = player.degree.shuf()
+##
+##    try:
+##
+##        player.pat_to_buf()
+##
+##    except:
+##
+##        pass
