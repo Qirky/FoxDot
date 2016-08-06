@@ -58,12 +58,12 @@ class TempoClock:
 
     def BeatDuration(self):
         """ Returns the length in seconds of one beat """
-        return 60.0 / self.bpm
+        return 60.0 / float(self.bpm)
 
     def now(self):
         """ Adds to the current counter and returns its value """
         now = time()
-        self.time += (now - self.mark) * (self.bpm  / 60.0)
+        self.time += (now - self.mark) * (float(self.bpm)  / 60.0)
         self.mark = now
         return self.time
         
@@ -185,6 +185,13 @@ class TempoClock:
         """ Returns the beat value for the start of the next bar """
         beat = self.now()
         return beat + (self.ts[0] - (beat % self.ts[0]))
+
+    def get_bpm(self):
+        try:
+            bpm = float(self.bpm.now(self.time))
+        except:
+            bpm = float(self.bpm)
+        return bpm
 
     def NextEvent(self):
         """ Returns the beat index for the next event to be called """

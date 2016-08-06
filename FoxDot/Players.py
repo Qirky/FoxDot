@@ -18,11 +18,6 @@ import Buffers
 
 #### Methods
 
-##shuffle = 'shuffle'
-##lshift  = 'lshift'
-##rshift  = 'rshift'
-##reverse = 'reverse'
-
 class MethodCall:
     def __init__(self, player, method, n, args=()):
         self.player = player
@@ -34,7 +29,11 @@ class MethodCall:
     def __call__(self):
         self.i += 1
         self.next = modi(self.when, self.i)
-        getattr(self.player, self.name).__call__(*self.args)    
+        if type(self.args) is tuple:
+            args = [modi(arg, self.i) for arg in self.args]
+        else:
+            args = [modi(self.args, self.i)]
+        getattr(self.player, self.name).__call__(*args)    
         
 
 ##################### ROOT PLAYER OBJECT #####################
@@ -451,23 +450,11 @@ class PlayerObject(Code.LiveObject):
         else:
             print "Player Object has no attribute '{}'".format(attr)
 
-    def _every(self, n, cmd, args=(), id=1):
-        if not callable(cmd):
-            return self
-        # Get unique name
-        name = cmd.__name__ + str(id)
-        # See if we have a reference to it
-        if name in self.scheduled_events:
-            # Update
-            pass
-        else:
-            # Create new schedulable event
-            obj = self.metro.call(lambda: cmd(self, *args), n)
-            # Add to clock
-            self.metro.schedule(obj, self.metro.NextBar() - 0.1)
-            # Store reference
-            self.scheduled_events[name] = obj
-        return self
+    def multiply(self, n=2):
+        self.attr['degree'] = self.attr['degree'] * n
+        return self        
+
+    """ Every x do y """
 
     def every(self, n, cmd, args=()):
         try:

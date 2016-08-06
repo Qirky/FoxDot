@@ -249,10 +249,9 @@ class Var(Code.LiveObject):
         """ Returns the current beat value """
         beat = self.metro.now()
         if self.bpm is not None:
-            beat *= (self.bpm / self.metro.bpm)
+            beat *= (self.bpm / float(self.metro.bpm))
         t = beat % self.length()
         return t
-
 
     def now(self):
         """ Returns the value from self.data for time t in self.metro """

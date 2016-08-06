@@ -8,6 +8,4 @@
 if __name__ == "__main__":
     
     import FoxDot
-    import sys
-
-    FoxDot.start(*sys.argv)
+    FoxDot.start()

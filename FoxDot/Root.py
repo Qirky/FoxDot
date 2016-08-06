@@ -10,7 +10,7 @@ class Note:
         self.char = None
         self.num  = None
 
-        self.change(index)
+        self.set(index)
 
     def __str__(self):
         return str(self.num)
@@ -18,7 +18,7 @@ class Note:
     def __repr__(self):
         return str(self.num)
 
-    def change(self, index):
+    def set(self, index):
 
         if type(index) is str:
 
@@ -67,7 +67,7 @@ class Note:
 
         if len(args) > 0:
 
-            self.change(args[0])
+            self.set(args[0])
 
         return self
 

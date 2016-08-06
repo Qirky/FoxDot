@@ -8,6 +8,8 @@
 
 from ServerManager import Server
 
+Server.boot()
+
 """ IMPORTS """
 
 from random import choice as choose
@@ -34,16 +36,11 @@ FoxCode.namespace=globals()
 
 """ IDE """
 
-def start(*args):
+def start():
 
     from Interface import FoxDot
     
     try:
-
-        if "-boot" in args:
-
-            Server.boot()
-            BufferManager.load()
         
         FoxDot().run()
         
