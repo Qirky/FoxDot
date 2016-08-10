@@ -111,13 +111,14 @@ class TempoClock:
 
                 self.nextEvent = MAXINT
 
-            # TODO This is a little odd
-
-            rest = self.nextEvent - self.now()
-
-            sleep(min(self.beat(1), self.beat(rest)))
+            rest = max((self.nextEvent - self.now()) * 0.25, 0)
+            sleep(min(self.beat(1), rest))
 
         return
+
+    def sleep(self):
+        
+        return None
 
     def schedule(self, obj, beat=None):
         """ Add a player / event to the queue """

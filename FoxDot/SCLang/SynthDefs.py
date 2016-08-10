@@ -16,6 +16,11 @@ with SynthDef("pads") as pads:
     pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) +  SinOsc.ar(pads.freq + 2, mul=pads.amp)
     pads.env = Env.perc()
 
+with SynthDef("growl") as growl:
+    growl.sus = growl.sus * 1.5
+    growl.osc = SinOsc.ar(growl.freq + SinOsc.kr(0.5, add=1, mul=2), mul=growl.amp) * Saw.ar((growl.sus / 1.5) * 32)
+    growl.env = Env()
+
 with SynthDef("bass") as bass:
     bass.amp  = bass.amp * 2
     bass.freq = bass.freq / 2
