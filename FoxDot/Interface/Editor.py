@@ -1,14 +1,11 @@
 #!/usr/bin/python
 
-""" Tkinter interface made for Live Coding with Python syntax highlighting """
-import sys
-
-# Check for OS
-os = sys.platform
+""" Tkinter interface made for Live Coding with Python syntax highlighting """  
 
 # Tkinter Interface
 from Tkinter import *
 import tkFont
+import tkFileDialog
 
 # stdlib threading
 from threading import Thread
@@ -33,7 +30,6 @@ class FoxDot:
 
         self.root = Tk()
         self.root.title("FoxDot - Live Coding with Python and SuperCollider")
-        #self.root.config(height=120, width=25)
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=2)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
@@ -41,24 +37,10 @@ class FoxDot:
         # Create Y scrollbar
 
         self.Yscroll = Scrollbar(self.root)
-        #self.Yscroll.pack(side=RIGHT, fill=Y)
         self.Yscroll.grid(row=0, column=1, sticky='nsew')
-
-        # Font Settings
 
         self.font = tkFont.Font(font=(DEFAULT_FONT, 12), name="CodeFont")
         self.font.configure(**tkFont.nametofont("CodeFont").configure())
-
-        # Root widget container
-
-        #self.container = Frame(self.root,
-        #                       borderwidth=5,
-        #                       relief="sunken")
-
-        #self.container.pack(side="top", fill="both", expand=True)
-        #self.container.grid(row=0, column=0, sticky='nsew')
-        #self.container.grid_rowconfigure(0, weight=4)
-        #self.container.grid_columnconfigure(0, weight=1)
 
         # Create text box for code
 
@@ -91,10 +73,9 @@ class FoxDot:
         self.text.bind("<Tab>",             self.tab)
         self.text.bind("<Key>",             self.keypress)
         
-
         # Use command key on Mac (Temporary)
         
-        ctrl = "Command" if os.startswith('darwin') else "Control"
+        ctrl = "Command" if SYSTEM.startswith('darwin') else "Control"
             
         self.text.bind("<{}-Return>".format(ctrl),          self.get_code)
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
@@ -106,21 +87,30 @@ class FoxDot:
         self.text.bind("<{}-minus>".format(ctrl),           self.zoom_out)
         self.text.bind("<{}-z>".format(ctrl),               self.undo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
+        self.text.bind("<{}-o>".format(ctrl),               self.openfile)        
         self.text.bind("<{}-h>".format(ctrl),               self.help)
-        self.text.bind("<{}-#>".format(ctrl),               self.toggle_console)
+
+        try:
+            self.text.bind("<{}-#>".format(ctrl), self.toggle_console)
+            self.toggle_key = "#"
+        except:
+            self.text.bind("<{}-t>".format(ctrl), self.toggle_console)
+            self.toggle_key = "T" 
+
+        # Save feature variabes
+
+        self.saved    = False
+        self.file     = None
+        self.filename = None
 
         # Automatic brackets
 
         self.inbrackets = False
-
         self.separators = py_separators
-
         self.left_brackets  = left_b
         self.right_brackets = right_b
-
         self.all_brackets = dict(zip(self.left_brackets, self.right_brackets))
         self.bracket_q = []
-        
         for char in self.left_brackets + self.right_brackets:
             self.text.bind(char, self.brackets)
 
@@ -214,7 +204,7 @@ class FoxDot:
         print "Ctrl+-       : Zoom out"
         print "Ctrl+S       : Save your work"
         print "Ctrl+O       : Open a file"
-        print "Ctrl+#       : Toggle console window" 
+        print "Ctrl+{}       : Toggle console window".format(self.toggle_key)
         print "--------------------------------------------"
         print "Please visit foxdot.org for more information"
         print "--------------------------------------------"
@@ -225,6 +215,43 @@ class FoxDot:
 
     def save(self, event=None):
         """ Saves the contents of the text editor """
+        text = self.text.get("0.0",END)
+        if not self.saved:
+            self.filename = tkFileDialog.asksaveasfilename()
+        if self.filename is not None:
+            with open(self.filename, 'w') as f:
+                f.write(text)
+                f.close()
+                self.saved = True
+                print "Save successful!"
+        return
+
+    # Open save
+
+    def saveAs(self,event=None):
+        text = self.text.get("0.0",END)
+        self.filename = tkFileDialog.asksaveasfilename()
+        if self.filename is not None:
+            with open(self.filename, 'w') as f:
+                f.write(text)
+                f.close()
+                self.saved = True
+                print "Save successful!"
+        return
+
+    # Open a file: Ctrl+o
+    #--------------------
+
+    def openfile(self, event=None):
+        f = tkFileDialog.askopenfile()
+        if f is None:
+            return
+        else:
+            text = f.read()
+            f.close()
+            self.text.delete("0.0", END)
+            self.text.insert("0.0", text)
+            self.update(event)
         return
 
     # Toggle console: Ctrl+#
@@ -244,18 +271,18 @@ class FoxDot:
         """ Ctrl-V: Pastes any text and updates the IDE """
 
         # Get first row
-        row1 = index(self.text.index(INSERT))[0]
+##        row1 = index(self.text.index(INSERT))[0]
 
         # Insert the data from the clipboard            
         self.text.insert(self.text.index(INSERT), self.root.clipboard_get())
 
-        # Get end row
-        row2 = index(self.text.index(INSERT))[0]
-
-        n_rows = row2 - row1
+##        # Get end row
+##        row2 = index(self.text.index(INSERT))[0]
+##
+##        n_rows = row2 - row1
 
         # Update the IDE colours
-        self.update(event, n_rows)
+        self.update(event)
         
         return "break"
 
@@ -684,14 +711,18 @@ class FoxDot:
         self.text.see(INSERT)
 
         # 1. Get the contents of the current line
-
-        cur = self.text.index(INSERT)
-
-        line, column = index(cur)
+##
+##        cur = self.text.index(INSERT)
+##
+##        line, column = index(cur)
 
         # -- check current and last line if return key
 
-        lines = [line] + [line-1-N for N in range(row)] + [line-1] * int(isReturn(event.char))
+        cur = self.text.index(END)
+        line, column = index(cur)
+
+        #lines = [line] + [line-1-N for N in range(row)] + [line-1] * int(isReturn(event.char))
+        lines = range(line)
 
         for line in lines:
 

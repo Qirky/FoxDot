@@ -11,27 +11,12 @@
 from OSC import *
 from subprocess import Popen
 from time import sleep
+from Settings import *
 import os
-
-SC_DIRECTORY = "C:/Program Files (x86)/SuperCollider-3.6.6/"
-USER_CWD     = os.path.realpath(".")
-FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../")
-
-try:
-
-    with open("Settings/server_address.txt") as f:
-        info = f.readlines()[0].split()
-        
-    ADDRESS, PORT = (str(info[0]), int(info[1]))
-    
-except:
-    
-    ADDRESS, PORT = "localhost", 57110
-
 
 class ServerManager:
 
-    def __init__(self, addr=ADDRESS, port=PORT):
+    def __init__(self, addr=ADDRESS, port=int(PORT)):
 
         self.addr = addr
         self.port = port
@@ -45,6 +30,11 @@ class ServerManager:
         self.node = 1000
 
         self.booted=False
+
+        debug = 0
+        msg = OSCMessage("/dumpOSC")
+        msg.append(debug)
+        self.client.send(msg)
 
     def __str__(self):
         return "FoxDot ServerManager Instance -> {}:{}".format(self.addr, self.port)
@@ -79,30 +69,40 @@ class ServerManager:
         self.client.send( message )
         return
 
+    # Buffer Communiation
+    # -------------------
+
     def bufferRead(self, bufnum, path):
         message = OSCMessage("/b_allocRead")
         message.append([bufnum, path])
         self.client.send( message )
         return
 
-    def sendsclang(self, code, cmd='/foxdot'):
+    # SynthDef Commmunication
+    # -----------------------
+
+    def loadSynthDef(self, fn, cmd='/foxdot'):
         msg = OSCMessage()
         msg.setAddress(cmd)
-        msg.append(code)
+        msg.append(fn)
         self.sclang.send(msg)
         return
 
+    # Boot and Quit
+    # -------------
+
     def boot(self):
         if not self.booted:
-            conf = os.path.realpath(FOXDOT_ROOT + "/foxdot.scd")
+            conf = os.path.realpath(FOXDOT_ROOT + OSC_FUNC)
+            print conf
             exe  = "sclang.exe"
             os.chdir(SC_DIRECTORY)
             print "Booting SuperCollider Server...",
-            self.daemon = Popen([exe, '-D', conf])#, creationflags=HIDE)
-            sleep(3)
-            self.sendsclang('s.boot;')
-            sleep(2)
-            print "Done!"
+            self.daemon = Popen([exe, '-D', conf])
+            sleep(5)
+            # TODO
+            # While no reply:
+            #   sleep(1)
             os.chdir(USER_CWD)
             self.booted=True
         else:
@@ -112,7 +112,7 @@ class ServerManager:
     def quit(self):
         if self.booted:
             print "Quitting SuperCollider Server"
-            self.sendsclang('s.quit;')
+            self.client.send(OSCMessage("/quit"))
             sleep(0.5)
             self.daemon.terminate()
         return

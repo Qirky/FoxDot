@@ -4,6 +4,8 @@
 
 from ..ServerManager import Server
 from copy import copy
+import StringIO
+import os
 
 def format_args(args=[], kwargs={}, delim=': '):
     return ", ".join([str(a) for a in args] + ["%s%s%s" % (key, delim, value) for key, value in kwargs.items()])
@@ -140,6 +142,7 @@ Vibrato  = cls("Vibrato")
 Line     = cls("Line")
 XLine    = cls("XLine")
 FreeVerb = cls("FreeVerb")
+GVerb    = cls("GVerb")
 Pan2     = cls("Pan2")
 LPF      = cls("LPF")
 BPF      = cls("BPF")
@@ -267,6 +270,8 @@ class SynthDef:
 
     def __init__(self, name):
         self.name = name
+        self.filename = os.path.realpath(__file__ + "/../scsyndef/{}.scd".format(self.name))
+        
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
                             "pan"       : 0,
@@ -278,7 +283,7 @@ class SynthDef:
                             "verb"      : 0.25,
                             "echo"      : 0,
                             "echoOn"    : 0,
-                            "room"      : 0.5,
+                            "room"      : 1,
                             "vib"       : 0,
                             "vibDelay"  : 0,
                             "vibVar"    : 0.04,
@@ -314,15 +319,35 @@ class SynthDef:
             raise AttributeError("Attribute '{}' not found".format(key))
     
     def add(self):
+        """ This is required to add the SynthDef to the SuperCollider Server """
+
+        #  This adds any filters
 
         self.osc = HPF.ar(self.osc, self.hpf)
         self.osc = LPF.ar(self.osc, self.lpf + 1)
         
-        if 1:#try:
-            SynthDef.server.sendsclang(str(self))
+        try:
+            # Write file
+            self.write()
+
+            # Load to server
+            SynthDef.server.loadSynthDef(self.filename)
+
+            # Add to list
             SynthDefs[self.name] = self
-        else:
-            print "SynthDef '{}' could not be added to the server".format(self.name)
+            
+        except:
+            
+            print "Error: SynthDef '{}' could not be added to the server".format(self.name)
+            
+        return None
+
+    def write(self):
+        """  Writes the SynthDef to file """
+        f = open(self.filename, 'w')
+        f.write(self.__str__())
+        f.close()
+        return None
         
 
     def modify(self):
@@ -347,6 +372,7 @@ class SynthDef:
         snd      = self.osc + self.echo_effect()
         sound    = str(Out.ar(0, Pan2.ar(FreeVerb.ar('osc * env', self.verb, self.room), self.pan)))
         return "SynthDef.new( \%s,{|%s|%s%s}).add;" % (name, defaults, mod, sound)
+        #return "SynthDef.new( \%s,{|%s|%s%s})" % (name, defaults, mod, sound)
 
     def __repr__(self):
         return str(self.name)
@@ -357,6 +383,34 @@ class SynthDef:
         new = copy(self)
         new.osc = self.osc + other.osc
         return new
+
+    def __call__(self, degree=0, **kwargs):
+        return SynthDefProxy(self.name, degree, kwargs)
+
+class SynthDefProxy:
+    def __init__(self, name, degree, kwargs):
+        self.name = name
+        self.degree = degree
+        self.mod = 0
+        self.kwargs = kwargs
+        self.methods = {}
+        self.vars = vars(self)
+    def __str__(self):
+        return "<SynthDef Proxy '{}'>".format(self.name)
+    def __add__(self, other):
+        self.mod = other
+        return self
+    def __coerce__(self, other):
+        return None
+    def __getattr__(self, name):
+        if name not in self.vars:
+            def func(*args, **kwargs):
+                self.methods[name] = (args, kwargs)
+                return self
+            return func
+        else:
+            return getattr(self, name)
+        
 
 # Array manipulation emulator functions
 

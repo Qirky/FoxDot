@@ -1,3 +1,12 @@
+# Settings
+------------------
+ADDRESS=localhost
+PORT=57110
+SUPERCOLLIDER=C:/Program Files (x86)/SuperCollider-3.6.6/
+FONT=Ubuntu Mono
+
+# Editor Colours
+------------------
 plaintext=#ffffff
 background=#4d4d4d
 functions=#ff9999
@@ -10,3 +19,4 @@ strings=#ffff99
 dollar=#cc33ff
 arrow=#ffff99
 players=#cc33ff
+

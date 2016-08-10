@@ -10,15 +10,12 @@
 from os.path import dirname
 from random import shuffle
 
-from SCLang import SynthDefProxy
+from SuperCollider.SCLang import SynthDefArgs
 from Patterns import *
 from Midi import *
 
 import Code
 import Buffers
-
-BufferManager = Buffers.BufferManager().from_file()
-BufferManager.load()
 
 #### Methods
 
@@ -29,12 +26,10 @@ class MethodCall:
         self.when = asStream(n)
         self.i    = 0
         self.next = self.when[self.i]
-        t = self.player.metro.now()
-        self.next = (t - (t % self.player.metro.ts[0])) + self.next
         self.args = args
     def __call__(self):
         self.i += 1
-        self.next += modi(self.when, self.i)
+        self.next = modi(self.when, self.i)
         if type(self.args) is tuple:
             args = [modi(arg, self.i) for arg in self.args]
         else:
@@ -43,8 +38,6 @@ class MethodCall:
         
 
 ##################### ROOT PLAYER OBJECT #####################
-
-SamplePlayer = 'play'
 
 class PlayerObject(Code.LiveObject):
 
@@ -57,7 +50,6 @@ class PlayerObject(Code.LiveObject):
     def __init__( self, name ):
 
         self.name     = name
-        
         self.SynthDef = None
         self.quantise = False
         self.stopping = False
@@ -116,29 +108,33 @@ class PlayerObject(Code.LiveObject):
         #self.bpm = ...
         self.freq   = [0]
 
-        self.reset()
-
     """ The PlayerObject Method >> """
 
     def __rshift__(self, other):
+        
         # Player Object Manipulation
-        if isinstance(other, SynthDefProxy):
-            self.update(other.name, other.degree, **other.kwargs)
-            self + other.mod
-            for method, arguments in other.methods.items():
-                args, kwargs = arguments
-                getattr(self, method).__call__(*args, **kwargs)                
-            return self
+        
+        if isinstance(other, SynthDefArgs):
+
+            if self.isplaying and isinstance(self, SamplePlayer):
+                print "Warning: Cannot convert <Sample Player '{}'> to <Player Object> while Playing".format(self.name)
+                return self
+
+            # Valid Argument        
+            if self.isplaying:
+                print "updating"
+                self.update(self, other.name, asStream(other.degree), **other.kwargs) + other.mod
+                return self
+            else:
+                print "new"
+                self = Player(other.name, asStream(other.degree), **other.kwargs) + other.mod
+                return self
+                    
+        if isinstance(other, tuple):
+            pass        
         raise TypeError("{} is an innapropriate argument type for PlayerObject".format(other))
         return self
-
-    def __setattr__(self, name, value):
-        if self._INIT:
-            if name not in self._VARS:
-                value = asStream(value)
-                self.attr[name] = value
-        self.__dict__[name] = value
-        return
+        
 
     # --- Startup methods
 
@@ -190,15 +186,7 @@ class PlayerObject(Code.LiveObject):
 
             # Call the MethodCall
             
-            if self.event_index >= cmd.next: cmd()
-
-        # Play the note
-
-        if self.metro.solo is None or self.metro.solo is self:
-
-            self.freq = 0 if self.SynthDef is SamplePlayer else self.calculate_freq()
-
-            self.send()
+            if (self.notes_played + 1) % cmd.next == 0: cmd()
 
         return
 
@@ -238,222 +226,32 @@ class PlayerObject(Code.LiveObject):
 
         return n, acc
 
-    def update(self, synthdef, degree, **kwargs):
+    def update(self):
         
         if self.isplaying is False:
 
-            # Add to clock        
-            self.isplaying = True
-            self.event_index = self.metro.NextBar()
-            self.event_n = 0
-            self.metro.schedule(self, self.event_index)
+            self.restart()
 
-        setattr(self, "SynthDef", synthdef)
-
-        if not self._INIT:
-
-            if synthdef is SamplePlayer: 
-
-                self.dur = self.attr['dur'] = asStream(0.5)
-                self.old_pattern_dur = self.dur
-
-            else:
-
-                self.scale = kwargs.get("scale", PlayerObject.default_scale )
-                self.root = self.attr['root']  = asStream(kwargs.get( "root",  PlayerObject.default_root ))
-                self.dur  = self.attr['dur']   = asStream(1)
-                self.sus  = self.attr['sus']   = asStream(1)
-
-        # Finish init (any assigned attributes now go in the player.attr dict
-
-        if not self._INIT: self._INIT = True
-
-        # Update the attribute value
-
-        for name, value in kwargs.items():
-
-            setattr(self, name, value)
-
-        # Set the degree and update sustain to equal duration if not specified
-
-        if synthdef is SamplePlayer:
-
-            setattr(self, "degree", str(degree) if len(degree) > 0 else " ")
-
-        else:
-
-            setattr(self, "degree", degree)
-
-            if 'sus' not in kwargs:
-
-                setattr(self, 'sus', self.dur)
-
-        return self
+        return
 
     def dur_updated(self):
-        dur_updated = self.attr['dur'] != self.old_dur
-        if self.SynthDef == SamplePlayer:
-            dur_updated = (self.pattern_rhythm_updated() or dur_updated)
-        return dur_updated
-    
+        return self.attr['dur'] != self.old_dur
 
     def rhythm(self):
-        r = asStream(self.attr['dur'])
-        if self.SynthDef is SamplePlayer:
-            r = r * [char.dur for char in self.attr['degree'].flat()]
-        return r
-
-    def pattern_rhythm_updated(self):
-        r = self.rhythm()
-        if self.old_pattern_dur != r:
-            self.old_pattern_dur = r
-            return True
-        return False
-
-    def char(self, other=None):
-        if other is not None:
-            try:
-                if type(other) == str and len(other) == 1: #char
-                    return BufferManager.bufnum(self.now('buf')) == other
-                raise TypeError("Argument should be a one character string")
-            except:
-                return False
-        else:
-            try:
-                return BufferManager.bufnum(self.now('buf'))
-            except:
-                return None
-
-    def calculate_freq(self):
-        """ Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider """
-
-        now = {}
-        
-        for attr in ('degree', 'oct'):
-
-            now[attr] = self.event[attr]
-
-            try:
-
-                now[attr] = list(now[attr])
-
-            except:
-
-                now[attr] = [now[attr]]
-                
-        size = max( len(now['oct']), len(now['degree']) )
-
-        f = []
-
-        for i in range(size):
-
-            try:
-                
-                midinum = midi( self.scale, modi(now['oct'], i), modi(now['degree'], i) , self.now('root') )
-
-            except:
-
-                print self.event
-                raise
-
-            f.append( miditofreq(midinum) )
-            
-        return f
-
-    def f(self, data):
-
-        """ adds value to frequency modifier """
-
-        if type(data) == int:
-
-            data = [data]
-
-        # Add to modulator
-
-        self.modf['freq'] = circular_add(self.modf['freq'], data)
-
-        return self
-
-    # Methods affecting other players - every n times, do a random thing?
-
-    def stutter(self, n=2):
-        """ repeats each value in each stream n times """
-
-        # if n is a list, stutter each degree[i] by n[i] times
-
-        self.degree = PStutter(self.degree, n)
-
-        return self
-
-    def __int__(self):
-        return int(self.now('degree'))
-
-    def __float__(self):
-        return float(self.now('degree'))
-
-    def __add__(self, data):
-        """ Change the degree modifier stream """
-        self.modf['degree'] = asStream(data)
-        return self
-
-    def __iadd__(self, data):
-        """ Increment the degree modifier stream """
-        self.modf['degree'] = circular_add(self.modf['degree'], asStream(data))
-        return self
-
-    def __sub__(self, data):
-        """ Change the degree modifier stream """
-        data = asStream(data)
-        data = [d * -1 for d in data]
-        self.modf['degree'] = data
-        return self
-
-    def __isub__(self, data):
-        """ de-increment the modifier stream """
-        data = asStream(data)
-        data = [d * -1 for d in data]
-        self.modf['degree'] = circular_add(self.modf['degree'], data)
-        return self
-
-    def __mul__(self, data):
-
-        """ Multiplying an instrument player multiplies each amp value by
-            the input, or circularly if the input is a list. The input is
-            stored here and calculated at the update stage """
-
-        if type(data) in (int, float):
-
-            data = [data]
-
-        self.modf['amp'] = asStream(data)
-
-        return self
-
-    def __div__(self, data):
-
-        if type(data) in (int, float):
-
-            data = [data]
-
-        self.modf['amp'] = [1.0 / d for d in data]
-
-        return self
+        return asStream(self.attr['dur'])
 
     # --- Data methods
 
-    def tupleN(self):
+    def tupleN(self, exclude=None):
         """ Returns the length of the largest nested tuple in the attr dict """
-
-        exclude = 'degree' if self.SynthDef is SamplePlayer else None
 
         size = len(self.freq)
         
         for attr, value in self.event.items():
             if attr != exclude:
                 try:
-                    l = len(value)
-                    if l > size:
-                        size = l
+                    if len(value) > size:
+                        size = len(value)
                 except:
                     pass
 
@@ -514,26 +312,18 @@ class PlayerObject(Code.LiveObject):
 
                 value = attr_value * modf_value
 
-            else:
+            else:              
             
                 value = attr_value + modf_value
 
         except:
 
             value = attr_value
-            
+        
         return value
 
     def get_event(self):
         """ Returns a dictionary of attr -> now values """
-
-        if self.SynthDef is SamplePlayer:
-
-            # Un-nest any PGroups
-
-            self.attr['degree'] = self.attr['degree'].flat()
-            
-        # Get the current event
 
         self.event = {}
         
@@ -541,22 +331,15 @@ class PlayerObject(Code.LiveObject):
 
             self.event[key] = self.now(key)
 
-        if self.SynthDef is SamplePlayer:
-
-            # Get the buffer number to play
-            self.event['buf'] = BufferManager.symbols.get(self.event['degree'].char, 0)
-
-            # Apply any duration ratio changes
-            self.event['dur'] *= self.event['degree'].dur
-
         return self
+            
 
-    def osc_message(self, index=0):
+    def osc_message(self, index=0, head=[]):
         """ Creates an OSC packet to play a SynthDef in SuperCollider """
 
         # Initial message plus custom head and echo variable
 
-        message = ['echoOn', int(self.event['echo'] > 0), 'freq', modi(self.freq, index)]
+        message = ['echoOn', int(self.event['echo'] > 0)] + head
 
         for key in self.attr:
 
@@ -581,9 +364,9 @@ class PlayerObject(Code.LiveObject):
     def send(self):
         """ Sends the current event data to SuperCollder """
 
-        size = self.tupleN()
-
-        for i in range(size):
+        # Get the current state in a dict
+        
+        for i in range(self.tupleN()):
 
             osc_msg = self.osc_message(i)
             
@@ -656,40 +439,10 @@ class PlayerObject(Code.LiveObject):
 
         return self
 
-##    def restart(self):
-##
-##        self.isAlive = True
-##        self.stopping = False
-##
-##        return self
+    def restart(self):
 
-    def follow(self, lead, follow=True):
-        """ Takes a now object and then follows the notes """
-
-        if follow:
-
-            self.following = lead
-
-            try:
-                self.scale = lead.scale
-            except:
-                pass
-
-        else:
-
-            self.following = None
-
-        return self
-
-    def solo(self, arg=True):
-
-        if arg:
-
-            self.metro.solo = self
-
-        else:
-
-            self.metro.solo = None
+        self.isAlive = True
+        self.stopping = False
 
         return self
         
@@ -729,11 +482,7 @@ class PlayerObject(Code.LiveObject):
 
     def multiply(self, n=2):
         self.attr['degree'] = self.attr['degree'] * n
-        return self
-
-    def test(self):
-        print 'test'
-        return self
+        return self        
 
     """ Every x do y """
 
@@ -825,7 +574,375 @@ class PlayerObject(Code.LiveObject):
         for attr, val in self.attr.items():
             s += "\t{}\t:{}\n".format(attr, val)
         return s
+        
+    def __setattr__(self, name, value):
+        if self._INIT:
+            if name not in self._VARS:
+                value = asStream(value)
+                self.attr[name] = value
+        self.__dict__[name] = value
+        return
 
+##################### SYNTH PLAYERS #####################
+
+class Player(PlayerObject):
+
+    default_scale = None
+    default_root  = None
+
+    def __init__(self, SynthDef, degree=[0], **kwargs):
+
+        # Inherit key methods
+
+        self.parent = super(self.__class__, self)
+
+        self.parent.__init__(SynthDef)
+
+        # Update self with kwargs
+        
+        self.attr.update(kwargs)
+        self.reset()
+
+        # Set key attribute default settings
+
+        self.scale = kwargs.get( "scale", Player.default_scale )
+        self.root = self.attr['root']  = asStream(kwargs.get( "root",  Player.default_root ))
+        self.dur  = self.attr['dur']   = asStream(1)
+        self.sus  = self.attr['sus']   = asStream(1)
+
+        # Finish init (any assigned attributes now go in the Player.attr dict
+        
+        self._INIT = True
+
+        # Update attributes
+        
+        self.update(SynthDef, degree, **kwargs)
+        
+        # Add to clock and update with keyword arguments
+        
+        self.isplaying = True
+        self.event_index = self.metro.NextBar()
+        self.event_n = 0
+        self.metro.schedule(self, self.event_index)
+
+    def update(self, SynthDef, degree=[0], **kwargs):
+        """ Updates the values of this Player """
+
+        self.parent.update()
+
+        setattr(self, "SynthDef", SynthDef)
+        setattr(self, "degree", degree)
+
+        for name, value in kwargs.items():
+            setattr(self, name, value)
+
+        if "sus" not in kwargs:
+            setattr(self, "sus", self.dur)
+
+        return self
+
+    def calculate_freq(self):
+        """ Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider """
+
+        now = {}
+        
+        for attr in ('degree', 'oct'):
+
+            now[attr] = self.event[attr]
+
+            try:
+
+                now[attr] = list(now[attr])
+
+            except:
+
+                now[attr] = [now[attr]]
+                
+        size = max( len(now['oct']), len(now['degree']) )
+
+        f = []
+
+        for i in range(size):
+
+            try:
+                
+                midinum = midi( self.scale, modi(now['oct'], i), modi(now['degree'], i) , self.now('root') )
+
+            except:
+
+                print self.event
+                raise
+
+            f.append( miditofreq(midinum) )
+            
+        return f
+
+    def __call__(self):
+        """ Calls the parent class update state then calculates frequency """
+        self.parent.__call__()
+        if self.metro.solo is None or self.metro.solo is self:
+            self.freq = self.calculate_freq()
+            self.send()
+
+    def osc_message(self, index=0, head=[]):
+        """ Attaches the frequency to the osc message """
+        msg_head = ['freq', modi(self.freq, index)]
+        return self.parent.osc_message(index, msg_head)
+
+    def follow(self, lead, follow=True):
+        """ Takes a now object and then follows the notes """
+
+        if follow:
+
+            self.following = lead
+            self.scale = lead.scale
+
+        else:
+
+            self.following = None
+
+        return self
+
+    def solo(self, arg=True):
+
+        if arg:
+
+            self.metro.solo = self
+
+        else:
+
+            self.metro.solo = None
+
+        return self
+
+    def copy(self, player):
+
+        """ Copies the attr dict of player to self """
+
+        self.dur    = player.attr['dur']
+        self.scale  = player.attr['scale']
+        self.root   = player.attr['root']
+        self.degree = player.attr['degree']
+        self.oct    = player.attr['oct']
+        self.amp    = player.attr['amp']
+        self.pan    = player.attr['pan']
+        self.sus    = player.attr['sus']
+        self.rate   = player.attr['rate']
+        self.pos    = player.attr['pos']
+        self.buf    = player.attr['buf']
+
+        return self
+
+    def f(self, data):
+
+        """ adds value to frequency modifier """
+
+        if type(data) == int:
+
+            data = [data]
+
+        # Add to modulator
+
+        self.modf['freq'] = circular_add(self.modf['freq'], data)
+
+        return self
+
+    # Methods affecting other players - every n times, do a random thing?
+
+    def stutter(self, n=2):
+        """ repeats each value in each stream n times """
+
+        # if n is a list, stutter each degree[i] by n[i] times
+
+        self.degree = PStutter(self.degree, n)
+
+        return self
+
+    def __int__(self):
+        return int(self.now('degree'))
+
+    def __float__(self):
+        return float(self.now('degree'))
+
+    def __add__(self, data):
+        """ Change the degree modifier stream """
+        self.modf['degree'] = asStream(data)
+        return self
+
+    def __iadd__(self, data):
+        """ Increment the degree modifier stream """
+        self.modf['degree'] = circular_add(self.modf['degree'], asStream(data))
+        return self
+
+    def __sub__(self, data):
+        """ Change the degree modifier stream """
+        data = asStream(data)
+        data = [d * -1 for d in data]
+        self.modf['degree'] = data
+        return self
+
+    def __isub__(self, data):
+        """ de-increment the modifier stream """
+        data = asStream(data)
+        data = [d * -1 for d in data]
+        self.modf['degree'] = circular_add(self.modf['degree'], data)
+        return self
+
+    def __mul__(self, data):
+
+        """ Multiplying an instrument player multiplies each amp value by
+            the input, or circularly if the input is a list. The input is
+            stored here and calculated at the update stage """
+
+        if type(data) in (int, float):
+
+            data = [data]
+
+        self.modf['amp'] = asStream(data)
+
+        return self
+
+    def __div__(self, data):
+
+        if type(data) in (int, float):
+
+            data = [data]
+
+        self.modf['amp'] = [1.0 / d for d in data]
+
+        return self
+
+    def __cmp__(self, other):
+        if isinstance(other, self.parent.__thisclass__):
+            return int( self is not other ) * -1
+        # Used for comparing to numbers etc
+        if self.now('degree') > other:
+            return 1
+        if self.now('degree') < other:
+            return -1
+        if self.now('degree') == other:
+            return 0
+
+
+# ---------------------------------------------- #
+# Class for for reading samples from buffers     # 
+# ---------------------------------------------- #
+
+# Table of characters to buffers
+
+BufferManager = Buffers.BufferManager().from_file()
+BufferManager.load()
+
+class SamplePlayer(PlayerObject):
+
+    def __init__(self, string='', **kwargs):
+
+        # Inherit from base class
+
+        self.parent = super(self.__class__, self)
+
+        self.parent.__init__("sample_player")
+
+        # Degree is the string of characters
+        self.degree     = string
+        self.old_degree = ""
+
+        # Set defaults
+        
+        self.dur = self.attr['dur'] = asStream(0.5)
+        self.old_pattern_dur = self.dur
+
+        self.attr.update(kwargs)
+        self.reset()
+
+        # Finish init
+
+        self._INIT = True
+
+        # Update attributes
+        
+        self.update(self.degree)
+
+        # Add to clock and update
+
+        self.isplaying = True
+        self.event_index = self.metro.NextBar()
+        self.metro.schedule(self, self.event_index)
+        
+    def update(self, degree="", **kwargs):
+        """ Updates the values of this Player """
+
+        if len(degree) is 0: degree = " "                            
+
+        self.parent.update()
+
+        setattr(self, "degree", str(degree) if len(degree) > 0 else " ")
+
+        #self.pat_to_buf()
+
+        for name, value in kwargs.items():
+            
+            setattr(self, name, value)
+
+        return self
+
+    def __call__(self):
+        """ String -> buffer numbers before clock update """
+        self.parent.__call__()
+        if self.metro.solo is None or self.metro.solo is self:
+            self.send()
+
+    def get_event(self):
+
+        # Un-nest any PGroups
+        self.attr['degree'] = self.attr['degree'].flat()
+        
+        # Get the current event
+        self.parent.get_event()
+
+        # Get the buffer number to play
+        self.event['buf'] = BufferManager.symbols.get(self.event['degree'].char, 0)
+
+        # Apply any duration ratio changes
+        self.event['dur'] *= self.event['degree'].dur
+
+        return self
+
+    def dur_updated(self):
+        """ Returns true if the base duration or the pattern has changed """
+        return (self.pattern_rhythm_updated() or self.parent.dur_updated())
+
+    def pattern_rhythm_updated(self):
+        r = self.rhythm()
+        if self.old_pattern_dur != r:
+            self.old_pattern_dur = r
+            return True
+        return False
+
+    def rhythm(self):
+        return self.parent.rhythm() * [char.dur for char in self.attr['degree'].flat()]
+
+    def tupleN(self):
+        """ Forces the tupleN method to skip out the degree attr when calculating the largest tuple """
+        return self.parent.tupleN(exclude='degree')
+
+    def char(self, other=None):
+        if other is not None:
+            try:
+                if type(other) == str and len(other) == 1: #char
+                    return BufferManager.bufnum(self.now('buf')) == other
+                raise TypeError("Argument should be a one character string")
+            except:
+                return False
+        else:
+            try:
+                return BufferManager.bufnum(self.now('buf'))
+            except:
+                return None
+
+    def coarse(self, n=3):
+        self.grain=n
+        return self
 
 ###### GROUP OBJECT
 

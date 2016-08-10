@@ -1,6 +1,7 @@
-class item:
-    freq=440
-    sus=1
-    data = [freq, sus]
-    def __str__(self):
-        return self.data
+class test:
+    def __init__(self):
+        self.x=10
+        self.y=10
+
+
+print __file__

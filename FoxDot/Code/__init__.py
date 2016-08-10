@@ -83,9 +83,9 @@ execute = FoxCode()
     - Check for creation of "Player" and "Sample Player" objects
 """
 
-FoxDotSyntax = [ when_statements,
-                 player_objects,
-                 sample_players ]
+FoxDotSyntax = [ when_statements ]
+                 #player_objects,
+                 #sample_players ]
 
 def process(text, ns={}):
     """ Iterates over the modules that replace FoxDot syntax with Python """

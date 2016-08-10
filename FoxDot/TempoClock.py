@@ -38,6 +38,10 @@ class TempoClock:
         self.when_statements = {}
         self.playing = []
 
+        # If one object is going to played
+
+        self.solo = None
+
     def __str__(self):
 
         return str(self.queue)
@@ -60,6 +64,10 @@ class TempoClock:
         """ Returns the length in seconds of one beat """
         return 60.0 / float(self.bpm)
 
+    def beat(self, n):
+        """ Returns the length of n beats in seconds """
+        return (60.0 / float(self.bpm)) * n
+
     def now(self):
         """ Adds to the current counter and returns its value """
         now = time()
@@ -72,37 +80,10 @@ class TempoClock:
         threading.Thread(target=self.run).start()
         return
 
-    def _run(self):
-        """ Main loop """        
-
-        self.ticking = True
-        self.beat = 0
- 
-        while self.ticking:
-                        
-            # Update and play players at next event
-            
-            if self.now() >= self.NextEvent():
-
-                event = self.queue.pop()
-
-                for obj in event[0]:
-
-                    if callable(obj):
-
-                        obj()
-
-        return self
 
     def run(self):
 
         self.ticking = True
-
-        # Wait until there's something in the queue
-
-        while len(self.queue) == 0:
-
-            pass
 
         # Sleep until next event
 
@@ -110,21 +91,31 @@ class TempoClock:
 
             if self.now() >= self.nextEvent:
 
-                event = self.queue.pop()
+                try:
 
-                for n in range(len(event[0])-1, -1, -1):
+                    event = self.queue.pop()
 
-                    item = event[0][n]
+                    for n in range(len(event[0])-1, -1, -1):
 
-                    if callable(item): item()
+                        item = event[0][n]
+
+                        if callable(item):
+                            
+                            item()
+
+                except IndexError:
+
+                    pass
 
             if len(self.queue) == 0:
 
                 self.nextEvent = MAXINT
 
-        # Stop ticking when not in use
+            # TODO This is a little odd
 
-        self.ticking = False
+            rest = self.nextEvent - self.now()
+
+            sleep(min(self.beat(1), self.beat(rest)))
 
         return
 
@@ -143,7 +134,7 @@ class TempoClock:
 
         # Keep track of objects in the Clock
 
-        if obj not in self.playing:
+        if obj not in self.playing and isinstance(obj, PlayerObject):
 
             self.playing.append(obj)
 
@@ -271,6 +262,7 @@ class TempoClock:
 
                     pass
 
+        self.solo = None
         self.queue = []
         self.playing = []
         self.ticking = False

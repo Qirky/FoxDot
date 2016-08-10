@@ -1,6 +1,7 @@
 import re
 from os.path import abspath, join, dirname
 from ..Code import classes, functions, instances
+from ..Settings import *
 
 def path(fn):
     return abspath(join(dirname(__file__), fn))
@@ -50,7 +51,7 @@ def userdefined(line):
 # Use our regex to read patterns.py and add all the functions to key_types
     
 from ..Patterns import Sequences, Feeders
-from ..SuperCollider import SCLang
+from ..SCLang import SCLang
 
 foxdot_kw = ["Clock","Group","group","Scale","Server","Root","BufferManager"] + ["var","Pvar","linvar","inf"]
 
@@ -94,30 +95,43 @@ other_kws = r"(?<![a-zA-Z.])(" + "|".join(py_other_kws) + ")(?![a-zA-Z])"
 
 # Load Default Colour Values
 
-try:
+##try:
+##
+##    with open(path("../Settings/text_colour.txt")) as f:
+##
+##        data = f.readlines()
+##
+##except:
+##
+##    data = ["plaintext=#ffffff",
+##            "background=#4d4d4d",
+##            "functions=#66ff99",
+##            "key_types=#66ccff",
+##            "user_defn=#ff9999",
+##            "other_kws=#ff99ff",
+##            "comments=#FF3300",
+##            "numbers=#FF9900",
+##            "strings=#ffff99",
+##            "dollar=#cc33ff",
+##            "arrow=#ffff99",
+##            "players=#cc33ff" ]    
+##
+### Generate colour mappings from config file
+##
+##colour_map = dict([line.replace("\n","").split("=") for line in data])
 
-    with open(path("../Settings/text_colour.txt")) as f:
-
-        data = f.readlines()
-
-except:
-
-    data = ["plaintext=#ffffff",
-            "background=#4d4d4d",
-            "functions=#66ff99",
-            "key_types=#66ccff",
-            "user_defn=#ff9999",
-            "other_kws=#ff99ff",
-            "comments=#FF3300",
-            "numbers=#FF9900",
-            "strings=#ffff99",
-            "dollar=#cc33ff",
-            "arrow=#ffff99",
-            "players=#cc33ff" ]    
-
-# Generate colour mappings from config file
-
-colour_map = dict([line.replace("\n","").split("=") for line in data])
+colour_map = {'plaintext'  : COLOURS.plaintext,
+              'background' : COLOURS.background,
+              'functions'  : COLOURS.functions,
+              'key_types'  : COLOURS.key_types,
+              'user_defn'  : COLOURS.user_defn,
+              'other_kws'  : COLOURS.other_kws,
+              'comments'   : COLOURS.comments,
+              'numbers'    : COLOURS.numbers,
+              'strings'    : COLOURS.strings,
+              'dollar'     : COLOURS.dollar,
+              'arrow'      : COLOURS.arrow,
+              'players'    : COLOURS.players}
 
 re_patterns = {  'functions' : functions,
                  'key_types' : key_types,

@@ -1,7 +1,14 @@
-FoxDot - Live Coding with Python v0.1.3
+FoxDot - Live Coding with Python v0.1.4
 =======================================
 
-*FoxDot is a pre-processed Python-based programming language that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box and no fiddling around with config files; all you need is Python and SuperCollider and you're ready to go!*
+*FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
+
+
+### v0.1.4 fixes and updates
+- Save/Open file feature added
+- Console can now be toggled
+- Reduced CPU usage when the TempoClock queue is empty
+- Added a 'grain' attribute to the `sample_player` SynthDef
 
 ### v0.1.3 fixes and updates
 - Key bindings for Linux, Mac, and Windows 10 fixed
@@ -11,22 +18,19 @@ FoxDot - Live Coding with Python v0.1.3
 
 ## Installation and startup
 
-*Note: FoxDot is still in early development and has only been tested with Python 2.7, SuperCollider 3.6.6, with Windows 7 and Windows 8.*
+#### Prerequisites
+- Python 2.7
+- SuperCollider 3.6 and above
 
-FoxDot uses the sound synthesis engine, SuperCollider, to make music so you'll need to make sure it's installed before using FoxDot. Currently, all you need to do is download the `.zip` file from this page and extract the contents. To start using FoxDot, first make sure you have a SuperCollider server instance running on your local machine (open SuperCollider and press `Ctrl+b`) then run `main.py` from the FoxDot folder. FoxDot can access any `SynthDef` that's stored on the server but it comes with some built-in definitions that are written in Python (more on that later). To use these, execute the following snippet of code (also found in `foxdot.scd`) or, better yet, add it to your `startup.scd` file that's located in your SuperCollider installation folder so that it's automatically executed when you boot SuperCollider.
+#### Download and install
 
-```java
-(
-OSCFunc(
-	{
-    arg msg, time, addr, port;
-		msg[1].asString.interpret;  // will execute the string sent from FoxDot
-		msg[1].postln;
-	},
-	'foxdot'
-);
-)
-```
+FoxDot uses the sound synthesis engine, SuperCollider, to make music so you'll need to make sure it's installed before using FoxDot. Currently, all you need to do is download the `.zip` file from this page and extract the contents. 
+
+#### Configuration
+
+1. Open `FoxDot/Settings/conf.txt`
+1. Change the value of `SUPERCOLLIDER` to the directory where SuperCollider is installed 
+2. Install the `UbuntuMono-R.ttf` font, or change the `FONT` value in the configuration file 
 
 ## Basics
 
@@ -105,11 +109,6 @@ The attribute `env` is set to `Env.perc()` by default, so as long as you set `os
 	out >> example([0,1,2,3], pow=[1,1.5])
 
 
-## Undocumented Items
+## Documentation
 
-* Patterns
-* TimeVar
-* Scale
-* Root
-* When Statements
-* Clock
+For more information on FoxDot, please see http://foxdot.org/

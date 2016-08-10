@@ -16,6 +16,12 @@ class POperand:
 
     def __call__(self, A, B):
 
+        # If the first pattern is empty, return empty
+
+        if len(A) == 0:
+
+            return A
+
         # Multiple patterns
 
         pat1, pat2 = self.setup(A, B)
@@ -99,8 +105,9 @@ PGet = POperand(Get)
 def LCM(*args):
     """ Lowest Common Multiple """
     # Base case
-    if len(args) == 1: return args[0]
-
+    if len(args) == 1:
+        return args[0]
+    
     X = list(args)
     
     while any([X[0]!=K for K in X]):
