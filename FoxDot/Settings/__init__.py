@@ -3,14 +3,30 @@ import sys
 
 # Check Python Version TODO
 
-# Check for OS
+# Check for OS -> mac, linux, win
 
-SYSTEM = sys.platform
+SYSTEM  = 0
+WINDOWS = 0
+LINUX   = 1
+MAC_OS  = 2
+
+if sys.platform.startswith('darwin'):
+
+    SYSTEM = MACOS
+
+elif sys.platform.startswith('win'):
+
+    SYSTEM = WINDOWS
+
+elif sys.platform.startswith('linux'):
+
+    SYSTEM = LINUX
 
 # Directory informations
 
 USER_CWD     = os.path.realpath(".")
 FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../../")
+SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 OSC_FUNC     = "/FoxDot/SCLang/OSCFunc.scd"
 
 # Open custom settings

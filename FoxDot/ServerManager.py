@@ -94,11 +94,9 @@ class ServerManager:
     def boot(self):
         if not self.booted:
             conf = os.path.realpath(FOXDOT_ROOT + OSC_FUNC)
-            print conf
-            exe  = "sclang.exe"
             os.chdir(SC_DIRECTORY)
             print "Booting SuperCollider Server...",
-            self.daemon = Popen([exe, '-D', conf])
+            self.daemon = Popen([SCLANG_EXEC, '-D', conf])
             sleep(5)
             # TODO
             # While no reply:

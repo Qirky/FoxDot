@@ -1,4 +1,11 @@
-def compare_functions(funcA, funcB):
+"""
+    compare_functions.py(funcA, funcB):
+
+        returns True if the functions are identical
+    
+"""
+
+def func_cmp(funcA, funcB):
 
     codeA = funcA.__code__
     A_bytecode  = codeA.co_code

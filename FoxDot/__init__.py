@@ -4,6 +4,10 @@
 
 """
 
+""" CODE EXEC MODULE """
+
+from Code import *
+
 """ SERVER """
 
 from ServerManager import Server
@@ -17,7 +21,6 @@ from random import choice as choose
 from TempoClock import *
 from Players import *
 from Patterns import *
-from Code import *
 from TimeVar import *
 import Scale
 import Root
@@ -33,14 +36,13 @@ from SCLang.SynthDefs import *
 """ CLOCK """
 
 Clock = TempoClock()
-
-Var.metro = Clock
+when.metro = Var.metro = Clock
 PlayerObject.metro  = Clock
 PlayerObject.server = Server
 PlayerObject.default_scale = Scale.default()
 PlayerObject.default_root  = Root.default()
 
-FoxCode.namespace=globals()
+FoxDotCode.namespace=globals()
 
 """ Preset PlayerObjects """
 
@@ -51,7 +53,7 @@ numbers  = '0123456789'
 
 for char in alphabet:
 
-    FoxCode.namespace[char] = PlayerObject(char)
+    FoxDotCode.namespace[char] = PlayerObject(char)
 
 # 2 Letter Player Objects
 
@@ -61,7 +63,7 @@ for char1 in alphabet:
 
         name = char1+char2
 
-        FoxCode.namespace[name] = PlayerObject(name)
+        FoxDotCode.namespace[name] = PlayerObject(name)
 
 
 """ IDE """

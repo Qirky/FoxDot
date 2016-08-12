@@ -75,7 +75,8 @@ class FoxDot:
         
         # Use command key on Mac (Temporary)
         
-        ctrl = "Command" if SYSTEM.startswith('darwin') else "Control"
+        #ctrl = "Command" if SYSTEM.startswith('darwin') else "Control"
+        ctrl = "Command" if SYSTEM == MAC_OS else "Control"
             
         self.text.bind("<{}-Return>".format(ctrl),          self.get_code)
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
@@ -217,9 +218,10 @@ class FoxDot:
         """ Saves the contents of the text editor """
         text = self.text.get("0.0",END)
         if not self.saved:
-            self.filename = tkFileDialog.asksaveasfilename()
+            self.filename = tkFileDialog.asksaveasfilename(defaultextension=".py")
         if self.filename is not None:
             with open(self.filename, 'w') as f:
+                f.write("from FoxDot import *\n")
                 f.write(text)
                 f.close()
                 self.saved = True
@@ -230,7 +232,7 @@ class FoxDot:
 
     def saveAs(self,event=None):
         text = self.text.get("0.0",END)
-        self.filename = tkFileDialog.asksaveasfilename()
+        self.filename = tkFileDialog.asksaveasfilename(defaultextension=".py")
         if self.filename is not None:
             with open(self.filename, 'w') as f:
                 f.write(text)

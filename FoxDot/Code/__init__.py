@@ -1,10 +1,8 @@
 from __future__ import division
 from types import CodeType, FunctionType, TypeType
 from traceback import format_exc as error_stack
+from when_statements import when
 from ..Patterns.Operations import modi
-
-import when_statements, player_objects, sample_players
-import assignments
 
 
 """
@@ -40,74 +38,37 @@ class LiveObject(object):
     
 """
 
-class FoxCode:
+class FoxDotCode:
     namespace={}
     def __call__(self, code, verbose=True):
         """ Takes a string of FoxDot code and executes as Python """
 
-        ns = self.namespace
+        if not code: return
 
         try:
 
             if type(code) != CodeType:
 
-                code = process(code, ns)
+                if verbose is True: print stdout(code)
 
-                if verbose: print stdout(code)
+                code = compile(code, "FoxDot", "exec")
 
-                if not code:
-
-                    return
-
-                else:
-
-                    code = compile(code, "FoxDot", "exec")
-
-            exec code in ns
+            exec code in self.namespace
 
         except:
 
             print error_stack()
 
-            raise # raise the error to any foxdot code that executes foxdot code
+            raise
 
         return
 
-execute = FoxCode()
-
-"""
-    FoxDot Syntax Checking
-    ----------------------
-
-    - Check for "When Statements"
-    - Check for creation of "Player" and "Sample Player" objects
-"""
-
-FoxDotSyntax = [ when_statements ]
-                 #player_objects,
-                 #sample_players ]
-
-def process(text, ns={}):
-    """ Iterates over the modules that replace FoxDot syntax with Python """
-    
-    for syntax in FoxDotSyntax:
-
-        text = syntax.find(text)
-
-    text = assignments.check(text, ns)
-
-    return text
-
-def _namespace(obj):
-    return globals().get(obj, None)
-
+execute = FoxDotCode()
 
 def stdout(code):
-    """ Imitates the Python IDE output style """
-    
+    """ Shell-based output """
     console_text = code.strip().split("\n")
-
-    return ">>> %s" % "\n>>> ".join(console_text)
+    return ">>> {}".format("\n... ".join(console_text))
 
 """ These functions return information about an imported module """
 
