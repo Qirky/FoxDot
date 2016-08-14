@@ -12,7 +12,7 @@ MAC_OS  = 2
 
 if sys.platform.startswith('darwin'):
 
-    SYSTEM = MACOS
+    SYSTEM = MAC_OS
 
 elif sys.platform.startswith('win'):
 
