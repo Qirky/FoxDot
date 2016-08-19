@@ -17,12 +17,16 @@ from AppFunctions import *
 from Console import console
 from Undo import UndoStack
 
+from ..Settings import FONT
+
 # Code execution
 from ..Code import execute
  
 # App object
 
 class FoxDot:
+
+    default_font = FONT
 
     def __init__(self):
 
@@ -34,13 +38,19 @@ class FoxDot:
         self.root.rowconfigure(0, weight=2)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
+        # Set font
+
+        if self.default_font not in tkFont.families():
+
+            self.default_font = 'Courier New'
+
+        self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
+        self.font.configure(**tkFont.nametofont("CodeFont").configure())
+
         # Create Y scrollbar
 
         self.Yscroll = Scrollbar(self.root)
         self.Yscroll.grid(row=0, column=1, sticky='nsew')
-
-        self.font = tkFont.Font(font=(DEFAULT_FONT, 12), name="CodeFont")
-        self.font.configure(**tkFont.nametofont("CodeFont").configure())
 
         # Create text box for code
 
@@ -75,7 +85,6 @@ class FoxDot:
         
         # Use command key on Mac (Temporary)
         
-        #ctrl = "Command" if SYSTEM.startswith('darwin') else "Control"
         ctrl = "Command" if SYSTEM == MAC_OS else "Control"
             
         self.text.bind("<{}-Return>".format(ctrl),          self.get_code)
@@ -129,7 +138,7 @@ class FoxDot:
 
         # Create lable for console
 
-        self.console = console(self.root)
+        self.console = console(self.root, self.default_font)
         self.console_visible = True
         sys.stdout = self.console
 
@@ -137,8 +146,6 @@ class FoxDot:
 
         print "Welcome to FoxDot! Press Ctrl+H for help."
         print "-----------------------------------------"
-        
-        #execute("Clock.start()", verbose=False)
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
@@ -197,15 +204,21 @@ class FoxDot:
     #---------------------
 
     def help(self, event=None):
+
+        if SYSTEM == MAC_OS:
+            ctrl = "Cmd"
+        else:
+            ctrl = "Ctrl"
+            
         print "FoxDot Help:"
         print "--------------------------------------------"
-        print "Ctrl+Return  : Execute code"
-        print "Ctrl+.       : Stop all sound"
-        print "Ctrl+=       : Zoom in"
-        print "Ctrl+-       : Zoom out"
-        print "Ctrl+S       : Save your work"
-        print "Ctrl+O       : Open a file"
-        print "Ctrl+{}       : Toggle console window".format(self.toggle_key)
+        print "{}+Return  : Execute code".format(ctrl)
+        print "{}+.       : Stop all sound".format(ctrl)
+        print "{}+=       : Zoom in".format(ctrl)
+        print "{}+-       : Zoom out".format(ctrl)
+        print "{}+S       : Save your work".format(ctrl)
+        print "{}+O       : Open a file".format(ctrl)
+        print "{}+{}       : Toggle console window".format(ctrl, self.toggle_key)
         print "--------------------------------------------"
         print "Please visit foxdot.org for more information"
         print "--------------------------------------------"
@@ -221,7 +234,9 @@ class FoxDot:
             self.filename = tkFileDialog.asksaveasfilename(defaultextension=".py")
         if self.filename is not None:
             with open(self.filename, 'w') as f:
-                f.write("from FoxDot import *\n")
+                f.write("# {}\n".format(self.filename))
+                f.write("from __future__ import division\n")
+                f.write("from FoxDot import *\n\n")
                 f.write(text)
                 f.close()
                 self.saved = True

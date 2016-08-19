@@ -18,7 +18,6 @@ import Code
 import Buffers
 
 BufferManager = Buffers.BufferManager().from_file()
-BufferManager.load()
 
 #### Methods
 
@@ -212,8 +211,14 @@ class PlayerObject(Code.LiveObject):
         now = self.metro.now()
 
         durations = self.rhythm()
- 
-        acc = now - (now % sum(durations))
+        total_dur = sum(durations)
+
+        if total_dur == 0:
+
+            print "Warning: Player object has a total duration of 0. Set to 1"
+            self.dur=total_dur=durations=1
+    
+        acc = now - (now % total_dur)
 
         while True:
             
@@ -271,6 +276,8 @@ class PlayerObject(Code.LiveObject):
         # Update the attribute value
 
         for name, value in kwargs.items():
+
+            if self.SynthDef == 'bass': print name, value
 
             setattr(self, name, value)
 

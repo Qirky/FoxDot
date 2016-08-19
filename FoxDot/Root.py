@@ -46,7 +46,7 @@ class Note:
             self.num = index
             self.char = "<Micro-Tuned>"
 
-        if isinstance(index, TimeVar.Var):
+        if isinstance(index, TimeVar.var):
 
             self.num = index
             self.char = "<Time-Varying>"

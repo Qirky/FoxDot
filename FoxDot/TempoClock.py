@@ -9,11 +9,11 @@
 
 from Players import PlayerObject
 from Patterns import asStream
+from TimeVar import var
 from Patterns.Operations import modi
 from time import sleep, time
 from sys import maxint as MAXINT
 import threading
-import inspect
 import Code
 line = "\n"
 
@@ -71,7 +71,11 @@ class TempoClock:
     def now(self):
         """ Adds to the current counter and returns its value """
         now = time()
-        self.time += (now - self.mark) * (float(self.bpm)  / 60.0)
+        if isinstance(self.bpm, var):
+            bpm_val = self.bpm.now(self.time)
+        else:
+            bpm_val = self.bpm
+        self.time += (now - self.mark) * (bpm_val  / 60.0)
         self.mark = now
         return self.time
         

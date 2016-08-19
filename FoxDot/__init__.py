@@ -12,8 +12,6 @@ from Code import *
 
 from ServerManager import Server
 
-Server.boot()
-
 """ IMPORTS """
 
 from random import choice as choose
@@ -28,7 +26,6 @@ import Root
 """ SCLang """
 
 import SCLang
-
 from SCLang import SynthDefs, Env
 from SCLang.SynthDefs import *
 
@@ -36,11 +33,14 @@ from SCLang.SynthDefs import *
 """ CLOCK """
 
 Clock = TempoClock()
-when.metro = Var.metro = Clock
+when.metro = var.metro = Clock
 PlayerObject.metro  = Clock
 PlayerObject.server = Server
 PlayerObject.default_scale = Scale.default()
 PlayerObject.default_root  = Root.default()
+
+BufferManager.server = Server
+BufferManager.load()
 
 FoxDotCode.namespace=globals()
 

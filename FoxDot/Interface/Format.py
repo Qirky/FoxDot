@@ -151,7 +151,3 @@ tag_weights = [['numbers'],
                ['key_types','functions','user_defn','other_kws','dollar','arrow','players'],
                ['comments'],
                ['strings']]
-
-# Font Data
-
-DEFAULT_FONT = "Ubuntu Mono"

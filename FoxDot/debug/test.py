@@ -1,15 +1,9 @@
-def compare_functions(funcA, funcB):
+import socket
 
-    codeA = funcA.__code__
-    A_bytecode  = codeA.co_code
-    A_constants = codeA.co_consts
-    A_variables = codeA.co_names
+sock = socket.socket()
+sock.bind(('localhost',57110))
 
-    codeB = funcB.__code__
-    B_bytecode  = codeB.co_code
-    B_constants = codeB.co_consts
-    B_variables = codeB.co_names
+while True:
+    sock.listen(1)
     
-    return all([A_bytecode == B_bytecode,
-                A_constants == B_constants,
-                A_variables == B_variables])
+

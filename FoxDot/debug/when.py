@@ -1,6 +1,3 @@
-def when(x):
-    return x
+from __future__ import division
 
-when (lambda: 1==2,
-      lambda: p.shuffle(),
-whennot=lambda: p.reverse())
+print 1 / 2

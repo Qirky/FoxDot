@@ -12,7 +12,7 @@ MAC_OS  = 2
 
 if sys.platform.startswith('darwin'):
 
-    SYSTEM = MACOS
+    SYSTEM = MAC_OS
 
 elif sys.platform.startswith('win'):
 
@@ -36,10 +36,10 @@ with open(os.path.join(FOXDOT_ROOT, 'FoxDot', 'Settings', 'conf.txt')) as f:
 
 # Set Environment Variables
 
-SC_DIRECTORY  = _conf['SUPERCOLLIDER']
-ADDRESS       = _conf['ADDRESS']
-PORT          = _conf['PORT']
-FONT          = _conf['FONT']
+SC_DIRECTORY  = _conf.get('SUPERCOLLIDER', None)
+ADDRESS       = _conf.get('ADDRESS', 'localhost')
+PORT          = _conf.get('PORT', 57110)
+FONT          = _conf.get('FONT', 'Ubuntu Mono')
 
 # Colours
 

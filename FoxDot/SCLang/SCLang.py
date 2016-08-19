@@ -156,36 +156,6 @@ BufRateScale = cls("BufRateScale")
 BufChannels  = cls("BufChannels")
 BufFrames    = cls("BufFrames")
 
-# Default Arguments
-    
-##freq        = instance("freq")
-##output      = instance("output")
-##sus         = instance("sus")
-##amp         = instance("amp")
-##pan         = instance("pan")
-##rate        = instance("rate")
-##lpf         = instance("lpf")
-##hpf         = instance("hpf")
-##delay       = instance("delay")
-##verb        = instance("verb")
-##echo        = instance("echo")
-##echoOn      = instance("echoOn")
-##room        = instance("room")
-##vib         = instance("vib")
-##vibDelay    = instance("vibDelay")
-##vibVar      = instance("vibVar")
-##depthVar    = instance("depthVar")
-##depth       = instance("depth")
-##slide       = instance("slide")
-##slidefrom   = instance("slidefrom")
-##buf         = instance("buf")
-##scrub       = instance("scrub")
-##grain       = instance("grain")
-
-##osc = instance("osc")
-##env = instance("env")
-
-
 """
     Envelope Generator
     ==================
@@ -349,7 +319,6 @@ class SynthDef:
         f.close()
         return None
         
-
     def modify(self):
         string = "var {};\n".format(",".join(self.var)) if self.var else ""
         for arg in self.defaults.keys() + self.var:

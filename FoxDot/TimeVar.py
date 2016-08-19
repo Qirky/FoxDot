@@ -36,7 +36,7 @@ def fetch(func):
     return eval_now
 
   
-class Var(Code.LiveObject):
+class var:
     """ Var(values [,durs=[4]]) """
 
     metro = None
@@ -57,6 +57,8 @@ class Var(Code.LiveObject):
         self.dependency = 1
         
         self.update(values, dur)
+
+        self.current_value = None
 
     @staticmethod
     def stream(values):
@@ -185,6 +187,24 @@ class Var(Code.LiveObject):
         """ Returns the duration of one full cycle in beats """
         return self.time[-1][1]
 
+    def __lshift__(self, other):
+        """ var >> var([0,1,2,3],[4,8])
+            var >> ([0,1,2,3],[4,8])
+        """
+        if type(other) == type(self):
+            values = other.data
+            dur    = other.dur
+
+        elif type(other) is tuple:
+            values, dur = other
+            
+        else:
+            print "Invalid arguments"
+            return self
+
+        self.update(values, dur)
+        return self
+
     def update(self, values, dur=None, **kwargs):
         """ Updates the TimeVar with new values """
 
@@ -245,15 +265,16 @@ class Var(Code.LiveObject):
         """ Returns val as modified by its dependencies """
         return self.evaluate(val, self.dependency)
 
-    def current_time(self):
+    def current_time(self, beat=None):
         """ Returns the current beat value """
-        beat = self.metro.now()
+        if beat is None:
+            beat = self.metro.now()
         if self.bpm is not None:
             beat *= (self.bpm / float(self.metro.bpm))
         t = beat % self.length()
         return t
 
-    def now(self):
+    def now(self, time=None):
         """ Returns the value from self.data for time t in self.metro """
 
         if self.inf_found == 3:
@@ -264,7 +285,7 @@ class Var(Code.LiveObject):
 
             # If using a different bpm to the clock
 
-            t = self.current_time()
+            t = self.current_time(time)
 
             val = 0
 
@@ -288,7 +309,42 @@ class Var(Code.LiveObject):
 
                     break
                 
-        return self.calculate(val)
+        self.current_value = self.calculate(val)
+
+        return self.current_value
+
+    def valueAt(self, t):
+        if self.inf_found == 3:
+
+            val = self.inf_value
+
+        else:
+
+            # If using a different bpm to the clock
+
+            val = 0
+
+            for i in range(len(self.data)):                
+
+                val = self.data[i]
+                
+                if self.time[i][0] <= t < self.time[i][1]:
+
+                    if isinstance(op.modi(self.dur, i), _inf):
+
+                        if self.inf_found == _inf.wait:
+
+                            self.inf_found = _inf.done
+
+                            self.inf_value = val
+
+                    elif self.inf_found == _inf.here:
+
+                        self.inf_found = _inf.wait
+
+                    break
+                
+        return float(self.calculate(val))        
 
     def copy(self):
         new = TimeVar(self.data, self.dur, self.metro)
@@ -326,21 +382,17 @@ class Var(Code.LiveObject):
     def shuf(self):
         pass
 
-var = Var
-
-class PVar(Var, Pattern):
+class Pvar(var, Pattern):
     """ Pvar([pat1, pat2], durs) """
     stream = PatternContainer
     def __init__(self, values, dur=4):
         Var.__init__(self, [asStream(val) for val in values], dur)
 
-Pvar = PVar
-
-class linvar(Var):
+class linvar(var):
     
-    def now(self):
+    def now(self, time=None):
 
-        t = self.current_time()
+        t = self.current_time(time)
 
         for i in range(len(self.data)):
 
@@ -362,9 +414,9 @@ class linvar(Var):
 
         val = (val * (1-p)) + (q * p)
 
-        return self.calculate(val)
-    
+        self.current_value = self.calculate(val)
 
+        return self.current_value
 
 class _inf(int):
     """ Used in TimeVars to stay on certain values until re-evaluated """

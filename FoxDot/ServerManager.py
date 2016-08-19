@@ -1,17 +1,16 @@
 """
     ServerManager.py
 
-    Handles OSC messages being sent to SuperCollider. Will try and
-    read data from Settings/server.txt which should contain the IP
-    address and port separated by a single space. If not it defaults
-    to SuperCollider's defaults.
+    Handles OSC messages being sent to SuperCollider.
 
 """
 
 from OSC import *
+from Settings import *
+
+import socket
 from subprocess import Popen
 from time import sleep
-from Settings import *
 import os
 
 class ServerManager:
@@ -20,21 +19,26 @@ class ServerManager:
 
         self.addr = addr
         self.port = port
+        self.SCLang_port = port + 10 # TODO
+
+        self.booted = False
+        self.wait_time = 5
+        self.count = 0
+
+        self.boot()
         
         self.client = OSCClient()
         self.client.connect( (self.addr, self.port) )
 
         self.sclang = OSCClient()
-        self.sclang.connect( (self.addr, self.port + 10) ) # TODO
+        self.sclang.connect( (self.addr, self.SCLang_port) )
 
         self.node = 1000
 
-        self.booted=False
+        # Toggle debug
+        # ------------
 
-        debug = 0
-        msg = OSCMessage("/dumpOSC")
-        msg.append(debug)
-        self.client.send(msg)
+        self.dumpOSC(0)
 
     def __str__(self):
         return "FoxDot ServerManager Instance -> {}:{}".format(self.addr, self.port)
@@ -88,32 +92,55 @@ class ServerManager:
         self.sclang.send(msg)
         return
 
+    # Debug - Dumps OSC messages SCLang side
+    # --------------------------------------
+
+    def dumpOSC(self, value=1):
+        msg = OSCMessage("/dumpOSC")
+        msg.append(value)
+        self.client.send(msg)
+        return
+
+
     # Boot and Quit
     # -------------
 
     def boot(self):
+
+        print self.count
+        self.count += 1
+
         if not self.booted:
+            
             conf = os.path.realpath(FOXDOT_ROOT + OSC_FUNC)
+            
             os.chdir(SC_DIRECTORY)
-            print "Booting SuperCollider Server...",
+            
+            print "Booting SuperCollider Server..."
+            
             self.daemon = Popen([SCLANG_EXEC, '-D', conf])
-            sleep(5)
-            # TODO
-            # While no reply:
-            #   sleep(1)
+
+            sleep(self.wait_time)
+
             os.chdir(USER_CWD)
-            self.booted=True
+
+            self.booted = True
+
         else:
-            print "Warning: SuperCollider already booted"
+            
+            print "Warning: SuperCollider already running"
+            
         return
 
     def quit(self):
         if self.booted:
-            print "Quitting SuperCollider Server"
             self.client.send(OSCMessage("/quit"))
             sleep(0.5)
             self.daemon.terminate()
         return
-    
 
-Server = ServerManager()
+if __name__ != "__main__":
+
+    # don't boot server unless imported
+
+    Server = ServerManager()

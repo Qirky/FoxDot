@@ -1,4 +1,6 @@
 from __future__ import division
+
+import sys
 from types import CodeType, FunctionType, TypeType
 from traceback import format_exc as error_stack
 from when_statements import when
@@ -49,7 +51,17 @@ class FoxDotCode:
 
             if type(code) != CodeType:
 
-                if verbose is True: print stdout(code)
+                if verbose is True:
+
+                    print stdout(code)
+
+                    try:
+
+                        sys.displayhook(eval(code, self.namespace))
+
+                    except:
+
+                        pass
 
                 code = compile(code, "FoxDot", "exec")
 
