@@ -1,45 +1,63 @@
 # Players.py
----
 
 ## Classes
----
 
 ### PlayerObject
 
 	PlayerObject.__init__(self) 
 
-desc
+Creates a new player object. This takes no arguments.
+
+---
 
 	PlayerObject.__rshift__(self, SynthDefProxy)
 	PlayerObject.update(self, SynthDef, degree, **kwargs)
 
-desc
+Two methods for updating a player's attributes. A SynthDefProxy object (see SCLang for a more in depth description) is an object that looks like a SynthDef object but acts like a PlayerObject object and passes keyword arguments and method calls to the PlayerObject it is being used with. Example:
+
+	test = PlayerObject()
+	test >> pads(dur=4)
+	test.update('pads', dur=4)
+
+---
 
 	PlayerObject.__call__(self)
 
-desc
+Calling a PlayerObject is what is used to send a message to SuperCollider to play a note and reschedule itself within the clock.
+
+---
 
 	PlayerObject.__int__(self)
 	PlayerObject.__float__(self)
 
 desc
 
+---
+
 	PlayerObject.__add__(self, other)
 	PlayerObject.__sub__(self, other)
 
 desc
 
+---
+
 	PlayerObject.rhythm(self)
 
 desc
+
+---
 
 	PlayerObject.f(self, frequency)
 
 desc
 
+---
+
 	PlayerObject.stutter(self, n=2)
 
 desc
+
+---
 
 	PlayerObject.now(self, attr='degree', x=0)
 
