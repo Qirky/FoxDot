@@ -1,8 +1,6 @@
 # Players.py
 
-## Classes
-
-### PlayerObject
+## PlayerObject
 
 	PlayerObject.__init__(self) 
 
@@ -16,6 +14,8 @@ Creates a new player object. This takes no arguments.
 Two methods for updating a player's attributes. A SynthDefProxy object (see SCLang for a more in depth description) is an object that looks like a SynthDef object but acts like a PlayerObject object and passes keyword arguments and method calls to the PlayerObject it is being used with. Example:
 
 	test = PlayerObject()
+	
+	# These two lines give the same results
 	test >> pads(dur=4)
 	test.update('pads', dur=4)
 
@@ -30,32 +30,32 @@ Calling a PlayerObject is what is used to send a message to SuperCollider to pla
 	PlayerObject.__int__(self)
 	PlayerObject.__float__(self)
 
-desc
+Returns the integer or float value of the *degree* of the PlayerObject
 
 ---
 
 	PlayerObject.__add__(self, other)
 	PlayerObject.__sub__(self, other)
 
-desc
+Sets the degree modifier value. When calculating the degree of a note, a PlayerObject will add this value. If other is a list or Pattern, it will add these values in turn each time the PlayerObject is called.
 
 ---
 
 	PlayerObject.rhythm(self)
 
-desc
+Returns the list of durations for the PlayerObject. 
 
 ---
 
 	PlayerObject.f(self, frequency)
 
-desc
+Sets the frequency modifier value. When calculating the frequency of a note, a PlayerObject will add this value. If other is a list or Pattern, it will add these values in turn each time the PlayerObject is called.
 
 ---
 
 	PlayerObject.stutter(self, n=2)
 
-desc
+Each of the PlayerObject attributes are 'stuttered' i.e. durations of [1,0.5,0.25,0.25] become [1,1,0.5,0.5,0.25,0.25]
 
 ---
 
