@@ -40,7 +40,7 @@ class TempoClock:
 
         # If one object is going to played
 
-        self.solo = None
+        self.solo = SoloPlayer()
 
     def __str__(self):
 
@@ -204,33 +204,33 @@ class TempoClock:
         self.schedule(self.call(cmd, n, args))
         return
 
-    def When(self, a, b, step=0.125, nextBar=False):
-        """
-
-            When Statements
-            ===============
-
-            Clock.When(a, b[,step])
-
-            When 'a' is true, do 'b'. Check this every step.
-
-        """
-
-        if nextBar:
-
-            start = self.NextBar()
-
-        else:
-
-            start = self.now() + step
-
-        w = When(a, b, step, self)
-        
-        self.schedule(w, start)
-
-        self.when_statements[a] = w
-
-        return
+##    def when(self, a, b, step=0.125, nextBar=False):
+##        """
+##
+##            When Statements
+##            ===============
+##
+##            Clock.When(a, b[,step])
+##
+##            When 'a' is true, do 'b'. Check this every step.
+##
+##        """
+##
+##        if nextBar:
+##
+##            start = self.NextBar()
+##
+##        else:
+##
+##            start = self.now() + step
+##
+##        w = When(a, b, step, self)
+##        
+##        self.schedule(w, start)
+##
+##        self.when_statements[a] = w
+##
+##        return
 
     def stop(self):
         self.ticking = False
@@ -267,7 +267,7 @@ class TempoClock:
 
                     pass
 
-        self.solo = None
+        self.solo.reset()
         self.queue = []
         self.playing = []
         self.ticking = False
@@ -310,59 +310,89 @@ class Wrapper(Code.LiveObject):
             self.obj.__call__(args)
         Code.LiveObject.__call__(self)
 
-
-class When(Code.LiveObject):
-    """
-
-        When Statements
-        ===============
-
-        TODO
-
-    """
-
-    def __init__(self, test, code, step, clock):
-
-        if type(code) in (list, tuple):
-            code = line.join(code)
-
-        self.metro = clock
-        self.test  = test
-        self.step  = step
-        self.code  = self.check(code)
-        self.n     = 0
-
-    @staticmethod
-    def check(code):
-        """ Test for syntax errors """
-        return compile(code, "FoxDot" , 'exec') if type(code) == str else code
-
-    def __call__(self, *args):
-        if type(self.code) == Code.FunctionType:
-            self.code()
-        else:
-            Code.execute(self.code, verbose=False)
-
-        Code.LiveObject.__call__(self)
-        
-        return
+class SoloPlayer:
+    """ SoloPlayer objects """
+    def __init__(self):
+        self.data = []
 
     def __repr__(self):
-        return "< 'When %s'>" % str(self)
-
-    def __str__(self):
-        return self.test
-
-    def __eq__(self, other):
-        return str(self) == str(other)
-
-    def update(self, new, step=0.25):
-        if isinstance(new, When):
-            self.code = self.check(new.code)
-            self.step = new.step
+        if len(self.data) == 0:
+            return "None"
+        if len(self.data) == 1:
+            return repr(self.data[0])
         else:
-            self.code = self.check(new)
-            self.step = step
-        return        
+            return repr(self.data)
+        
+    def add(self, player):
+        if player not in self.data:
+            self.data.append(player)
+    def set(self, player):
+        self.data = [player]
+    def reset(self):
+        self.data = []
+    def active(self):
+        """ Returns true if self.data is not empty """
+        return len(self.data) > 0
+    def __eq__(self, other):
+        """ Returns true if other is in self.data or if self.data is empty """
+        return (other in self.data) if self.data else True
+    def __ne__(self, other):
+        return (other not in self.data) if self.data else True
+        
 
-    
+
+##class When(Code.LiveObject):
+##    """
+##
+##        When Statements
+##        ===============
+##
+##        TODO
+##
+##    """
+##
+##    def __init__(self, test, code, step, clock):
+##
+##        if type(code) in (list, tuple):
+##            code = line.join(code)
+##
+##        self.metro = clock
+##        self.test  = test
+##        self.step  = step
+##        self.code  = self.check(code)
+##        self.n     = 0
+##
+##    @staticmethod
+##    def check(code):
+##        """ Test for syntax errors """
+##        return compile(code, "FoxDot" , 'exec') if type(code) == str else code
+##
+##    def __call__(self, *args):
+##        if type(self.code) == Code.FunctionType:
+##            self.code()
+##        else:
+##            Code.execute(self.code, verbose=False)
+##
+##        Code.LiveObject.__call__(self)
+##        
+##        return
+##
+##    def __repr__(self):
+##        return "< 'When %s'>" % str(self)
+##
+##    def __str__(self):
+##        return self.test
+##
+##    def __eq__(self, other):
+##        return str(self) == str(other)
+##
+##    def update(self, new, step=0.25):
+##        if isinstance(new, When):
+##            self.code = self.check(new.code)
+##            self.step = new.step
+##        else:
+##            self.code = self.check(new)
+##            self.step = step
+##        return        
+##
+##    

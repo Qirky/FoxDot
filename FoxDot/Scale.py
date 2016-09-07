@@ -1,30 +1,25 @@
 from Patterns.Base import Pattern
 
-def directory():
-
-    return scale_types.keys()
-
-def Object():
-
-    return 
+def names():
+    """ Returns a list of all the scales by name """
+    return Scale.names.keys()
 
 class Scale(Pattern):
 
-    def __init__(self, data=None):
+    names = {}
+    name  = 'unnamed'
 
-        if data is None:
+    def __init__(self, name, *args):
 
-            self.data = major
+        self.name = name
+
+        if args:
+
+            self.__class__.names[name] = self.data = args[0]
 
         else:
 
-            if type(data) is str:
-
-                self.data = scale_types[data]
-
-            else:
-
-                self.data = data
+            self.data = Scale.names[name]
 
         self.pentatonic = PentatonicScale(self)
 
@@ -37,22 +32,22 @@ class Scale(Pattern):
         return self
 
     def __eq__(self, other):
-
-        return other == Object
+        return self.name == other.name if isinstance(other, Scale) else False
 
     def __ne__(self, other):
-
-        return other != Object
+        return self.name != other.name if isinstance(other, Scale) else True
 
     def set(self, new):
 
         if type(new) == str:
 
-            self.data = scale_types[new]
+            self.data = self.__class__.names[new]
+            self.name = new
 
         elif isinstance(new, (list, Pattern)):
 
             self.data = new
+            self.name = Scale.name
 
         else:
 
@@ -92,20 +87,24 @@ class PentatonicScale(Scale):
 
         return self.values(self.data)[key]
 
+class _freq:
+    def __str__(self):
+        return "[inf]"
 
 #: Define scales
 
-chromatic       = Scale([0,1,2,3,4,5,6,7,8,9,10,11,12])
-major           = Scale([0,2,4,5,7,9,11])
-majorPentatonic = Scale([0,2,4,7,9])
-minor           = Scale([0,2,3,5,7,8,10])
-minorPentatonic = Scale([0,3,5,7,10])
-mixolydian      = Scale([0,2,4,5,7,9,10])
-melodicMinor    = Scale([0,2,3,5,7,9,11])
-harmonicMinor   = Scale([0,2,3,5,7,8,11])
-justMajor       = Scale([ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
-justMinor       = Scale([ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
-dorian          = Scale([0,2,3,5,7,9,10])
+chromatic       = Scale("chromatic", [0,1,2,3,4,5,6,7,8,9,10,11,12])
+major           = Scale("major", [0,2,4,5,7,9,11])
+majorPentatonic = Scale("majorPentatonic", [0,2,4,7,9])
+minor           = Scale("minor", [0,2,3,5,7,8,10])
+minorPentatonic = Scale("minorPentatonic", [0,3,5,7,10])
+mixolydian      = Scale("mixolydian", [0,2,4,5,7,9,10])
+melodicMinor    = Scale("melodicMinor", [0,2,3,5,7,9,11])
+harmonicMinor   = Scale("harmonicMinor", [0,2,3,5,7,8,11])
+justMajor       = Scale("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
+justMinor       = Scale("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
+dorian          = Scale("dorian", [0,2,3,5,7,9,10])
+freq            = Scale("freq", _freq())
 
 # Custom made fibonacci tuning
 
@@ -115,20 +114,10 @@ for n in range(2,11):
     
 fibonacci = []
 for n in range(3, len(fib)-1):
-    fibonacci.append((n-3) * (fib[n] / float(fib[n-1])))   
+    fibonacci.append((n-3) * (fib[n] / float(fib[n-1])))
 
-scale_types = { "chromatic"         : chromatic,
-                "major"             : major,
-                "minor"             : minor,
-                "mixolydian"        : mixolydian,
-                "melodicMinor"      : melodicMinor,
-                "harmonicMinor"     : harmonicMinor,
-                "majorPentatonic"   : majorPentatonic,
-                "minorPentatonic"   : minorPentatonic,
-                "justMajor"         : justMajor,
-                "justMinor"         : justMinor,
-                "fibonacci"         : fibonacci,
-                "dorian"            : dorian}
+fibonacci = Scale("fibonacci", fibonacci)
 
+# Default scale is major
 
 default = Scale("major")  

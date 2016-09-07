@@ -174,10 +174,10 @@ class var:
     def new(self, other):
         """ Returns a new TimeVar object """
             
-        if isinstance(other, Var):
+        if isinstance(other, var):
             new = other
         else:     
-            new = Var(other, self.dur, bpm=self.bpm)
+            new = var(other, self.dur, bpm=self.bpm)
 
         new.dependency = self
         
@@ -347,7 +347,7 @@ class var:
         return float(self.calculate(val))        
 
     def copy(self):
-        new = TimeVar(self.data, self.dur, self.metro)
+        new = var(self.data, self.dur, bpm=self.bpm)
         return new
                    
     def durs(self):
@@ -386,7 +386,7 @@ class Pvar(var, Pattern):
     """ Pvar([pat1, pat2], durs) """
     stream = PatternContainer
     def __init__(self, values, dur=4):
-        Var.__init__(self, [asStream(val) for val in values], dur)
+        var.__init__(self, [asStream(val) for val in values], dur)
 
 class linvar(var):
     

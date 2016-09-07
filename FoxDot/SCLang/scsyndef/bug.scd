@@ -1,4 +1,4 @@
-SynthDef.new( \bug,{|vib=0, vibVar=0.04, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, hpf=0, pan=0, scrub=0, verb=0.25, amp=1, freq=0, buf=0, echoOn=0, room=1, rate=0, depth=0.02, grain=0, lpf=20000, slidefrom=1|var osc,env;
+SynthDef.new( \bug,{|vib=0, vibVar=0.04, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, hpf=0, pan=0, scrub=0, verb=0.1, amp=1, freq=0, buf=0, echoOn=0, room=0.3, rate=0, depth=0.02, grain=0, lpf=20000, slidefrom=1|var osc,env;
 amp=(amp / 5);
 freq=Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth);
 osc=LPF.ar(HPF.ar((Pulse.ar([Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth), (Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth) * 1.0001)], width: [0.09, 0.16, 0.25]) * SinOsc.ar((rate * 4))), hpf), (lpf + 1));

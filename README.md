@@ -1,8 +1,10 @@
-FoxDot - Live Coding with Python v0.1.4
+FoxDot - Live Coding with Python v0.1.5
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
+### v0.1.5 fixes and updates
+- Removed RegEx find and replace `>>` and `$` syntax. FoxDot now uses pure Python code and saved files can be run by themselves.
 
 ### v0.1.4 fixes and updates
 - Save/Open file feature added
@@ -19,8 +21,11 @@ FoxDot - Live Coding with Python v0.1.4
 ## Installation and startup
 
 #### Prerequisites
-- Python 2.7
-- SuperCollider 3.6 and above
+- [Python 2.7](https://www.python.org/downloads/release/python-2712/)
+- [SuperCollider 3.6 and above](http://supercollider.github.io/download)
+
+#### Recommended
+- [sc3 plugins](http://sc3-plugins.sourceforge.net/)
 
 #### Download and install
 

@@ -53,15 +53,15 @@ class FoxDotCode:
 
                 if verbose is True:
 
-                    print stdout(code)
+                    print(stdout(code))
 
-                    try:
-
-                        sys.displayhook(eval(code, self.namespace))
-
-                    except:
-
-                        pass
+##                    try:
+##
+##                        sys.displayhook(eval(code, self.namespace))
+##
+##                    except:
+##
+##                        pass
 
                 code = compile(code, "FoxDot", "exec")
 
@@ -77,10 +77,15 @@ class FoxDotCode:
 
 execute = FoxDotCode()
 
+""" Printing / Formatting functions """
+
 def stdout(code):
     """ Shell-based output """
     console_text = code.strip().split("\n")
     return ">>> {}".format("\n... ".join(console_text))
+
+def WarningMsg(text):
+    print("Warning: {}".format( text ))
 
 """ These functions return information about an imported module """
 

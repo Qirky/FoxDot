@@ -88,6 +88,17 @@ class PxRand(Base.Pattern):
 
 Pxrand = PxRand #: Alias for PxRand
 
+class PwRand(Base.Pattern):
+    """ Docstring """
+    def __init__(self, pattern, weights):
+        seq = []
+        for i, value in enumerate(pattern):
+            seq.extend([value] * int(weights[i] * 100))
+        self.data = [random.choice(seq) for n in range(MAX_SIZE)]
+        self.make()
+
+Pwrand = PwRand
+
 class PSq(Base.Pattern):
     def __init__(self, a=1, b=2, c=3):
         self.data = [x*b for x in range(a,a+c)]

@@ -1,29 +1,26 @@
 from random import choice, shuffle
 from Operations import *
+from Parse import Parse
 from ..Code.parse import brackets, closing_brackets
 
-class PCHAR(object):
-    def __init__(self, char, dur=1):
-        self.char = str(char[0])
-        self.dur=dur
-    def scale_dur(self, scale):
-        self.dur = self.dur * scale
-    def __getitem__(self, key):
-        return self.char
-    def __str__(self):
-        return self.char
-    def __repr__(self):
-        return self.char
-    def __len__(self):
-        return 1
+##class PCHAR(object):
+##    def __init__(self, char, dur=1):
+##        self.char = str(char[0])
+##        self.dur=dur
+##    def scale_dur(self, scale):
+##        self.dur = self.dur * scale
+##    def __getitem__(self, key):
+##        return self.char
+##    def __str__(self):
+##        return self.char
+##    def __repr__(self):
+##        return self.char
+##    def __len__(self):
+##        return 1
         
 
 class metaPattern(object):
-    """
-        Abstract pattern class
-        ======================
-        
-    """
+    """ Abstract base class """
 
     data = None
 
@@ -70,6 +67,8 @@ class metaPattern(object):
         return Pattern( self.data[i:j] )
     def __setslice__(self, i, j, item):
         self.data[i:j] = item
+    def count(self, item):
+        return self.data.count(item)
     #: Operators
     def __add__(self, other):  return PAdd(self, other)
     def __radd__(self, other): return PAdd(self, other)
@@ -107,7 +106,7 @@ class metaPattern(object):
         except:
             return self.data != other
 
-    def fromString(self, string, dur=1):
+    def _fromString(self, string, dur=1):
         """ Converts a string of characters to a pattern based on bracket syntax """
         
         i = 0
@@ -147,6 +146,10 @@ class metaPattern(object):
 
         self.make()
 
+        return self
+
+    def fromString(self, string):
+        self.data = Parse(string)
         return self
 
     def flat(self):

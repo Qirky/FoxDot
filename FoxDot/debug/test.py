@@ -1,9 +1,8 @@
-import socket
+class test:
+    def __bool__(self):
+        return False
 
-sock = socket.socket()
-sock.bind(('localhost',57110))
 
-while True:
-    sock.listen(1)
-    
+a = test()
 
+print bool(a)

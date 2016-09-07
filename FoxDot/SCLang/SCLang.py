@@ -3,6 +3,8 @@
 """
 
 from ..ServerManager import Server
+from ..Code import WarningMsg
+
 from copy import copy
 import StringIO
 import os
@@ -156,6 +158,12 @@ BufRateScale = cls("BufRateScale")
 BufChannels  = cls("BufChannels")
 BufFrames    = cls("BufFrames")
 
+# sc3 Plugins
+
+BufGrain  = cls("BufGrain")
+Decimator = cls("Decimator")
+CrossoverDistortion = cls("CrossoverDistortion")
+
 """
     Envelope Generator
     ==================
@@ -198,6 +206,8 @@ class SynthDict(dict):
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
     def __str__(self):
+        return str(self.keys())
+    def __repr__(self):
         return str(self.keys())
     def __call__(self, name):
         return self[name]
@@ -250,10 +260,10 @@ class SynthDef:
                             "lpf"       : 20000,
                             "hpf"       : 0,
                             "delay"     : 0,
-                            "verb"      : 0.25,
+                            "verb"      : 0.1,
                             "echo"      : 0,
                             "echoOn"    : 0,
-                            "room"      : 1,
+                            "room"      : 0.3,
                             "vib"       : 0,
                             "vibDelay"  : 0,
                             "vibVar"    : 0.04,
@@ -308,7 +318,7 @@ class SynthDef:
             
         except:
             
-            print "Error: SynthDef '{}' could not be added to the server".format(self.name)
+            WarningMsg("Error: SynthDef '{}' could not be added to the server".format(self.name))
             
         return None
 

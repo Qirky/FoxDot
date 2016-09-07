@@ -1,4 +1,4 @@
-SynthDef.new( \scratch,{|vib=0, vibVar=0.04, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, hpf=0, pan=0, scrub=0, verb=0.25, amp=1, freq=0, buf=0, echoOn=0, room=1, rate=0.04, depth=0.5, grain=0, lpf=20000, slidefrom=1|var osc,env;
+SynthDef.new( \scratch,{|vib=0, vibVar=0.04, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, hpf=0, pan=0, scrub=0, verb=0.1, amp=1, freq=0, buf=0, echoOn=0, room=0.3, rate=0.04, depth=0.5, grain=0, lpf=20000, slidefrom=1|var osc,env;
 freq=(Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth) * Crackle.ar(1.5));
 osc=LPF.ar(HPF.ar(SinOsc.ar(Vibrato.kr((Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth) * Crackle.ar(1.5)), 2, 3, depthVariation: depth, rateVariation: rate), mul: amp), hpf), (lpf + 1));
 env=EnvGen.ar(Env(releaseTime: sus, level: amp, levels: [0, amp, 0], times: [(sus / 2), (sus / 2)]).delay(delay), doneAction: 2);

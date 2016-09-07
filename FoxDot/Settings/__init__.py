@@ -1,8 +1,6 @@
 import os
 import sys
 
-# Check Python Version TODO
-
 # Check for OS -> mac, linux, win
 
 SYSTEM  = 0
@@ -40,6 +38,12 @@ SC_DIRECTORY  = _conf.get('SUPERCOLLIDER', None)
 ADDRESS       = _conf.get('ADDRESS', 'localhost')
 PORT          = _conf.get('PORT', 57110)
 FONT          = _conf.get('FONT', 'Ubuntu Mono')
+SC3_PLUGINS   = _conf.get('SC3PLUGINS', '1') == '1'
+MAX_CHANNELS  = int(_conf.get('MAX_CHANNELS', 1))
+
+# Name of SamplePlayer SynthDef
+
+SamplePlayer = 'play'
 
 # Colours
 
@@ -58,6 +62,7 @@ class COLOURS:
     players    = _conf['players']
 
 # Buffer Details
+#--TODO
 
 
 

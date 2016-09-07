@@ -10,11 +10,13 @@
 from os.path import dirname
 from random import shuffle
 
+from Settings import SamplePlayer
+from Code import WarningMsg
 from SCLang import SynthDefProxy
 from Patterns import *
 from Midi import *
 
-import Code
+import Scale
 import Buffers
 
 BufferManager = Buffers.BufferManager().from_file()
@@ -24,13 +26,17 @@ BufferManager = Buffers.BufferManager().from_file()
 class MethodCall:
     def __init__(self, player, method, n, args=()):
         self.player = player
+        t = self.player.metro.now()
+        
         self.name = method
         self.when = asStream(n)
         self.i    = 0
+
         self.next = self.when[self.i]
-        t = self.player.metro.now()
         self.next = (t - (t % self.player.metro.ts[0])) + self.next
+
         self.args = args
+        
     def __call__(self):
         self.i += 1
         self.next += modi(self.when, self.i)
@@ -43,9 +49,7 @@ class MethodCall:
 
 ##################### ROOT PLAYER OBJECT #####################
 
-SamplePlayer = 'play'
-
-class PlayerObject(Code.LiveObject):
+class PlayerObject:
 
     _VARS = []
     _INIT = False
@@ -66,6 +70,7 @@ class PlayerObject(Code.LiveObject):
         # Modifiers
         
         self.reversing = False
+        self.degrading = False
         self.when_statements = []
 
         # Keeps track of echo effects
@@ -95,12 +100,18 @@ class PlayerObject(Code.LiveObject):
         # Hold a list of any schedule methods
 
         self.scheduled_events = {}
+
+        # Keyword arguments that are used internally
+
+        self.keywords = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay')
         
         # List the internal variables we don't want to send to SuperCollider
 
         self._VARS = self.__dict__.keys()
 
         # Default attribute dictionary
+
+        self.scale  = None
 
         self.dur    = self.attr['dur']      =  [0]
         self.degree = self.attr['degree']   =  [0]
@@ -193,7 +204,7 @@ class PlayerObject(Code.LiveObject):
 
         # Play the note
 
-        if self.metro.solo is None or self.metro.solo is self:
+        if self.metro.solo == self:
 
             self.freq = 0 if self.SynthDef is SamplePlayer else self.calculate_freq()
 
@@ -215,8 +226,9 @@ class PlayerObject(Code.LiveObject):
 
         if total_dur == 0:
 
-            print "Warning: Player object has a total duration of 0. Set to 1"
-            self.dur=total_dur=durations=1
+            WarningMsg("Player object has a total duration of 0. Set to 1")
+            
+            self.dur = total_dur = durations = 1
     
         acc = now - (now % total_dur)
 
@@ -253,6 +265,12 @@ class PlayerObject(Code.LiveObject):
             self.event_n = 0
             self.metro.schedule(self, self.event_index)
 
+        # If there is a designated solo player when updating, add this at next bar
+        
+        if self.metro.solo.active() and self.metro.solo != self:
+
+            self.metro.schedule(lambda: self.metro.solo.add(self), self.metro.NextBar() - 0.001)
+
         setattr(self, "SynthDef", synthdef)
 
         if not self._INIT:
@@ -276,8 +294,6 @@ class PlayerObject(Code.LiveObject):
         # Update the attribute value
 
         for name, value in kwargs.items():
-
-            if self.SynthDef == 'bass': print name, value
 
             setattr(self, name, value)
 
@@ -334,6 +350,14 @@ class PlayerObject(Code.LiveObject):
     def calculate_freq(self):
         """ Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider """
 
+        # If the scale is frequency only, just return the degree
+
+        if self.scale == Scale.freq:
+            try:
+                return list(self.event['degree'])
+            except:
+                return [self.event['degree']]
+
         now = {}
         
         for attr in ('degree', 'oct'):
@@ -360,7 +384,6 @@ class PlayerObject(Code.LiveObject):
 
             except:
 
-                print self.event
                 raise
 
             f.append( miditofreq(midinum) )
@@ -371,13 +394,9 @@ class PlayerObject(Code.LiveObject):
 
         """ adds value to frequency modifier """
 
-        if type(data) == int:
-
-            data = [data]
-
         # Add to modulator
 
-        self.modf['freq'] = circular_add(self.modf['freq'], data)
+        self.modf['freq'] = asStream(data)
 
         return self
 
@@ -454,7 +473,7 @@ class PlayerObject(Code.LiveObject):
         exclude = 'degree' if self.SynthDef is SamplePlayer else None
 
         size = len(self.freq)
-        
+
         for attr, value in self.event.items():
             if attr != exclude:
                 try:
@@ -567,7 +586,7 @@ class PlayerObject(Code.LiveObject):
 
         for key in self.attr:
 
-            if key not in ('degree', 'oct', 'freq', 'dur', 'offset'):
+            if key not in self.keywords:
 
                 try:
                     
@@ -595,30 +614,6 @@ class PlayerObject(Code.LiveObject):
             osc_msg = self.osc_message(i)
             
             self.server.sendNote( self.SynthDef, osc_msg )
-
-##            # If echo flag has been set to True - schedule echo decay
-##
-##            if self.echo_on:
-##
-##                index = self.event_index
-##
-##                i = osc_msg.index('amp') + 1
-##
-##                a = amp = osc_msg[i]
-##
-##                while amp > 0:
-##                    
-##                    index += self.echo_fx['delay']
-##
-##                    amp = amp - (a / self.echo_fx['decay'])
-##
-##                    i = osc_msg.index('amp') + 1
-##
-##                    osc_msg[i] = amp
-##                    
-##                    self.metro.schedule(lambda: self.server.sendNote(self.SynthDef, osc_msg), index )
-##
-##                print z
 
         return
 
@@ -663,13 +658,6 @@ class PlayerObject(Code.LiveObject):
 
         return self
 
-##    def restart(self):
-##
-##        self.isAlive = True
-##        self.stopping = False
-##
-##        return self
-
     def follow(self, lead, follow=True):
         """ Takes a now object and then follows the notes """
 
@@ -691,18 +679,18 @@ class PlayerObject(Code.LiveObject):
     def solo(self, arg=True):
 
         if arg:
-
-            self.metro.solo = self
+            
+            self.metro.solo.set(self)
 
         else:
 
-            self.metro.solo = None
+            self.metro.solo.reset()
 
         return self
         
 
     """
-        Feeder Methods
+        State-Shift Methods
         --------------
 
         These methods are used in conjunction with Patterns.Feeders functions.
@@ -732,45 +720,43 @@ class PlayerObject(Code.LiveObject):
         elif attr in self.attr:
             shuffle(self.attr[attr])
         else:
-            print "Player Object has no attribute '{}'".format(attr)
+            WarningMsg("Player Object has no attribute '{}'".format(attr))
 
     def multiply(self, n=2):
         self.attr['degree'] = self.attr['degree'] * n
         return self
 
-    def test(self):
-        print 'test'
+    def degrade(self, amount=0.5):
+        """ Sets the amp modifier to a random array of 0s and 1s
+            amount=0.5 weights the array to equal numbers """
+        if not self.degrading:
+            self.amp = Pwrand([0,1],[1-amount, amount])
+            self.degrading = True
+        else:
+            ones = int(self.amp.count(1) * amount)
+            zero = self.amp.count(0)
+            self.amp = Pshuf(Pstutter([1,0],[ones,zero]))
         return self
-
-    """ Every x do y """
 
     def every(self, n, cmd, args=()):
+        """ Every n beats, do y """
+        
         try:
+
             method = getattr(self, cmd)
+
             assert callable(method)
+
         except:
-            print "Warning: {} is not a valid player method".format(cmd)
+
+            WarningMsg("{} is not a valid player method".format(cmd))
+
             return self
+        
         self.scheduled_events[cmd] = MethodCall(self, cmd, n, args)
+
         return self
             
-
-##    def _every(self, n, cmd, *args):
-##
-##        # Creates an expression unique to this object and function
-##        e = "'{0}'=='{0}' and '{1}'=='{1}'".format(cmd.__name__, id(self))
-##
-##        if e not in self.when_statements:
-##
-##            self.when_statements.append(e)
-##
-##            self.metro.When(e, lambda: cmd(self), n, nextBar=True)
-##
-##        else:
-##
-##            self.metro.when_statements[e].step = n 
-##
-##        return self
 
     """
 
@@ -808,22 +794,12 @@ class PlayerObject(Code.LiveObject):
             self.delay = asStream(dur)
         return self
 
-
-    """
-
-        Python's Magic Methods
-        ----------------------
-
-        Standard object operation methods
-
-    """
-
-    def __name__(self):
-        for name, var in globals().items():
-            if self == var: return name
+##    def __name__(self):
+##        for name, var in globals().items():
+##            if self == var: return name
 
     def __repr__(self):
-        return "<Player Instance ('%s')>" % self.SynthDef
+        return "a '%s' Player Object" % self.SynthDef
 
     def __str__(self):
         s = "Player Instance using '%s' \n\n" % self.SynthDef
@@ -847,13 +823,20 @@ class Group:
 
     def __setattr__(self, name, value):
         try:
+
             for i, p in enumerate(self.players):
+
                 try:
+
                     setattr(p, name, value)
+
                 except:
-                    print "AttributeError: '%s' object has no attribute '%s'" % (str(p), name)
+
+                    WarningMsg("'%s' object has no attribute '%s'" % (str(p), name))
         except:
+
             self.__dict__[name] = value 
+
         return self        
 
     def __getattr__(self, name):

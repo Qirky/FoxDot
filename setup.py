@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='FoxDot',
-      version='0.1.2',
+      version='0.2.0',
       description='Live Coding with SuperCollider',
       author='Ryan Kirkbride',
       author_email='sc10rpk@leeds.ac.uk',
@@ -13,7 +13,8 @@ setup(name='FoxDot',
                 'FoxDot.Custom',
                 'FoxDot.Interface',
                 'FoxDot.Patterns',
-                'FoxDot.SuperCollider'],
+                'FoxDot.SCLang',
+                'FoxDot.Settings'],
       py_modules=['main'],      
       package_data={'FoxDot':['Settings/*',
                               'SuperCollider/*',

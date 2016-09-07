@@ -1,13 +1,20 @@
 from __future__ import division
+from ..Settings import SYSTEM, WINDOWS, SC3_PLUGINS, MAX_CHANNELS
 from SCLang import *
+
+# TODO - Number of buffers
+
+# NUM_CHANNELS = 1 if SYSTEM == WINDOWS else 2
+NUM_CHANNELS = MAX_CHANNELS
 
 # Sample Player
 
 with SynthDef("play") as play:
-    play.defaults.update(room=0.1 ,rate=1)
+    play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
-    #play.osc  = PlayBuf.ar(play.buf.numChannels, play.buf, BufRateScale.ir(play.buf) * play.rate, trigger=LFPar.kr(play.grain), startPos=Line.kr(0,BufFrames.kr(play.buf)*0.75,play.sus*2)) * play.amp * 3
-    play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate, trigger=LFPar.kr(play.grain), startPos=Line.kr(0,BufFrames.kr(play.buf)*0.75,play.sus*2)) * play.amp * 3
+    play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate) * play.amp * 3
+    if SC3_PLUGINS:
+        play.osc  = Decimator.ar(play.osc, rate=44100, bits=play.bitcrush) # Add to all?
     play.env  = Env.block(sus=play.sus*2)
 
 # Synth Players
@@ -128,7 +135,6 @@ marimba.osc = Klank.ar([[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,1]], PinkNoise.ar([0
 marimba.sus = 1
 marimba.env = Env.perc(atk=0.001, curve=-6)
 marimba.add()
-
 
 fuzz = SynthDef("fuzz")
 fuzz.freq = fuzz.freq / 2
