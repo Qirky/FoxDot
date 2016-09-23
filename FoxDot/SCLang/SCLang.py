@@ -4,6 +4,7 @@
 
 from ..ServerManager import Server
 from ..Code import WarningMsg
+from ..Settings import SC3_PLUGINS
 
 from copy import copy
 import StringIO
@@ -150,6 +151,8 @@ LPF      = cls("LPF")
 BPF      = cls("BPF")
 HPF      = cls("HPF")
 DelayC   = cls("DelayC")
+DelayN   = cls("DelayN")
+DelayL   = cls("DelayL")
 CombN    = cls("CombN")
 Crackle  = cls("Crackle")
 
@@ -185,13 +188,13 @@ class EnvGen(instance):
         self.value = str(string)
     def __call__(self, *args, **kwargs):
         if not self.ismethod():
-            kwargs['levels'] = args[0] if args else kwargs.get('levels', [0,self.amp,0])
-            kwargs['times']  = args[1] if args else kwargs.get('times', [self.sus / 2] * 2)
+            kwargs['levels'] = args[0] if len(args) > 0 else kwargs.get('levels', [0,self.amp,0])
+            kwargs['times']  = args[1] if len(args) > 1 else kwargs.get('times', [self.sus / 2] * 2)
         return instance.__call__(self, *args, **kwargs)
     def ismethod(self):
         return '.' in self.value
     def __str__(self):
-        return str( cls("EnvGen").ar(instance(self.value).delay(instance('delay')), doneAction=2))
+        return str( cls("EnvGen").ar(instance(self.value), doneAction=2))
     """ Custom Envelopes """
     def block(self, *args, **kwargs):
         return self.__call__([0,self.amp,self.amp,0],[0,kwargs.get("sus", self.sus),0])
@@ -203,6 +206,7 @@ Env = EnvGen("Env")
 # Container for SynthDefs
 
 class SynthDict(dict):
+    module = None
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
     def __str__(self):
@@ -211,6 +215,10 @@ class SynthDict(dict):
         return str(self.keys())
     def __call__(self, name):
         return self[name]
+    def reload(self):
+        reload(self.module)
+
+# Create container for SynthDefs
 
 SynthDefs = SynthDict()
 
@@ -220,10 +228,10 @@ class SynthDef:
 
     server = Server
     var = ['osc', 'env']
+    default_env = Env.perc()
 
-    osc = instance("osc")
-    env = instance("env")
-    
+    osc         = instance("osc")
+    env         = instance("env")
     freq        = instance("freq")
     output      = instance("output")
     sus         = instance("sus")
@@ -232,7 +240,6 @@ class SynthDef:
     rate        = instance("rate")
     lpf         = instance("lpf")
     hpf         = instance("hpf")
-    delay       = instance("delay")
     verb        = instance("verb")
     echo        = instance("echo")
     echoOn      = instance("echoOn")
@@ -247,37 +254,38 @@ class SynthDef:
     buf         = instance("buf")
     scrub       = instance("scrub")
     grain       = instance("grain")
+    bits        = instance("bits")
+    delay       = instance("delay")
 
     def __init__(self, name):
         self.name = name
+        self.base = []
         self.filename = os.path.realpath(__file__ + "/../scsyndef/{}.scd".format(self.name))
         
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
                             "pan"       : 0,
                             "freq"      : 0,
-                            "rate"      : 0,
+                            "rate"      : 1,
                             "lpf"       : 20000,
                             "hpf"       : 0,
-                            "delay"     : 0,
-                            "verb"      : 0.1,
+                            "verb"      : 0.25,
                             "echo"      : 0,
                             "echoOn"    : 0,
                             "room"      : 0.3,
                             "vib"       : 0,
-                            "vibDelay"  : 0,
-                            "vibVar"    : 0.04,
-                            "depthVar"  : 0.1,
-                            "depth"     : 0.02,
                             "slide"     : 0,
                             "slidefrom" : 1 ,
                             "buf"       : 0,
                             "scrub"     : 0,
-                            "grain"     : 0 }
-
-        self.base()
+                            "grain"     : 0,
+                            "bits"      : 24,
+                            "delay"     : 0 }
+        
+        self.add_base_class_behaviour()
 
     # Context Manager
+    # ---------------
 
     def __enter__(self):
         return self
@@ -285,18 +293,73 @@ class SynthDef:
     def __exit__(self, exc_type, exc_value, traceback):
         self.add()
 
-    def base(self):
-        # Base-class behaviour
-        self.freq = Line.ar(self.freq * self.slidefrom, self.freq * (1 + self.slide), self.sus)
-        self.freq = Vibrato.kr(self.freq, rate=self.vib, depth=self.depth, delay=self.vibDelay, rateVariation=self.vibVar, depthVariation=self.depthVar)
-        self.env  = Env.perc()
-        return
+    # String representation
+    # ---------------------
+
+    def __str__(self):
+        Def  = "SynthDef.new(\{},\n".format(self.name)
+        Def += "{}|{}|\n".format("{", format_args(kwargs=self.defaults, delim='='))
+        Def += "{}\n".format(self.get_base_class_variables())
+        Def += "{}\n".format(self.get_base_class_behaviour())
+        Def += "{}\n".format(self.get_custom_behaviour())
+        Def += "\tOut.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))"
+        Def += "}).add;"
+        return Def
+
+    def __repr__(self):
+        return str(self.name)
+
+    # Combining with other SynthDefs
+    # ------------------------------
+
+    def __add__(self, other):
+        if not isinstance(other, SynthDef):
+            raise TypeError("Warning: '{}' is not a SynthDef".format(str(other)))
+        new = copy(self)
+        new.osc = self.osc + other.osc
+        return new
+
+    # Returning the SynthDefProxy
+    # ---------------------------
+
+    def __call__(self, degree=0, **kwargs):
+        return SynthDefProxy(self.name, degree, kwargs)
+
+    # Getter and setter
+    # -----------------
 
     def __getattr__(self, key):
         if key in self.defaults:
             return instance(key)
-        else:
-            raise AttributeError("Attribute '{}' not found".format(key))
+        raise AttributeError("Attribute '{}' not found".format(key))
+
+
+    # Defining class behaviour
+    # ------------------------
+
+    def add_base_class_behaviour(self):
+        """ Defines the initial setup for every SynthDef """
+        self.base.append("amp = amp / 2;")
+        self.base.append("freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);")
+        self.base.append("freq = Vibrato.kr(freq, rate: vib);")
+        return
+
+    def get_base_class_behaviour(self):
+        return "\n".join(self.base)
+
+    def get_base_class_variables(self):
+        return "var {};".format(", ".join(self.var))
+
+    def get_custom_behaviour(self):
+        return "\n".join([str(arg) + '=' + str(self.__dict__[arg]) + ';' for arg in self.defaults.keys() + self.var if arg in self.__dict__])
+
+    # Adding the SynthDef to the Server
+    # ---------------------------------
+
+    def write(self):
+        """  Writes the SynthDef to file """
+        with open(self.filename, 'w') as f:
+            f.write(self.__str__())
     
     def add(self):
         """ This is required to add the SynthDef to the SuperCollider Server """
@@ -305,8 +368,16 @@ class SynthDef:
 
         self.osc = HPF.ar(self.osc, self.hpf)
         self.osc = LPF.ar(self.osc, self.lpf + 1)
-        
+        self.env = self.env if self.env is not None else self.default_env
+
+        if SC3_PLUGINS:
+
+            # Add any behaviour based on SC3 Plugins
+            
+            self.osc  = Decimator.ar(self.osc, rate=44100, bits=self.bits)
+    
         try:
+            
             # Write file
             self.write()
 
@@ -316,55 +387,16 @@ class SynthDef:
             # Add to list
             SynthDefs[self.name] = self
             
-        except:
+        except Exception as e:
             
-            WarningMsg("Error: SynthDef '{}' could not be added to the server".format(self.name))
+            WarningMsg("Error: SynthDef '{}' could not be added to the server:\n{}".format(self.name, e))
             
         return None
-
-    def write(self):
-        """  Writes the SynthDef to file """
-        f = open(self.filename, 'w')
-        f.write(self.__str__())
-        f.close()
-        return None
-        
-    def modify(self):
-        string = "var {};\n".format(",".join(self.var)) if self.var else ""
-        for arg in self.defaults.keys() + self.var:
-            if arg in self.__dict__:
-                string = string + str(arg) + '=' + str(self.__dict__[arg]) + ';\n'
-        return string
 
     def rename(self, newname):
         new = copy(self)
         new.name = str(newname)
         return new
-
-    def echo_effect(self):
-        return self.echoOn * CombN.ar(self.osc, self.echo * 0.1, self.echo * 0.1, (self.echo * 0.5) * self.sus, 1)
-
-    def __str__(self):
-        name     = str(self.name)
-        defaults = str(format_args(kwargs=self.defaults, delim='='))
-        mod      = str(self.modify())
-        snd      = self.osc + self.echo_effect()
-        sound    = str(Out.ar(0, Pan2.ar(FreeVerb.ar('osc * env', self.verb, self.room), self.pan)))
-        return "SynthDef.new( \%s,{|%s|%s%s}).add;" % (name, defaults, mod, sound)
-        #return "SynthDef.new( \%s,{|%s|%s%s})" % (name, defaults, mod, sound)
-
-    def __repr__(self):
-        return str(self.name)
-
-    def __add__(self, other):
-        if not isinstance(other, SynthDef):
-            raise TypeError("Warning: '{}' is not a SynthDef".format(str(other)))
-        new = copy(self)
-        new.osc = self.osc + other.osc
-        return new
-
-    def __call__(self, degree=0, **kwargs):
-        return SynthDefProxy(self.name, degree, kwargs)
 
 class SynthDefProxy:
     def __init__(self, name, degree, kwargs):
@@ -395,4 +427,7 @@ class SynthDefProxy:
 
 stutter = lambda array, n: [item for item in array for i in range(n)]
 dup = lambda x: [x, x]
-        
+
+#
+import SynthDefs as s
+SynthDefs.module=s

@@ -24,8 +24,6 @@ class ServerManager:
         self.booted = False
         self.wait_time = 5
         self.count = 0
-
-        self.boot()
         
         self.client = OSCClient()
         self.client.connect( (self.addr, self.port) )

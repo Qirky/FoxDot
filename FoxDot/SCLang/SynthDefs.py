@@ -2,9 +2,7 @@ from __future__ import division
 from ..Settings import SYSTEM, WINDOWS, SC3_PLUGINS, MAX_CHANNELS
 from SCLang import *
 
-# TODO - Number of buffers
-
-# NUM_CHANNELS = 1 if SYSTEM == WINDOWS else 2
+# TODO - check this!!!
 NUM_CHANNELS = MAX_CHANNELS
 
 # Sample Player
@@ -13,15 +11,27 @@ with SynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate) * play.amp * 3
-    if SC3_PLUGINS:
-        play.osc  = Decimator.ar(play.osc, rate=44100, bits=play.bitcrush) # Add to all?
     play.env  = Env.block(sus=play.sus*2)
 
 # Synth Players
 
 with SynthDef("pads") as pads:
-    pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) +  SinOsc.ar(pads.freq + 2, mul=pads.amp)
+    pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
     pads.env = Env.perc()
+
+with SynthDef("dab") as synth:
+     a = HPF.ar(Saw.ar(synth.freq / 4, mul=synth.amp / 2), 2000)
+     #b = HPF.ar(LFSaw.ar((synth.freq / 4) * 1.005, mul=synth.amp / 2), Env([5000,0,2500,5000],[synth.sus * 0.2, synth.sus * 0.2, synth.sus * 0.6]) )# XLine.kr(10000, 10, synth.sus))
+     b = VarSaw.ar(synth.freq / 4, mul=synth.amp, width=Env.perc(synth.sus / 20, synth.sus, 0.5, -5))
+     synth.osc = a + b
+     synth.env = Env()
+dab = synth
+
+with SynthDef("varsaw") as synth:
+     synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005], mul=synth.amp / 2, width=synth.rate)
+     synth.env = Env()
+varsaw = synth
+    
 
 with SynthDef("growl") as growl:
     growl.sus = growl.sus * 1.5
@@ -160,3 +170,7 @@ saw.amp = saw.amp / 4
 saw.osc = Saw.ar(saw.freq)
 saw.env = Env.block()
 saw.add()
+
+# Get rid of the variable synth
+
+del synth

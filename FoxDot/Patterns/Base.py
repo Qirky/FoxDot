@@ -1,22 +1,7 @@
 from random import choice, shuffle
 from Operations import *
 from Parse import Parse
-from ..Code.parse import brackets, closing_brackets
-
-##class PCHAR(object):
-##    def __init__(self, char, dur=1):
-##        self.char = str(char[0])
-##        self.dur=dur
-##    def scale_dur(self, scale):
-##        self.dur = self.dur * scale
-##    def __getitem__(self, key):
-##        return self.char
-##    def __str__(self):
-##        return self.char
-##    def __repr__(self):
-##        return self.char
-##    def __len__(self):
-##        return 1
+# from ..Code.parse import brackets, closing_brackets
         
 
 class metaPattern(object):

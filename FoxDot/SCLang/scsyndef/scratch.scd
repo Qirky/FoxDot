@@ -1,5 +1,10 @@
-SynthDef.new( \scratch,{|vib=0, vibVar=0.04, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, hpf=0, pan=0, scrub=0, verb=0.1, amp=1, freq=0, buf=0, echoOn=0, room=0.3, rate=0.04, depth=0.5, grain=0, lpf=20000, slidefrom=1|var osc,env;
-freq=(Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth) * Crackle.ar(1.5));
-osc=LPF.ar(HPF.ar(SinOsc.ar(Vibrato.kr((Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth) * Crackle.ar(1.5)), 2, 3, depthVariation: depth, rateVariation: rate), mul: amp), hpf), (lpf + 1));
-env=EnvGen.ar(Env(releaseTime: sus, level: amp, levels: [0, amp, 0], times: [(sus / 2), (sus / 2)]).delay(delay), doneAction: 2);
-Out.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))}).add;
+SynthDef.new(\scratch,
+{|vib=0, grain=0, echoOn=0, scrub=0, room=0.3, bits=24, depth=0.5, slide=0, echo=0, delay=0, rate=0.04, verb=0.25, sus=1, slidefrom=1, lpf=20000, amp=1, freq=0, buf=0, hpf=0, pan=0|
+var osc, env;
+amp = amp / 2;
+freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
+freq = Vibrato.kr(freq, rate: vib);
+freq=(freq * Crackle.ar(1.5));
+osc=Decimator.ar(LPF.ar(HPF.ar(SinOsc.ar(Vibrato.kr((freq * Crackle.ar(1.5)), 2, 3, depthVariation: depth, rateVariation: rate), mul: amp), hpf), (lpf + 1)), rate: 44100, bits: bits);
+env=EnvGen.ar(Env(releaseTime: sus, level: amp, levels: [0, amp, 0], times: [(sus / 2), (sus / 2)]), doneAction: 2);
+	Out.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))}).add;

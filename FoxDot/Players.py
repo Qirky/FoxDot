@@ -9,47 +9,22 @@
 
 from os.path import dirname
 from random import shuffle
+from copy import deepcopy
 
 from Settings import SamplePlayer
 from Code import WarningMsg
 from SCLang import SynthDefProxy
+from Repeat import *
 from Patterns import *
 from Midi import *
 
 import Scale
 import Buffers
+import TimeVar
 
 BufferManager = Buffers.BufferManager().from_file()
 
-#### Methods
-
-class MethodCall:
-    def __init__(self, player, method, n, args=()):
-        self.player = player
-        t = self.player.metro.now()
-        
-        self.name = method
-        self.when = asStream(n)
-        self.i    = 0
-
-        self.next = self.when[self.i]
-        self.next = (t - (t % self.player.metro.ts[0])) + self.next
-
-        self.args = args
-        
-    def __call__(self):
-        self.i += 1
-        self.next += modi(self.when, self.i)
-        if type(self.args) is tuple:
-            args = [modi(arg, self.i) for arg in self.args]
-        else:
-            args = [modi(self.args, self.i)]
-        getattr(self.player, self.name).__call__(*args)    
-        
-
-##################### ROOT PLAYER OBJECT #####################
-
-class PlayerObject:
+class PlayerObject(repeatable_object):
 
     _VARS = []
     _INIT = False
@@ -57,9 +32,7 @@ class PlayerObject:
     metro = None
     server = None
 
-    def __init__( self, name ):
-
-        self.name     = name
+    def __init__( self ):
         
         self.SynthDef = None
         self.quantise = False
@@ -113,20 +86,9 @@ class PlayerObject:
 
         self.scale  = None
 
-        self.dur    = self.attr['dur']      =  [0]
-        self.degree = self.attr['degree']   =  [0]
-        self.oct    = self.attr['oct']      =  [5]
-        self.amp    = self.attr['amp']      =  [1]
-        self.pan    = self.attr['pan']      =  [0]
-        self.sus    = self.attr['sus']      =  [1]
-        self.rate   = self.attr['rate']     =  [1]
-        self.buf    = self.attr['buf']      =  [0]
-        self.echo   = self.attr['echo']     =  [0]
-        self.offset = self.attr['offset']   =  [0]
-        #self.bpm = ...
-        self.freq   = [0]
-
         self.reset()
+
+        #### end of init
 
     """ The PlayerObject Method >> """
 
@@ -145,7 +107,7 @@ class PlayerObject:
     def __setattr__(self, name, value):
         if self._INIT:
             if name not in self._VARS:
-                value = asStream(value)
+                value = asStream(value) if not isinstance(value, TimeVar.var) else value
                 self.attr[name] = value
         self.__dict__[name] = value
         return
@@ -153,8 +115,20 @@ class PlayerObject:
     # --- Startup methods
 
     def reset(self):
+        self.dur    = self.attr['dur']      =  [0]
+        self.degree = self.attr['degree']   =  [0]
+        self.oct    = self.attr['oct']      =  [5]
+        self.amp    = self.attr['amp']      =  [1]
+        self.pan    = self.attr['pan']      =  [0]
+        self.sus    = self.attr['sus']      =  [1]
+        self.rate   = self.attr['rate']     =  [1]
+        self.buf    = self.attr['buf']      =  [0]
+        self.echo   = self.attr['echo']     =  [0]
+        self.offset = self.attr['offset']   =  [0]
+        self.delay  = self.attr['delay']    =  [0]
+        #self.bpm = ...
+        self.freq   = [0]
         self.modf = dict([(key, [0]) for key in self.attr])
-        self.modf['amp'] = 0.5
         return self    
 
     # --- Update methods
@@ -193,14 +167,6 @@ class PlayerObject:
 
         self.event_n += 1 if not self.reversing else -1
         self.notes_played += 1
-
-        # Call any player methods
-
-        for cmd in self.scheduled_events.values():
-
-            # Call the MethodCall
-            
-            if self.event_index >= cmd.next: cmd()
 
         # Play the note
 
@@ -301,7 +267,7 @@ class PlayerObject:
 
         if synthdef is SamplePlayer:
 
-            setattr(self, "degree", str(degree) if len(degree) > 0 else " ")
+            setattr(self, "degree", "".join(degree) if len(degree) > 0 else " ")
 
         else:
 
@@ -533,16 +499,8 @@ class PlayerObject:
         # Combine attribute and modifier values
 
         try:
-
-            # Amp is multiplied, not added
-
-            if attr == "amp":
-
-                value = attr_value * modf_value
-
-            else:
             
-                value = attr_value + modf_value
+            value = attr_value + modf_value
 
         except:
 
@@ -553,12 +511,6 @@ class PlayerObject:
     def get_event(self):
         """ Returns a dictionary of attr -> now values """
 
-        if self.SynthDef is SamplePlayer:
-
-            # Un-nest any PGroups
-
-            self.attr['degree'] = self.attr['degree'].flat()
-            
         # Get the current event
 
         self.event = {}
@@ -582,7 +534,9 @@ class PlayerObject:
 
         # Initial message plus custom head and echo variable
 
-        message = ['echoOn', int(self.event['echo'] > 0), 'freq', modi(self.freq, index)]
+        message = ['echoOn', int(self.event['echo'] > 0),
+                   'freq',   float(modi(self.freq, index)) ]
+                   # 'delay',  float(delay * self.metro.BeatDuration() * index)]
 
         for key in self.attr:
 
@@ -612,8 +566,16 @@ class PlayerObject:
         for i in range(size):
 
             osc_msg = self.osc_message(i)
+
+            delay = modi(self.event['delay'], i)
+
+            if delay > 0:
+
+                self.metro.schedule(send_delay(self, osc_msg), self.metro.now() + delay)
+                
+            else:
             
-            self.server.sendNote( self.SynthDef, osc_msg )
+                self.server.sendNote(self.SynthDef, osc_msg)
 
         return
 
@@ -622,8 +584,8 @@ class PlayerObject:
     def kill(self):
         """ Removes this object from the Clock and resets itself"""
         self.isplaying = False
-        self.isAlive = False
-        self.event_n = 0
+        #self.isAlive = False
+        #self.event_n = 0
         self.offset = self.attr['offset'] = 0
         return
         
@@ -737,25 +699,6 @@ class PlayerObject:
             zero = self.amp.count(0)
             self.amp = Pshuf(Pstutter([1,0],[ones,zero]))
         return self
-
-    def every(self, n, cmd, args=()):
-        """ Every n beats, do y """
-        
-        try:
-
-            method = getattr(self, cmd)
-
-            assert callable(method)
-
-        except:
-
-            WarningMsg("{} is not a valid player method".format(cmd))
-
-            return self
-        
-        self.scheduled_events[cmd] = MethodCall(self, cmd, n, args)
-
-        return self
             
 
     """
@@ -794,20 +737,28 @@ class PlayerObject:
             self.delay = asStream(dur)
         return self
 
-##    def __name__(self):
-##        for name, var in globals().items():
-##            if self == var: return name
 
     def __repr__(self):
         return "a '%s' Player Object" % self.SynthDef
 
-    def __str__(self):
+    def info(self):
         s = "Player Instance using '%s' \n\n" % self.SynthDef
         s += "ATTRIBUTES\n"
         s += "----------\n\n"
         for attr, val in self.attr.items():
             s += "\t{}\t:{}\n".format(attr, val)
         return s
+
+####
+
+
+class send_delay:
+    def __init__(self, s, message):
+        self.server = s.server
+        self.synth = s.SynthDef
+        self.msg = message
+    def __call__(self):
+        self.server.sendNote(self.synth, self.msg)
 
 
 ###### GROUP OBJECT

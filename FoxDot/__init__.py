@@ -29,7 +29,6 @@ import SCLang
 from SCLang import SynthDefs, Env
 from SCLang.SynthDefs import *
 
-
 """ CLOCK """
 
 Clock = TempoClock()
@@ -53,7 +52,7 @@ numbers  = '0123456789'
 
 for char in alphabet:
 
-    FoxDotCode.namespace[char] = PlayerObject(char)
+    FoxDotCode.namespace[char] = PlayerObject()
 
 # 2 Letter Player Objects
 
@@ -63,7 +62,7 @@ for char1 in alphabet:
 
         name = char1+char2
 
-        FoxDotCode.namespace[name] = PlayerObject(name)
+        FoxDotCode.namespace[name] = PlayerObject()
 
 
 """ IDE """
@@ -76,7 +75,7 @@ def start():
         
         FoxDot().run()
         
-    except KeyboardInterrupt, SystemExit:
+    except (KeyboardInterrupt, SystemExit):
 
         Clock.stop()
         Server.quit()

@@ -6,30 +6,7 @@
 """
 
 import re
-try:
-    from Operations import modi, LCM
-except:
-    def modi(array, i, debug=0):
-        """ Returns the modulo index i.e. modi([0,1,2],4) will return 1 """
-        try:
-            return array[i % len(array)]
-        except:        
-            return array
-
-    def LCM(*args):
-        """ Lowest Common Multiple """
-        # Base case
-        if len(args) == 1:
-            return args[0]
-        
-        X = list(args)
-        
-        while any([X[0]!=K for K in X]):
-
-            i = X.index(min(X))
-            X[i] += args[i]        
-
-        return X[0]
+from Operations import modi, LCM
 
 class PlayString:
     """ Container for PCHAR objects """
@@ -64,7 +41,7 @@ class PlayString:
                     count -= 1
                 else:
                     return i
-        raise SyntaxError
+        raise SyntaxError("Bad string")
             
 
 class PCHAR:
@@ -88,16 +65,16 @@ class Parser:
 
     def __call__(self, string):
         output = self.parse(string)
-        while any([len(x) > 1 for x in output]):
+        while any([isinstance(x, PlayString) for x in output]):
             output = self.expand(output)
         return output
 
     @staticmethod
-    def expand(unnested):
+    def expand(nested_list):
         # Expand any '[]' or '{}' groups
         output = PlayString([])
-        for item in unnested:
-            if len(item) > 1:
+        for item in nested_list:
+            if isinstance(item, PlayString):
                 output.extend(item)
             else:
                 output.append(item)

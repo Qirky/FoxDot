@@ -39,6 +39,9 @@ class BufferManager:
         self.server = server 
         return self
 
+    def __str__(self):
+        return "\n".join(["{}: {}".format(symbol, self.buffers[n]) for symbol, n in self.symbols.items()])
+
     def load(self):
         for buf, fn in self.buffers.items():
             self.server.bufferRead(buf, path("./Samples/" + fn))

@@ -22,24 +22,18 @@ class TempoClock:
     def __init__(self, bpm=120.0, meter=(4,4)):
 
         self.bpm = bpm
-
         self.time = 0
         self.mark = time()
-
-        self.ts = meter
-        
-        self.queue = []
-        self.nextEvent = None
-
+        self.meter = meter
+        self.queue = Queue()
         self.ticking = False        
 
         # Keeps track of the when statements and players
-
         self.when_statements = {}
         self.playing = []
+        self.items = []
 
         # If one object is going to played
-
         self.solo = SoloPlayer()
 
     def __str__(self):
@@ -58,7 +52,7 @@ class TempoClock:
 
     def Bar(self):
         """ Returns the length of a bar in terms of beats """
-        return (float(self.ts[0]) / self.ts[1]) * 4
+        return (float(self.meter[0]) / self.meter[1]) * 4
 
     def BeatDuration(self):
         """ Returns the length in seconds of one beat """
@@ -89,33 +83,21 @@ class TempoClock:
 
         self.ticking = True
 
-        # Sleep until next event
-
         while self.ticking:
 
-            if self.now() >= self.nextEvent:
+            if self.now() >= self.queue.next():
 
-                try:
+                # Call any item in the popped event
 
-                    event = self.queue.pop()
+                for item in self.queue.pop():
 
-                    for n in range(len(event[0])-1, -1, -1):
+                    item.__call__()
 
-                        item = event[0][n]
+            # Make sure rest is positive so any events that SHOULD
+            # have been played are played straight away
+            rest = max((self.queue.next() - self.now()) * 0.25, 0)
 
-                        if callable(item):
-                            
-                            item()
-
-                except IndexError:
-
-                    pass
-
-            if len(self.queue) == 0:
-
-                self.nextEvent = MAXINT
-
-            rest = max((self.nextEvent - self.now()) * 0.25, 0)
+            # If there are no events for at least 1 beat, sleep for 1 beat
             sleep(min(self.beat(1), rest))
 
         return
@@ -143,44 +125,22 @@ class TempoClock:
 
             self.playing.append(obj)
 
-        # Go through queue and add in order
+        if obj not in self.items:
 
-        for i in range(len(self.queue)):
+            self.items.append(obj)
 
-            # If another event is happening at the same time, schedule together
+        # Add to the queue
 
-            if beat == self.queue[i][1]:
+        if beat > self.now():
 
-                if isinstance(obj, PlayerObject):
-
-                    self.queue[i][0].append(obj)
-
-                else:
-
-                    self.queue[i][0].insert(0, obj)
-
-                break
-
-            if beat > self.queue[i][1]:
-
-                self.queue.insert(i, ([obj], beat))
-
-                break
-            
-        else:
-            
-            self.queue.append(([obj], beat))
-
-        # Set next event time
-
-        self.nextEvent = self.queue[-1][1]
-            
+            self.queue.add(obj, beat)
+        
         return
 
     def NextBar(self):
         """ Returns the beat value for the start of the next bar """
         beat = self.now()
-        return beat + (self.ts[0] - (beat % self.ts[0]))
+        return beat + (self.meter[0] - (beat % self.meter[0]))
 
     def get_bpm(self):
         try:
@@ -204,34 +164,6 @@ class TempoClock:
         self.schedule(self.call(cmd, n, args))
         return
 
-##    def when(self, a, b, step=0.125, nextBar=False):
-##        """
-##
-##            When Statements
-##            ===============
-##
-##            Clock.When(a, b[,step])
-##
-##            When 'a' is true, do 'b'. Check this every step.
-##
-##        """
-##
-##        if nextBar:
-##
-##            start = self.NextBar()
-##
-##        else:
-##
-##            start = self.now() + step
-##
-##        w = When(a, b, step, self)
-##        
-##        self.schedule(w, start)
-##
-##        self.when_statements[a] = w
-##
-##        return
-
     def stop(self):
         self.ticking = False
         self.reset()
@@ -247,33 +179,94 @@ class TempoClock:
 
         for player in self.playing:
 
-                try:
+                player.kill()
 
-                    player.kill()
-
-                except:
-
-                    pass
-
-        for event in self.queue:
-
-            for player in event[0]:
-
-                try:
-
-                    player.kill()
-
-                except:
-
-                    pass
-
+        self.items = []
+        self.queue.clear()
         self.solo.reset()
-        self.queue = []
+        
         self.playing = []
         self.ticking = False
         self.reset()
 
         return
+
+#####
+
+class Queue:
+    def __init__(self):
+        self.data = []
+
+    def __repr__(self):
+        return "\n".join([str(item) for item in self.data]) if len(self.data) > 0 else "[]"
+
+    def add(self, item, beat):
+
+        # If the new event is before the next scheduled event,
+        # move it to the 'front' of the queue
+
+        if beat < self.next():
+
+            self.data.append(QueueItem(item, beat))
+
+            return
+
+        # If the event is after the next scheduled event, work
+        # out its position in the queue
+
+        for i in range(len(self.data)):
+
+            # If another event is happening at the same time, schedule together
+
+            if beat == self.data[i].beat:
+
+                self.data[i].add(item)
+
+                break
+
+            # If the event is later than the next event, schedule it here
+
+            if beat > self.data[i].beat:
+
+                self.data.insert(i, QueueItem(item, beat))
+
+                break            
+
+        return
+
+    def clear(self):
+        while len(self.data):
+            del self.data[-1]
+        return
+
+    def pop(self):
+        return self.data.pop() if len(self.data) > 0 else []
+
+    def next(self):
+        return self.data[-1].beat if len(self.data) > 0 else MAXINT
+            
+
+class QueueItem:
+    def __init__(self, obj, t):
+        self.data = [obj]
+        self.beat = t
+    def __repr__(self):
+        return "{}: {}".format(self.beat, self.data)
+    def add(self, obj):
+        # PlayerObjects are added to the 'front' of the queue
+        if isinstance(obj, PlayerObject):
+            self.data.append(obj)
+        else:
+            self.data.insert(0, obj)
+        return
+    def call(self):
+        for item in self.data:
+            item.__call__()
+        return
+    def __iter__(self):
+        # Iterates in reverse order
+        for n in range(len(self.data)-1, -1, -1):
+            yield self.data[n]
 
 ###############################################################
 """ 

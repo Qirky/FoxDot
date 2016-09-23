@@ -1,6 +1,10 @@
-SynthDef.new( \play,{|vib=0, vibVar=0.04, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, bitcrush=24, hpf=0, pan=0, scrub=0, verb=0.1, amp=1, freq=0, buf=0, echoOn=0, room=0.1, rate=1, depth=0.02, grain=0, lpf=20000, slidefrom=1|var osc,env;
-freq=Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth);
+SynthDef.new(\play,
+{|vib=0, scrub=0, echo=0, rate=1, verb=0.25, lpf=20000, amp=1, freq=0, buf=0, echoOn=0, room=0.1, delay=0, slide=0, grain=0, pan=0, bitcrush=24, sus=1, bits=24, hpf=0, slidefrom=1|
+var osc, env;
+amp = amp / 2;
+freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
+freq = Vibrato.kr(freq, rate: vib);
 rate=(((scrub * LFPar.kr((scrub / 4))) + rate) - scrub);
-osc=LPF.ar(HPF.ar(Decimator.ar(((PlayBuf.ar(1, buf, (BufRateScale.ir(buf) * (((scrub * LFPar.kr((scrub / 4))) + rate) - scrub))) * amp) * 3), rate: 44100, bits: bitcrush), hpf), (lpf + 1));
-env=EnvGen.ar(Env([0, amp, amp, 0], [0, (sus * 2), 0], releaseTime: sus, level: amp, levels: [0, amp, amp, 0], times: [0, (sus * 2), 0]).delay(delay), doneAction: 2);
-Out.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))}).add;
+osc=Decimator.ar(LPF.ar(HPF.ar(((PlayBuf.ar(1, buf, (BufRateScale.ir(buf) * (((scrub * LFPar.kr((scrub / 4))) + rate) - scrub))) * amp) * 3), hpf), (lpf + 1)), rate: 44100, bits: bits);
+env=EnvGen.ar(Env([0, amp, amp, 0], [0, (sus * 2), 0], releaseTime: sus, level: amp, levels: [0, amp, amp, 0], times: [0, (sus * 2), 0]), doneAction: 2);
+	Out.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))}).add;

@@ -15,8 +15,8 @@
 """
 
 from sys import maxint as MAX_SIZE
-from math import modf
 from Patterns import Pattern, asStream, PatternContainer
+from Repeat import repeatable_object
 import Patterns.Sequences as pat
 import Patterns.Operations as op
 import Code
@@ -36,7 +36,7 @@ def fetch(func):
     return eval_now
 
   
-class var:
+class var(repeatable_object):
     """ Var(values [,durs=[4]]) """
 
     metro = None
@@ -129,6 +129,20 @@ class var:
         new = self.new(other)
         new.evaluate = fetch(op.Div)
         return new
+
+    # Comparisons
+
+    def __gt__(self, other):
+        return self.now() > other
+
+    def __lt__(self, other):
+        return self.now() < other
+
+    def __ge__(self, other):
+        return self.now() >= other
+
+    def __le__(self, other):
+        return self.now() >= other
 
     # %
     def __mod__(self, other):
@@ -356,7 +370,15 @@ class var:
     def values(self):
         return self.data
 
-    # Methods that do cool stuff
+    # 1. Methods that change the 'var' in place
+    def invert1(self):
+        lrg = float(max(self.data))
+        for i, item in enumerate(self.data):
+            self.data[i] = (((item / lrg) * -1) + 1) * lrg
+        return
+        
+
+    # Method that return an augmented NEW version of the 'var'
 
     def invert(self):
         new = self.new(self.data)
