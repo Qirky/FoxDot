@@ -29,17 +29,19 @@ OSC_FUNC     = "/FoxDot/SCLang/OSCFunc.scd"
 
 # Open custom settings
 
-with open(os.path.join(FOXDOT_ROOT, 'FoxDot', 'Settings', 'conf.txt')) as f:
-    _conf = dict([line.replace("\n","").split("=",1) for line in f.readlines() if "=" in line])
+##with open(os.path.join(FOXDOT_ROOT, 'FoxDot', 'Settings', 'conf.txt')) as f:
+##    _conf = dict([line.replace("\n","").split("=",1) for line in f.readlines() if "=" in line])
+
+import conf
 
 # Set Environment Variables
 
-SC_DIRECTORY  = _conf.get('SUPERCOLLIDER', None)
-ADDRESS       = _conf.get('ADDRESS', 'localhost')
-PORT          = _conf.get('PORT', 57110)
-FONT          = _conf.get('FONT', 'Ubuntu Mono')
-SC3_PLUGINS   = _conf.get('SC3PLUGINS', '1') == '1'
-MAX_CHANNELS  = int(_conf.get('MAX_CHANNELS', 1))
+SC_DIRECTORY  = conf.SUPERCOLLIDER
+ADDRESS       = conf.ADDRESS
+PORT          = conf.PORT
+FONT          = conf.FONT
+SC3_PLUGINS   = conf.SC3PLUGINS
+MAX_CHANNELS  = conf.MAX_CHANNELS
 
 # Name of SamplePlayer SynthDef
 
@@ -48,21 +50,18 @@ SamplePlayer = 'play'
 # Colours
 
 class COLOURS:
-    plaintext  = _conf['plaintext']
-    background = _conf['background']
-    functions  = _conf['functions']
-    key_types  = _conf['key_types']
-    user_defn  = _conf['user_defn']
-    other_kws  = _conf['other_kws']
-    comments   = _conf['comments']
-    numbers    = _conf['numbers']   
-    strings    = _conf['strings']
-    dollar     = _conf['dollar']  
-    arrow      = _conf['arrow']   
-    players    = _conf['players']
-
-# Buffer Details
-#--TODO
+    plaintext  = conf.plaintext
+    background = conf.background
+    functions  = conf.functions
+    key_types  = conf.key_types
+    user_defn  = conf.user_defn
+    other_kws  = conf.other_kws
+    comments   = conf.comments
+    numbers    = conf.numbers   
+    strings    = conf.strings
+    dollar     = conf.dollar  
+    arrow      = conf.arrow   
+    players    = conf.players
 
 
 
