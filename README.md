@@ -1,20 +1,15 @@
-FoxDot - Live Coding with Python v0.1.5
+FoxDot - Live Coding with Python v0.1.6
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.1.5 fixes and updates
-- Removed RegEx find and replace `>>` and `$` syntax. FoxDot now uses pure Python code and saved files can be run by themselves.
+### v0.1.6 fixes and updates
+- Decimator (a.k.a. bitcrush) added to default SynthDef behaviour
+- `SynthDefs` and `BufferManager` can be reloaded
+- Removed automatic bootup of sclang as default behaviour
+- Added new SynthDefs
 
-### v0.1.4 fixes and updates
-- Save/Open file feature added
-- Console can now be toggled
-- Reduced CPU usage when the TempoClock queue is empty
-- Added a 'grain' attribute to the `sample_player` SynthDef
-
-### v0.1.3 fixes and updates
-- Key bindings for Linux, Mac, and Windows 10 fixed
-- Fixed freeze on keyboard interrupt exit
+See `docs/changelog` for more
 
 ---
 
@@ -29,13 +24,19 @@ FoxDot - Live Coding with Python v0.1.5
 
 #### Download and install
 
-FoxDot uses the sound synthesis engine, SuperCollider, to make music so you'll need to make sure it's installed before using FoxDot. Currently, all you need to do is download the `.zip` file from this page and extract the contents. 
+FoxDot uses the sound synthesis engine, SuperCollider, to make noise and Python 2.7 so you'll need to make sure they're installed correctly before using FoxDot. Download the `FoxDot-master.zip` file from this page and extract the contents. For the best experience, install the `UbuntuMono-R.ttf` font (optional).
 
-#### Configuration
+#### Startup
 
-1. Open `FoxDot/Settings/conf.txt`
-1. Change the value of `SUPERCOLLIDER` to the directory where SuperCollider is installed 
-2. Install the `UbuntuMono-R.ttf` font, or change the `FONT` value in the configuration file 
+1. Open SuperCollider
+2. Open the file `FoxDot-Master/FoxDot/SCLang/OSCFunc.scd` in SuperCollider and execute the contents. This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot. 
+3. Run the `main.py` file in the `FoxDot-master` directory. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run FoxDot from the command line, change directory to `FoxDot-master` and enter the command `python main.py`
+
+#### Troubleshooting
+
+##### Buffer mismatch error
+If you are getting an error along the lines of "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" when trying to play back audio samples, go to FoxDot/Settings/Conf.txt and change the value of MAX_CHANNELS from 2 to 1 or vice versa. This issue might be to do with the version of SuperCollider or O/S being used.
+
 
 ## Basics
 
