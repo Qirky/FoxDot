@@ -227,8 +227,11 @@ class PlayerObject(repeatable_object):
 
             # Add to clock        
             self.isplaying = True
+            self.stopping = False
+            
             self.event_index = self.metro.NextBar()
             self.event_n = 0
+            
             self.metro.schedule(self, self.event_index)
 
         # If there is a designated solo player when updating, add this at next bar

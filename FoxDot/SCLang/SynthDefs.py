@@ -66,6 +66,7 @@ with SynthDef("scatter") as scatter:
 with SynthDef("charm") as charm:
     charm.osc = SinOsc.ar([charm.freq, charm.freq + 2 * 2], mul=charm.amp / 4) + VarSaw.ar(charm.freq * 8, 10, mul=charm.amp/8)
     charm.osc = LPF.ar(charm.osc, SinOsc.ar(Line.ar(1,charm.rate*4, charm.sus/8),0,charm.freq*2,charm.freq*2 + 10 ))
+    charm.env = Env.perc()
 
 with SynthDef("bell") as bell:
     bell.defaults.update(verb = 0.5, room = 0.5)

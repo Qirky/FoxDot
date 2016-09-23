@@ -5,21 +5,19 @@
 
 """
 
+import os, socket
 from OSC import *
-from Settings import *
-
-import socket
 from subprocess import Popen
 from time import sleep
-import os
+
 
 class ServerManager:
 
-    def __init__(self, addr=ADDRESS, port=int(PORT)):
+    def __init__(self, addr, osc_port, sclang_port):
 
         self.addr = addr
-        self.port = port
-        self.SCLang_port = port + 10 # TODO
+        self.port = osc_port
+        self.SCLang_port = sclang_port
 
         self.booted = False
         self.wait_time = 5
@@ -104,8 +102,8 @@ class ServerManager:
     # -------------
 
     def boot(self):
+        """ Don't use """
 
-        print self.count
         self.count += 1
 
         if not self.booted:
@@ -114,7 +112,7 @@ class ServerManager:
             
             os.chdir(SC_DIRECTORY)
             
-            print "Booting SuperCollider Server..."
+            print("Booting SuperCollider Server...")
             
             self.daemon = Popen([SCLANG_EXEC, '-D', conf])
 
@@ -126,7 +124,7 @@ class ServerManager:
 
         else:
             
-            print "Warning: SuperCollider already running"
+            print("Warning: SuperCollider already running")
             
         return
 
@@ -139,6 +137,6 @@ class ServerManager:
 
 if __name__ != "__main__":
 
-    # don't boot server unless imported
+    from Settings import ADDRESS, PORT, PORT2
 
-    Server = ServerManager()
+    Server = ServerManager(ADDRESS, PORT, PORT2)

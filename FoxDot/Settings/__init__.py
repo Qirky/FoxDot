@@ -27,18 +27,14 @@ FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../../")
 SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 OSC_FUNC     = "/FoxDot/SCLang/OSCFunc.scd"
 
-# Open custom settings
-
-##with open(os.path.join(FOXDOT_ROOT, 'FoxDot', 'Settings', 'conf.txt')) as f:
-##    _conf = dict([line.replace("\n","").split("=",1) for line in f.readlines() if "=" in line])
+# Set Environment Variables
 
 import conf
-
-# Set Environment Variables
 
 SC_DIRECTORY  = conf.SUPERCOLLIDER
 ADDRESS       = conf.ADDRESS
 PORT          = conf.PORT
+PORT2         = conf.PORT2
 FONT          = conf.FONT
 SC3_PLUGINS   = conf.SC3PLUGINS
 MAX_CHANNELS  = conf.MAX_CHANNELS
