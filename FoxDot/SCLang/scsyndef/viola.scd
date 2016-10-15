@@ -5,6 +5,6 @@ amp = amp / 2;
 freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
 freq = Vibrato.kr(freq, rate: vib);
 freq=freq;
-osc=LPF.ar(HPF.ar(PMOsc.ar(freq, Vibrato.kr(freq, delay: (sus * 0.25), rate: vib, depth: 0.008), 10, mul: (amp / 2)), hpf), (lpf + 1));
+osc=Decimator.ar(LPF.ar(HPF.ar(PMOsc.ar(freq, Vibrato.kr(freq, delay: (sus * 0.25), rate: vib, depth: 0.008), 10, mul: (amp / 2)), hpf), (lpf + 1)), rate: 44100, bits: bits);
 env=EnvGen.ar(Env.perc((0.25 * sus), (2.5 * sus), level: amp, releaseTime: sus), doneAction: 2);
 	Out.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))}).add;

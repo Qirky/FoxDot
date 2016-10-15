@@ -6,6 +6,6 @@ freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
 freq = Vibrato.kr(freq, rate: vib);
 amp=(amp + 1e-05);
 freq=[freq, (freq + LFNoise2.ar(50).range(-2, 2))];
-osc=LPF.ar(HPF.ar(((((SinOsc.ar((freq * 1.002), phase: VarSaw.ar(freq, width: Line.ar(1, 0.2, 2))) * 0.3) + (SinOsc.ar(freq, phase: VarSaw.ar(freq, width: Line.ar(1, 0.2, 2))) * 0.3)) * XLine.ar((amp + 1e-05), ((amp + 1e-05) / 10000), (sus * 4))) * 0.3), hpf), (lpf + 1));
-env=EnvGen.ar(Env([0, amp, amp, 0], [0, (sus * 1.5), 0], releaseTime: sus, level: amp, levels: [0, amp, amp, 0], times: [0, (sus * 1.5), 0]), doneAction: 2);
+osc=Decimator.ar(LPF.ar(HPF.ar(((((SinOsc.ar((freq * 1.002), phase: VarSaw.ar(freq, width: Line.ar(1, 0.2, 2))) * 0.3) + (SinOsc.ar(freq, phase: VarSaw.ar(freq, width: Line.ar(1, 0.2, 2))) * 0.3)) * XLine.ar((amp + 1e-05), ((amp + 1e-05) / 10000), (sus * 4))) * 0.3), hpf), (lpf + 1)), rate: 44100, bits: bits);
+env=EnvGen.ar(Env([0, amp, amp, 0], [0, (sus * 1.5), 0], releaseTime: sus, level: amp, levels: [0, amp, amp, 0], curve: 'step', times: [0, (sus * 1.5), 0]), doneAction: 2);
 	Out.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))}).add;

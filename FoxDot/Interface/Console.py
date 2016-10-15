@@ -10,12 +10,12 @@ class console:
 
         self.Yscroll = Scrollbar(master)
         self.Yscroll.grid(column=1, sticky='nsew')
-        self.height = 10
+        self.height = 7
         
         self.text = Text( master, padx=5, pady=5,
                             height=self.height,
                             bg="Black", fg="White",
-                            font=(font, 12),
+                            font=(font, 16),
                             yscrollcommand=self.Yscroll.set)
 
         self.Yscroll.config(command=self.text.yview)

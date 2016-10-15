@@ -1,13 +1,18 @@
-from func_cmp import func_cmp
+from func_cmp import *
 
 class _whenStatement:
 
     def __init__(self, func):
         self.expr = func
+        self.reset()
+        self.remove_me = False
 
+    def __repr__(self):
+        return func_str(self.expr)
+
+    def reset(self):
         self.action = lambda: None
         self.notaction = lambda: None
-        
         self.do_switch = False
         self.elsedo_switch = False
 
@@ -16,13 +21,27 @@ class _whenStatement:
         if self.expr():
             if not self.do_switch:
                 self.action()
+                self.toggle_live_functions(True)
                 self.do_switch = True
                 self.elsedo_switch = False
         else:
             if not self.elsedo_switch:
                 self.notaction()
+                self.toggle_live_functions(False)
                 self.do_switch = False
                 self.elsedo_switch = True
+
+    def toggle_live_functions(self, switch):
+        """ If the action functions are @livefunctions, turn them on/off """    
+        try:
+            self.action.live = switch
+        except:
+            pass
+        try:
+            self.notaction.live = (not switch)
+        except:
+            pass
+        return
                 
     def do(self, func):
         if callable(func):
@@ -35,21 +54,29 @@ class _whenStatement:
         return self
     
     def stop(self):
-        pass
+        self.reset()
+        return self
+
+    def remove(self):
+        self.reset()
+        self.remove_me = True
+        return self
 
 class _whenLibrary:
     """
         Example:
         
-        when(lambda: x==10).do(lambda: p.shuffle()).elsedo(lambda: p. reverse())
-                
+        A. when(lambda: x==10).do(lambda: p.shuffle()).elsedo(lambda: p. reverse())               
         
     """
-    metro = None
-    dur   = 0.125
     def __init__(self):
         self.library = []
-        self.scheduled = False
+
+    def __len__(self):
+        return len(self.library)
+
+    def __repr__(self):
+        return repr(self.library)        
         
     def __call__(self, func=None, **kwargs):
         """ Calling when() with no arguments will evaluate all expressions
@@ -60,13 +87,17 @@ class _whenLibrary:
         """
         # Calling with no argument executes the statements
         
-        if func is None and self.scheduled:
+        if func is None:
             
             for expression in self.library:
 
-                expression.evaluate()
+                if expression.remove_me == True:
 
-            self.metro.schedule(self, self.metro.now() + self.dur)
+                    self.library.remove(expression)
+
+                else:
+
+                    expression.evaluate()
 
         # Giving it a function will return the corresponding when statement
         # or create a new one if it doesn't exist
@@ -84,13 +115,6 @@ class _whenLibrary:
 
                 self.library.append(_whenStatement(func))
 
-                # Schedule in the clock
-        
-                if not self.scheduled:
-
-                    self.metro.schedule(self, self.metro.now() + self.dur)
-                    self.scheduled = True
-
                 # Return the last added expression
 
                 return self.library[-1]
@@ -100,7 +124,6 @@ class _whenLibrary:
     def reset(self):
         """ Clears the library and stop scheduling """
         self.library = []
-        self.scheduled = False
         return self
 
 when = _whenLibrary()

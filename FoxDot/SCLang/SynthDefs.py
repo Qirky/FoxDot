@@ -11,7 +11,8 @@ with SynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate) * play.amp * 3
-    play.env  = Env.block(sus=play.sus*2)
+    play.osc  = play.osc * OpenEnv.block(sus=play.sus * 2)
+    play.env  = Env.block(sus=2)
 
 # Synth Players
 
@@ -19,12 +20,16 @@ with SynthDef("pads") as pads:
     pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
     pads.env = Env.perc()
 
+noise = SynthDef("noise")
+noise.osc = LFNoise0.ar(noise.freq, noise.amp)
+noise.env = Env()
+noise.add()
+
 with SynthDef("dab") as synth:
      a = HPF.ar(Saw.ar(synth.freq / 4, mul=synth.amp / 2), 2000)
-     #b = HPF.ar(LFSaw.ar((synth.freq / 4) * 1.005, mul=synth.amp / 2), Env([5000,0,2500,5000],[synth.sus * 0.2, synth.sus * 0.2, synth.sus * 0.6]) )# XLine.kr(10000, 10, synth.sus))
-     b = VarSaw.ar(synth.freq / 4, mul=synth.amp, width=Env.perc(synth.sus / 20, synth.sus, 0.5, -5))
+     b = VarSaw.ar(synth.freq / 4, mul=synth.amp, width=OpenEnv.perc(synth.sus / 20, synth.sus / 4, 0.5, -5))
      synth.osc = a + b
-     synth.env = Env()
+     synth.env = Env(times=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
 dab = synth
 
 with SynthDef("varsaw") as synth:
@@ -45,7 +50,7 @@ with SynthDef("bass") as bass:
     bass.env  = Env.perc()
 
 with SynthDef("dirt") as dirt:
-    dirt.amp  = dirt.amp * 0.8
+    dirt.amp  = dirt.amp * 1.2
     dirt.freq = dirt.freq / 2
     dirt.osc  = LFSaw.ar(dirt.freq, mul=dirt.amp) + VarSaw.ar(dirt.freq + 1, width=0.85, mul=dirt.amp) + SinOscFB.ar(dirt.freq - 1, mul=dirt.amp/2)
     dirt.env  = Env.perc()

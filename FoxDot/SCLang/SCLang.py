@@ -183,6 +183,8 @@ class EnvGen(instance):
     
     defaults = { 'releaseTime' : sus,
                  'level'       : amp }
+
+    doneAction = 2
     
     def __init__(self, string):
         self.value = str(string)
@@ -190,18 +192,23 @@ class EnvGen(instance):
         if not self.ismethod():
             kwargs['levels'] = args[0] if len(args) > 0 else kwargs.get('levels', [0,self.amp,0])
             kwargs['times']  = args[1] if len(args) > 1 else kwargs.get('times', [self.sus / 2] * 2)
+            
         return instance.__call__(self, *args, **kwargs)
     def ismethod(self):
         return '.' in self.value
     def __str__(self):
-        return str( cls("EnvGen").ar(instance(self.value), doneAction=2))
+        return str( cls("EnvGen").ar(instance(self.value), doneAction=self.doneAction))
     """ Custom Envelopes """
     def block(self, *args, **kwargs):
-        return self.__call__([0,self.amp,self.amp,0],[0,kwargs.get("sus", self.sus),0])
+        return self.__call__([0,self.amp,self.amp,0],[0,kwargs.get("sus", self.sus),0], curve="'step'")
     def reverse(self, *args, **kwargs):
         return self.__call__(levels=[0.001, self.amp, 0.001], times=[kwargs.get("sus", self.sus), 0.001], curve="'exp'")
+
+class OpenEnvGen(EnvGen):
+    doneAction = 0
         
-Env = EnvGen("Env")
+Env     = EnvGen("Env")
+OpenEnv = OpenEnvGen("Env")
 
 # Container for SynthDefs
 
@@ -322,7 +329,7 @@ class SynthDef:
     # Returning the SynthDefProxy
     # ---------------------------
 
-    def __call__(self, degree=0, **kwargs):
+    def __call__(self, degree=None, **kwargs):
         return SynthDefProxy(self.name, degree, kwargs)
 
     # Getter and setter

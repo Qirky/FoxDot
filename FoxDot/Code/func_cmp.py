@@ -20,3 +20,8 @@ def func_cmp(funcA, funcB):
     return all([A_bytecode == B_bytecode,
                 A_constants == B_constants,
                 A_variables == B_variables])
+
+def func_str(func):
+    """ Returns a function as a string """
+    code = func.__code__
+    return ",".join([func.__name__, str(code.co_names), str(code.co_consts)])

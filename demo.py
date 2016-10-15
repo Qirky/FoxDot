@@ -17,7 +17,7 @@ hh >> play("~", dur=var([1/2,1/4],[4,2,3,1]))
 
 cp >> play("*[*]", amp=Prand([1,0])[:8], room=0.5, rate=5)
 
-group(bb,bd,sn).hpf=var([0,4000],[28,4])
+Group(bb,bd,sn).hpf=var([0,4000],[28,4])
 
 d2 >> dirt(var([0,var([2,6],[12,4])],[3,1]), amp=Prand([1,0])[:16] * 2, dur=1/4) + var([0,3],[24,8])
 

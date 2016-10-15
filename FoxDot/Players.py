@@ -61,14 +61,16 @@ class PlayerObject(repeatable_object):
         # Used for checking clock updates
         
         self.old_dur = None
+        self.old_pattern_dur = None
+        
         self.isplaying = False
         self.isAlive = True
         self.last_offset = 0
 
         # These dicts contain the attribute and modifier values that are sent to SuperCollider
 
-        self.attr = {}
-        self.modf = {}
+        self.attr  = {}
+        self.modf  = {}
 
         # Hold a list of any schedule methods
 
@@ -76,7 +78,9 @@ class PlayerObject(repeatable_object):
 
         # Keyword arguments that are used internally
 
-        self.keywords = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay')
+        self.frequency_mod = [0]
+
+        self.keywords = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay', 'blur', 'amplify')
         
         # List the internal variables we don't want to send to SuperCollider
 
@@ -115,17 +119,28 @@ class PlayerObject(repeatable_object):
     # --- Startup methods
 
     def reset(self):
-        self.dur    = self.attr['dur']      =  [0]
-        self.degree = self.attr['degree']   =  [0]
-        self.oct    = self.attr['oct']      =  [5]
-        self.amp    = self.attr['amp']      =  [1]
-        self.pan    = self.attr['pan']      =  [0]
-        self.sus    = self.attr['sus']      =  [1]
-        self.rate   = self.attr['rate']     =  [1]
-        self.buf    = self.attr['buf']      =  [0]
-        self.echo   = self.attr['echo']     =  [0]
-        self.offset = self.attr['offset']   =  [0]
-        self.delay  = self.attr['delay']    =  [0]
+        # Duration of notes
+        self.dur     = self.attr['dur']      =  [0.5 if self.SynthDef is SamplePlayer else 1]
+        self.offset  = self.attr['offset']   =  [0]
+        self.delay   = self.attr['delay']    =  [0]
+        # Degree of scale / Characters of samples
+        self.degree  = self.attr['degree']   =  [0]
+        # Octave of the note
+        self.oct     = self.attr['oct']      =  [5]
+        # Amplitude
+        self.amp     = self.attr['amp']      =  [1]
+        self.amplify = self.attr['amplify']  =  [1]
+        # Left-Right panning (-1,1)
+        self.pan     = self.attr['pan']      =  [0]
+        # Sustain and blur (aka legato)
+        self.sus     = self.attr['sus']      =  [1]
+        self.blur    = self.attr['blur']     =  [1]
+        # Rate - varies between SynthDef
+        self.rate    = self.attr['rate']     =  [1]
+        # Audio sample buffer number
+        self.buf     = self.attr['buf']      =  [99]
+        # Echo amount
+        self.echo    = self.attr['echo']     =  [0]
         #self.bpm = ...
         self.freq   = [0]
         self.modf = dict([(key, [0]) for key in self.attr])
@@ -135,9 +150,13 @@ class PlayerObject(repeatable_object):
 
     def __call__(self):
 
+        # If stopping, kill the event
+
         if self.stopping and self.metro.now() >= self.stop_point:
             self.kill()
             return
+
+        # If the duration has changed, work out where the internal markers should be
 
         if self.dur_updated():
 
@@ -146,6 +165,14 @@ class PlayerObject(repeatable_object):
         # Get the current state
 
         self.get_event()
+
+        # Play the note
+
+        if self.metro.solo == self:
+
+            self.freq = 0 if self.SynthDef is SamplePlayer else self.calculate_freq()
+
+            self.send()
 
         # Get next occurence
 
@@ -167,14 +194,6 @@ class PlayerObject(repeatable_object):
 
         self.event_n += 1 if not self.reversing else -1
         self.notes_played += 1
-
-        # Play the note
-
-        if self.metro.solo == self:
-
-            self.freq = 0 if self.SynthDef is SamplePlayer else self.calculate_freq()
-
-            self.send()
 
         return
 
@@ -240,20 +259,19 @@ class PlayerObject(repeatable_object):
 
             self.metro.schedule(lambda: self.metro.solo.add(self), self.metro.NextBar() - 0.001)
 
-        setattr(self, "SynthDef", synthdef)
-
         if not self._INIT:
+
+            self.scale = kwargs.get("scale", PlayerObject.default_scale )
+            self.root = self.attr['root']  = asStream(kwargs.get( "root",  PlayerObject.default_root ))
 
             if synthdef is SamplePlayer: 
 
-                self.dur = self.attr['dur'] = asStream(0.5)
+                self.dur = self.attr['dur'] = self.old_dur = asStream(0.5)
                 self.old_pattern_dur = self.dur
 
             else:
 
-                self.scale = kwargs.get("scale", PlayerObject.default_scale )
-                self.root = self.attr['root']  = asStream(kwargs.get( "root",  PlayerObject.default_root ))
-                self.dur  = self.attr['dur']   = asStream(1)
+                self.dur  = self.attr['dur'] = self.old_dur = asStream(1)
                 self.sus  = self.attr['sus']   = asStream(1)
 
         # Finish init (any assigned attributes now go in the player.attr dict
@@ -270,15 +288,19 @@ class PlayerObject(repeatable_object):
 
         if synthdef is SamplePlayer:
 
-            setattr(self, "degree", "".join(degree) if len(degree) > 0 else " ")
+            setattr(self, "degree", degree if len(degree) > 0 else " ")
 
         else:
 
-            setattr(self, "degree", degree)
+            if degree is not None:
+
+                setattr(self, "degree", degree)
 
             if 'sus' not in kwargs:
 
                 setattr(self, 'sus', self.dur)
+
+        setattr(self, "SynthDef", synthdef)
 
         return self
 
@@ -290,9 +312,20 @@ class PlayerObject(repeatable_object):
     
 
     def rhythm(self):
-        r = asStream(self.attr['dur'])
+        # If a TimeVar
+        if isinstance(self.attr['dur'], TimeVar.Pvar):
+            r = asStream(self.attr['dur'].now().data)
+        elif isinstance(self.attr['dur'], TimeVar.Pvar):
+            r = asStream(self.attr['dur'].data)
+        else:
+            r = asStream(self.attr['dur'])
+            
         if self.SynthDef is SamplePlayer:
-            r = r * [char.dur for char in self.attr['degree'].flat()]
+            try:
+                d = self.attr['degree'].now()
+            except:
+                d = self.attr['degree']
+            r = r * [char.dur for char in d.flat()]
         return r
 
     def pattern_rhythm_updated(self):
@@ -353,6 +386,8 @@ class PlayerObject(repeatable_object):
 
             except:
 
+                WarningMsg("Invalid degree / octave arguments for frequency calculation, reset to default")
+
                 raise
 
             f.append( miditofreq(midinum) )
@@ -365,7 +400,7 @@ class PlayerObject(repeatable_object):
 
         # Add to modulator
 
-        self.modf['freq'] = asStream(data)
+        self.frequency_mod = asStream(data)
 
         return self
 
@@ -461,15 +496,24 @@ class PlayerObject(repeatable_object):
 
         modifier_event_n = self.event_n
 
+        attr_value = self.attr[attr]
+
         # Get which instrument is leading
 
-        if self.following and attr == 'degree':
+        if attr == 'degree':
 
-            attr_value = self.following.now('degree')
-            
-        else:
+            if self.following:
+
+                # Use a timevar to work out where the degree should be
+                if isinstance(self.following, TimeVar.var):
+
+                    attr_value = self.following.degree
+
+                else:
+                
+                    attr_value = TimeVar.var(self.following.degree, self.following.dur)
     
-            attr_value = modi(self.attr[attr], self.event_n + x)
+        attr_value = modi(asStream(attr_value), self.event_n + x)
         
         # If the attribute isn't in the modf dictionary, default to 0
 
@@ -539,7 +583,6 @@ class PlayerObject(repeatable_object):
 
         message = ['echoOn', int(self.event['echo'] > 0),
                    'freq',   float(modi(self.freq, index)) ]
-                   # 'delay',  float(delay * self.metro.BeatDuration() * index)]
 
         for key in self.attr:
 
@@ -549,9 +592,15 @@ class PlayerObject(repeatable_object):
                     
                     val = modi(self.event[key], index)
 
+                    # Special case modulation
+
                     if key == "sus":
 
-                        val = val * self.metro.BeatDuration()
+                        val = val * self.metro.BeatDuration() * modi(self.event['blur'], index)
+
+                    elif key == "amp":
+
+                        val = val * modi(self.event['amplify'], index)
 
                     message += [key, float(val)]
 
@@ -571,14 +620,20 @@ class PlayerObject(repeatable_object):
             osc_msg = self.osc_message(i)
 
             delay = modi(self.event['delay'], i)
+            amp   = modi(self.event['amp'], i)
+            buf   = modi(self.event['buf'], i)
 
-            if delay > 0:
+            # Any messages with zero amps or 0 buf are not sent
 
-                self.metro.schedule(send_delay(self, osc_msg), self.metro.now() + delay)
+            if amp > 0 and buf > 0:
+
+                if delay > 0:
+
+                    self.metro.schedule(send_delay(self, osc_msg), self.metro.now() + delay)
+                    
+                else:
                 
-            else:
-            
-                self.server.sendNote(self.SynthDef, osc_msg)
+                    self.server.sendNote(str(self.SynthDef), osc_msg)
 
         return
 
@@ -676,6 +731,10 @@ class PlayerObject(repeatable_object):
     def reverse(self):
         """ Sets flag to reverse streams """
         self.reversing = not self.reversing
+        if self.reversing:
+            self.event_n -= 1
+        else:
+            self.event_n += 1
         return self
 
     def shuffle(self, attr=None):
@@ -740,7 +799,6 @@ class PlayerObject(repeatable_object):
             self.delay = asStream(dur)
         return self
 
-
     def __repr__(self):
         return "a '%s' Player Object" % self.SynthDef
 
@@ -775,40 +833,33 @@ class Group:
     def __len__(self):
         return len(self.players)
 
+    def __str__(self):
+        return str(self.players)
+
     def __setattr__(self, name, value):
         try:
-
-            for i, p in enumerate(self.players):
-
+            for p in self.players:
                 try:
-
                     setattr(p, name, value)
-
                 except:
-
                     WarningMsg("'%s' object has no attribute '%s'" % (str(p), name))
         except:
-
             self.__dict__[name] = value 
-
         return self        
 
     def __getattr__(self, name):
         """ Returns a Pattern object containing the desired attribute for each player in the group  """
-        return P([player.__dict__[name] for player in self.players])
+        if name == "players":
+            return self.players
+        attributes = GroupAttr()
+        for player in self.players:
+            if hasattr(player, name):
+                attributes.append(getattr(player, name))
+        return attributes
 
-    def call(self, method, args):
-        for p in self.players:
-            p.__dict__[method].__call__(*args)
-
-    def stop(self, n=0):
-        for item in self.players:
-            item.stop(n)
-        return self
-
-    def play(self):
-        for item in self.players:
-            item.play()
-        return self
-
-group = Group
+class GroupAttr(list):
+    def __call__(self, *args, **kwargs):
+        for p in self:
+            if callable(p):
+                p.__call__(*args, **kwargs)
+        

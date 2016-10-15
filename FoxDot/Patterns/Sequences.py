@@ -17,22 +17,7 @@ class PStutter(Base.Pattern):
     """ PStutter(pattern, n) -> Creates a pattern such that each item in the array is repeated n times (can be a pattern) """
 
     def __init__(self, data, n=1):
-
-        n = P(n)
-
-        lrg = max(len(data), len(n))
-
-        self.data = []
-
-        for i in range(lrg):
-            for j in range(op.modi(n,i)):
-                self.data.append(op.modi(data,i))
-
-##        for i, item in enumerate(data):
-##            for j in range(op.modi(n,i)):
-##                self.data.append( item )
-
-        self.make()
+        self.data = P(data).stutter(n).data
 
 Pstutter = PStutter #: Alias for PStutter()
 
@@ -73,18 +58,12 @@ class PxRand(Base.Pattern):
     """
 
     def __init__(self, a, b=None):
-        if isinstance(a, list):
-            self.data = a
-        else:
-            self.data = range(a,b)
+        if not isinstance(a, list):
+            a = range(a, b) if b is not None else range(a)
+        self.data = [random.choice(a)]
+        for n in range(MAX_SIZE):
+            self.data.append(random.choice([item for item in a if item != self.data[-1]]))
         self.make()
-    def __iter__(self):
-        for item in self.data:
-            yield self.choose()
-    def __getitem__(self, key):
-        return self.choose()
-    def __getslice__(self, start, end):
-        return PxRand([self.choose() for n in range(start, end)])
 
 Pxrand = PxRand #: Alias for PxRand
 
@@ -104,6 +83,16 @@ class PSq(Base.Pattern):
         self.data = [x*b for x in range(a,a+c)]
         self.make()
 
+class PAlt(Base.Pattern):
+    def __init__(self, *patterns):
+        self.data = []
+        item = [Base.asStream(p) for p in patterns]
+        size = op.LCM(*[len(i) for i in item])
+        for n in range(size):
+            for i in item:
+                self.data.append(op.modi(i,n))
+        self.make()
+        
 
 class PSum(Base.Pattern):
     """

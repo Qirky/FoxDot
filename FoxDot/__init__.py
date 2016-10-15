@@ -32,8 +32,13 @@ from SCLang.SynthDefs import *
 """ CLOCK """
 
 Clock = TempoClock()
+Clock.when_statements = when
+
 when.metro = var.metro = Clock
 PlayerObject.metro  = Clock
+
+Clock.start()
+
 PlayerObject.server = Server
 PlayerObject.default_scale = Scale.default()
 PlayerObject.default_root  = Root.default()
@@ -63,6 +68,13 @@ for char1 in alphabet:
         name = char1+char2
 
         FoxDotCode.namespace[name] = PlayerObject()
+
+class futureprint:
+    """ Wraps Python 2.7 print statements as a function """
+    def __init__(self, string=""):
+        self.string = string
+    def __call__(self):
+        print self.string
 
 
 """ IDE """

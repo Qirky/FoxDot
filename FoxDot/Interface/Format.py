@@ -9,7 +9,8 @@ def path(fn):
 # RegEx Group 1
 user_defn = r"(?<=def )(\w+)"
 players   = r"(?<=>> )(\w+)"
-comments  = r"#.*"
+comments  = r"^\s*#.*"
+decorator = r"\A@\S+"
 numbers   = r"(?<![a-zA-Z])\d+"
 strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
@@ -53,7 +54,7 @@ def userdefined(line):
 from ..Patterns import Sequences, Feeders
 from ..SCLang import SCLang
 
-foxdot_kw = ["Clock","Group","group","Scale","Server","Root","BufferManager"] + ["var","Pvar","linvar","inf"]
+foxdot_kw = ["Clock","Group","Scale","Server","Root","BufferManager","var","Pvar","linvar","inf","lambda", decorator]
 
 foxdot_funcs = classes(Sequences) #+ functions(Feeders) + instances(SCLang, SCLang.cls) + instances(SCLang, SCLang.EnvGen)
 
@@ -62,7 +63,7 @@ foxdot_funcs = classes(Sequences) #+ functions(Feeders) + instances(SCLang, SCLa
 py_indent_kw = ["for","if","elif","else","def","while","class","try","except","when"]
 
 py_functions = ["if","elif","else","return","def","print","when","from",
-                 "and","or","not","is","in","for","as","with","lambda",
+                 "and","or","not","is","in","for","as","with",
                  "while", "class", "import", "try","except","from"]
 
 py_other_kws = foxdot_kw + ["True", "False", "None", "self"]
@@ -93,33 +94,6 @@ functions = r"(?<![a-zA-Z.])(" + "|".join(py_functions) + ")(?![a-zA-Z])"
 key_types = r"(?<![a-zA-Z.])(" + "|".join(py_key_types) + ")(?![a-zA-Z])"
 other_kws = r"(?<![a-zA-Z.])(" + "|".join(py_other_kws) + ")(?![a-zA-Z])"
 
-# Load Default Colour Values
-
-##try:
-##
-##    with open(path("../Settings/text_colour.txt")) as f:
-##
-##        data = f.readlines()
-##
-##except:
-##
-##    data = ["plaintext=#ffffff",
-##            "background=#4d4d4d",
-##            "functions=#66ff99",
-##            "key_types=#66ccff",
-##            "user_defn=#ff9999",
-##            "other_kws=#ff99ff",
-##            "comments=#FF3300",
-##            "numbers=#FF9900",
-##            "strings=#ffff99",
-##            "dollar=#cc33ff",
-##            "arrow=#ffff99",
-##            "players=#cc33ff" ]    
-##
-### Generate colour mappings from config file
-##
-##colour_map = dict([line.replace("\n","").split("=") for line in data])
-
 colour_map = {'plaintext'  : COLOURS.plaintext,
               'background' : COLOURS.background,
               'functions'  : COLOURS.functions,
@@ -149,5 +123,5 @@ re_patterns = {  'functions' : functions,
 
 tag_weights = [['numbers'],
                ['key_types','functions','user_defn','other_kws','dollar','arrow','players'],
-               ['comments'],
-               ['strings']]
+               ['strings'],
+               ['comments']]

@@ -4,6 +4,7 @@ import sys
 from types import CodeType, FunctionType, TypeType
 from traceback import format_exc as error_stack
 from when_statements import when
+from live_functions import livefunction
 from ..Patterns.Operations import modi
 
 
@@ -69,13 +70,17 @@ class FoxDotCode:
 
         except:
 
-            print error_stack()
+            print(error_stack())
 
             raise
 
         return
 
 execute = FoxDotCode()
+
+""" Returns the value of objects if they are time-varying """
+def get_now(obj):
+    return getattr(obj, 'now', lambda: obj).__call__()
 
 """ Printing / Formatting functions """
 

@@ -1,8 +1,9 @@
-class test:
-    def __bool__(self):
-        return False
+class Parent:
+    pass
 
+class Child(Parent):
+    pass
 
-a = test()
+a = Child()
 
-print bool(a)
+print super(type(a))

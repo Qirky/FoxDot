@@ -97,13 +97,29 @@ class FoxDot:
         self.text.bind("<{}-minus>".format(ctrl),           self.zoom_out)
         self.text.bind("<{}-z>".format(ctrl),               self.undo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
-        self.text.bind("<{}-o>".format(ctrl),               self.openfile)        
-        self.text.bind("<{}-h>".format(ctrl),               self.help)
+        self.text.bind("<{}-o>".format(ctrl),               self.openfile)
+
+        # Change ctrl+h on Mac (is used to close)
+
+        if SYSTEM == MAC_OS:
+                       
+            self.text.bind("<{}-k>".format(ctrl), self.help)
+            self.help_key = "K"
+
+        else:
+
+            self.text.bind("<{}-h>".format(ctrl), self.help)
+            self.help_key = "H"
+
+        # Toggle console button keybind
 
         try:
+            
             self.text.bind("<{}-#>".format(ctrl), self.toggle_console)
             self.toggle_key = "#"
+            
         except:
+            
             self.text.bind("<{}-t>".format(ctrl), self.toggle_console)
             self.toggle_key = "T" 
 
@@ -144,7 +160,7 @@ class FoxDot:
 
         # Say Hello to the user
 
-        print "Welcome to FoxDot! Press Ctrl+H for help."
+        print "Welcome to FoxDot! Press Ctrl+{} for help.".format(self.help_key)
         print "-----------------------------------------"
 
     def run(self):

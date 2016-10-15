@@ -60,6 +60,12 @@ class var(repeatable_object):
 
         self.current_value = None
 
+        # If the clock is not ticking, start it
+
+        if self.metro.ticking == False:
+
+            self.metro.start()
+
     @staticmethod
     def stream(values):
         return asStream(values)
@@ -90,7 +96,7 @@ class var(repeatable_object):
     def __radd__(self, other):
         new = self.new(other)
         new.evaluate = fetch(op.rAdd)
-        return new 
+        return new
 
     # -
     def __sub__(self, other):
@@ -111,6 +117,18 @@ class var(repeatable_object):
         new = self.new(other)
         new.evaluate = fetch(op.Mul)
         return new
+
+    # **
+
+    def __pow__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.rPow)
+        return new
+
+    def __rpow__(self, other):
+        new = self.new(other)
+        new.evaluate = fetch(op.Pow)
+        return new
     
     # /
     def __div__(self, other):
@@ -130,35 +148,51 @@ class var(repeatable_object):
         new.evaluate = fetch(op.Div)
         return new
 
+    # Incremental operators (use in place of var = var + n)
+    def __iadd__(self, other):
+        self.data = self.data + other
+        return self
+    def __isub__(self, other):
+        self.data = self.data - other
+        return self
+    def __imul__(self, other):
+        self.data = self.data * other
+        return self
+    def __idiv__(self, other):
+        self.data = self.data / other
+        return self
+
     # Comparisons
 
     def __gt__(self, other):
-        return self.now() > other
+        return float(self.now()) > float(other)
 
     def __lt__(self, other):
-        return self.now() < other
+        return float(self.now()) < float(other)
 
     def __ge__(self, other):
-        return self.now() >= other
+        return float(self.now()) >= float(other)
 
     def __le__(self, other):
-        return self.now() >= other
+        return float(self.now()) >= float(other)
 
     # %
+    #def __mod__(self, other):
+        #return float(self.now()) % other
     def __mod__(self, other):
-        return float(self.now()) % other
+        new = self.new(other)
+        new.evaulate = fetch(op.rMod)
+        return new
 
-    def __rmod__(self, other):
-        return other % float(self.now())
+    #def __rmod__(self, other):
+        #return other % float(self.now())
     
-####        new = self.new(other)
-####        new.evaulate = fetch(op.rMod)
-####        return new
-##
-##    def __rmod__(self, other): #works
-##        new = self.new(other)
-##        new.evaluate = fetch(op.Mod)
-##        return new
+        
+
+    def __rmod__(self, other): #works
+        new = self.new(other)
+        new.evaluate = fetch(op.Mod)
+        return new
 
     #  Comparisons
 
@@ -167,6 +201,12 @@ class var(repeatable_object):
 
     def __ne__(self, other):
         return other != self.now()
+
+    # Storing functions etc
+
+    def __call__(self, *args, **kwargs):
+        self.now().__call__(*args, **kwargs)
+        return
 
     # Emulating container types 
 
@@ -187,14 +227,8 @@ class var(repeatable_object):
 
     def new(self, other):
         """ Returns a new TimeVar object """
-            
-        if isinstance(other, var):
-            new = other
-        else:     
-            new = var(other, self.dur, bpm=self.bpm)
-
+        new = var(other, self.dur, bpm=self.bpm)
         new.dependency = self
-        
         return new
 
     def length(self):
@@ -224,12 +258,6 @@ class var(repeatable_object):
 
         self.bpm = kwargs.get('bpm', self.bpm)
 
-        #: If updated with a TimeVar object, copy the attribute dict
-        
-        if isinstance(values, self.__class__):
-            self.__dict__ = values.__dict__
-            return self
-        
         # if isinstance(values, str): values = [values]
 
         self.data = []
@@ -371,7 +399,7 @@ class var(repeatable_object):
         return self.data
 
     # 1. Methods that change the 'var' in place
-    def invert1(self):
+    def i_invert(self):
         lrg = float(max(self.data))
         for i, item in enumerate(self.data):
             self.data[i] = (((item / lrg) * -1) + 1) * lrg

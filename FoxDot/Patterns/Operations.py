@@ -65,10 +65,11 @@ Sub  = lambda a, b: a - b
 Mul  = lambda a, b: a * b
 Div  = lambda a, b: a / b
 Mod  = lambda a, b: a % b
+rMod = lambda a, b: b % a
 Pow  = lambda a, b: a ** b
+rPow = lambda a, b: b ** a
 rDiv = lambda a, b: b / a
 rSub = lambda a, b: b - a
-rMod = lambda a, b: b % a
 Get  = lambda a, b: a[b]
 rGet = lambda a, b: b[a]
 

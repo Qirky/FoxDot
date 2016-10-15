@@ -27,14 +27,18 @@ class repeatable_object:
         if cmd in self.repeat_events:
             
             self.repeat_events[cmd].update(n, args)
+
+            if not self.repeat_events[cmd].isScheduled():
+
+                self.repeat_events[cmd].schedule()
             
         else:
 
             call = MethodCall(self, cmd, n, args)
 
             self.repeat_events[cmd] = call
-            
-            self.metro.schedule(call)
+
+            call.schedule()
 
         return self
 
@@ -65,10 +69,17 @@ class MethodCall:
         # Call the parent's method
         getattr(self.parent, self.name).__call__(*args)
 
-        # Re-schedule
-        self.parent.metro.schedule(self, self.next - 0.001)
+        # Re-schedule the method call
+        self.schedule()
 
         return
+
+    def schedule(self):
+        self.parent.metro.schedule(self, self.next - 0.1)
+
+    def isScheduled(self):
+        """ Returns True if this is in the Tempo Clock """
+        return self in self.parent.metro
 
     def stop(self):
         del self.parent.repeat_events[self.name]

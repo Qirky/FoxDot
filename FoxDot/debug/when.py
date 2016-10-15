@@ -1,3 +1,4 @@
-from __future__ import division
+def when(stmt, do=1, elsedo=2):
+    print stmt, do, elsedo
 
-print 1 / 2
+when(lambda: x==1).do(lambda: x==1).elsedo(lambda: 10)

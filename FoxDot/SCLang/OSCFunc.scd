@@ -1,4 +1,6 @@
 (
+s.options.blockSize = 128;
+s.options.memSize = 32768;
 s.boot;
 
 OSCFunc(

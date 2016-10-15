@@ -19,6 +19,8 @@ line = "\n"
 
 class TempoClock:
 
+    when_statements = lambda: None
+
     def __init__(self, bpm=120.0, meter=(4,4)):
 
         self.bpm = bpm
@@ -28,9 +30,10 @@ class TempoClock:
         self.queue = Queue()
         self.ticking = False        
 
-        # Keeps track of the when statements and players
-        self.when_statements = {}
+        # Player Objects stored here
         self.playing = []
+
+        # All other scheduled items go here
         self.items = []
 
         # If one object is going to played
@@ -49,6 +52,9 @@ class TempoClock:
     def __len__(self):
 
         return len(self.queue)
+
+    def __contains__(self, item):
+        return item in self.items
 
     def Bar(self):
         """ Returns the length of a bar in terms of beats """
@@ -78,6 +84,11 @@ class TempoClock:
         threading.Thread(target=self.run).start()
         return
 
+    def when_eval(self):
+        """ Evaluates any 'when' statements """
+        if len(self.when_statements) > 0:
+            self.when_statements.__call__()
+        return
 
     def run(self):
 
@@ -85,26 +96,31 @@ class TempoClock:
 
         while self.ticking:
 
+            # Evaluate when_statements at EVERY possible opportunity
+
+            self.when_eval()            
+
             if self.now() >= self.queue.next():
 
                 # Call any item in the popped event
 
-                for item in self.queue.pop():
+                for item in self.queue.pop():    
 
                     item.__call__()
+
+                    # Test if any changes caused by item.__call__() affect when statements
+
+                    self.when_eval()
 
             # Make sure rest is positive so any events that SHOULD
             # have been played are played straight away
             rest = max((self.queue.next() - self.now()) * 0.25, 0)
 
             # If there are no events for at least 1 beat, sleep for 1 beat
-            sleep(min(self.beat(1), rest))
+            # sleep(min(self.beat(1), rest))
+            sleep(min(0.005, rest))
 
         return
-
-    def sleep(self):
-        
-        return None
 
     def schedule(self, obj, beat=None):
         """ Add a player / event to the queue """
@@ -179,6 +195,7 @@ class TempoClock:
 
         for player in self.playing:
 
+                player.reset()
                 player.kill()
 
         self.items = []
@@ -331,61 +348,3 @@ class SoloPlayer:
         return (other in self.data) if self.data else True
     def __ne__(self, other):
         return (other not in self.data) if self.data else True
-        
-
-
-##class When(Code.LiveObject):
-##    """
-##
-##        When Statements
-##        ===============
-##
-##        TODO
-##
-##    """
-##
-##    def __init__(self, test, code, step, clock):
-##
-##        if type(code) in (list, tuple):
-##            code = line.join(code)
-##
-##        self.metro = clock
-##        self.test  = test
-##        self.step  = step
-##        self.code  = self.check(code)
-##        self.n     = 0
-##
-##    @staticmethod
-##    def check(code):
-##        """ Test for syntax errors """
-##        return compile(code, "FoxDot" , 'exec') if type(code) == str else code
-##
-##    def __call__(self, *args):
-##        if type(self.code) == Code.FunctionType:
-##            self.code()
-##        else:
-##            Code.execute(self.code, verbose=False)
-##
-##        Code.LiveObject.__call__(self)
-##        
-##        return
-##
-##    def __repr__(self):
-##        return "< 'When %s'>" % str(self)
-##
-##    def __str__(self):
-##        return self.test
-##
-##    def __eq__(self, other):
-##        return str(self) == str(other)
-##
-##    def update(self, new, step=0.25):
-##        if isinstance(new, When):
-##            self.code = self.check(new.code)
-##            self.step = new.step
-##        else:
-##            self.code = self.check(new)
-##            self.step = step
-##        return        
-##
-##    

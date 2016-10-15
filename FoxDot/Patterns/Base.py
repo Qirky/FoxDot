@@ -1,13 +1,13 @@
 from random import choice, shuffle
 from Operations import *
-from Parse import Parse
-# from ..Code.parse import brackets, closing_brackets
-        
+from Comparisons import *
+from Parse import Parse        
 
 class metaPattern(object):
     """ Abstract base class """
 
     data = None
+    _now = None
 
     def __init__(self, data=[]):
         
@@ -39,7 +39,8 @@ class metaPattern(object):
         return string
     #: Container methods
     def __getitem__(self, key):
-        return self.data[key]
+        self._now = self.data[key] # store last value retrieved
+        return self._now
     def __setitem__(self, key, value):
         self.data[key] = value
     def __iter__(self):
@@ -79,59 +80,14 @@ class metaPattern(object):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return Pattern(asStream(other).pipe(self))
     #: Comparisons
-    def __eq__(self, other):
-        try:
-            return self.data == other.data
-        except:
-            return self.data == other
+    def __eq__(self, other): return Peq(self, other)
+    def __ne__(self, other): return Pne(self, other)
+    def __gt__(self, other): return Pgt(self, other)
+    def __ge__(self, other): return Pge(self, other)
+    def __lt__(self, other): return Plt(self, other)
+    def __le__(self, other): return Ple(self, other)
 
-    def __ne__(self, other):
-        try:
-            return self.data != other.data
-        except:
-            return self.data != other
-
-    def _fromString(self, string, dur=1):
-        """ Converts a string of characters to a pattern based on bracket syntax """
-        
-        i = 0
-        self.data = []
-        
-        bracket_styles = {"()" : Pattern,
-                          "[]" : PGroup,
-                          "{}" : Shared_Time_PGroup }
-
-        while i < len(string):
-
-            char = string[i]
-
-            if char in "([{":
-
-                # Get the characters in brackets
-
-                a, b = brackets(string, i, closing_brackets[char])
-
-                # Apply appropriate pattern type
-
-                PatternCls, s = bracket_styles[string[a]+string[b-1]], string[a+1:b-1]
-
-                # Apply any duration ratios
-
-                char = PatternCls().fromString(s, dur)
-
-                i = b - 1
-
-            else:
-
-                char = PCHAR(char, dur=dur)
-
-            self.data.append(char)
-
-            i += 1
-
-        self.make()
-
-        return self
+    #: Methods for strings as pattern
 
     def fromString(self, string):
         self.data = Parse(string)
@@ -158,11 +114,6 @@ class metaPattern(object):
         new = asStream(self.data)
         shuffle(new.data)
         return new
-
-    def shift(self, n=1):
-        """ Rotates the pattern left by n steps """
-        new = self.data[n:len(self.data)] + self.data[0:n]
-        return asStream(new)
     
     def stretch(self, size):
         """ Stretches (repeats) the contents until len(Pattern) == size """
@@ -183,10 +134,6 @@ class metaPattern(object):
         """ Used in place of sorted(pattern) to force type """
         return Pattern(sorted(self.data))
 
-    def append(self, item):
-        self[len(self):] = [item]
-        return self
-
     def reverse(self):
         new = [self.data[i-1] for i in range(len(self.data), 0, -1)]
         return Pattern(new)
@@ -200,6 +147,41 @@ class metaPattern(object):
             except:
                 new.append((((item / lrg) * -1) + 1) * lrg)
         return Pattern(new)
+
+    def rotate(self, n=1):
+        new = self.data[n:] + self.data[0:n]
+        return Pattern(new)
+
+    def stutter(self, n=2):
+        n = asStream(n)
+        lrg = max(len(self.data), len(n))
+        new = []
+        for i in range(lrg):
+            for j in range(modi(n,i)):
+                new.append(modi(self.data,i))
+        return Pattern(new)
+
+    # Changing the pattern in place
+
+    def append(self, item):
+        self[len(self):] = [item]
+        return self
+
+    def i_rotate(self, n=1):
+        self.data = self.data[n:] + self.data[0:n]
+        return self
+
+    def i_reverse(self):
+        self.data.reverse()
+        return self
+
+    def i_sort(self):
+        self.data = Pattern(sorted(self.data))
+        return self
+
+    def i_shuf(self):
+        shuffle(self.data)
+        return self
 
     # Boolean tests
 
@@ -223,15 +205,22 @@ class metaPattern(object):
     def pipe(self, pattern):
         """ Concatonates this patterns stream with another """
         data = list(self)
-        for item in pattern:
+        for item in asStream(pattern):
             data.append(item)
         return Pattern(data)
 
-    # Returns individual elements
+    # Returns individual elements / slices
 
     def choose(self):
         """ Returns one randomly selected item """
         return choice(self.data)
+
+    def trim(self, size):
+        return self[:size]
+
+    def ltrim(self, size):
+        return self[-size:]
+
 
     # Automatic expansion of nested patterns
 
