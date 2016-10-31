@@ -1,5 +1,12 @@
+### v0.1.7 fixes and updates
+- "Chop" added to default SynthDef behaviour
+- GUI icon updated
+- Using `var` objects for Player durations no longer crashes
+- New Pattern types added
+- FoxDot can be run using `python -m FoxDot` if FoxDot is in your PATH
+
 ### v0.1.6 fixes and updates
-- Decimator (a.k.a. bitcrush added to default SynthDef behaviour)
+- Decimator (a.k.a. bitcrush) added to default SynthDef behaviour
 - `SynthDefs` and `BufferManager` can be reloaded
 - Removed automatic bootup of sclang as default behaviour
 - Added new SynthDefs
