@@ -3,11 +3,11 @@ FoxDot - Live Coding with Python v0.1.6
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.1.6 fixes and updates
-- Decimator (a.k.a. bitcrush) added to default SynthDef behaviour
-- `SynthDefs` and `BufferManager` can be reloaded
-- Removed automatic bootup of sclang as default behaviour
-- Added new SynthDefs
+### v0.1.7 fixes and updates
+- "Chop" added to default SynthDef behaviour
+- GUI icon updated
+- Using `var` objects for Player durations no longer crashes
+- New Pattern types added
 
 See `docs/changelog` for more
 
