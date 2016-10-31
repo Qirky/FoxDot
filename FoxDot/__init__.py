@@ -79,13 +79,16 @@ class futureprint:
 
 """ IDE """
 
+
 def start():
 
     from Interface import FoxDot
+    FoxDot.namespace=FoxDotCode.namespace
     
     try:
         
-        FoxDot().run()
+        fx_ide = FoxDot()        
+        fx_ide.run()
         
     except (KeyboardInterrupt, SystemExit):
 

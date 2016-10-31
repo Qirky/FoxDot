@@ -15,7 +15,7 @@ class console:
         self.text = Text( master, padx=5, pady=5,
                             height=self.height,
                             bg="Black", fg="White",
-                            font=(font, 16),
+                            font=(font, 12),
                             yscrollcommand=self.Yscroll.set)
 
         self.Yscroll.config(command=self.text.yview)

@@ -1,9 +1,10 @@
-class Parent:
-    pass
+class test:
+    def __init__(self, val):
+        self.v = val
+    def __setattr__(self, name, value):
+        self.__dict__[name] = value
 
-class Child(Parent):
-    pass
-
-a = Child()
-
-print super(type(a))
+a = test(10)
+print a.v
+a.v = 1000
+print a.v

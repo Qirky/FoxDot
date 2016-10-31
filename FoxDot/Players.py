@@ -24,17 +24,23 @@ import TimeVar
 
 BufferManager = Buffers.BufferManager().from_file()
 
+class player_key:
+    def __init__(self, value):
+        self.value = value
+
 class PlayerObject(repeatable_object):
 
-    _VARS = []
-    _INIT = False
+    # These are the PlayerObject attributes NOT included in OSC messages
+    VARS = []
+    # This is an internal flag 
+    INIT = False
 
     metro = None
     server = None
 
     def __init__( self ):
         
-        self.SynthDef = None
+        self.synthdef = None
         self.quantise = False
         self.stopping = False
         self.stop_point = 0
@@ -44,13 +50,7 @@ class PlayerObject(repeatable_object):
         
         self.reversing = False
         self.degrading = False
-        self.when_statements = []
-
-        # Keeps track of echo effects
-
-        self.echo_on = False
-        self.echo_fx = {}
-
+        
         # Keeps track of which note to play etc
 
         self.event_index = 0
@@ -72,23 +72,18 @@ class PlayerObject(repeatable_object):
         self.attr  = {}
         self.modf  = {}
 
-        # Hold a list of any schedule methods
-
-        self.scheduled_events = {}
-
         # Keyword arguments that are used internally
 
         self.frequency_mod = [0]
 
-        self.keywords = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay', 'blur', 'amplify')
+        self.keywords = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay', 'blur', 'amplify', 'scale')
+        self.scale = None
         
         # List the internal variables we don't want to send to SuperCollider
 
-        self._VARS = self.__dict__.keys()
+        self.VARS = self.__dict__.keys()
 
-        # Default attribute dictionary
-
-        self.scale  = None
+        self.INIT = True
 
         self.reset()
 
@@ -109,10 +104,15 @@ class PlayerObject(repeatable_object):
         return self
 
     def __setattr__(self, name, value):
-        if self._INIT:
-            if name not in self._VARS:
+        if self.INIT:
+            # Force the data into a TimeVar or Pattern if the attribute is used with SuperCollider
+            if name not in self.VARS:
+                # Values can be assigned to player attributes using player_key()
+                if isinstance(value, player_key):
+                    self.__dict__[name] = value.value
                 value = asStream(value) if not isinstance(value, TimeVar.var) else value
                 self.attr[name] = value
+                return
         self.__dict__[name] = value
         return
 
@@ -120,31 +120,36 @@ class PlayerObject(repeatable_object):
 
     def reset(self):
         # Duration of notes
-        self.dur     = self.attr['dur']      =  [0.5 if self.SynthDef is SamplePlayer else 1]
-        self.offset  = self.attr['offset']   =  [0]
-        self.delay   = self.attr['delay']    =  [0]
+        self.dur     = 0.5 if self.synthdef is SamplePlayer else 1
+        self.old_pattern_dur = self.old_dur = self.attr['dur']
+        
+        self.offset  = 0
+        self.delay   = 0
         # Degree of scale / Characters of samples
-        self.degree  = self.attr['degree']   =  [0]
+        self.degree  = 0
         # Octave of the note
-        self.oct     = self.attr['oct']      =  [5]
+        self.oct     = 5
         # Amplitude
-        self.amp     = self.attr['amp']      =  [1]
-        self.amplify = self.attr['amplify']  =  [1]
+        self.amp     = 1
+        self.amplify = 1
         # Left-Right panning (-1,1)
-        self.pan     = self.attr['pan']      =  [0]
+        self.pan     = 0
         # Sustain and blur (aka legato)
-        self.sus     = self.attr['sus']      =  [1]
-        self.blur    = self.attr['blur']     =  [1]
+        self.sus     = 1
+        self.blur    = 1
         # Rate - varies between SynthDef
-        self.rate    = self.attr['rate']     =  [1]
+        self.rate    = 1
         # Audio sample buffer number
-        self.buf     = self.attr['buf']      =  [99]
+        self.buf     = 99
         # Echo amount
-        self.echo    = self.attr['echo']     =  [0]
+        self.echo    = 0
         #self.bpm = ...
-        self.freq   = [0]
+        # Frequency and modifier
+        self.freq   =  0
+        self.fmod   =  0
+        
         self.modf = dict([(key, [0]) for key in self.attr])
-        return self    
+        return self
 
     # --- Update methods
 
@@ -168,9 +173,9 @@ class PlayerObject(repeatable_object):
 
         # Play the note
 
-        if self.metro.solo == self:
+        if self.metro.solo == self: # TODO this syntax is ambiguous
 
-            self.freq = 0 if self.SynthDef is SamplePlayer else self.calculate_freq()
+            self.freq = 0 if self.synthdef is SamplePlayer else self.calculate_freq()
 
             self.send()
 
@@ -197,14 +202,14 @@ class PlayerObject(repeatable_object):
 
         return
 
-    def count(self):
+    def count(self, time=None):
 
         # Count the events that should have taken place between 0 and now()
 
         n = 0
         acc = 0
         dur = 0
-        now = self.metro.now()
+        now = time if time is not None else self.metro.now()
 
         durations = self.rhythm()
         total_dur = sum(durations)
@@ -216,6 +221,7 @@ class PlayerObject(repeatable_object):
             self.dur = total_dur = durations = 1
     
         acc = now - (now % total_dur)
+        n = int(len(durations) * (acc / total_dur))
 
         while True:
             
@@ -241,7 +247,63 @@ class PlayerObject(repeatable_object):
         return n, acc
 
     def update(self, synthdef, degree, **kwargs):
+
+        # SynthDef name
         
+        self.synthdef = synthdef
+
+        if self.isplaying is False:
+
+            self.reset()
+
+        # If there is a designated solo player when updating, add this at next bar
+        
+        if self.metro.solo.active() and self.metro.solo != self:
+
+            self.metro.schedule(lambda: self.metro.solo.add(self), self.metro.NextBar() - 0.001)
+
+        # Update the attribute values
+
+        special_cases = ["scale","root","dur"]
+
+        # Set the degree
+
+        if synthdef is SamplePlayer:
+
+            setattr(self, "degree", degree if len(degree) > 0 else " ")
+
+        elif degree is not None:
+
+            setattr(self, "degree", degree)
+
+        # Set special case attributes
+
+        self.scale = kwargs.get("scale", PlayerObject.default_scale )
+        self.root  = kwargs.get("root",  PlayerObject.default_root )
+
+        # If only duration is specified, set sustain to that value also
+
+        if "dur" in kwargs:
+            self.dur = kwargs["dur"]
+            if "sus" not in kwargs:
+                self.sus = self.attr['dur']
+
+        if synthdef is SamplePlayer: pass
+
+            # self.old_pattern_dur
+
+            # self.old_dur = self.attr['dur']
+
+        # Set any other attributes
+
+        for name, value in kwargs.items():
+
+            if name not in special_cases:
+
+                setattr(self, name, value)
+
+        # Calculate new position if not already playing
+
         if self.isplaying is False:
 
             # Add to clock        
@@ -250,77 +312,34 @@ class PlayerObject(repeatable_object):
             
             self.event_index = self.metro.NextBar()
             self.event_n = 0
+
+            self.event_n, _ = self.count(self.event_index)
             
             self.metro.schedule(self, self.event_index)
-
-        # If there is a designated solo player when updating, add this at next bar
-        
-        if self.metro.solo.active() and self.metro.solo != self:
-
-            self.metro.schedule(lambda: self.metro.solo.add(self), self.metro.NextBar() - 0.001)
-
-        if not self._INIT:
-
-            self.scale = kwargs.get("scale", PlayerObject.default_scale )
-            self.root = self.attr['root']  = asStream(kwargs.get( "root",  PlayerObject.default_root ))
-
-            if synthdef is SamplePlayer: 
-
-                self.dur = self.attr['dur'] = self.old_dur = asStream(0.5)
-                self.old_pattern_dur = self.dur
-
-            else:
-
-                self.dur  = self.attr['dur'] = self.old_dur = asStream(1)
-                self.sus  = self.attr['sus']   = asStream(1)
-
-        # Finish init (any assigned attributes now go in the player.attr dict
-
-        if not self._INIT: self._INIT = True
-
-        # Update the attribute value
-
-        for name, value in kwargs.items():
-
-            setattr(self, name, value)
-
-        # Set the degree and update sustain to equal duration if not specified
-
-        if synthdef is SamplePlayer:
-
-            setattr(self, "degree", degree if len(degree) > 0 else " ")
-
-        else:
-
-            if degree is not None:
-
-                setattr(self, "degree", degree)
-
-            if 'sus' not in kwargs:
-
-                setattr(self, 'sus', self.dur)
-
-        setattr(self, "SynthDef", synthdef)
 
         return self
 
     def dur_updated(self):
         dur_updated = self.attr['dur'] != self.old_dur
-        if self.SynthDef == SamplePlayer:
+        if self.synthdef == SamplePlayer:
             dur_updated = (self.pattern_rhythm_updated() or dur_updated)
         return dur_updated
-    
+
+    def step_duration(self):
+        return 0.5 if self.synthdef is SamplePlayer else 1    
 
     def rhythm(self):
-        # If a TimeVar
+        # If a Pattern TimeVar
         if isinstance(self.attr['dur'], TimeVar.Pvar):
             r = asStream(self.attr['dur'].now().data)
-        elif isinstance(self.attr['dur'], TimeVar.Pvar):
-            r = asStream(self.attr['dur'].data)
+        # If duration is a TimeVar
+        elif isinstance(self.attr['dur'], TimeVar.var):
+            r = asStream(self.attr['dur'].now())
         else:
             r = asStream(self.attr['dur'])
-            
-        if self.SynthDef is SamplePlayer:
+
+        # TODO: Make sure degree is a string
+        if self.synthdef is SamplePlayer:
             try:
                 d = self.attr['degree'].now()
             except:
@@ -355,9 +374,13 @@ class PlayerObject(repeatable_object):
         # If the scale is frequency only, just return the degree
 
         if self.scale == Scale.freq:
+            
             try:
+
                 return list(self.event['degree'])
+
             except:
+
                 return [self.event['degree']]
 
         now = {}
@@ -400,7 +423,7 @@ class PlayerObject(repeatable_object):
 
         # Add to modulator
 
-        self.frequency_mod = asStream(data)
+        self.fmod = data
 
         return self
 
@@ -471,12 +494,12 @@ class PlayerObject(repeatable_object):
 
     # --- Data methods
 
-    def tupleN(self):
+    def largest_attribute(self):
         """ Returns the length of the largest nested tuple in the attr dict """
 
-        exclude = 'degree' if self.SynthDef is SamplePlayer else None
+        exclude = 'degree' if self.synthdef is SamplePlayer else None
 
-        size = len(self.freq)
+        size = len(self.attr['freq'])
 
         for attr, value in self.event.items():
             if attr != exclude:
@@ -512,7 +535,7 @@ class PlayerObject(repeatable_object):
                 else:
                 
                     attr_value = TimeVar.var(self.following.degree, self.following.dur)
-    
+
         attr_value = modi(asStream(attr_value), self.event_n + x)
         
         # If the attribute isn't in the modf dictionary, default to 0
@@ -564,9 +587,13 @@ class PlayerObject(repeatable_object):
         
         for key in self.attr:
 
-            self.event[key] = self.now(key)
+            # Eg. sp.sus returns the currently used value for sustain
 
-        if self.SynthDef is SamplePlayer:
+            self.__dict__[key] = self.event[key] = self.now(key)
+
+        # Special case: sample player
+
+        if self.synthdef is SamplePlayer:
 
             # Get the buffer number to play
             self.event['buf'] = BufferManager.symbols.get(self.event['degree'].char, 0)
@@ -581,8 +608,11 @@ class PlayerObject(repeatable_object):
 
         # Initial message plus custom head and echo variable
 
-        message = ['echoOn', int(self.event['echo'] > 0),
-                   'freq',   float(modi(self.freq, index)) ]
+        #message = ['echoOn', int(self.event['echo'] > 0),
+
+        freq = float(modi(self.attr['freq'], index))
+        
+        message = ['freq',  freq ]
 
         for key in self.attr:
 
@@ -613,7 +643,7 @@ class PlayerObject(repeatable_object):
     def send(self):
         """ Sends the current event data to SuperCollder """
 
-        size = self.tupleN()
+        size = self.largest_attribute()
 
         for i in range(size):
 
@@ -629,11 +659,13 @@ class PlayerObject(repeatable_object):
 
                 if delay > 0:
 
+                    # TODO-Replace with an OSC Bundle and timestamps?
+
                     self.metro.schedule(send_delay(self, osc_msg), self.metro.now() + delay)
                     
                 else:
                 
-                    self.server.sendNote(str(self.SynthDef), osc_msg)
+                    self.server.sendNote(str(self.synthdef), osc_msg)
 
         return
 
@@ -642,8 +674,6 @@ class PlayerObject(repeatable_object):
     def kill(self):
         """ Removes this object from the Clock and resets itself"""
         self.isplaying = False
-        #self.isAlive = False
-        #self.event_n = 0
         self.offset = self.attr['offset'] = 0
         return
         
@@ -686,8 +716,11 @@ class PlayerObject(repeatable_object):
             self.following = lead
 
             try:
+
                 self.scale = lead.scale
+
             except:
+
                 pass
 
         else:
@@ -761,6 +794,15 @@ class PlayerObject(repeatable_object):
             zero = self.amp.count(0)
             self.amp = Pshuf(Pstutter([1,0],[ones,zero]))
         return self
+
+    def rotate(self, n=1, attr='degree'):
+        self.attr[attr].i_rotate(n)
+        return self
+
+    def rotate_all(self, n=1):
+        for attr in self.attr.keys():
+            self.attr[attr].i_rotate(n)
+        return self
             
 
     """
@@ -792,7 +834,7 @@ class PlayerObject(repeatable_object):
 
     def strum(self, dur=0.025):
         """ Adds a delay to a Synth Envelope """
-        x = self.tupleN()
+        x = self.largest_attribute()
         if x > 1:
             self.delay = asStream([tuple(a * dur for a in range(x))])
         else:
@@ -800,10 +842,10 @@ class PlayerObject(repeatable_object):
         return self
 
     def __repr__(self):
-        return "a '%s' Player Object" % self.SynthDef
+        return "a '%s' Player Object" % self.synthdef
 
     def info(self):
-        s = "Player Instance using '%s' \n\n" % self.SynthDef
+        s = "Player Instance using '%s' \n\n" % self.synthdef
         s += "ATTRIBUTES\n"
         s += "----------\n\n"
         for attr, val in self.attr.items():
@@ -816,7 +858,7 @@ class PlayerObject(repeatable_object):
 class send_delay:
     def __init__(self, s, message):
         self.server = s.server
-        self.synth = s.SynthDef
+        self.synth = s.synthdef
         self.msg = message
     def __call__(self):
         self.server.sendNote(self.synth, self.msg)

@@ -17,7 +17,8 @@ from AppFunctions import *
 from Console import console
 from Undo import UndoStack
 
-from ..Settings import FONT
+from ..Settings import FONT, FOXDOT_ICON
+import os
 
 # Code execution
 from ..Code import execute
@@ -27,6 +28,7 @@ from ..Code import execute
 class FoxDot:
 
     default_font = FONT
+    namespace = {}
 
     def __init__(self):
 
@@ -37,6 +39,7 @@ class FoxDot:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=2)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
+        self.root.iconbitmap(FOXDOT_ICON)
 
         # Set font
 
@@ -302,17 +305,8 @@ class FoxDot:
     
     def paste(self, event=None):
         """ Ctrl-V: Pastes any text and updates the IDE """
-
-        # Get first row
-##        row1 = index(self.text.index(INSERT))[0]
-
         # Insert the data from the clipboard            
         self.text.insert(self.text.index(INSERT), self.root.clipboard_get())
-
-##        # Get end row
-##        row2 = index(self.text.index(INSERT))[0]
-##
-##        n_rows = row2 - row1
 
         # Update the IDE colours
         self.update(event)
@@ -702,7 +696,13 @@ class FoxDot:
 
             # If cursor is in between brackets that follow a type word
 
-            self.check_namespace()
+            try:
+
+                self.check_namespace()
+
+            except:
+
+                pass
 
         else:
 
@@ -715,7 +715,7 @@ class FoxDot:
     def check_namespace(self):
         """ Sets the label """
 
-        obj = namespace(self.last_word)
+        obj = self.namespace[self.last_word]
 
         if obj:
 

@@ -1,7 +1,13 @@
 from random import choice, shuffle
 from Operations import *
 from Comparisons import *
-from Parse import Parse        
+from Parse import Parse
+
+class dots:
+    def __repr__(self):
+        return '...'
+    def __str__(self):
+        return '...'
 
 class metaPattern(object):
     """ Abstract base class """
@@ -23,7 +29,11 @@ class metaPattern(object):
     def __len__(self):
         return len(self.data)
     def __str__(self):
-        return self.BRACKETS % str(self.data)[1:-1]
+        if len(self.data) > 10:
+            val = self.data[:3] + [dots()] + self.data[-3:]
+        else:
+            val = self.data
+        return self.BRACKETS % str(val)[1:-1]
     def __repr__(self):
         return str(self)
     def string(self):

@@ -1,8 +1,14 @@
 from Patterns.Base import Pattern
+from random import choice
 
 def names():
     """ Returns a list of all the scales by name """
-    return Scale.names.keys()
+    return sorted(Scale.names.keys())
+
+def choose():
+    """ Scale.choose() -> Returns a random scale object """
+    return choice(Scale.names.values())
+    
 
 class Scale(Pattern):
 
@@ -39,6 +45,10 @@ class Scale(Pattern):
 
     def set(self, new):
 
+        if new is self:
+
+            return self
+
         if type(new) == str:
 
             self.data = self.__class__.names[new]
@@ -54,6 +64,10 @@ class Scale(Pattern):
             print "Warning: {} is not a valid scale".format(new)       
 
         return self
+
+    def __rshift__(self, other):
+        return self.set(other)
+        
 
 class PentatonicScale(Scale):
 
@@ -113,6 +127,19 @@ justMajor       = Scale("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.98
 justMinor       = Scale("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
 
 dorian          = Scale("dorian", [0,2,3,5,7,9,10])
+
+egyptian        = Scale("egyptian", [0,2,5,7,10])
+zgi             = Scale("zhi", [0,2,5,7,9])
+phyrgian        = Scale("phrygian", [0,1,3,5,7,8,10])
+prometheus      = Scale("prometheus", [0,2,4,6,11])
+indian          = Scale("indian", [0,4,5,7,10])
+
+locrian         = Scale("locrian", [0,1,3,5,6,8,10])
+locrianMajor    = Scale("locrianMajor", [0,2,4,5,6,8,10])
+
+lydian          = Scale("lydian", [0,2,4,6,7,9,11])
+lydianMinor     = Scale("lydianMinor", [0,2,4,6,7,8,10])
+
 freq            = Scale("freq", _freq())
 
 # Custom made fibonacci tuning

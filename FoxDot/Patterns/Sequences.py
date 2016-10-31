@@ -182,6 +182,24 @@ class PSine(Base.Pattern):
 
 Psine = PSine #: Alias for PSine
 
+class PDur(Base.Pattern):
+    def __init__(self, seq, dur=0.5):
+        """ Pat should be a series of 1 and 0 values, first value is assumed 1 """
+        self.data = []
+        if type(seq) is str:
+            seq = [int(x!=" ") for x in seq]
+        i = 0
+        count = 0
+        while i < len(seq):
+            j = seq[i]
+            if j == 0:
+                count += 1
+            if j == 1:
+                count += 1
+            i += 1
+        self.make()
+            
+
 class PStretch(Base.Pattern):
 
     def __init__(self, data, size):
@@ -231,208 +249,226 @@ class PRhythm(Base.Pattern):
 
 Prhythm = PRhythm #: Alias
 
-class PDur(Base.Pattern):
-
-    def __init__(self, s, dur=0.5):
-
-        self.chars = []
-        self.data  = []
-
-        if type(s) is str:
-            s = P().fromString(s)
-            
-        dur = s.dur(dur)
-        self.data = []
-        
-        for i, char in s.items():
-            # Recursively get rhythms
-            val = op.modi(dur,i)
-            if isinstance(char, Base.PGroup):
-                dur_group = self.__class__(char, val)
-                self.chars += list(dur_group.chars)
-                self.data  += list(dur_group.data)
-            else:
-                self.chars.append(char)
-                self.data.append(val)
-
-Pdur = PDur #: Alias                
+##class PDur(Base.Pattern):
+##
+##    def __init__(self, s, dur=0.5):
+##
+##        self.chars = []
+##        self.data  = []
+##
+##        if type(s) is str:
+##            s = P().fromString(s)
+##            
+##        dur = s.dur(dur)
+##        self.data = []
+##        
+##        for i, char in s.items():
+##            # Recursively get rhythms
+##            val = op.modi(dur,i)
+##            if isinstance(char, Base.PGroup):
+##                dur_group = self.__class__(char, val)
+##                self.chars += list(dur_group.chars)
+##                self.data  += list(dur_group.data)
+##            else:
+##                self.chars.append(char)
+##                self.data.append(val)
+##
+##Pdur = PDur #: Alias                
 
 class PChords(Base.Pattern):
-
     def __init__(self, seq, struct=(0,2,4), stepsPerOctave=7):
-
-        # 1. Try just adding seq and struct
-
-        try:
-
-            self.data = P(seq + struct)
-
-        except:
-
-            self.data = seq
-            self.make()
-
-            struct = Base.PGroup(struct)
-
-            chords = []
-            
-            for item in self.data:
-                val = (struct + item) % stepsPerOctave
-                chords.append(val.sorted())
-
-            self.data = chords
+        # First item 'root' chord
+        self.data = []
+        for i, item in enumerate(seq):
+            chord = [item + val for val in struct]
+            if i > 0:
+                chords = [  chord,
+                           [note % stepsPerOctave for note in chord],
+                           [chord[0],chord[1],chord[2]-stepsPerOctave],
+                         ]
+                c2 = self.data[-1]
+                best = 1000
+                for c1 in chords:
+                    d = self.distance(c1, c2)
+                    if d < best:
+                        chord = c1
+                        best = d
+            # Add the chord with the smallest total change
+            self.data.append(tuple(sorted(chord)))
+    @staticmethod
+    def distance(a, b):
+        a = sorted(a)
+        b = sorted(b)
+        return sum([abs(a[i] - b[i]) for i in range(len(a))])        
 
 Pchords = PChords #: Alias
+
+class PPairs(Base.Pattern):
+
+    def __init__(self, seq, func=lambda n: 8-n):
+        """ PPairs(iterable, func=lambda n: 8-n)
+
+            Laces a sequence with a second sequence obtained
+            by performing a function on the original """
+        
+        i = 0
+        self.data = []
+        for item in seq:
+            self.data.append(item)
+            self.data.append(func(item))
+            i += 1
+            if i >= MAX_SIZE:
+                break
+        self.make()
+
+Ppairs = PPairs #: Alias
+
+class PZip(Base.Pattern):
+
+    def __init__(self, *pats):
+        l, p = [], []
+        for pat in pats:
+            p.append(Base.asStream(pat))
+            l.append(len(p[-1]))
+        length = op.LCM(*l)
+        self.data = zip(*[p[i].stretch(length) for i in range(len(p))])        
+        
 
 #### ---- Testing
 
 
 #### -------------- These need updating
 
-def irange(start, stop=None, step=0.1):
-    r = []
-    if not stop:
-        stop = start
-        start = 0
-    while start <= stop:
-        r.append( start )
-        start += step
-    return r
-
-def Chord(stream=[0], structure=[0,2,4]):
-
-    new = []
-
-    for item in stream:
-
-        new.append([item + s for s in structure])
-
-    return new
-
-
-
-
-def fShuf(a, b=None, size=8):
-
-    if b:
-
-        L = [a + (n * ( (b-a) / float(size))) for n in range(size)]
-
-    else:
-
-        L = [n * ( a / float(size)) for n in range(size)]
-
-    random.shuffle(L)
-
-    return L
-
-
-
-
-def Walk(hi=8, variation=1, size=256):
-
-    stream = [0]
-
-    variation = 1.0 / variation
-
-    step = random.choice([1,-1])
-
-    while len(stream) < size:
-
-        step = step * (-1)
-
-        for x in range( int(hi * random.triangular(variation, 1)) - 1 ):
-
-            stream.append( stream[-1] + step )
-
-            if len(stream) == size:
-                break
-
-    return stream
-
-
-def Sparse(arr=[0,1], hi=8):
-
-    stream =[]
-
-    return strema
-
-
-def Geom(n, lo=1, hi=None):
-
-    if not hi:
-
-        hi = max(lo, 1)
-        lo = min(lo, 1)
-
-    return [n**i for i in range(lo, hi+1)]
-
-def GeomFill(arr, N=2):
-    """ GeomFill(arr) -> new_arr such that sum(new_list) is power of N """
-    nums  = arr
-    total = 1
-    while sum(nums) >= total:
-        total *= N
-    nums.append( total - sum(nums) )
-    return nums
-
-
-def Rint(a, b=None):
-
-    if b:
-
-        return random.randrange(a, b)
-
-    else:
-
-        return random.randrange(0, a)
-
-
-def Rhythm(string, step=0.5):
-
-    stream = []
-
-    dur = 0.0
-
-    in_br = False
-
-    for i, char in enumerate(string):
-
-       # Needs work 
-
-        if char == "[":
-
-            in_br = True
-
-            dur -= step
-
-        elif char == "]":
-
-            in_br = False
-
-            dur -= step
-        
-        elif char != " ":
-
-            stream.append(dur)
-
-            dur = 0.0
-
-        elif i == len(string) - 1:
-
-            stream.append(dur + step)
-
-
-        if in_br:
-
-            dur += step/2.0
-
-        else:   
-    
-            dur += step
-
-    return stream[1:]
-
+##def irange(start, stop=None, step=0.1):
+##    r = []
+##    if not stop:
+##        stop = start
+##        start = 0
+##    while start <= stop:
+##        r.append( start )
+##        start += step
+##    return r
+##
+##
+##def fShuf(a, b=None, size=8):
+##
+##    if b:
+##
+##        L = [a + (n * ( (b-a) / float(size))) for n in range(size)]
+##
+##    else:
+##
+##        L = [n * ( a / float(size)) for n in range(size)]
+##
+##    random.shuffle(L)
+##
+##    return L
+##
+##
+##def Walk(hi=8, variation=1, size=256):
+##
+##    stream = [0]
+##
+##    variation = 1.0 / variation
+##
+##    step = random.choice([1,-1])
+##
+##    while len(stream) < size:
+##
+##        step = step * (-1)
+##
+##        for x in range( int(hi * random.triangular(variation, 1)) - 1 ):
+##
+##            stream.append( stream[-1] + step )
+##
+##            if len(stream) == size:
+##                break
+##
+##    return stream
+##
+##
+##def Sparse(arr=[0,1], hi=8):
+##
+##    stream =[]
+##
+##    return strema
+##
+##
+##def Geom(n, lo=1, hi=None):
+##
+##    if not hi:
+##
+##        hi = max(lo, 1)
+##        lo = min(lo, 1)
+##
+##    return [n**i for i in range(lo, hi+1)]
+##
+##def GeomFill(arr, N=2):
+##    """ GeomFill(arr) -> new_arr such that sum(new_list) is power of N """
+##    nums  = arr
+##    total = 1
+##    while sum(nums) >= total:
+##        total *= N
+##    nums.append( total - sum(nums) )
+##    return nums
+##
+##
+##def Rint(a, b=None):
+##
+##    if b:
+##
+##        return random.randrange(a, b)
+##
+##    else:
+##
+##        return random.randrange(0, a)
+##
+##
+##def Rhythm(string, step=0.5):
+##
+##    stream = []
+##
+##    dur = 0.0
+##
+##    in_br = False
+##
+##    for i, char in enumerate(string):
+##
+##       # Needs work 
+##
+##        if char == "[":
+##
+##            in_br = True
+##
+##            dur -= step
+##
+##        elif char == "]":
+##
+##            in_br = False
+##
+##            dur -= step
+##        
+##        elif char != " ":
+##
+##            stream.append(dur)
+##
+##            dur = 0.0
+##
+##        elif i == len(string) - 1:
+##
+##            stream.append(dur + step)
+##
+##
+##        if in_br:
+##
+##            dur += step/2.0
+##
+##        else:   
+##    
+##            dur += step
+##
+##    return stream[1:]
+##
 
 
 

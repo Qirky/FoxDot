@@ -1,3 +1,7 @@
+# demo and debug folders
+demos/*
+FoxDot/debug/*
+
 # Compiled Python file
 *.pyc
 

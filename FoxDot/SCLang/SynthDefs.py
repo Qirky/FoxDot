@@ -10,8 +10,8 @@ NUM_CHANNELS = MAX_CHANNELS
 with SynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
-    play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate) * play.amp * 3
-    play.osc  = play.osc * OpenEnv.block(sus=play.sus * 2)
+    play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate)
+    play.osc  = play.osc * OpenEnv.block(sus=play.sus * 2) * play.amp * 3
     play.env  = Env.block(sus=2)
 
 # Synth Players
@@ -176,6 +176,11 @@ saw.amp = saw.amp / 4
 saw.osc = Saw.ar(saw.freq)
 saw.env = Env.block()
 saw.add()
+
+snick = SynthDef("snick")
+snick.osc = LFPar.ar(snick.freq, mul=1) * Blip.ar(((snick.rate+1) * 4))
+snick.env = Env.perc()
+snick.add()
 
 # Get rid of the variable synth
 

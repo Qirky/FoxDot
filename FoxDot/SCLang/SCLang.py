@@ -133,9 +133,7 @@ Crackle   = cls("Crackle")
 LFCub     = cls("LFCub")
 PinkNoise = cls("PinkNoise")
 Impulse   = cls("Impulse")
-
-# Contain ` references
-
+Blip      = cls("Blip")
 Klank     = cls("Klank", ref="`")
 
 # Other
@@ -240,6 +238,7 @@ class SynthDef:
     osc         = instance("osc")
     env         = instance("env")
     freq        = instance("freq")
+    fmod        = instance("fmod")
     output      = instance("output")
     sus         = instance("sus")
     amp         = instance("amp")
@@ -263,6 +262,7 @@ class SynthDef:
     grain       = instance("grain")
     bits        = instance("bits")
     delay       = instance("delay")
+    chop        = instance("chop")
 
     def __init__(self, name):
         self.name = name
@@ -273,6 +273,7 @@ class SynthDef:
                             "sus"       : 1,
                             "pan"       : 0,
                             "freq"      : 0,
+                            "fmod"      : 0,
                             "rate"      : 1,
                             "lpf"       : 20000,
                             "hpf"       : 0,
@@ -287,7 +288,8 @@ class SynthDef:
                             "scrub"     : 0,
                             "grain"     : 0,
                             "bits"      : 24,
-                            "delay"     : 0 }
+                            "delay"     : 0,
+                            "chop"      : 0}
         
         self.add_base_class_behaviour()
 
@@ -347,6 +349,7 @@ class SynthDef:
     def add_base_class_behaviour(self):
         """ Defines the initial setup for every SynthDef """
         self.base.append("amp = amp / 2;")
+        self.base.append("freq = freq + fmod;")
         self.base.append("freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);")
         self.base.append("freq = Vibrato.kr(freq, rate: vib);")
         return
@@ -375,6 +378,7 @@ class SynthDef:
 
         self.osc = HPF.ar(self.osc, self.hpf)
         self.osc = LPF.ar(self.osc, self.lpf + 1)
+        self.osc = self.osc * LFPulse.ar(self.chop / self.sus)
         self.env = self.env if self.env is not None else self.default_env
 
         if SC3_PLUGINS:
