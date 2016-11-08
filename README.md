@@ -37,24 +37,27 @@ FoxDot uses the sound synthesis engine, SuperCollider, to make noise and Python 
 ##### Buffer mismatch error
 If you are getting an error along the lines of "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" when trying to play back audio samples, go to FoxDot/Settings/Conf.txt and change the value of MAX_CHANNELS from 2 to 1 or vice versa. This issue might be to do with the version of SuperCollider or O/S being used.
 
-
 ## Basics
 
 ### Executing Code
 
-A 'block' of code in FoxDot is made up of consecutive lines of code with no empty lines. Pressing `Ctrl+Return` will execute the block of code that the cursor is currently in. Try `print 1 + 1` to see what happens!
+A 'block' of code in FoxDot is made up of consecutive lines of code with no empty lines. Pressing `Ctrl+Return` (or `Cmd-Return` on a Mac) will execute the block of code that the cursor is currently in. Try `print 1 + 1` to see what happens!
 
 ### Player Objects
 
-Python supports many different programming paradigms, including procedural and functional, but FoxDot implements a traditional object orientated approach with a little bit of cheating to make it easier to live code. Player objects are created when the FoxDot library is imported and are assigned to all possible one or two character variable names. By using a double-arrow, `>>`, operator like so:
+Python supports many different programming paradigms, including procedural and functional, but FoxDot implements a traditional object orientated approach with a little bit of cheating to make it easier to live code. A player object is what FoxDot uses to make music by assigning it a synth (the 'instrument' it will play) and some instructions, such as note pitches. All one and two character variable names are reserved for player objects at startup so, by default, the variables `a`, `bd`, and `p1` are 'empty' player objects. If you use one of these variables to store something else but want to use it as a player object again, or you  want to use a variable with more than two characters, you just have to reserve it by creating a `Player` and assigning it like so:
 
-	p1 >> synth([0,1,2,3])
+	p1 = Player()	
 
-The empty player object, `p1` is now assigned a particular synth and playback instructions. `p1` will play the first four notes of the default scale using a SuperCollider `SynthDef` with the name `\synth`. By default, each note lasts for 1 beat at 120 bpm. These defaults can be changed by specifying keyword arguments:
+Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print SynthDefs` to see all available synths) you would use the following code:
 
-	p1 >> synth([0,1,2,3], dur=[1/4,3/4], sus=1, rate=4, scale=Scale.minor)
+	p1 >> pads([0,1,2,3])
 
-The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - any others, such as `rate` in the above example, refer to keyword arguments in the corresponding `SynthDef`. The first argument, `degree`, does not have to be stated explicitly. Notes can be grouped together so that they are played simultaneously using round brackets, `()`. The sequence `[(0,2,4),1,2,3]` will play the the the first harmonic triad of the default scale followed by the next three notes. To see a list of the FoxDot SynthDefs, simply execute `print SynthDefs`.
+The empty player object, `p1` is now assigned a the 'pads' synth and some playback instructions. `p1` will play the first four notes of the default scale using a SuperCollider `SynthDef` with the name `\pads`. By default, each note lasts for 1 beat at 120 bpm. These defaults can be changed by specifying keyword arguments:
+
+	p1 >> pads([0,1,2,3], dur=[1/4,3/4], sus=1, rate=4, scale=Scale.minor)
+
+The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - any others, such as `rate` in the above example, refer to keyword arguments in the corresponding `SynthDef`. The first argument, `degree`, does not have to be stated explicitly. Notes can be grouped together so that they are played simultaneously using round brackets, `()`. The sequence `[(0,2,4),1,2,3]` will play the the the first harmonic triad of the default scale followed by the next three notes. 
 
 ### 'Sample Player' Objects
 
