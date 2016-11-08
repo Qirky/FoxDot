@@ -40,6 +40,7 @@ class var(repeatable_object):
     """ Var(values [,durs=[4]]) """
 
     metro = None
+    timevar="timevar"
 
     def __init__(self, values, dur=4, **kwargs):
 
@@ -216,8 +217,8 @@ class var(repeatable_object):
         new.evaluate = fetch(op.rGet)
         return new
 
-    def __index__(self):
-        return int(self)
+    #def __index__(self):
+    #    return int(self)
 
     def __iter__(self):
         for item in self.now():
@@ -235,7 +236,7 @@ class var(repeatable_object):
         """ Returns the duration of one full cycle in beats """
         return self.time[-1][1]
 
-    def __lshift__(self, other):
+    def __rshift__(self, other):
         """ var >> var([0,1,2,3],[4,8])
             var >> ([0,1,2,3],[4,8])
         """
@@ -523,3 +524,16 @@ class const:
         return self.value
     def __rdiv__(self, other):
         return self.value
+
+# TimeVar indexing of patterns
+
+def _timevar_index(self, key):
+    if isinstance(key, var):
+        item = Pvar([self.data])
+        item.dependency = key
+        item.evaluate = fetch(op.Get)
+        return item
+    else:
+        return self.data[key]
+
+Pattern.__getitem__ = _timevar_index

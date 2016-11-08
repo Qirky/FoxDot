@@ -417,13 +417,24 @@ class PlayerObject(repeatable_object):
             
         return f
 
-    def f(self, data):
+    def f(self, *data):
 
         """ adds value to frequency modifier """
 
         # Add to modulator
 
-        self.fmod = data
+        self.fmod = tuple(data)
+
+        p = []
+        for val in self.attr['fmod']:
+
+            try:
+                pan = tuple((item / ((len(val)-1) / 2.0))-1 for item in range(len(val)))
+            except:
+                pan = 0
+            p.append(pan)
+
+        self.pan = p
 
         return self
 
@@ -449,23 +460,11 @@ class PlayerObject(repeatable_object):
         self.modf['degree'] = asStream(data)
         return self
 
-    def __iadd__(self, data):
-        """ Increment the degree modifier stream """
-        self.modf['degree'] = circular_add(self.modf['degree'], asStream(data))
-        return self
-
     def __sub__(self, data):
         """ Change the degree modifier stream """
         data = asStream(data)
         data = [d * -1 for d in data]
         self.modf['degree'] = data
-        return self
-
-    def __isub__(self, data):
-        """ de-increment the modifier stream """
-        data = asStream(data)
-        data = [d * -1 for d in data]
-        self.modf['degree'] = circular_add(self.modf['degree'], data)
         return self
 
     def __mul__(self, data):
@@ -606,10 +605,6 @@ class PlayerObject(repeatable_object):
     def osc_message(self, index=0):
         """ Creates an OSC packet to play a SynthDef in SuperCollider """
 
-        # Initial message plus custom head and echo variable
-
-        #message = ['echoOn', int(self.event['echo'] > 0),
-
         freq = float(modi(self.attr['freq'], index))
         
         message = ['freq',  freq ]
@@ -627,6 +622,12 @@ class PlayerObject(repeatable_object):
                     if key == "sus":
 
                         val = val * self.metro.BeatDuration() * modi(self.event['blur'], index)
+
+                    elif key == "echo":
+
+                        val = val * self.metro.BeatDuration() * modi(self.event['blur'], index)
+
+                        message += ['echoOn', int(val > 0)]
 
                     elif key == "amp":
 

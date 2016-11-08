@@ -11,6 +11,7 @@ with SynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate)
+    # play.osc  = play.osc + CombL.ar(play.osc, maxdelaytime=2, delaytime=play.echo) * play.echoOn # TODO - add to default player behavoiur
     play.osc  = play.osc * OpenEnv.block(sus=play.sus * 2) * play.amp * 3
     play.env  = Env.block(sus=2)
 
@@ -18,6 +19,7 @@ with SynthDef("play") as play:
 
 with SynthDef("pads") as pads:
     pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
+    #pads.osc = SinOsc.ar(pads.freq, mul=pads.amp / 2) + SinOsc.ar(pads.freq + 2, mul=pads.amp / 2)
     pads.env = Env.perc()
 
 noise = SynthDef("noise")

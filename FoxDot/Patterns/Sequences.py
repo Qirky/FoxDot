@@ -331,8 +331,20 @@ class PZip(Base.Pattern):
             p.append(Base.asStream(pat))
             l.append(len(p[-1]))
         length = op.LCM(*l)
-        self.data = zip(*[p[i].stretch(length) for i in range(len(p))])        
-        
+        self.data = zip(*[p[i].stretch(length) for i in range(len(p))])
+
+
+class PZip2(Base.Pattern):
+    def __init__(self, pat1, pat2, rule=lambda a, b: True):
+        length = op.LCM(len(pat1), len(pat2))
+        self.data = []
+        i = 0
+        while i < min(length, 32):
+            a, b = op.modi(pat1,i), op.modi(pat2,i)
+            if rule(a, b):
+                self.data.append((a,b))
+            i += 1
+        self.make()
 
 #### ---- Testing
 

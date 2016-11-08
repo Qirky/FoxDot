@@ -1,6 +1,7 @@
 # demo and debug folders
 demos/*
 FoxDot/debug/*
+TODO.txt
 
 # Compiled Python file
 *.pyc

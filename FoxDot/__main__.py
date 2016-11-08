@@ -9,9 +9,11 @@ try:
     
     fx_ide = FoxDot()        
     fx_ide.run()
+
+    Clock.stop()
+    Server.quit()
     
 except (KeyboardInterrupt, SystemExit):
 
     Clock.stop()
     Server.quit()
-

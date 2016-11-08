@@ -25,7 +25,7 @@ from ..Code import execute
  
 # App object
 
-class FoxDot:
+class workspace:
 
     default_font = FONT
     namespace = {}

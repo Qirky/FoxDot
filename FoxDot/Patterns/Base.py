@@ -49,8 +49,7 @@ class metaPattern(object):
         return string
     #: Container methods
     def __getitem__(self, key):
-        self._now = self.data[key] # store last value retrieved
-        return self._now
+        return self.data[key]
     def __setitem__(self, key, value):
         self.data[key] = value
     def __iter__(self):
@@ -386,6 +385,20 @@ def Place(data):
          #: If the pattern doesn't need lacing, return original
         return data
 
+
+class PatternLacer:
+    def __call__(self, data):
+        i, loop = 0, LCM(*[(len(self(item)) if hasattr(item, "__len__") else 1) for item in data])
+        new_data = []
+        while i < loop:
+            for item in data:
+                if isinstance(item, (Pattern, list)):
+                    item = modi(self(item), i)
+                new_data.append(item)
+            i += 1
+        return new_data
+
+Place = PatternLacer()
 
 # Used to force any non-pattern data into a Pattern
                 

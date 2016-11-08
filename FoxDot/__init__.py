@@ -78,17 +78,19 @@ class futureprint:
 
 
 """ IDE """
+from Workspace import workspace
 
+# Share the GUI information with the user
+
+workspace.namespace=FoxDotCode.namespace
+
+FoxDot = workspace()
 
 def start():
-
-    from Interface import FoxDot
-    FoxDot.namespace=FoxDotCode.namespace
     
     try:
-        
-        fx_ide = FoxDot()        
-        fx_ide.run()
+             
+        FoxDot.run()
         
     except (KeyboardInterrupt, SystemExit):
 

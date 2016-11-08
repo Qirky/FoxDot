@@ -152,6 +152,8 @@ DelayC   = cls("DelayC")
 DelayN   = cls("DelayN")
 DelayL   = cls("DelayL")
 CombN    = cls("CombN")
+CombL    = cls("CombL")
+CombC    = cls("CombC")
 Crackle  = cls("Crackle")
 
 ClipNoise    = cls("ClipNoise")
