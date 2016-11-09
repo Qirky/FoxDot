@@ -24,11 +24,28 @@ import TimeVar
 
 BufferManager = Buffers.BufferManager().from_file()
 
-class player_key:
-    def __init__(self, value):
+class PlayerKey:
+    def __init__(self, value=None):
+        self.value = value
+            
+    def update(self, value):
         self.value = value
 
-class PlayerObject(repeatable_object):
+    def __int__(self):
+        return int(self.value)
+    def __float__(self):
+        return float(self.value)
+    def __str__(self):
+        return str(self.value)
+    def __repr__(self):
+        return repr(self.value)
+    def __len__(self):
+        return len(self.value)
+    def now(self):
+        return self.value
+    
+
+class Player(repeatable_object):
 
     # These are the PlayerObject attributes NOT included in OSC messages
     VARS = []
@@ -107,10 +124,7 @@ class PlayerObject(repeatable_object):
         if self.INIT:
             # Force the data into a TimeVar or Pattern if the attribute is used with SuperCollider
             if name not in self.VARS:
-                # Values can be assigned to player attributes using player_key()
-                if isinstance(value, player_key):
-                    self.__dict__[name] = value.value
-                value = asStream(value) if not isinstance(value, TimeVar.var) else value
+                value = asStream(value) if not isinstance(value, (PlayerKey, TimeVar.var)) else value
                 self.attr[name] = value
                 return
         self.__dict__[name] = value
@@ -260,7 +274,7 @@ class PlayerObject(repeatable_object):
         
         if self.metro.solo.active() and self.metro.solo != self:
 
-            self.metro.schedule(lambda: self.metro.solo.add(self), self.metro.NextBar() - 0.001)
+            self.metro.schedule(lambda: self.metro.solo.add(self), self.metro.next_bar() - 0.001)
 
         # Update the attribute values
 
@@ -278,8 +292,8 @@ class PlayerObject(repeatable_object):
 
         # Set special case attributes
 
-        self.scale = kwargs.get("scale", PlayerObject.default_scale )
-        self.root  = kwargs.get("root",  PlayerObject.default_root )
+        self.scale = kwargs.get("scale", self.__class__.default_scale )
+        self.root  = kwargs.get("root",  self.__class__.default_root )
 
         # If only duration is specified, set sustain to that value also
 
@@ -310,7 +324,7 @@ class PlayerObject(repeatable_object):
             self.isplaying = True
             self.stopping = False
             
-            self.event_index = self.metro.NextBar()
+            self.event_index = self.metro.next_bar()
             self.event_n = 0
 
             self.event_n, _ = self.count(self.event_index)
@@ -588,7 +602,15 @@ class PlayerObject(repeatable_object):
 
             # Eg. sp.sus returns the currently used value for sustain
 
-            self.__dict__[key] = self.event[key] = self.now(key)
+            self.event[key] = self.now(key)
+
+            try:
+
+                self.__dict__[key].update(self.event[key])
+
+            except:
+
+                self.__dict__[key] = PlayerKey(self.event[key])
 
         # Special case: sample player
 
@@ -613,7 +635,7 @@ class PlayerObject(repeatable_object):
 
             if key not in self.keywords:
 
-                try:
+                #try:
                     
                     val = modi(self.event[key], index)
 
@@ -621,11 +643,11 @@ class PlayerObject(repeatable_object):
 
                     if key == "sus":
 
-                        val = val * self.metro.BeatDuration() * modi(self.event['blur'], index)
+                        val = val * self.metro.beat() * modi(self.event['blur'], index)
 
                     elif key == "echo":
 
-                        val = val * self.metro.BeatDuration() * modi(self.event['blur'], index)
+                        val = val * self.metro.beat() * modi(self.event['blur'], index)
 
                         message += ['echoOn', int(val > 0)]
 
@@ -635,9 +657,9 @@ class PlayerObject(repeatable_object):
 
                     message += [key, float(val)]
 
-                except:
+                #except:
 
-                    pass
+                 #   pass
 
         return message
 
@@ -689,7 +711,7 @@ class PlayerObject(repeatable_object):
 
         if N > 0:
 
-            self.stop_point += self.metro.NextBar() + ((N-1) * self.metro.Bar())
+            self.stop_point += self.metro.next_bar() + ((N-1) * self.metro.bar_length())
 
         return self
 

@@ -7,7 +7,7 @@
 
 """
 
-from Players import PlayerObject
+from Players import Player, PlayerKey
 from Patterns import asStream
 from TimeVar import var
 from Patterns.Operations import modi
@@ -56,15 +56,16 @@ class TempoClock:
     def __contains__(self, item):
         return item in self.items
 
-    def Bar(self):
+    def bar_length(self):
         """ Returns the length of a bar in terms of beats """
         return (float(self.meter[0]) / self.meter[1]) * 4
+    
 
-    def BeatDuration(self):
-        """ Returns the length in seconds of one beat """
-        return 60.0 / float(self.bpm)
+##    def BeatDuration(self):
+##        """ Returns the length in seconds of one beat """
+##        return 60.0 / float(self.bpm)
 
-    def beat(self, n):
+    def beat(self, n=1):
         """ Returns the length of n beats in seconds """
         return (60.0 / float(self.bpm)) * n
 
@@ -123,7 +124,8 @@ class TempoClock:
         return
 
     def schedule(self, obj, beat=None):
-        """ Add a player / event to the queue """
+        """ TempoClock.schedule(callable, beat=None)
+            Add a player / event to the queue """
 
         if self.ticking == False:
 
@@ -133,11 +135,11 @@ class TempoClock:
 
         if beat is None:
 
-            beat = self.NextBar()
+            beat = self.next_bar()
 
         # Keep track of objects in the Clock
 
-        if obj not in self.playing and isinstance(obj, PlayerObject):
+        if obj not in self.playing and isinstance(obj, Player):
 
             self.playing.append(obj)
 
@@ -153,7 +155,7 @@ class TempoClock:
         
         return
 
-    def NextBar(self):
+    def next_bar(self):
         """ Returns the beat value for the start of the next bar """
         beat = self.now()
         return beat + (self.meter[0] - (beat % self.meter[0]))
@@ -165,7 +167,7 @@ class TempoClock:
             bpm = float(self.bpm)
         return bpm
 
-    def NextEvent(self):
+    def next_event(self):
         """ Returns the beat index for the next event to be called """
         try:    return self.queue[-1][1]
         except: return MAXINT
@@ -265,25 +267,51 @@ class Queue:
 
 class QueueItem:
     def __init__(self, obj, t):
-        self.data = [obj]
+
+        # Priority
+        self.players_high = []
+        self.players_low  = []
+        self.other        = []
+
         self.beat = t
+        self.add(obj)
+        
     def __repr__(self):
-        return "{}: {}".format(self.beat, self.data)
+        return "{}: {}".format(self.beat, self.players_high + self.players_low + self.other)
+    
     def add(self, obj):
-        # PlayerObjects are added to the 'front' of the queue
-        if isinstance(obj, PlayerObject):
-            self.data.append(obj)
-        else:
-            self.data.insert(0, obj)
+        
+        # High priority
+
+        if isinstance(obj, Player):
+
+            # High priority player objects *do not* contain PlayerKey attributes
+
+            if any([isinstance(attr, PlayerKey) for attr in obj.attr.values()]):
+
+                self.players_low.append(obj)
+
+            else:
+
+                self.players_high.append(obj)
+
+        # None player objects have lowest priority
+
+        else: self.other.append(obj)
+
         return
+    
     def call(self):
-        for item in self.data:
+        """ Calls all items in queue slot """
+        for item in self:
             item.__call__()
         return
+    
     def __iter__(self):
-        # Iterates in reverse order
-        for n in range(len(self.data)-1, -1, -1):
-            yield self.data[n]
+        
+        for item in self.players_high + self.players_low + self.other:
+
+            yield item
 
 ###############################################################
 """ 

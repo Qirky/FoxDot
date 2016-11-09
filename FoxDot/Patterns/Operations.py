@@ -6,8 +6,6 @@ import Base
     Module for key operations on Python lists or FoxDot Patterns
 """
 
-#: The following return operand patterns
-
 class POperand:
 
     def __init__(self, func):
@@ -15,6 +13,8 @@ class POperand:
         self.operate = func
 
     def __call__(self, A, B):
+        """ A is always a pattern.
+        """
 
         # If the first pattern is empty, return empty
 
@@ -22,40 +22,32 @@ class POperand:
 
             return A
 
-        # Multiple patterns
+        # Get the dominant pattern type and convert B
 
-        pat1, pat2 = self.setup(A, B)
+        cls = Base.Dominant(A, B)
 
-        for i, item in pat1.items():
+        B = cls(B)
+
+        # Calculate total length before operations
+
+        i, length = 0, LCM(len(A), len(B))
+
+        P1 = []
+
+        while i < length:
 
             try:
 
-                # Perform the operation
-
-                pat1[i] = self.operate(item, pat2[i])
+                val = self.operate(A[i], B[i])
 
             except ZeroDivisionError:
 
-                # Numbers divided by 0 are set to 0
+                val = 0
 
-                pat1[i] = 0
+            P1.append(val)
+            i += 1
 
-        return pat1
-
-    @staticmethod
-    def setup(A, B):
-        """ Prepares two Patterns, A & B, for correct use in operands"""
-        #A, B = copy(A), copy(B)
-        cls = Base.Dominant(A, B)
-
-        A, B = cls(A), cls(B)
-
-        length = LCM(len(A), len(B))
-
-        A.stretch(length)
-        B.stretch(length)
-        
-        return A, B
+        return cls(P1)
 
 # General operations
 Nil  = lambda a, b: a
@@ -75,11 +67,21 @@ rGet = lambda a, b: b[a]
 
 # Pattern operations
 PAdd = POperand(Add)
+
 PSub = POperand(Sub)
+PSub2 = POperand(rSub)
+
 PMul = POperand(Mul)
+
 PDiv = POperand(Div)
+PDiv2 = POperand(rDiv)
+
 PMod = POperand(Mod)
-PPow = POperand(Pow) # a ^ b also calls this
+PMod2 = POperand(rMod)
+
+PPow = POperand(Pow)
+PPow2 = POperand(rPow)
+
 PGet = POperand(Get)
 
 

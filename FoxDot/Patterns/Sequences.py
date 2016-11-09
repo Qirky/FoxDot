@@ -44,7 +44,14 @@ class PRand(Base.Pattern):
             self.data = [random.randrange(a, b) for n in range(MAX_SIZE)]
         self.make()
 
-Prand = PRand #: Alias for PRand
+Prand = PRand
+
+class PSparse(Base.Pattern):
+    def __init__(self, n):
+        self.data = [random.choice((0,1)) for i in range(n)]
+        self.make()
+
+Psparse = PSparse
 
 class PxRand(Base.Pattern):
     """
@@ -248,6 +255,18 @@ class PRhythm(Base.Pattern):
         return self.chars[n] == ' '
 
 Prhythm = PRhythm #: Alias
+
+##class PLace(Base.Pattern):
+##    def __init__(self, data):
+##        i, loop = 0, LCM(*[(len(self(item)) if hasattr(item, "__len__") else 1) for item in data])
+##        new_data = []
+##        while i < loop:
+##            for item in data:
+##                if isinstance(item, (Pattern, list)):
+##                    item = modi(self(item), i)
+##                new_data.append(item)
+##            i += 1
+##        self.make()
 
 ##class PDur(Base.Pattern):
 ##

@@ -1,19 +1,30 @@
 from random import choice, shuffle
 from Operations import *
-from Comparisons import *
+# from Comparisons import *
 from Parse import Parse
+
+"""
+
+    dots: Class for representing long Patterns in strings
+
+"""
 
 class dots:
     def __repr__(self):
         return '...'
-    def __str__(self):
-        return '...'
+
+
+"""
+
+    metaPattern: Abstract Base Class for Pattern behaviour
+
+"""
 
 class metaPattern(object):
-    """ Abstract base class """
+    """ Abstract base class for Patterns """
 
     data = None
-    _now = None
+    bracket_style = "[%s]"    
 
     def __init__(self, data=[]):
         
@@ -27,15 +38,19 @@ class metaPattern(object):
             self.make()
             
     def __len__(self):
-        return len(self.data)
+        lengths = [1] + [len(p) for p in self.data if isinstance(p, Pattern)]
+        return LCM(*lengths) * len(self.data)
+    
     def __str__(self):
-        if len(self.data) > 10:
-            val = self.data[:3] + [dots()] + self.data[-3:]
+        if len(self.data) > 20:
+            val = self.data[:8] + [dots()] + self.data[-8:]
         else:
             val = self.data
-        return self.BRACKETS % str(val)[1:-1]
+        return self.bracket_style % str(val)[1:-1]
+
     def __repr__(self):
         return str(self)
+
     def string(self):
         """ Returns a string made up of all the values:
 
@@ -47,54 +62,102 @@ class metaPattern(object):
             except:
                 string += str(item)
         return string
-    #: Container methods
+    
+    """
+
+        Pattern container methods
+        -------------------------
+
+    """
+
+    # this is replaced in FoxDot.TimeVar
     def __getitem__(self, key):
-        return self.data[key]
+        return self.getitem(key)
+
+    def getitem(self, key):
+        """ Is called by __getitem__ """
+        i = key % len(self.data)
+        val = self.data[i]
+        if isinstance(val, Pattern):
+            j = key // len(self.data)
+            val = val.getitem(j)
+        return val
+    
     def __setitem__(self, key, value):
-        self.data[key] = value
+        i = key % len(self.data)
+        if isinstance(self.data[i], metaPattern):
+            j = key // len(self.data)
+            self.data[i][j] = value
+        else:
+            if key >= len(self.data):
+                self.data[i] = Pattern([self.data[i], Format(value)]).stutter([key // len(self.data) , 1])
+            else:
+                self.data[i] = Format(value)
+
+    def setitem(self, key, value):
+        self.data[key] = Format(value)
+            
     def __iter__(self):
-        for data in self.data:
-            yield data
+        for i in range(len(self)):
+            yield self.getitem(i)
+
     def items(self):
-        for i, data in enumerate(self.data):
-            yield i, data
+        for i, value in enumerate(self):
+            yield i, value
+
     def __getslice__(self, i, j):
         return Pattern( self.data[i:j] )
+
     def __setslice__(self, i, j, item):
-        self.data[i:j] = item
+        self.data[i:j] = Format(item)
+
+    # count all values that occur?
     def count(self, item):
         return self.data.count(item)
-    #: Operators
+
+    """
+
+        Pattern operators (i.e. magic methods)
+        --------------------------------------
+
+    """
     def __add__(self, other):  return PAdd(self, other)
     def __radd__(self, other): return PAdd(self, other)
     def __sub__(self, other):  return PSub(self, other)
-    def __rsub__(self, other): return PSub(other, self)
+    def __rsub__(self, other): return PSub2(self, other)
     def __mul__(self, other):  return PMul(self, other)
-    def __rmul__(self, other): return PMul(other, self)
+    def __rmul__(self, other): return PMul(self, other)
     def __div__(self, other):  return PDiv(self, other)
-    def __rdiv__(self, other): return PDiv(other, self)
+    def __rdiv__(self, other): return PDiv2(self, other)
     def __mod__(self, other):  return PMod(self, other)
-    def __rmod__(self, other): return PMod(other, self)
+    def __rmod__(self, other): return PMod2(self, other)
     def __pow__(self, other):  return PPow(self, other)
-    def __rpow__(self, other): return PPow(other, self)
+    def __rpow__(self, other): return PPow2(self, other)
     def __xor__(self, other):  return PPow(self, other)
-    def __rxor__(self, other): return PPow(other, self)
+    def __rxor__(self, other): return PPow2(self, other)
     def __truediv__(self, other):  return PDiv(self, other)
-    def __rtruediv__(self, other): return PDiv(other, self)
-    #: Piping patterns
+    def __rtruediv__(self, other): return PDiv2(self, other)
+
+    """
+
+        Piping patterns together using the '|' operator
+
+    """
+    
     def __or__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return Pattern(self.pipe(other))
     def __ror__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return Pattern(asStream(other).pipe(self))
+    
     #: Comparisons
-    def __eq__(self, other): return Peq(self, other)
-    def __ne__(self, other): return Pne(self, other)
-    def __gt__(self, other): return Pgt(self, other)
-    def __ge__(self, other): return Pge(self, other)
-    def __lt__(self, other): return Plt(self, other)
-    def __le__(self, other): return Ple(self, other)
+##    def __eq__(self, other): return Peq(self, other)
+##    def __ne__(self, other): return Pne(self, other)
+##    def __gt__(self, other): return Pgt(self, other)
+##    def __ge__(self, other): return Pge(self, other)
+##    def __lt__(self, other): return Plt(self, other)
+##    def __le__(self, other): return Ple(self, other)
 
     #: Methods for strings as pattern
 
@@ -241,7 +304,7 @@ class metaPattern(object):
 
             self.data = list(self.data)
             
-        if not isinstance(self.data, list):
+        if not isinstance(self.data, PatternType):
     
             self.data = [self.data]
 
@@ -249,27 +312,20 @@ class metaPattern(object):
         for i, data in enumerate(self.data):
             if type(data) is tuple:
                 self.data[i] = PGroup(data)
-
-        #: Lace any nested lists
-        self.data = Place(self.data)
-        
+            elif type(data) is list:
+                self.data[i] = Pattern(data)
+                
         return self
 
 class Pattern(metaPattern):
-    """
-        Pattern Base Class
-        ==================
-        
-    """
+    pass
 
-    NEST_ME = True
-    BRACKETS = "[%s]"
+PatternType = (Pattern, list)
 
-class PatternContainer(metaPattern):
-    NEST_ME = False
-    BRACKETS = "[%s]"
-    def make(self):
-        return self
+class PatternContainer(Pattern):
+    def getitem(self, key):
+        key = key % len(self)
+        return self.data[key]
     def __str__(self):
         return str(["%s()" % item.__class__.__name__ for item in self.data])
     def __repr__(self):
@@ -282,45 +338,30 @@ class PGroup(metaPattern):
         PGroups should only be found within a Pattern object.
         
     """
-
-    NEST_ME = False
-    BRACKETS = "(%s)"
+    
+    bracket_style = "(%s)"
 
     def __init__(self, data=[], *args):
         if not args:
-            if type(data) is tuple:
+            if isinstance(data, (PGroup, tuple)):
                 data = list(data)
         else:
             data = [data] + list(args)
+
         metaPattern.__init__(self, data)
-    
-    def make(self):
-        """
-            Overrides the Pattern.make() method to allow PGroup to invert nesting:
 
-            i.e. (0,[1,2]) -> [(0,1),(0,2)] and NEST_ME flag is set to False
-            i.e. (0,[1,2],[3,4]) -> [(0,1,3),(0,2,4)]
+        # If the PGroup contains patterns, change it to a Pattern
+        l = [len(p) for p in self.data if isinstance(p, Pattern)]
+        if len(l) > 0:
+            new_data = []
+            for key in range(max(l)):
+                new_data.append(PGroup([item.getitem(key) if isinstance(item, Pattern) else item for item in self.data]))
+            self.__class__ = Pattern
+            self.data = new_data
 
-        """
-
-        if not isinstance(self.data, (list, metaPattern)):
-    
-            self.data = [self.data]
-
-        #: Inverts the nested and grouped data if PGroup has a nested Pattern
-        if contains_nest(self.data):
-            
-            sub = Place(self.data)
-
-            step = len(self.data)
-
-            self.data = [self.__class__(sub[n:n+step]) for n in range(0, len(sub), step)]
-
-            # Make this a pseudo-normal pattern          
-            self.NEST_ME  = Pattern.NEST_ME
-            self.BRACKETS = Pattern.BRACKETS
-            
-        return self
+    def getitem(self, key):
+        key = key % len(self.data)        
+        return self.data[key]
 
     def coeff(self):
         return 0.5
@@ -339,66 +380,52 @@ class PGroup(metaPattern):
 Pgroup = PGroup #: Alias for PGroup
 
 class Shared_Time_PGroup(PGroup):
-    BRACKETS = "{%s}"
+    bracket_style = "{%s}"
     def coeff(self):
         return 1.0 / len(self)
 
 
 # Functions used to separate Groups and Nests from within Patterns
 
-def nested(data):
-    """ Returns true is data is any kind of pattern (inc. lists) EXCEPT PGroups or TimeVars """
-    try:
-        return data.NEST_ME
-    except:
-        return isinstance(data, list)
+##def nested(data):
+##    """ Returns true is data is any kind of pattern (inc. lists) EXCEPT PGroups or TimeVars """
+##    try:
+##        return data.NEST_ME
+##    except:
+##        return isinstance(data, list)
 
-def contains_nest(data):
-    """ Returns true if any items in data are 'nest-able' patterns """
-    try:
-        return any([nested(item) for item in data])
-    except:
-        return False
+##def contains_nest(data):
+##    """ Returns true if any items in data are 'nest-able' patterns """
+##    try:
+##        return any([nested(item) for item in data])
+##    except:
+##        return False
+##
+##def Place(data):
+##    """ nested patterns are stretched
+##        e.g. [[1,0],0,1,0] would be returned as [1,0,1,0,0,0,1,0] """
+##
+##    if contains_nest(data):
+##
+##        #: Works out the largest sub-patterns and loops the overall pattern until it is stretched out
+##        
+##        sub = LCM(*[len(item) for item in data if nested(item)])
+##        new = []
+##
+##        for i in range( sub ):
+##            for j in range(len(data)):
+##                item = data[j]
+##                if nested(item):
+##                    item = modi(item, i)
+##                    if type(item) is tuple:
+##                        item = PGroup(item)
+##                new.append(item)
+##        return new
+##    
+##    else:
+##         #: If the pattern doesn't need lacing, return original
+##        return data
 
-def Place(data):
-    """ nested patterns are stretched
-        e.g. [[1,0],0,1,0] would be returned as [1,0,1,0,0,0,1,0] """
-
-    if contains_nest(data):
-
-        #: Works out the largest sub-patterns and loops the overall pattern until it is stretched out
-        
-        sub = LCM(*[len(item) for item in data if nested(item)])
-        new = []
-
-        for i in range( sub ):
-            for j in range(len(data)):
-                item = data[j]
-                if nested(item):
-                    item = modi(item, i)
-                    if type(item) is tuple:
-                        item = PGroup(item)
-                new.append(item)
-        return new
-    
-    else:
-         #: If the pattern doesn't need lacing, return original
-        return data
-
-
-class PatternLacer:
-    def __call__(self, data):
-        i, loop = 0, LCM(*[(len(self(item)) if hasattr(item, "__len__") else 1) for item in data])
-        new_data = []
-        while i < loop:
-            for item in data:
-                if isinstance(item, (Pattern, list)):
-                    item = modi(self(item), i)
-                new_data.append(item)
-            i += 1
-        return new_data
-
-Place = PatternLacer()
 
 # Used to force any non-pattern data into a Pattern
                 
@@ -407,6 +434,13 @@ def asStream(data):
     if isinstance(data, Pattern):
         return data
     return Pattern(data)
+
+def Format(data):
+    if isinstance(data, list):
+        return Pattern(data)
+    if isinstance(data, tuple):
+        return PGroup(data)
+    return data
 
 def Dominant(*patterns):
     for p in patterns:
@@ -424,7 +458,7 @@ def Convert(*args):
             PatternTypes.append(PGroup(val))
         else:
             PatternTypes.append(Pattern(val))
-    return PatternTypes
+    return PatternTypes if len(PatternTypes) > 0 else PatternTypes[0]
 
 
 

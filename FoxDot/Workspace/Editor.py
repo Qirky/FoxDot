@@ -16,6 +16,7 @@ from Format import *
 from AppFunctions import *
 from Console import console
 from Undo import UndoStack
+from Prompt import TextPrompt
 
 from ..Settings import FONT, FOXDOT_ICON
 import os
@@ -72,11 +73,7 @@ class workspace:
 
         # Docstring prompt label
 
-        self.prompt = StringVar()
-        self.promptlbl = Label(self.text, textvariable=self.prompt)
-        self.promptlbl.place(x=9999, y=9999)
-        self.last_word = ""
-        self.prompt.set("")        
+        self.prompt = TextPrompt(self.text)        
 
         # Key bindings
         
@@ -90,7 +87,8 @@ class workspace:
         
         ctrl = "Command" if SYSTEM == MAC_OS else "Control"
             
-        self.text.bind("<{}-Return>".format(ctrl),          self.get_code)
+        self.text.bind("<{}-Return>".format(ctrl),          self.exec_block)
+        self.text.bind("<Alt-Return>",                      self.exec_line)
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
         self.text.bind("<{}-v>".format(ctrl),               self.paste)
@@ -203,6 +201,68 @@ class workspace:
             self.undo_stack.append_keystroke(index)
 
             self.update(event)
+
+        return "break"
+
+    """
+
+        Getting blocks / lines
+
+    """
+
+    def exec_line(self, event=None):
+        """ Highlights a single line and executes """
+        line, column = index(self.text.index(INSERT))
+        a, b = "%d.0" % line, "%d.end" % line
+        self.highlight(a, b)
+        self.submit( self.text.get(a, b) )
+        Thread(target=self.unhighlight).start()
+        return "break"
+
+    def exec_block(self, event):
+        """ Method to highlight block of code and execute """
+
+        # Get start and end of the buffer
+        start, end = "1.0", self.text.index(END)
+        lastline   = int(end.split('.')[0]) + 1
+
+        # Indicies of block to execute
+        block = [0,0]        
+        
+        # 1. Get position of cursor
+        cursor = self.text.index(INSERT)
+        cur_x, cur_y   = (int(a) for a in cursor.split('.'))
+        
+        # 2. Go through line by line (back) and see what it's value is
+        
+        for line in range(cur_x, 0, -1):
+            if not self.text.get("%d.0" % line, "%d.end" % line).strip():
+                break
+
+        block[0] = line
+
+        # 3. Iterate forwards until we get two \n\n or index==END
+        for line in range(cur_x, lastline):
+            if not self.text.get("%d.0" % line, "%d.end" % line).strip():
+                break
+
+        block[1] = line
+
+        # Now we have the lines of code!
+
+        a, b = ("%d.0" % n for n in block)
+
+        # Highlight text to execute
+
+        self.highlight(a, b)
+
+        # Execute the python code
+        
+        self.submit( self.text.get( a , b ) )
+
+        # Unhighlight the line of text
+
+        Thread(target=self.unhighlight).start()
 
         return "break"
 
@@ -574,57 +634,7 @@ class workspace:
         size = max(8, font.actual()["size"]-2)
         font.configure(size=size)
         return  'break'
-
-
-    # Code execution: Ctrl+Return
-    #----------------------------
-
-    def get_code(self, event):
-        """ Method to highlight block of code and execute """
-
-        # Get start and end of the buffer
-        start, end = "1.0", self.text.index(END)
-        lastline   = int(end.split('.')[0]) + 1
-
-        # Indicies of block to execute
-        block = [0,0]        
-        
-        # 1. Get position of cursor
-        cursor = self.text.index(INSERT)
-        cur_x, cur_y   = (int(a) for a in cursor.split('.'))
-        
-        # 2. Go through line by line (back) and see what it's value is
-        
-        for line in range(cur_x, 0, -1):
-            if not self.text.get("%d.0" % line, "%d.end" % line).strip():
-                break
-
-        block[0] = line
-
-        # 3. Iterate forwards until we get two \n\n or index==END
-        for line in range(cur_x, lastline):
-            if not self.text.get("%d.0" % line, "%d.end" % line).strip():
-                break
-
-        block[1] = line
-
-        # Now we have the lines of code!
-
-        a, b = ("%d.0" % n for n in block)
-
-        # Highlight text to execute
-
-        self.highlight(a, b)
-
-        # Execute the python code
-        
-        self.submit( self.text.get( a , b ) )
-
-        # Unhighlight the line of text
-
-        Thread(target=self.unhighlight).start()
-
-        return "break"
+    
 
     def submit(self, code_str):
         """ Runs the chunk of code through FoxDot processing and execute """
@@ -644,6 +654,7 @@ class workspace:
         a, b = (int(n.split('.')[0]) for n in (start, end))
 
         if a == 1: a = 0
+        if a == b: b += 1
 
         for line in range(a + 1, b):
             start = "%d.0" % line
@@ -692,7 +703,7 @@ class workspace:
             x = self.font.measure(text)
             y = self.font.metrics("linespace") * line
 
-            self.promptlbl.place(x=x, y=y)
+            self.prompt.move(x, y)
 
             # If cursor is in between brackets that follow a type word
 
@@ -708,9 +719,7 @@ class workspace:
 
             # Hide prompt
 
-            self.promptlbl.place(x=9999, y=9999)
-
-        #self.prompt.set("cheese")
+            self.prompt.hide()
 
     def check_namespace(self):
         """ Sets the label """
@@ -721,11 +730,11 @@ class workspace:
 
             if obj.__doc__ is not None:
 
-                self.prompt.set(obj.__doc__)
+                self.prompt.value.set(obj.__doc__)
 
             else:
 
-                self.promptlbl.place(x=9999, y=9999)
+                self.prompt.hide()
 
     """
 

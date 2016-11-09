@@ -1,3 +1,9 @@
+### v0.1.8 fixes and updates
+
+- PSparse pattern type added (all Pattern names can be seen by executing `print(PatternTypes)`
+- Major overhaul of Pattern nesting/lacing behaviour. Patterns can now be nested to multiple levels.
+- Player object attributes now 'follow' one another and their current  values are examined instead of the Pattern value
+
 ### v0.1.7 fixes and updates
 - "Chop" added to default SynthDef behaviour
 - GUI icon updated

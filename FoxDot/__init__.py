@@ -20,6 +20,7 @@ from TempoClock import *
 from Players import *
 from Patterns import *
 from TimeVar import *
+from Constants import *
 import Scale
 import Root
 
@@ -35,13 +36,12 @@ Clock = TempoClock()
 Clock.when_statements = when
 
 when.metro = var.metro = Clock
-PlayerObject.metro  = Clock
+Player.metro  = Clock
+Player.server = Server
+Player.default_scale = Scale.default()
+Player.default_root  = Root.default()
 
 Clock.start()
-
-PlayerObject.server = Server
-PlayerObject.default_scale = Scale.default()
-PlayerObject.default_root  = Root.default()
 
 BufferManager.server = Server
 BufferManager.load()
@@ -57,7 +57,7 @@ numbers  = '0123456789'
 
 for char in alphabet:
 
-    FoxDotCode.namespace[char] = PlayerObject()
+    FoxDotCode.namespace[char] = Player()
 
 # 2 Letter Player Objects
 
@@ -67,7 +67,9 @@ for char1 in alphabet:
 
         name = char1+char2
 
-        FoxDotCode.namespace[name] = PlayerObject()
+        FoxDotCode.namespace[name] = Player()
+
+# misc
 
 class futureprint:
     """ Wraps Python 2.7 print statements as a function """
@@ -75,6 +77,16 @@ class futureprint:
         self.string = string
     def __call__(self):
         print self.string
+
+PatternTypes = []
+for pattern_name in sorted(classes(Sequences)):
+    if len(PatternTypes) == 0:
+        PatternTypes.append(pattern_name)
+    else:
+        if pattern_name.upper() !=  PatternTypes[-1].upper():
+            PatternTypes.append(pattern_name)
+        
+
 
 
 """ IDE """
