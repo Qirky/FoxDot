@@ -75,52 +75,37 @@ Grouping characters in round brackets laces the pattern so that on each play thr
 
 ## Writing your own Synth Definitions
 
-FoxDot can access any `SynthDef` stored on the SuperCollider server but you may want to write (or edit) your own during run-time in FoxDot. This is done using the `SCLang` module. All FoxDot `SynthDef` objects inherit the base-class behaviour, such as low- and high-pass filters and vibrato, but these can be overridden or updated easily. The `SCLang` module also provides an easy-to-use API to the SCLang used in SuperCollider
+FoxDot can access any SynthDef stored on the SuperCollider server, but it needs to know it's there. If you have already written a SynthDef in SuperCollider and named it `\mySynth` then you just create a SynthDef instance using FoxDot like so:
 
-Example:
+```python
+mySynth = SynthDef("mySynth")
+```
+
+Using the same variable name in FoxDot as in SuperCollider for your SynthDef is a good idea to avoid confusion. If you want to write (or edit) your own SynthDef during run-time in FoxDot you can use a SuperCollider API by importing the `SCLang` module. All FoxDot SynthDef objects inherit the base-class behaviour, such as low- and high-pass filters and vibrato, but these can be overridden or updated easily. If you want to know more about digital sound processing and SynthDef creation, check out the [SuperCollider documentation](http://doc.sccode.org/Classes/SynthDef.html). Below is an example of creating one in FoxDot:
 
 ```python
 # Import module for writing SCLang code from Python
 from SCLang import *
 
-# Create a SynthDef named 'example'
-ex = SynthDef("example")			
+# Create a SynthDef named 'example' (using the same variable name as the SynthDef name is a good idea)
+example = SynthDef("example")				
 
-# Add a custom argument named 'pow'
-ex.defaults.update(pow=1)			
+# Create the oscillator (osc) using a sine wave
+example.osc = SinOsc.ar(ex.freq)	
 
-# Create our oscillator using a sine wave that oscillates at the given frequency to power of 'pow'
-ex.osc = SinOsc.ar(ex.freq ^ ex.pow)	
+# And give it a percussive sound envelope (env)
+example.env = Env.perc()					
 
-# Using a percussive sound envelope
-ex.env = Env.perc()					
-
-# Add to the server
-ex.add()							
+# Finally, store it!
+example.add()							
 ```
-
-*This is equivalent to the following SynthDef that inherits from the base-class (it's a little nicer isn't it?)*
-
-```java
-SynthDef.new( \example,
-	{ |vib=0, vibVar=0.04, pow=1, echo=0, depthVar=0.1, vibDelay=0, slide=0, delay=0, sus=1, hpf=0, pan=0, scrub=0, verb=0.25, amp=1, freq=0, buf=0, echoOn=0, room=0.5, rate=0, depth=0.02, grain=0, lpf=20000, slidefrom=1|
-
-	var osc, env;
-
-	freq=Vibrato.kr(Line.ar((freq * slidefrom), (freq * (1 + slide)), sus), delay: vibDelay, depthVariation: depthVar, rate: vib, rateVariation: vibVar, depth: depth);
-
-	osc=LPF.ar(HPF.ar(SinOsc.ar((freq ** pow)), hpf), lpf);
-
-	env=EnvGen.ar(Env.perc(level: amp, releaseTime: sus).delay(delay), doneAction: 2);
-
-	Out.ar(0, Pan2.ar(FreeVerb.ar(((osc + (echoOn * CombN.ar(osc, (echo * 0.1), (echo * 0.1), ((echo * 0.5) * sus), 1))) * env), verb, room), pan))}).add;
-```
-
-The attribute `env` is set to `Env.perc()` by default, so as long as you set `osc` to a valid SuperCollider UGen, you'll be making noise in no time! Once the `SynthDef` has been added to the server, you'll be able to use it using the basic FoxDot syntax like so:
-
-	e1 >> ex([0,1,2,3], pow=[1,1.5])
-
 
 ## Documentation
 
-For more information on FoxDot, please see http://foxdot.org/
+For more information on FoxDot, please see the `docs` folder or go to http://foxdot.org/index.php/documentation/ (although largely unwritten)
+
+## Thanks
+
+- The SuperCollider development community and, of course, James McCartney, its original developer
+- PyOSC, Artem Baguinski et al
+- Sounds in the `samples/kindohm` folder courtesy of Mike Hodnick's live coded album, [Expedition](https://github.com/kindohm/expedition)
