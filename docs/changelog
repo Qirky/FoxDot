@@ -1,5 +1,10 @@
-### v0.1.8 fixes and updates
+### v0.1.9 fixes and updates
+- PSparse renamed to PBin
+- Loading the icon now works on Linux
+- Upheaval of SCLang API
+- Player Objects now have visual feedback behaviour via the `bang` method and take Tkinter tag_config keyword arguments.
 
+### v0.1.8 fixes and updates
 - PSparse pattern type added (all Pattern names can be seen by executing `print(PatternTypes)`
 - Major overhaul of Pattern nesting/lacing behaviour. Patterns can now be nested to multiple levels.
 - Player object attributes now 'follow' one another and their current  values are examined instead of the Pattern value

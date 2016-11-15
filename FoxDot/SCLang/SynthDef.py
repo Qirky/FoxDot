@@ -137,7 +137,7 @@ class SynthDef(object):
     # ---------------------------
 
     def __call__(self, degree=None, **kwargs):
-        return SynthDefProxy(self.name, degree, kwargs)
+        return SynthDefProxy(self.name, self.env, degree, kwargs)
 
     # Getter and setter
     # -----------------
@@ -165,7 +165,8 @@ class SynthDef(object):
                 self.attr.append((key, value))
         except:
             pass
-        self.__dict__[key] = value
+        if key not in self.__dict__ or str(key) != str(value):
+            self.__dict__[key] = value
 
 
     # Defining class behaviour
@@ -184,9 +185,6 @@ class SynthDef(object):
 
     def get_base_class_variables(self):
         return "var {};".format(", ".join(self.var))
-
-    #def get_custom_behaviour(self):
-    #    return "\n".join([str(arg) + '=' + str(self.__dict__[arg]) + ';' for arg in self.defaults.keys() + self.var if arg in self.__dict__])
 
     def get_custom_behaviour(self):
         string = ""
@@ -257,8 +255,9 @@ class SynthDef(object):
         return new
 
 class SynthDefProxy:
-    def __init__(self, name, degree, kwargs):
+    def __init__(self, name, envelope, degree, kwargs):
         self.name = name
+        self.env  = envelope
         self.degree = degree
         self.mod = 0
         self.kwargs = kwargs

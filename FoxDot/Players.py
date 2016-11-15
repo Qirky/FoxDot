@@ -18,6 +18,8 @@ from Repeat import *
 from Patterns import *
 from Midi import *
 
+from Bang import Bang
+
 import Scale
 import Buffers
 import TimeVar
@@ -31,6 +33,8 @@ class Player(repeatable_object):
     VARS = []
     # This is an internal flag 
     INIT = False
+    # Used for visual feedback
+    bang_kwargs = {}
 
     metro = None
     server = None
@@ -38,10 +42,18 @@ class Player(repeatable_object):
     def __init__( self ):
         
         self.synthdef = None
+        self.id = None
         self.quantise = False
         self.stopping = False
         self.stop_point = 0
         self.following = None
+
+        # Visual feedback information
+
+        self.envelope    = None
+        self.line_number = None
+        self.whitespace  = None
+        self.bang_kwargs = {}
 
         # Modifiers
         
@@ -93,6 +105,7 @@ class Player(repeatable_object):
         if isinstance(other, SynthDefProxy):
             self.update(other.name, other.degree, **other.kwargs)
             self + other.mod
+            self.envelope = other.env
             for method, arguments in other.methods.items():
                 args, kwargs = arguments
                 getattr(self, method).__call__(*args, **kwargs)                
@@ -615,7 +628,7 @@ class Player(repeatable_object):
 
             if key not in self.keywords:
 
-                #try:
+                try:
                     
                     val = modi(self.event[key], index)
 
@@ -637,9 +650,9 @@ class Player(repeatable_object):
 
                     message += [key, float(val)]
 
-                #except:
+                except:
 
-                 #   pass
+                    print key, val
 
         return message
 
@@ -647,6 +660,7 @@ class Player(repeatable_object):
         """ Sends the current event data to SuperCollder """
 
         size = self.largest_attribute()
+        banged = False
 
         for i in range(size):
 
@@ -665,11 +679,17 @@ class Player(repeatable_object):
                     # TODO-Replace with an OSC Bundle and timestamps?
 
                     self.metro.schedule(send_delay(self, osc_msg), self.metro.now() + delay)
+                    self.metro.schedule(self.bang, self.metro.now() + delay)
                     
                 else:
                 
                     self.server.sendNote(str(self.synthdef), osc_msg)
 
+                    if not banged:
+
+                        self.bang()
+
+                        banged = True
         return
 
     #: Methods for stop/starting players
@@ -817,17 +837,6 @@ class Player(repeatable_object):
 
     """
 
-##    def echo(self, stop=False, delay=0.5, decay=10):
-##        """ Schedules the current event to repeat and decay """
-##        if stop:
-##            self.echo_on = False
-##        else:
-##            self.echo_on = True
-##            self.echo_fx['delay'] = delay
-##            self.echo_fx['decay'] = decay
-##        return self
-        
-
     def offbeat(self, dur=0.5):
         """ Off sets the next event occurence """
 
@@ -854,6 +863,22 @@ class Player(repeatable_object):
         for attr, val in self.attr.items():
             s += "\t{}\t:{}\n".format(attr, val)
         return s
+
+    def bang(self, **kwargs):
+        """
+        Triggered when sendNote is called. Responsible for any
+        action to be triggered by a note being played. Default action
+        is underline the player
+        """
+        if kwargs:
+
+            self.bang_kwargs = kwargs
+
+        elif self.bang_kwargs:
+
+            bang = Bang(self, self.bang_kwargs)
+
+        return self
 
 ####
 

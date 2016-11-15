@@ -13,7 +13,7 @@ with SynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate)
-    play.osc  = play.osc * Env.ramp(amp=[1,1], sus=[play.sus * 2], doneAction=0) * play.amp * 3
+    play.osc  = play.osc * Env.ramp(amp=[1,1,0], sus=[play.sus * 2,0], doneAction=0) * play.amp * 3
     play.env  = Env.ramp(sus=2)
 
 # Synth Players

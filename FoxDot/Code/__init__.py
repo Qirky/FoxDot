@@ -7,6 +7,9 @@ from when_statements import when
 from live_functions import livefunction
 from ..Patterns.Operations import modi
 
+# Player RegEx
+import re
+re_player = re.compile(r"(\s*?)(\w+)\s*?>>\s*?\w+")
 
 """
     Live Object
@@ -43,6 +46,7 @@ class LiveObject(object):
 
 class FoxDotCode:
     namespace={}
+    player_line_numbers={}
     def __call__(self, code, verbose=True):
         """ Takes a string of FoxDot code and executes as Python """
 
@@ -55,15 +59,9 @@ class FoxDotCode:
                 if verbose is True:
 
                     print(stdout(code))
-
-##                    try:
-##
-##                        sys.displayhook(eval(code, self.namespace))
-##
-##                    except:
-##
-##                        pass
-
+    
+                    #TODO - Add sys.displayhook?
+                    
                 code = compile(code, "FoxDot", "exec")
 
             exec code in self.namespace
@@ -74,6 +72,45 @@ class FoxDotCode:
 
             raise
 
+        return
+
+    def update_line_numbers(self, text_widget, start="1.0", end="end", remove=0):
+
+        lines = text_widget.get(start, end).split("\n")[remove:]
+        update = []
+        offset = int(start.split(".")[0])
+
+        for i, line in enumerate(lines):
+
+            # Check line for a player and assign it a line number
+            match = re_player.match(line)
+            line_changed = False
+
+            if match is not None:                
+
+                whitespace = len(match.group(1))
+                player     = match.group(2)
+                line       = i + offset
+
+                if player in self.player_line_numbers:
+
+                    if (line, whitespace) != self.player_line_numbers[player]:
+
+                        line_changed = True
+
+                if line_changed or player not in self.player_line_numbers:
+
+                    self.player_line_numbers[player] = (line, whitespace)
+                    update.append("{}.id = '{}'".format(player, player))
+                    update.append("{}.line_number = {}".format(player, line))
+                    update.append("{}.whitespace  = {}".format(player, whitespace))
+
+        # Execute updates if necessary
+    
+        if len(update) > 0:
+
+            self.__call__("\n".join(update), verbose = False)
+                
         return
 
 execute = FoxDotCode()

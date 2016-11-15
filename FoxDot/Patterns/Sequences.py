@@ -46,12 +46,12 @@ class PRand(Base.Pattern):
 
 Prand = PRand
 
-class PSparse(Base.Pattern):
+class PBin(Base.Pattern):
     def __init__(self, n):
         self.data = [random.choice((0,1)) for i in range(n)]
         self.make()
 
-Psparse = PSparse
+Pbin = PBin
 
 class PxRand(Base.Pattern):
     """
@@ -87,7 +87,7 @@ Pwrand = PwRand
 
 class PSq(Base.Pattern):
     def __init__(self, a=1, b=2, c=3):
-        self.data = [x*b for x in range(a,a+c)]
+        self.data = [x**b for x in range(a,a+c)]
         self.make()
 
 class PAlt(Base.Pattern):

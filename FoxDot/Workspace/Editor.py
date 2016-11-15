@@ -7,10 +7,6 @@ from Tkinter import *
 import tkFont
 import tkFileDialog
 
-# stdlib threading
-from threading import Thread
-from time import sleep as wait
-
 # Custom app modules
 from Format import *
 from AppFunctions import *
@@ -222,10 +218,22 @@ class workspace:
     def exec_line(self, event=None):
         """ Highlights a single line and executes """
         line, column = index(self.text.index(INSERT))
+        
         a, b = "%d.0" % line, "%d.end" % line
-        self.highlight(a, b)
-        self.submit( self.text.get(a, b) )
-        Thread(target=self.unhighlight).start()
+
+        self.highlight(a, b, "purple") # TODO, change purple?
+
+        try:
+
+            execute( self.text.get(a, b) )
+            execute.update_line_numbers(self.text, a, b)
+
+        except:
+
+            pass
+
+        self.root.after(200, self.unhighlight)
+
         return "break"
 
     def exec_block(self, event):
@@ -259,19 +267,36 @@ class workspace:
 
         # Now we have the lines of code!
 
-        a, b = ("%d.0" % n for n in block)
+        a, b = block
+        
+        if a == b: b += 1
 
-        # Highlight text to execute
+        for line in range(a, b):
+            start = "%d.0" % line
+            end   = "%d.end" % line
 
-        self.highlight(a, b)
+            # Highlight text only to last character, not whole line
+
+            self.highlight(start, end)
+
+        # Convert line numbers to Tkinter indices
+
+        a, b = ("%d.0" % n for n in (a, b))
 
         # Execute the python code
-        
-        self.submit( self.text.get( a , b ) )
+
+        try:
+
+            execute( self.text.get( a , b ) )
+            execute.update_line_numbers(self.text, a, b)
+
+        except:
+
+            pass
 
         # Unhighlight the line of text
 
-        Thread(target=self.unhighlight).start()
+        self.root.after(200, self.unhighlight)
 
         return "break"
 
@@ -356,7 +381,8 @@ class workspace:
             f.close()
             self.text.delete("0.0", END)
             self.text.insert("0.0", text)
-            self.update(event)
+            self.update_all()
+            self.text.mark_set(INSERT, "0.0")
         return
 
     # Toggle console: Ctrl+#
@@ -400,6 +426,10 @@ class workspace:
         # Add newline
 
         self.text.insert(self.text.index(INSERT), "\n")
+
+        # Update player line numbers
+
+        execute.update_line_numbers(self.text)
 
         pos = 0 # amount of whitespace to add
 
@@ -527,6 +557,11 @@ class workspace:
         """ Deletes a character or selected area """
         # If there is a selected area, delete that
         if self.delete_selection():
+
+            # Update player line numbers
+
+            execute.update_line_numbers(self.text)
+
             return "break"
         
         # Else, work out if there is a tab to delete
@@ -536,7 +571,15 @@ class workspace:
         # If we are at the start of a line, delete that
 
         if j == 0:
+
             self.update(event)
+
+            # Update player line numbers
+
+            #execute.update_line_numbers(self.text, remove=int(i!=1))
+
+            execute.update_line_numbers(self.text, start="%d.0" % (i-1), remove=int(i!=1))
+
             return
 
         tab = index(i,j-tabsize)
@@ -572,10 +615,11 @@ class workspace:
         self.update(event)
         return "break"
 
-    def delete2(self,event):
+    def delete2(self,event): # TODO - This guy needs serious work
         """ Delete the next character """
         self.text.delete(self.text.index(INSERT))
         self.update(event)
+        execute.update_line_numbers(self.text)
         return "break"
 
     def delete_selection(self):
@@ -655,33 +699,21 @@ class workspace:
 
             return
 
-    def highlight(self, start, end):
-        """ Highlights block of code on execution """
+    def highlight(self, start, end, colour="Red"):
+        """ Highlights an area of text """
 
         # Label block (start and end are the lines before and after the code itself)
 
-        a, b = (int(n.split('.')[0]) for n in (start, end))
-
-        if a == 1: a = 0
-        if a == b: b += 1
-
-        for line in range(a + 1, b):
-            start = "%d.0" % line
-            end   = "%d.end" % line
-            self.text.tag_add("code", start, end)
+        self.text.tag_add("code", start, end)
 
         # Highlight
         
-        self.text.tag_config("code", background="Red", foreground="White")
+        self.text.tag_config("code", background=colour, foreground="White")
 
         return
 
     def unhighlight(self):
         """ Creates thread to wait 0.2 seconds before removing any highlights from the text """
-
-        # Hold highlight
-        
-        wait(0.2)
 
         # Remove labels
 
@@ -752,50 +784,54 @@ class workspace:
 
     """
 
-    def update(self, event=None, row=0):
+    def update(self, event=None, row=0): # TODO- make this guy more efficient
         """ Updates the the colours of the IDE """
-
-        ### TODO - also update the rows above and below
 
         # Move the window to view the current line
 
         self.text.see(INSERT)
 
         # 1. Get the contents of the current line
-##
-##        cur = self.text.index(INSERT)
-##
-##        line, column = index(cur)
 
-        # -- check current and last line if return key
-
-        cur = self.text.index(END)
+        cur = self.text.index(INSERT)
         line, column = index(cur)
 
-        #lines = [line] + [line-1-N for N in range(row)] + [line-1] * int(isReturn(event.char))
-        lines = range(line)
-
-        for line in lines:
-
-            start, end = index(line,0), index(line,"end")
-
-            thisline = self.text.get(start, end)
-
-            # 2. Remove tags at current point
-
-            for tag_name in self.text.tag_names():
-
-                self.text.tag_remove(tag_name, start, end)
-
-            # 3. Re-apply tags
-
-            for tag_name, start, end in findstyles(thisline):
-                
-                self.text.tag_add(tag_name, index(line, start), index(line, end))
+        self.colour_line(line)
 
         self.update_prompt()
 
         return "break"
+
+    def update_all(self):
+        """ Updates every line in the IDE """
+
+        row, col = index(self.text.index(END))
+        lines = row + 1
+
+        for line in range(lines):
+
+            self.colour_line(line)
+
+        return
+
+    def colour_line(self, line):
+        """ Checks a line for any tags that match regex and updates IDE colours """
+
+        start, end = index(line,0), index(line,"end")
+
+        thisline = self.text.get(start, end)
+
+        # 2. Remove tags at current point
+
+        for tag_name in self.text.tag_names():
+
+            self.text.tag_remove(tag_name, start, end)
+
+        # 3. Re-apply tags
+
+        for tag_name, start, end in findstyles(thisline):
+            
+            self.text.tag_add(tag_name, index(line, start), index(line, end))
                     
 
     def brackets(self, event):
