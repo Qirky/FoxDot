@@ -1,15 +1,18 @@
-class foo:
-    value = "foo"
+class test(object):
+    def __init__(self):
+        self.x = 10
+        self.y = 20
+    def __getattr__(self, key):
+        print key
+        return 99
+    def __getattribute__(self, key):
+        try:
+            object.__getattribute__(self, key)
+        except:
+            return 999
 
-class bar:
-    value = "bar"
-    def change(self):
-        self.__class__ = foo
+a = test()
 
-a = bar()
+print a.x
 
-print a.value
-
-a.change()
-
-print a.value
+print a.z

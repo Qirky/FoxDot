@@ -1,9 +1,11 @@
 from __future__ import division
-from ..Settings import SYSTEM, WINDOWS, SC3_PLUGINS, MAX_CHANNELS
+#from ..Settings import MAX_CHANNELS
 from SCLang import *
+from SynthDef import SynthDef
+import Env
 
 # TODO - check this!!!
-NUM_CHANNELS = MAX_CHANNELS
+NUM_CHANNELS = MAX_CHANNELS = 1
 
 # Sample Player
 
@@ -11,49 +13,49 @@ with SynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate)
-    # play.osc  = play.osc + CombL.ar(play.osc, maxdelaytime=2, delaytime=play.echo) * play.echoOn # TODO - add to default player behavoiur
-    play.osc  = play.osc * OpenEnv.block(sus=play.sus * 2) * play.amp * 3
-    play.env  = Env.block(sus=2)
+    play.osc  = play.osc * Env.ramp(amp=[1,1], sus=[play.sus * 2], doneAction=0) * play.amp * 3
+    play.env  = Env.ramp(sus=2)
 
 # Synth Players
 
 with SynthDef("pads") as pads:
+    pads.amp = pads.amp / 2
     pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
     #pads.osc = SinOsc.ar(pads.freq, mul=pads.amp / 2) + SinOsc.ar(pads.freq + 2, mul=pads.amp / 2)
     pads.env = Env.perc()
 
 noise = SynthDef("noise")
 noise.osc = LFNoise0.ar(noise.freq, noise.amp)
-noise.env = Env()
+noise.env = Env.env()
 noise.add()
 
 with SynthDef("dab") as synth:
      a = HPF.ar(Saw.ar(synth.freq / 4, mul=synth.amp / 2), 2000)
-     b = VarSaw.ar(synth.freq / 4, mul=synth.amp, width=OpenEnv.perc(synth.sus / 20, synth.sus / 4, 0.5, -5))
+     b = VarSaw.ar(synth.freq / 4, mul=synth.amp, width=Env.perc(synth.sus / 20, synth.sus / 4, 0.5, -5, doneAction=0))
      synth.osc = a + b
-     synth.env = Env(times=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
+     synth.env = Env.env(sus=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
 dab = synth
 
 with SynthDef("varsaw") as synth:
-     synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005], mul=synth.amp / 2, width=synth.rate)
-     synth.env = Env()
+     synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005], mul=synth.amp / 4, width=synth.rate)
+     synth.env = Env.env()
 varsaw = synth
     
 
 with SynthDef("growl") as growl:
     growl.sus = growl.sus * 1.5
     growl.osc = SinOsc.ar(growl.freq + SinOsc.kr(0.5, add=1, mul=2), mul=growl.amp) * Saw.ar((growl.sus / 1.5) * 32)
-    growl.env = Env()
+    growl.env = Env.env()
 
 with SynthDef("bass") as bass:
     bass.amp  = bass.amp * 2
-    bass.freq = bass.freq / 2
+    bass.freq = bass.freq / 4
     bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=0.85, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
     bass.env  = Env.perc()
 
 with SynthDef("dirt") as dirt:
-    dirt.amp  = dirt.amp * 1.2
-    dirt.freq = dirt.freq / 2
+    # dirt.amp  = dirt.amp * 1.2
+    dirt.freq = dirt.freq / 4
     dirt.osc  = LFSaw.ar(dirt.freq, mul=dirt.amp) + VarSaw.ar(dirt.freq + 1, width=0.85, mul=dirt.amp) + SinOscFB.ar(dirt.freq - 1, mul=dirt.amp/2)
     dirt.env  = Env.perc()
 
@@ -82,13 +84,13 @@ with SynthDef("bell") as bell:
     bell.osc = Klank.ar([ [0.501, 1, 0.7,   2.002, 3, 9.6,   2.49, 11, 2.571,  3.05, 6.242, 12.49, 13, 16, 24],
                        [0.002,0.02,0.001, 0.008,0.02,0.004, 0.02,0.04,0.02, 0.005,0.05,0.05, 0.02, 0.03, 0.04],
                        stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.25), bell.freq, 0, 3)
-    bell.env = Env.block()
+    bell.env = Env.ramp()
 
 with SynthDef("soprano") as soprano:
     soprano.defaults.update(vib=5, verb=0.5)
     soprano.amp = soprano.amp / 2
     soprano.osc = SinOsc.ar(soprano.freq * 3, mul=soprano.amp) + SinOscFB.ar(soprano.freq * 3, mul=soprano.amp / 2)
-    soprano.env = Env()
+    soprano.env = Env.env()
 
 with SynthDef("dub") as dub:
     dub.freq = dub.freq / 4
@@ -98,7 +100,6 @@ with SynthDef("dub") as dub:
 
 with SynthDef("viola") as viola:
     viola.defaults.update(verb=0.33, vib=6)
-    viola.freq = SynthDef.freq
     viola.osc = PMOsc.ar(viola.freq, Vibrato.kr(viola.freq, rate=viola.vib, depth=0.008, delay=viola.sus*0.25), 10, mul=viola.amp / 2)
     viola.env = Env.perc( 1/4 * viola.sus, 5/2 * viola.sus )
 
@@ -106,12 +107,12 @@ with SynthDef("scratch") as scratch:
     scratch.defaults.update(depth=0.5, rate=0.04)
     scratch.freq = scratch.freq * Crackle.ar(1.5)
     scratch.osc  = SinOsc.ar(Vibrato.kr(scratch.freq, 2, 3, rateVariation=scratch.rate, depthVariation=scratch.depth), mul=scratch.amp )
-    scratch.env  = Env()
+    scratch.env  = Env.env()
 
 with SynthDef("klank") as klank:
     klank.sus = klank.sus * 1.5
     klank.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, klank.freq)
-    klank.env = Env()
+    klank.env = Env.env()
 
 with SynthDef("pluck") as pluck:
     freq = instance('freq')
@@ -119,14 +120,14 @@ with SynthDef("pluck") as pluck:
     pluck.freq = [pluck.freq, pluck.freq + LFNoise2.ar(50).range(-2,2)]
     pluck.osc  = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
     pluck.osc  = pluck.osc * XLine.ar(pluck.amp, pluck.amp/10000, pluck.sus * 4) * 0.3
-    pluck.env  = Env.block(sus=pluck.sus*1.5)
+    pluck.env  = Env.ramp(sus=pluck.sus*1.5)
 
 
 with SynthDef("ripple") as ripple:
     ripple.amp = ripple.amp / 6
     ripple.osc = Pulse.ar([ripple.freq/4, ripple.freq/4+1 ],0.2,0.25) + Pulse.ar([ripple.freq+2,ripple.freq],0.5,0.5)
     ripple.osc = ripple.osc * SinOsc.ar(ripple.rate/ripple.sus,0,0.5,1)
-    ripple.env = Env(sus=[0.55,0.55])
+    ripple.env = Env.env(sus=[0.55,0.55])
 
 with SynthDef("creep") as creep:
     creep.amp = creep.amp / 4
@@ -158,7 +159,7 @@ fuzz = SynthDef("fuzz")
 fuzz.freq = fuzz.freq / 2
 fuzz.amp = fuzz.amp / 6
 fuzz.osc = LFSaw.ar(LFSaw.kr(fuzz.freq,0,fuzz.freq,fuzz.freq * 2))
-fuzz.env = Env.block()
+fuzz.env = Env.ramp()
 fuzz.add()
 
 bug = SynthDef("bug")
@@ -170,13 +171,13 @@ bug.add()
 pulse = SynthDef("pulse")
 pulse.amp = pulse.amp / 4
 pulse.osc = Pulse.ar(pulse.freq)
-pulse.env = Env.block()
+pulse.env = Env.ramp()
 pulse.add()
 
 saw = SynthDef("saw")
 saw.amp = saw.amp / 4
 saw.osc = Saw.ar(saw.freq)
-saw.env = Env.block()
+saw.env = Env.ramp()
 saw.add()
 
 snick = SynthDef("snick")

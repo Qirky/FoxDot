@@ -13,7 +13,7 @@ from copy import deepcopy
 
 from Settings import SamplePlayer
 from Code import WarningMsg
-from SCLang import SynthDefProxy
+from SCLang.SynthDef import SynthDefProxy
 from Repeat import *
 from Patterns import *
 from Midi import *
@@ -24,26 +24,6 @@ import TimeVar
 
 BufferManager = Buffers.BufferManager().from_file()
 
-class PlayerKey:
-    def __init__(self, value=None):
-        self.value = value
-            
-    def update(self, value):
-        self.value = value
-
-    def __int__(self):
-        return int(self.value)
-    def __float__(self):
-        return float(self.value)
-    def __str__(self):
-        return str(self.value)
-    def __repr__(self):
-        return repr(self.value)
-    def __len__(self):
-        return len(self.value)
-    def now(self):
-        return self.value
-    
 
 class Player(repeatable_object):
 
@@ -874,6 +854,66 @@ class Player(repeatable_object):
         for attr, val in self.attr.items():
             s += "\t{}\t:{}\n".format(attr, val)
         return s
+
+####
+
+class PlayerKey:
+    def __init__(self, value=None):
+        self.value = value
+        self.other = 0
+    @staticmethod
+    def calculate(x, y):
+        return x
+            
+    def update(self, value):
+        self.value = value
+    def __add__(self, other):
+        self.other = asStream(other)
+        self.calculate = Add
+        return self
+    
+##    def __radd__(self, other):
+##        return PAdd(self, other)
+##    def __sub__(self, other):
+##        return PSub(self, other)
+##    def __rsub__(self, other):
+##        return PSub2(self, other)
+##    def __mul__(self, other):
+##        return PMul(self, other)
+##    def __rmul__(self, other):
+##        return PMul(self, other)
+##    def __div__(self, other):
+##        return PDiv(self, other)
+##    def __rdiv__(self, other):
+##        return PDiv2(self, other)
+##    def __mod__(self, other):
+##        return PMod(self, other)
+##    def __rmod__(self, other):
+##        return PMod2(self, other)
+##    def __pow__(self, other):
+##        return PPow(self, other)
+##    def __rpow__(self, other):
+##        return PPow2(self, other)
+##    def __xor__(self, other):
+##        return PPow(self, other)
+##    def __rxor__(self, other):
+##        return PPow2(self, other)
+##    def __truediv__(self, other):
+##        return PDiv(self, other)
+##    def __rtruediv__(self, other):
+##        return PDiv2(self, other)
+    def __int__(self):
+        return int(self.now())
+    def __float__(self):
+        return float(self.now())
+    def __str__(self):
+        return str(self.now())
+    def __repr__(self):
+        return repr(self.now())
+    def __len__(self):
+        return len(self.now())
+    def now(self):
+        return self.calculate(self.value, self.other)
 
 ####
 

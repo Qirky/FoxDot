@@ -99,7 +99,12 @@ class PAlt(Base.Pattern):
             for i in item:
                 self.data.append(op.modi(i,n))
         self.make()
-        
+
+class PStep(Base.Pattern):
+    def __init__(self, n, value, default=0):
+        self.data = [default]*(n-1)+[value]
+        self.make()
+Pstep = PStep
 
 class PSum(Base.Pattern):
     """

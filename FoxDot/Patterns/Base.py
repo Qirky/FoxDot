@@ -255,6 +255,10 @@ class metaPattern(object):
         shuffle(self.data)
         return self
 
+    def set(self, index, value):
+        self.data[index] = asStream(value)
+        return self
+
     # Boolean tests
 
     def contains_nest(self):
