@@ -49,8 +49,7 @@ class workspace:
         except:
 
             # Use .gif if necessary
-            self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON_GIF))
-        
+            self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON))
 
         # Set font
 
