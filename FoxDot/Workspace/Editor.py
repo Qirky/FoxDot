@@ -40,7 +40,17 @@ class workspace:
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=2)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
-        self.root.iconbitmap(FOXDOT_ICON)
+
+        # Set FoxDot icon
+        try:
+            # Use .ico file by default
+            self.root.iconbitmap(FOXDOT_ICON)
+            
+        except:
+
+            # Use .gif if necessary
+            self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON_GIF))
+        
 
         # Set font
 

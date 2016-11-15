@@ -24,7 +24,8 @@ elif sys.platform.startswith('linux'):
 
 USER_CWD     = os.path.realpath(".")
 FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../../")
-FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/FoxDot/Workspace/foxdot.ico")
+FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/FoxDot/Workspace/img/icon.ico")
+FOXDOT_ICON_GIF = os.path.realpath(FOXDOT_ROOT + "/FoxDot/Workspace/img/icon.gif")
 
 SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 OSC_FUNC     = "/FoxDot/SCLang/OSCFunc.scd"

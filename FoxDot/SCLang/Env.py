@@ -41,7 +41,7 @@ class sine(EnvGen):
         self.attr['level'] = amp
         self.doneAction = doneAction
 
-class ramp(EnvGen): # maybe call it ramp?
+class ramp(EnvGen):
     def __init__(self, sus=None, amp=[1,1], curve="'step'", doneAction=2):
         self.attr={}
         self.attr['times']  = [instance("sus")] if sus is None else sus
