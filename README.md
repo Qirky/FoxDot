@@ -10,6 +10,7 @@ FoxDot - Live Coding with Python v0.1.9
 - Sample names case error fixed
 - Upheaval of SCLang API
 - Player Objects now have visual feedback behaviour via the `bang` method and take Tkinter `tag_config` keyword arguments. 
+- Consolas now default font
 
 See `docs/changelog` for more
 
@@ -26,7 +27,7 @@ See `docs/changelog` for more
 
 #### Download and install
 
-FoxDot uses the sound synthesis engine, SuperCollider, to make noise and Python 2.7 so you'll need to make sure they're installed correctly before using FoxDot. Download the `FoxDot-master.zip` file from this page and extract the contents. For the best experience, install the `UbuntuMono-R.ttf` font (optional).
+FoxDot uses the sound synthesis engine, SuperCollider, to make noise and Python 2.7 so you'll need to make sure they're installed correctly before using FoxDot. Download the `FoxDot-master.zip` file from this page and extract the contents.
 
 #### Startup
 
