@@ -26,8 +26,7 @@ import Root
 
 """ SCLang """
 
-import SCLang
-from SCLang import SynthDefs, Env
+from SCLang import Synths, Env
 from SCLang.SynthDefs import *
 
 """ CLOCK """

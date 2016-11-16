@@ -3,6 +3,9 @@ demos/*
 FoxDot/debug/*
 TODO.txt
 
+# Setup file (for now)
+setup.py
+
 # Compiled Python file
 *.pyc
 

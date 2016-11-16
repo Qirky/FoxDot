@@ -168,10 +168,6 @@ BufGrain  = cls("BufGrain")
 Decimator = cls("Decimator")
 CrossoverDistortion = cls("CrossoverDistortion")
 
-##
-##import SynthDefs as s
-##SynthDefs.module=s
-
 # Array manipulation emulator functions
 
 stutter = lambda array, n: [item for item in array for i in range(n)]

@@ -21,7 +21,7 @@ class SynthDict(dict):
 
 # Create container for SynthDefs
 
-SynthDefs = SynthDict()
+Synths = SynthDict()
 
 # SynthDef Base Class
 
@@ -30,6 +30,7 @@ class SynthDef(object):
     server = Server
     var = ['osc', 'env']
     defaults = {}
+    container = Synths
     default_env = Env.perc()
 
     def __init__(self, name):
@@ -239,7 +240,7 @@ class SynthDef(object):
             SynthDef.server.loadSynthDef(self.filename)
 
             # Add to list
-            SynthDefs[self.name] = self
+            self.container[self.name] = self
             
         except Exception as e:
             

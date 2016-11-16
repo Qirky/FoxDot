@@ -7,7 +7,7 @@ class repeatable_object:
     repeat_events = {}
     def every(self, n, cmd, args=()):
         """ Every n beats, do self.cmd(args) """
-        
+
         try:
 
             # Make sure cmd is a method
@@ -23,15 +23,15 @@ class repeatable_object:
             return self
 
         # If the method call already exists, just update it
-        
+
         if cmd in self.repeat_events:
-            
+
             self.repeat_events[cmd].update(n, args)
 
             if not self.repeat_events[cmd].isScheduled():
 
                 self.repeat_events[cmd].schedule()
-            
+
         else:
 
             call = MethodCall(self, cmd, n, args)
@@ -51,12 +51,12 @@ class MethodCall:
         self.name = method
         self.when = asStream(n)
         self.i    = 0
-        self.next = self.when[self.i] + self.parent.metro.NextBar()
+        self.next = self.when[self.i] + self.parent.metro.next_bar()
         self.args = args
-        
+
     def __call__(self):
         """ Proxy for parent object __call__ """
-        
+
         self.i += 1
         self.next += modi(self.when, self.i)
 
