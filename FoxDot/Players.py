@@ -590,8 +590,10 @@ class Player(repeatable_object):
         # Get the current event
 
         self.event = {}
+
+        attributes = self.attr
         
-        for key in self.attr:
+        for key in attributes:
 
             # Eg. sp.sus returns the currently used value for sustain
 
@@ -624,7 +626,9 @@ class Player(repeatable_object):
         
         message = ['freq',  freq ]
 
-        for key in self.attr:
+        attributes = self.attr
+
+        for key in attributes:
 
             if key not in self.keywords:
 
@@ -652,7 +656,7 @@ class Player(repeatable_object):
 
                 except:
 
-                    print key, val
+                    print "Problem with", key
 
         return message
 

@@ -11,6 +11,7 @@ FoxDot - Live Coding with Python v0.1.9
 - Upheaval of SCLang API
 - Player Objects now have visual feedback behaviour via the `bang` method and take Tkinter `tag_config` keyword arguments. 
 - Consolas now default font
+- Fixed `Pvar` and `linvar` bugs
 
 See `docs/changelog` for more
 

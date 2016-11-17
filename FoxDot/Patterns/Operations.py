@@ -1,5 +1,4 @@
 from __future__ import division
-from copy import copy
 import Base
 
 """
@@ -16,11 +15,11 @@ class POperand:
         """ A is always a pattern.
         """
 
-        # If the first pattern is empty, return empty
+        # If the first pattern is empty, return the other as a pattern
 
         if len(A) == 0:
 
-            return A
+            return Base.Pattern(B)
 
         # Get the dominant pattern type and convert B
 
@@ -50,20 +49,21 @@ class POperand:
         return cls(P1)
 
 # General operations
-Nil  = lambda a, b: a
-Add  = lambda a, b: a + b
-rAdd = lambda a, b: b + a
-Sub  = lambda a, b: a - b
-Mul  = lambda a, b: a * b
-Div  = lambda a, b: a / b
-Mod  = lambda a, b: a % b
-rMod = lambda a, b: b % a
-Pow  = lambda a, b: a ** b
-rPow = lambda a, b: b ** a
-rDiv = lambda a, b: b / a
-rSub = lambda a, b: b - a
-Get  = lambda a, b: a[b]
-rGet = lambda a, b: b[a]
+def Nil(a, b):  return a
+def Add(a, b):  return a + b
+def Sub(a, b):  return a - b
+def Mul(a, b):  return a * b
+def Div(a, b):  return a / b
+def Mod(a, b):  return a % b
+def Pow(a, b):  return a ** b
+def Get(a, b):  return a[b]
+
+def rAdd(a, b): return b + a
+def rGet(a, b): return b[a]
+def rSub(a, b): return b - a
+def rDiv(a, b): return b / a
+def rMod(a, b): return b % a
+def rPow(a, b): return b ** a
 
 # Pattern operations
 PAdd = POperand(Add)

@@ -1,112 +1,77 @@
+"""
+    Sequences.py
+    ------------
+    All patterns inherit from Base.Pattern. There are two types of pattern:
+
+    1. Container types
+        - Similar to lists but with different mathematical operators
+    2. Generator types
+        - Similar to generators but can be indexed (returns values based on functions)
+
+"""
+
 import random
-import Base
 import Operations as op
+from Base import Pattern, GeneratorPattern, PGroup, asStream
 
-"""
-    All patterns inherit from Base.Pattern
+#==============================#
+#      1. Container Types      #
+#==============================#
 
-"""
 
 MAX_SIZE = 2048
  
-class P(Base.Pattern):
+class P(Pattern):
     """ P(iterable) -> User-defined pattern """
     pass
 
-class PStutter(Base.Pattern):
+class PStutter(Pattern):
     """ PStutter(pattern, n) -> Creates a pattern such that each item in the array is repeated n times (can be a pattern) """
 
-    def __init__(self, data, n=1):
+    def __init__(self, data, n=2):
         self.data = P(data).stutter(n).data
 
 Pstutter = PStutter #: Alias for PStutter()
 
-class PShuf(Base.Pattern):
+class PShuf(Pattern):
     """ PShuf(seq) ->  """
 
     def __init__(self, data):
         self.data = data
-        self.make()
         random.shuffle(self.data)
+        self.make()
 
 Pshuf = PShuf #: Alias for PShuf()
 
-class PRand(Base.Pattern):
-    """
-        Prand(iterable) -> Returns a stream of random elements
-        Prand(lo, hi) -> Returns a stream of random elements between lo and hi
-    """
-
-    def __init__(self, a, b=None):        
-        if isinstance(a, list):
-            self.data = [random.choice(a) for n in range(MAX_SIZE)]
-        else:
-            self.data = [random.randrange(a, b) for n in range(MAX_SIZE)]
-        self.make()
-
-Prand = PRand
-
-class PBin(Base.Pattern):
+class PBin(Pattern):
     def __init__(self, n):
         self.data = [random.choice((0,1)) for i in range(n)]
         self.make()
 
 Pbin = PBin
 
-class PxRand(Base.Pattern):
-    """
-        PxRand(iterable)
-        PxRand(lo, hi)
-
-        Differs from PRand() in that PxRand returns a random element
-        of a given list or range(lo, hi) each time it is accessed as
-        opposed to a predetermined list of random numbers/elements
-
-    """
-
-    def __init__(self, a, b=None):
-        if not isinstance(a, list):
-            a = range(a, b) if b is not None else range(a)
-        self.data = [random.choice(a)]
-        for n in range(MAX_SIZE):
-            self.data.append(random.choice([item for item in a if item != self.data[-1]]))
-        self.make()
-
-Pxrand = PxRand #: Alias for PxRand
-
-class PwRand(Base.Pattern):
-    """ Docstring """
-    def __init__(self, pattern, weights):
-        seq = []
-        for i, value in enumerate(pattern):
-            seq.extend([value] * int(weights[i] * 100))
-        self.data = [random.choice(seq) for n in range(MAX_SIZE)]
-        self.make()
-
-Pwrand = PwRand
-
-class PSq(Base.Pattern):
+class PSq(Pattern):
     def __init__(self, a=1, b=2, c=3):
         self.data = [x**b for x in range(a,a+c)]
         self.make()
 
-class PAlt(Base.Pattern):
+class PAlt(Pattern):
     def __init__(self, *patterns):
         self.data = []
-        item = [Base.asStream(p) for p in patterns]
+        item = [asStream(p) for p in patterns]
         size = op.LCM(*[len(i) for i in item])
         for n in range(size):
             for i in item:
                 self.data.append(op.modi(i,n))
         self.make()
 
-class PStep(Base.Pattern):
+class PStep(Pattern):
     def __init__(self, n, value, default=0):
         self.data = [default]*(n-1)+[value]
         self.make()
 Pstep = PStep
 
-class PSum(Base.Pattern):
+class PSum(Pattern):
     """
         PSum(n, total) -> Pattern of length n that sums to equal total
 
@@ -138,11 +103,11 @@ class PSum(Base.Pattern):
 
 Psum = PSum #: Alias for PSum
 
-class PRange(Base.Pattern):
+class PRange(Pattern):
 
     def __init__(self, *args):
 
-        if len(args) == 1 and isinstance(args[0], (list, Base.Pattern)):
+        if len(args) == 1 and isinstance(args[0], (list, Pattern)):
             self.data = []
             for n in args[0]:
                 self.data += range(n)
@@ -152,21 +117,7 @@ class PRange(Base.Pattern):
 
 Prange = PRange #: Alias
 
-class PWhite(Base.Pattern):
-
-    def __init__(self, lo=0, hi=1):
-
-        lo = float(lo)
-        hi = float(hi)
-
-        mode = (lo + hi) / 2.0
-
-        self.data = [random.triangular(lo, hi, mode) for n in range(MAX_SIZE)]
-        self.make()
-
-Pwhite = PWhite #: Alias
-
-class PTri(Base.Pattern):
+class PTri(Pattern):
 
     def __init__(self, *args):
 
@@ -185,7 +136,7 @@ class PTri(Base.Pattern):
 
 Ptri = PTri #: Alias for PTri
 
-class PSine(Base.Pattern):
+class PSine(Pattern):
 
     def __init__(self, size=16):
 
@@ -194,7 +145,90 @@ class PSine(Base.Pattern):
 
 Psine = PSine #: Alias for PSine
 
-class PDur(Base.Pattern):
+class PStretch(Pattern):
+
+    def __init__(self, data, size):
+        try:
+            self.data = data.stretch(size)
+        except:
+            self.data = P(data).stretch(size)
+
+Pstretch = PStretch #: Alias
+
+class PChords(Pattern):
+    def __init__(self, seq, struct=(0,2,4), stepsPerOctave=7):
+        # First item 'root' chord
+        self.data = []
+        for i, item in enumerate(seq):
+            chord = [item + val for val in struct]
+            if i > 0:
+                chords = [  chord,
+                           [note % stepsPerOctave for note in chord],
+                           [chord[0],chord[1],chord[2]-stepsPerOctave],
+                         ]
+                c2 = self.data[-1]
+                best = 1000
+                for c1 in chords:
+                    d = self.distance(c1, c2)
+                    if d < best:
+                        chord = c1
+                        best = d
+            # Add the chord with the smallest total change
+            self.data.append(tuple(sorted(chord)))
+    @staticmethod
+    def distance(a, b):
+        a = sorted(a)
+        b = sorted(b)
+        return sum([abs(a[i] - b[i]) for i in range(len(a))])        
+
+Pchords = PChords #: Alias
+
+class PPairs(Pattern):
+
+    def __init__(self, seq, func=lambda n: 8-n):
+        """ PPairs(iterable, func=lambda n: 8-n)
+
+            Laces a sequence with a second sequence obtained
+            by performing a function on the original """
+        
+        i = 0
+        self.data = []
+        for item in seq:
+            self.data.append(item)
+            self.data.append(func(item))
+            i += 1
+            if i >= MAX_SIZE:
+                break
+        self.make()
+
+Ppairs = PPairs #: Alias
+
+class PZip(Pattern):
+
+    def __init__(self, *pats):
+        l, p = [], []
+        for pat in pats:
+            p.append(asStream(pat))
+            l.append(len(p[-1]))
+        length = op.LCM(*l)
+        self.data = zip(*[p[i].stretch(length) for i in range(len(p))])
+
+
+class PZip2(Pattern):
+    def __init__(self, pat1, pat2, rule=lambda a, b: True):
+        length = op.LCM(len(pat1), len(pat2))
+        self.data = []
+        i = 0
+        while i < min(length, 32):
+            a, b = op.modi(pat1,i), op.modi(pat2,i)
+            if rule(a, b):
+                self.data.append((a,b))
+            i += 1
+        self.make()
+
+### Patterns used for calculating rhythms
+
+class PDur(Pattern):
     def __init__(self, seq, dur=0.5):
         """ Pat should be a series of 1 and 0 values, first value is assumed 1 """
         self.data = []
@@ -210,19 +244,9 @@ class PDur(Base.Pattern):
                 count += 1
             i += 1
         self.make()
-            
+        
 
-class PStretch(Base.Pattern):
-
-    def __init__(self, data, size):
-        try:
-            self.data = data.stretch(size)
-        except:
-            self.data = P(data).stretch(size)
-
-Pstretch = PStretch #: Alias
-
-class PRhythm(Base.Pattern):
+class PRhythm(Pattern):
 
     def __init__(self, s, dur=0.5):
 
@@ -237,7 +261,7 @@ class PRhythm(Base.Pattern):
         
         for i, char in s.items():
             # Recursively get rhythms
-            if isinstance(char, Base.PGroup):
+            if isinstance(char, PGroup):
                 character += list(char)
                 durations += list(self.__class__(char, dur))
             else:
@@ -260,6 +284,78 @@ class PRhythm(Base.Pattern):
         return self.chars[n] == ' '
 
 Prhythm = PRhythm #: Alias
+
+
+#==============================#
+#      2. Generator Types      #
+#==============================#
+
+class PRand(GeneratorPattern):
+    def __init__(self, start, stop=None):
+        GeneratorPattern.__init__(self)
+        if hasattr(start, "__iter__"):
+            self.data = start
+            self.func = lambda index: random.choice(Pattern(self.data))
+        else:
+            self.low  = start if stop is not None else 0
+            self.high = stop  if stop is not None else start
+    def func(self, index):
+        return random.randrange(self.low, self.high)
+
+Prand = PRand
+
+class PWhite(GeneratorPattern):
+    def __init__(self, lo=0, hi=1):
+        GeneratorPattern.__init__(self)
+        self.low = float(lo)
+        self.high = float(hi)
+        self.mid = (lo + hi) / 2.0
+    def func(self, index):
+        return random.triangular(self.low, self.high, self.mid)
+
+Pwhite = PWhite #: Alias
+
+class PSquare(GeneratorPattern):
+    def func(self, index):
+        return index * index
+
+##
+##
+##class PxRand(GeneratorPattern):
+##    """
+##        PxRand(iterable)
+##        PxRand(lo, hi)
+##
+##        Differs from PRand() in that PxRand returns a random element
+##        of a given list or range(lo, hi) each time it is accessed as
+##        opposed to a predetermined list of random numbers/elements
+##
+##    """
+##
+##    def __init__(self, a, b=None):
+##        if not isinstance(a, list):
+##            a = range(a, b) if b is not None else range(a)
+##        self.data = [random.choice(a)]
+##        for n in range(MAX_SIZE):
+##            self.data.append(random.choice([item for item in a if item != self.data[-1]]))
+##        self.make()
+##
+##Pxrand = PxRand #: Alias for PxRand
+##
+##class PwRand(GeneratorPattern):
+##    """ Docstring """
+##    def __init__(self, pattern, weights):
+##        seq = []
+##        for i, value in enumerate(pattern):
+##            seq.extend([value] * int(weights[i] * 100))
+##        self.data = [random.choice(seq) for n in range(MAX_SIZE)]
+##        self.make()
+##
+##Pwrand = PwRand
+##
+##
+##
+
 
 ##class PLace(Base.Pattern):
 ##    def __init__(self, data):
@@ -299,76 +395,6 @@ Prhythm = PRhythm #: Alias
 ##
 ##Pdur = PDur #: Alias                
 
-class PChords(Base.Pattern):
-    def __init__(self, seq, struct=(0,2,4), stepsPerOctave=7):
-        # First item 'root' chord
-        self.data = []
-        for i, item in enumerate(seq):
-            chord = [item + val for val in struct]
-            if i > 0:
-                chords = [  chord,
-                           [note % stepsPerOctave for note in chord],
-                           [chord[0],chord[1],chord[2]-stepsPerOctave],
-                         ]
-                c2 = self.data[-1]
-                best = 1000
-                for c1 in chords:
-                    d = self.distance(c1, c2)
-                    if d < best:
-                        chord = c1
-                        best = d
-            # Add the chord with the smallest total change
-            self.data.append(tuple(sorted(chord)))
-    @staticmethod
-    def distance(a, b):
-        a = sorted(a)
-        b = sorted(b)
-        return sum([abs(a[i] - b[i]) for i in range(len(a))])        
-
-Pchords = PChords #: Alias
-
-class PPairs(Base.Pattern):
-
-    def __init__(self, seq, func=lambda n: 8-n):
-        """ PPairs(iterable, func=lambda n: 8-n)
-
-            Laces a sequence with a second sequence obtained
-            by performing a function on the original """
-        
-        i = 0
-        self.data = []
-        for item in seq:
-            self.data.append(item)
-            self.data.append(func(item))
-            i += 1
-            if i >= MAX_SIZE:
-                break
-        self.make()
-
-Ppairs = PPairs #: Alias
-
-class PZip(Base.Pattern):
-
-    def __init__(self, *pats):
-        l, p = [], []
-        for pat in pats:
-            p.append(Base.asStream(pat))
-            l.append(len(p[-1]))
-        length = op.LCM(*l)
-        self.data = zip(*[p[i].stretch(length) for i in range(len(p))])
-
-
-class PZip2(Base.Pattern):
-    def __init__(self, pat1, pat2, rule=lambda a, b: True):
-        length = op.LCM(len(pat1), len(pat2))
-        self.data = []
-        i = 0
-        while i < min(length, 32):
-            a, b = op.modi(pat1,i), op.modi(pat2,i)
-            if rule(a, b):
-                self.data.append((a,b))
-            i += 1
-        self.make()
 
 #### ---- Testing
 

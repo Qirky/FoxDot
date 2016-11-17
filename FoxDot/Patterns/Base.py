@@ -1,17 +1,8 @@
 from random import choice, shuffle
 from Operations import *
-# from Comparisons import *
 from Parse import Parse
 
-"""
 
-    dots: Class for representing long Patterns in strings
-
-"""
-
-class dots:
-    def __repr__(self):
-        return '...'
 
 
 """
@@ -78,7 +69,7 @@ class metaPattern(object):
         """ Is called by __getitem__ """
         i = key % len(self.data)
         val = self.data[i]
-        if isinstance(val, Pattern):
+        if isinstance(val, (Pattern, GeneratorPattern)):
             j = key // len(self.data)
             val = val.getitem(j)
         return val
@@ -324,12 +315,91 @@ class metaPattern(object):
 class Pattern(metaPattern):
     pass
 
-PatternType = (Pattern, list)
+class GeneratorPattern(object):
+    """
+        Used for when a Pattern does not generate a set length pattern,
+        e.g. random patterns
+    """
+    MAX_SIZE = 2048
+    def __init__(self):
+        self.mod = Pattern()
+        self.mod_functions = []
+        self.name = self.__class__.__name__
+
+    def __repr__(self):
+        return "[GeneratorPattern <{}>]".format(self.name)
+        
+    def getitem(self, index):
+        """ Calls self.func(index) to get an item, and also calculates
+            performs any arithmetic operation assigned """
+        value = self.func(index)
+        for i, func in enumerate(self.mod_functions):
+            value = func(value, modi(modi(self.mod, i), index))
+        return value
+    def func(self, index):
+        return
+
+    def __len__(self):
+        return 1
+    
+    # Arithmetic operations create new GeneratorPatterns
+    def __add__(self, other):
+        return self.new(other, Add)
+    def __radd__(self, other):
+        return self.new(other, Add)
+    def __sub__(self, other):
+        return self.new(other, Sub)
+    def __rsub__(self, other):
+        return self.new(other, rSub)
+    def __mul__(self, other):
+        return self.new(other, Mul)
+    def __rmul__(self, other):
+        return self.new(other, Mul)
+    def __div__(self, other):
+        return self.new(other, Div)
+    def __truediv__(self, other):
+        return self.new(other, Div)
+    def __rdiv__(self, other):
+        return self.new(other, rDiv)
+    def __rtruediv__(self, other):
+        return self.new(other, rDiv)
+
+    def new(self, other, func=Nil):
+        # Create and empty GeneratorPattern
+        new = GeneratorPattern()
+        # Give it a list of previous mod_functions
+        new.mod_functions = self.mod_functions + [func]
+        # Update the base function to be the same
+        new.func = self.func
+        # Update it's list of modifying values
+        new.mod  = Pattern([item for item in self.mod])
+        new.mod.append(tuple(asStream(other)))
+        return new
+        
+    # Container methods
+    def __iter__(self):
+        for i in range(self.MAX_SIZE):
+            yield self[i]
+    def __getitem__(self, key):
+        if type(key) is int:
+            return self.getitem(key)
+        elif type(key) is slice:
+            a = key.start if key.start else 0
+            b = key.stop
+            c = key.step if key.step else 1
+            return Pattern([self[i] for i in range(a, b, c)])
+
+    # Pattern methods that don't return anything
+    def stretch(self, n):
+        return self
+
 
 class PatternContainer(Pattern):
     def getitem(self, key):
         key = key % len(self)
         return self.data[key]
+    def __len__(self):
+        return len(self.data)
     def __str__(self):
         return str(["%s()" % item.__class__.__name__ for item in self.data])
     def __repr__(self):
@@ -432,10 +502,12 @@ class Shared_Time_PGroup(PGroup):
 
 
 # Used to force any non-pattern data into a Pattern
+
+PatternType = (Pattern, list)
                 
 def asStream(data):
     """ Forces any data into a [pattern] form """
-    if isinstance(data, Pattern):
+    if isinstance(data, (Pattern, GeneratorPattern)):
         return data
     return Pattern(data)
 
@@ -464,5 +536,7 @@ def Convert(*args):
             PatternTypes.append(Pattern(val))
     return PatternTypes if len(PatternTypes) > 0 else PatternTypes[0]
 
-
-
+class dots:        
+    """ Class for representing long Patterns in strings """
+    def __repr__(self):
+        return '...'

@@ -1,6 +1,3 @@
-import re
-re_player = r"(\w+)\s*?>>\s*?\w+"
+def test(a, b): return a + b
 
-re_player = re.compile(re_player)
-
-print re_player.match("bd >> play()").group(1)
+print test(10,20)

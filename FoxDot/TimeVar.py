@@ -14,10 +14,11 @@
 
 """
 
+from __future__ import division
+
 from sys import maxint as MAX_SIZE
-from Patterns import Pattern, asStream, PatternContainer
+from Patterns import Pattern, asStream, PatternContainer, GeneratorPattern
 from Repeat import repeatable_object
-import Patterns.Sequences as pat
 import Patterns.Operations as op
 import Code
 
@@ -60,6 +61,10 @@ class var(repeatable_object):
         self.update(values, dur)
 
         self.current_value = None
+        self.current_index = None
+        self.next_value    = None
+
+        self.current_time_block  = None
 
         # If the clock is not ticking, start it
 
@@ -178,17 +183,10 @@ class var(repeatable_object):
         return float(self.now()) >= float(other)
 
     # %
-    #def __mod__(self, other):
-        #return float(self.now()) % other
     def __mod__(self, other):
         new = self.new(other)
         new.evaulate = fetch(op.rMod)
         return new
-
-    #def __rmod__(self, other):
-        #return other % float(self.now())
-    
-        
 
     def __rmod__(self, other): #works
         new = self.new(other)
@@ -263,7 +261,6 @@ class var(repeatable_object):
 
         self.data = []
         self.time = []
-        a, b = 0, 0
 
         #: Update the durations of each state
 
@@ -275,30 +272,14 @@ class var(repeatable_object):
 
                 self.inf_found = _inf.here
 
-        # Make equal size
-
-        values = self.stream(values)
-
-        length = max(len(values), len(self.dur))
-
-        values.stretch(length)
-        self.dur.stretch(length)
-
-        # Loop over the values and define time frame
-
-        for i, val in enumerate(values):
-              
-            this_dur = op.modi(self.dur, i)
-
+        self.data = self.stream(values)
+        
+        a, b = 0, 0
+        
+        for dur in self.dur:
             a = b
-            b = a + this_dur
-    
-            self.data.append( val )
+            b = a + dur
             self.time.append((a,b))
-
-        # The contained data should be a Pattern
-
-        self.data = self.stream( self.data )
 
         return self
 
@@ -314,81 +295,79 @@ class var(repeatable_object):
             beat = self.metro.now()
         if self.bpm is not None:
             beat *= (self.bpm / float(self.metro.bpm))
-        t = beat % self.length()
-        return t
+        return beat
 
+    # Finding current values
     def now(self, time=None):
-        """ Returns the value from self.data for time t in self.metro """
 
-        if self.inf_found == 3:
+        time = self.current_time(time)
 
-            val = self.inf_value
+        loops = time // sum(self.dur)
+        time  = time - (loops * sum(self.dur))
 
-        else:
+        index = int(loops * len(self.dur))
 
-            # If using a different bpm to the clock
+        for i in range(len(self.dur)):
 
-            t = self.current_time(time)
+            time_block = self.time[i]
+            
+            if time_block[0] <= time < time_block[1]:
 
-            val = 0
+                # We have our index
 
-            for i in range(len(self.data)):                
+                i = i + index
 
-                val = self.data[i]
-                
-                if self.time[i][0] <= t < self.time[i][1]:
+                if i != self.current_index:
 
-                    if isinstance(op.modi(self.dur, i), _inf):
+                    self.current_index = i
+                    self.current_value = self.next_value if self.next_value else self.calculate(self.data[i])
+                    self.next_value    = self.calculate(self.data[i+1])
 
-                        if self.inf_found == _inf.wait:
+                    self.current_time_block  = time_block
 
-                            self.inf_found = _inf.done
-
-                            self.inf_value = val
-
-                    elif self.inf_found == _inf.here:
-
-                        self.inf_found = _inf.wait
-
-                    break
-                
-        self.current_value = self.calculate(val)
-
+                break
+            
         return self.current_value
 
-    def valueAt(self, t):
-        if self.inf_found == 3:
-
-            val = self.inf_value
-
-        else:
-
-            # If using a different bpm to the clock
-
-            val = 0
-
-            for i in range(len(self.data)):                
-
-                val = self.data[i]
-                
-                if self.time[i][0] <= t < self.time[i][1]:
-
-                    if isinstance(op.modi(self.dur, i), _inf):
-
-                        if self.inf_found == _inf.wait:
-
-                            self.inf_found = _inf.done
-
-                            self.inf_value = val
-
-                    elif self.inf_found == _inf.here:
-
-                        self.inf_found = _inf.wait
-
-                    break
-                
-        return float(self.calculate(val))        
-
+##    def _now_old(self, time=None):
+##        """ Returns the value from self.data for time t in self.metro """
+##
+##        if self.inf_found == 3:
+##
+##            val = self.inf_value
+##
+##        else:
+##
+##            # If using a different bpm to the clock
+##
+##            t = self.current_time(time) % self.length()
+##
+##            val = 0
+##
+##            for i in range(len(self.data)):                
+##
+##                val = self.data[i]
+##                
+##                if self.time[i][0] <= t < self.time[i][1]:
+##
+##                    if isinstance(op.modi(self.dur, i), _inf):
+##
+##                        if self.inf_found == _inf.wait:
+##
+##                            self.inf_found = _inf.done
+##
+##                            self.inf_value = val
+##
+##                    elif self.inf_found == _inf.here:
+##
+##                        self.inf_found = _inf.wait
+##
+##                    break
+##                
+##        self.current_value = self.calculate(val)
+##
+##        return self.current_value
+    
     def copy(self):
         new = var(self.data, self.dur, bpm=self.bpm)
         return new
@@ -440,34 +419,24 @@ class Pvar(var, Pattern):
         var.__init__(self, [asStream(val) for val in values], dur)
 
 class linvar(var):
-    
+
+    def __init__(self, *args, **kwargs):
+        var.__init__(self, *args, **kwargs)
+        self.next_value = None
+
     def now(self, time=None):
-
-        t = self.current_time(time)
-
-        for i in range(len(self.data)):
-
-            val = self.data[i]
-            
-            if self.time[i][0] <= t < self.time[i][1]:
-
-                break
-
-        # Proportion of the way between values
+        # Already calculate the current and next value
         
-        p = (float(t) - self.time[i][0]) / (self.time[i][1] - self.time[i][0])
+        var.now(self, time)
 
-        # Next value
+        time = self.current_time(time)
 
-        q = op.modi(self.data, i + 1)
+        # Calculate the proportion through this time block
 
-        # Calculate and add dependencies
+        p = (float(time % sum(self.dur)) - self.current_time_block[0]) / (self.current_time_block[1] - self.current_time_block[0])
 
-        val = (val * (1-p)) + (q * p)
-
-        self.current_value = self.calculate(val)
-
-        return self.current_value
+        return (self.current_value * (1-p)) + (self.next_value * p)
+    
 
 class _inf(int):
     """ Used in TimeVars to stay on certain values until re-evaluated """

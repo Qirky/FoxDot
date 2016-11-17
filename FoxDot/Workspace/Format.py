@@ -51,12 +51,12 @@ def userdefined(line):
 
 # Use our regex to read patterns.py and add all the functions to key_types
     
-from ..Patterns import Sequences, Feeders
+from ..Patterns import Sequences
 from ..SCLang import SCLang
 
 foxdot_kw = ["Clock","Group","Scale","Server","Root","BufferManager","var","Pvar","linvar","inf","lambda", decorator]
 
-foxdot_funcs = classes(Sequences) #+ functions(Feeders) + instances(SCLang, SCLang.cls) + instances(SCLang, SCLang.EnvGen)
+foxdot_funcs = classes(Sequences) # + instances(SCLang, SCLang.cls) + instances(SCLang, SCLang.EnvGen)
 
 # Python keywords used in RegEx Group 2
 

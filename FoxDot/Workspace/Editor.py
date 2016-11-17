@@ -94,6 +94,7 @@ class workspace:
             
         self.text.bind("<{}-Return>".format(ctrl),          self.exec_block)
         self.text.bind("<Alt-Return>",                      self.exec_line)
+        self.text.bind("<Alt_L>",                           lambda event: "break")
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
         self.text.bind("<{}-v>".format(ctrl),               self.paste)
@@ -221,7 +222,7 @@ class workspace:
         
         a, b = "%d.0" % line, "%d.end" % line
 
-        self.highlight(a, b, "purple") # TODO, change purple?
+        self.highlight(a, b, "red")
 
         try:
 
