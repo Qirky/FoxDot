@@ -39,7 +39,10 @@ FoxDot uses the sound synthesis engine, SuperCollider, to make noise and Python 
 #### Troubleshooting
 
 ##### Buffer mismatch error
-If you are getting an error along the lines of "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" when trying to play back audio samples, go to FoxDot/Settings/Conf.txt and change the value of MAX_CHANNELS from 2 to 1 or vice versa. This issue might be to do with the version of SuperCollider or O/S being used.
+If you are getting an error along the lines of "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider when trying to play back audio samples, go to FoxDot/Settings/Conf.txt and change the value of MAX_CHANNELS from 2 to 1 or vice versa. This issue might be to do with the version of SuperCollider or O/S being used.
+
+##### `Decimator` class not defined
+This is a class that is found in the SC3 plugins (link at the top) but if you don't have it installed, go to `Settings/conf.py` and set `SC3_PLUGINS` to `False`.
 
 ## Basics
 
@@ -55,7 +58,7 @@ Python supports many different programming paradigms, including procedural and f
 p1 = Player()
 ```
 
-Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print SynthDefs` to see all available synths) you would use the following code:
+Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print Synths` to see all available synths) you would use the following code:
 
 ``` python
 p1 >> pads([0,1,2,3])
@@ -113,6 +116,41 @@ example.env = Env.perc()
 # Finally, store it!
 example.add()							
 ```
+
+## Player Object Keywords
+
+- dur
+  - Durations (defaults to 1 and 1/2 for the Sample Player)
+- sus
+  - Sustain (defaults to `dur`)
+- amp
+  - Amplitude (defaults to 1)
+- pan
+  - Panning, where -1 is far left, 1 is far right (defaults to 0)
+- vib
+  - Vibrato (defaults to 0)
+- hpf
+  - High-pass filter; only frequences **above** this value are kept in the final signal (defaults to 0)
+- lpf
+  - Low-pass filter; only frequences **below** this value are kept in final signal (defaults to 20000)
+- bits
+  - The bit depth that the signal is reduced to; this is a value between 1 and 24 where other values are ignored (defaults to 0)
+- rate
+  - Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
+- verb
+  - The dry/wet mix of reverb; this should be a value between 0 and 1 (defalts to 0.25)
+- room
+  - Room size for reverb; this should be a value between 0 and 1 (defaults, to 0.3)
+- chop
+  - 'Chops' the signal into smaller chunks (defaults to 0)
+- delay
+  - A duration of time to wait before sending the information to SuperCollider (defaults to 0)
+- slide
+  - 'Slides' the frequency value of a signal to `freq * (slide+1)` over the  duration of a note (defaults to 0)
+- echo
+  - Sets the decay time for any echo effect in beats, works best on Sample Player (defaults to 0)
+- scrub
+  - Special keyword for Sample Players; changes the playback rate to change like a DJ scratching a record (defaults to 0)
 
 ## Documentation
 
