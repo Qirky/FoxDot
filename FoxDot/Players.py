@@ -24,10 +24,9 @@ import Scale
 import Buffers
 import TimeVar
 
-BufferManager = Buffers.BufferManager().from_file()
+BufferManager = Buffers.BufferManager()
 
-
-class Player(repeatable_object):
+class Player(Repeatable):
 
     # These are the PlayerObject attributes NOT included in OSC messages
     VARS = []
@@ -39,7 +38,14 @@ class Player(repeatable_object):
     metro = None
     server = None
 
+    # Tkinter Window
+    widget = None
+
     def __init__( self ):
+
+        # Inherit
+
+        Repeatable.__init__(self)
         
         self.synthdef = None
         self.id = None
@@ -47,6 +53,7 @@ class Player(repeatable_object):
         self.stopping = False
         self.stop_point = 0
         self.following = None
+        self.playstring = ""
 
         # Visual feedback information
 
@@ -147,7 +154,7 @@ class Player(repeatable_object):
         # Rate - varies between SynthDef
         self.rate    = 1
         # Audio sample buffer number
-        self.buf     = 99
+        self.buf     = 0
         # Echo amount
         self.echo    = 0
         #self.bpm = ...
@@ -276,6 +283,8 @@ class Player(repeatable_object):
         # Set the degree
 
         if synthdef is SamplePlayer:
+
+            self.playstring = degree
 
             setattr(self, "degree", degree if len(degree) > 0 else " ")
 
@@ -612,7 +621,7 @@ class Player(repeatable_object):
         if self.synthdef is SamplePlayer:
 
             # Get the buffer number to play
-            self.event['buf'] = BufferManager.symbols.get(self.event['degree'].char, 0)
+            self.event['buf'] = BufferManager[self.event['degree'].char].bufnum(self.event['buf'])
 
             # Apply any duration ratio changes
             self.event['dur'] *= self.event['degree'].dur
@@ -702,6 +711,7 @@ class Player(repeatable_object):
         """ Removes this object from the Clock and resets itself"""
         self.isplaying = False
         self.offset = self.attr['offset'] = 0
+        self.repeat_events = {}
         return
         
     def stop(self, N=0):
@@ -716,6 +726,8 @@ class Player(repeatable_object):
         if N > 0:
 
             self.stop_point += self.metro.next_bar() + ((N-1) * self.metro.bar_length())
+
+        self.repeat_events = {}
 
         return self
 
@@ -797,14 +809,30 @@ class Player(repeatable_object):
             self.event_n += 1
         return self
 
-    def shuffle(self, attr=None):
-        """ Shuffles """
-        if attr is None:
-            shuffle(self.attr['degree'])
-        elif attr in self.attr:
-            shuffle(self.attr[attr])
-        else:
-            WarningMsg("Player Object has no attribute '{}'".format(attr))
+    def shuffle(self):
+        """ Shuffles the degree of a player. If possible, do it visually """
+        if self.synthdef == SamplePlayer:
+            self._replace_string(PlayString(self.playstring).shuffle())
+        return self
+
+    def mirror(self):
+        if self.synthdef == SamplePlayer:
+            self._replace_string(PlayString(self.playstring).mirror())
+        return self
+
+    def rotate(self, n=1):
+        if self.synthdef == SamplePlayer:
+            self._replace_string(PlayString(self.playstring).rotate(n))
+        return self
+
+    def _replace_string(self, new_string):
+        # Update the GUI if possible
+        if self.widget:
+            # Replace old_string with new string
+            self.widget.replace(self.line_number, self.playstring, new_string)
+        self.playstring = new_string
+        setattr(self, 'degree', new_string)
+        return
 
     def multiply(self, n=2):
         self.attr['degree'] = self.attr['degree'] * n
@@ -822,14 +850,14 @@ class Player(repeatable_object):
             self.amp = Pshuf(Pstutter([1,0],[ones,zero]))
         return self
 
-    def rotate(self, n=1, attr='degree'):
-        self.attr[attr].i_rotate(n)
-        return self
-
-    def rotate_all(self, n=1):
-        for attr in self.attr.keys():
-            self.attr[attr].i_rotate(n)
-        return self
+##    def rotate(self, n=1, attr='degree'):
+##        self.attr[attr].i_rotate(n)
+##        return self
+##
+##    def rotate_all(self, n=1):
+##        for attr in self.attr.keys():
+##            self.attr[attr].i_rotate(n)
+##        return self
             
 
     """

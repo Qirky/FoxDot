@@ -97,6 +97,10 @@ workspace.namespace=FoxDotCode.namespace
 
 FoxDot = workspace()
 
+# Give players information about the workspace
+
+Player.widget = FoxDot
+
 def start():
     
     try:

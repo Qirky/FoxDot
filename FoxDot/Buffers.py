@@ -3,10 +3,46 @@
 """ This module manages the allocation of buffer numbers and samples """
 
 from os.path import abspath, join, dirname
+import os
 
 def path(fn):
     return abspath(join(dirname(__file__), fn))
 
+alpha    = "abcdefghijklmnopqrstuvwxyz"
+
+nonalpha = {"&" : "ampersand",
+            "*" : "asterix",
+            "@" : "at",
+            "|" : "bar",
+            "^" : "caret",
+            ":" : "colon",
+            "$" : "dollar",
+            "=" : "equals",
+            "!" : "exclamation",
+            "/" : "forwardslash",
+            ">" : "greaterthan",
+            "#" : "hash",
+            "-" : "hyphen",
+            "<" : "lessthan",
+            "%" : "percent",
+            "+" : "plus",
+            "?" : "question",
+            "~" : "tilde",
+            "\\" :"backslash" }
+            
+class BufChar:
+    def __init__(self, char):
+        self.char    = char
+        self.buffers = {}
+        self.files   = []
+    def addbuffer(self, fn, num):
+        self.buffers[fn] = num
+        self.files.append(fn)
+    def __iter__(self):
+        for fn, buf in self.buffers.items():
+            yield fn, buf
+    def bufnum(self, n):
+        return self.buffers[self.files[n % len(self.files)]]
 
 class BufferManager:
     def __init__(self):
@@ -19,22 +55,59 @@ class BufferManager:
 
         # Dictionary of buffer numbers to character
         self.buffers = {}
+
+        # Load buffers
+        bufnum = 1
+        root   = path("./Samples/")
+
+        # Go through the alphabet
+
+        for char in alpha:
+
+            upper = join(root, char, "upper")
+            lower = join(root, char, "lower")
+
+            # Iterate over each
+
+            self.symbols[char] = BufChar(char)
+
+            for f in sorted(os.listdir(lower)):
+
+                self.symbols[char].addbuffer(join(lower, f), bufnum)
+
+                bufnum += 1
+
+            char = char.upper()
+
+            self.symbols[char] = BufChar(char)
+
+            for f in sorted(os.listdir(upper)):
+
+                self.symbols[char].addbuffer(join(upper, f), bufnum)
+
+                bufnum += 1
+            
+        # Go through symbols
+
+        for char in nonalpha:
+
+            self.symbols[char] = BufChar(char)
+
+            folder = join(root, "_", nonalpha[char])
+
+            for f in sorted(os.listdir(folder)):
+
+                self.symbols[char].addbuffer(join(folder, f), bufnum)
+
+                bufnum += 1
+
+        # Define empty buffer
+        self.nil = BufChar(None)
+        self.nil.addbuffer(None, 0)
+
+    def __getitem__(self, key):
+        return self.symbols.get(key, self.nil)
         
-    def from_file(self, configFile="./Settings/samplelib.csv", offset=0):
-        """ Reads in a config file """
-        with open(path(configFile)) as f:
-            lines = f.readlines()
-
-        for bufnum, line in enumerate(lines):
-            bufnum = bufnum + offset + 1 # 0 is the empty buffer
-            try:
-                char, fn, desc       = line.strip().split(',')
-                self.symbols[char]   = bufnum 
-                self.buffers[bufnum] = fn
-            except:
-                pass
-        return self
-
     def __call__(self, server):
         self.server = server 
         return self
@@ -43,12 +116,18 @@ class BufferManager:
         return "\n".join(["{}: {}".format(symbol, self.buffers[n]) for symbol, n in self.symbols.items()])
 
     def load(self):
-        for buf, fn in self.buffers.items():
-            self.server.bufferRead(buf, path("./Samples/" + fn))
+        for char in self.symbols:
+            for fn, buf in self.symbols[char]:
+                self.server.bufferRead(buf, path(fn))
+        return
+            
+##        for buf, fn in self.buffers.items():
+##            self.server.bufferRead(buf, path("./Samples/" + fn))
 
     def bufnum(self, char):
-        b = 0
-        for ch, buf in self.symbols.items():
-            if ch == char:
-                b = buf
-        return b
+        return self.symbols.get(char, 0)
+##        b = 0
+##        for ch, buf in self.symbols.items():
+##            if ch == char:
+##                b = buf
+##        return b

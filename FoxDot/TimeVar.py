@@ -18,7 +18,7 @@ from __future__ import division
 
 from sys import maxint as MAX_SIZE
 from Patterns import Pattern, asStream, PatternContainer, GeneratorPattern
-from Repeat import repeatable_object
+from Repeat import *
 import Patterns.Operations as op
 import Code
 
@@ -37,13 +37,15 @@ def fetch(func):
     return eval_now
 
   
-class var(repeatable_object):
+class var(Repeatable):
     """ Var(values [,durs=[4]]) """
 
     metro = None
     timevar="timevar"
 
     def __init__(self, values, dur=4, **kwargs):
+
+        Repeatable.__init__(self)
 
         self.data   = values
         self.time   = []

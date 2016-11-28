@@ -3,8 +3,10 @@
 from Code import WarningMsg
 from Patterns import asStream, modi
 
-class repeatable_object:
-    repeat_events = {}
+class Repeatable:
+    def __init__(self):
+        self.repeat_events = {}
+        
     def every(self, n, cmd, args=()):
         """ Every n beats, do self.cmd(args) """
 
@@ -21,6 +23,16 @@ class repeatable_object:
             WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
 
             return self
+
+        # Make sure args is a tuple
+
+        try:
+
+            args = tuple(args)
+
+        except:
+
+            args = (args,)
 
         # If the method call already exists, just update it
 

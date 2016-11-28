@@ -6,47 +6,67 @@ class Bang:
 
         self.widget = execute.namespace['FoxDot']
 
-        # Get visible portion of the text window
+        self.func = kwargs.get("func", None)
 
-        try:
+        # Argument is by default, the  player
         
-            a = self.widget.text.index("@0,0")
-            b = self.widget.text.index("@0,%d" % self.widget.text.winfo_height())
+        self.args = kwargs.get("args", (player,))
 
-            a, b = (int(s.split(".")[0]) for s in (a, b))
+        # User can supply a function to call on bang
 
-        except:
-
-            a, b = 9999, 0
-
-        # Only update visuals if the line is visible
-
-        if a <= player.line_number <= b:
-            
-            row = player.line_number
-            col = player.whitespace
-            env   = player.envelope
-            event = player.event
-            
-            duration = event['sus']
-
-            self.id = "{}_bang".format(player.id)
-
-            start = "%d.%d" % (row, col)
-            end   = "%d.end" % row
+        if self.func:
 
             try:
 
-                self.widget.text.tag_add(self.id, start, end)
-                self.widget.text.tag_config(self.id, **kwargs)
+                self.func.__call__(*self.args)
 
-                self.duration = 0.1
+            except Exception as e:
 
-                player.metro.schedule(self.remove, player.metro.now() + self.duration)
+                print(e)
+
+        else:
+
+            # Get visible portion of the text window
+
+            try:
+            
+                a = self.widget.text.index("@0,0")
+                b = self.widget.text.index("@0,%d" % self.widget.text.winfo_height())
+
+                a, b = (int(s.split(".")[0]) for s in (a, b))
 
             except:
 
-                pass
+                a, b = 9999, 0
+
+            # Only update visuals if the line is visible
+
+            if a <= player.line_number <= b:
+                
+                row = player.line_number
+                col = player.whitespace
+                env   = player.envelope
+                event = player.event
+                
+                duration = event['sus']
+
+                self.id = "{}_bang".format(player.id)
+
+                start = "%d.%d" % (row, col)
+                end   = "%d.end" % row
+
+                try:
+
+                    self.widget.text.tag_add(self.id, start, end)
+                    self.widget.text.tag_config(self.id, **kwargs)
+
+                    self.duration = 0.1
+
+                    player.metro.schedule(self.remove, player.metro.now() + self.duration)
+
+                except:
+
+                    pass
 
 
     def remove(self):

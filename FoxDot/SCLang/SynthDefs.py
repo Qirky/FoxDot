@@ -21,7 +21,6 @@ with SynthDef("play") as play:
 with SynthDef("pads") as pads:
     pads.amp = pads.amp / 2
     pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
-    #pads.osc = SinOsc.ar(pads.freq, mul=pads.amp / 2) + SinOsc.ar(pads.freq + 2, mul=pads.amp / 2)
     pads.env = Env.perc()
 
 noise = SynthDef("noise")
@@ -51,7 +50,7 @@ with SynthDef("bass") as bass:
     bass.amp  = bass.amp * 2
     bass.freq = bass.freq / 4
     bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=0.85, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
-    bass.env  = Env.perc()
+    bass.env  = Env.perc(curve="'lin'")
 
 with SynthDef("dirt") as dirt:
     # dirt.amp  = dirt.amp * 1.2
@@ -101,7 +100,7 @@ with SynthDef("dub") as dub:
 with SynthDef("viola") as viola:
     viola.defaults.update(verb=0.33, vib=6)
     viola.osc = PMOsc.ar(viola.freq, Vibrato.kr(viola.freq, rate=viola.vib, depth=0.008, delay=viola.sus*0.25), 10, mul=viola.amp / 2)
-    viola.env = Env.perc( 1/4 * viola.sus, 5/2 * viola.sus )
+    viola.env = Env.perc( 1/4 * viola.sus, 3/4 * viola.sus )
 
 with SynthDef("scratch") as scratch:
     scratch.defaults.update(depth=0.5, rate=0.04)
