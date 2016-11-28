@@ -2,6 +2,9 @@
 demos/*
 FoxDot/debug/*
 TODO.txt
+PeerA.py
+PeerB.py
+FoxDot/Custom/*
 
 # Setup file (for now)
 setup.py
