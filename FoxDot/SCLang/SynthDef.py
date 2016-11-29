@@ -74,6 +74,7 @@ class SynthDef(object):
         self.bits        = instance("bits")
         self.delay       = instance("delay")
         self.chop        = instance("chop")
+        self.limit       = instance("limit")
         
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
@@ -95,7 +96,8 @@ class SynthDef(object):
                             "grain"     : 0,
                             "bits"      : 24,
                             "delay"     : 0,
-                            "chop"      : 0}
+                            "chop"      : 0,
+                            "limit"     : 1}
 
         self.add_base_class_behaviour()
 
@@ -117,7 +119,11 @@ class SynthDef(object):
         Def += "{}\n".format(self.get_base_class_variables())
         Def += "{}\n".format(self.get_base_class_behaviour())
         Def += "{}\n".format(self.get_custom_behaviour())
-        Def += "\tOut.ar(0, Pan2.ar(FreeVerb.ar(osc * env, verb, room), pan))"
+        # Put oscillator and envelope together, limit, pan -> out
+        Def += "osc = osc * env;\n"
+        Def += "osc = Limiter.ar(osc, level: limit);\n" 
+        Def += "osc = Pan2.ar(FreeVerb.ar(osc, verb, room), pan);\n"
+        Def += "\tOut.ar(0, osc)"
         Def += "}).add;)"
         return Def
 

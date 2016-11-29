@@ -156,6 +156,7 @@ CombN    = cls("CombN")
 CombL    = cls("CombL")
 CombC    = cls("CombC")
 Crackle  = cls("Crackle")
+Limiter  = cls("Limiter")
 
 ClipNoise    = cls("ClipNoise")
 BufRateScale = cls("BufRateScale")
