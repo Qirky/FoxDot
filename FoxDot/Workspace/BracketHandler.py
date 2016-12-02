@@ -27,27 +27,37 @@ class BracketHandler:
 
             self.text.bind(char, self.handle)
 
-    def handle(self, event=None, insert=INSERT, peer=False):
+    def handle(self, event=None, insert=INSERT):
 
         line, column = index(self.text.index(insert))
-
-        # Networking disables automatic bracketing (for now)
-
-        if self.root.network:
-
-            self.text.insert(insert, event.char)
-
-            if peer is False:
-
-                self.root.peer.push(index(line, column), event.char, event.keysym)
-
-            return "break"
 
         # 1. Type a left bracket
 
         next_char = self.text.get(index(line, column))
 
         if event.char in self.left_brackets:
+
+            # A. Type a left bracket and an area is selected
+
+            try:
+
+                a = self.text.index(SEL_FIRST)
+                b = self.text.index(SEL_LAST)
+
+                self.text.insert(b, self.all_brackets[event.char])
+                self.text.insert(a, event.char)
+
+                # unselect
+
+                self.text.tag_remove(SEL, "1.0", END)
+
+                return "break"
+                
+            except:
+                
+                pass
+
+            # B. Needs a closing bracket
 
             if next_char in whitespace + self.right_brackets:
 
@@ -58,13 +68,15 @@ class BracketHandler:
         # 2. Type right bracket
         elif event.char in self.right_brackets:
 
-            # if there is *that* right bracket in front of it, just move the cursor
+            # if there is *the same* right bracket in front of it, just move the cursor
 
             if next_char == event.char:
 
                 self.text.mark_set(insert, index(line, column + 1))
 
                 return "break"
+
+            # TODO - highlight the enclosed area
 
         # Update line colours
         

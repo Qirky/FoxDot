@@ -68,14 +68,6 @@ for char1 in alphabet:
 
         FoxDotCode.namespace[name] = Player()
 
-# misc
-
-class futureprint:
-    """ Wraps Python 2.7 print statements as a function """
-    def __init__(self, string=""):
-        self.string = string
-    def __call__(self):
-        print self.string
 
 PatternTypes = []
 for pattern_name in sorted(classes(Sequences)):
@@ -85,29 +77,3 @@ for pattern_name in sorted(classes(Sequences)):
         if pattern_name.upper() !=  PatternTypes[-1].upper():
             PatternTypes.append(pattern_name)
         
-
-
-
-""" IDE """
-from Workspace import workspace
-
-# Share the GUI information with the user
-
-workspace.namespace=FoxDotCode.namespace
-
-FoxDot = workspace()
-
-# Give players information about the workspace
-
-Player.widget = FoxDot
-
-def start():
-    
-    try:
-             
-        FoxDot.run()
-        
-    except (KeyboardInterrupt, SystemExit):
-
-        Clock.stop()
-        Server.quit()

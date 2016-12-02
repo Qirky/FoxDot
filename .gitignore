@@ -1,10 +1,8 @@
 # demo and debug folders
 demos/*
-FoxDot/debug/*
 TODO.txt
-PeerA.py
-PeerB.py
 FoxDot/Custom/*
+FoxDot/debug/*
 
 # Setup file (for now)
 setup.py

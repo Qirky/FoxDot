@@ -14,6 +14,7 @@ from Console import console
 from Undo import UndoStack
 from Prompt import TextPrompt
 from BracketHandler import BracketHandler
+from TextBox import ThreadedText
 
 from ..Settings import FONT, FOXDOT_ICON
 import os
@@ -62,15 +63,15 @@ class workspace:
 
         # Create text box for code
 
-        self.text = Text(self.root,
-                         padx=5, pady=5,
-                         bg=colour_map['background'],
-                         fg=colour_map['plaintext'],
-                         insertbackground="White",
-                         font = "CodeFont",
-                         yscrollcommand=self.Yscroll.set,
-                         width=120, height=20,
-                         maxundo=50)
+        self.text = ThreadedText(self.root,
+                                 padx=5, pady=5,
+                                 bg=colour_map['background'],
+                                 fg=colour_map['plaintext'],
+                                 insertbackground="White",
+                                 font = "CodeFont",
+                                 yscrollcommand=self.Yscroll.set,
+                                 width=120, height=20,
+                                 maxundo=50 )
 
         self.text.grid(row=0, column=0, sticky="nsew")
         self.Yscroll.config(command=self.text.yview)
@@ -102,7 +103,7 @@ class workspace:
         self.text.bind("<{}-bracketleft>".format(ctrl),     self.unindent)
         self.text.bind("<{}-equal>".format(ctrl),           self.zoom_in)
         self.text.bind("<{}-minus>".format(ctrl),           self.zoom_out)
-        # self.text.bind("<{}-z>".format(ctrl),               self.undo)
+        self.text.bind("<{}-z>".format(ctrl),               self.undo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
         self.text.bind("<{}-o>".format(ctrl),               self.openfile)
 
@@ -161,12 +162,6 @@ class workspace:
         self.text.mark_set(self.origin, INSERT)
         self.text.mark_gravity(self.origin, LEFT)
 
-        # Store any peer connections
-
-        self.network = False
-        self.peer    = None
-        self.peers   = []
-
         # Say Hello to the user
 
         print "Welcome to FoxDot! Press Ctrl+{} for help.".format(self.help_key)
@@ -188,12 +183,6 @@ class workspace:
         """ Handles any keypress """
 
         index = self.text.index(INSERT)
-
-        # If the user is using networking
-
-        if self.network is True:
-
-            self.peer.push(index, event.char, event.keysym)
 
         # For non string characters, return normally
 
@@ -219,65 +208,13 @@ class workspace:
 
         return "break"
 
-    def peer_key_press(self, value):
-
-        keypress = value.split()
-        
-        try:
-            
-            # message should contain the peer, and the key
-            # could use self.root.event_generate(message)? Or just call a bound function?
-
-            # If message is a special event (i.e. whose bindings return "break"):
-
-            # - Key movement (left / right / up / down) -> don't need?
-            # - Brackets -> disabled (for now)
-            # - Ctrl+.      (Stop all)  -> Only master can stop?
-            # - Ctrl+]      (Tab right) -> disabled
-            # - Ctrl+[      (Tab left)  -> disabled
-            
-
-            # Index, char, keysym
-            if len(keypress) > 2:
-                self.text.insert(keypress[0], keypress[1])
-                try:
-                    self.colour_line(int(keypress[0].split(".")[0]))
-                except:
-                    pass
-            # - Spacebar
-            elif keypress[1] == "space":
-                self.text.insert(keypress[0], " ")
-            # - Alt+Return  (Execute  one line)
-            elif keypress[1] == "exec_line":
-                self.exec_line(event=None, insert=keypress[0], peer=True)
-            # - Ctrl+Return (Execute)
-            elif keypress[1] == "exec_block":
-                self.exec_block(event=None, insert=keypress[0], peer=True)
-            # - Delete
-            elif keypress[1] == "delete":
-                self.delete(event=None, insert=keypress[0], peer=True)
-            # - Delete2
-            elif keypress[1] == "delete2":
-                self.delete2(event=None, insert=keypress[0], peer=True)
-            # - Newline
-            elif keypress[1] == "newline":
-                self.newline(event=None, insert=keypress[0], peer=True)
-            # - Tab
-            elif keypress[1] == "tab":
-                self.tab(event=None, insert=keypress[0], peer=True)
-
-            
-        except Exception as e:
-            print e
-        return
-
     """
 
         Getting blocks / lines
 
     """
 
-    def exec_line(self, event=None, insert=INSERT, peer=False):
+    def exec_line(self, event=None, insert=INSERT):
         """ Highlights a single line and executes """
         line, column = index(self.text.index(insert))
         
@@ -296,15 +233,9 @@ class workspace:
 
         self.root.after(200, self.unhighlight)
 
-        # Push to other peers unless executed by peer
-
-        if self.network is True and peer is False:
-
-            self.peer.push(index(line, column), 'exec_line')
-
         return "break"
 
-    def exec_block(self, event=None, insert=INSERT, peer=False):
+    def exec_block(self, event=None, insert=INSERT):
         """ Method to highlight block of code and execute """
 
         # Get start and end of the buffer
@@ -367,13 +298,13 @@ class workspace:
 
         self.root.after(200, self.unhighlight)
 
-        # Push to other peers unless executed by peer
-
-        if self.network is True and peer is False:
-
-            self.peer.push(index(cur_x, cur_y), 'exec_block')
-
         return "break"
+
+    # Scheduling tasks
+    # ----------------
+    def schedule(self, target, args=(), kwargs={}):
+        self.text.queue.put((target, args, kwargs))
+        return
 
     # Undo action: Ctrl+Z
     #--------------------
@@ -483,14 +414,12 @@ class workspace:
     # Newline
     #--------
 
-    def newline(self, event=None, insert=INSERT, peer=False):
+    def newline(self, event=None, insert=INSERT):
         """ Adds whitespace to newlines where necessary """
 
         # Remove any highlighted text
 
-        if not self.network:
-
-            self.delete_selection()
+        self.delete_selection()
 
         # Get the text from this line
 
@@ -544,31 +473,24 @@ class workspace:
         # Update the IDE colours
 
         self.update(event)
-
-        # Push to other peers unless executed by peer
-
-        if self.network is True and peer is False:
-
-            self.peer.push(index(i, j), 'newline')
         
         return "break"
 
     # Tab
     #----
 
-    def tab(self, event=None, insert=INSERT, peer=False):
+    def tab(self, event=None, insert=INSERT):
         """ Move selected text forward 4 spaces """
-        if not self.network:
-            try: # Move any selected lines forwards
-                a, b = (index(a)[0] for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
-                if a < b:
-                    self.indent(event)
-                    return "break"
-                else:
-                    self.delete(event)
-            except: 
-                pass
-            
+        try: # Move any selected lines forwards
+            a, b = (index(a)[0] for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
+            if a < b:
+                self.indent(event)
+                return "break"
+            else:
+                self.delete(event)
+        except: 
+            pass
+        
         # Insert white space
 
         line, column = index(self.text.index(insert))
@@ -578,51 +500,16 @@ class workspace:
         # Update IDE
 
         self.update(event)
-
-        # Push to other peers unless executed by peer
-
-        if self.network is True and peer is False:
-
-            self.peer.push(index(line, column), 'tab')
             
         return "break"
 
     # Indent: Ctrl+]
     #---------------
 
-    def indent(self, event=None, insert=INSERT, peer=False):
+    def indent(self, event=None, insert=INSERT):
         """ Indent the current line or selected text """
-        if not self.network:
-            try:
+        try:
 
-                if not self.text_selected():
-                    a = index(self.text.index(INSERT))
-                    a = a[0],a[1]-1
-                    b = a[0],a[1]+1
-                    self.text.tag_add(SEL, index(*a), index(*b))
-
-                sel_a = index(index(self.text.index(SEL_FIRST))[0],0)
-                sel_b = index(index(self.text.index(SEL_LAST))[0],'end')
-                    
-                start, end = (index(a) for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
-                for row in range(start[0], end[0]+1):
-                    # Add intentation
-                    self.text.insert(index(row,0), self.tabspace())
-
-                self.text.tag_add(SEL, sel_a, sel_b)
-
-            except:
-
-                pass
-            
-        return "break"
-
-    # Un-inden: Ctrl+[
-    #-----------------
-
-    def unindent(self, event):
-        """ Moves the current row or selected text back by 4 spaces """
-        if not self.network:
             if not self.text_selected():
                 a = index(self.text.index(INSERT))
                 a = a[0],a[1]-1
@@ -634,42 +521,65 @@ class workspace:
                 
             start, end = (index(a) for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
             for row in range(start[0], end[0]+1):
-                # Unindent
-                line = self.text.get(index(row,0), index(row,'end'))
-                for n, char in enumerate(line[:tabsize]):
-                    if char != " ":
-                        break
-                self.text.delete(index(row,0),index(row,n+1))
-                #self.text.insert(index(row,0), self.tabspace())
+                # Add intentation
+                self.text.insert(index(row,0), self.tabspace())
 
             self.text.tag_add(SEL, sel_a, sel_b)
-        
+
+        except:
+
+            pass
+            
+        return "break"
+
+    # Un-inden: Ctrl+[
+    #-----------------
+
+    def unindent(self, event):
+        """ Moves the current row or selected text back by 4 spaces """
+        if not self.text_selected():
+            a = index(self.text.index(INSERT))
+            a = a[0],a[1]-1
+            b = a[0],a[1]+1
+            self.text.tag_add(SEL, index(*a), index(*b))
+
+        sel_a = index(index(self.text.index(SEL_FIRST))[0],0)
+        sel_b = index(index(self.text.index(SEL_LAST))[0],'end')
+            
+        start, end = (index(a) for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
+        for row in range(start[0], end[0]+1):
+            # Unindent
+            line = self.text.get(index(row,0), index(row,'end'))
+            for n, char in enumerate(line[:tabsize]):
+                if char != " ":
+                    break
+            self.text.delete(index(row,0),index(row,n+1))
+            #self.text.insert(index(row,0), self.tabspace())
+
+        self.text.tag_add(SEL, sel_a, sel_b)    
         return "break"
 
     # Deletion
     #---------
 
-    def delete(self, event=None, insert=INSERT, peer=False):
+    def delete(self, event=None, insert=INSERT):
         """ Deletes a character or selected area """
         # If there is a selected area, delete that
-        if not self.network:
-            
-            if self.delete_selection():
 
-                # Update player line numbers
+        if self.delete_selection():
 
-                execute.update_line_numbers(self.text)
+            # Update player line numbers
 
-                return "break"
+            execute.update_line_numbers(self.text)
+
+            return "break"
 
         # Handle delete in brackets
 
-        if not self.network:
+        if self.bracketHandler.delete():
 
-            if self.bracketHandler.delete():
-
-                return "break"
-        
+            return "break"
+    
         # Else, work out if there is a tab to delete
         
         line, column = index(self.text.index(insert))
@@ -699,42 +609,22 @@ class workspace:
             else:
 
                 self.text.delete(index(line, column-1), insert)
-
-        # Push to other peers unless executed by peer
-
-        if self.network is True and peer is False:
-
-            self.peer.push(index(line, column), 'delete')
-
+                
         # Update the IDE
         self.update(event)
 
         return "break"
 
-    def delete2(self, event=None, insert=INSERT, peer=False):
+    def delete2(self, event=None, insert=INSERT):
         """ Delete the next character """
 
-        if not self.network:
-
-            if not self.delete_selection():
-
-                self.text.delete(self.text.index(insert))
-
-        else:
+        if not self.delete_selection():
 
             self.text.delete(self.text.index(insert))
             
         self.update(event)
 
         execute.update_line_numbers(self.text)
-
-        # Push to other peers unless executed by peer
-
-        if self.network is True and peer is False:
-
-            line, column = index(self.text.index(insert))
-
-            self.peer.push(index(line, column), 'delete2')
 
         return "break"
 
@@ -1036,12 +926,6 @@ class workspace:
         except:
 
             return
-        
-
-    """
-        Methods used in real-time network performance
-
-    """
 
     def set_all(self, text):
         self.text.delete("1.0", END)

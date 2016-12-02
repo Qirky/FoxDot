@@ -14,22 +14,34 @@ import random
 import Operations as op
 from Base import Pattern, GeneratorPattern, PGroup, asStream
 
-#==============================#
-#      1. Container Types      #
-#==============================#
-
 
 MAX_SIZE = 2048
  
-class P(Pattern):
-    """ P(iterable) -> User-defined pattern """
-    pass
+class _Pattern:
+    """ Pseudo-pattern.
+        P[1,2,3] = Pattern([1,2,3])
+        P(1,2,3) = Pattern((0,1,3))
+    """
+    def __getitem__(self, args):
+        try:
+            args = list(args)
+        except:
+            pass
+        return Pattern(args)
+    def __call__(self, *args):
+        return Pattern(args)
+    
+P = _Pattern()
+
+#==============================#
+#      1. Container Types      #
+#==============================#
 
 class PStutter(Pattern):
     """ PStutter(pattern, n) -> Creates a pattern such that each item in the array is repeated n times (can be a pattern) """
 
     def __init__(self, data, n=2):
-        self.data = P(data).stutter(n).data
+        self.data = Pattern(data).stutter(n).data
 
 Pstutter = PStutter #: Alias for PStutter()
 
@@ -151,7 +163,7 @@ class PStretch(Pattern):
         try:
             self.data = data.stretch(size)
         except:
-            self.data = P(data).stretch(size)
+            self.data = Pattern(data).stretch(size)
 
 Pstretch = PStretch #: Alias
 
@@ -254,7 +266,7 @@ class PRhythm(Pattern):
         durations = []
 
         if type(s) is str:
-            s = P().fromString(s)
+            s = Pattern().fromString(s)
             
         dur = s.dur(dur)
         self.data = []

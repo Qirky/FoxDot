@@ -685,13 +685,11 @@ class Player(Repeatable):
 
             # Any messages with zero amps or 0 buf are not sent
 
-            if amp > 0 or (self.synthdef == SamplePlayer and buf > 0 and amp > 0):
+            if (self.synthdef != SamplePlayer and amp > 0) or (self.synthdef == SamplePlayer and buf > 0 and amp > 0):
 
                 if delay > 0:
 
-                    # TODO-Replace with an OSC Bundle and timestamps?
-
-                    self.metro.schedule(send_delay(self, osc_msg), self.metro.now() + delay)
+                    self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
                     self.metro.schedule(self.bang, self.metro.now() + delay)
                     
                 else:
