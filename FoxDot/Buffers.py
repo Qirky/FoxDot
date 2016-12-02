@@ -69,23 +69,35 @@ class BufferManager:
 
             # Iterate over each
 
-            self.symbols[char] = BufChar(char)
+            try:
 
-            for f in sorted(os.listdir(lower)):
+                self.symbols[char] = BufChar(char)
 
-                self.symbols[char].addbuffer(join(lower, f), bufnum)
+                for f in sorted(os.listdir(lower)):
 
-                bufnum += 1
+                    self.symbols[char].addbuffer(join(lower, f), bufnum)
 
-            char = char.upper()
+                    bufnum += 1
 
-            self.symbols[char] = BufChar(char)
+            except:
 
-            for f in sorted(os.listdir(upper)):
+                del self.symbols[char]
 
-                self.symbols[char].addbuffer(join(upper, f), bufnum)
+            try:
 
-                bufnum += 1
+                char = char.upper()
+
+                self.symbols[char] = BufChar(char)
+    
+                for f in sorted(os.listdir(upper)):
+
+                    self.symbols[char].addbuffer(join(upper, f), bufnum)
+
+                    bufnum += 1
+
+            except:
+
+                del self.symbols[char]
             
         # Go through symbols
 
@@ -95,11 +107,17 @@ class BufferManager:
 
             folder = join(root, "_", nonalpha[char])
 
-            for f in sorted(os.listdir(folder)):
+            try:
 
-                self.symbols[char].addbuffer(join(folder, f), bufnum)
+                for f in sorted(os.listdir(folder)):
 
-                bufnum += 1
+                    self.symbols[char].addbuffer(join(folder, f), bufnum)
+
+                    bufnum += 1
+
+            except:
+
+                del self.symbols[char]
 
         # Define empty buffer
         self.nil = BufChar(None)
