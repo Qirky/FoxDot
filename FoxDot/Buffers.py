@@ -63,41 +63,38 @@ class BufferManager:
         # Go through the alphabet
 
         for char in alpha:
-
             upper = join(root, char, "upper")
             lower = join(root, char, "lower")
 
             # Iterate over each
 
-            try:
+            self.symbols[char] = BufChar(char)
 
-                self.symbols[char] = BufChar(char)
+            if os.path.isdir(lower):
+                try:
+                    for f in sorted(os.listdir(lower)):
 
-                for f in sorted(os.listdir(lower)):
+                        self.symbols[char].addbuffer(join(lower, f), bufnum)
 
-                    self.symbols[char].addbuffer(join(lower, f), bufnum)
+                        bufnum += 1
 
-                    bufnum += 1
+                except:
+                    del self.symbols[char]
 
-            except:
+            char = char.upper()
 
-                del self.symbols[char]
+            self.symbols[char] = BufChar(char)
 
-            try:
+            if os.path.isdir(upper):
+                try:
+                    for f in sorted(os.listdir(upper)):
 
-                char = char.upper()
+                        self.symbols[char].addbuffer(join(upper, f), bufnum)
 
-                self.symbols[char] = BufChar(char)
-    
-                for f in sorted(os.listdir(upper)):
+                        bufnum += 1
 
-                    self.symbols[char].addbuffer(join(upper, f), bufnum)
-
-                    bufnum += 1
-
-            except:
-
-                del self.symbols[char]
+                except:
+                    del self.symbols[char]
             
         # Go through symbols
 
@@ -107,17 +104,16 @@ class BufferManager:
 
             folder = join(root, "_", nonalpha[char])
 
-            try:
+            if (os.path.isdir(folder)):
+                try:
+                    for f in sorted(os.listdir(folder)):
 
-                for f in sorted(os.listdir(folder)):
+                        self.symbols[char].addbuffer(join(folder, f), bufnum)
 
-                    self.symbols[char].addbuffer(join(folder, f), bufnum)
+                        bufnum += 1
 
-                    bufnum += 1
-
-            except:
-
-                del self.symbols[char]
+                except:
+                    del self.symbols[char]
 
         # Define empty buffer
         self.nil = BufChar(None)
