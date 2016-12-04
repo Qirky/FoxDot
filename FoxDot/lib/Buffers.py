@@ -3,6 +3,7 @@
 """ This module manages the allocation of buffer numbers and samples """
 
 from os.path import abspath, join, dirname
+from Settings import FOXDOT_SND
 import os
 
 def path(fn):
@@ -29,7 +30,7 @@ nonalpha = {"&" : "ampersand",
             "?" : "question",
             "~" : "tilde",
             "\\" :"backslash" }
-            
+
 class BufChar:
     def __init__(self, char):
         self.char    = char
@@ -58,7 +59,7 @@ class BufferManager:
 
         # Load buffers
         bufnum = 1
-        root   = path("./Samples/")
+        root   = FOXDOT_SND
 
         # Go through the alphabet
 
@@ -95,7 +96,7 @@ class BufferManager:
 
                 except:
                     del self.symbols[char]
-            
+
         # Go through symbols
 
         for char in nonalpha:
@@ -121,9 +122,9 @@ class BufferManager:
 
     def __getitem__(self, key):
         return self.symbols.get(key, self.nil)
-        
+
     def __call__(self, server):
-        self.server = server 
+        self.server = server
         return self
 
     def __str__(self):
@@ -134,14 +135,6 @@ class BufferManager:
             for fn, buf in self.symbols[char]:
                 self.server.bufferRead(buf, path(fn))
         return
-            
-##        for buf, fn in self.buffers.items():
-##            self.server.bufferRead(buf, path("./Samples/" + fn))
 
     def bufnum(self, char):
         return self.symbols.get(char, 0)
-##        b = 0
-##        for ch, buf in self.symbols.items():
-##            if ch == char:
-##                b = buf
-##        return b

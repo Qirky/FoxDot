@@ -24,11 +24,11 @@ elif sys.platform.startswith('linux'):
 
 USER_CWD     = os.path.realpath(".")
 FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../../")
-FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/FoxDot/Workspace/img/icon" + (".ico" if SYSTEM != LINUX else ".gif"))
-# FOXDOT_ICON_GIF = os.path.realpath(FOXDOT_ROOT + "/FoxDot/Workspace/img/icon.gif")
+FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon" + (".ico" if SYSTEM != LINUX else ".gif"))
+FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 
 SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
-OSC_FUNC     = "/FoxDot/SCLang/OSCFunc.scd"
+OSC_FUNC     = "/lib/SCLang/OSCFunc.scd"
 
 # Set Environment Variables
 
@@ -56,11 +56,8 @@ class COLOURS:
     user_defn  = conf.user_defn
     other_kws  = conf.other_kws
     comments   = conf.comments
-    numbers    = conf.numbers   
+    numbers    = conf.numbers
     strings    = conf.strings
-    dollar     = conf.dollar  
-    arrow      = conf.arrow   
+    dollar     = conf.dollar
+    arrow      = conf.arrow
     players    = conf.players
-
-
-

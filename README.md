@@ -1,17 +1,15 @@
-FoxDot - Live Coding with Python v0.1.9
+FoxDot - Live Coding with Python v0.2.0
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.1.9 fixes and updates
+### v0.2.0 fixes and updates
 
-- PSparse renamed to PBin
-- Loading the icon now works on Linux
-- Sample names case error fixed
-- Upheaval of SCLang API
-- Player Objects now have visual feedback behaviour via the `bang` method and take Tkinter `tag_config` keyword arguments. 
-- Consolas now default font
-- Fixed `Pvar` and `linvar` bugs
+- Reorganised project structure. Samples and code are kept separate.
+- SuperCollider `OSCFunc.scd` now found in `/osc/` folder
+- `setup.py` now included for an easier install
+- (in progress) characters can have more than one sample attached to them. These are accessed by supplying a `buf` keyword argument.  
+- Python lists can be interpreted as FoxDot pattern when attached with a P prefix e.g. `P[1, 2, 3] + [0,2]` will return `P[1,4,3,3,2,5]` not `[1,2,3,0,2]`.
 
 See `docs/changelog` for more
 
@@ -28,13 +26,15 @@ See `docs/changelog` for more
 
 #### Download and install
 
-FoxDot uses the sound synthesis engine, SuperCollider, to make noise and Python 2.7 so you'll need to make sure they're installed correctly before using FoxDot. Download the `FoxDot-master.zip` file from this page and extract the contents.
+1. Install Python 2.7 and SuperCollider 3
+1. Clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents.
+2. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`. Doing this allows you to import FoxDot into your own Python applications and means you can run it from anywhere by executing `python -m FoxDot` in your command prompt. 
 
 #### Startup
 
 1. Open SuperCollider
-2. Open the file `FoxDot-Master/FoxDot/SCLang/OSCFunc.scd` in SuperCollider and execute the contents. This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot. 
-3. Run the `main.py` file in the `FoxDot-master` directory. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run FoxDot from the command line, change directory to `FoxDot-master` and enter the command `python main.py`
+2. Open the file `/FoxDot/osc/OSCFunc.scd` in SuperCollider and execute the contents. This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot.
+3. Run FoxDot using `python -m FoxDot`. If you haven't used the `setup.py` file, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run the file via the command line, just use `python __main__.py` or `python -m FoxDot` if you are in the root directory of the download.
 
 #### Troubleshooting
 
@@ -42,7 +42,7 @@ FoxDot uses the sound synthesis engine, SuperCollider, to make noise and Python 
 If you are getting an error along the lines of "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider when trying to play back audio samples, go to FoxDot/Settings/Conf.txt and change the value of MAX_CHANNELS from 2 to 1 or vice versa. This issue might be to do with the version of SuperCollider or O/S being used.
 
 ##### `Decimator` class not defined
-This is a class that is found in the SC3 plugins (link at the top) but if you don't have it installed, go to `Settings/conf.py` and set `SC3_PLUGINS` to `False`.
+This is a class that is found in the SC3 plugins (link at the top) but if you don't have it installed, go to `lib/Settings/conf.py` and set `SC3_PLUGINS` to `False`.
 
 ## Basics
 
@@ -74,7 +74,7 @@ The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - an
 
 ### 'Sample Player' Objects
 
-In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters as its first argument. Each character in the string refers to one sample (the current list can be seen in the `FoxDot/Settings/samplelib.csv` file, which you can customise if you so wish). To create a basic drum beat, you can execute the following line of code:
+In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters as its first argument. Each character in the string refers to one sample (the current list can be seen in the `FoxDot/lib/Settings/samplelib.csv` file, which you can customise if you so wish). To create a basic drum beat, you can execute the following line of code:
 
 ``` python
 d1 >> play("x-o-")
@@ -119,38 +119,39 @@ example.add()
 
 ## Player Object Keywords
 
-- dur
-  - Durations (defaults to 1 and 1/2 for the Sample Player)
-- sus
-  - Sustain (defaults to `dur`)
-- amp
-  - Amplitude (defaults to 1)
-- pan
-  - Panning, where -1 is far left, 1 is far right (defaults to 0)
-- vib
-  - Vibrato (defaults to 0)
-- hpf
-  - High-pass filter; only frequences **above** this value are kept in the final signal (defaults to 0)
-- lpf
-  - Low-pass filter; only frequences **below** this value are kept in final signal (defaults to 20000)
-- bits
-  - The bit depth that the signal is reduced to; this is a value between 1 and 24 where other values are ignored (defaults to 0)
-- rate
-  - Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
-- verb
-  - The dry/wet mix of reverb; this should be a value between 0 and 1 (defalts to 0.25)
-- room
-  - Room size for reverb; this should be a value between 0 and 1 (defaults, to 0.3)
-- chop
-  - 'Chops' the signal into smaller chunks (defaults to 0)
-- delay
-  - A duration of time to wait before sending the information to SuperCollider (defaults to 0)
-- slide
-  - 'Slides' the frequency value of a signal to `freq * (slide+1)` over the  duration of a note (defaults to 0)
-- echo
-  - Sets the decay time for any echo effect in beats, works best on Sample Player (defaults to 0)
-- scrub
-  - Special keyword for Sample Players; changes the playback rate to change like a DJ scratching a record (defaults to 0)
+dur - Durations (defaults to 1 and 1/2 for the Sample Player)
+
+sus - Sustain (defaults to `dur`)
+
+amp - Amplitude (defaults to 1)
+
+pan - Panning, where -1 is far left, 1 is far right (defaults to 0)
+
+vib - Vibrato (defaults to 0)
+
+hpf - High-pass filter; only frequences **above** this value are kept in the final signal (defaults to 0)
+
+lpf - Low-pass filter; only frequences **below** this value are kept in final signal (defaults to 20000)
+
+bits - The bit depth that the signal is reduced to; this is a value between 1 and 24 where other values are ignored (defaults to 0)
+
+rate - Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
+
+verb - The dry/wet mix of reverb; this should be a value between 0 and 1 (defalts to 0.25)
+
+room - Room size for reverb; this should be a value between 0 and 1 (defaults, to 0.3)
+
+chop -'Chops' the signal into smaller chunks (defaults to 0)
+
+delay - A duration of time to wait before sending the information to SuperCollider (defaults to 0)
+
+slide - 'Slides' the frequency value of a signal to `freq * (slide+1)` over the  duration of a note (defaults to 0)
+
+echo - Sets the decay time for any echo effect in beats, works best on Sample Player (defaults to 0)
+
+scrub - Special keyword for Sample Players; changes the playback rate to change like a DJ scratching a record (defaults to 0)
+
+buf - Special keyword for Sample Players; selects another audio file for a sample character.
 
 ## Documentation
 

@@ -56,7 +56,7 @@ from ..SCLang import SCLang
 
 foxdot_kw = ["Clock","Group","Scale","Server","Root","BufferManager","var","Pvar","linvar","inf","lambda", decorator]
 
-foxdot_funcs = classes(Sequences) # + instances(SCLang, SCLang.cls) + instances(SCLang, SCLang.EnvGen)
+foxdot_funcs = classes(Sequences) + ["P"]
 
 # Python keywords used in RegEx Group 2
 

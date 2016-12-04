@@ -302,7 +302,7 @@ class workspace:
 
     # Scheduling tasks
     # ----------------
-    def schedule(self, target, args=(), kwargs={}):
+    def addTask(self, target, args=(), kwargs={}):
         self.text.queue.put((target, args, kwargs))
         return
 

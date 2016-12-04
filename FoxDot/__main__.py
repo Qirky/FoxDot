@@ -8,8 +8,8 @@
 
 """
 
-from FoxDot import *
-from FoxDot.Workspace import workspace
+from lib import *
+from lib.Workspace import workspace
 
 # Create the  IDE
 FoxDot = workspace()

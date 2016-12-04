@@ -56,11 +56,11 @@ class FoxDotCode:
 
             if type(code) != CodeType:
 
+                response = stdout(code)
+
                 if verbose is True:
 
-                    print(stdout(code))
-    
-                    #TODO - Add sys.displayhook?
+                    print(response)
                     
                 code = compile(code, "FoxDot", "exec")
 
@@ -68,11 +68,13 @@ class FoxDotCode:
 
         except:
 
-            print(error_stack())
+            response = error_stack()
 
-            raise
+            print(response)
 
-        return
+        #TODO - Add sys.displayhook?
+
+        return response
 
     def update_line_numbers(self, text_widget, start="1.0", end="end", remove=0):
 

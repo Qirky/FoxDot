@@ -827,7 +827,7 @@ class Player(Repeatable):
         # Update the GUI if possible
         if self.widget:
             # Replace old_string with new string
-            self.widget.replace(self.line_number, self.playstring, new_string)
+            self.widget.addTask(target=self.widget.replace, args=(self.line_number, self.playstring, new_string))
         self.playstring = new_string
         setattr(self, 'degree', new_string)
         return

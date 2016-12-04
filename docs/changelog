@@ -1,3 +1,13 @@
+### v0.2.0 fixes and updates (4/12/16)
+
+- Reorganised project structure. Samples and code are kept separate.
+- SuperCollider `OSCFunc.scd` now found in `/osc/` folder
+- `setup.py` now included for an easier install
+- (in progress) characters can have more than one sample attached to them. These are accessed by supplying a `buf` keyword argument.  
+- Python lists can be interpreted as FoxDot pattern when attached with a P prefix e.g. `P[1, 2, 3] + [0,2]` will return `P[1,4,3,3,2,5]` not `[1,2,3,0,2]`.
+
+---
+
 ### v0.1.9 fixes and updates
 - PSparse renamed to PBin
 - Loading the icon now works on Linux

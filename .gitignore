@@ -1,11 +1,8 @@
 # demo and debug folders
 demos/*
 TODO.txt
-FoxDot/Custom/*
-FoxDot/debug/*
-
-# Setup file (for now)
-setup.py
+FoxDot/lib/debug/*
+build/*
 
 # Compiled Python file
 *.pyc

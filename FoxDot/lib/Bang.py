@@ -57,8 +57,8 @@ class Bang:
 
                 try:
 
-                    self.widget.schedule(target=self.widget.text.tag_add, args=(self.id, start, end))
-                    self.widget.schedule(target=self.widget.text.tag_config, args=(self.id,), kwargs=kwargs)
+                    self.widget.addTask(target=self.widget.text.tag_add, args=(self.id, start, end))
+                    self.widget.addTask(target=self.widget.text.tag_config, args=(self.id,), kwargs=kwargs)
 
                     self.duration = 0.1
 
@@ -70,6 +70,6 @@ class Bang:
 
 
     def remove(self):
-        self.widget.schedule(target=self.widget.text.tag_delete, args=(self.id,))
+        self.widget.addTask(target=self.widget.text.tag_delete, args=(self.id,))
         return
       

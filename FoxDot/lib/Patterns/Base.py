@@ -37,10 +37,10 @@ class metaPattern(object):
             val = self.data[:8] + [dots()] + self.data[-8:]
         else:
             val = self.data
-        return self.bracket_style % str(val)[1:-1]
+        return "P" + self.bracket_style % str(val)[1:-1]
 
     def __repr__(self):
-        return str(self)
+        return str(self)[1:]
 
     def string(self):
         """ Returns a string made up of all the values:
