@@ -37,7 +37,7 @@ class metaPattern(object):
             val = self.data[:8] + [dots()] + self.data[-8:]
         else:
             val = self.data
-        return "P" + self.bracket_style % str(val)[1:-1]
+        return "P" + self.bracket_style % repr(val)[1:-1]
 
     def __repr__(self):
         return str(self)[1:]
@@ -173,9 +173,14 @@ class metaPattern(object):
 
     # Methods that return augmented versions of original
 
-    def shuf(self):
+    def shuffle(self):
         new = asStream(self.data)
         shuffle(new.data)
+        return new
+
+    def mirror(self):
+        new = self[:]
+        new.data.reverse()
         return new
     
     def stretch(self, size):
@@ -446,8 +451,8 @@ class PGroup(metaPattern):
             item.scale_dur(n)
         return
 
-    def fromString(self, s, dur=1):
-        metaPattern.fromString(self, s, dur)
+    def fromString(self, string):
+        metaPattern.fromString(self, string)
         self.scale_dur(self.coeff())
         return self
 

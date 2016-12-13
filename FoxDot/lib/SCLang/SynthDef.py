@@ -261,6 +261,15 @@ class SynthDef(object):
         new.name = str(newname)
         return new
 
+
+    # Playing a single note
+    def play(self, freq, **kwargs):
+        message = ["freq", freq]
+        for key, value in kwargs.items():
+            message += [key, value]
+        self.server.sendNote(self.name, message)
+        return
+
 class SynthDefProxy:
     def __init__(self, name, envelope, degree, kwargs):
         self.name = name

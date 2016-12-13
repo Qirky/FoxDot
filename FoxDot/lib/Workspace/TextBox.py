@@ -29,6 +29,10 @@ class ThreadedText(Text):
 
             pass
 
+        except Exception as e:
+
+            print e
+
         # Recursive call
         self.after(10, self.update)
         return

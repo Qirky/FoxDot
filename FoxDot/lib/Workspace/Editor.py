@@ -182,8 +182,6 @@ class workspace:
     def keypress(self, event=None):
         """ Handles any keypress """
 
-        index = self.text.index(INSERT)
-
         # For non string characters, return normally
 
         if not event.char or isHex(event.char):
@@ -199,6 +197,8 @@ class workspace:
         else:
 
             self.delete_selection()
+
+            index = self.text.index(INSERT)
 
             self.text.insert(index, event.char)
 
@@ -841,9 +841,9 @@ class workspace:
                 
                 self.text.tag_add(tag_name, index(line, start), index(line, end))
 
-        except:
+        except Exception as e:
 
-            pass
+            print e
                     
 
     def get_last_word(self):
@@ -924,6 +924,43 @@ class workspace:
             self.text.mark_set(INSERT, origin)
 
         except:
+
+            return
+
+    def replace_re(self, line, re_pattern=re_list, new=""):
+        """ Replaces text on a specified line and updates the IDE """
+        try:
+
+            # Store cursor
+            origin = self.text.index(INSERT)
+            # Get contents of the line
+            a = index(line, 0)
+            b = index(line, END)
+            contents = self.text.get(a, b)
+
+            # Search using RegEx
+
+            match = re_pattern.search(contents)
+
+            if match:
+                
+                # Find the part to replace
+
+                i = match.start()
+                j = match.end()
+                a = index(line, i)
+                b = index(line, j)
+                
+                self.text.delete(a, b)
+                self.text.insert(a, new)
+
+                self.update(insert=a)
+
+                self.text.mark_set(INSERT, origin)
+
+        except Exception as e:
+
+            print e
 
             return
 

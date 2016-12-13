@@ -1,13 +1,14 @@
-(SynthDef.new(\bug,
+(SynthDef.new(\quin,
 {|vib=0, echo=0, rate=1, delay=0, sus=1, limit=1, bits=24, hpf=0, pan=0, scrub=0, verb=0.25, amp=1, freq=0, buf=0, echoOn=0, room=0.3, chop=0, slide=0, grain=0, fmod=0, lpf=20000, slidefrom=1|
 var osc, env;
 amp = amp / 2;
 freq = freq + fmod;
 freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
 freq = Vibrato.kr(freq, rate: vib);
-amp=(amp / 5);
-osc=(Pulse.ar([freq, (freq * 1.0001)], width: [0.09, 0.16, 0.25]) * SinOsc.ar((rate * 4)));
-env=EnvGen.ar(Env.perc(level: amp,curve: 0,attackTime: (sus * 1.5),releaseTime: sus), doneAction: 2);
+amp=(amp * 2);
+osc=Klank.ar(`[[1, 2, 3, 4], [1, 4, 9, 16], [16, 9, 10, 20]], SinOsc.ar(0.5), [(freq * 0.99), freq]);
+osc=LPF.ar(osc, Line.ar(4000, 40, dur: (0.25 / rate)));
+env=EnvGen.ar(Env.perc(level: amp,curve: -12,attackTime: 0.01,releaseTime: 4), doneAction: 2);
 osc=HPF.ar(osc, hpf);
 osc=LPF.ar(osc, (lpf + 1));
 osc=(osc * LFPulse.ar((chop / sus)));

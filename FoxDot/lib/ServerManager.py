@@ -51,12 +51,7 @@ class SCLangServerManager:
         message = OSCMessage("/s_new")
         node = packet[1] = self.nextnodeID()
         message.append(packet)
-        self.client.send( message )
-        ### Chop test
-        #message = OSCMessage("/n_set")
-        #message.append( [node, "chop", 4] )
-        #self.client.send( message )
-        
+        self.client.send( message )        
         return
 
     def sendNote(self, SynthDef, packet):

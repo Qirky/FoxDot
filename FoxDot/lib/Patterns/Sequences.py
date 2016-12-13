@@ -29,7 +29,9 @@ class _Pattern:
             pass
         return Pattern(args)
     def __call__(self, *args):
-        return Pattern(args)
+        if len(args) == 1:
+            args = args[0]
+        return PGroup(args)
     
 P = _Pattern()
 

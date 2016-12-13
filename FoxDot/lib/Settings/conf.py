@@ -5,13 +5,13 @@ PORT=57110
 PORT2=57120
 SUPERCOLLIDER='C:/Program Files (x86)/SuperCollider-3.6.6/'
 FONT='Consolas'
-SC3PLUGINS=True
+SC3PLUGINS=False
 MAX_CHANNELS=1
 
 # Editor Colours
 # ------------------
 plaintext='#ffffff'
-background='#262626'#'#4d4d4d'
+background='#262626'
 functions='#ff9999'
 key_types='#66ccff'
 user_defn='#ff99ff'

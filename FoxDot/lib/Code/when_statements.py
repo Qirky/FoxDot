@@ -1,4 +1,5 @@
 from func_cmp import *
+from threading import Thread
 
 class _whenStatement:
 
@@ -71,12 +72,38 @@ class _whenLibrary:
     """
     def __init__(self):
         self.library = []
+        
+    def start_thread(self):
+        self.thread = Thread(target=self.run)
+        self.thread.daemon = True
+        self.thread.start()
 
     def __len__(self):
         return len(self.library)
 
     def __repr__(self):
-        return repr(self.library)        
+        return repr(self.library)
+
+    def run(self):
+        """ Continual loop evaluating when_statements
+        """
+        while True:
+            
+            for expression in self.library:
+
+                if expression.remove_me == True:
+
+                    self.library.remove(expression)
+
+                    if len(self.library) == 0:
+
+                        break
+
+                else:
+
+                    expression.evaluate()
+
+        return
         
     def __call__(self, func=None, **kwargs):
         """ Calling when() with no arguments will evaluate all expressions
@@ -85,30 +112,22 @@ class _whenLibrary:
             or update the 
 
         """
-        # Calling with no argument executes the statements
-        
-        if func is None:
-            
-            for expression in self.library:
-
-                if expression.remove_me == True:
-
-                    self.library.remove(expression)
-
-                else:
-
-                    expression.evaluate()
 
         # Giving it a function will return the corresponding when statement
         # or create a new one if it doesn't exist
         
-        elif callable(func):
+        if callable(func):
+
+            if len(self.library) == 0:
+
+                self.thread_start()                
             
             for stmt in self.library:
 
                 if func_cmp(func, stmt.expr):
 
                     return stmt
+
             else:
 
                 # Make a new statement
@@ -118,6 +137,10 @@ class _whenLibrary:
                 # Return the last added expression
 
                 return self.library[-1]
+
+        else:
+
+            print("{} is not callable".format(func))
 
         return self
 

@@ -13,10 +13,13 @@ from lib.Workspace import workspace
 
 # Create the  IDE
 FoxDot = workspace()
+
 # This allows the user to access the IDE, an object called FoxDot
 FoxDotCode.namespace['FoxDot'] = FoxDot
+
 # And this gives PlayerObjects access to the  IDE too
 Player.widget = FoxDot
+
 # This shares the code namespace between Python and the FoxDot IDE
 workspace.namespace=FoxDotCode.namespace
 

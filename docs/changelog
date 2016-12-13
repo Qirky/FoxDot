@@ -1,3 +1,10 @@
+### v0.2.1 fixes and updates
+
+- Syntax highlighting bugs fixed
+- Visual feedback for `shuffle`, `mirror`, and `rotate` methods for `play` SynthDef
+- SC3 Plugins disabled by default
+- Player Object dictionaries shallow copied before iteration to stop `RunTimeErrors` occurring 
+
 ### v0.2.0 fixes and updates (4/12/16)
 
 - Reorganised project structure. Samples and code are kept separate.

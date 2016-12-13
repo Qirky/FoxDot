@@ -4,6 +4,8 @@ def miditofreq(midinote):
     """ Converts a midi number to frequency """
     return 440 * (2 ** ((midinote - 69.0)/12.0))
 
+midi2cps = miditofreq
+
 def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     """ Calculates a midinote from a scale, octave, degree, and root """
 

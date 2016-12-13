@@ -8,13 +8,16 @@ def path(fn):
 
 # RegEx Group 1
 user_defn = r"(?<=def )(\w+)"
-players   = r"(?<=>> )(\w+)"
+players   = r"(?<=>>)(\s*\w+)"
 comments  = r"^\s*#.*"
 decorator = r"\A@\S+"
 numbers   = r"(?<![a-zA-Z])\d+"
 strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
+
+# RegEx Group 2
+re_list = re.compile(r"P?\[.*?\]")
 
 def findstyles(line, *args):
     """ Finds any locations of any regex and returns the name

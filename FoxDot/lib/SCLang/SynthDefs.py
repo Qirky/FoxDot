@@ -113,6 +113,13 @@ with SynthDef("klank") as klank:
     klank.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, klank.freq)
     klank.env = Env.env()
 
+with SynthDef("quin") as synth:
+    synth.amp = synth.amp * 2
+    synth.osc = Klank.ar([[1,2,3,4],[1,4,9,16],[16,9,10,20]], SinOsc.ar(0.5), [synth.freq * 0.99, synth.freq])
+    synth.osc = LPF.ar(synth.osc, Line.ar(4000,40, dur=0.25 / synth.rate))
+    synth.env = Env.perc(atk=0.01, sus=4, curve=-12)
+quin = synth
+
 with SynthDef("pluck") as pluck:
     freq = instance('freq')
     pluck.amp  = pluck.amp + 0.00001
@@ -183,6 +190,15 @@ snick = SynthDef("snick")
 snick.osc = LFPar.ar(snick.freq, mul=1) * Blip.ar(((snick.rate+1) * 4))
 snick.env = Env.perc()
 snick.add()
+
+twang = SynthDef("twang")
+twang.freq = twang.freq / 2
+twang.osc = LPF.ar(Impulse.ar([twang.freq, twang.freq + 1]), 4000)
+twang.osc = CombL.ar(twang.osc, delaytime=[0.004,0.003], maxdelaytime= 2);
+twang.env = Env.perc()
+twang.add()
+
+
 
 # Get rid of the variable synth
 

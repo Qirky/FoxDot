@@ -87,7 +87,7 @@ class MethodCall:
         return
 
     def schedule(self):
-        self.parent.metro.schedule(self, self.next - 0.1)
+        self.parent.metro.schedule(self, self.next)
 
     def isScheduled(self):
         """ Returns True if this is in the Tempo Clock """

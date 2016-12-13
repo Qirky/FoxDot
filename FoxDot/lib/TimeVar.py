@@ -41,7 +41,6 @@ class var(Repeatable):
     """ Var(values [,durs=[4]]) """
 
     metro = None
-    timevar="timevar"
 
     def __init__(self, values, dur=4, **kwargs):
 
@@ -56,8 +55,8 @@ class var(Repeatable):
         self.inf_value = None
 
         # Dynamic method for calculating values
-
-        self.evaluate = fetch(op.Nil)
+        self.func     = op.Nil
+        self.evaluate = fetch(op.Nil) 
         self.dependency = 1
         
         self.update(values, dur)
@@ -99,6 +98,7 @@ class var(Repeatable):
     # + 
     def __add__(self, other):
         new = self.new(other)
+        self.func    = op.Add
         new.evaluate = fetch(op.Add)
         return new
     def __radd__(self, other):
@@ -315,61 +315,13 @@ class var(Repeatable):
             
             if time_block[0] <= time < time_block[1]:
 
-                # We have our index
-
                 i = i + index
-
-                if i != self.current_index:
-
-                    self.current_index = i
-                    self.current_value = self.next_value if self.next_value else self.calculate(self.data[i])
-                    self.next_value    = self.calculate(self.data[i+1])
-
-                    self.current_time_block  = time_block
+                self.current_value = self.calculate(self.data[i])
 
                 break
             
         return self.current_value
 
-##    def _now_old(self, time=None):
-##        """ Returns the value from self.data for time t in self.metro """
-##
-##        if self.inf_found == 3:
-##
-##            val = self.inf_value
-##
-##        else:
-##
-##            # If using a different bpm to the clock
-##
-##            t = self.current_time(time) % self.length()
-##
-##            val = 0
-##
-##            for i in range(len(self.data)):                
-##
-##                val = self.data[i]
-##                
-##                if self.time[i][0] <= t < self.time[i][1]:
-##
-##                    if isinstance(op.modi(self.dur, i), _inf):
-##
-##                        if self.inf_found == _inf.wait:
-##
-##                            self.inf_found = _inf.done
-##
-##                            self.inf_value = val
-##
-##                    elif self.inf_found == _inf.here:
-##
-##                        self.inf_found = _inf.wait
-##
-##                    break
-##                
-##        self.current_value = self.calculate(val)
-##
-##        return self.current_value
-    
     def copy(self):
         new = var(self.data, self.dur, bpm=self.bpm)
         return new
@@ -426,13 +378,36 @@ class linvar(var):
         var.__init__(self, *args, **kwargs)
         self.next_value = None
 
+    # Finding current values
     def now(self, time=None):
-        # Already calculate the current and next value
-        
-        var.now(self, time)
 
         time = self.current_time(time)
 
+        loops = time // sum(self.dur)
+        time  = time - (loops * sum(self.dur))
+
+        index = int(loops * len(self.dur))
+
+        for i in range(len(self.dur)):
+
+            time_block = self.time[i]
+            
+            if time_block[0] <= time < time_block[1]:
+
+                # We have our index
+
+                i = i + index
+
+                if i != self.current_index:
+
+                    self.current_index = i
+                    self.current_value = self.next_value if self.next_value is not None else self.calculate(self.data[i])
+                    self.next_value    = self.calculate(self.data[i+1])
+                    
+                    self.current_time_block  = time_block
+
+                break
+            
         # Calculate the proportion through this time block
 
         p = (float(time % sum(self.dur)) - self.current_time_block[0]) / (self.current_time_block[1] - self.current_time_block[0])

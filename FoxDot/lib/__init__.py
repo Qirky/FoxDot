@@ -21,6 +21,7 @@ from Players import *
 from Patterns import *
 from TimeVar import *
 from Constants import *
+from Midi import *
 import Scale
 import Root
 
@@ -32,7 +33,7 @@ from SCLang.SynthDefs import *
 """ CLOCK """
 
 Clock = TempoClock()
-Clock.when_statements = when
+# Clock.when_statements = when
 
 when.metro = var.metro = Clock
 Player.metro  = Clock

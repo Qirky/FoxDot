@@ -1,8 +1,14 @@
 # demo and debug folders
 demos/*
-TODO.txt
 FoxDot/lib/debug/*
 build/*
+dist/*
+
+# To-do list
+TODO.txt
+
+# PIP Registration file
+.pypirc
 
 # Compiled Python file
 *.pyc

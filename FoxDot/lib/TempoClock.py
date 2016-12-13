@@ -8,6 +8,7 @@
 """
 
 from Players import Player, PlayerKey
+from Repeat import MethodCall
 from Patterns import asStream
 from TimeVar import var
 from Patterns.Operations import modi
@@ -19,7 +20,7 @@ line = "\n"
 
 class TempoClock:
 
-    when_statements = lambda: None
+    # when_statements = lambda: None
 
     def __init__(self, bpm=120.0, meter=(4,4)):
 
@@ -85,11 +86,11 @@ class TempoClock:
         threading.Thread(target=self.run).start()
         return
 
-    def when_eval(self):
-        """ Evaluates any 'when' statements """
-        if len(self.when_statements) > 0:
-            self.when_statements.__call__()
-        return
+##    def when_eval(self):
+##        """ Evaluates any 'when' statements """
+##        if len(self.when_statements) > 0:
+##            self.when_statements.__call__()
+##        return
 
     def run(self):
 
@@ -99,7 +100,7 @@ class TempoClock:
 
             # Evaluate when_statements at EVERY possible opportunity
 
-            self.when_eval()            
+            # self.when_eval()            
 
             if self.now() >= self.queue.next():
 
@@ -111,7 +112,7 @@ class TempoClock:
 
                     # Test if any changes caused by item.__call__() affect when statements
 
-                    self.when_eval()
+                    # self.when_eval()
 
             # Make sure rest is positive so any events that SHOULD
             # have been played are played straight away
@@ -123,7 +124,7 @@ class TempoClock:
 
         return
 
-    def schedule(self, obj, beat=None):
+    def schedule(self, obj, beat=None, args=()):
         """ TempoClock.schedule(callable, beat=None)
             Add a player / event to the queue """
 
@@ -151,7 +152,12 @@ class TempoClock:
 
         if beat > self.now():
 
-            self.queue.add(obj, beat)
+            self.queue.add(obj, beat, args)
+
+## Add any "historic" schedules to right now?
+##        else:
+##
+##            self.queue.add(obj,
         
         return
 
@@ -197,8 +203,13 @@ class TempoClock:
 
         for player in self.playing:
 
-                player.reset()
-                player.kill()
+            player.reset()
+            player.kill()
+
+        for item in self.items:
+            
+            try: item.stop()
+            except: pass                
 
         self.items = []
         self.queue.clear()
@@ -219,14 +230,14 @@ class Queue:
     def __repr__(self):
         return "\n".join([str(item) for item in self.data]) if len(self.data) > 0 else "[]"
 
-    def add(self, item, beat):
+    def add(self, item, beat, args=()):
 
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
 
         if beat < self.next():
 
-            self.data.append(QueueItem(item, beat))
+            self.data.append(QueueItem(item, beat, args))
 
             return
 
@@ -239,7 +250,7 @@ class Queue:
 
             if beat == self.data[i].beat:
 
-                self.data[i].add(item)
+                self.data[i].add(item, args)
 
                 break
 
@@ -247,7 +258,7 @@ class Queue:
 
             if beat > self.data[i].beat:
 
-                self.data.insert(i, QueueItem(item, beat))
+                self.data.insert(i, QueueItem(item, beat, args))
 
                 break            
 
@@ -266,52 +277,65 @@ class Queue:
             
 
 class QueueItem:
-    def __init__(self, obj, t):
+    priority_levels = [
+                        lambda x: isinstance(x, MethodCall),
+                        lambda x: not any([isinstance(attr, PlayerKey) for attr in x.attr.values()]) if isinstance(x, Player) else False,
+                        lambda x: isinstance(x, Player),
+                        lambda x: True
+                      ]
+
+    # priority_sorting = [None, None, (sorted, {'key' : lambda q: q.obj.num_key_references()}), None]
+                       
+    def __init__(self, obj, t, args=()):
 
         # Priority
-        self.players_high = []
-        self.players_low  = []
-        self.other        = []
+        self.events = [ [] for lvl in self.priority_levels ]
 
         self.beat = t
-        self.add(obj)
+        self.add(obj, args)
         
     def __repr__(self):
-        return "{}: {}".format(self.beat, self.players_high + self.players_low + self.other)
+        return "{}: {}".format(self.beat, list(self))
     
-    def add(self, obj):
-        
-        # High priority
+    def add(self, obj, args=()):
 
-        if isinstance(obj, Player):
+        q_obj = QueueObj(obj, args)
 
-            # High priority player objects *do not* contain PlayerKey attributes
+        for i, level in enumerate(self.priority_levels):
 
-            if any([isinstance(attr, PlayerKey) for attr in obj.attr.values()]):
+            if level(obj):
 
-                self.players_low.append(obj)
+                self.events[i].append(q_obj)
 
-            else:
+                #f = self.priority_sorting[i]
 
-                self.players_high.append(obj)
+                #if f is not None:
 
-        # None player objects have lowest priority
+                #    self.events[i] = f[0](self.events[i], **f[1])
 
-        else: self.other.append(obj)
+                #   print self.events[i], [q.obj.num_key_references() for q in self.events[i]]
 
+                break
         return
-    
+
     def call(self):
         """ Calls all items in queue slot """
         for item in self:
-            item.__call__()
+            item()
         return
-    
-    def __iter__(self):
-        
-        for item in self.players_high + self.players_low + self.other:
 
-            yield item
+    def __iter__(self):
+        return (item for level in self.events for item in level)
+        
+
+class QueueObj:
+    def __init__(self, obj, args=()):
+        self.obj = obj
+        self.args = args
+    def __repr__(self):
+        return repr(self.obj)
+    def __call__(self):
+        self.obj.__call__(*self.args)
 
 ###############################################################
 """ 

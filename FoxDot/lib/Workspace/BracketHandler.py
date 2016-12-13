@@ -29,6 +29,8 @@ class BracketHandler:
 
     def handle(self, event=None, insert=INSERT):
 
+        ret = None
+
         line, column = index(self.text.index(insert))
 
         # 1. Type a left bracket
@@ -51,7 +53,7 @@ class BracketHandler:
 
                 self.text.tag_remove(SEL, "1.0", END)
 
-                return "break"
+                ret = "break"
                 
             except:
                 
@@ -61,9 +63,11 @@ class BracketHandler:
 
             if next_char in whitespace + self.right_brackets:
 
-                self.text.insert(self.text.index(insert), self.all_brackets[event.char])
+                self.text.insert(self.text.index(insert), event.char + self.all_brackets[event.char])
 
-                self.text.mark_set(insert, index(line, column))
+                self.text.mark_set(insert, index(line, column + 1))
+
+                ret = "break"
 
         # 2. Type right bracket
         elif event.char in self.right_brackets:
@@ -74,7 +78,7 @@ class BracketHandler:
 
                 self.text.mark_set(insert, index(line, column + 1))
 
-                return "break"
+                ret = "break"
 
             # TODO - highlight the enclosed area
 
@@ -82,7 +86,7 @@ class BracketHandler:
         
         self.root.colour_line(line)
 
-        return
+        return ret
 
     def delete(self, insert=INSERT):
         line, column = index(self.text.index(insert))
@@ -94,54 +98,3 @@ class BracketHandler:
                 self.text.delete(index(line, column-1), index(line, column+1))
                 return True
         return False
-
-##    def handle2(self, event):
-##        """ Inserts and deletes enclosing brackets automatically """
-##
-##        # If a right bracket is typed and was auto added, delete it
-##
-##        if self.queue and event.char == self.queue[-1]:
-##
-##            line, column = index(self.text.index(INSERT))
-##
-##            if self.text.get(index(line, column)) == self.bracket_q[-1]:
-##    
-##                self.text.delete(index(line, column))
-##
-##            self.queue.pop(0)
-##
-##        # If a left bracket, automatically add the right
-##
-##        if event.char in self.left_brackets and self.text.get(self.text.index(INSERT)) in py_whitespace + self.left_brackets + self.right_brackets:
-##
-##            # Get the last word
-##
-##            self.get_last_word()
-##
-##            # Insert closed brackets
-##
-##            self.text.insert(self.text.index(INSERT), self.all_brackets[event.char])
-##
-##            # Move cursor back one place
-##
-##            line, column = index(self.text.index(INSERT))
-##
-##            self.text.mark_set("insert", "%d.%d" % (line, column - 1))
-##
-##            # Add to the stack of "open brackets"
-##
-##            self.bracket_q.append(self.all_brackets[event.char])
-##
-##        # Add originally typed bracket
-##
-##        self.text.insert(self.text.index(INSERT), event.char)
-##
-##        self.inbrackets = True
-##        
-##        # Update any colour
-##
-##        self.update(event)
-##
-##        return "break"
-##
-##        

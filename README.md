@@ -1,15 +1,14 @@
-FoxDot - Live Coding with Python v0.2.0
+FoxDot - Live Coding with Python v0.2.1
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.2.0 fixes and updates
+### v0.2.1 fixes and updates
 
-- Reorganised project structure. Samples and code are kept separate.
-- SuperCollider `OSCFunc.scd` now found in `/osc/` folder
-- `setup.py` now included for an easier install
-- (in progress) characters can have more than one sample attached to them. These are accessed by supplying a `buf` keyword argument.  
-- Python lists can be interpreted as FoxDot pattern when attached with a P prefix e.g. `P[1, 2, 3] + [0,2]` will return `P[1,4,3,3,2,5]` not `[1,2,3,0,2]`.
+- Syntax highlighting bugs fixed
+- Visual feedback for `shuffle`, `mirror`, and `rotate` methods for `play` SynthDef
+- SC3 Plugins disabled by default
+- Player Object dictionaries shallow copied before iteration to stop `RunTimeErrors` occurring 
 
 See `docs/changelog` for more
 
@@ -27,14 +26,15 @@ See `docs/changelog` for more
 #### Download and install
 
 1. Install Python 2.7 and SuperCollider 3
-1. Clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents.
-2. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`. Doing this allows you to import FoxDot into your own Python applications and means you can run it from anywhere by executing `python -m FoxDot` in your command prompt. 
+2. If you have pip installed (comes packed with Python) you can install FoxDot from the command prompt using the command `pip install FoxDot`
+1. Or you can clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`. You can find the installed files in `/lib/site-packages/FoxDot` folder of your Python installation.
+2. Optionally, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run the file via the command line, just use `python /path/to/__main__.py` or `python -m FoxDot` if you are in the root directory of the download.
 
 #### Startup
 
 1. Open SuperCollider
 2. Open the file `/FoxDot/osc/OSCFunc.scd` in SuperCollider and execute the contents. This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot.
-3. Run FoxDot using `python -m FoxDot`. If you haven't used the `setup.py` file, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run the file via the command line, just use `python __main__.py` or `python -m FoxDot` if you are in the root directory of the download.
+3. Run FoxDot using `python -m FoxDot`.
 
 #### Troubleshooting
 
