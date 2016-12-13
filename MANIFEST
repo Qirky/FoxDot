@@ -53,6 +53,7 @@ FoxDot\lib\SCLang\scsyndef\pads.scd
 FoxDot\lib\SCLang\scsyndef\play.scd
 FoxDot\lib\SCLang\scsyndef\pluck.scd
 FoxDot\lib\SCLang\scsyndef\pulse.scd
+FoxDot\lib\SCLang\scsyndef\quin.scd
 FoxDot\lib\SCLang\scsyndef\rave.scd
 FoxDot\lib\SCLang\scsyndef\rev.scd
 FoxDot\lib\SCLang\scsyndef\ripple.scd
@@ -63,6 +64,7 @@ FoxDot\lib\SCLang\scsyndef\scratch.scd
 FoxDot\lib\SCLang\scsyndef\snick.scd
 FoxDot\lib\SCLang\scsyndef\soprano.scd
 FoxDot\lib\SCLang\scsyndef\test.scd
+FoxDot\lib\SCLang\scsyndef\twang.scd
 FoxDot\lib\SCLang\scsyndef\varsaw.scd
 FoxDot\lib\SCLang\scsyndef\viola.scd
 FoxDot\lib\SCLang\scsyndef\zap.scd

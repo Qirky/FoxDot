@@ -25,29 +25,16 @@ See `docs/changelog` for more
 
 #### Download and install
 
-1. Install Python 2.7 and SuperCollider 3
-<<<<<<< HEAD
-2. If you have pip installed (comes packed with Python) you can install FoxDot from the command prompt using the command `pip install FoxDot`
-1. Or you can clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`. You can find the installed files in `/lib/site-packages/FoxDot` folder of your Python installation.
-2. Optionally, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run the file via the command line, just use `python /path/to/__main__.py` or `python -m FoxDot` if you are in the root directory of the download.
-=======
-2. If you have Python 2.7 correctly installed, you can use `pip install FoxDot` and ignore step 3.
-3. Clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents.
-4. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`.
-5. Installing FoxDot (as opposed to just downloading) allows you to import FoxDot into your own Python applications and means you can run it from anywhere by executing `python -m FoxDot` in your command prompt. 
->>>>>>> origin/master
+1. Install from the command line using `pip install FoxDot`
+2. *Or* you can clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`. You can find the installed files in `/lib/site-packages/FoxDot` folder of your Python installation.
+3. Optionally, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. 
+
 
 #### Startup
 
 1. Open SuperCollider
-<<<<<<< HEAD
 2. Open the file `/FoxDot/osc/OSCFunc.scd` in SuperCollider and execute the contents. This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot.
 3. Run FoxDot using `python -m FoxDot`.
-=======
-2. Open the file `/FoxDot/osc/OSCFunc.scd` in SuperCollider - this will be found in your download folder or in `Python/lib/site-package/` depending on how you're using FoxDot.
-4. Evaluate the contents of OSCFunc.scd - This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot.
-3. Run FoxDot using `python -m FoxDot`. If you haven't used the `setup.py` file, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run the file via the command line, just use `python __main__.py` or `python -m FoxDot` if you are in the root directory of the download.
->>>>>>> origin/master
 
 #### Troubleshooting
 
@@ -102,6 +89,23 @@ sn >> play("  o ")
 ```
 
 Grouping characters in round brackets laces the pattern so that on each play through of the sequence of samples, the next character in the group's sample is played. The sequence `(xo)---` would be played back as if it were entered `x---o---`. Characters in square brackets are played twice as fast (half the duration) of one character by itself, and characters in curly brackets (`{}`) are played in the same time span as one character. Example: `{oo}` would play two snare hits at a quarter beat each but `{ooo}` would play three snare hits at 3/8 beats each.
+
+## Scheduling Player methods
+
+You can perform actions like shuffle, mirror, and rotate on Player Objects just by calling the appropriate method.
+
+```python
+bd >> play("x o  xo ")
+
+# Shuffle the contents of bd
+bd.shuffle()
+```
+
+You can schedule these methods by calling the `every` method, which takes a list of durations (in beats), the name of the method as a string, and any other arguments. The following syntax mirrors the string of sample characters after 6 beats, then again 2 beats  later and also shuffles it every 8 beats. 
+
+```python
+bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
+```
 
 ## Writing your own Synth Definitions
 
