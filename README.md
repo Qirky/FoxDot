@@ -26,15 +26,28 @@ See `docs/changelog` for more
 #### Download and install
 
 1. Install Python 2.7 and SuperCollider 3
+<<<<<<< HEAD
 2. If you have pip installed (comes packed with Python) you can install FoxDot from the command prompt using the command `pip install FoxDot`
 1. Or you can clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`. You can find the installed files in `/lib/site-packages/FoxDot` folder of your Python installation.
 2. Optionally, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run the file via the command line, just use `python /path/to/__main__.py` or `python -m FoxDot` if you are in the root directory of the download.
+=======
+2. If you have Python 2.7 correctly installed, you can use `pip install FoxDot` and ignore step 3.
+3. Clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents.
+4. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`.
+5. Installing FoxDot (as opposed to just downloading) allows you to import FoxDot into your own Python applications and means you can run it from anywhere by executing `python -m FoxDot` in your command prompt. 
+>>>>>>> origin/master
 
 #### Startup
 
 1. Open SuperCollider
+<<<<<<< HEAD
 2. Open the file `/FoxDot/osc/OSCFunc.scd` in SuperCollider and execute the contents. This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot.
 3. Run FoxDot using `python -m FoxDot`.
+=======
+2. Open the file `/FoxDot/osc/OSCFunc.scd` in SuperCollider - this will be found in your download folder or in `Python/lib/site-package/` depending on how you're using FoxDot.
+4. Evaluate the contents of OSCFunc.scd - This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot.
+3. Run FoxDot using `python -m FoxDot`. If you haven't used the `setup.py` file, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. To run the file via the command line, just use `python __main__.py` or `python -m FoxDot` if you are in the root directory of the download.
+>>>>>>> origin/master
 
 #### Troubleshooting
 
