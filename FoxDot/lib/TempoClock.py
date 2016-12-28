@@ -275,7 +275,10 @@ class Queue:
         return
 
     def pop(self):
-        return self.data.pop() if len(self.data) > 0 else []
+        if len(self.data) > 0:
+            return self.data.pop()
+        else:
+            return list()
 
     def next(self):
         return self.data[-1].beat if len(self.data) > 0 else MAXINT
