@@ -1,6 +1,7 @@
 # demo and debug folders
-demos/*
+myTests/*
 FoxDot/lib/debug/*
+FoxDot/lib/Settings/conf.py
 build/*
 dist/*
 

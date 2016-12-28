@@ -47,13 +47,12 @@ with SynthDef("growl") as growl:
     growl.env = Env.env()
 
 with SynthDef("bass") as bass:
-    bass.amp  = bass.amp * 2
+    bass.amp  = bass.amp
     bass.freq = bass.freq / 4
     bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=0.85, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
     bass.env  = Env.perc(curve="'lin'")
 
 with SynthDef("dirt") as dirt:
-    # dirt.amp  = dirt.amp * 1.2
     dirt.freq = dirt.freq / 4
     dirt.osc  = LFSaw.ar(dirt.freq, mul=dirt.amp) + VarSaw.ar(dirt.freq + 1, width=0.85, mul=dirt.amp) + SinOscFB.ar(dirt.freq - 1, mul=dirt.amp/2)
     dirt.env  = Env.perc()
@@ -127,6 +126,25 @@ with SynthDef("pluck") as pluck:
     pluck.osc  = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
     pluck.osc  = pluck.osc * XLine.ar(pluck.amp, pluck.amp/10000, pluck.sus * 4) * 0.3
     pluck.env  = Env.ramp(sus=pluck.sus*1.5)
+
+with SynthDef("spark") as synth:
+    freq = instance('freq')
+    synth.amp  = synth.amp + 0.00001
+    synth.verb = synth.verb + 0.1
+    synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
+    synth.osc  = LFSaw.ar(freq * 1.002, iphase=Saw.ar(0.1)) * 0.3 + LFSaw.ar(freq, iphase=Saw.ar(0.1)) * 0.3
+    synth.osc  = synth.osc * Line.ar(synth.amp, synth.amp/10000, synth.sus * 1.5) * 0.3
+    synth.env  = Env.ramp(sus=synth.sus*2)
+spark = synth
+
+with SynthDef("blip") as synth:
+    freq = instance('freq')
+    synth.amp  = synth.amp + 0.00001
+    synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
+    synth.osc  = (LFCub.ar(freq * 1.002, iphase=1.5) + LFTri.ar(freq, iphase=Line.ar(2,0,0,2)) * 0.3) * Blip.ar(freq / 2, synth.rate)
+    synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 2) * 0.3
+    synth.env  = Env.ramp(sus=synth.sus*2.5)
+blip = synth
 
 
 with SynthDef("ripple") as ripple:

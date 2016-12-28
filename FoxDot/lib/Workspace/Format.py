@@ -17,7 +17,30 @@ dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
 
 # RegEx Group 2
-re_list = re.compile(r"P?\[.*?\]")
+def re_list(string, br="[]"):
+    new = ""
+    nested = False
+    n, m = 0, 0
+    while n < len(string):
+        char = string[n]
+        if char == br[0]:
+            if nested is False:
+                nested = True
+                m = n
+                n += 1
+            else:
+                value = re_list(string[n + 1:])
+                n += len(value) + 1
+        elif char == br[1]:
+            return string[m:n+1]
+        else:
+            n += 1
+
+def re_pat(string):
+    r = r"P?" + re_list(string)
+    for char in "[]()":
+        r = r.replace(char,"\\" + char)
+    return re.search(r, string)
 
 def findstyles(line, *args):
     """ Finds any locations of any regex and returns the name

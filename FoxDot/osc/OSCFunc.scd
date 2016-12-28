@@ -1,6 +1,6 @@
 (
 s.options.blockSize = 128;
-s.options.memSize = 65536;
+s.options.memSize = 131072;
 s.boot;
 
 OSCFunc(
@@ -11,7 +11,6 @@ OSCFunc(
 		// Get local filename
 
 		fn = msg[1].asString;
-		fn.postln;
 
 		// Add SynthDef to file
 

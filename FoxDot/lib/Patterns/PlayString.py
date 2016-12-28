@@ -96,6 +96,9 @@ class PCHAR:
     def __init__(self, char, dur=1):
         self.char = char
         self.dur  = dur
+    def __iter__(self):
+        for x in [self]:
+            yield self
     def __len__(self):
         return 1
     def __str__(self):

@@ -35,6 +35,9 @@ class Player(Repeatable):
     # Used for visual feedback
     bang_kwargs = {}
 
+    keywords   = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay', 'blur', 'amplify', 'scale', 'bpm')
+    Attributes = keywords + ('sus', 'bits', 'chop', 'rate', 'scrub', 'pan', 'echo', 'amp', 'fmod', 'buf')
+    
     metro = None
     server = None
 
@@ -91,8 +94,6 @@ class Player(Repeatable):
         # Keyword arguments that are used internally
 
         self.frequency_mod = [0]
-
-        self.keywords = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay', 'blur', 'amplify', 'scale')
         self.scale = None
         
         # List the internal variables we don't want to send to SuperCollider
@@ -133,34 +134,59 @@ class Player(Repeatable):
     # --- Startup methods
 
     def reset(self):
+
+        # --- SuperCollider Keywords
+
+        # Left-Right panning (-1,1)
+        self.pan     = 0
+
+        # Sustain and blur (aka legato)
+        self.sus     = 1
+
+        # Amplitude
+        self.amp     = 1
+
+        # Rate - varies between SynthDef
+        self.rate    = 1
+        
+        # Audio sample buffer number
+        self.buf     = 0
+
+        # Echo amount
+        self.echo    = 0
+
+        self.fmod   =  0
+
+        # --- FoxDot Keywords
+        
         # Duration of notes
         self.dur     = 0.5 if self.synthdef is SamplePlayer else 1
         self.old_pattern_dur = self.old_dur = self.attr['dur']
         
         self.offset  = 0
+
         self.delay   = 0
+
         # Degree of scale / Characters of samples
-        self.degree  = 0
+
+        self.degree  = " " if self.synthdef is SamplePlayer else 0
+
         # Octave of the note
         self.oct     = 5
-        # Amplitude
-        self.amp     = 1
+
+        # Amplitude mod
         self.amplify = 1
-        # Left-Right panning (-1,1)
-        self.pan     = 0
-        # Sustain and blur (aka legato)
-        self.sus     = 1
+        
+        # Legato
         self.blur    = 1
-        # Rate - varies between SynthDef
-        self.rate    = 1
-        # Audio sample buffer number
-        self.buf     = 0
-        # Echo amount
-        self.echo    = 0
-        #self.bpm = ...
+        
+        # Tempo
+        self.bpm     = None 
+
         # Frequency and modifier
         self.freq   =  0
-        self.fmod   =  0
+
+        self.offset = 0
         
         self.modf = dict([(key, [0]) for key in self.attr])
         return self
@@ -180,6 +206,8 @@ class Player(Repeatable):
         if self.dur_updated():
 
             self.event_n, self.event_index = self.count()
+
+            self.old_dur = self.attr['dur']
         
         # Get the current state
 
@@ -196,6 +224,12 @@ class Player(Repeatable):
         # Get next occurence
 
         dur = float(self.event['dur'])
+
+        # If using custom bpm
+
+        if self.event['bpm'] is not None:
+
+            dur *= (float(self.metro.bpm) / float(self.event['bpm']))
 
         offset = float(self.event["offset"]) - self.last_offset
 
@@ -278,7 +312,7 @@ class Player(Repeatable):
 
         # Update the attribute values
 
-        special_cases = ["scale","root","dur"]
+        special_cases = ["scale", "root", "dur"]
 
         # Set the degree
 
@@ -302,8 +336,11 @@ class Player(Repeatable):
         # If only duration is specified, set sustain to that value also
 
         if "dur" in kwargs:
+            
             self.dur = kwargs["dur"]
+
             if "sus" not in kwargs:
+
                 self.sus = self.attr['dur']
 
         if synthdef is SamplePlayer: pass
@@ -350,9 +387,11 @@ class Player(Repeatable):
         # If a Pattern TimeVar
         if isinstance(self.attr['dur'], TimeVar.Pvar):
             r = asStream(self.attr['dur'].now().data)
+            
         # If duration is a TimeVar
         elif isinstance(self.attr['dur'], TimeVar.var):
             r = asStream(self.attr['dur'].now())
+            
         else:
             r = asStream(self.attr['dur'])
 
@@ -458,9 +497,9 @@ class Player(Repeatable):
 
     def stutter(self, n=2):
         """ Plays the current note n-1 times over the current durations """
-
-        if self.metro.solo == self: # TODO this syntax is ambiguous
-
+    
+        if self.metro.solo == self and n >  0:
+            
             size = self.largest_attribute()
 
             n = int(n)
@@ -487,6 +526,13 @@ class Player(Repeatable):
                         self.metro.schedule(self.bang, self.metro.now() + delay)
                     
         return self
+
+    # TODO
+    def spin(self, amount=4):
+        # Stutter but with pan all around
+        return self
+
+    # --- Misc. Standard Object methods
 
     def __int__(self):
         return int(self.now('degree'))
@@ -535,7 +581,8 @@ class Player(Repeatable):
     def largest_attribute(self):
         """ Returns the length of the largest nested tuple in the attr dict """
 
-        exclude = 'degree' if self.synthdef is SamplePlayer else None
+        # exclude = 'degree' if self.synthdef is SamplePlayer else None
+        exclude = None
 
         size = len(self.attr['freq'])
 
@@ -634,11 +681,29 @@ class Player(Repeatable):
 
         if self.synthdef is SamplePlayer:
 
-            # Get the buffer number to play
-            self.event['buf'] = BufferManager[self.event['degree'].char].bufnum(self.event['buf'])
+            event_buf = list(range(len(self.event['degree'])))
+            event_dur = self.event['dur']
 
-            # Apply any duration ratio changes
-            self.event['dur'] *= self.event['degree'].dur
+            for i, bufchar in enumerate(self.event['degree']):
+
+                char = BufferManager[bufchar]
+
+                # Get the buffer number to play
+                buf_mod_index = modi(self.event['buf'], i)
+
+                event_buf[i] = char.bufnum(buf_mod_index)
+
+                # Apply any duration ratio changes
+
+                try:
+                    
+                    self.event['dur'] *= bufchar.dur
+
+                except:
+
+                    pass
+
+            self.event['buf'] = P(event_buf)
 
         return self
 
@@ -678,7 +743,7 @@ class Player(Repeatable):
                     message += [key, float(val)]
 
                 except:
-
+                    
                     print("Error generating OSC message for '{}'. Problem with {}".format(self.synthdef, key))
 
         return message
@@ -688,6 +753,7 @@ class Player(Repeatable):
 
         size = self.largest_attribute()
         banged = False
+        sent_messages = []
 
         for i in range(size):
 
@@ -707,8 +773,14 @@ class Player(Repeatable):
                     self.metro.schedule(self.bang, self.metro.now() + delay)
                     
                 else:
-                
-                    self.server.sendNote(str(self.synthdef), osc_msg)
+
+                    # Don't send duplicate messages
+
+                    if osc_msg not in sent_messages:
+                    
+                        self.server.sendNote(str(self.synthdef), osc_msg)
+
+                        sent_messages.append(osc_msg)
 
                     if not banged:
 
@@ -824,24 +896,28 @@ class Player(Repeatable):
         if self.synthdef == SamplePlayer:
             self._replace_string(PlayString(self.playstring).shuffle())
         else:
-            #self._replace_degree(self.attr['degree'].shuffle())
-            self.degree = self.attr['degree'].shuffle()
+            self._replace_degree(self.attr['degree'].shuffle())
+            # self.degree = self.attr['degree'].shuffle()
         return self
 
     def mirror(self):
         if self.synthdef == SamplePlayer:
             self._replace_string(PlayString(self.playstring).mirror())
         else:
-            #self._replace_degree(self.attr['degree'].mirror())
-            self.degree = self.attr['degree'].mirror()
+            self._replace_degree(self.attr['degree'].mirror())
+            #self.degree = self.attr['degree'].mirror()
         return self
 
     def rotate(self, n=1):
         if self.synthdef == SamplePlayer:
             self._replace_string(PlayString(self.playstring).rotate(n))
         else:
-            #self._replace_degree(self.attr['degree'].rotate(n))
-            self.degree = self.attr['degree'].rotate(n)
+            self._replace_degree(self.attr['degree'].rotate(n))
+            #self.degree = self.attr['degree'].rotate(n)
+        return self
+
+    def splice(self):
+        # [0,1,2,3,4] -> [0,3,2,1,4] (rotate every other val)
         return self
 
     def _replace_string(self, new_string):

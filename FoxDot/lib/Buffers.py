@@ -31,11 +31,50 @@ nonalpha = {"&" : "ampersand",
             "~" : "tilde",
             "\\" :"backslash" }
 
+DESCRIPTIONS = { 'a' : "Unknown",
+                 'b' : "Unknown",
+                 'c' : "Unknown",
+                 'd' : "Unknown",
+                 'e' : "Unknown",
+                 'f' : "Wood",
+                 'g' : "Unknown",
+                 'h' : "Unknown",
+                 'i' : "Unknown",
+                 'j' : "Unknown",
+                 'k' : "Unknown",
+                 'l' : "Unknown",
+                 'm' : "Toms",
+                 'n' : "Unknown",
+                 'o' : "Snare drum",
+                 'p' : "Unknown",
+                 'q' : "Unknown",
+                 'r' : "Metal",
+                 's' : "Shaker",
+                 't' : "Cowbell",
+                 'u' : "Unknown",
+                 'v' : "Unknown",
+                 'w' : "Unknown",
+                 'x' : "Bass drum",
+                 'y' : "Unknown",
+                 'z' : "Unknown",
+                 '-' : "Hi hat closed",
+                 '=' : "Hi hat open",
+                 '*' : "Clap",
+                 '~' : "Ride cymbal",
+                 '^' : "'Donks'",
+                 '#' : "Crash",
+                 '+' : "Clicks",
+                 '@' : "Computer" }
+                 
+                 
+
 class BufChar:
     def __init__(self, char):
         self.char    = char
         self.buffers = {}
         self.files   = []
+    def __str__(self):
+        return "BufChar '{}'".format(self.char)
     def addbuffer(self, fn, num):
         self.buffers[fn] = num
         self.files.append(fn)
@@ -43,7 +82,7 @@ class BufChar:
         for fn, buf in self.buffers.items():
             yield fn, buf
     def bufnum(self, n):
-        return self.buffers[self.files[n % len(self.files)]]
+        return self.buffers[self.files[n % len(self.files)]] if len(self.files) else 0
 
 class BufferManager:
     def __init__(self):
@@ -121,6 +160,8 @@ class BufferManager:
         self.nil.addbuffer(None, 0)
 
     def __getitem__(self, key):
+        if hasattr(key, 'char'):
+            key = key.char
         return self.symbols.get(key, self.nil)
 
     def __call__(self, server):

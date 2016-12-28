@@ -120,7 +120,7 @@ class _whenLibrary:
 
             if len(self.library) == 0:
 
-                self.thread_start()                
+                self.start_thread()                
             
             for stmt in self.library:
 

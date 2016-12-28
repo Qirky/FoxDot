@@ -143,12 +143,18 @@ class metaPattern(object):
         return Pattern(asStream(other).pipe(self))
     
     #: Comparisons
-##    def __eq__(self, other): return Peq(self, other)
-##    def __ne__(self, other): return Pne(self, other)
-##    def __gt__(self, other): return Pgt(self, other)
-##    def __ge__(self, other): return Pge(self, other)
-##    def __lt__(self, other): return Plt(self, other)
-##    def __le__(self, other): return Ple(self, other)
+    def __eq__(self, other):
+        return PEq(self, other)
+    def __ne__(self, other):
+        return PNe(self, other)
+    def __gt__(self, other):
+        return False
+    def __ge__(self, other):
+        return self == other
+    def __lt__(self, other):
+        return False
+    def __le__(self, other):
+        return self == other
 
     #: Methods for strings as pattern
 

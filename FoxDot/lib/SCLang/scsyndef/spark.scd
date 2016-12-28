@@ -1,12 +1,16 @@
-(SynthDef.new(\dab,
+(SynthDef.new(\spark,
 {|vib=0, echo=0, rate=1, delay=0, sus=1, limit=1, bits=24, hpf=0, pan=0, scrub=0, verb=0.25, amp=1, freq=0, buf=0, echoOn=0, room=0.3, chop=0, slide=0, grain=0, fmod=0, lpf=20000, slidefrom=1|
 var osc, env;
 amp = amp / 2;
 freq = freq + fmod;
 freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
 freq = Vibrato.kr(freq, rate: vib);
-osc=(HPF.ar(Saw.ar((freq / 4), mul: (amp / 2)), 2000) + VarSaw.ar((freq / 4), mul: amp, width: EnvGen.ar(Env.perc(level: 0.5,curve: -5,attackTime: (sus / 20),releaseTime: (sus / 4)), doneAction: 0)));
-env=EnvGen.ar(Env(levels: [0, amp, 0],curve: 'lin',times: [(sus * 0.25), (sus * 1)]), doneAction: 2);
+amp=(amp + 1e-05);
+verb=(verb + 0.1);
+freq=[freq, (freq + LFNoise2.ar(50).range(-2, 2))];
+osc=((LFSaw.ar((freq * 1.002), iphase: Saw.ar(0.1)) * 0.3) + (LFSaw.ar(freq, iphase: Saw.ar(0.1)) * 0.3));
+osc=((osc * Line.ar(amp, (amp / 10000), (sus * 1.5))) * 0.3);
+env=EnvGen.ar(Env(levels: [(amp * 1), (amp * 1)],curve: 'step',times: (sus * 2)), doneAction: 2);
 osc=HPF.ar(osc, hpf);
 osc=LPF.ar(osc, (lpf + 1));
 osc=(osc * LFPulse.ar((chop / sus)));

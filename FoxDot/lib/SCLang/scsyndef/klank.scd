@@ -12,6 +12,7 @@ osc=HPF.ar(osc, hpf);
 osc=LPF.ar(osc, (lpf + 1));
 osc=(osc * LFPulse.ar((chop / sus)));
 osc=(osc + (CombL.ar(osc, delaytime: echo, maxdelaytime: 2) * echoOn));
+osc=Decimator.ar(osc, rate: 44100, bits: bits);
 
 osc = osc * env;
 osc = Limiter.ar(osc, level: limit);

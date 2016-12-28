@@ -14,6 +14,7 @@ from TimeVar import var
 from Patterns.Operations import modi
 from time import sleep, time
 from sys import maxint as MAXINT
+from traceback import format_exc as error_stack
 import threading
 import Code
 line = "\n"
@@ -60,11 +61,6 @@ class TempoClock:
     def bar_length(self):
         """ Returns the length of a bar in terms of beats """
         return (float(self.meter[0]) / self.meter[1]) * 4
-    
-
-##    def BeatDuration(self):
-##        """ Returns the length in seconds of one beat """
-##        return 60.0 / float(self.bpm)
 
     def beat(self, n=1):
         """ Returns the length of n beats in seconds """
@@ -98,17 +94,21 @@ class TempoClock:
 
         while self.ticking:
 
-            # Evaluate when_statements at EVERY possible opportunity
-
-            # self.when_eval()            
+            # Evaluate when_statements at EVERY possible opportunity           
 
             if self.now() >= self.queue.next():
 
                 # Call any item in the popped event
 
-                for item in self.queue.pop():    
+                for item in self.queue.pop():
 
-                    item.__call__()
+                    try:
+
+                        item.__call__()
+
+                    except:
+
+                        print(error_stack())
 
                     # Test if any changes caused by item.__call__() affect when statements
 
@@ -157,7 +157,7 @@ class TempoClock:
 ## Add any "historic" schedules to right now?
 ##        else:
 ##
-##            self.queue.add(obj,
+##            self.queue.add(obj?)
         
         return
 
@@ -196,6 +196,11 @@ class TempoClock:
     def reset(self):
         self.time = 0
         self.mark = time()
+        return
+
+    def shift(self, n):
+        """ Offset the clock time """
+        self.time += n
         return
 
     def clear(self):

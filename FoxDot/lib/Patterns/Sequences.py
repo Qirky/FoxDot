@@ -85,9 +85,9 @@ class PStep(Pattern):
         self.make()
 Pstep = PStep
 
-class PSum(Pattern):
+class PFit(Pattern):
     """
-        PSum(n, total) -> Pattern of length n that sums to equal total
+        PFit(n, total) -> Pattern of length n that sums to equal total
 
         e.g. PSum(3,8) -> [3,3,2]
              PSum(5,4) -> [1,0.75,0.75,0.75,0.75]
@@ -115,7 +115,7 @@ class PSum(Pattern):
             
         self.make()
 
-Psum = PSum #: Alias for PSum
+Pfit = PFit #: Alias for PSum
 
 class PRange(Pattern):
 
@@ -225,7 +225,7 @@ class PZip(Pattern):
             p.append(asStream(pat))
             l.append(len(p[-1]))
         length = op.LCM(*l)
-        self.data = zip(*[p[i].stretch(length) for i in range(len(p))])
+        self.data = asStream(zip(*[p[i].stretch(length) for i in range(len(p))]))
 
 
 class PZip2(Pattern):
@@ -233,7 +233,7 @@ class PZip2(Pattern):
         length = op.LCM(len(pat1), len(pat2))
         self.data = []
         i = 0
-        while i < min(length, 32):
+        while i < length:
             a, b = op.modi(pat1,i), op.modi(pat2,i)
             if rule(a, b):
                 self.data.append((a,b))
@@ -242,22 +242,39 @@ class PZip2(Pattern):
 
 ### Patterns used for calculating rhythms
 
+class PEuclid(Pattern):
+    def __init__(self, n, k):
+        self.data = op.EuclidsAlgorithm(n, k)
+
 class PDur(Pattern):
-    def __init__(self, seq, dur=0.5):
-        """ Pat should be a series of 1 and 0 values, first value is assumed 1 """
+    def __init__(self, n, k, dur=0.25):
+        """ Calculate durations based on Euclidean rhythms """
+
+        pulses = asStream(n)
+        steps  = asStream(k)
+
+        size = op.LCM(len(pulses), len(steps))
+        
         self.data = []
-        if type(seq) is str:
-            seq = [int(x!=" ") for x in seq]
-        i = 0
-        count = 0
-        while i < len(seq):
-            j = seq[i]
-            if j == 0:
-                count += 1
-            if j == 1:
-                count += 1
-            i += 1
-        self.make()
+
+        for i in range(size):
+
+            n = pulses[i]
+            k = steps[i]
+            
+            data = op.EuclidsAlgorithm(n, k)            
+
+            count, new = 1, []
+
+            for item in data[1:]:
+                if item == 1:
+                    new.append(count)
+                    count = 1
+                else:
+                    count += 1
+            new.append(count)       
+                    
+            self.data += [count * dur for count in new]
         
 
 class PRhythm(Pattern):

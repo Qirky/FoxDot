@@ -84,24 +84,10 @@ PPow2 = POperand(rPow)
 
 PGet = POperand(Get)
 
+# Pattern comparisons
+PEq = lambda a, b: (all([a[i]==b[i] for i in range(len(a))]) if len(a) == len(b) else False) if a.__class__ == b.__class__ else False
+PNe = lambda a, b: (any([a[i]!=b[i] for i in range(len(a))]) if len(a) == len(b) else True) if a.__class__ == b.__class__ else True
 
-
-
-# --- Cases
-#
-#       [0,1] + 2 = [2,3]
-#       (0,1) + 2 = (2,3)
-#
-#   [0,1] + [2,3] = [2,4]
-#   [0,1] + (2,3) = [(2,3),(3,4)] -> [0,1] + [(2,3)] = [(2,3),(3,4)]
-#
-#   (0,1) + (2,3) = (2,4)
-#   (0,1) + [2,3] = [(2,3),(3,4)]
-#
-#  [(0,1),2] + 3  = [(3,4),5]
-#
-#
-#
 
 #: Misc. Operations
 
@@ -119,6 +105,26 @@ def LCM(*args):
         X[i] += args[i]        
 
     return X[0]
+
+def EuclidsAlgorithm(n, k):
+    data = [[1 if i < n else 0] for i in range(k)]
+    
+    while True:
+        
+        k = k - n
+
+        if k <= 1:
+            break
+
+        elif k < n:
+            n, k = k, n
+
+        for i in range(n):
+            data[i] += data[-1]
+            del data[-1]
+    
+    return [x for y in data for x in y]
+
 
 def patternclass(a, b):
     return Base.PGroup if isinstance(a, Base.PGroup) and isinstance(b, Base.PGroup) else Base.Pattern

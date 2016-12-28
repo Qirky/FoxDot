@@ -1,14 +1,15 @@
-FoxDot - Live Coding with Python v0.2.1
+FoxDot - Live Coding with Python v0.2.2
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.2.1 fixes and updates
+### v0.2.2 fixes and updates
 
-- Syntax highlighting bugs fixed
-- Visual feedback for `shuffle`, `mirror`, and `rotate` methods for `play` SynthDef
-- SC3 Plugins disabled by default
-- Player Object dictionaries shallow copied before iteration to stop `RunTimeErrors` occurring 
+- `PDur` added: a pattern that implements Euclidean Rhythms
+- Player attributes can be manipulated using the `Player.every` method
+- Errors caught and displayed in FoxDot console instead of crashing
+- Can set different tempi for Players using the `bpm` keyword 
+- Sample Player objects can play multiple samples together by grouping them as a PGroup but cannot feature square brackets
 
 See `docs/changelog` for more
 
@@ -107,32 +108,7 @@ You can schedule these methods by calling the `every` method, which takes a list
 bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 ```
 
-## Writing your own Synth Definitions
 
-FoxDot can access any SynthDef stored on the SuperCollider server, but it needs to know it's there. If you have already written a SynthDef in SuperCollider and named it `\mySynth` then you just create a SynthDef instance using FoxDot like so:
-
-``` python
-mySynth = SynthDef("mySynth")
-```
-
-Using the same variable name in FoxDot as in SuperCollider for your SynthDef is a good idea to avoid confusion. If you want to write (or edit) your own SynthDef during run-time in FoxDot you can use a SuperCollider API by importing the `SCLang` module. All FoxDot SynthDef objects inherit the base-class behaviour, such as low- and high-pass filters and vibrato, but these can be overridden or updated easily. If you want to know more about digital sound processing and SynthDef creation, check out the [SuperCollider documentation](http://doc.sccode.org/Classes/SynthDef.html). Below is an example of creating one in FoxDot:
-
-``` python
-# Import module for writing SCLang code from Python
-from SCLang import *
-
-# Create a SynthDef named 'example' (using the same variable name as the SynthDef name is a good idea)
-example = SynthDef("example")				
-
-# Create the oscillator (osc) using a sine wave
-example.osc = SinOsc.ar(ex.freq)	
-
-# And give it a percussive sound envelope (env)
-example.env = Env.perc()					
-
-# Finally, store it!
-example.add()							
-```
 
 ## Player Object Keywords
 

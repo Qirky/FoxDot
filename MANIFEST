@@ -35,6 +35,7 @@ FoxDot\lib\SCLang\SynthDefs.py
 FoxDot\lib\SCLang\__init__.py
 FoxDot\lib\SCLang\scsyndef\bass.scd
 FoxDot\lib\SCLang\scsyndef\bell.scd
+FoxDot\lib\SCLang\scsyndef\blip.scd
 FoxDot\lib\SCLang\scsyndef\bug.scd
 FoxDot\lib\SCLang\scsyndef\charm.scd
 FoxDot\lib\SCLang\scsyndef\creep.scd
@@ -63,6 +64,7 @@ FoxDot\lib\SCLang\scsyndef\scatter.scd
 FoxDot\lib\SCLang\scsyndef\scratch.scd
 FoxDot\lib\SCLang\scsyndef\snick.scd
 FoxDot\lib\SCLang\scsyndef\soprano.scd
+FoxDot\lib\SCLang\scsyndef\spark.scd
 FoxDot\lib\SCLang\scsyndef\test.scd
 FoxDot\lib\SCLang\scsyndef\twang.scd
 FoxDot\lib\SCLang\scsyndef\varsaw.scd
@@ -137,9 +139,11 @@ FoxDot\snd\v\lower\0.wav
 FoxDot\snd\v\upper\0.wav
 FoxDot\snd\w\lower\0.wav
 FoxDot\snd\w\upper\0.wav
-FoxDot\snd\x\lower\0.wav
-FoxDot\snd\x\lower\1.wav
-FoxDot\snd\x\upper\0.wav
+FoxDot\snd\x\lower\bd0.wav
+FoxDot\snd\x\lower\bd1.wav
+FoxDot\snd\x\lower\bd2.wav
+FoxDot\snd\x\upper\bd0_up.wav
+FoxDot\snd\x\upper\bd1_up.wav
 FoxDot\snd\y\lower\0.wav
 FoxDot\snd\y\upper\0.wav
 FoxDot\snd\z\lower\0.wav

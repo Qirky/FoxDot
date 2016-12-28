@@ -18,6 +18,7 @@ from TextBox import ThreadedText
 
 from ..Settings import FONT, FOXDOT_ICON
 import os
+import re
 
 # Code execution
 from ..Code import execute
@@ -701,9 +702,9 @@ class workspace:
                 
             execute( code_str )
 
-        except:
+        except Exception as e:
 
-            return
+            print e
 
     def highlight(self, start, end, colour="Red"):
         """ Highlights an area of text """
@@ -927,7 +928,7 @@ class workspace:
 
             return
 
-    def replace_re(self, line, re_pattern=re_list, new=""):
+    def replace_re(self, line, new=""):
         """ Replaces text on a specified line and updates the IDE """
         try:
 
@@ -939,13 +940,11 @@ class workspace:
             contents = self.text.get(a, b)
 
             # Search using RegEx
-
-            match = re_pattern.search(contents)
+            match = re_pat(contents)
 
             if match:
-                
-                # Find the part to replace
 
+                # Find the part to replace
                 i = match.start()
                 j = match.end()
                 a = index(line, i)

@@ -50,25 +50,16 @@ FoxDotCode.namespace=globals()
 
 """ Preset PlayerObjects """
 
-alphabet = 'abcdefghijklmnopqrstuvwxyz'
-numbers  = '0123456789'
-
-# 1 Letter Player Objects
-
-for char in alphabet:
-
-    FoxDotCode.namespace[char] = Player()
-
-# 2 Letter Player Objects
+alphabet = list('abcdefghijklmnopqrstuvwxyz')
+numbers  = list('0123456789') + [""]
 
 for char1 in alphabet:
 
     for char2 in alphabet + numbers:
 
-        name = char1+char2
+        FoxDotCode.namespace[char1 + char2] = Player()
 
-        FoxDotCode.namespace[name] = Player()
-
+""" List of Patterns """
 
 PatternTypes = []
 for pattern_name in sorted(classes(Sequences)):

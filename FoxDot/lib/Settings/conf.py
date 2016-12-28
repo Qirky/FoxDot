@@ -3,9 +3,9 @@
 ADDRESS='localhost'
 PORT=57110
 PORT2=57120
-SUPERCOLLIDER='C:/Program Files (x86)/SuperCollider-3.6.6/'
+SUPERCOLLIDER=''
 FONT='Consolas'
-SC3PLUGINS=False
+SC3PLUGINS=True
 MAX_CHANNELS=1
 
 # Editor Colours

@@ -5,7 +5,6 @@ amp = amp / 2;
 freq = freq + fmod;
 freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
 freq = Vibrato.kr(freq, rate: vib);
-amp=(amp * 2);
 freq=(freq / 4);
 osc=((LFTri.ar(freq, mul: amp) + VarSaw.ar(freq, width: 0.85, mul: amp)) + SinOscFB.ar(freq, mul: (amp / 2)));
 env=EnvGen.ar(Env.perc(level: amp,curve: 'lin',attackTime: 0.01,releaseTime: sus), doneAction: 2);
@@ -13,6 +12,7 @@ osc=HPF.ar(osc, hpf);
 osc=LPF.ar(osc, (lpf + 1));
 osc=(osc * LFPulse.ar((chop / sus)));
 osc=(osc + (CombL.ar(osc, delaytime: echo, maxdelaytime: 2) * echoOn));
+osc=Decimator.ar(osc, rate: 44100, bits: bits);
 
 osc = osc * env;
 osc = Limiter.ar(osc, level: limit);
