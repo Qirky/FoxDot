@@ -408,7 +408,7 @@ class workspace:
         self.text.insert(self.text.index(INSERT), self.root.clipboard_get())
 
         # Update the IDE colours
-        self.update(event)
+        self.update_all()
         
         return "break"
 

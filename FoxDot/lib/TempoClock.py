@@ -13,8 +13,8 @@ from Patterns import asStream
 from TimeVar import var
 from Patterns.Operations import modi
 from time import sleep, time
-from sys import maxint as MAXINT
 from traceback import format_exc as error_stack
+import sys
 import threading
 import Code
 line = "\n"
@@ -106,6 +106,10 @@ class TempoClock:
 
                         item.__call__()
 
+                    except SystemExit:
+
+                        sys.exit()
+
                     except:
 
                         print(error_stack())
@@ -176,7 +180,7 @@ class TempoClock:
     def next_event(self):
         """ Returns the beat index for the next event to be called """
         try:    return self.queue[-1][1]
-        except: return MAXINT
+        except: return sys.maxint
 
     def call(self, obj, dur, args=()):
         """ Returns a 'schedulable' wrapper for any callable object """
@@ -281,7 +285,7 @@ class Queue:
             return list()
 
     def next(self):
-        return self.data[-1].beat if len(self.data) > 0 else MAXINT
+        return self.data[-1].beat if len(self.data) > 0 else sys.maxint
             
 
 class QueueItem:

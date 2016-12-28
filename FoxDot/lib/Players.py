@@ -35,7 +35,7 @@ class Player(Repeatable):
     # Used for visual feedback
     bang_kwargs = {}
 
-    keywords   = ('degree', 'oct', 'freq', 'dur', 'offset', 'delay', 'blur', 'amplify', 'scale', 'bpm')
+    keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'blur', 'amplify', 'scale', 'bpm')
     Attributes = keywords + ('sus', 'bits', 'chop', 'rate', 'scrub', 'pan', 'echo', 'amp', 'fmod', 'buf')
     
     metro = None
@@ -84,7 +84,6 @@ class Player(Repeatable):
         
         self.isplaying = False
         self.isAlive = True
-        self.last_offset = 0
 
         # These dicts contain the attribute and modifier values that are sent to SuperCollider
 
@@ -93,8 +92,8 @@ class Player(Repeatable):
 
         # Keyword arguments that are used internally
 
-        self.frequency_mod = [0]
         self.scale = None
+        self.offset  = 0
         
         # List the internal variables we don't want to send to SuperCollider
 
@@ -162,8 +161,6 @@ class Player(Repeatable):
         # Duration of notes
         self.dur     = 0.5 if self.synthdef is SamplePlayer else 1
         self.old_pattern_dur = self.old_dur = self.attr['dur']
-        
-        self.offset  = 0
 
         self.delay   = 0
 
@@ -186,6 +183,7 @@ class Player(Repeatable):
         # Frequency and modifier
         self.freq   =  0
 
+        # Offbeat delay
         self.offset = 0
         
         self.modf = dict([(key, [0]) for key in self.attr])
@@ -231,17 +229,11 @@ class Player(Repeatable):
 
             dur *= (float(self.metro.bpm) / float(self.event['bpm']))
 
-        offset = float(self.event["offset"]) - self.last_offset
-
         # Schedule the next event
 
-        self.event_index = self.event_index + dur + offset
+        self.event_index = self.event_index + dur
         
         self.metro.schedule(self, self.event_index)
-
-        # Store any offset
-
-        self.last_offset = self.event["offset"]
 
         # Change internal marker
 
@@ -794,8 +786,8 @@ class Player(Repeatable):
     def kill(self):
         """ Removes this object from the Clock and resets itself"""
         self.isplaying = False
-        self.offset = self.attr['offset'] = 0
         self.repeat_events = {}
+        self.reset()
         return
         
     def stop(self, N=0):
@@ -811,9 +803,9 @@ class Player(Repeatable):
 
             self.stop_point += self.metro.next_bar() + ((N-1) * self.metro.bar_length())
 
-        self.repeat_events = {}
+        else:
 
-        self.offset = 0
+            self.kill()
 
         return self
 
@@ -966,7 +958,9 @@ class Player(Repeatable):
     def offbeat(self, dur=0.5):
         """ Off sets the next event occurence """
 
-        self.offset = self.attr['offset'] = dur
+        self.attr['delay'] += (dur-self.offset)
+
+        self.offset = dur
 
         return self
 

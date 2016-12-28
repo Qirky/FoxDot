@@ -281,7 +281,7 @@ class var(Repeatable):
         for dur in self.dur:
             a = b
             b = a + dur
-            self.time.append((a,b))
+            self.time.append([a,b])
 
         return self
 
@@ -327,7 +327,7 @@ class var(Repeatable):
         return new
                    
     def durs(self):
-        return self.dur        
+        return self.dur
 
     def values(self):
         return self.data
@@ -401,7 +401,8 @@ class linvar(var):
                 if i != self.current_index:
 
                     self.current_index = i
-                    self.current_value = self.next_value if self.next_value is not None else self.calculate(self.data[i])
+                    
+                    self.current_value = self.calculate(self.data[i])
                     self.next_value    = self.calculate(self.data[i+1])
                     
                     self.current_time_block  = time_block
