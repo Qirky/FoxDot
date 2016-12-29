@@ -36,6 +36,7 @@ Clock = TempoClock()
 # Clock.when_statements = when
 
 when.metro = var.metro = Clock
+
 Player.metro  = Clock
 Player.server = Server
 Player.default_scale = Scale.default()

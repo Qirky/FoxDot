@@ -10,6 +10,12 @@ from OSC import *
 from subprocess import Popen
 from time import sleep
 
+class SCLangClient(OSCClient):
+    def send(*args, **kwargs):
+        try:
+            OSCClient.send(*args, **kwargs)
+        except Exception as e:
+            print(e)
 
 class SCLangServerManager:
 
@@ -23,11 +29,11 @@ class SCLangServerManager:
         self.wait_time = 5
         self.count = 0
         
-        self.client = OSCClient()
+        self.client = SCLangClient()
         self.client.connect( (self.addr, self.port) )
 
-        self.sclang = OSCClient()
-        self.sclang.connect( (self.addr, self.SCLang_port) )
+        self.sclang = SCLangClient()
+        self.sclang.connect( (self.addr, self.SCLang_port) )        
 
         self.node = 1000
 

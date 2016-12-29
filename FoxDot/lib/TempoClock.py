@@ -79,7 +79,9 @@ class TempoClock:
         
     def start(self):
         """ Starts the clock thread """
-        threading.Thread(target=self.run).start()
+        main = threading.Thread(target=self.run)
+        main.daemon = True
+        main.start()
         return
 
 ##    def when_eval(self):
@@ -92,9 +94,7 @@ class TempoClock:
 
         self.ticking = True
 
-        while self.ticking:
-
-            # Evaluate when_statements at EVERY possible opportunity           
+        while self.ticking:          
 
             if self.now() >= self.queue.next():
 
