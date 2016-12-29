@@ -12,32 +12,26 @@ import sys
 from lib import *
 from lib.Workspace import workspace
 
-if len(sys.argv) > 3:
+# Create the  IDE
+FoxDot = workspace()
 
-    print sys.argv
+# This allows the user to access the IDE, an object called FoxDot
+FoxDotCode.namespace['FoxDot'] = FoxDot
 
-else:
+# And this gives PlayerObjects access to the IDE too
+Player.widget = FoxDot
 
-    # Create the  IDE
-    FoxDot = workspace()
+# This shares the code namespace between Python and the FoxDot IDE
+workspace.namespace=FoxDotCode.namespace
 
-    # This allows the user to access the IDE, an object called FoxDot
-    FoxDotCode.namespace['FoxDot'] = FoxDot
+# Run the IDE. Stop threads if it exits.
 
-    # And this gives PlayerObjects access to the IDE too
-    Player.widget = FoxDot
+try:
 
-    # This shares the code namespace between Python and the FoxDot IDE
-    workspace.namespace=FoxDotCode.namespace
+    FoxDot.run()
 
-    # Run the IDE. Stop threads if it exits.
+except (KeyboardInterrupt, SystemExit):
 
-    try:
+    Clock.stop()
 
-        FoxDot.run()
-
-    except (KeyboardInterrupt, SystemExit):
-
-        Clock.stop()
-
-        Server.quit()
+    Server.quit()
