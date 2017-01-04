@@ -9,20 +9,21 @@ class console:
     def __init__(self, master, font):
 
         self.Yscroll = Scrollbar(master)
-        self.Yscroll.grid(column=1, sticky='nsew')
-        self.height = 7
+        self.Yscroll.grid(row=1, column=2, sticky='nsew')
         
+        self.height = 7
         self.text = Text( master, padx=5, pady=5,
-                            height=self.height,
-                            bg="Black", fg="White",
-                            font=(font, 12),
-                            yscrollcommand=self.Yscroll.set)
+                          height=self.height,
+                          bg="Black", fg="White",
+                          font=(font, 12),
+                          yscrollcommand=self.Yscroll.set)
 
         self.Yscroll.config(command=self.text.yview)
 
         self.text.bind("<Key>", lambda e: "break")
         
-        self.text.grid(row=1, column=0, sticky="nsew")
+        self.text.grid(row=1, column=0, sticky="nsew", columnspan=2)
+        self.text.grid_rowconfigure(1, weight=0)
 
     def __str__(self):
         """ str(s) -> string """

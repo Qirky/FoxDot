@@ -4,6 +4,7 @@
 
 # Tkinter Interface
 from Tkinter import *
+import ttk
 import tkFont
 import tkFileDialog
 
@@ -15,6 +16,7 @@ from Undo import UndoStack
 from Prompt import TextPrompt
 from BracketHandler import BracketHandler
 from TextBox import ThreadedText
+from LineNumbers import LineNumbers
 
 from ..Settings import FONT, FOXDOT_ICON
 import os
@@ -38,12 +40,14 @@ class workspace:
 
         self.root = Tk()
         self.root.title("FoxDot - Live Coding with Python and SuperCollider")
-        self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=2)
+        self.root.columnconfigure(1, weight=1)
+        self.root.rowconfigure(0, weight=1)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
         # Set FoxDot icon
+        
         try:
+
             # Use .ico file by default
             self.root.iconbitmap(FOXDOT_ICON)
             
@@ -56,11 +60,11 @@ class workspace:
 
         self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
         self.font.configure(**tkFont.nametofont("CodeFont").configure())
-
+        
         # Create Y scrollbar
 
         self.Yscroll = Scrollbar(self.root)
-        self.Yscroll.grid(row=0, column=1, sticky='nsew')
+        self.Yscroll.grid(row=0, column=2, sticky='nsew')
 
         # Create text box for code
 
@@ -71,12 +75,22 @@ class workspace:
                                  insertbackground="White",
                                  font = "CodeFont",
                                  yscrollcommand=self.Yscroll.set,
-                                 width=120, height=20,
+                                 width=100, height=20, bd=0,
                                  maxundo=50 )
 
-        self.text.grid(row=0, column=0, sticky="nsew")
+        self.text.grid(row=0, column=1, sticky="nsew")
         self.Yscroll.config(command=self.text.yview)
         self.text.focus_set()
+
+        # Create box for line numbers
+
+        self.linenumbers = LineNumbers(self.text, width=25,
+                                       bg=colour_map['background'],
+                                       bd=0, highlightthickness=0 )
+        
+        self.linenumbers.grid(row=0, column=0, sticky='nsew')
+        self.linenumbers.grid_columnconfigure(0, weight=0)
+        
 
         # Docstring prompt label
 
