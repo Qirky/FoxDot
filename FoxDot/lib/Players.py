@@ -36,7 +36,7 @@ class Player(Repeatable):
     bang_kwargs = {}
 
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'blur', 'amplify', 'scale', 'bpm')
-    Attributes = keywords + ('sus', 'bits', 'chop', 'rate', 'scrub', 'pan', 'echo', 'amp', 'fmod', 'buf')
+    Attributes = keywords + ('sus', 'bits', 'chop', 'rate', 'scrub', 'pan', 'echo', 'amp', 'fmod', 'buf', 'vib')
     
     metro = None
     server = None
@@ -209,7 +209,21 @@ class Player(Repeatable):
         
         # Get the current state
 
-        self.get_event()
+        dur = 0
+
+        while True:
+
+            self.get_event()
+            
+            dur = float(self.event['dur'])
+
+            if dur == 0:
+
+                self.event_n += 1
+
+            else:
+
+                break
 
         # Play the note
 
@@ -218,10 +232,6 @@ class Player(Repeatable):
             self.freq = 0 if self.synthdef is SamplePlayer else self.calculate_freq()
 
             self.send()
-
-        # Get next occurence
-
-        dur = float(self.event['dur'])
 
         # If using custom bpm
 
@@ -329,7 +339,7 @@ class Player(Repeatable):
 
         if "dur" in kwargs:
             
-            self.dur = kwargs["dur"]
+            self.dur = Pattern([list(i) if isinstance(i, PGroup) else i for i in asStream(kwargs['dur'])])
 
             if "sus" not in kwargs:
 
@@ -385,7 +395,7 @@ class Player(Repeatable):
             r = asStream(self.attr['dur'].now())
             
         else:
-            r = asStream(self.attr['dur'])
+            r = asStream(self.attr['dur']) 
 
         # TODO: Make sure degree is a string
         if self.synthdef is SamplePlayer:

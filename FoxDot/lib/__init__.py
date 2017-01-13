@@ -12,6 +12,10 @@ from Code import *
 
 from ServerManager import Server
 
+""" GHOST """
+
+from GhostWriter import Ghost
+
 """ IMPORTS """
 
 from random import choice as choose
