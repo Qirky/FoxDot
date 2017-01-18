@@ -1,8 +1,3 @@
-(
-s.options.blockSize = 128;
-s.options.memSize = 131072;
-s.boot;
-
 OSCFunc(
 	{
 		arg msg, time, addr, port;
@@ -21,4 +16,3 @@ OSCFunc(
 	},
 	'foxdot'
 );
-)

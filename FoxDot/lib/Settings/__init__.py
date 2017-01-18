@@ -28,13 +28,61 @@ FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon" + (".ico
 FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 
 SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
-OSC_FUNC     = "/lib/SCLang/OSCFunc.scd"
+SYNTHDEF_DIR = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
+
+FOXDOT_OSC_FUNC     = os.path.realpath(FOXDOT_ROOT + "/osc/OSCFunc.scd")
+FOXDOT_STARTUP_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Startup.scd")
+FOXDOT_BUFFERS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Buffers.scd")
+
+def GET_SYNTHDEF_FILES():
+    return [os.path.realpath(SYNTHDEF_DIR + "/" + path) for path in os.listdir(SYNTHDEF_DIR)]
+
 
 # Set Environment Variables
 
 import conf
 
-SC_DIRECTORY  = conf.SUPERCOLLIDER
+if conf.SUPERCOLLIDER == '':
+
+    import tkFileDialog
+    import Tkinter
+
+    root = Tkinter.Tk()
+    root.withdraw()
+    
+    sc_dir = tkFileDialog.askdirectory(title="Please Find Your SuperCollider Installation Directory")
+
+    if not sc_dir:
+
+        sys.exit('Please locate SuperCollider and try using FoxDot again')
+
+    root.destroy()
+
+    SC_DIRECTORY = sc_dir
+
+    # Re-write conf file for next use
+
+    conf_fn = os.path.realpath(os.path.dirname(__file__) + "/conf.py")
+
+    with open(conf_fn) as f:
+
+        conflines = f.readlines()
+
+    with open(conf_fn, 'w') as f:
+
+        for line in conflines:
+
+            if 'SUPERCOLLIDER' in line:
+
+                f.write('SUPERCOLLIDER="' + sc_dir + '"\n')
+
+            else:
+
+                f.write(line)
+else:
+
+    SC_DIRECTORY  = conf.SUPERCOLLIDER
+    
 ADDRESS       = conf.ADDRESS
 PORT          = conf.PORT
 PORT2         = conf.PORT2

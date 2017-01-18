@@ -3,7 +3,8 @@
 """ This module manages the allocation of buffer numbers and samples """
 
 from os.path import abspath, join, dirname
-from Settings import FOXDOT_SND
+from Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
+# from ServerManager import Server
 import os
 
 def path(fn):
@@ -88,7 +89,7 @@ class BufferManager:
     def __init__(self):
 
         # ServerManager Object
-        self.server = None
+        #self.server = Server
 
         # Dictionary of characters to respective buffer number
         self.symbols = {}
@@ -159,17 +160,23 @@ class BufferManager:
         self.nil = BufChar(None)
         self.nil.addbuffer(None, 0)
 
+        # Write to file
+        self.write_to_file()
+
     def __getitem__(self, key):
         if hasattr(key, 'char'):
             key = key.char
         return self.symbols.get(key, self.nil)
 
-    def __call__(self, server):
-        self.server = server
-        return self
-
     def __str__(self):
         return "\n".join(["{}: {}".format(symbol, self.buffers[n]) for symbol, n in self.symbols.items()])
+
+    def write_to_file(self):
+        f = open(FOXDOT_BUFFERS_FILE, 'w')
+        for char in self.symbols:
+            for fn, buf in self.symbols[char]:
+                f.write('Buffer.read(s, "{}", bufnum:{});\n'.format(path(fn).replace("\\","/"), buf))
+        return
 
     def load(self):
         for char in self.symbols:

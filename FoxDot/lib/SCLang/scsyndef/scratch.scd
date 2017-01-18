@@ -1,5 +1,5 @@
 (SynthDef.new(\scratch,
-{|vib=0, echo=0, rate=0.04, depth=0.5, delay=0, sus=1, limit=1, bits=24, hpf=0, pan=0, scrub=0, verb=0.25, amp=1, freq=0, buf=0, echoOn=0, room=0.3, chop=0, slide=0, grain=0, fmod=0, lpf=20000, slidefrom=1|
+{|vib=0, chop=0, echoOn=0, room=0.3, depth=0.5, limit=1, echo=0, delay=0, rate=0.04, verb=0.25, sus=1, slide=0, fmod=0, lpf=20000, slidefrom=1, amp=1, freq=0, bits=24, hpf=0, pan=0|
 var osc, env;
 amp = amp / 2;
 freq = freq + fmod;

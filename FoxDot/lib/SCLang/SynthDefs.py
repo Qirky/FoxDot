@@ -1,7 +1,7 @@
 from __future__ import division
 #from ..Settings import MAX_CHANNELS
 from SCLang import *
-from SynthDef import SynthDef
+from SynthDef import SynthDef, SampleSynthDef
 import Env
 
 # TODO - check this!!!
@@ -9,7 +9,7 @@ NUM_CHANNELS = MAX_CHANNELS = 1
 
 # Sample Player
 
-with SynthDef("play") as play:
+with SampleSynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate)

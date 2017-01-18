@@ -525,7 +525,10 @@ class Player(Repeatable):
                         delay += (stutter * dur)
 
                         self.metro.schedule(self.send, self.event_index + delay)
-                        self.metro.schedule(self.bang, self.metro.now() + delay)
+
+                        if self.bang_kwargs:
+
+                            self.metro.schedule(self.bang, self.metro.now() + delay)
                     
         return self
 
@@ -772,7 +775,10 @@ class Player(Repeatable):
                 if delay > 0:
 
                     self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
-                    self.metro.schedule(self.bang, self.metro.now() + delay)
+
+                    if self.bang_kwargs:
+
+                        self.metro.schedule(self.bang, self.metro.now() + delay)
                     
                 else:
 
@@ -784,7 +790,7 @@ class Player(Repeatable):
 
                         sent_messages.append(osc_msg)
 
-                    if not banged:
+                    if not banged and self.bang_kwargs:
 
                         self.bang()
 
@@ -1005,6 +1011,8 @@ class Player(Repeatable):
             self.bang_kwargs = kwargs
 
         elif self.bang_kwargs:
+
+            print self.bang_kwargs
 
             bang = Bang(self, self.bang_kwargs)
 

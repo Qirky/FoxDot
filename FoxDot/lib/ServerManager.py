@@ -6,9 +6,11 @@
 """
 
 import os, socket
-from OSC import *
 from subprocess import Popen
 from time import sleep
+
+from Settings import *
+from OSC import *
 
 class SCLangClient(OSCClient):
     def send(*args, **kwargs):
@@ -110,19 +112,13 @@ class SCLangServerManager:
     def boot(self):
         """ Don't use """
 
-        self.count += 1
-
         if not self.booted:
-            
-            conf = os.path.realpath(FOXDOT_ROOT + OSC_FUNC)
             
             os.chdir(SC_DIRECTORY)
             
             print("Booting SuperCollider Server...")
             
-            self.daemon = Popen([SCLANG_EXEC, '-D', conf])
-
-            sleep(self.wait_time)
+            self.daemon = Popen([SCLANG_EXEC, '-D', FOXDOT_STARTUP_FILE])
 
             os.chdir(USER_CWD)
 
@@ -132,6 +128,34 @@ class SCLangServerManager:
             
             print("Warning: SuperCollider already running")
             
+        return
+
+    def start(self):
+        ''' Boot SuperCollider and connect over OSC '''
+
+        # 1. Compile startup file
+
+        with open(FOXDOT_STARTUP_FILE, 'w') as startup:
+
+            startup.write('''Routine.run {
+                	s.options.blockSize = 128;
+                        s.options.memSize = 131072;
+                        s.bootSync();\n''')
+
+            files = [FOXDOT_OSC_FUNC, FOXDOT_BUFFERS_FILE] + GET_SYNTHDEF_FILES()
+
+            for fn in files:
+
+                f = open(fn)
+                startup.write(f.read())
+                startup.write("\n")
+
+            startup.write("};")
+
+        # 2. Boot SuperCollider
+
+        self.boot()
+
         return
 
     def quit(self):

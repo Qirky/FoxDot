@@ -133,6 +133,10 @@ class Ghost:
 
         return
 
+    def start(self):
+        self.act()
+        return self
+
     def stop(self):
         self.running = False
 

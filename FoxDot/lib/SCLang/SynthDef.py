@@ -1,8 +1,8 @@
+import os
 import Env
 from SCLang import *
-import os
-
 from ..ServerManager import Server
+from ..Settings import SYNTHDEF_DIR
 
 # Container for SynthDefs
 
@@ -25,8 +25,8 @@ Synths = SynthDict()
 
 # SynthDef Base Class
 
-class SynthDef(object):
-
+class SynthDefBaseClass(object):
+    
     server = Server
     var = ['osc', 'env']
     defaults = {}
@@ -43,7 +43,7 @@ class SynthDef(object):
         self.attr = [] # stores custom attributes
 
         # Name of the file to store the SynthDef
-        self.filename = os.path.realpath(__file__ + "/../scsyndef/{}.scd".format(self.name))
+        self.filename = SYNTHDEF_DIR + "/{}.scd".format(self.name)
 
         # SynthDef default arguments
         self.osc         = instance("osc")
@@ -61,16 +61,6 @@ class SynthDef(object):
         self.echo        = instance("echo")
         self.echoOn      = instance("echoOn")
         self.room        = instance("room")
-        self.vib         = instance("vib")
-        self.vibDelay    = instance("vibDelay")
-        self.vibVar      = instance("vibVar")
-        self.depthVar    = instance("depthVar")
-        self.depth       = instance("depth")
-        self.slide       = instance("slide")
-        self.slidefrom   = instance("slidefrom")
-        self.buf         = instance("buf")
-        self.scrub       = instance("scrub")
-        self.grain       = instance("grain")
         self.bits        = instance("bits")
         self.delay       = instance("delay")
         self.chop        = instance("chop")
@@ -88,12 +78,6 @@ class SynthDef(object):
                             "echo"      : 0,
                             "echoOn"    : 0,
                             "room"      : 0.3,
-                            "vib"       : 0,
-                            "slide"     : 0,
-                            "slidefrom" : 1 ,
-                            "buf"       : 0,
-                            "scrub"     : 0,
-                            "grain"     : 0,
                             "bits"      : 24,
                             "delay"     : 0,
                             "chop"      : 0,
@@ -114,7 +98,7 @@ class SynthDef(object):
     # ---------------------
 
     def __str__(self):
-        Def  = "(SynthDef.new(\{},\n".format(self.name)
+        Def  = "SynthDef.new(\{},\n".format(self.name)
         Def += "{}|{}|\n".format("{", format_args(kwargs=self.defaults, delim='='))
         Def += "{}\n".format(self.get_base_class_variables())
         Def += "{}\n".format(self.get_base_class_behaviour())
@@ -124,7 +108,7 @@ class SynthDef(object):
         Def += "osc = Limiter.ar(osc, level: limit);\n" 
         Def += "osc = Pan2.ar(FreeVerb.ar(osc, verb, room), pan);\n"
         Def += "\tOut.ar(0, osc)"
-        Def += "}).add;)"
+        Def += "}).add;"
         return Def
 
     def __repr__(self):
@@ -182,9 +166,6 @@ class SynthDef(object):
     def add_base_class_behaviour(self):
         """ Defines the initial setup for every SynthDef """
         self.base.append("amp = amp / 2;")
-        self.base.append("freq = freq + fmod;")
-        self.base.append("freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);")
-        self.base.append("freq = Vibrato.kr(freq, rate: vib);")
         return
 
     def get_base_class_behaviour(self):
@@ -261,14 +242,57 @@ class SynthDef(object):
         new.name = str(newname)
         return new
 
-
-    # Playing a single note
     def play(self, freq, **kwargs):
+        ''' Plays a single sound '''
         message = ["freq", freq]
         for key, value in kwargs.items():
             message += [key, value]
         self.server.sendNote(self.name, message)
         return
+
+###
+
+class SynthDef(SynthDefBaseClass):
+    def __init__(self, *args, **kwargs):
+        SynthDefBaseClass.__init__(self, *args, **kwargs)
+        # Player Keywords
+        self.vib         = instance("vib")
+        self.vibDelay    = instance("vibDelay")
+        self.vibVar      = instance("vibVar")
+        self.depthVar    = instance("depthVar")
+        self.depth       = instance("depth")
+        self.slide       = instance("slide")
+        self.slidefrom   = instance("slidefrom")
+        # Player Default Values
+        self.defaults.update( {"vib"       : 0,
+                               "slide"     : 0,
+                               "slidefrom" : 1 } )
+
+    def add_base_class_behaviour(self):
+        """ Defines the initial setup for every SynthDef """
+        SynthDefBaseClass.add_base_class_behaviour(self)
+        self.base.append("freq = freq + fmod;")
+        self.base.append("freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);")
+        self.base.append("freq = Vibrato.kr(freq, rate: vib);")
+        return
+        
+class SampleSynthDef(SynthDefBaseClass):
+    def __init__(self, *args, **kwargs):
+        SynthDefBaseClass.__init__(self, *args, **kwargs)
+        # Sample Player Keywords
+        self.buf   = instance("buf")
+        self.scrub = instance("scrub")
+        # Sample Player Default Values
+        self.defaults['buf']   = 0
+        self.defaults['scrub'] = 0
+
+
+'''
+    SynthDefProxy Class
+    -------------------
+
+    
+'''
 
 class SynthDefProxy:
     def __init__(self, name, envelope, degree, kwargs):

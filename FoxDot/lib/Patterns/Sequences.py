@@ -106,9 +106,9 @@ def PRange(start, stop=None, step=None):
 
 
 def PTri(start, stop=None, step=None):
-    step = step if step is not None else 1
+    rev_step = step if step is not None else 1
     data = list(PRange(start, stop, step))
-    return Pattern(data + [item + step for item in reversed(data)])
+    return Pattern(data + [item + rev_step for item in reversed(data)])
 
 from math import sin, pi
 

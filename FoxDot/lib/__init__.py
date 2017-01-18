@@ -14,7 +14,7 @@ from ServerManager import Server
 
 """ GHOST """
 
-from GhostWriter import Ghost
+from GhostCoder import Ghost
 
 """ IMPORTS """
 
@@ -31,7 +31,7 @@ import Root
 
 """ SCLang """
 
-from SCLang import Synths, Env
+from SCLang import Synths, Env, SynthDef
 from SCLang.SynthDefs import *
 
 """ CLOCK """
@@ -46,12 +46,10 @@ Player.server = Server
 Player.default_scale = Scale.default()
 Player.default_root  = Root.default()
 
-Clock.start()
-
-BufferManager.server = Server
-BufferManager.load()
-
 FoxDotCode.namespace=globals()
+
+Clock.start()
+Server.start()
 
 """ Preset PlayerObjects """
 
