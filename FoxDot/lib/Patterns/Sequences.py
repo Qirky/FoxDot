@@ -165,10 +165,11 @@ def PPairs(seq, func=lambda n: 8-n):
 def PZip(pat1, pat2, *patN):
     l, p = [], []
     for pat in [pat1, pat2] + list(patN):
-        p.append(asStream(pat))
+        #p.append(asStream(pat))
+        p.append(P[pat])
         l.append(len(p[-1]))
     length = LCM(*l)
-    return Pattern(zip(*[p[i].stretch(length) for i in range(len(p))]))
+    return Pattern([tuple(pat[i] for pat in p) for i in range(length)])
 
 
 def PZip2(pat1, pat2, rule=lambda a, b: True):

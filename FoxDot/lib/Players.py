@@ -57,6 +57,7 @@ class Player(Repeatable):
         self.stop_point = 0
         self.following = None
         self.playstring = ""
+        self.buf_delay = []
 
         # Visual feedback information
 
@@ -206,7 +207,7 @@ class Player(Repeatable):
             self.event_n, self.event_index = self.count()
 
             self.old_dur = self.attr['dur']
-        
+
         # Get the current state
 
         dur = 0
@@ -271,7 +272,18 @@ class Player(Repeatable):
             self.dur = total_dur = durations = 1
     
         acc = now - (now % total_dur)
-        n = int(len(durations) * (acc / total_dur))
+
+        try:
+
+            n = int(len(durations) * (acc / total_dur))
+
+        except TypeError as e:
+
+            WarningMsg(e)
+
+            self.stop()
+
+            return 0, 0
 
         while True:
             
@@ -338,8 +350,8 @@ class Player(Repeatable):
         # If only duration is specified, set sustain to that value also
 
         if "dur" in kwargs:
-            
-            self.dur = Pattern([list(i) if isinstance(i, PGroup) else i for i in asStream(kwargs['dur'])])
+
+            self.dur = kwargs['dur']
 
             if "sus" not in kwargs:
 
@@ -524,7 +536,11 @@ class Player(Repeatable):
 
                         delay += (stutter * dur)
 
-                        self.metro.schedule(self.send, self.event_index + delay)
+                        ###ryan -> should be send delay?
+
+                        #self.metro.schedule(self.send, self.event_index + delay)
+
+                        self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
 
                         if self.bang_kwargs:
 
@@ -686,30 +702,55 @@ class Player(Repeatable):
 
         if self.synthdef is SamplePlayer:
 
-            event_buf = list(range(len(self.event['degree'])))
             event_dur = self.event['dur']
 
-            for i, bufchar in enumerate(self.event['degree']):
+            if isinstance(self.event['degree'], PlayGroup):
 
-                char = BufferManager[bufchar]
+                buf_list = ((0, self.event['degree']),)
+                event_buf = [0]
 
-                # Get the buffer number to play
-                buf_mod_index = modi(self.event['buf'], i)
+            else:
 
-                event_buf[i] = char.bufnum(buf_mod_index)
+                buf_list = enumerate(self.event['degree'])
+                event_buf = list(range(len(self.event['degree'])))
 
-                # Apply any duration ratio changes
+            self.buf_delay = []
+            
+            for i, bufchar in buf_list:
 
-                try:
+                if isinstance(bufchar, PlayGroup):
+
+                    char = BufferManager[bufchar[0]]
+
+                    # Get the buffer number to play
                     
-                    self.event['dur'] *= bufchar.dur
+                    buf_mod_index = modi(self.event['buf'], i)
 
-                except:
+                    event_buf[i] = char.bufnum(buf_mod_index)                    
 
-                    pass
+                    delay = 0
+                
+                    for n, b in enumerate(bufchar[1:]):
+
+                        char = BufferManager[b]
+
+                        buf_mod_index = modi(self.event['buf'], i)
+
+                        delay += (bufchar[n].dur * self.event['dur'])
+
+                        self.buf_delay.append((char.bufnum(buf_mod_index),  delay))
+
+                else:
+
+                    char = BufferManager[bufchar]
+
+                    # Get the buffer number to play
+                    buf_mod_index = modi(self.event['buf'], i)
+
+                    event_buf[i] = char.bufnum(buf_mod_index)
 
             self.event['buf'] = P(event_buf)
-
+            
         return self
 
     def osc_message(self, index=0):
@@ -759,6 +800,7 @@ class Player(Repeatable):
         size = self.largest_attribute()
         banged = False
         sent_messages = []
+        delayed_messages = []
 
         for i in range(size):
 
@@ -774,7 +816,11 @@ class Player(Repeatable):
 
                 if delay > 0:
 
-                    self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
+                    if (delay, osc_msg) not in delayed_messages:
+
+                        self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
+
+                        delayed_messages.append((delay, osc_msg))
 
                     if self.bang_kwargs:
 
@@ -795,6 +841,22 @@ class Player(Repeatable):
                         self.bang()
 
                         banged = True
+                        
+            if self.buf_delay:
+
+                for buf_num, buf_delay in self.buf_delay:
+
+                    if buf_num > 0:
+
+                        i = osc_msg.index('buf') + 1
+
+                        osc_msg[i] = buf_num
+
+                        if (buf_delay + delay, osc_msg) not in delayed_messages:
+
+                            self.metro.schedule(send_delay(self, osc_msg), self.event_index + buf_delay + delay)
+
+                            delayed_messages.append((buf_delay + delay, osc_msg))
         return
 
     #: Methods for stop/starting players
@@ -1141,7 +1203,9 @@ class send_delay:
     def __init__(self, s, message):
         self.server = s.server
         self.synth = s.synthdef
-        self.msg = message
+        self.msg = message[:]
+    def __repr__(self):
+        return "<'{}' delay>".format(self.synth)
     def __call__(self):
         self.server.sendNote(self.synth, self.msg)
 

@@ -29,6 +29,10 @@ class PlayString:
     def get_dur(self):
         """ Returns a list of durations """
         return [char.get_dur() for char in self.string]
+    def multiply(self, value):
+        for char in self.string:
+            char.multiply(value)
+        return
     def append(self, item):
         self.string.append(item)
     def extend(self, items):
@@ -83,15 +87,32 @@ class PlayString:
         string = re.sub(re_chars, "%s", self.original)
 
         # 2. Rotate
-
+    
         n = int(n)
 
         chars = chars[n:] + chars[:n]
 
         return string % tuple(chars)
-        
-            
 
+
+class PlayGroup(list):
+    def __init__(self, seq=[]):
+        data = []
+        for item in seq:
+            if isinstance(item, self.__class__):
+                data.extend(item)
+            else:
+                data.append(item)
+        list.__init__(self, data)
+    def __repr__(self):
+        return "{" + list.__repr__(self)[1:-1] + "}"
+    def __len__(self):
+        return 1
+    def divide(self, value):
+        for item in self:
+            item.divide(value)
+        return self
+            
 class PCHAR:
     def __init__(self, char, dur=1):
         self.char = char
@@ -107,3 +128,8 @@ class PCHAR:
         return repr(self.char)
     def get_dur(self):
         return self.dur
+    def multiply(self, val):
+        self.dur *= float(val)
+        return
+    def divide(self, value):
+        self.dur /= float(value)

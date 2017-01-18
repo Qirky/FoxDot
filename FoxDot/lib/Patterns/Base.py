@@ -1,9 +1,7 @@
 from random import choice, shuffle
 from Operations import *
 from Parse import Parse
-
-
-
+from PlayString import PlayString
 
 """
 
@@ -160,6 +158,7 @@ class metaPattern(object):
 
     def fromString(self, string):
         self.data = Parse(string)
+        self.make()
         return self
 
     def flat(self):
@@ -310,7 +309,7 @@ class metaPattern(object):
 
             self.data = list(self.data)
             
-        if not isinstance(self.data, PatternType):
+        if not isinstance(self.data, (PatternType, PlayString)):
     
             self.data = [self.data]
 
