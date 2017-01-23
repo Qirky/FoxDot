@@ -11,6 +11,7 @@ NUM_CHANNELS = MAX_CHANNELS = 1
 
 with SampleSynthDef("play") as play:
     play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
+    play.amp  = play.amp * 0.75
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * Env.ramp(amp=[1,1,0], sus=[play.sus * 2,0], doneAction=0) * play.amp * 3
@@ -130,7 +131,6 @@ with SynthDef("pluck") as pluck:
 with SynthDef("spark") as synth:
     freq = instance('freq')
     synth.amp  = synth.amp + 0.00001
-    synth.verb = synth.verb + 0.1
     synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
     synth.osc  = LFSaw.ar(freq * 1.002, iphase=Saw.ar(0.1)) * 0.3 + LFSaw.ar(freq, iphase=Saw.ar(0.1)) * 0.3
     synth.osc  = synth.osc * Line.ar(synth.amp, synth.amp/10000, synth.sus * 1.5) * 0.3

@@ -165,7 +165,6 @@ def PPairs(seq, func=lambda n: 8-n):
 def PZip(pat1, pat2, *patN):
     l, p = [], []
     for pat in [pat1, pat2] + list(patN):
-        #p.append(asStream(pat))
         p.append(P[pat])
         l.append(len(p[-1]))
     length = LCM(*l)
@@ -263,6 +262,15 @@ def PDur(n, k, dur=0.25):
 #==============================#
 #      2. Generator Types      #
 #==============================#
+
+class __generatorpattern__:
+    ''' Pseudo-RandomGenerator.
+        R[1,2,3]
+    '''
+    def __getitem__(self, args):
+        return PRand(list(args) if hasattr(args, '__iter__') else args)
+        
+R = __generatorpattern__()
 
 class PRand(GeneratorPattern):
     def __init__(self, start, stop=None):

@@ -14,6 +14,7 @@ from copy import copy
 from Settings import SamplePlayer
 from Code import WarningMsg
 from SCLang.SynthDef import SynthDefProxy
+from Effects import FxList
 from Repeat import *
 from Patterns import *
 from Midi import *
@@ -26,6 +27,15 @@ import TimeVar
 
 BufferManager = Buffers.BufferManager()
 
+class counter:
+    def __init__(self, start):
+        self.count = start
+    def __call__(self):
+        self.count += 1
+        return self.count
+
+nextBusID = counter(4)
+
 class Player(Repeatable):
 
     # These are the PlayerObject attributes NOT included in OSC messages
@@ -35,8 +45,15 @@ class Player(Repeatable):
     # Used for visual feedback
     bang_kwargs = {}
 
-    keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'blur', 'amplify', 'scale', 'bpm')
-    Attributes = keywords + ('sus', 'bits', 'chop', 'rate', 'scrub', 'pan', 'echo', 'amp', 'fmod', 'buf', 'vib')
+    # These are used by FoxDot
+    keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'blur', 'amplify', 'scale', 'bpm', 'style')
+
+    # Base attributes
+    base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom', 'pan', 'rate', 'amp', 'room')
+    fx_attributes   = ('chop', 'echo', 'verb', 'bits', 'hpf', 'lpf')
+    play_attributes = ('scrub',)
+    
+    Attributes      = keywords + base_attributes + fx_attributes + play_attributes
     
     metro = None
     server = None
@@ -58,6 +75,7 @@ class Player(Repeatable):
         self.following = None
         self.playstring = ""
         self.buf_delay = []
+        self.bus = nextBusID()
 
         # Visual feedback information
 
@@ -153,9 +171,13 @@ class Player(Repeatable):
         self.buf     = 0
 
         # Echo amount
-        self.echo    = 0
+        # self.echo    = 0
 
+        # Frequency modifier
         self.fmod   =  0
+
+        # Buffer
+        self.style  = 0
 
         # --- FoxDot Keywords
         
@@ -513,6 +535,8 @@ class Player(Repeatable):
         """ Plays the current note n-1 times over the current durations """
     
         if self.metro.solo == self and n >  0:
+
+            self.get_event()
             
             size = self.largest_attribute()
 
@@ -535,10 +559,6 @@ class Player(Repeatable):
                     if (self.synthdef != SamplePlayer and amp > 0) or (self.synthdef == SamplePlayer and buf > 0 and amp > 0):
 
                         delay += (stutter * dur)
-
-                        ###ryan -> should be send delay?
-
-                        #self.metro.schedule(self.send, self.event_index + delay)
 
                         self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
 
@@ -724,7 +744,7 @@ class Player(Repeatable):
 
                     # Get the buffer number to play
                     
-                    buf_mod_index = modi(self.event['buf'], i)
+                    buf_mod_index = modi(self.event['style'], i)
 
                     event_buf[i] = char.bufnum(buf_mod_index)                    
 
@@ -734,7 +754,7 @@ class Player(Repeatable):
 
                         char = BufferManager[b]
 
-                        buf_mod_index = modi(self.event['buf'], i)
+                        buf_mod_index = modi(self.event['style'], i)
 
                         delay += (bufchar[n].dur * self.event['dur'])
 
@@ -745,13 +765,54 @@ class Player(Repeatable):
                     char = BufferManager[bufchar]
 
                     # Get the buffer number to play
-                    buf_mod_index = modi(self.event['buf'], i)
+                    buf_mod_index = modi(self.event['style'], i)
 
                     event_buf[i] = char.bufnum(buf_mod_index)
 
             self.event['buf'] = P(event_buf)
             
         return self
+##
+##    def Old_osc_message(self, index=0):
+##        """ Creates an OSC packet to play a SynthDef in SuperCollider """
+##
+##        freq = float(modi(self.attr['freq'], index))
+##        
+##        message = ['freq',  freq ]
+##
+##        attributes = self.attr
+##
+##        for key in attributes:
+##
+##            if key not in self.keywords:
+##
+##                try:
+##                    
+##                    val = modi(self.event[key], index)
+##
+##                    # Special case modulation
+##
+##                    if key == "sus":
+##
+##                        val = val * self.metro.beat() * modi(self.event['blur'], index)
+##
+##                    elif key == "echo":
+##
+##                        val = val * self.metro.beat() * modi(self.event['blur'], index)
+##
+##                        message += ['echoOn', int(val > 0)]
+##
+##                    elif key == "amp":
+##
+##                        val = val * modi(self.event['amplify'], index)
+##
+##                    message += [key, float(val)]
+##
+##                except:
+##                    
+##                    print("Error generating OSC message for '{}'. Problem with {}".format(self.synthdef, key))
+##
+##        return message
 
     def osc_message(self, index=0):
         """ Creates an OSC packet to play a SynthDef in SuperCollider """
@@ -759,15 +820,16 @@ class Player(Repeatable):
         freq = float(modi(self.attr['freq'], index))
         
         message = ['freq',  freq ]
+        fx_dict = {}
 
         attributes = self.attr
 
         for key in attributes:
 
-            if key not in self.keywords:
+            try:
 
-                try:
-                    
+                if key in self.base_attributes:
+
                     val = modi(self.event[key], index)
 
                     # Special case modulation
@@ -776,23 +838,46 @@ class Player(Repeatable):
 
                         val = val * self.metro.beat() * modi(self.event['blur'], index)
 
-                    elif key == "echo":
-
-                        val = val * self.metro.beat() * modi(self.event['blur'], index)
-
-                        message += ['echoOn', int(val > 0)]
-
                     elif key == "amp":
 
                         val = val * modi(self.event['amplify'], index)
 
                     message += [key, float(val)]
 
-                except:
-                    
-                    print("Error generating OSC message for '{}'. Problem with {}".format(self.synthdef, key))
+                elif key in self.fx_attributes:
 
-        return message
+                    fx_dict[key] = []
+
+                    for sub_key in FxList[key].args:
+
+                        val = modi(self.event[sub_key], index)
+
+                        # Values that use amplify / sustain
+
+                        if key == "echo":
+
+                            val = val * self.metro.beat() * modi(self.event['blur'], index)
+
+                        val = float(val)
+
+                        # Don't send fx with zero values
+
+                        if val > 0:
+                            
+                            fx_dict[key] += [sub_key, val]
+
+                    # Don't send fx with no arguments
+
+                    if len(fx_dict[key]) == 0:
+
+                        del fx_dict[key]
+
+            except:
+                
+                print("Issue in OSC message for '{}'. Problem with {}".format(self.synthdef, key))     
+
+        return message, fx_dict
+
 
     def send(self):
         """ Sends the current event data to SuperCollder """
@@ -804,7 +889,7 @@ class Player(Repeatable):
 
         for i in range(size):
 
-            osc_msg = self.osc_message(i)
+            osc_msg, effects = self.osc_message(i)
 
             delay = modi(self.event['delay'], i)
             amp   = modi(self.event['amp'], i)
@@ -816,11 +901,11 @@ class Player(Repeatable):
 
                 if delay > 0:
 
-                    if (delay, osc_msg) not in delayed_messages:
+                    if (delay, osc_msg, effects) not in delayed_messages:
 
-                        self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
+                        self.metro.schedule(send_delay(self, osc_msg, effects), self.event_index + delay)
 
-                        delayed_messages.append((delay, osc_msg))
+                        delayed_messages.append((delay, osc_msg, effects))
 
                     if self.bang_kwargs:
 
@@ -830,11 +915,11 @@ class Player(Repeatable):
 
                     # Don't send duplicate messages
 
-                    if osc_msg not in sent_messages:
+                    if (osc_msg, effects) not in sent_messages:
                     
-                        self.server.sendNote(str(self.synthdef), osc_msg)
+                        self.server.sendPlayerMessage(str(self.synthdef), osc_msg, effects)
 
-                        sent_messages.append(osc_msg)
+                        sent_messages.append((osc_msg, effects))
 
                     if not banged and self.bang_kwargs:
 
@@ -852,11 +937,11 @@ class Player(Repeatable):
 
                         osc_msg[i] = buf_num
 
-                        if (buf_delay + delay, osc_msg) not in delayed_messages:
+                        if (buf_delay + delay, osc_msg, effects) not in delayed_messages:
 
-                            self.metro.schedule(send_delay(self, osc_msg), self.event_index + buf_delay + delay)
+                            self.metro.schedule(send_delay(self, osc_msg, effects), self.event_index + buf_delay + delay)
 
-                            delayed_messages.append((buf_delay + delay, osc_msg))
+                            delayed_messages.append((buf_delay + delay, osc_msg, effects))
         return
 
     #: Methods for stop/starting players
@@ -1200,14 +1285,15 @@ class PlayerKey:
 class send_delay:
     """ Holds the state of a player whose send has
         been scheduled in the future """
-    def __init__(self, s, message):
+    def __init__(self, s, message, fx):
         self.server = s.server
         self.synth = s.synthdef
         self.msg = message[:]
+        self.fx  = fx.copy()
     def __repr__(self):
         return "<'{}' delay>".format(self.synth)
     def __call__(self):
-        self.server.sendNote(self.synth, self.msg)
+        self.server.sendPlayerMessage(self.synth, self.msg, self.fx)
 
 
 ###### GROUP OBJECT
@@ -1223,6 +1309,16 @@ class Group:
 
     def __str__(self):
         return str(self.players)
+
+    def iterate(self, dur=4):
+        if dur == 0 or dur is None:
+            self.amplify=1
+        else:
+            delay, on = 0, float(dur) / len(self.players)
+            for player in self.players:
+                player.amplify=TimeVar.var([0,1,0],[delay, on, dur-delay])
+                delay += on
+        return           
 
     def __setattr__(self, name, value):
         try:

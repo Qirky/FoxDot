@@ -30,8 +30,11 @@ class console:
 
     def write(self, string):
         """ Adds string to the bottom of the console """
-        self.text.insert( END, string )
-        self.text.see(END)
+        try:
+            self.text.insert( END, string )
+            self.text.see(END)
+        except:
+            pass            
         return
 
     def read(self):

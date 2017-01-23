@@ -31,12 +31,19 @@ import Root
 
 """ SCLang """
 
-from SCLang import Synths, Env, SynthDef
-from SCLang.SynthDefs import *
+from SCLang import SynthDefs, Env, SynthDef
+from SCLang.Definitions import *
+
 
 """ CLOCK """
 
 Clock = TempoClock()
+
+def nextBar(f, n=0):
+    ''' Schedule functions when you define them with @nextBar'''
+    Clock.schedule(f, Clock.next_bar() + n)
+    return f
+
 # Clock.when_statements = when
 
 when.metro = var.metro = Clock
@@ -49,7 +56,7 @@ Player.default_root  = Root.default()
 FoxDotCode.namespace=globals()
 
 Clock.start()
-Server.start()
+#Server.start()
 
 """ Preset PlayerObjects """
 

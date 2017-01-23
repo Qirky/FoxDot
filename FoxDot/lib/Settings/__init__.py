@@ -29,14 +29,18 @@ FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 
 SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 SYNTHDEF_DIR = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
+ENVELOPE_DIR = os.path.realpath(FOXDOT_ROOT + "/osc/scsynenv/")
 
 FOXDOT_OSC_FUNC     = os.path.realpath(FOXDOT_ROOT + "/osc/OSCFunc.scd")
 FOXDOT_STARTUP_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Startup.scd")
 FOXDOT_BUFFERS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Buffers.scd")
+FOXDOT_EFFECTS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Effects.scd")
 
 def GET_SYNTHDEF_FILES():
     return [os.path.realpath(SYNTHDEF_DIR + "/" + path) for path in os.listdir(SYNTHDEF_DIR)]
 
+def GET_ENVELOPE_FILES():
+    return [os.path.realpath(ENVELOPE_DIR + "/" + path) for path in os.listdir(ENVELOPE_DIR)]
 
 # Set Environment Variables
 

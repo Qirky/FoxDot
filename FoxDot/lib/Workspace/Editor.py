@@ -70,7 +70,24 @@ class workspace:
 
         self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
         self.font.configure(**tkFont.nametofont("CodeFont").configure())
+
+        # Create menu
+
+        self.menu = Menu(self.root)
+        self.menu.config(font="CodeFont",
+                         bg=colour_map['background'],
+                         fg=colour_map['plaintext'])
+
+        self.menu_visible = True
+
+        self.root.config(menu=self.menu)
         
+        self.menu.add_command(label="Open",       command=self.openfile)
+        self.menu.add_command(label="Save",       command=self.save)
+        self.menu.add_command(label="Save As",    command=self.save)
+        self.menu.add_command(label="Settings",   command=lambda: None)
+        self.menu.add_command(label="Help",       command=lambda: None)
+       
         # Create Y scrollbar
 
         self.Yscroll = Scrollbar(self.root)
@@ -130,6 +147,7 @@ class workspace:
         self.text.bind("<{}-z>".format(ctrl),               self.undo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
         self.text.bind("<{}-o>".format(ctrl),               self.openfile)
+        self.text.bind("<{}-m>".format(ctrl),               self.toggleMenu)
 
         # Change ctrl+h on Mac (is used to close)
 
@@ -364,10 +382,11 @@ class workspace:
         print "--------------------------------------------"
         print "{}+Return  : Execute code".format(ctrl)
         print "{}+.       : Stop all sound".format(ctrl)
-        print "{}+=       : Zoom in".format(ctrl)
-        print "{}+-       : Zoom out".format(ctrl)
+        print "{}+=       : Increase font size".format(ctrl)
+        print "{}+-       : Decrease font size".format(ctrl)
         print "{}+S       : Save your work".format(ctrl)
         print "{}+O       : Open a file".format(ctrl)
+        print "{}+M       : Toggle the menu".format(ctrl)
         print "{}+{}       : Toggle console window".format(ctrl, self.toggle_key)
         print "--------------------------------------------"
         print "Please visit foxdot.org for more information"
@@ -431,6 +450,11 @@ class workspace:
             self.text.config(height=self.text.cget('height')-self.console.height)
             self.console_visible = True
         return
+
+    def toggleMenu(self, event=None):
+        self.root.config(menu=self.menu if not self.menu_visible else 0)
+        self.menu_visible = not self.menu_visible
+        return "break"
     
     def paste(self, event=None):
         """ Ctrl-V: Pastes any text and updates the IDE """
@@ -712,6 +736,8 @@ class workspace:
         font = tkFont.nametofont("CodeFont")
         size = font.actual()["size"]+2
         font.configure(size=size)
+        # Increase size of line number
+        self.linenumbers.config(width=self.linenumbers.winfo_width() + 3)
         return 'break'
 
     # Zoom out: Ctrl+-
@@ -721,8 +747,10 @@ class workspace:
         """ Ctrl+- decreases text size (minimum of 8) """
         self.root.grid_propagate(False)
         font = tkFont.nametofont("CodeFont")
-        size = max(8, font.actual()["size"]-2)
-        font.configure(size=size)
+        size = font.actual()["size"]-2
+        if size >= 8:
+            font.configure(size=size)
+            self.linenumbers.config(width=self.linenumbers.winfo_width() - 3)
         return  'break'
     
 

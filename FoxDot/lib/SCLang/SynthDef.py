@@ -2,7 +2,16 @@ import os
 import Env
 from SCLang import *
 from ..ServerManager import Server
-from ..Settings import SYNTHDEF_DIR
+from ..Settings import SYNTHDEF_DIR, ENVELOPE_DIR
+
+ENVDEF_STRING = """
+SynthDef.new(\makeSound_%s,
+	{ arg bus, sus=1, amp=1;
+		var osc, env;
+		env = %s;
+		osc = In.ar(bus, 2);
+		osc = osc * env;
+		Out.ar(0, osc)}).add;"""
 
 # Container for SynthDefs
 
@@ -21,7 +30,7 @@ class SynthDict(dict):
 
 # Create container for SynthDefs
 
-Synths = SynthDict()
+SynthDefs = SynthDict()
 
 # SynthDef Base Class
 
@@ -30,7 +39,7 @@ class SynthDefBaseClass(object):
     server = Server
     var = ['osc', 'env']
     defaults = {}
-    container = Synths
+    container = SynthDefs
     default_env = Env.perc()
 
     def __init__(self, name):
@@ -43,7 +52,8 @@ class SynthDefBaseClass(object):
         self.attr = [] # stores custom attributes
 
         # Name of the file to store the SynthDef
-        self.filename = SYNTHDEF_DIR + "/{}.scd".format(self.name)
+        self.filename     = SYNTHDEF_DIR + "/{}.scd".format(self.name)
+        self.env_filename = ENVELOPE_DIR + "/{}.scd".format(self.name)
 
         # SynthDef default arguments
         self.osc         = instance("osc")
@@ -55,16 +65,16 @@ class SynthDefBaseClass(object):
         self.amp         = instance("amp")
         self.pan         = instance("pan")
         self.rate        = instance("rate")
-        self.lpf         = instance("lpf")
-        self.hpf         = instance("hpf")
-        self.verb        = instance("verb")
-        self.echo        = instance("echo")
-        self.echoOn      = instance("echoOn")
-        self.room        = instance("room")
-        self.bits        = instance("bits")
-        self.delay       = instance("delay")
-        self.chop        = instance("chop")
-        self.limit       = instance("limit")
+        #self.lpf         = instance("lpf")
+        #self.hpf         = instance("hpf")
+        #self.verb        = instance("verb")
+        #self.echo        = instance("echo")
+        #self.echoOn      = instance("echoOn")
+        #self.room        = instance("room")
+        #self.bits        = instance("bits")
+        #self.delay       = instance("delay")
+        #self.chop        = instance("chop")
+        #self.limit       = instance("limit")
         
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
@@ -72,16 +82,17 @@ class SynthDefBaseClass(object):
                             "freq"      : 0,
                             "fmod"      : 0,
                             "rate"      : 1,
-                            "lpf"       : 20000,
-                            "hpf"       : 0,
-                            "verb"      : 0.25,
-                            "echo"      : 0,
-                            "echoOn"    : 0,
-                            "room"      : 0.3,
-                            "bits"      : 24,
-                            "delay"     : 0,
-                            "chop"      : 0,
-                            "limit"     : 1}
+                            "bus"       : 0 }
+                            #"lpf"       : 20000,
+                            #"hpf"       : 0,
+                            #"verb"      : 0.25,
+                            #"echo"      : 0,
+                            #"echoOn"    : 0,
+                            #"room"      : 0.3,
+                            #"bits"      : 24,
+                            #"delay"     : 0,
+                            #"chop"      : 0,
+                            #"limit"     : 1}
 
         self.add_base_class_behaviour()
 
@@ -105,9 +116,10 @@ class SynthDefBaseClass(object):
         Def += "{}\n".format(self.get_custom_behaviour())
         # Put oscillator and envelope together, limit, pan -> out
         Def += "osc = osc * env;\n"
-        Def += "osc = Limiter.ar(osc, level: limit);\n" 
-        Def += "osc = Pan2.ar(FreeVerb.ar(osc, verb, room), pan);\n"
-        Def += "\tOut.ar(0, osc)"
+        # TODO-remove limiter in SynthDef
+        Def += "osc = Limiter.ar(osc, level: 1);\n"
+        Def += "osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];\n"
+        Def += "\tOut.ar(bus, osc)"
         Def += "}).add;"
         return Def
 
@@ -165,7 +177,8 @@ class SynthDefBaseClass(object):
 
     def add_base_class_behaviour(self):
         """ Defines the initial setup for every SynthDef """
-        self.base.append("amp = amp / 2;")
+        # self.base.append("amp = amp / 2;")
+        # self.base.append()
         return
 
     def get_base_class_behaviour(self):
@@ -191,7 +204,6 @@ class SynthDefBaseClass(object):
                     string += (str(arg) + '=' + str(self.__dict__[arg]) + ';\n')
         return string
                 
-        
 
     # Adding the SynthDef to the Server
     # ---------------------------------
@@ -206,22 +218,24 @@ class SynthDefBaseClass(object):
 
         #  This adds any filters
 
-        self.osc = HPF.ar(self.osc, self.hpf)
-        self.osc = LPF.ar(self.osc, self.lpf + 1)
-        self.osc = self.osc * LFPulse.ar(self.chop / self.sus)
-        self.osc = self.osc + CombL.ar(self.osc, maxdelaytime=2, delaytime=self.echo) * self.echoOn
-        self.env = self.env if self.env is not None else self.default_env
+        #self.osc = HPF.ar(self.osc, self.hpf)
+        #self.osc = LPF.ar(self.osc, self.lpf + 1)
+        #self.osc = self.osc * LFPulse.ar(self.chop / self.sus)
+        #self.osc = self.osc + CombL.ar(self.osc, maxdelaytime=2, delaytime=self.echo) * self.echoOn
+        #self.env = self.env if self.env is not None else self.default_env
 
-        if SC3_PLUGINS:
-
-            # Add any behaviour based on SC3 Plugins
-            
-            self.osc  = Decimator.ar(self.osc, rate=44100, bits=self.bits)
-    
+##        if SC3_PLUGINS:
+##
+##            # Add any behaviour based on SC3 Plugins
+##            
+##            self.osc  = Decimator.ar(self.osc, rate=44100, bits=self.bits)
+##    
         try:
             
             # Write file
             self.write()
+
+            self.synth_added = True
 
             # Load to server
             SynthDef.server.loadSynthDef(self.filename)
@@ -233,8 +247,6 @@ class SynthDefBaseClass(object):
             
             WarningMsg("Error: SynthDef '{}' could not be added to the server:\n{}".format(self.name, e))
 
-        self.synth_added = True
-            
         return None
 
     def rename(self, newname):
