@@ -2,16 +2,7 @@ import os
 import Env
 from SCLang import *
 from ..ServerManager import Server
-from ..Settings import SYNTHDEF_DIR, ENVELOPE_DIR
-
-ENVDEF_STRING = """
-SynthDef.new(\makeSound_%s,
-	{ arg bus, sus=1, amp=1;
-		var osc, env;
-		env = %s;
-		osc = In.ar(bus, 2);
-		osc = osc * env;
-		Out.ar(0, osc)}).add;"""
+from ..Settings import SYNTHDEF_DIR
 
 # Container for SynthDefs
 
@@ -53,11 +44,9 @@ class SynthDefBaseClass(object):
 
         # Name of the file to store the SynthDef
         self.filename     = SYNTHDEF_DIR + "/{}.scd".format(self.name)
-        self.env_filename = ENVELOPE_DIR + "/{}.scd".format(self.name)
 
         # SynthDef default arguments
         self.osc         = instance("osc")
-        self.env         = instance("env")
         self.freq        = instance("freq")
         self.fmod        = instance("fmod")
         self.output      = instance("output")
@@ -65,16 +54,7 @@ class SynthDefBaseClass(object):
         self.amp         = instance("amp")
         self.pan         = instance("pan")
         self.rate        = instance("rate")
-        #self.lpf         = instance("lpf")
-        #self.hpf         = instance("hpf")
-        #self.verb        = instance("verb")
-        #self.echo        = instance("echo")
-        #self.echoOn      = instance("echoOn")
-        #self.room        = instance("room")
-        #self.bits        = instance("bits")
-        #self.delay       = instance("delay")
-        #self.chop        = instance("chop")
-        #self.limit       = instance("limit")
+        self.bits        = instance("bits")
         
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
@@ -82,17 +62,8 @@ class SynthDefBaseClass(object):
                             "freq"      : 0,
                             "fmod"      : 0,
                             "rate"      : 1,
-                            "bus"       : 0 }
-                            #"lpf"       : 20000,
-                            #"hpf"       : 0,
-                            #"verb"      : 0.25,
-                            #"echo"      : 0,
-                            #"echoOn"    : 0,
-                            #"room"      : 0.3,
-                            #"bits"      : 24,
-                            #"delay"     : 0,
-                            #"chop"      : 0,
-                            #"limit"     : 1}
+                            "bus"       : 0,
+                            "bits"      : 0 } # This is an effect in the synthdef - bad idea?
 
         self.add_base_class_behaviour()
 
@@ -113,14 +84,12 @@ class SynthDefBaseClass(object):
         Def += "{}|{}|\n".format("{", format_args(kwargs=self.defaults, delim='='))
         Def += "{}\n".format(self.get_base_class_variables())
         Def += "{}\n".format(self.get_base_class_behaviour())
-        Def += "{}\n".format(self.get_custom_behaviour())
-        # Put oscillator and envelope together, limit, pan -> out
-        Def += "osc = osc * env;\n"
-        # TODO-remove limiter in SynthDef
-        Def += "osc = Limiter.ar(osc, level: 1);\n"
+        Def += "{}".format(self.get_custom_behaviour())
+        # Put oscillator and envelope together, limit, pan -> out?
+##        Def += "osc = Limiter.ar(osc, level: limit);\n"
         Def += "osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];\n"
-        Def += "\tOut.ar(bus, osc)"
-        Def += "}).add;"
+        Def += "\tReplaceOut.ar(bus, osc)"
+        Def += "}).add;\n"
         return Def
 
     def __repr__(self):
@@ -140,7 +109,7 @@ class SynthDefBaseClass(object):
     # ---------------------------
 
     def __call__(self, degree=None, **kwargs):
-        return SynthDefProxy(self.name, self.env, degree, kwargs)
+        return SynthDefProxy(self.name, degree, kwargs)
 
     # Getter and setter
     # -----------------
@@ -177,8 +146,6 @@ class SynthDefBaseClass(object):
 
     def add_base_class_behaviour(self):
         """ Defines the initial setup for every SynthDef """
-        # self.base.append("amp = amp / 2;")
-        # self.base.append()
         return
 
     def get_base_class_behaviour(self):
@@ -212,24 +179,21 @@ class SynthDefBaseClass(object):
         """  Writes the SynthDef to file """
         with open(self.filename, 'w') as f:
             f.write(self.__str__())
+
+    def has_envelope(self):
+        try:
+            object.__getattribute__(self, 'env')
+            return True
+        except:
+            return False
     
     def add(self):
         """ This is required to add the SynthDef to the SuperCollider Server """
 
-        #  This adds any filters
+        if self.has_envelope():
 
-        #self.osc = HPF.ar(self.osc, self.hpf)
-        #self.osc = LPF.ar(self.osc, self.lpf + 1)
-        #self.osc = self.osc * LFPulse.ar(self.chop / self.sus)
-        #self.osc = self.osc + CombL.ar(self.osc, maxdelaytime=2, delaytime=self.echo) * self.echoOn
-        #self.env = self.env if self.env is not None else self.default_env
-
-##        if SC3_PLUGINS:
-##
-##            # Add any behaviour based on SC3 Plugins
-##            
-##            self.osc  = Decimator.ar(self.osc, rate=44100, bits=self.bits)
-##    
+            self.osc = self.osc * self.env
+    
         try:
             
             # Write file
@@ -297,6 +261,11 @@ class SampleSynthDef(SynthDefBaseClass):
         # Sample Player Default Values
         self.defaults['buf']   = 0
         self.defaults['scrub'] = 0
+        self.defaults['cut']   = 1
+        
+        self.base.append("Line.kr(0,1, BufDur.kr(buf) * cut * (1 / rate), doneAction: 2);")
+
+        
 
 
 '''
@@ -307,9 +276,8 @@ class SampleSynthDef(SynthDefBaseClass):
 '''
 
 class SynthDefProxy:
-    def __init__(self, name, envelope, degree, kwargs):
+    def __init__(self, name, degree, kwargs):
         self.name = name
-        self.env  = envelope
         self.degree = degree
         self.mod = 0
         self.kwargs = kwargs

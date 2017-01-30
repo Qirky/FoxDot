@@ -22,19 +22,11 @@ from Midi import *
 from Bang import Bang
 
 import Scale
+import Root
 import Buffers
 import TimeVar
 
 BufferManager = Buffers.BufferManager()
-
-class counter:
-    def __init__(self, start):
-        self.count = start
-    def __call__(self):
-        self.count += 1
-        return self.count
-
-nextBusID = counter(4)
 
 class Player(Repeatable):
 
@@ -49,9 +41,9 @@ class Player(Repeatable):
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'blur', 'amplify', 'scale', 'bpm', 'style')
 
     # Base attributes
-    base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom', 'pan', 'rate', 'amp', 'room')
-    fx_attributes   = ('chop', 'echo', 'verb', 'bits', 'hpf', 'lpf')
-    play_attributes = ('scrub',)
+    base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom', 'pan', 'rate', 'amp', 'room', 'buf', 'bits')
+    fx_attributes   = FxList.kwargs()
+    play_attributes = ('scrub', 'cut')
     
     Attributes      = keywords + base_attributes + fx_attributes + play_attributes
     
@@ -60,6 +52,10 @@ class Player(Repeatable):
 
     # Tkinter Window
     widget = None
+
+    default_scale = Scale.default()
+    default_root  = Root.default()
+
 
     def __init__( self ):
 
@@ -75,7 +71,6 @@ class Player(Repeatable):
         self.following = None
         self.playstring = ""
         self.buf_delay = []
-        self.bus = nextBusID()
 
         # Visual feedback information
 
@@ -131,7 +126,6 @@ class Player(Repeatable):
         if isinstance(other, SynthDefProxy):
             self.update(other.name, other.degree, **other.kwargs)
             self + other.mod
-            self.envelope = other.env
             for method, arguments in other.methods.items():
                 args, kwargs = arguments
                 getattr(self, method).__call__(*args, **kwargs)                
@@ -170,8 +164,9 @@ class Player(Repeatable):
         # Audio sample buffer number
         self.buf     = 0
 
-        # Echo amount
-        # self.echo    = 0
+        # Reverb
+        self.verb   = 0.1
+        self.room   = 0.1
 
         # Frequency modifier
         self.fmod   =  0
@@ -182,7 +177,7 @@ class Player(Repeatable):
         # --- FoxDot Keywords
         
         # Duration of notes
-        self.dur     = 0.5 if self.synthdef is SamplePlayer else 1
+        self.dur     = 0.5 if self.synthdef == SamplePlayer else 1
         self.old_pattern_dur = self.old_dur = self.attr['dur']
 
         self.delay   = 0
@@ -252,7 +247,7 @@ class Player(Repeatable):
 
         if self.metro.solo == self: # TODO this syntax is ambiguous
 
-            self.freq = 0 if self.synthdef is SamplePlayer else self.calculate_freq()
+            self.freq = 0 if self.synthdef == SamplePlayer else self.calculate_freq()
 
             self.send()
 
@@ -375,7 +370,7 @@ class Player(Repeatable):
 
             self.dur = kwargs['dur']
 
-            if "sus" not in kwargs:
+            if "sus" not in kwargs and synthdef != SamplePlayer:
 
                 self.sus = self.attr['dur']
 
@@ -531,48 +526,25 @@ class Player(Repeatable):
 
     # Methods affecting other players - every n times, do a random thing?
 
-    def stutter(self, n=2):
+    def stutter(self, n=2, **kwargs):
         """ Plays the current note n-1 times over the current durations """
-    
-        if self.metro.solo == self and n >  0:
 
-            self.get_event()
-            
-            size = self.largest_attribute()
+        if self.metro.solo == self and n > 0:
 
-            n = int(n)
+            dur = float(kwargs.get("dur", self.event['dur'])) / int(n)
 
-            dur = float(self.event['dur']) / n
+            delay = 0
 
             for stutter in range(1, n):
 
-                for i in range(size):
+                delay += dur
 
-                    osc_msg = self.osc_message(i)
+                sub = {kw:modi(val, stutter-1) for kw, val in kwargs.items()}
 
-                    delay = modi(self.event['delay'], i)
-                    amp   = modi(self.event['amp'], i)
-                    buf   = modi(self.event['buf'], i)
-
-                    # Any messages with zero amps or 0 buf are not sent
-
-                    if (self.synthdef != SamplePlayer and amp > 0) or (self.synthdef == SamplePlayer and buf > 0 and amp > 0):
-
-                        delay += (stutter * dur)
-
-                        self.metro.schedule(send_delay(self, osc_msg), self.event_index + delay)
-
-                        if self.bang_kwargs:
-
-                            self.metro.schedule(self.bang, self.metro.now() + delay)
-                    
+                self.metro.schedule(func_delay(self.send, **sub), self.event_index + delay)
+                
         return self
-
-    # TODO
-    def spin(self, amount=4):
-        # Stutter but with pan all around
-        return self
-
+    
     # --- Misc. Standard Object methods
 
     def __int__(self):
@@ -720,167 +692,141 @@ class Player(Repeatable):
 
         # Special case: sample player
 
-        if self.synthdef is SamplePlayer:
+        if self.synthdef == SamplePlayer:
 
-            event_dur = self.event['dur']
+            try:
 
-            if isinstance(self.event['degree'], PlayGroup):
+                event_dur = self.event['dur']
 
-                buf_list = ((0, self.event['degree']),)
-                event_buf = [0]
+                if isinstance(self.event['degree'], PlayGroup):
 
-            else:
-
-                buf_list = enumerate(self.event['degree'])
-                event_buf = list(range(len(self.event['degree'])))
-
-            self.buf_delay = []
-            
-            for i, bufchar in buf_list:
-
-                if isinstance(bufchar, PlayGroup):
-
-                    char = BufferManager[bufchar[0]]
-
-                    # Get the buffer number to play
-                    
-                    buf_mod_index = modi(self.event['style'], i)
-
-                    event_buf[i] = char.bufnum(buf_mod_index)                    
-
-                    delay = 0
-                
-                    for n, b in enumerate(bufchar[1:]):
-
-                        char = BufferManager[b]
-
-                        buf_mod_index = modi(self.event['style'], i)
-
-                        delay += (bufchar[n].dur * self.event['dur'])
-
-                        self.buf_delay.append((char.bufnum(buf_mod_index),  delay))
+                    buf_list = ((0, self.event['degree']),)
+                    event_buf = [0]
 
                 else:
 
-                    char = BufferManager[bufchar]
+                    buf_list = enumerate(self.event['degree'])
+                    event_buf = list(range(len(self.event['degree'])))
 
-                    # Get the buffer number to play
-                    buf_mod_index = modi(self.event['style'], i)
+                self.buf_delay = []
+                
+                for i, bufchar in buf_list:
 
-                    event_buf[i] = char.bufnum(buf_mod_index)
+                    if isinstance(bufchar, PlayGroup):
 
-            self.event['buf'] = P(event_buf)
+                        char = BufferManager[bufchar[0]]
+
+                        # Get the buffer number to play
+                        
+                        buf_mod_index = modi(self.event['style'], i)
+
+                        event_buf[i] = char.bufnum(buf_mod_index).bufnum               
+
+                        delay = 0
+                    
+                        for n, b in enumerate(bufchar[1:]):
+
+                            char = BufferManager[b]
+
+                            buf_mod_index = modi(self.event['style'], i)
+
+                            delay += (bufchar[n].dur * self.event['dur'])
+
+                            self.buf_delay.append((char.bufnum(buf_mod_index),  delay))
+
+                    else:
+
+                        char = BufferManager[bufchar]
+
+                        # Get the buffer number to play
+                        buf_mod_index = modi(self.event['style'], i)                    
+
+                        event_buf[i] = char.bufnum(buf_mod_index).bufnum
+
+                self.event['buf'] = P(event_buf)
+
+            except TypeError:
+
+                pass
             
         return self
-##
-##    def Old_osc_message(self, index=0):
-##        """ Creates an OSC packet to play a SynthDef in SuperCollider """
-##
-##        freq = float(modi(self.attr['freq'], index))
-##        
-##        message = ['freq',  freq ]
-##
-##        attributes = self.attr
-##
-##        for key in attributes:
-##
-##            if key not in self.keywords:
-##
-##                try:
-##                    
-##                    val = modi(self.event[key], index)
-##
-##                    # Special case modulation
-##
-##                    if key == "sus":
-##
-##                        val = val * self.metro.beat() * modi(self.event['blur'], index)
-##
-##                    elif key == "echo":
-##
-##                        val = val * self.metro.beat() * modi(self.event['blur'], index)
-##
-##                        message += ['echoOn', int(val > 0)]
-##
-##                    elif key == "amp":
-##
-##                        val = val * modi(self.event['amplify'], index)
-##
-##                    message += [key, float(val)]
-##
-##                except:
-##                    
-##                    print("Error generating OSC message for '{}'. Problem with {}".format(self.synthdef, key))
-##
-##        return message
 
-    def osc_message(self, index=0):
-        """ Creates an OSC packet to play a SynthDef in SuperCollider """
+
+    def osc_message(self, index=0, **kwargs):
+        """ NEW: Creates an OSC packet to play a SynthDef in SuperCollider,
+            use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] """
 
         freq = float(modi(self.attr['freq'], index))
         
         message = ['freq',  freq ]
         fx_dict = {}
 
-        attributes = self.attr
+        attributes = self.attr.copy()
+
+        # Go through the attr dictionary and add kwargs
 
         for key in attributes:
 
             try:
 
-                if key in self.base_attributes:
+                # Don't use fx keywords or foxdot keywords
 
-                    val = modi(self.event[key], index)
+                if key not in FxList.kwargs() and key not in self.keywords:
+
+                    val = modi(kwargs.get(key, self.event[key]), index)
 
                     # Special case modulation
 
                     if key == "sus":
 
-                        val = val * self.metro.beat() * modi(self.event['blur'], index)
+                        val = val * self.metro.beat() * modi(kwargs.get('blur', self.event['blur']), index)
 
                     elif key == "amp":
 
-                        val = val * modi(self.event['amplify'], index)
+                        val = val * modi(kwargs.get('amplify', self.event['amplify']), index)
 
                     message += [key, float(val)]
 
-                elif key in self.fx_attributes:
+            except:
+                
+              print("Issue in OSC message for '{}'. Problem with {}".format(self.synthdef, key))
 
-                    fx_dict[key] = []
+        # See if any fx_attributes 
 
-                    for sub_key in FxList[key].args:
+        for key in self.fx_attributes:
 
-                        val = modi(self.event[sub_key], index)
+            if key in attributes:
 
-                        # Values that use amplify / sustain
+                # All effects use sustain to release nodes
 
-                        if key == "echo":
+                fx_dict[key] = []
 
-                            val = val * self.metro.beat() * modi(self.event['blur'], index)
+                # Look for any other attributes require e.g. room and verb
 
-                        val = float(val)
+                for sub_key in FxList[key].args:
+
+                    if sub_key in self.event:
+
+                        val = float(modi(kwargs.get(sub_key, self.event[sub_key]), index))
 
                         # Don't send fx with zero values
 
-                        if val > 0:
+                        if val == 0:
                             
+                            del fx_dict[key]
+
+                            break
+
+                        else:
+
                             fx_dict[key] += [sub_key, val]
-
-                    # Don't send fx with no arguments
-
-                    if len(fx_dict[key]) == 0:
-
-                        del fx_dict[key]
-
-            except:
-                
-                print("Issue in OSC message for '{}'. Problem with {}".format(self.synthdef, key))     
 
         return message, fx_dict
 
 
-    def send(self):
-        """ Sends the current event data to SuperCollder """
+    def send(self, **kwargs):
+        """ Sends the current event data to SuperCollder.
+            Use kwargs to overide values in the """
 
         size = self.largest_attribute()
         banged = False
@@ -889,21 +835,38 @@ class Player(Repeatable):
 
         for i in range(size):
 
-            osc_msg, effects = self.osc_message(i)
+            osc_msg, effects = self.osc_message(i, **kwargs)
 
-            delay = modi(self.event['delay'], i)
-            amp   = modi(self.event['amp'], i)
-            buf   = modi(self.event['buf'], i)
+            delay = modi(kwargs.get('delay', self.event['delay']), i)
+            buf   = modi(kwargs.get('buf', self.event['buf']), i)
+
+            amp   = osc_msg[osc_msg.index('amp') + 1]
 
             # Any messages with zero amps or 0 buf are not sent
 
             if (self.synthdef != SamplePlayer and amp > 0) or (self.synthdef == SamplePlayer and buf > 0 and amp > 0):
 
+                if self.synthdef == SamplePlayer:
+
+                    numChannels = BufferManager.getBuffer(buf).channels
+
+                    if numChannels == 1:
+
+                        synthdef = "play1"
+
+                    else:
+
+                        synthdef = "play2"
+
+                else:
+
+                    synthdef = str(self.synthdef)
+
                 if delay > 0:
 
                     if (delay, osc_msg, effects) not in delayed_messages:
 
-                        self.metro.schedule(send_delay(self, osc_msg, effects), self.event_index + delay)
+                        self.metro.schedule(send_delay(self, synthdef, osc_msg, effects), self.event_index + delay)
 
                         delayed_messages.append((delay, osc_msg, effects))
 
@@ -917,10 +880,10 @@ class Player(Repeatable):
 
                     if (osc_msg, effects) not in sent_messages:
                     
-                        self.server.sendPlayerMessage(str(self.synthdef), osc_msg, effects)
+                        self.server.sendPlayerMessage(synthdef, osc_msg, effects)
 
                         sent_messages.append((osc_msg, effects))
-
+                        
                     if not banged and self.bang_kwargs:
 
                         self.bang()
@@ -931,17 +894,37 @@ class Player(Repeatable):
 
                 for buf_num, buf_delay in self.buf_delay:
 
-                    if buf_num > 0:
+                    # Only send messages with amps > 0
 
-                        i = osc_msg.index('buf') + 1
+                    i = osc_msg.index('amp') + 1
 
-                        osc_msg[i] = buf_num
+                    if osc_msg[i] > 0:
 
-                        if (buf_delay + delay, osc_msg, effects) not in delayed_messages:
+                        # Make sure we use an integer number
 
-                            self.metro.schedule(send_delay(self, osc_msg, effects), self.event_index + buf_delay + delay)
+                        buf_num = int(buf_num)
 
-                            delayed_messages.append((buf_delay + delay, osc_msg, effects))
+                        if buf_num > 0:
+
+                            i = osc_msg.index('buf') + 1
+
+                            osc_msg[i] = buf_num
+
+                            numChannels = BufferManager.getBuffer(buf_num).channels
+
+                            if numChannels == 1:
+
+                                synthdef = "play1"
+
+                            else:
+
+                                synthdef = "play2"
+
+                            if (buf_delay + delay, osc_msg, effects) not in delayed_messages:
+
+                                self.metro.schedule(send_delay(self, synthdef, osc_msg, effects), self.event_index + buf_delay + delay)
+
+                                delayed_messages.append((buf_delay + delay, osc_msg, effects))
         return
 
     #: Methods for stop/starting players
@@ -1048,27 +1031,27 @@ class Player(Repeatable):
 
     def shuffle(self):
         """ Shuffles the degree of a player. If possible, do it visually """
-        if self.synthdef == SamplePlayer:
-            self._replace_string(PlayString(self.playstring).shuffle())
-        else:
-            self._replace_degree(self.attr['degree'].shuffle())
-            # self.degree = self.attr['degree'].shuffle()
+##        if self.synthdef == SamplePlayer:
+##            self._replace_string(PlayString(self.playstring).shuffle())
+##        else:
+##            #self._replace_degree(self.attr['degree'].shuffle())
+        self.degree = self.attr['degree'].shuffle()
         return self
 
     def mirror(self):
-        if self.synthdef == SamplePlayer:
-            self._replace_string(PlayString(self.playstring).mirror())
-        else:
-            self._replace_degree(self.attr['degree'].mirror())
-            #self.degree = self.attr['degree'].mirror()
+##        if self.synthdef == SamplePlayer:
+##            self._replace_string(PlayString(self.playstring).mirror())
+##        else:
+##            self._replace_degree(self.attr['degree'].mirror())
+        self.degree = self.attr['degree'].mirror()
         return self
 
     def rotate(self, n=1):
-        if self.synthdef == SamplePlayer:
-            self._replace_string(PlayString(self.playstring).rotate(n))
-        else:
-            self._replace_degree(self.attr['degree'].rotate(n))
-            #self.degree = self.attr['degree'].rotate(n)
+##        if self.synthdef == SamplePlayer:
+##            self._replace_string(PlayString(self.playstring).rotate(n))
+##        else:
+##            self._replace_degree(self.attr['degree'].rotate(n))
+        self.degree = self.attr['degree'].rotate(n)
         return self
 
     def splice(self):
@@ -1285,15 +1268,25 @@ class PlayerKey:
 class send_delay:
     """ Holds the state of a player whose send has
         been scheduled in the future """
-    def __init__(self, s, message, fx):
-        self.server = s.server
-        self.synth = s.synthdef
-        self.msg = message[:]
-        self.fx  = fx.copy()
+    def __init__(self, p, synthdef, message, fx={}):
+        self.server = p.server
+        self.synth = synthdef
+        self.msg = list(message[:])
+        self.fx = fx.copy()
     def __repr__(self):
         return "<'{}' delay>".format(self.synth)
     def __call__(self):
         self.server.sendPlayerMessage(self.synth, self.msg, self.fx)
+
+class func_delay:
+    def __init__(self, func, *args, **kwargs):
+        self.func = func
+        self.args = args[:]
+        self.kwargs = kwargs.copy()
+    def __repr__(self):
+        return "<'{}' delay>".format(self.func.__name__)
+    def __call__(self):
+        self.func(*self.args, **self.kwargs)
 
 
 ###### GROUP OBJECT

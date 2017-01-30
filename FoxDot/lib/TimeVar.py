@@ -94,34 +94,63 @@ class var(Repeatable):
         return "<TimeVar(%s, %s)>" % (repr(self.values()), repr(self.durs()))
         
     # Mathematical Operators
+    # ----------------------
+    # Only resolve to a new TimeVar if a var, int, or float
 
     # + 
     def __add__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__radd__(self) for x in other))
+            else:
+                return other.__radd__(self)
         new = self.new(other)
-        self.func    = op.Add
         new.evaluate = fetch(op.Add)
         return new
+    
     def __radd__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__add__(self) for x in other))
+            else:
+                return other.__add__( self)
         new = self.new(other)
         new.evaluate = fetch(op.rAdd)
         return new
 
     # -
     def __sub__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__rsub__(self) for x in other))
+            else:
+                return other.__rsub__(self)
         new = self.new(other)
         new.evaluate = fetch(op.rSub)
         return new
     def __rsub__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__sub__(self) for x in other))
+            else:
+                return other.__sub__(self)
         new = self.new(other)
         new.evaluate = fetch(op.Sub)
         return new
 
     # *
     def __mul__(self, other):
+        if not isinstance(other, (var, int, float)):
+            return other.__rmul__(self)
         new = self.new(other)
         new.evaluate = fetch(op.Mul)
         return new
     def __rmul__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__mul__(self) for x in other))
+            else:
+                return other.__mul__(self)
         new = self.new(other)
         new.evaluate = fetch(op.Mul)
         return new
@@ -129,29 +158,63 @@ class var(Repeatable):
     # **
 
     def __pow__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__row__(self) for x in other))
+            else:
+                return other.__rpow__(self)
         new = self.new(other)
         new.evaluate = fetch(op.rPow)
         return new
 
     def __rpow__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__pow__(self) for x in other))
+            else:
+                return other.__pow__(self)
+        
         new = self.new(other)
         new.evaluate = fetch(op.Pow)
         return new
     
     # /
     def __div__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__rdiv__(self) for x in other))
+            else:
+                return other.__rdiv__(self)
         new = self.new(other)
         new.evaluate = fetch(op.rDiv)
         return new
+    
     def __rdiv__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__div__(self) for x in other))
+            else:
+                return other.__div__(self)
         new = self.new(other)
         new.evaluate = fetch(op.Div)
         return new
+    
     def __truediv__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__rtruediv__(self) for x in other))
+            else:
+                return other.__rtruediv__(self)
         new = self.new(other)
         new.evaluate = fetch(op.rDiv)
         return new
+    
     def __rtruediv__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__truediv__(self) for x in other))
+            else:
+                return other.__truediv__(self)
         new = self.new(other)
         new.evaluate = fetch(op.Div)
         return new
@@ -186,11 +249,21 @@ class var(Repeatable):
 
     # %
     def __mod__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__rmod__(self) for x in other))
+            else:
+                return other.__rmod__(self)
         new = self.new(other)
         new.evaulate = fetch(op.rMod)
         return new
 
-    def __rmod__(self, other): #works
+    def __rmod__(self, other):
+        if not isinstance(other, (var, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__mod__(self) for x in other))
+            else:
+                return other.__mod__(self)
         new = self.new(other)
         new.evaluate = fetch(op.Mod)
         return new
@@ -216,9 +289,6 @@ class var(Repeatable):
         new.dependency = self
         new.evaluate = fetch(op.rGet)
         return new
-
-    #def __index__(self):
-    #    return int(self)
 
     def __iter__(self):
         for item in self.now():

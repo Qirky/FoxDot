@@ -139,6 +139,7 @@ class workspace:
         self.text.bind("<Alt_L>",                           lambda event: "break")
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
+        self.text.bind("<Alt-period>".format(ctrl),    self.releaseNodes)
         self.text.bind("<{}-v>".format(ctrl),               self.paste)
         self.text.bind("<{}-bracketright>".format(ctrl),    self.indent)
         self.text.bind("<{}-bracketleft>".format(ctrl),     self.unindent)
@@ -956,6 +957,10 @@ class workspace:
         """ Called on window close. Ends Clock thread process """
         execute("Clock.stop()")
         execute("Server.quit()")
+        return
+
+    def releaseNodes(self, event=None):
+        execute("Server.freeAllNodes()")
         return
 
     def replace(self, line, old, new):

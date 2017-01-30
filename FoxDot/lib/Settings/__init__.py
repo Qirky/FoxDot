@@ -29,7 +29,7 @@ FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 
 SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 SYNTHDEF_DIR = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
-ENVELOPE_DIR = os.path.realpath(FOXDOT_ROOT + "/osc/scsynenv/")
+EFFECTS_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/sceffects/")
 
 FOXDOT_OSC_FUNC     = os.path.realpath(FOXDOT_ROOT + "/osc/OSCFunc.scd")
 FOXDOT_STARTUP_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Startup.scd")
@@ -39,8 +39,8 @@ FOXDOT_EFFECTS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Effects.scd")
 def GET_SYNTHDEF_FILES():
     return [os.path.realpath(SYNTHDEF_DIR + "/" + path) for path in os.listdir(SYNTHDEF_DIR)]
 
-def GET_ENVELOPE_FILES():
-    return [os.path.realpath(ENVELOPE_DIR + "/" + path) for path in os.listdir(ENVELOPE_DIR)]
+def GET_FX_FILES():
+    return [os.path.realpath(EFFECTS_DIR + "/" + path) for path in os.listdir(EFFECTS_DIR)]
 
 # Set Environment Variables
 
@@ -96,7 +96,14 @@ MAX_CHANNELS  = conf.MAX_CHANNELS
 
 # Name of SamplePlayer SynthDef
 
-SamplePlayer = 'play'
+class _SamplePlayer:
+    names = ('play1', 'play2')
+    def __eq__(self, other):
+        return other in self.names
+    def __ne__(self, other):
+        return other not in self.names
+
+SamplePlayer = _SamplePlayer()
 
 # Colours
 

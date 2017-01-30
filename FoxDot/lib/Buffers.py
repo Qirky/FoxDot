@@ -4,7 +4,7 @@
 
 from os.path import abspath, join, dirname
 from Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
-# from ServerManager import Server
+import wave
 import os
 
 def path(fn):
@@ -66,30 +66,36 @@ DESCRIPTIONS = { 'a' : "Unknown",
                  '#' : "Crash",
                  '+' : "Clicks",
                  '@' : "Computer" }
-                 
-                 
+
+class Buffer:
+    def __init__(self, fn, number, channels=1):
+        self.fn = fn
+        self.bufnum   = int(number)
+        self.channels = channels
+    def __repr__(self):
+        return "<Buffer num {}>".format(self.bufnum)
+    def __int__(self):
+        return self.bufnum
 
 class BufChar:
     def __init__(self, char):
         self.char    = char
-        self.buffers = {}
-        self.files   = []
+        self.buffers = []
     def __str__(self):
         return "BufChar '{}'".format(self.char)
-    def addbuffer(self, fn, num):
-        self.buffers[fn] = num
-        self.files.append(fn)
+    def addbuffer(self, fn, num, num_channels=1):
+        self.buffers.append( Buffer(fn, num, num_channels) )
+        return
+    def __getitem__(self, key):
+        return self.buffers[key]
     def __iter__(self):
-        for fn, buf in self.buffers.items():
-            yield fn, buf
+        for buf in self.buffers:
+            yield buf.fn, buf.bufnum
     def bufnum(self, n):
-        return self.buffers[self.files[n % len(self.files)]] if len(self.files) else 0
+        return self.buffers[n % len(self.buffers)] if self.buffers else Buffer(None, 0)
 
 class BufferManager:
     def __init__(self):
-
-        # ServerManager Object
-        #self.server = Server
 
         # Dictionary of characters to respective buffer number
         self.symbols = {}
@@ -103,39 +109,41 @@ class BufferManager:
 
         # Go through the alphabet
 
-        for char in alpha:
-            upper = join(root, char, "upper")
-            lower = join(root, char, "lower")
+        for folder in ('lower', 'upper'):
 
-            # Iterate over each
+            for char in alpha:
 
-            self.symbols[char] = BufChar(char)
+                if folder == 'upper':
 
-            if os.path.isdir(lower):
-                try:
-                    for f in sorted(os.listdir(lower)):
+                    char = char.upper()
+                
+                path = join(root, char, folder)
 
-                        self.symbols[char].addbuffer(join(lower, f), bufnum)
+                # Start with lower case
 
-                        bufnum += 1
+                self.symbols[char] = BufChar(char)
 
-                except:
-                    del self.symbols[char]
+                if os.path.isdir(path):
+                    try:
+                        for f in sorted(os.listdir(path)):
 
-            char = char.upper()
+                            try:
 
-            self.symbols[char] = BufChar(char)
+                                snd = wave.open(join(path, f))
+                                numChannels = snd.getnchannels()
+                                snd.close()
 
-            if os.path.isdir(upper):
-                try:
-                    for f in sorted(os.listdir(upper)):
+                            except:
 
-                        self.symbols[char].addbuffer(join(upper, f), bufnum)
+                                numChannels = 2
 
-                        bufnum += 1
+                            self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
+                            self.buffers[bufnum] = self.symbols[char][-1]
 
-                except:
-                    del self.symbols[char]
+                            bufnum += 1
+
+                    except:
+                        pass
 
         # Go through symbols
 
@@ -149,12 +157,23 @@ class BufferManager:
                 try:
                     for f in sorted(os.listdir(folder)):
 
-                        self.symbols[char].addbuffer(join(folder, f), bufnum)
+                        try:
+
+                            snd = wave.open(join(path, f))
+                            numChannels = snd.getnchannels()
+                            snd.close()
+
+                        except:
+
+                            numChannels = 2
+
+                        self.symbols[char].addbuffer(join(folder, f), bufnum, numChannels)
+                        self.buffers[bufnum] = self.symbols[char][-1]
 
                         bufnum += 1
 
-                except:
-                    del self.symbols[char]
+                except Exception as e:
+                    print char, e
 
         # Define empty buffer
         self.nil = BufChar(None)
@@ -168,8 +187,11 @@ class BufferManager:
             key = key.char
         return self.symbols.get(key, self.nil)
 
+    def getBuffer(self, bufnum):
+        return self.buffers[int(bufnum)]
+
     def __str__(self):
-        return "\n".join(["{}: {}".format(symbol, self.buffers[n]) for symbol, n in self.symbols.items()])
+        return "\n".join(["{}: {}".format(symbol, b.buffers) for symbol, b in self.symbols.items()])
 
     def write_to_file(self):
         f = open(FOXDOT_BUFFERS_FILE, 'w')

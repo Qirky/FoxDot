@@ -217,6 +217,22 @@ class metaPattern(object):
         new = [self.data[i-1] for i in range(len(self.data), 0, -1)]
         return Pattern(new)
 
+    def swap(self, n=2):
+        new = []
+        for pair in [list(val) for val in [reversed(self[i:i+n]) for i in range(0, len(self), n)]]:
+            for item in pair:
+                new.append(item)
+        return Pattern(new)
+
+    def splice(self, seq, *seqs):
+        sequences = (self, seq) + seqs
+        size = LCM(*[len(s) for s in sequences])
+        new = []
+        for i in range(size):
+            for seq in sequences:
+                new.append(seq[i])
+        return Pattern(new)
+
     def invert(self):
         new = []
         lrg = float(max(self.data))

@@ -6,11 +6,10 @@
 """
 
 import os, socket
-from subprocess import Popen
+import signal
+import subprocess 
 from time import sleep
-
-from Effects import FxList
-
+import Effects
 from Settings import *
 from OSC import *
 
@@ -32,18 +31,18 @@ class SCLangServerManager:
         self.booted = False
         self.wait_time = 5
         self.count = 0
-        
+
         self.client = SCLangClient()
         self.client.connect( (self.addr, self.port) )
 
         self.sclang = SCLangClient()
         self.sclang.connect( (self.addr, self.SCLang_port) )        
 
-        self.node = 1100 # The first 100 are reserved
+        self.node = 1000
         self.bus  = 4
 
         self.fx_setup_done = False
-        self.fx_nodes = {}
+        self.fx_names = {name: fx.synthdef for name, fx in Effects.FxList.items() }
 
         # Toggle debug
         # ------------
@@ -60,6 +59,10 @@ class SCLangServerManager:
         self.node += 1
         return self.node
 
+    def query(self):
+        self.client.send(OSCMessage("/status"))
+        return
+
     def nextbusID(self):
         if self.bus > 100:
             self.bus = 4
@@ -74,84 +77,55 @@ class SCLangServerManager:
         self.client.send( message )        
         return
 
-    def sendNote(self, SynthDef, packet):
-        packet = [SynthDef, 0, 1, 1] + packet
-        message = OSCMessage("/s_new")
-        node = packet[1] = self.nextnodeID()
-        message.append(packet)
-        self.client.send( message )   
+    def freeAllNodes(self):
+        msg = OSCMessage("/g_freeAll")
+        msg.append([1])
+        self.client.send(msg)
         return
 
-    def fx_setup(self):
-        bundle = OSCBundle()
-        msg=OSCMessage("/s_new")
-        packet = ["makeSound", 1001, 1, 1]
-        msg.append(packet)
-        bundle.append(msg)
-
-        self.fx_nodes["makeSound"]=1001
-        
-        for name, fx in FxList.items():
-            msg = OSCMessage("/s_new")
-            packet = [fx.node_name, fx.node_id, 1, 1]
-
-            self.fx_nodes[name] = fx.node_id
-            
-            msg.append( packet )
-            bundle.append(msg)
-        self.client.send(bundle)
-        self.fx_setup_done = True
-        return       
-
     def sendPlayerMessage(self, synthdef, packet, effects):
-        if not self.fx_setup_done:
-            self.fx_setup()
         # Create a bundle
         bundle = OSCBundle()
-        this_node = self.nextnodeID()
+
+        # Create a group for the note
+        group_id = self.nextnodeID()
+        msg = OSCMessage("/g_new")
+        msg.append( [group_id, 1, 1] )
+        bundle.append(msg)
+
+        # Get the bus and SynthDef nodes
         this_bus  = self.nextbusID()
+        this_node = self.nextnodeID()
+
+        # Make sure messages release themselves after 8 * the duration at max (temp)
+        i = packet.index('sus') + 1
+        max_sus = packet[i] * 8
 
         # Synth
         msg = OSCMessage("/s_new")
-        packet = [synthdef, this_node, 1, 1, 'bus', this_bus] + packet
-        # packet = [synthdef, this_node, 1, 1] + packet
+        packet = [synthdef, this_node, 0, group_id, 'bus', this_bus] + packet
         msg.append( packet )
         bundle.append(msg)
 
         # Effects
         for fx in effects:
-            this_node, last_node = self.fx_nodes[fx], this_node
             
-            # Set control values
-            msg = OSCMessage("/n_set")
-            packet = [this_node] + effects[fx]
-            msg.append( packet )
+            # Get next node ID
+            this_node, last_node = self.nextnodeID(), this_node
+
+            msg = OSCMessage("/s_new")
+            packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + effects[fx]
+            msg.append(packet)
             bundle.append(msg)
 
-            # Put after synth
-            msg = OSCMessage("/n_after")
-            packet = [this_node, last_node]
-            msg.append( packet )
-            bundle.append(msg)
-            
-        # Output
-        this_node, last_node = self.fx_nodes['makeSound'], this_node
-
-        # Control values
-        msg = OSCMessage("/n_set")
-        packet = [this_node, 'bus', this_bus]
-        msg.append( packet )
+        # Finally, output sound through end node "makeSound"
+        msg = OSCMessage("/s_new")
+        this_node, last_node = self.nextnodeID(), this_node
+        packet = ['makeSound', this_node, 1, group_id, 'bus', this_bus, 'sus', max_sus]
+        msg.append(packet)
         bundle.append(msg)
 
-        # Put after effects
-        msg = OSCMessage("/n_after")
-        packet = [this_node, last_node]
-        msg.append( packet )
-        bundle.append(msg)
-
-        print bundle
-
-        # Send
+        # Send to SuperCollider
         self.client.send( bundle )
         return
         
@@ -198,16 +172,16 @@ class SCLangServerManager:
     # Boot and Quit
     # -------------
 
-    def boot(self):
-        """ Don't use """
+    def start(self):
+        """ Boots SuperCollider """
 
         if not self.booted:
             
             os.chdir(SC_DIRECTORY)
             
             print("Booting SuperCollider Server...")
-            
-            self.daemon = Popen([SCLANG_EXEC, '-D', FOXDOT_STARTUP_FILE])
+
+            self.daemon = subprocess.Popen([SCLANG_EXEC, '-D', FOXDOT_STARTUP_FILE])
 
             os.chdir(USER_CWD)
 
@@ -219,7 +193,7 @@ class SCLangServerManager:
             
         return
 
-    def start(self):
+    def makeStartupFile(self):
         ''' Boot SuperCollider and connect over OSC '''
 
         # 1. Compile startup file
@@ -227,31 +201,30 @@ class SCLangServerManager:
         with open(FOXDOT_STARTUP_FILE, 'w') as startup:
 
             startup.write('''Routine.run {
-                	s.options.blockSize = 128;
-                        s.options.memSize = 131072;
-                        s.bootSync();\n''')
+            s.options.blockSize = 128;
+            s.options.memSize = 131072;
+            s.bootSync();\n''')
 
-            files = [FOXDOT_OSC_FUNC, FOXDOT_BUFFERS_FILE, FOXDOT_EFFECTS_FILE]
-            files = files + GET_SYNTHDEF_FILES() + GET_ENVELOPE_FILES()
-
+            files = [FOXDOT_OSC_FUNC, FOXDOT_BUFFERS_FILE]
+            files = files + GET_SYNTHDEF_FILES() + GET_FX_FILES()
+            
             for fn in files:
 
                 f = open(fn)
                 startup.write(f.read())
-                startup.write("\n")
+                startup.write("\n\n")
+
+            startup.write('include("BatLib");\n')
+            startup.write('StageLimiter.activate(2);\n')
 
             startup.write("};")
-
-        # 2. Boot SuperCollider
-
-        self.boot()
 
         return
 
     def quit(self):
         if self.booted:
             self.client.send(OSCMessage("/quit"))
-            sleep(0.5)
+            sleep(1)
             self.daemon.terminate()
         return
 

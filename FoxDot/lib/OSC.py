@@ -1750,7 +1750,7 @@ class OSCAddressSpace:
 					raise TypeError("Message-callback %s did not return OSCMessage or None: %s" % (self.server.callbacks['default'], type(reply)))
 			else:
 				raise NoCallbackError(pattern)
-		
+
 		return replies
 
 ######

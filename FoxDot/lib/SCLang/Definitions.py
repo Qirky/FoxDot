@@ -1,21 +1,23 @@
 from __future__ import division
-#from ..Settings import MAX_CHANNELS
 from SCLang import *
 from SynthDef import SynthDef, SampleSynthDef
 import Env
 
-# TODO - check this!!!
-NUM_CHANNELS = MAX_CHANNELS = 1
-
 # Sample Player
 
-with SampleSynthDef("play") as play:
-    play.defaults.update(room=0.1 ,rate=1, bitcrush=24)
+with SampleSynthDef("play1") as play:
+    play.defaults.update(room=0.1 ,rate=1)
     play.amp  = play.amp * 0.75
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
-    play.osc  = PlayBuf.ar(NUM_CHANNELS, play.buf, BufRateScale.ir(play.buf) * play.rate)
-    play.osc  = play.osc * Env.ramp(amp=[1,1,0], sus=[play.sus * 2,0], doneAction=0) * play.amp * 3
-    play.env  = Env.ramp(sus=2)
+    play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate, doneAction=2)
+    play.osc  = play.osc * play.amp * 3
+
+with SampleSynthDef("play2") as play:
+    play.defaults.update(room=0.1 ,rate=1)
+    play.amp  = play.amp * 0.75
+    play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
+    play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate , doneAction=2)
+    play.osc  = play.osc * play.amp * 3
 
 # Synth Players
 
@@ -24,10 +26,9 @@ with SynthDef("pads") as pads:
     pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
     pads.env = Env.perc()
 
-noise = SynthDef("noise")
-noise.osc = LFNoise0.ar(noise.freq, noise.amp)
-noise.env = Env.env()
-noise.add()
+with SynthDef("noise") as noise:
+    noise.osc = LFNoise0.ar(noise.freq, noise.amp)
+    noise.env = Env.env()
 
 with SynthDef("dab") as synth:
      a = HPF.ar(Saw.ar(synth.freq / 4, mul=synth.amp / 2), 2000)
@@ -55,6 +56,7 @@ with SynthDef("bass") as bass:
 
 with SynthDef("dirt") as dirt:
     dirt.freq = dirt.freq / 4
+    dirt.amp  = dirt.amp / 2
     dirt.osc  = LFSaw.ar(dirt.freq, mul=dirt.amp) + VarSaw.ar(dirt.freq + 1, width=0.85, mul=dirt.amp) + SinOscFB.ar(dirt.freq - 1, mul=dirt.amp/2)
     dirt.env  = Env.perc()
 
@@ -111,13 +113,14 @@ with SynthDef("scratch") as scratch:
 with SynthDef("klank") as klank:
     klank.sus = klank.sus * 1.5
     klank.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, klank.freq)
-    klank.env = Env.env()
+    klank.osc = Decimator.ar(klank.osc, bits=klank.rate - 1)
+    klank.env = Env.env(klank.sus*2)
 
 with SynthDef("quin") as synth:
-    synth.amp = synth.amp * 2
-    synth.osc = Klank.ar([[1,2,3,4],[1,4,9,16],[16,9,10,20]], SinOsc.ar(0.5), [synth.freq * 0.99, synth.freq])
-    synth.osc = LPF.ar(synth.osc, Line.ar(4000,40, dur=0.25 / synth.rate))
-    synth.env = Env.perc(atk=0.01, sus=4, curve=-12)
+    synth.amp = synth.amp 
+    synth.osc = Klank.ar([[1,2,4,2],[100,50,0,10],[1,5,0,1]], Impulse.ar(synth.freq).dup, [synth.freq * 1.01, synth.freq]) / 5000
+    synth.osc = synth.osc * LFSaw.ar(synth.freq * synth.rate)
+    synth.env = Env.perc(atk=0.01, sus=synth.sus, curve=1)
 quin = synth
 
 with SynthDef("pluck") as pluck:
@@ -125,8 +128,7 @@ with SynthDef("pluck") as pluck:
     pluck.amp  = pluck.amp + 0.00001
     pluck.freq = [pluck.freq, pluck.freq + LFNoise2.ar(50).range(-2,2)]
     pluck.osc  = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
-    pluck.osc  = pluck.osc * XLine.ar(pluck.amp, pluck.amp/10000, pluck.sus * 4) * 0.3
-    pluck.env  = Env.ramp(sus=pluck.sus*1.5)
+    pluck.osc  = pluck.osc * XLine.ar(pluck.amp, pluck.amp/10000, pluck.sus * 4, doneAction=2) * 0.3
 
 with SynthDef("spark") as synth:
     freq = instance('freq')
@@ -134,7 +136,6 @@ with SynthDef("spark") as synth:
     synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
     synth.osc  = LFSaw.ar(freq * 1.002, iphase=Saw.ar(0.1)) * 0.3 + LFSaw.ar(freq, iphase=Saw.ar(0.1)) * 0.3
     synth.osc  = synth.osc * Line.ar(synth.amp, synth.amp/10000, synth.sus * 1.5) * 0.3
-    synth.env  = Env.ramp(sus=synth.sus*2)
 spark = synth
 
 with SynthDef("blip") as synth:
@@ -143,7 +144,6 @@ with SynthDef("blip") as synth:
     synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
     synth.osc  = (LFCub.ar(freq * 1.002, iphase=1.5) + LFTri.ar(freq, iphase=Line.ar(2,0,0,2)) * 0.3) * Blip.ar(freq / 2, synth.rate)
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 2) * 0.3
-    synth.env  = Env.ramp(sus=synth.sus*2.5)
 blip = synth
 
 
@@ -195,13 +195,13 @@ bug.add()
 pulse = SynthDef("pulse")
 pulse.amp = pulse.amp / 4
 pulse.osc = Pulse.ar(pulse.freq)
-pulse.env = Env.ramp()
+pulse.env = Env.mask()
 pulse.add()
 
 saw = SynthDef("saw")
 saw.amp = saw.amp / 4
 saw.osc = Saw.ar(saw.freq)
-saw.env = Env.ramp()
+saw.env = Env.mask()
 saw.add()
 
 snick = SynthDef("snick")

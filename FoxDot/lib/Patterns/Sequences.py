@@ -60,7 +60,10 @@ def PAlt(pat1, pat2, *patN):
     return Pattern(data)
 
 def PStep(n, value, default=0):
-    return Pattern([default]*(n-1)+[value])
+    data = []
+    for length in asStream(n):
+        data += ([default] * (length-1) + [value])
+    return Pattern(data)
 
 def PSum(n, total, **kwargs):
     """
