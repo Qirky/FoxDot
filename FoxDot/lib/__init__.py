@@ -4,52 +4,57 @@
 
 """
 
-""" CODE EXEC MODULE """
-
 from Code import *
-
-""" SERVER """
-
-from ServerManager import Server
-
-""" IMPORTS """
-
-from random import choice as choose
-
 from TempoClock import *
 from Players import *
 from Patterns import *
+from Effects import *
 from TimeVar import *
 from Constants import *
 from Midi import *
+from Settings import *
+from SCLang.Definitions import *
+from SCLang import SynthDefs, Env, SynthDef
+from ServerManager import Server
+from GhostCoder import Ghost
 import Scale
 import Root
 
-""" SCLang """
+# stdlib imports
 
-from SCLang import Synths, Env
-from SCLang.SynthDefs import *
+from random import choice as choose
 
-""" CLOCK """
+# Create a clock and define and click functions
 
 Clock = TempoClock()
-# Clock.when_statements = when
 
-when.metro = var.metro = Clock
+def nextBar(f, n=0):
+    ''' Schedule functions when you define them with @nextBar'''
+    Clock.schedule(f, Clock.next_bar() + n)
+    return f
 
+# Assign the clock to time-keeping classes
+
+when.metro    = Clock
+var.metro     = Clock
 Player.metro  = Clock
+
+# Players and effects need reference to SC server
+
 Player.server = Server
-Player.default_scale = Scale.default()
-Player.default_root  = Root.default()
-
-Clock.start()
-
-BufferManager.server = Server
-BufferManager.load()
+Effect.server = Server
 
 FoxDotCode.namespace=globals()
 
-""" Preset PlayerObjects """
+# Compile a .scd file to send to SuperCollider and boot server
+
+Server.makeStartupFile()
+
+if conf.BOOT_ON_STARTUP:
+
+    Server.start()
+
+# Create a preset Players
 
 alphabet = list('abcdefghijklmnopqrstuvwxyz')
 numbers  = list('0123456789') + [""]
@@ -60,7 +65,7 @@ for char1 in alphabet:
 
         FoxDotCode.namespace[char1 + char2] = Player()
 
-""" List of Patterns """
+# Keep a list of pattern names
 
 PatternTypes = []
 for pattern_name in sorted(classes(Sequences)):
@@ -69,4 +74,7 @@ for pattern_name in sorted(classes(Sequences)):
     else:
         if pattern_name.upper() !=  PatternTypes[-1].upper():
             PatternTypes.append(pattern_name)
-        
+
+# Start the TempoClock
+
+Clock.start()
