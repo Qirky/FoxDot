@@ -1,15 +1,14 @@
-FoxDot - Live Coding with Python v0.2.2
+FoxDot - Live Coding with Python v0.2.3
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.2.2 fixes and updates
+### v0.2.3 fixes and update
 
-- `PDur` added: a pattern that implements Euclidean Rhythms
-- Player attributes can be manipulated using the `Player.every` method
-- Errors caught and displayed in FoxDot console instead of crashing
-- Can set different tempi for Players using the `bpm` keyword 
-- Sample Player objects can play multiple samples together by grouping them as a PGroup but cannot feature square brackets
+- Effects are now implemented using busses on SuperCollider, which uses less CPU 
+- Effects can be customised and defined
+- Sample Player behaviour (i.e. how the string of characters relates to playback) has been altered. Square brackets refer to a single event even though two samples are played.
+- SuperCollider is booted on startup with a compiled startup file.
 
 See `docs/changelog` for more
 
@@ -33,14 +32,12 @@ See `docs/changelog` for more
 
 #### Startup
 
-1. Open SuperCollider
-2. Open the file `/FoxDot/osc/OSCFunc.scd` in SuperCollider and execute the contents. This is done by placing the text cursor anywhere in the text and pressing `Ctrl+Return`. This boots the SuperCollider server (sometimes referred to as `sclang` or `SCLang` - short for SuperCollider Language) and listens for messages coming from FoxDot.
-3. Run FoxDot using `python -m FoxDot`.
+1. Run FoxDot by entering `python -m FoxDot` at the command line. On your first use you will be asked to select the directory where SuperCollider is installed. This is so FoxDot can boot the SuperCollider server on startup.
 
 #### Troubleshooting
 
 ##### Buffer mismatch error
-If you are getting an error along the lines of "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider when trying to play back audio samples, go to FoxDot/Settings/Conf.txt and change the value of MAX_CHANNELS from 2 to 1 or vice versa. This issue might be to do with the version of SuperCollider or O/S being used.
+If you are getting an error similar to "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider this just means that a mono audio file is being played back where SuperCollider was expecting stereo. Nothing to worry about!
 
 ##### `Decimator` class not defined
 This is a class that is found in the SC3 plugins (link at the top) but if you don't have it installed, go to `lib/Settings/conf.py` and set `SC3_PLUGINS` to `False`.
@@ -75,7 +72,7 @@ The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - an
 
 ### 'Sample Player' Objects
 
-In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters as its first argument. Each character in the string refers to one sample (the current list can be seen in the `FoxDot/lib/Settings/samplelib.csv` file, which you can customise if you so wish). To create a basic drum beat, you can execute the following line of code:
+In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters (known as a "PlayString") as its first argument. Each character in the string refers to one sample (the current list can be seen in the `FoxDot/lib/Settings/samplelib.csv` file, which you can customise if you so wish). To create a basic drum beat, you can execute the following line of code:
 
 ``` python
 d1 >> play("x-o-")
@@ -87,6 +84,12 @@ To have samples play simultaneously, just create a new 'Sample Player' object fo
 bd >> play("x( x)  ")
 hh >> play("---[--]")
 sn >> play("  o ")
+```
+
+**New in v0.2.3:** You can merge multiple PlayStrings together by using the `PZip` pattern:
+
+``` python
+d1 >> play( PZip("x( x)  ", "--[--]", "  o( [ o])") )
 ```
 
 Grouping characters in round brackets laces the pattern so that on each play through of the sequence of samples, the next character in the group's sample is played. The sequence `(xo)---` would be played back as if it were entered `x---o---`. Characters in square brackets are played twice as fast (half the duration) of one character by itself, and characters in curly brackets (`{}`) are played in the same time span as one character. Example: `{oo}` would play two snare hits at a quarter beat each but `{ooo}` would play three snare hits at 3/8 beats each.
@@ -107,8 +110,6 @@ You can schedule these methods by calling the `every` method, which takes a list
 ```python
 bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 ```
-
-
 
 ## Player Object Keywords
 
