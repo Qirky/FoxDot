@@ -162,6 +162,7 @@ ClipNoise    = cls("ClipNoise")
 BufRateScale = cls("BufRateScale")
 BufChannels  = cls("BufChannels")
 BufFrames    = cls("BufFrames")
+BufDur       = cls("BufDur")
 
 # sc3 Plugins
 

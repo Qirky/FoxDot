@@ -1,9 +1,7 @@
 from random import choice, shuffle
 from Operations import *
 from Parse import Parse
-
-
-
+from PlayString import PlayString
 
 """
 
@@ -67,11 +65,14 @@ class metaPattern(object):
 
     def getitem(self, key):
         """ Is called by __getitem__ """
-        i = key % len(self.data)
-        val = self.data[i]
-        if isinstance(val, (Pattern, GeneratorPattern)):
-            j = key // len(self.data)
-            val = val.getitem(j)
+        if isinstance(key, metaPattern):
+            val = self.__class__([value for n, value in enumerate(self) if key[n] > 0])
+        else:
+            i = key % len(self.data)
+            val = self.data[i]
+            if isinstance(val, (Pattern, GeneratorPattern)):
+                j = key // len(self.data)
+                val = val.getitem(j)
         return val
     
     def __setitem__(self, key, value):
@@ -96,9 +97,11 @@ class metaPattern(object):
         for i, value in enumerate(self):
             yield i, value
 
-    def __getslice__(self, i, j):
-        return Pattern( self.data[i:j] )
-
+    def __getslice__(self, start, stop, step=1):
+        if stop < start:
+            stop = (len(self.data) + start)
+        return Pattern([self[i] for i in range(start, stop, step) ])
+            
     def __setslice__(self, i, j, item):
         self.data[i:j] = Format(item)
 
@@ -147,19 +150,21 @@ class metaPattern(object):
         return PEq(self, other)
     def __ne__(self, other):
         return PNe(self, other)
+    
     def __gt__(self, other):
-        return False
+        return Pattern([int(value > other) for value in self])
     def __ge__(self, other):
-        return self == other
+        return Pattern([int(value >= other) for value in self])
     def __lt__(self, other):
-        return False
+        return Pattern([int(value < other) for value in self])
     def __le__(self, other):
-        return self == other
+        return Pattern([int(value <= other) for value in self])
 
     #: Methods for strings as pattern
 
     def fromString(self, string):
         self.data = Parse(string)
+        self.make()
         return self
 
     def flat(self):
@@ -210,6 +215,22 @@ class metaPattern(object):
 
     def reverse(self):
         new = [self.data[i-1] for i in range(len(self.data), 0, -1)]
+        return Pattern(new)
+
+    def swap(self, n=2):
+        new = []
+        for pair in [list(val) for val in [reversed(self[i:i+n]) for i in range(0, len(self), n)]]:
+            for item in pair:
+                new.append(item)
+        return Pattern(new)
+
+    def splice(self, seq, *seqs):
+        sequences = (self, seq) + seqs
+        size = LCM(*[len(s) for s in sequences])
+        new = []
+        for i in range(size):
+            for seq in sequences:
+                new.append(seq[i])
         return Pattern(new)
 
     def invert(self):
@@ -310,7 +331,7 @@ class metaPattern(object):
 
             self.data = list(self.data)
             
-        if not isinstance(self.data, PatternType):
+        if not isinstance(self.data, (PatternType, PlayString)):
     
             self.data = [self.data]
 

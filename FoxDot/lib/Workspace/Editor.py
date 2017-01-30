@@ -4,6 +4,7 @@
 
 # Tkinter Interface
 from Tkinter import *
+import ttk
 import tkFont
 import tkFileDialog
 
@@ -15,6 +16,7 @@ from Undo import UndoStack
 from Prompt import TextPrompt
 from BracketHandler import BracketHandler
 from TextBox import ThreadedText
+from LineNumbers import LineNumbers
 
 from ..Settings import FONT, FOXDOT_ICON
 import os
@@ -30,20 +32,32 @@ class workspace:
     default_font = FONT
     namespace = {}
 
-    def __init__(self):
+    def __init__(self, CodeClass):
 
-        self.n=0
+        # Configure FoxDot's namespace to include the editor
+
+        CodeClass.namespace['FoxDot'] = self
+        CodeClass.namespace['Player'].widget = self
+        CodeClass.namespace['Ghost'].widget = self
+
+        # Used for docstring prompt
+        
+        self.namespace = CodeClass.namespace
 
         # Set up master widget  
 
         self.root = Tk()
         self.root.title("FoxDot - Live Coding with Python and SuperCollider")
-        self.root.columnconfigure(0, weight=1)
-        self.root.rowconfigure(0, weight=2)
+        self.root.columnconfigure(1, weight=1)
+        self.root.rowconfigure(0, weight=1)
+        self.root.rowconfigure(1, weight=0)
+        self.root.grid_columnconfigure(0, weight=0)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
         # Set FoxDot icon
+        
         try:
+
             # Use .ico file by default
             self.root.iconbitmap(FOXDOT_ICON)
             
@@ -57,10 +71,27 @@ class workspace:
         self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
         self.font.configure(**tkFont.nametofont("CodeFont").configure())
 
+        # Create menu
+
+        self.menu = Menu(self.root)
+        self.menu.config(font="CodeFont",
+                         bg=colour_map['background'],
+                         fg=colour_map['plaintext'])
+
+        self.menu_visible = True
+
+        self.root.config(menu=self.menu)
+        
+        self.menu.add_command(label="Open",       command=self.openfile)
+        self.menu.add_command(label="Save",       command=self.save)
+        self.menu.add_command(label="Save As",    command=self.save)
+        self.menu.add_command(label="Settings",   command=lambda: None)
+        self.menu.add_command(label="Help",       command=lambda: None)
+       
         # Create Y scrollbar
 
         self.Yscroll = Scrollbar(self.root)
-        self.Yscroll.grid(row=0, column=1, sticky='nsew')
+        self.Yscroll.grid(row=0, column=2, sticky='nsew')
 
         # Create text box for code
 
@@ -71,12 +102,21 @@ class workspace:
                                  insertbackground="White",
                                  font = "CodeFont",
                                  yscrollcommand=self.Yscroll.set,
-                                 width=120, height=20,
+                                 width=100, height=20, bd=0,
                                  maxundo=50 )
 
-        self.text.grid(row=0, column=0, sticky="nsew")
+        self.text.grid(row=0, column=1, sticky="nsew")
         self.Yscroll.config(command=self.text.yview)
         self.text.focus_set()
+
+        # Create box for line numbers
+
+        self.linenumbers = LineNumbers(self.text, width=25,
+                                       bg=colour_map['background'],
+                                       bd=0, highlightthickness=0 )
+        
+        self.linenumbers.grid(row=0, column=0, sticky='nsew')
+        
 
         # Docstring prompt label
 
@@ -99,6 +139,7 @@ class workspace:
         self.text.bind("<Alt_L>",                           lambda event: "break")
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
+        self.text.bind("<Alt-period>".format(ctrl),    self.releaseNodes)
         self.text.bind("<{}-v>".format(ctrl),               self.paste)
         self.text.bind("<{}-bracketright>".format(ctrl),    self.indent)
         self.text.bind("<{}-bracketleft>".format(ctrl),     self.unindent)
@@ -107,6 +148,7 @@ class workspace:
         self.text.bind("<{}-z>".format(ctrl),               self.undo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
         self.text.bind("<{}-o>".format(ctrl),               self.openfile)
+        self.text.bind("<{}-m>".format(ctrl),               self.toggleMenu)
 
         # Change ctrl+h on Mac (is used to close)
 
@@ -170,8 +212,15 @@ class workspace:
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
-        self.root.mainloop()
+        try:
+            self.root.mainloop()
+        except (KeyboardInterrupt, SystemExit):
+            execute("Clock.stop()")
+            execute("Server.quit()")
         return
+
+    def read(self):
+        return self.text.get("1.0", END)
 
     """
 
@@ -334,10 +383,11 @@ class workspace:
         print "--------------------------------------------"
         print "{}+Return  : Execute code".format(ctrl)
         print "{}+.       : Stop all sound".format(ctrl)
-        print "{}+=       : Zoom in".format(ctrl)
-        print "{}+-       : Zoom out".format(ctrl)
+        print "{}+=       : Increase font size".format(ctrl)
+        print "{}+-       : Decrease font size".format(ctrl)
         print "{}+S       : Save your work".format(ctrl)
         print "{}+O       : Open a file".format(ctrl)
+        print "{}+M       : Toggle the menu".format(ctrl)
         print "{}+{}       : Toggle console window".format(ctrl, self.toggle_key)
         print "--------------------------------------------"
         print "Please visit foxdot.org for more information"
@@ -401,6 +451,11 @@ class workspace:
             self.text.config(height=self.text.cget('height')-self.console.height)
             self.console_visible = True
         return
+
+    def toggleMenu(self, event=None):
+        self.root.config(menu=self.menu if not self.menu_visible else 0)
+        self.menu_visible = not self.menu_visible
+        return "break"
     
     def paste(self, event=None):
         """ Ctrl-V: Pastes any text and updates the IDE """
@@ -682,6 +737,8 @@ class workspace:
         font = tkFont.nametofont("CodeFont")
         size = font.actual()["size"]+2
         font.configure(size=size)
+        # Increase size of line number
+        self.linenumbers.config(width=self.linenumbers.winfo_width() + 3)
         return 'break'
 
     # Zoom out: Ctrl+-
@@ -691,8 +748,10 @@ class workspace:
         """ Ctrl+- decreases text size (minimum of 8) """
         self.root.grid_propagate(False)
         font = tkFont.nametofont("CodeFont")
-        size = max(8, font.actual()["size"]-2)
-        font.configure(size=size)
+        size = font.actual()["size"]-2
+        if size >= 8:
+            font.configure(size=size)
+            self.linenumbers.config(width=self.linenumbers.winfo_width() - 3)
         return  'break'
     
 
@@ -898,6 +957,10 @@ class workspace:
         """ Called on window close. Ends Clock thread process """
         execute("Clock.stop()")
         execute("Server.quit()")
+        return
+
+    def releaseNodes(self, event=None):
+        execute("Server.freeAllNodes()")
         return
 
     def replace(self, line, old, new):

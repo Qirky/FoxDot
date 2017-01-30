@@ -170,6 +170,8 @@ class TempoClock:
         beat = self.now()
         return beat + (self.meter[0] - (beat % self.meter[0]))
 
+    #def scheduleAtNextBar(
+
     def get_bpm(self):
         try:
             bpm = float(self.bpm.now(self.time))
@@ -287,9 +289,10 @@ class Queue:
     def next(self):
         return self.data[-1].beat if len(self.data) > 0 else sys.maxint
             
-
+from types import FunctionType
 class QueueItem:
     priority_levels = [
+                        lambda x: type(x) == FunctionType,
                         lambda x: isinstance(x, MethodCall),
                         lambda x: not any([isinstance(attr, PlayerKey) for attr in x.attr.values()]) if isinstance(x, Player) else False,
                         lambda x: isinstance(x, Player),
