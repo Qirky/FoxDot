@@ -1,3 +1,18 @@
+### v0.2.3 fixes and update
+
+- Effects are now implemented using busses on SuperCollider, which uses less CPU 
+- Effects can be customised and defined
+- Sample Player behaviour (i.e. how the string of characters relates to playback) has been altered. Square brackets refer to a single event even though two samples are played.
+- SuperCollider is booted on startup with a compiled startup file.
+
+### v0.2.2 fixes and updates
+
+- `PDur` added: a pattern that implements Euclidean Rhythms
+- Player attributes can be manipulated using the `Player.every` method
+- Errors caught and displayed in FoxDot console instead of crashing
+- Can set different tempi for Players using the `bpm` keyword 
+- Sample Player objects can play multiple samples together by grouping them as a PGroup but cannot feature square brackets
+
 ### v0.2.1 fixes and updates
 
 - Syntax highlighting bugs fixed
