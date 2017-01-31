@@ -23,12 +23,15 @@ See `docs/changelog` for more
 #### Recommended
 - [sc3 plugins](http://sc3-plugins.sourceforge.net/)
 
-#### Download and install
+#### Installing FoxDot
 
-1. Install from the command line using `pip install FoxDot`
-2. *Or* you can clone this repository or download the `FoxDot-master.zip` file from this page and extract the contents. You can install FoxDot by opening a command prompt window, changing directory to FoxDot, and executing `python setup.py install`. You can find the installed files in `/lib/site-packages/FoxDot` folder of your Python installation.
-3. Optionally, you can still run FoxDot from where you downloaded it. Go into the FoxDot directory and run the `__main__.py` file. This can be done through the command line or by double-clicking the file, depending on how you've installed Python. 
-
+1. Install the latest version from the Python Package Index from the command line by executing `pip install FoxDot`
+2. Alternatively, you can build from source:
+``` bash
+git clone --recursive https://github.com/Qirky/FoxDot.git
+cd FoxDot
+python setup.py install
+```
 
 #### Startup
 
@@ -65,10 +68,10 @@ p1 >> pads([0,1,2,3])
 The empty player object, `p1` is now assigned a the 'pads' synth and some playback instructions. `p1` will play the first four notes of the default scale using a SuperCollider `SynthDef` with the name `\pads`. By default, each note lasts for 1 beat at 120 bpm. These defaults can be changed by specifying keyword arguments:
 
 ``` python
-p1 >> pads([0,1,2,3], dur=[1/4,3/4], sus=1, rate=4, scale=Scale.minor)
+p1 >> pads([0,1,2,3], dur=[1/4,3/4], sus=1, vib=4, scale=Scale.minor)
 ```
 
-The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - any others, such as `rate` in the above example, refer to keyword arguments in the corresponding `SynthDef`. The first argument, `degree`, does not have to be stated explicitly. Notes can be grouped together so that they are played simultaneously using round brackets, `()`. The sequence `[(0,2,4),1,2,3]` will play the the the first harmonic triad of the default scale followed by the next three notes. 
+The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - any others, such as `vib` in the above example, refer to keyword arguments in the corresponding `SynthDef`. The first argument, `degree`, does not have to be stated explicitly. Notes can be grouped together so that they are played simultaneously using round brackets, `()`. The sequence `[(0,2,4),1,2,3]` will play the the the first harmonic triad of the default scale followed by the next three notes. 
 
 ### 'Sample Player' Objects
 
@@ -92,7 +95,11 @@ sn >> play("  o ")
 d1 >> play( PZip("x( x)  ", "--[--]", "  o( [ o])") )
 ```
 
-Grouping characters in round brackets laces the pattern so that on each play through of the sequence of samples, the next character in the group's sample is played. The sequence `(xo)---` would be played back as if it were entered `x---o---`. Characters in square brackets are played twice as fast (half the duration) of one character by itself, and characters in curly brackets (`{}`) are played in the same time span as one character. Example: `{oo}` would play two snare hits at a quarter beat each but `{ooo}` would play three snare hits at 3/8 beats each.
+Grouping characters in round brackets laces the pattern so that on each play through of the sequence of samples, the next character in the group's sample is played. The sequence `(xo)---` would be played back as if it were entered `x---o---`. Using square brackets will force the enclosed samples to played in the same time span as a single character e.g. `--[--]` will play two hi-hat hits at a half beat then two at a quarter beat. You can play a random sample from a selection by using curly braces in your Play String like so:
+
+``` python
+d1 >> play("x-o{-[--]o[-o]}")
+```
 
 ## Scheduling Player methods
 
