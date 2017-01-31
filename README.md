@@ -155,4 +155,6 @@ For more information on FoxDot, please see the `docs` folder or go to http://fox
 
 - The SuperCollider development community and, of course, James McCartney, its original developer
 - PyOSC, Artem Baguinski et al
-- Sounds in the `samples/kindohm` folder courtesy of Mike Hodnick's live coded album, [Expedition](https://github.com/kindohm/expedition)
+- Sounds in `snd/z/` folder courtesy of Mike Hodnick's live coded album, [Expedition](https://github.com/kindohm/expedition)
+- Many samples have been obtained from http://freesound.org and have been placed in the public domain via the Creative Commons 0 License: http://creativecommons.org/publicdomain/zero/1.0/ - thank you to the original creators
+- Other samples have come from the [Dirt Sample Engine](https://github.com/tidalcycles/Dirt-Samples/tree/c2db9a0dc4ffb911febc613cdb9726cae5175223) which is part of the TidalCycles live coding language created by Yaxu - another huge amount of thanks.
