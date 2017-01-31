@@ -115,13 +115,18 @@ class PlayGroup(list):
 
 class RandomPlayGroup:
     def __init__(self, seq):
-        self.data = seq
+        self.data = []
+        for item in seq:
+            if type(item) is list:
+                self.data.extend(item)
+            else:
+                self.data.append(item)
     def now(self):
         return choice(self.data)
     def __len__(self):
         return 1
     def __repr__(self):
-        return "<?" + self.data.__repr__(self)[1:-1] + ">"
+        return "<?" + repr(self.data)[1:-1] + ">"
             
 class PCHAR:
     def __init__(self, char, dur=1):

@@ -16,7 +16,6 @@ from Settings import *
 from SCLang.Definitions import *
 from SCLang import SynthDefs, Env, SynthDef
 from ServerManager import Server
-from GhostCoder import Ghost
 import Scale
 import Root
 

@@ -87,8 +87,6 @@ class Parser:
 
                         new_chars.append(PlayGroup([modi(ch, num) for ch in chars]))
 
-                    print new_chars
-
                     items.append( new_chars )
 
                 else:
