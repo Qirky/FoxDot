@@ -4,9 +4,9 @@ ADDRESS='localhost'
 PORT=57110
 PORT2=57120
 FONT='Consolas'
-SUPERCOLLIDER="C:/Program Files/SuperCollider-3.7.2"
+SUPERCOLLIDER=""
 BOOT_ON_STARTUP=True
-SC3PLUGINS=True
+SC3PLUGINS=False
 MAX_CHANNELS=1
 
 # Editor Colours
