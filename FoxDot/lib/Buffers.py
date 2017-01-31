@@ -82,7 +82,7 @@ class BufChar:
         self.char    = char
         self.buffers = []
     def __str__(self):
-        return "BufChar '{}'".format(self.char)
+        return "BufChar '{}': '{}'".format(self.char, DESCRIPTIONS.get(self.char, "unknown"))
     def addbuffer(self, fn, num, num_channels=1):
         self.buffers.append( Buffer(fn, num, num_channels) )
         return
@@ -191,7 +191,7 @@ class BufferManager:
         return self.buffers[int(bufnum)]
 
     def __str__(self):
-        return "\n".join(["{}: {}".format(symbol, b.buffers) for symbol, b in self.symbols.items()])
+        return "\n".join(["{}: {}".format(symbol, b) for symbol, b in self.symbols.items()])
 
     def write_to_file(self):
         f = open(FOXDOT_BUFFERS_FILE, 'w')

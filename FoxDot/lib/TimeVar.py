@@ -101,7 +101,7 @@ class var(Repeatable):
     def __add__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__radd__(self) for x in other))
+                return other.__class__((self + x for x in other))
             else:
                 return other.__radd__(self)
         new = self.new(other)
@@ -111,7 +111,7 @@ class var(Repeatable):
     def __radd__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__add__(self) for x in other))
+                return other.__class__((x + self for x in other))
             else:
                 return other.__add__( self)
         new = self.new(other)
@@ -122,7 +122,7 @@ class var(Repeatable):
     def __sub__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__rsub__(self) for x in other))
+                return other.__class__((self - x for x in other))
             else:
                 return other.__rsub__(self)
         new = self.new(other)
@@ -131,7 +131,7 @@ class var(Repeatable):
     def __rsub__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__sub__(self) for x in other))
+                return other.__class__((x - self for x in other))
             else:
                 return other.__sub__(self)
         new = self.new(other)
@@ -141,14 +141,17 @@ class var(Repeatable):
     # *
     def __mul__(self, other):
         if not isinstance(other, (var, int, float)):
-            return other.__rmul__(self)
+            if type(other) in (tuple, list):
+                return other.__class__((self * x for x in other))
+            else:
+                return other.__rmul__(self)
         new = self.new(other)
         new.evaluate = fetch(op.Mul)
         return new
     def __rmul__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__mul__(self) for x in other))
+                return other.__class__((x * self for x in other))
             else:
                 return other.__mul__(self)
         new = self.new(other)
@@ -160,7 +163,7 @@ class var(Repeatable):
     def __pow__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__row__(self) for x in other))
+                return other.__class__((self ** x for x in other))
             else:
                 return other.__rpow__(self)
         new = self.new(other)
@@ -170,7 +173,7 @@ class var(Repeatable):
     def __rpow__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__pow__(self) for x in other))
+                return other.__class__((x ** self for x in other))
             else:
                 return other.__pow__(self)
         
@@ -182,7 +185,7 @@ class var(Repeatable):
     def __div__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__rdiv__(self) for x in other))
+                return other.__class__((self / x for x in other))
             else:
                 return other.__rdiv__(self)
         new = self.new(other)
@@ -192,7 +195,7 @@ class var(Repeatable):
     def __rdiv__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__div__(self) for x in other))
+                return other.__class__((x / self for x in other))
             else:
                 return other.__div__(self)
         new = self.new(other)
@@ -202,7 +205,7 @@ class var(Repeatable):
     def __truediv__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__rtruediv__(self) for x in other))
+                return other.__class__((self / x for x in other))
             else:
                 return other.__rtruediv__(self)
         new = self.new(other)
@@ -212,7 +215,7 @@ class var(Repeatable):
     def __rtruediv__(self, other):
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x.__truediv__(self) for x in other))
+                return other.__class__((x / self for x in other))
             else:
                 return other.__truediv__(self)
         new = self.new(other)

@@ -279,13 +279,17 @@ class PRand(GeneratorPattern):
     def __init__(self, start, stop=None):
         GeneratorPattern.__init__(self)
         if hasattr(start, "__iter__"):
-            self.data = start
-            self.func = lambda index: random.choice(Pattern(self.data))
+            self.data = Pattern(start)
+            self.func = lambda index: random.choice(self.data)
         else:
             self.low  = start if stop is not None else 0
             self.high = stop  if stop is not None else start
     def func(self, index):
         return random.randrange(self.low, self.high)
+
+#TODO
+class PwRand(GeneratorPattern):
+    pass
 
 class PWhite(GeneratorPattern):
     def __init__(self, lo=0, hi=1):

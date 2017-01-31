@@ -216,7 +216,18 @@ twang.osc = CombL.ar(twang.osc, delaytime=[0.004,0.003], maxdelaytime= 2);
 twang.env = Env.perc()
 twang.add()
 
+donk = SynthDef("donk")
+donk.amp = donk.amp * 9
+donk.freq = donk.freq / 4
+donk.osc = Ringz.ar(Impulse.ar(0), [donk.freq, donk.freq + 2], donk.sus, donk.amp)
+donk.add()
 
+squish = SynthDef("squish")
+squish.freq = squish.freq / 4
+squish.osc = Ringz.ar(Pulse.ar(4 * squish.rate), squish.freq, squish.sus, squish.amp)
+squish.osc = squish.osc * XLine.ar(1/2, 0.000001, squish.sus, doneAction=2)
+squish.osc = squish.osc.cos
+squish.add()
 
 # Get rid of the variable synth
 

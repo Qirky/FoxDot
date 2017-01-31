@@ -1,7 +1,7 @@
 from random import choice, shuffle
 from Operations import *
 from Parse import Parse
-from PlayString import PlayString
+from PlayString import PlayString, PlayGroup
 
 """
 
@@ -98,6 +98,7 @@ class metaPattern(object):
             yield i, value
 
     def __getslice__(self, start, stop, step=1):
+        stop = min(stop, len(self))
         if stop < start:
             stop = (len(self.data) + start)
         return Pattern([self[i] for i in range(start, stop, step) ])
@@ -341,6 +342,8 @@ class metaPattern(object):
                 self.data[i] = PGroup(data)
             elif type(data) is list:
                 self.data[i] = Pattern(data)
+            elif type(data) is str and len(data) > 1:
+                self.data[i] = Pattern(data)
                 
         return self
 
@@ -424,7 +427,6 @@ class GeneratorPattern(object):
     # Pattern methods that don't return anything
     def stretch(self, n):
         return self
-
 
 class PatternContainer(Pattern):
     def getitem(self, key):

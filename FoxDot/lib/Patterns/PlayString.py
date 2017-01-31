@@ -1,5 +1,5 @@
 import re
-from random import shuffle
+from random import shuffle, choice
 
 re_nests  = r"\((.*?)\)"
 re_square = r"\[.*?\]"
@@ -105,13 +105,23 @@ class PlayGroup(list):
                 data.append(item)
         list.__init__(self, data)
     def __repr__(self):
-        return "{" + list.__repr__(self)[1:-1] + "}"
+        return "<" + list.__repr__(self)[1:-1] + ">"
     def __len__(self):
         return 1
     def divide(self, value):
         for item in self:
             item.divide(value)
         return self
+
+class RandomPlayGroup:
+    def __init__(self, seq):
+        self.data = seq
+    def now(self):
+        return choice(self.data)
+    def __len__(self):
+        return 1
+    def __repr__(self):
+        return "<?" + self.data.__repr__(self)[1:-1] + ">"
             
 class PCHAR:
     def __init__(self, char, dur=1):

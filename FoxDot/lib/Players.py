@@ -165,8 +165,8 @@ class Player(Repeatable):
         self.buf     = 0
 
         # Reverb
-        self.verb   = 0.1
-        self.room   = 0.1
+        self.verb   = 0.25
+        self.room   = 0
 
         # Frequency modifier
         self.fmod   =  0
@@ -705,7 +705,7 @@ class Player(Repeatable):
 
                 else:
 
-                    buf_list = enumerate(self.event['degree'])
+                    buf_list  = enumerate(self.event['degree'])
                     event_buf = list(range(len(self.event['degree'])))
 
                 self.buf_delay = []
@@ -1052,10 +1052,6 @@ class Player(Repeatable):
 ##        else:
 ##            self._replace_degree(self.attr['degree'].rotate(n))
         self.degree = self.attr['degree'].rotate(n)
-        return self
-
-    def splice(self):
-        # [0,1,2,3,4] -> [0,3,2,1,4] (rotate every other val)
         return self
 
     def _replace_string(self, new_string):
