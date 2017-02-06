@@ -1,14 +1,11 @@
-FoxDot - Live Coding with Python v0.2.3
+FoxDot - Live Coding with Python v0.2.6
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.2.3 fixes and update
+### v0.2.6 fixes and update
 
-- Effects are now implemented using busses on SuperCollider, which uses less CPU 
-- Effects can be customised and defined
-- Sample Player behaviour (i.e. how the string of characters relates to playback) has been altered. Square brackets refer to a single event even though two samples are played.
-- SuperCollider is booted on startup with a compiled startup file.
+- OSC Communication is now done through a dedicated SuperCollider Quark
 
 See `docs/changelog` for more
 
@@ -25,16 +22,18 @@ See `docs/changelog` for more
 
 #### Installing FoxDot
 
-1. Install the latest version from the Python Package Index from the command line by executing `pip install FoxDot`
-2. Alternatively, you can build from source:
+- Install the latest version from the Python Package Index from the command line by executing `pip install FoxDot`
+- Alternatively, you can build from source:
 ``` bash
 git clone https://github.com/Qirky/FoxDot.git
 cd FoxDot
 python setup.py install
 ```
-3. Open SuperCollder and install the FoxDot Quark (this allows FoxDot to communicate with SuperCollider) by entering the following and pressing `Ctrl+Return` (this evaluates a line of code):
+- Open SuperCollder and install the FoxDot Quark (this allows FoxDot to communicate with SuperCollider) by entering the following and pressing `Ctrl+Return` (this evaluates a line of code):
 
-`Quarks.install("https://github.com/Qirky/FoxDotQuark.git")` 
+```supercollider
+Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
+```
 
 #### Startup
 
