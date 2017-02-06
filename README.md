@@ -30,10 +30,10 @@ cd FoxDot
 python setup.py install
 ```
 - Open SuperCollder and install the FoxDot Quark (this allows FoxDot to communicate with SuperCollider) by entering the following and pressing `Ctrl+Return` (this evaluates a line of code):
-
 ```supercollider
 Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
 ```
+- Recompile the SuperCollider class library by going to `Language -> Recompile Class Library` or pressing `Ctrl+Shift+L`
 
 #### Startup
 
