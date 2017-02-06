@@ -1,4 +1,8 @@
-### v0.2.3 fixes and update
+### v0.2.6 fixes and updates
+
+- OSC Communication is now done through a dedicated SuperCollider Quark
+
+### v0.2.3 fixes and updates
 
 - Effects are now implemented using busses on SuperCollider, which uses less CPU 
 - Effects can be customised and defined
