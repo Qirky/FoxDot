@@ -150,7 +150,6 @@ class SCLangServerManager:
         message = OSCMessage("/b_allocRead")
         message.append([bufnum, path])
         self.client.send( message )
-        print message
         return
 
     # SynthDef Commmunication
