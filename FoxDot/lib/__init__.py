@@ -23,9 +23,15 @@ import Root
 
 from random import choice as choose
 
-# Create a clock and define and click functions
+# Create a clock and define functions
 
 Clock = TempoClock()
+
+# Give the server information about Effects
+
+Server.setFx(FxList)
+
+# Define any custom functions
 
 def nextBar(f, n=0):
     ''' Schedule functions when you define them with @nextBar'''
@@ -45,15 +51,7 @@ Effect.server = Server
 
 FoxDotCode.namespace=globals()
 
-# Compile a .scd file to send to SuperCollider and boot server
-
-Server.makeStartupFile()
-
-if conf.BOOT_ON_STARTUP:
-
-    Server.start()
-
-# Create a preset Players
+# Create preset Players
 
 alphabet = list('abcdefghijklmnopqrstuvwxyz')
 numbers  = list('0123456789') + [""]

@@ -9,7 +9,6 @@ import os, socket
 import signal
 import subprocess 
 from time import sleep
-import Effects
 from Settings import *
 from OSC import *
 
@@ -42,7 +41,7 @@ class SCLangServerManager:
         self.bus  = 4
 
         self.fx_setup_done = False
-        self.fx_names = {name: fx.synthdef for name, fx in Effects.FxList.items() }
+        self.fx_names = {}
 
         # Toggle debug
         # ------------
@@ -81,6 +80,10 @@ class SCLangServerManager:
         msg = OSCMessage("/g_freeAll")
         msg.append([1])
         self.client.send(msg)
+        return
+
+    def setFx(self, fx_list):
+        self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
 
     def sendPlayerMessage(self, synthdef, packet, effects):
@@ -143,10 +146,11 @@ class SCLangServerManager:
     # Buffer Communiation
     # -------------------
 
-    def bufferRead(self, bufnum, path):
+    def bufferRead(self, path, bufnum):
         message = OSCMessage("/b_allocRead")
         message.append([bufnum, path])
         self.client.send( message )
+        print message
         return
 
     # SynthDef Commmunication
@@ -213,9 +217,6 @@ class SCLangServerManager:
                 f = open(fn)
                 startup.write(f.read())
                 startup.write("\n\n")
-
-            startup.write('include("BatLib");\n')
-            startup.write('StageLimiter.activate(2);\n')
 
             startup.write("};")
 

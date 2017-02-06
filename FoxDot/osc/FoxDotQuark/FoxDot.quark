@@ -1,0 +1,7 @@
+(
+	\name: 			"FoxDot",
+	\summary:		"OSC Functionality for FoxDot",
+	\author: 		"Ryan Kirkbride",
+	\since: 		"2017",
+	\dependencies:  ["BatLib"]
+)

@@ -45,47 +45,6 @@ def GET_FX_FILES():
 # Set Environment Variables
 
 import conf
-
-if conf.SUPERCOLLIDER == '':
-
-    import tkFileDialog
-    import Tkinter
-
-    root = Tkinter.Tk()
-    root.withdraw()
-    
-    sc_dir = tkFileDialog.askdirectory(title="Please Find Your SuperCollider Installation Directory")
-
-    if not sc_dir:
-
-        sys.exit('Please locate SuperCollider and try using FoxDot again')
-
-    root.destroy()
-
-    SC_DIRECTORY = sc_dir
-
-    # Re-write conf file for next use
-
-    conf_fn = os.path.realpath(os.path.dirname(__file__) + "/conf.py")
-
-    with open(conf_fn) as f:
-
-        conflines = f.readlines()
-
-    with open(conf_fn, 'w') as f:
-
-        for line in conflines:
-
-            if 'SUPERCOLLIDER' in line:
-
-                f.write('SUPERCOLLIDER="' + sc_dir + '"\n')
-
-            else:
-
-                f.write(line)
-else:
-
-    SC_DIRECTORY  = conf.SUPERCOLLIDER
     
 ADDRESS       = conf.ADDRESS
 PORT          = conf.PORT

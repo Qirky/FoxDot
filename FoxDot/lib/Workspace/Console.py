@@ -10,6 +10,7 @@ class console:
 
         self.Yscroll = Scrollbar(master)
         self.Yscroll.grid(row=1, column=2, sticky='nsew')
+        self.height = 7
 
         self.text = Text( master, padx=5, pady=5,
                           height=10,

@@ -1,8 +1,9 @@
 from Settings import EFFECTS_DIR, SC3_PLUGINS
+from ServerManager import Server
 
 class Effect:
-    server=None
-    def __init__(self, foxdot_name, synthdef, args):
+    server=Server
+    def __init__(self, foxdot_name, synthdef, args=[]):
 
         self.name      = foxdot_name
         self.synthdef  = synthdef
@@ -40,6 +41,19 @@ class Effect:
             self.server.loadSynthDef(self.filename)
         return
 
+class Out(Effect):
+    def __init__(self):
+        Effect.__init__(self, 'makeSound', 'makeSound')
+        self.save()
+    def __str__(self):
+        s  = "SynthDef.new(\makeSound,\n"
+	s += "{ arg bus, sus; var osc;\n"
+	s += "	osc = In.ar(bus, 2);\n"
+	s += "	Line.ar(dur: sus, doneAction: 14);\n"
+	s += "	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);\n"
+	s += "	Out.ar(0, osc)}).add;\n"
+	return s
+
 class EffectManager(dict):
     def __init__(self):
         dict.__init__(self)
@@ -75,7 +89,7 @@ if SC3_PLUGINS:
     fx.save()
 
 fx = FxList.new('chop', 'chop', ['chop', 'sus'])
-fx.add("osc = osc * LFPulse.ar(chop / sus)")
+fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.01)")
 fx.save()
 
 fx = FxList.new('echo', 'combDelay', ['echo'])
@@ -89,5 +103,7 @@ fx.save()
 fx = FxList.new('verb', 'reverb', ['verb', 'room'])
 fx.add("osc = FreeVerb.ar(osc, verb, room)")
 fx.save()
+
+Out()
 
     

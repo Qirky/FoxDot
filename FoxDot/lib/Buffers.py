@@ -4,6 +4,7 @@
 
 from os.path import abspath, join, dirname
 from Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
+from ServerManager import Server
 import wave
 import os
 
@@ -78,6 +79,7 @@ class Buffer:
         return self.bufnum
 
 class BufChar:
+    server = Server
     def __init__(self, char):
         self.char    = char
         self.buffers = []
@@ -85,6 +87,8 @@ class BufChar:
         return "BufChar '{}': '{}'".format(self.char, DESCRIPTIONS.get(self.char, "unknown"))
     def addbuffer(self, fn, num, num_channels=1):
         self.buffers.append( Buffer(fn, num, num_channels) )
+        if fn is not None:
+            self.server.bufferRead(fn, num)
         return
     def __getitem__(self, key):
         return self.buffers[key]

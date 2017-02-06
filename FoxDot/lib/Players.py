@@ -8,12 +8,12 @@
 """
 
 from os.path import dirname
-from random import shuffle
+from random import shuffle, choice
 from copy import copy
 
 from Settings import SamplePlayer
 from Code import WarningMsg
-from SCLang.SynthDef import SynthDefProxy
+from SCLang.SynthDef import SynthDefProxy, SynthDef
 from Effects import FxList
 from Repeat import *
 from Patterns import *
@@ -38,15 +38,17 @@ class Player(Repeatable):
     bang_kwargs = {}
 
     # These are used by FoxDot
-    keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'blur', 'amplify', 'scale', 'bpm', 'style')
+    keywords   = ('degree', 'oct', 'freq', 'dur', 'delay',
+                  'blur', 'amplify', 'scale', 'bpm', 'style')
 
     # Base attributes
-    base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom', 'pan', 'rate', 'amp', 'room', 'buf', 'bits')
-    fx_attributes   = FxList.kwargs()
+    base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom',
+                       'pan', 'rate', 'amp', 'room', 'buf', 'bits')
     play_attributes = ('scrub', 'cut')
+    fx_attributes   = FxList.kwargs()
     
     Attributes      = keywords + base_attributes + fx_attributes + play_attributes
-    
+
     metro = None
     server = None
 
@@ -69,6 +71,7 @@ class Player(Repeatable):
         self.stopping = False
         self.stop_point = 0
         self.following = None
+        self.queue_block = None
         self.playstring = ""
         self.buf_delay = []
 
@@ -165,8 +168,8 @@ class Player(Repeatable):
         self.buf     = 0
 
         # Reverb
-        self.verb   = 0.25
-        self.room   = 0
+        self.verb   = 0.05
+        self.room   = 0.01
 
         # Frequency modifier
         self.fmod   =  0
@@ -620,6 +623,12 @@ class Player(Repeatable):
         attr_value = self.attr[attr]
 
         attr_value = modi(asStream(attr_value), self.event_n + x)
+
+        ## If this player is following another, update that player first
+
+        if attr == "degree" and self.following != None:
+
+            self.queue_block.call(self.following)
         
         # If the attribute isn't in the modf dictionary, default to 0
 
@@ -974,7 +983,8 @@ class Player(Repeatable):
     def follow(self, lead, follow=True):
         """ Takes a now object and then follows the notes """
 
-        self.degree = lead.degree
+        self.degree    = lead.degree
+        self.following = lead
 
         return self
 
@@ -1086,7 +1096,15 @@ class Player(Repeatable):
             ones = int(self.amp.count(1) * amount)
             zero = self.amp.count(0)
             self.amp = Pshuf(Pstutter([1,0],[ones,zero]))
-        return self            
+        return self
+
+    def changeSynth(self, list_of_synthdefs):
+        new_synth = choice(list_of_synthdefs)
+        if isinstance(new_synth, SynthDef):
+            new_synth = str(new_synth.name)
+        self.synthdef = new_synth
+        # TODO, change the >> name
+        return self
 
     """
 

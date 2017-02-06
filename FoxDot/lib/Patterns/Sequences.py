@@ -11,6 +11,7 @@
 """
 
 import random
+
 from Operations import LCM, modi, EuclidsAlgorithm
 from Base import Pattern, GeneratorPattern, PGroup, asStream
 

@@ -84,12 +84,6 @@ class TempoClock:
         main.start()
         return
 
-##    def when_eval(self):
-##        """ Evaluates any 'when' statements """
-##        if len(self.when_statements) > 0:
-##            self.when_statements.__call__()
-##        return
-
     def run(self):
 
         self.ticking = True
@@ -100,23 +94,23 @@ class TempoClock:
 
                 # Call any item in the popped event
 
-                for item in self.queue.pop():
+                block = self.queue.pop()
 
-                    try:
+                for item in block:
 
-                        item.__call__()
+                    if not block.called(item):
+                        
+                        try:
 
-                    except SystemExit:
+                            block.call(item)
 
-                        sys.exit()
+                        except SystemExit:
 
-                    except:
+                            sys.exit()
 
-                        print(error_stack())
+                        except:
 
-                    # Test if any changes caused by item.__call__() affect when statements
-
-                    # self.when_eval()
+                            print(error_stack())
 
             # Make sure rest is positive so any events that SHOULD
             # have been played are played straight away
@@ -158,10 +152,11 @@ class TempoClock:
 
             self.queue.add(obj, beat, args)
 
-## Add any "historic" schedules to right now?
-##        else:
-##
-##            self.queue.add(obj?)
+        #  Add any "historic" schedules to right now?
+        else:
+
+            pass
+            # self.queue.add(obj, self.now() + 0.1, args)
         
         return
 
@@ -169,8 +164,6 @@ class TempoClock:
         """ Returns the beat value for the start of the next bar """
         beat = self.now()
         return beat + (self.meter[0] - (beat % self.meter[0]))
-
-    #def scheduleAtNextBar(
 
     def get_bpm(self):
         try:
@@ -250,28 +243,36 @@ class Queue:
 
             self.data.append(QueueItem(item, beat, args))
 
-            return
+            i = 0
 
-        # If the event is after the next scheduled event, work
-        # out its position in the queue
+        else:
 
-        for i in range(len(self.data)):
+            # If the event is after the next scheduled event, work
+            # out its position in the queue
 
-            # If another event is happening at the same time, schedule together
+            for i in range(len(self.data)):
 
-            if beat == self.data[i].beat:
+                # If another event is happening at the same time, schedule together
 
-                self.data[i].add(item, args)
+                if beat == self.data[i].beat:
 
-                break
+                    self.data[i].add(item, args)
 
-            # If the event is later than the next event, schedule it here
+                    break
 
-            if beat > self.data[i].beat:
+                # If the event is later than the next event, schedule it here
 
-                self.data.insert(i, QueueItem(item, beat, args))
+                if beat > self.data[i].beat:
 
-                break            
+                    self.data.insert(i, QueueItem(item, beat, args))
+
+                    break
+
+        # Tell any players about what queue item they are in
+
+        if isinstance(item, Player):
+
+            item.queue_block = self.data[i]
 
         return
 
@@ -281,10 +282,7 @@ class Queue:
         return
 
     def pop(self):
-        if len(self.data) > 0:
-            return self.data.pop()
-        else:
-            return list()
+        return self.data.pop() if len(self.data) > 0 else list()
 
     def next(self):
         return self.data[-1].beat if len(self.data) > 0 else sys.maxint
@@ -292,19 +290,16 @@ class Queue:
 from types import FunctionType
 class QueueItem:
     priority_levels = [
-                        lambda x: type(x) == FunctionType,
-                        lambda x: isinstance(x, MethodCall),
-                        lambda x: not any([isinstance(attr, PlayerKey) for attr in x.attr.values()]) if isinstance(x, Player) else False,
-                        lambda x: isinstance(x, Player),
-                        lambda x: True
+                        lambda x: type(x) == FunctionType,   # Any functions are called first
+                        lambda x: isinstance(x, MethodCall), # Then scheduled player methods
+                        lambda x: isinstance(x, Player),     # Then players themselves
+                        lambda x: True                       # And anything else
                       ]
-
-    # priority_sorting = [None, None, (sorted, {'key' : lambda q: q.obj.num_key_references()}), None]
                        
     def __init__(self, obj, t, args=()):
 
-        # Priority
-        self.events = [ [] for lvl in self.priority_levels ]
+        self.events        = [ [] for lvl in self.priority_levels ]
+        self.called_events = []
 
         self.beat = t
         self.add(obj, args)
@@ -322,21 +317,20 @@ class QueueItem:
 
                 self.events[i].append(q_obj)
 
-                #f = self.priority_sorting[i]
-
-                #if f is not None:
-
-                #    self.events[i] = f[0](self.events[i], **f[1])
-
-                #   print self.events[i], [q.obj.num_key_references() for q in self.events[i]]
-
                 break
         return
 
-    def call(self):
+    def called(self, item):
+        return item in self.called_events
+
+    def call(self, item):
         """ Calls all items in queue slot """
-        for item in self:
-            item()
+        if item not in self.called_events:
+            for event in self:
+                if event == item:
+                    item.__call__()
+                    self.called_events.append(item)
+                    break
         return
 
     def __iter__(self):
