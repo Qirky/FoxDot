@@ -5,13 +5,9 @@ PORT=57110
 PORT2=57120
 FONT='Consolas'
 SUPERCOLLIDER=""
-BOOT_ON_STARTUP=True
+BOOT_ON_STARTUP=False
 SC3PLUGINS=False
-<<<<<<< HEAD
 MAX_CHANNELS=2
-=======
-MAX_CHANNELS=1
->>>>>>> origin/master
 
 # Editor Colours
 # ------------------
