@@ -110,9 +110,12 @@ def PZip2(pat1, pat2, rule=lambda a, b: True):
 
 #: Pattern functions that take single values
 
+from functools import wraps
+
 def loop_pattern_func(f):
     ''' Wrapper for allowing any Pattern function to create
         multiple Patterns by using Patterns as arguments '''
+    @wraps(f)
     def new_function(*args):
         pat = Pattern()
         for i in range(LCM(*[len(arg) for arg in args if hasattr(arg, '__len__')])):

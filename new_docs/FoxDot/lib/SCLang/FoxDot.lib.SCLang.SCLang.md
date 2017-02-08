@@ -18,15 +18,15 @@ SCLang.py
 
 ## Functions
 
-### `<lambda>(array, n)`
-
-None
-
-### `<lambda>(x)`
+### `dup(x)`
 
 None
 
 ### `format_args(args=[], kwargs={}, delim=: )`
+
+None
+
+### `stutter(array, n)`
 
 None
 

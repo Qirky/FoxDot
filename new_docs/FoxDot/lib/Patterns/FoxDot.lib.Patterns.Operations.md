@@ -17,10 +17,6 @@ A is always a pattern.
 
 ## Functions
 
-### `<lambda>(a, b)`
-
-None
-
 ### `Add(a, b)`
 
 None
@@ -50,6 +46,14 @@ None
 None
 
 ### `Nil(a, b)`
+
+None
+
+### `PEq(a, b)`
+
+None
+
+### `PNe(a, b)`
 
 None
 

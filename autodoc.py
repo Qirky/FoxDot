@@ -160,7 +160,7 @@ class ModuleDoc:
 
                 elif inspect.isfunction(item):
 
-                    name = getdetails(item)
+                    name = getdetails(item, name)
 
                     self.functions[name] = DataDoc(inspect.getdoc(item))
 

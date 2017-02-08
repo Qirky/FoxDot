@@ -10,6 +10,10 @@ Module sed for converting streams and frequencies
 
 Calculates a midinote from a scale, octave, degree, and root 
 
+### `midi2cps(midinote)`
+
+Converts a midi number to frequency 
+
 ### `miditofreq(midinote)`
 
 Converts a midi number to frequency 
