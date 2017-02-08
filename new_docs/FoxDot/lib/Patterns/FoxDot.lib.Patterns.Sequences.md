@@ -57,7 +57,7 @@ performs any arithmetic operation assigned
 
 ## Functions
 
-### `P10(*args)`
+### `P10(n)`
 
 None
 
@@ -65,13 +65,13 @@ None
 
 None
 
-### `PDur(*args)`
+### `PDur(n, k, dur=0.25)`
 
 Returns the *actual* durations based on Euclidean rhythms (see PEuclid) where dur
 is the length of each step.
 e.g. PDur(3, 8) -> P[0.75, 0.75, 0.5] 
 
-### `PEuclid(*args)`
+### `PEuclid(n, k)`
 
 Returns the Euclidean rhythm which spreads 'n' pulses over 'k' steps as evenly as possible.
 e.g. PEuclid(3, 8) -> P[1, 0, 0, 1, 0, 0, 1, 0] 
@@ -83,7 +83,7 @@ PPairs(iterable, func=lambda n: 8-n)
 Laces a sequence with a second sequence obtained
 by performing a function on the original 
 
-### `PRange(*args)`
+### `PRange(start, stop=None, step=None)`
 
 None
 
@@ -91,15 +91,15 @@ None
 
 PShuf(seq) -> Returns a shuffled version of seq
 
-### `PSine(*args)`
+### `PSine(n=16)`
 
 Returns values of one cycle of sine wave split into 'n' parts 
 
-### `PSq(*args)`
+### `PSq(a=1, b=2, c=3)`
 
 None
 
-### `PStep(*args)`
+### `PStep(n, value, default=0)`
 
 None
 
@@ -111,14 +111,14 @@ None
 
 PStutter(seq, n) -> Creates a pattern such that each item in the array is repeated n times (n can be a pattern) 
 
-### `PSum(*args)`
+### `PSum(n, total, **kwargs)`
 
 PSum(n, total) -> Pattern of length n that sums to equal total
 
 e.g. PSum(3,8) -> [3,3,2]
      PSum(5,4) -> [1,0.75,0.75,0.75,0.75]
 
-### `PTri(*args)`
+### `PTri(start, stop=None, step=None)`
 
 None
 

@@ -13,7 +13,12 @@ def pkgname(pkg):
 
 def getdetails(function, name=None):
     ''' returns a string "function(args)" '''
-    argspec  = inspect.getargspec(function)
+
+    if hasattr(function, 'argspec'):
+        argspec = function.argspec
+    else:
+        argspec  = inspect.getargspec(function)
+
     args     = argspec.args
     defaults = argspec.defaults if argspec.defaults is not None else ()
 
