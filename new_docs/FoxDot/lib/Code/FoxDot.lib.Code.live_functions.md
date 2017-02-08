@@ -6,6 +6,8 @@ Allows you continually update a function
 
 ### `_live_function(self, func, dependency=None)`
 
+
+
 #### Methods
 
 ---

@@ -8,6 +8,8 @@ Handles OSC messages being sent to SuperCollider.
 
 ### `SCLangClient(self, server=None)`
 
+
+
 #### Methods
 
 ##### `setServer(self, server)`
@@ -74,6 +76,8 @@ Set and configure client socket
 ---
 
 ### `SCLangServerManager(self, addr, osc_port, sclang_port)`
+
+
 
 #### Methods
 

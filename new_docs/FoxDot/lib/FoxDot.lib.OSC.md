@@ -161,6 +161,9 @@ Original Comments
 
 ### `ForkingOSCServer(self, server_address, client=None, return_port=0)`
 
+An Asynchronous OSCServer.
+This server forks a new process to handle each incoming request.
+
 #### Methods
 
 ##### `printErr(self, txt)`
@@ -484,6 +487,9 @@ Returns None
 
 ### `NoCallbackError(self, pattern)`
 
+This error is raised (by an OSCServer) when an OSCMessage with an 'unmatched' address-pattern
+is received, and no 'default' handler is registered.
+
 #### Methods
 
 ##### `__init__(self, pattern)`
@@ -495,11 +501,16 @@ The specified 'pattern' should be the OSC-address of the 'unmatched' message cau
 
 ### `NotSubscribedError(self, addr, prefix=None)`
 
+This error is raised (by an OSCMultiClient) when an attempt is made to unsubscribe a host
+that isn't subscribed.
+
 #### Methods
 
 ---
 
 ### `OSCAddressSpace(self)`
+
+
 
 #### Methods
 
@@ -536,6 +547,20 @@ or raises NoCallbackError if a 'default' callback is not registered.
 ---
 
 ### `OSCBundle(self, address=, time=0)`
+
+Builds a 'bundle' of OSC messages.
+
+OSCBundle objects are container objects for building OSC-bundles of OSC-messages.
+An OSC-bundle is a special kind of OSC-message which contains a list of OSC-messages
+(And yes, OSC-bundles may contain other OSC-bundles...)
+
+OSCBundle objects behave much the same as OSCMessage objects, with these exceptions:
+  - if an item or items to be appended or inserted are not OSCMessage objects, 
+  OSCMessage objectss are created to encapsulate the item(s)
+  - an OSC-bundle does not have an address of its own, only the contained OSC-messages do.
+  The OSCBundle's 'address' is inherited by any OSCMessage the OSCBundle object creates.
+  - OSC-bundles have a timetag to tell the receiver when the bundle should be processed.
+  The default timetag value (0) means 'immediately'
 
 #### Methods
 
@@ -747,6 +772,9 @@ Or, if 'i' is a slice, a list of these or another OSCMessage.
 
 ### `OSCClient(self, server=None)`
 
+Simple OSC Client. Handles the sending of OSC-Packets (OSCMessage or OSCBundle) via a UDP-socket
+        
+
 #### Methods
 
 ##### `setServer(self, server)`
@@ -824,17 +852,52 @@ Set and configure client socket
 
 ### `OSCClientError(self, message)`
 
+Class for all OSCClient errors
+        
+
 #### Methods
 
 ---
 
 ### `OSCError(self, message)`
 
+Base Class for all OSC-related errors
+        
+
 #### Methods
 
 ---
 
 ### `OSCMessage(self, address=, *args)`
+
+Builds typetagged OSC messages. 
+
+OSCMessage objects are container objects for building OSC-messages.
+On the 'front' end, they behave much like list-objects, and on the 'back' end
+they generate a binary representation of the message, which can be sent over a network socket.
+OSC-messages consist of an 'address'-string (not to be confused with a (host, port) IP-address!),
+followed by a string of 'typetags' associated with the message's arguments (ie. 'payload'), 
+and finally the arguments themselves, encoded in an OSC-specific way.
+
+On the Python end, OSCMessage are lists of arguments, prepended by the message's address.
+The message contents can be manipulated much like a list:
+  >>> msg = OSCMessage("/my/osc/address")
+  >>> msg.append('something')
+  >>> msg.insert(0, 'something else')
+  >>> msg[1] = 'entirely'
+  >>> msg.extend([1,2,3.])
+  >>> msg += [4, 5, 6.]
+  >>> del msg[3:6]
+  >>> msg.pop(-2)
+  5
+  >>> print msg
+  /my/osc/address ['something else', 'entirely', 1, 6.0]
+
+OSCMessages can be concatenated with the + operator. In this case, the resulting OSCMessage
+inherits its address from the left-hand operand. The right-hand operand's address is ignored.
+To construct an 'OSC-bundle' from multiple OSCMessage, see OSCBundle!
+
+Additional methods exist for retreiving typetags or manipulating items as (typetag, value) tuples.
 
 #### Methods
 
@@ -1033,6 +1096,11 @@ Or, if 'i' is a slice, a list of these or another OSCMessage.
 
 ### `OSCMultiClient(self, server=None)`
 
+'Multiple-Unicast' OSC Client. Handles the sending of OSC-Packets (OSCMessage or OSCBundle) via a UDP-socket
+This client keeps a dict of 'OSCTargets'. and sends each OSCMessage to each OSCTarget
+The OSCTargets are simply (host, port) tuples, and may be associated with an OSC-address prefix.
+the OSCTarget's prefix gets prepended to each OSCMessage sent to that target.
+
 #### Methods
 
 ##### `setServer(self, server)`
@@ -1206,6 +1274,9 @@ Erases all OSCTargets from the Client's dict
 
 ### `OSCRequestHandler(self, request, client_address, server)`
 
+RequestHandler class for the OSCServer
+        
+
 #### Methods
 
 ##### `handle(self)`
@@ -1232,6 +1303,13 @@ Recursive bundle-unpacking function
 ---
 
 ### `OSCServer(self, server_address, client=None, return_port=0)`
+
+A Synchronous OSCServer
+Serves one request at-a-time, until the OSCServer is closed.
+The OSC address-pattern is matched against a set of OSC-adresses
+that have been registered to the server with a callback-function.
+If the adress-pattern of the message machtes the registered address of a callback,
+that function is called. 
 
 #### Methods
 
@@ -1554,11 +1632,28 @@ Returns None
 
 ### `OSCServerError(self, message)`
 
+Class for all OSCServer errors
+        
+
 #### Methods
 
 ---
 
 ### `OSCStreamRequestHandler(self, request, client_address, server)`
+
+This is the central class of a streaming OSC server. If a client
+connects to the server, the server instantiates a OSCStreamRequestHandler
+for each new connection. This is fundamentally different to a packet
+oriented server which has a single address space for all connections.
+This connection based (streaming) OSC server maintains an address space
+for each single connection, because usually tcp server spawn a new thread
+or process for each new connection. This would generate severe
+multithreading synchronization problems when each thread would operate on
+the same address space object. Therefore: To implement a streaming/TCP OSC
+server a custom handler must be implemented which implements the
+setupAddressSpace member in which it creates its own address space for this
+very connection. This has been done within the testbench and can serve as
+inspiration.
 
 #### Methods
 
@@ -1636,6 +1731,18 @@ socket has been closed, False.
 
 ### `OSCStreamingClient(self)`
 
+OSC streaming client.
+A streaming client establishes a connection to a streaming server but must
+be able to handle replies by the server as well. To accomplish this the
+receiving takes place in a secondary thread, because no one knows if we
+have to expect a reply or not, i.e. synchronous architecture doesn't make
+much sense.
+Replies will be matched against the local address space. If message
+handlers access code of the main thread (where the client messages are sent
+to the server) care must be taken e.g. by installing sychronization
+mechanisms or by using an event dispatcher which can handle events
+originating from other threads. 
+
 #### Methods
 
 ##### `sendOSC(self, msg)`
@@ -1696,6 +1803,9 @@ and the remote-address it is connected to (if any)
 ---
 
 ### `OSCStreamingServer(self, address)`
+
+A connection oriented (TCP/IP) OSC server.
+        
 
 #### Methods
 
@@ -1823,6 +1933,8 @@ deadlock.
 ---
 
 ### `OSCStreamingServerThreading(self, address)`
+
+
 
 #### Methods
 
@@ -1955,6 +2067,9 @@ deadlock.
 
 ### `ThreadingOSCRequestHandler(self, request, client_address, server)`
 
+Multi-threaded OSCRequestHandler;
+Starts a new RequestHandler thread for each unbundled OSCMessage
+
 #### Methods
 
 ##### `handle(self)`
@@ -1983,6 +2098,9 @@ then waits for all its children to finish.
 ---
 
 ### `ThreadingOSCServer(self, server_address, client=None, return_port=0)`
+
+An Asynchronous OSCServer.
+This server starts a new thread to handle each incoming request.
 
 #### Methods
 

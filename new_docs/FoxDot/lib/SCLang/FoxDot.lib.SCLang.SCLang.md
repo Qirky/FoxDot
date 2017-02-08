@@ -6,11 +6,15 @@ SCLang.py
 
 ### `cls(self, name, **kwargs)`
 
+
+
 #### Methods
 
 ---
 
 ### `instance(self, string)`
+
+
 
 #### Methods
 

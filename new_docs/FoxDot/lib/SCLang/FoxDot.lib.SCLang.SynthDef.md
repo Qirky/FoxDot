@@ -6,6 +6,8 @@ None
 
 ### `SampleSynthDef(self, *args, **kwargs)`
 
+
+
 #### Methods
 
 ##### `add(self)`
@@ -27,6 +29,8 @@ Plays a single sound
 ---
 
 ### `SynthDef(self, *args, **kwargs)`
+
+
 
 #### Methods
 
@@ -50,6 +54,8 @@ Plays a single sound
 
 ### `SynthDefBaseClass(self, name)`
 
+
+
 #### Methods
 
 ##### `add(self)`
@@ -72,11 +78,15 @@ Plays a single sound
 
 ### `SynthDefProxy(self, name, degree, kwargs)`
 
+
+
 #### Methods
 
 ---
 
 ### `SynthDict(self, **kwargs)`
+
+
 
 #### Methods
 

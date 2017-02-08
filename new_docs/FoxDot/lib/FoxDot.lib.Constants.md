@@ -6,6 +6,8 @@ None
 
 ### `const(self, value)`
 
+A number value that cannot be changed 
+
 #### Methods
 
 ---

@@ -10,6 +10,8 @@ playback specific samples located in the Samples directory).
 
 ### `Group(self, *args)`
 
+
+
 #### Methods
 
 ##### `__getattr__(self, name)`
@@ -20,11 +22,15 @@ Returns a Pattern object containing the desired attribute for each player in the
 
 ### `GroupAttr(self)`
 
+
+
 #### Methods
 
 ---
 
 ### `Player(self)`
+
+
 
 #### Methods
 
@@ -138,17 +144,24 @@ Shuffles the degree of a player. If possible, do it visually
 
 ### `PlayerKey(self, value=None, reference=None)`
 
+
+
 #### Methods
 
 ---
 
 ### `func_delay(self, func, *args, **kwargs)`
 
+
+
 #### Methods
 
 ---
 
 ### `send_delay(self, p, synthdef, message, fx={})`
+
+Holds the state of a player whose send has
+been scheduled in the future 
 
 #### Methods
 

@@ -14,10 +14,9 @@ def pkgname(pkg):
 def getdetails(function, name=None):
     ''' returns a string "function(args)" '''
 
-    if hasattr(function, 'argspec'):
-        argspec = function.argspec
-    else:
-        argspec  = inspect.getargspec(function)
+    # Pattern decorators have this attribute
+
+    argspec = function.argspec if hasattr(function, 'argspec') else inspect.getargspec(function)
 
     args     = argspec.args
     defaults = argspec.defaults if argspec.defaults is not None else ()
@@ -203,12 +202,12 @@ class DataDoc:
 
 class ClassDoc:
     def __init__(self, docstring, methods):
-        self.doc     = docstring
+        self.doc     = docstring if docstring is not None else ''
         self.methods = methods
     def generatemethods(self):
         return ['##### `{}`\n\n{}'.format(method, doc) for method, doc in self.methods.items() if doc is not None]
     def read(self):
-        return '#### Methods\n\n' + ''.join([str(doc) + '\n\n' for doc in self.generatemethods()]) + '---\n\n'
+        return self.doc + '\n\n' + '#### Methods\n\n' + ''.join([str(doc) + '\n\n' for doc in self.generatemethods()]) + '---\n\n'
 
 if __name__ == "__main__":
 

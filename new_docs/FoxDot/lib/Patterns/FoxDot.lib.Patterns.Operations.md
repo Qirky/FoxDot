@@ -6,6 +6,8 @@ None
 
 ### `POperand(self, func)`
 
+
+
 #### Methods
 
 ##### `__call__(self, A, B)`

@@ -17,6 +17,8 @@ Time-Dependent Variable Base Class
 
 ### `Pvar(self, values, dur=4)`
 
+Pvar([pat1, pat2], durs) 
+
 #### Methods
 
 ##### `stretch(self, size)`
@@ -118,11 +120,15 @@ Returns a duration value relative to the type of pattern. Most patterns return v
 
 ### `_inf(self)`
 
+Used in TimeVars to stay on certain values until re-evaluated 
+
 #### Methods
 
 ---
 
 ### `linvar(self, *args, **kwargs)`
+
+
 
 #### Methods
 
@@ -166,6 +172,8 @@ Returns the duration of one full cycle in beats
 ---
 
 ### `var(self, values, dur=4, **kwargs)`
+
+Var(values [,durs=[4]]) 
 
 #### Methods
 

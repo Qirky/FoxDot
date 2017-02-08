@@ -6,6 +6,10 @@ None
 
 ### `_whenLibrary(self)`
 
+Example:
+
+A. when(lambda: x==10).do(lambda: p.shuffle()).elsedo(lambda: p. reverse())               
+
 #### Methods
 
 ##### `run(self)`
@@ -27,6 +31,8 @@ or update the
 ---
 
 ### `_whenStatement(self, func)`
+
+
 
 #### Methods
 

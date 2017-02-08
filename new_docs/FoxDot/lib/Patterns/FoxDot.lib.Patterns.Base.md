@@ -6,6 +6,9 @@ None
 
 ### `GeneratorPattern(self)`
 
+Used for when a Pattern does not generate a set length pattern,
+e.g. random patterns
+
 #### Methods
 
 ##### `getitem(self, index)`
@@ -16,6 +19,9 @@ performs any arithmetic operation assigned
 ---
 
 ### `PGroup(self, data=[], *args)`
+
+Class to represent any groupings of notes as denoted by brackets.
+PGroups should only be found within a Pattern object.
 
 #### Methods
 
@@ -76,6 +82,8 @@ Scales the dur values for all the items in self.data by n
 ---
 
 ### `Pattern(self, data=[])`
+
+
 
 #### Methods
 
@@ -141,6 +149,8 @@ Is called by __getitem__
 
 ### `PatternContainer(self, data=[])`
 
+
+
 #### Methods
 
 ##### `__or__(self, other)`
@@ -200,6 +210,9 @@ Returns a duration value relative to the type of pattern. Most patterns return v
 ---
 
 ### `Pgroup(self, data=[], *args)`
+
+Class to represent any groupings of notes as denoted by brackets.
+PGroups should only be found within a Pattern object.
 
 #### Methods
 
@@ -261,6 +274,8 @@ Scales the dur values for all the items in self.data by n
 
 ### `Shared_Time_PGroup(self, data=[], *args)`
 
+
+
 #### Methods
 
 ##### `__or__(self, other)`
@@ -321,11 +336,15 @@ Scales the dur values for all the items in self.data by n
 
 ### `dots(self)`
 
+Class for representing long Patterns in strings 
+
 #### Methods
 
 ---
 
 ### `metaPattern(self, data=[])`
+
+Abstract base class for Patterns 
 
 #### Methods
 

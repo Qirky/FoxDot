@@ -6,6 +6,8 @@ None
 
 ### `PentatonicScale(self, scale)`
 
+
+
 #### Methods
 
 ##### `__or__(self, other)`
@@ -70,6 +72,8 @@ Is called by __getitem__
 
 ### `Scale(self, name, *args)`
 
+
+
 #### Methods
 
 ##### `__or__(self, other)`
@@ -133,6 +137,8 @@ Is called by __getitem__
 ---
 
 ### `_freq(self)`
+
+
 
 #### Methods
 

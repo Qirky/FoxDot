@@ -6,6 +6,9 @@ Repeat.py
 
 ### `MethodCall(self, parent, method, n, args=(), kwargs={})`
 
+Class to represent an object's method call that,
+when called, schedules itself in the future 
+
 #### Methods
 
 ##### `__call__(self)`
@@ -19,6 +22,8 @@ Returns True if this is in the Tempo Clock
 ---
 
 ### `Repeatable(self)`
+
+
 
 #### Methods
 
@@ -37,6 +42,8 @@ Every n beats, do self.cmd(args)
 ---
 
 ### `WhenModMethodCall(self, parent, method, mod, n, args=(), kwargs={})`
+
+
 
 #### Methods
 

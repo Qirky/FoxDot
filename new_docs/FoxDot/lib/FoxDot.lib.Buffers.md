@@ -6,17 +6,23 @@ This module manages the allocation of buffer numbers and samples
 
 ### `BufChar(self, char)`
 
+
+
 #### Methods
 
 ---
 
 ### `Buffer(self, fn, number, channels=1)`
 
+
+
 #### Methods
 
 ---
 
 ### `BufferManager(self)`
+
+
 
 #### Methods
 
