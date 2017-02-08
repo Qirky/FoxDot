@@ -31,9 +31,12 @@ class metaPattern(object):
         return LCM(*lengths) * len(self.data)
     
     def __str__(self):
-        if len(self.data) > 20:
-            val = self.data[:8] + [dots()] + self.data[-8:]
-        else:
+        try:
+            if len(self.data) > 20:
+                val = self.data[:8] + [dots()] + self.data[-8:]
+            else:
+                val = self.data
+        except AttributeError:
             val = self.data
         return "P" + self.bracket_style % repr(val)[1:-1]
 
@@ -141,10 +144,10 @@ class metaPattern(object):
     
     def __or__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
-        return Pattern(self.pipe(other))
+        return self.pipe(other)
     def __ror__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
-        return Pattern(asStream(other).pipe(self))
+        return asStream(other).pipe(self)
     
     #: Comparisons
     def __eq__(self, other):

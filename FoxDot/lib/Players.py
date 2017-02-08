@@ -146,6 +146,12 @@ class Player(Repeatable):
         self.__dict__[name] = value
         return
 
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return not self is other
+
     # --- Startup methods
 
     def reset(self):
@@ -628,7 +634,9 @@ class Player(Repeatable):
 
         if attr == "degree" and self.following != None:
 
-            self.queue_block.call(self.following)
+            if self.following in list(self.queue_block):
+
+                self.queue_block.call(self.following, self)
         
         # If the attribute isn't in the modf dictionary, default to 0
 
@@ -1244,6 +1252,7 @@ class PlayerKey:
         new = PlayerKey(other, self)
         new.calculate = rDiv
         return new
+
     # Comparisons
     def __eq__(self, other):
         return self.now(step=0) == other

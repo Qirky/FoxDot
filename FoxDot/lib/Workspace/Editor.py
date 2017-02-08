@@ -73,14 +73,14 @@ class workspace:
 
         # Create menu
 
+        self.menu_visible = False
+
         self.menu = Menu(self.root)
         self.menu.config(font="CodeFont",
                          bg=colour_map['background'],
                          fg=colour_map['plaintext'])
 
-        self.menu_visible = True
-
-        self.root.config(menu=self.menu)
+        # self.root.config(menu=self.menu)
         
         self.menu.add_command(label="Open",       command=self.openfile)
         self.menu.add_command(label="Save",       command=self.save)

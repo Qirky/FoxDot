@@ -323,18 +323,31 @@ class QueueItem:
     def called(self, item):
         return item in self.called_events
 
-    def call(self, item):
+    def call(self, item, caller = None):
         """ Calls all items in queue slot """
-        if item not in self.called_events:
-            for event in self:
-                if event == item:
-                    item.__call__()
-                    self.called_events.append(item)
-                    break
+        this_block = list(self)
+        
+        if caller is not None:
+
+            correct = caller in this_block
+
+        else:
+            correct = True
+
+        if item in this_block and item not in self.called_events and correct:
+
+            self[item].__call__()
+            self.called_events.append(item)
+
         return
 
+    def __getitem__(self, key):
+        for event in self:
+            if event == key:
+                return event
+
     def __iter__(self):
-        return (item for level in self.events for item in level)
+        return (item.obj for level in self.events for item in level)
         
 
 class QueueObj:

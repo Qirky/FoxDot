@@ -1,5 +1,6 @@
 from __future__ import division
 import Base
+import inspect
 
 """
     Module for key operations on Python lists or FoxDot Patterns
@@ -91,10 +92,21 @@ PNe = lambda a, b: (any([a[i]!=b[i] for i in range(len(a))]) if len(a) == len(b)
 
 #: Misc. Operations
 
+def sliceToRange(s):
+    start = s.start if s.start is not None else 0
+    stop  = s.stop 
+    step  = s.step if s.step is not None else 1
+    try:
+        return list(range(start, stop, step))
+    except OverflowError:
+        raise TypeError("range() integer end argument expected, got NoneType")
+
 def LCM(*args):
     """ Lowest Common Multiple """
     # Base case
-    if len(args) == 1:
+    if len(args) == 0:
+        return 1
+    elif len(args) == 1:
         return args[0]
     
     X = list(args)
@@ -140,5 +152,3 @@ def modi(array, i, debug=0):
 def max_length(*patterns):
     """ Returns the largest length pattern """
     return max([len(p) for p in patterns])  
-
-

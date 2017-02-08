@@ -1,5 +1,6 @@
 from Tkinter import Scrollbar, Text
 from Tkinter import RIGHT, LEFT, BOTH, END, INSERT, Y, X
+import Queue
 
 #!/usr/bin/python
 """ Console widget that displays the true Python input """
@@ -8,8 +9,11 @@ class console:
 
     def __init__(self, master, font):
 
+        self.root = master
+        
         self.Yscroll = Scrollbar(master)
         self.Yscroll.grid(row=1, column=2, sticky='nsew')
+
         self.height = 7
 
         self.text = Text( master, padx=5, pady=5,
@@ -25,18 +29,38 @@ class console:
         
         self.text.grid(row=1, column=0, sticky="nsew", columnspan=2)
 
+        self.queue = Queue.Queue()
+
+        self.update()
+
     def __str__(self):
         """ str(s) -> string """
-        return self.text.get()        
+        return self.text.get()   
 
     def write(self, string):
         """ Adds string to the bottom of the console """
-        try:
-            self.text.insert( END, string )
-            self.text.see(END)
-        except:
-            pass            
+        self.queue.put(string)
         return
+
+    def update(self):
+        try:
+
+            while True:
+                string = self.queue.get_nowait()
+                
+                try:
+
+                    self.text.insert( END, string )
+                    self.text.see(END)
+
+                except:
+                    pass
+
+        except Queue.Empty:
+
+            pass
+
+        self.root.after(50, self.update)
 
     def read(self):
         """ Returns contents of the console widget """
