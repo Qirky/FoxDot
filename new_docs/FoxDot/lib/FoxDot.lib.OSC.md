@@ -1,4 +1,4 @@
-# FoxDot.lib.OSC
+# `FoxDot.lib.OSC`
 
 This module contains an OpenSoundControl implementation (in Pure Python), based
 (somewhat) on the good old 'SimpleOSC' implementation by Daniel Holth & Clinton

@@ -1,4 +1,4 @@
-# FoxDot.lib.Patterns.Sequences
+# `FoxDot.lib.Patterns.Sequences`
 
 Sequences.py
 ------------
@@ -149,20 +149,7 @@ multiple Patterns by using Patterns as arguments
 
 ## Data
 
-### `P`
+#### `P = <FoxDot.lib.Patterns.Sequences.__pattern__ instance>`
 
-Used to define lists as patterns:
-
-`P[1,2,3]` is equivalent to `Pattern([1,2,3])` and
-`P(1,2,3)` is equivalent to `Pattern((1,2,3))`.
-
-Ranges can be created using slicing, e.g. `P[1:6:2]` will generate the range
-1 to 6 in steps of 2, thus creating the Pattern `[1, 3, 5]`. Slices can be
-combined with other values in a Pattern such that `P[0,2,1:10]` will return
-the Pattern `P[0, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
-
-### `R`
-
-Pseudo-RandomGenerator.
-R[1,2,3]
+#### `R = <FoxDot.lib.Patterns.Sequences.__generatorpattern__ instance>`
 

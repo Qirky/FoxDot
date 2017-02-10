@@ -1,4 +1,4 @@
-# FoxDot.lib.Players
+# `FoxDot.lib.Players`
 
 Copyright Ryan Kirkbride 2015
 
@@ -41,6 +41,10 @@ Calculates the values for each attr to send to the server at the current clock t
 ##### `stutter(self, n=2, **kwargs)`
 
 Plays the current note n-1 times over the current durations 
+
+##### `reverse(self)`
+
+Sets flag to reverse streams 
 
 ##### `offbeat(self, dur=0.5)`
 
@@ -96,10 +100,6 @@ use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1]
 ##### `strum(self, dur=0.025)`
 
 Adds a delay to a Synth Envelope 
-
-##### `reverse(self)`
-
-Sets flag to reverse streams 
 
 ##### `stop(self, N=0)`
 

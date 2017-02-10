@@ -1,4 +1,4 @@
-# FoxDot.lib.SCLang.SynthDef
+# `FoxDot.lib.SCLang.SynthDef`
 
 None
 
@@ -96,7 +96,5 @@ Plays a single sound
 
 ## Data
 
-### `SynthDefs`
-
-
+#### `SynthDefs = ['varsaw', 'bell', 'scratch', 'pulse', 'blip', '...', 'play1', 'ripple', 'fuzz', 'klank', 'scatter']`
 

@@ -1,4 +1,4 @@
-# FoxDot.lib.Midi
+# `FoxDot.lib.Midi`
 
 Module sed for converting streams and frequencies 
 

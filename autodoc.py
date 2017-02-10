@@ -172,32 +172,34 @@ class ModuleDoc:
                 
                 elif pydoc.isdata(item):
 
-                    self.data[name] = DataDoc(inspect.cleandoc(pydoc.TextDoc().docdata(item)))
+                    name = name + " = " + inspect.cleandoc(pydoc.TextDoc().docother(item))
+
+                    self.data[name] = ''
 
     def __repr__(self):
         return "<doc for {}>".format(self.title)
 
     def _write_title(self):
-        self.file.write('# {}\n\n'.format(self.title))
+        self.file.write('# `{}`\n\n'.format(self.title))
         self.file.write('{}\n\n'.format(self.docstring))
 
-    def _write_section(self, header):
+    def _write_section(self, header, level=3):
         self.file.write('## {}\n\n'.format(header.title()))
         for name, doc in sorted(self.__dict__[header].items()):
-            self.file.write('### `{}`\n\n'.format(name))
-            self.file.write(doc.read())
+            self.file.write('#' * level + ' `{}`\n\n'.format(name))
+            self.file.write(str(doc))
 
     def write(self, path='.'):
         with open(os.path.join(path, self.filename), 'w') as self.file:
             self._write_title()
             self._write_section('classes')
             self._write_section('functions')
-            self._write_section('data')
+            self._write_section('data', level = 4)
 
 class DataDoc:
     def __init__(self, docstring):
         self.doc = docstring
-    def read(self):
+    def __str__(self):
         return '{}\n\n'.format(self.doc)
 
 class ClassDoc:
@@ -206,7 +208,7 @@ class ClassDoc:
         self.methods = methods
     def generatemethods(self):
         return ['##### `{}`\n\n{}'.format(method, doc) for method, doc in self.methods.items() if doc is not None]
-    def read(self):
+    def __str__(self):
         return self.doc + '\n\n' + '#### Methods\n\n' + ''.join([str(doc) + '\n\n' for doc in self.generatemethods()]) + '---\n\n'
 
 if __name__ == "__main__":

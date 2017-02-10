@@ -1,4 +1,4 @@
-# FoxDot.lib.ServerManager
+# `FoxDot.lib.ServerManager`
 
 ServerManager.py
 
@@ -99,7 +99,5 @@ Boot SuperCollider and connect over OSC
 
 ## Data
 
-### `Server`
-
-
+#### `Server = FoxDot ServerManager Instance -> localhost:57110`
 

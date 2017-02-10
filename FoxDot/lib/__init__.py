@@ -5,6 +5,10 @@
 """
 
 from Code import *
+from Code import __when__
+
+FoxDotCode.namespace = globals()
+
 from TempoClock import *
 from Players import *
 from Patterns import *
@@ -40,7 +44,6 @@ def nextBar(f, n=0):
 
 # Assign the clock to time-keeping classes
 
-when.metro    = Clock
 var.metro     = Clock
 Player.metro  = Clock
 
@@ -48,8 +51,6 @@ Player.metro  = Clock
 
 Player.server = Server
 Effect.server = Server
-
-FoxDotCode.namespace=globals()
 
 # Create preset Players
 
@@ -71,6 +72,10 @@ for pattern_name in sorted(classes(Sequences)):
     else:
         if pattern_name.upper() !=  PatternTypes[-1].upper():
             PatternTypes.append(pattern_name)
+
+# Give the __when__ statement access to the  global namespace
+
+__when__.set_namespace(FoxDotCode)
 
 # Start the TempoClock
 

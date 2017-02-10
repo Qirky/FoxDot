@@ -122,7 +122,7 @@ class TempoClock:
 
         return
 
-    def schedule(self, obj, beat=None, args=()):
+    def schedule(self, obj, beat=None, args=(), kwargs={}):
         """ TempoClock.schedule(callable, beat=None)
             Add a player / event to the queue """
 
@@ -150,13 +150,17 @@ class TempoClock:
 
         if beat > self.now():
 
-            self.queue.add(obj, beat, args)
+            self.queue.add(obj, beat, args, kwargs)
 
-        #  Add any "historic" schedules to right now?
+        # Add any events that should have happend, but silence Players
+        
         else:
 
-            pass
-            # self.queue.add(obj, self.now() + 0.1, args)
+            if isinstance(obj, Player):
+
+                kwargs['verbose'] = False
+                
+            self.queue.add(obj, self.now() + 0.1, args, kwargs)
         
         return
 
@@ -234,14 +238,14 @@ class Queue:
     def __repr__(self):
         return "\n".join([str(item) for item in self.data]) if len(self.data) > 0 else "[]"
 
-    def add(self, item, beat, args=()):
+    def add(self, item, beat, args=(), kwargs={}):
 
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
 
         if beat < self.next():
 
-            self.data.append(QueueItem(item, beat, args))
+            self.data.append(QueueItem(item, beat, args, kwargs))
 
             i = 0
 
@@ -256,7 +260,7 @@ class Queue:
 
                 if beat == self.data[i].beat:
 
-                    self.data[i].add(item, args)
+                    self.data[i].add(item, args, kwargs)
 
                     break
 
@@ -264,7 +268,7 @@ class Queue:
 
                 if beat > self.data[i].beat:
 
-                    self.data.insert(i, QueueItem(item, beat, args))
+                    self.data.insert(i, QueueItem(item, beat, args, kwargs))
 
                     break
 
@@ -296,20 +300,20 @@ class QueueItem:
                         lambda x: True                       # And anything else
                       ]
                        
-    def __init__(self, obj, t, args=()):
+    def __init__(self, obj, t, args=(), kwargs={}):
 
         self.events        = [ [] for lvl in self.priority_levels ]
         self.called_events = []
 
         self.beat = t
-        self.add(obj, args)
+        self.add(obj, args, kwargs)
         
     def __repr__(self):
         return "{}: {}".format(self.beat, list(self))
     
-    def add(self, obj, args=()):
+    def add(self, obj, args=(), kwargs={}):
 
-        q_obj = QueueObj(obj, args)
+        q_obj = QueueObj(obj, args, kwargs)
 
         for i, level in enumerate(self.priority_levels):
 
@@ -335,7 +339,6 @@ class QueueItem:
             correct = True
 
         if item in this_block and item not in self.called_events and correct:
-
             self[item].__call__()
             self.called_events.append(item)
 
@@ -343,21 +346,27 @@ class QueueItem:
 
     def __getitem__(self, key):
         for event in self:
+            # Possible need to be key.obj?
             if event == key:
                 return event
 
     def __iter__(self):
-        return (item.obj for level in self.events for item in level)
+        return (item for level in self.events for item in level)
         
 
 class QueueObj:
-    def __init__(self, obj, args=()):
+    def __init__(self, obj, args=(), kwargs={}):
         self.obj = obj
         self.args = args
+        self.kwargs = kwargs
+    def __eq__(self, other):
+        return other == self.obj
+    def __ne__(self, other):
+        return other != self.obj
     def __repr__(self):
         return repr(self.obj)
     def __call__(self):
-        self.obj.__call__(*self.args)
+        self.obj.__call__(*self.args, **self.kwargs)
 
 ###############################################################
 """ 

@@ -1,4 +1,4 @@
-# FoxDot.lib.Settings.conf
+# `FoxDot.lib.Settings.conf`
 
 None
 

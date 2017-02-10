@@ -1,4 +1,4 @@
-# FoxDot.lib.Effects
+# `FoxDot.lib.Effects`
 
 None
 
@@ -40,11 +40,7 @@ writes to file and sends to server
 
 ## Data
 
-### `FxList`
+#### `FxList = {'bits': <Fx 'bitcrush' -- args: bits,sus,amp>, ...,sus>, 'hpf': <Fx 'highPassFilter' -- args: hpf>}`
 
-
-
-### `fx`
-
-
+#### `fx = <Fx 'reverb' -- args: verb,room>`
 

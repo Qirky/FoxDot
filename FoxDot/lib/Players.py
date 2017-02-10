@@ -218,7 +218,7 @@ class Player(Repeatable):
 
     # --- Update methods
 
-    def __call__(self):
+    def __call__(self, **kwargs):
 
         # If stopping, kill the event
 
@@ -254,7 +254,7 @@ class Player(Repeatable):
 
         # Play the note
 
-        if self.metro.solo == self: # TODO this syntax is ambiguous
+        if self.metro.solo == self and kwargs.get('verbose', True): 
 
             self.freq = 0 if self.synthdef == SamplePlayer else self.calculate_freq()
 
@@ -270,7 +270,7 @@ class Player(Repeatable):
 
         self.event_index = self.event_index + dur
         
-        self.metro.schedule(self, self.event_index)
+        self.metro.schedule(self, self.event_index, kwargs={})
 
         # Change internal marker
 

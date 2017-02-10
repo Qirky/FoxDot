@@ -1,4 +1,4 @@
-# FoxDot.lib.Patterns.Operations
+# `FoxDot.lib.Patterns.Operations`
 
 None
 
@@ -109,47 +109,25 @@ None
 
 ## Data
 
-### `PAdd`
+#### `PAdd = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
+#### `PDiv = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
+#### `PDiv2 = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
-### `PDiv`
+#### `PGet = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
+#### `PMod = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
+#### `PMod2 = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
-### `PDiv2`
+#### `PMul = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
+#### `PPow = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
+#### `PPow2 = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
-### `PGet`
+#### `PSub = <FoxDot.lib.Patterns.Operations.POperand instance>`
 
-
-
-### `PMod`
-
-
-
-### `PMod2`
-
-
-
-### `PMul`
-
-
-
-### `PPow`
-
-
-
-### `PPow2`
-
-
-
-### `PSub`
-
-
-
-### `PSub2`
-
-
+#### `PSub2 = <FoxDot.lib.Patterns.Operations.POperand instance>`
 

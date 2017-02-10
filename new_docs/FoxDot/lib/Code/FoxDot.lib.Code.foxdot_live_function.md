@@ -1,4 +1,4 @@
-# FoxDot.lib.Code.live_functions
+# `FoxDot.lib.Code.foxdot_live_function`
 
 Allows you continually update a function 
 

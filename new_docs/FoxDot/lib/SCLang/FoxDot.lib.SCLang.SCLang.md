@@ -1,4 +1,4 @@
-# FoxDot.lib.SCLang.SCLang
+# `FoxDot.lib.SCLang.SCLang`
 
 SCLang.py
 
@@ -36,211 +36,107 @@ None
 
 ## Data
 
-### `BPF`
+#### `BPF = BPF`
 
+#### `Blip = Blip`
 
+#### `BufChannels = BufChannels`
 
-### `Blip`
+#### `BufDur = BufDur`
 
+#### `BufFrames = BufFrames`
 
+#### `BufGrain = BufGrain`
 
-### `BufChannels`
+#### `BufRateScale = BufRateScale`
 
+#### `ClipNoise = ClipNoise`
 
+#### `CombC = CombC`
 
-### `BufDur`
+#### `CombL = CombL`
 
+#### `CombN = CombN`
 
+#### `Crackle = Crackle`
 
-### `BufFrames`
+#### `CrossoverDistortion = CrossoverDistortion`
 
+#### `Decimator = Decimator`
 
+#### `DelayC = DelayC`
 
-### `BufGrain`
+#### `DelayL = DelayL`
 
+#### `DelayN = DelayN`
 
+#### `Formant = Formant`
 
-### `BufRateScale`
+#### `FreeVerb = FreeVerb`
 
+#### `GVerb = GVerb`
 
+#### `Gendy1 = Gendy1`
 
-### `ClipNoise`
+#### `Gendy2 = Gendy2`
 
+#### `Gendy3 = Gendy3`
 
+#### `Gendy4 = Gendy4`
 
-### `CombC`
+#### `Gendy5 = Gendy5`
 
+#### `HPF = HPF`
 
+#### `Impulse = Impulse`
 
-### `CombL`
+#### `Klank = Klank`
 
+#### `LFCub = LFCub`
 
+#### `LFNoise0 = LFNoise0`
 
-### `CombN`
+#### `LFNoise1 = LFNoise1`
 
+#### `LFNoise2 = LFNoise2`
 
+#### `LFPar = LFPar`
 
-### `Crackle`
+#### `LFPulse = LFPulse`
 
+#### `LFSaw = LFSaw`
 
+#### `LFTri = LFTri`
 
-### `CrossoverDistortion`
+#### `LPF = LPF`
 
+#### `Limiter = Limiter`
 
+#### `Line = Line`
 
-### `Decimator`
+#### `Out = Out`
 
+#### `PMOsc = PMOsc`
 
+#### `Pan2 = Pan2`
 
-### `DelayC`
+#### `PinkNoise = PinkNoise`
 
+#### `PlayBuf = PlayBuf`
 
+#### `Pulse = Pulse`
 
-### `DelayL`
+#### `Ringz = Ringz`
 
+#### `Saw = Saw`
 
+#### `SinOsc = SinOsc`
 
-### `DelayN`
+#### `SinOscFB = SinOscFB`
 
+#### `VarSaw = VarSaw`
 
+#### `Vibrato = Vibrato`
 
-### `Formant`
-
-
-
-### `FreeVerb`
-
-
-
-### `GVerb`
-
-
-
-### `Gendy1`
-
-
-
-### `Gendy2`
-
-
-
-### `Gendy3`
-
-
-
-### `Gendy4`
-
-
-
-### `Gendy5`
-
-
-
-### `HPF`
-
-
-
-### `Impulse`
-
-
-
-### `Klank`
-
-
-
-### `LFCub`
-
-
-
-### `LFNoise0`
-
-
-
-### `LFNoise1`
-
-
-
-### `LFNoise2`
-
-
-
-### `LFPar`
-
-
-
-### `LFPulse`
-
-
-
-### `LFSaw`
-
-
-
-### `LFTri`
-
-
-
-### `LPF`
-
-
-
-### `Limiter`
-
-
-
-### `Line`
-
-
-
-### `Out`
-
-
-
-### `PMOsc`
-
-
-
-### `Pan2`
-
-
-
-### `PinkNoise`
-
-
-
-### `PlayBuf`
-
-
-
-### `Pulse`
-
-
-
-### `Ringz`
-
-
-
-### `Saw`
-
-
-
-### `SinOsc`
-
-
-
-### `SinOscFB`
-
-
-
-### `VarSaw`
-
-
-
-### `Vibrato`
-
-
-
-### `XLine`
-
-
+#### `XLine = XLine`
 

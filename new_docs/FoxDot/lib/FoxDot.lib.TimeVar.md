@@ -1,4 +1,4 @@
-# FoxDot.lib.TimeVar
+# `FoxDot.lib.TimeVar`
 
 Time-Dependent Variable Base Class
 ==================================
@@ -228,7 +228,5 @@ Function to wrap basic lambda operators for TimeVars
 
 ## Data
 
-### `inf`
-
-Used in TimeVars to stay on certain values until re-evaluated
+#### `inf = 2147483647`
 

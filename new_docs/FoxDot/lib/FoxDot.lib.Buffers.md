@@ -1,4 +1,4 @@
-# FoxDot.lib.Buffers
+# `FoxDot.lib.Buffers`
 
 This module manages the allocation of buffer numbers and samples 
 

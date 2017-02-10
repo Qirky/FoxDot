@@ -1,4 +1,4 @@
-# FoxDot.lib.Code.func_cmp
+# `FoxDot.lib.Code.foxdot_func_cmp`
 
 compare_functions.py(funcA, funcB):
 

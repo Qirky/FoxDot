@@ -101,8 +101,8 @@ class PentatonicScale(Scale):
 
         return self.values(self.data)[key]
 
-class _freq:
-    def __str__(self):
+class __freq:
+    def __repr__(self):
         return "[inf]"
 
 #: Define scales
@@ -140,7 +140,7 @@ locrianMajor    = Scale("locrianMajor", [0,2,4,5,6,8,10])
 lydian          = Scale("lydian", [0,2,4,6,7,9,11])
 lydianMinor     = Scale("lydianMinor", [0,2,4,6,7,8,10])
 
-freq            = Scale("freq", _freq())
+freq            = Scale("freq", __freq())
 
 # Custom made fibonacci tuning
 

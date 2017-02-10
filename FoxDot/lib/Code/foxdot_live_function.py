@@ -51,8 +51,3 @@ if __name__ == "__main__":
     part1()
 
     print part1.__class__
-
-    ##    p >> pads()
-    ##
-    ##
-    ##when(lambda: x == 1).do(part1).elsedo(lambda: None)

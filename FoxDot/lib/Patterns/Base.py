@@ -41,7 +41,7 @@ class metaPattern(object):
         return "P" + self.bracket_style % repr(val)[1:-1]
 
     def __repr__(self):
-        return str(self)[1:]
+        return str(self)
 
     def string(self):
         """ Returns a string made up of all the values:
@@ -189,7 +189,7 @@ class metaPattern(object):
     # Methods that return augmented versions of original
 
     def shuffle(self):
-        new = asStream(self.data)
+        new = asStream(self.data[:])
         shuffle(new.data)
         return new
 

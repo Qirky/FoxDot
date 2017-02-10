@@ -1,4 +1,4 @@
-# FoxDot.lib.Root
+# `FoxDot.lib.Root`
 
 None
 
@@ -16,7 +16,5 @@ None
 
 ## Data
 
-### `default`
-
-
+#### `default = 0`
 

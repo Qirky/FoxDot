@@ -1,4 +1,4 @@
-# FoxDot.lib.Scale
+# `FoxDot.lib.Scale`
 
 None
 
@@ -136,14 +136,6 @@ Is called by __getitem__
 
 ---
 
-### `_freq(self)`
-
-
-
-#### Methods
-
----
-
 ## Functions
 
 ### `choose()`
@@ -156,95 +148,49 @@ Returns a list of all the scales by name
 
 ## Data
 
-### `chromatic`
+#### `chromatic = P[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]`
 
+#### `default = P[0, 2, 4, 5, 7, 9, 11]`
 
+#### `dorian = P[0, 2, 3, 5, 7, 9, 10]`
 
-### `default`
+#### `egyptian = P[0, 2, 5, 7, 10]`
 
+#### `fibonacci = P[0.0, 1.5, 3.3333333333333335, 4.800000000000001, 6.5, 8.076923076923077, 9.714285714285715]`
 
+#### `freq = P[inf]`
 
-### `dorian`
+#### `harmonicMajor = P[0, 2, 4, 5, 7, 8, 11]`
 
+#### `harmonicMinor = P[0, 2, 3, 5, 7, 8, 11]`
 
+#### `indian = P[0, 4, 5, 7, 10]`
 
-### `egyptian`
+#### `locrian = P[0, 1, 3, 5, 6, 8, 10]`
 
+#### `locrianMajor = P[0, 2, 4, 5, 6, 8, 10]`
 
+#### `lydian = P[0, 2, 4, 6, 7, 9, 11]`
 
-### `fibonacci`
+#### `lydianMinor = P[0, 2, 4, 6, 7, 8, 10]`
 
+#### `major = P[0, 2, 4, 5, 7, 9, 11]`
 
+#### `majorPentatonic = P[0, 2, 4, 7, 9]`
 
-### `freq`
+#### `melodicMajor = P[0, 2, 4, 5, 7, 8, 11]`
 
+#### `melodicMinor = P[0, 2, 3, 5, 7, 9, 11]`
 
+#### `minor = P[0, 2, 3, 5, 7, 8, 10]`
 
-### `harmonicMajor`
+#### `minorPentatonic = P[0, 3, 5, 7, 10]`
 
+#### `mixolydian = P[0, 2, 4, 5, 7, 9, 10]`
 
+#### `phyrgian = P[0, 1, 3, 5, 7, 8, 10]`
 
-### `harmonicMinor`
+#### `prometheus = P[0, 2, 4, 6, 11]`
 
-
-
-### `indian`
-
-
-
-### `locrian`
-
-
-
-### `locrianMajor`
-
-
-
-### `lydian`
-
-
-
-### `lydianMinor`
-
-
-
-### `major`
-
-
-
-### `majorPentatonic`
-
-
-
-### `melodicMajor`
-
-
-
-### `melodicMinor`
-
-
-
-### `minor`
-
-
-
-### `minorPentatonic`
-
-
-
-### `mixolydian`
-
-
-
-### `phyrgian`
-
-
-
-### `prometheus`
-
-
-
-### `zgi`
-
-
+#### `zgi = P[0, 2, 5, 7, 9]`
 
