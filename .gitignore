@@ -8,6 +8,10 @@ dist/*
 # To-do list
 TODO.txt
 
+# Make directory and autodoc scripts
+autodoc.py
+snd/mkdir.py
+
 # PIP Registration file
 .pypirc
 
