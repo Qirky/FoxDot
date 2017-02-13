@@ -304,6 +304,7 @@ class QueueItem:
 
         self.events        = [ [] for lvl in self.priority_levels ]
         self.called_events = []
+        self.called_objects = []
 
         self.beat = t
         self.add(obj, args, kwargs)
@@ -329,16 +330,28 @@ class QueueItem:
 
     def call(self, item, caller = None):
         """ Calls all items in queue slot """
-        this_block = list(self)
+        # TODO -> Make more efficient
         
         if caller is not None:
 
-            correct = caller in this_block
+            correct = (caller in self.objects())
+
+            for event in self:
+
+                if item == event.obj:
+
+                    item = event
+
+                    break
 
         else:
+
             correct = True
 
-        if item in this_block and item not in self.called_events and correct:
+        # item is a QueueObj OR the object itself
+
+        if correct and (item in self) and (item not in self.called_events):
+            
             self[item].__call__()
             self.called_events.append(item)
 
@@ -352,6 +365,9 @@ class QueueItem:
 
     def __iter__(self):
         return (item for level in self.events for item in level)
+
+    def objects(self):
+        return [item.obj for level in self.events for item in level]
         
 
 class QueueObj:

@@ -215,5 +215,5 @@ if __name__ == "__main__":
 
     import FoxDot
 
-    docs = GenerateDocs(FoxDot, 'new_docs')
+    docs = GenerateDocs(FoxDot, 'docs')
     docs.write()

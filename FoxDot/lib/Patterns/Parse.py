@@ -43,7 +43,8 @@ class Parser:
             if char == "(":
 
                 # Parse the contents of the brackets if found
-                j = string.index(")", start=i+1)
+                j = string.index(")", start=i+2)
+                
                 s = string[i+1:j]
                 i = j
 
@@ -57,7 +58,7 @@ class Parser:
             elif char == "{":
 
                 # Parse the contents of the brackets if found
-                j = string.index("}", start=i+1)
+                j = string.index("}", start=i+2)
                 s = string[i+1:j]
                 i = j
 
@@ -68,7 +69,7 @@ class Parser:
             # Look for a '[]'
             elif char == "[":
                 
-                j = string.index("]", start=i+1)
+                j = string.index("]", start=i+2)
                 s = string[i+1:j]
                 i = j
 

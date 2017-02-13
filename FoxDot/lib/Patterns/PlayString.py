@@ -50,7 +50,7 @@ class PlayString:
                     count -= 1
                 else:
                     return i
-        raise SyntaxError("Bad string")
+        raise SyntaxError("Bad string: Empty or non-closing brackets")
 
     # Return strings
     

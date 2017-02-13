@@ -11,4 +11,10 @@
 from lib import FoxDotCode
 from lib.Workspace import workspace
 
+##import sys
+##
+##if sys.argv[1] == "-f":
+##
+##    f = sys.argv[2]
+
 FoxDot = workspace(FoxDotCode).run()

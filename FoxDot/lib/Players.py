@@ -1,9 +1,121 @@
 """
-    Copyright Ryan Kirkbride 2015
+    Making music with FoxDot Players
+    --------------------------------
+    
+    Players are what make FoxDot make music. They are similar in design to
+    SuperCollider's `PDef` and `PBind` combo but with slicker syntax. FoxDot
+    uses SuperCollider to *actually* make the sound and does so by triggering
+    predefined `SynthDefs` - sort of like definitions of a digital instruments.
+    To have a look at the list of `SynthDefs`, you can just `print` them to
+    the console:
 
-    This module contains the objects for Instrument Players (those that send musical
-    information to SuperCollider) and Sample Players (those that send buffer IDs to
-    playback specific samples located in the Samples directory).
+    ```python
+    print SynthDefs
+    ```
+
+    Each one of these represents a `SynthDef` *object*. These objects are then
+    given to Players to play - like giving an instrument to someone in your
+    orchestra. To give someone the instrument, `pads`, you use a double arrow
+    some code syntax like this:
+
+    ```python
+    p1 >> pads()
+    ```
+
+    `p1` is the name of a predefined player object. At startup, FoxDot reserves
+    all one- and two-character variable names, such as `x`, `p1`, or `bd` for
+    player objects but these can be repurposed if you like. If you want to use
+    a variable name for a player object with more than two characters, you just
+    instantiate a new `Player` object:
+
+    ```python
+    new_player = Player()
+
+    new_player >> pads()
+    ```
+
+    Changing parameters
+    -------------------
+
+    By default, player objects play the first note of their default scale (more
+    below) with a duration of 1 beat per note. To change the pitch just give the
+    `SynthDef` a list of numbers.
+
+    ```python
+    p1 >> pads([0,7,6,4])
+    ```    
+
+    When you start FoxDot up, your clock is ticking at 120bpm and your player
+    objects are all playing in the major scale. With 8 pitches in the major scale,
+    the 0 refers to the first pitch and the 7 refers to the pitch one octave
+    higher because Python, like most programming languages, uses zero-indexing.
+    To change your scale you can specify a new scale as a keyword argument (see
+    the documentation on `Scales` for more information on scales) or change the
+    default scale for all player objects.
+
+    ```python
+    # Changing scale as a keyword argument
+    p1 >> pads([0,7,6,4], scale=Scale.minor)
+
+    # Changing the default scalew (the following are equivalent)
+    Scale.default.set("minor")
+    Scale.default.set(Scale.minor)
+    Scale.default.set([0,2,3,5,7,8,10])
+
+    # See a list of scales
+    print Scale.names()
+
+    # Change the tempo
+    Clock.bpm = 144
+    ```
+
+    To change the rhythm of your player object, specify the durations using
+    the `dur` keyword. Other keywords can be specified, such as `oct` for the
+    octave and `sus` for the sustain, which is the same as the duration by
+    default.
+
+    ```python
+    p1 >> pads([0,7,6,4], dur=[1,1/2,1/4,1/4], oct=6, sus=1)
+
+    # See a list of possible keyword arguments
+    print Player.Attributes()
+    ```
+
+    Using the `play` SynthDef
+    -------------------------
+
+    There is a special case SynthDef object called `play` which allows you
+    to play short audio files rather than specify pitches. In this case
+    you use a string of characters as the first argument where each character
+    refers to a different folder of audio files. You can see more information
+    by evaluating `print BufferManager`. The following line of code creates
+    a basic drum beat:
+
+    ```python
+    d1 >> play("x-o-")
+    ```
+
+    To play multiple patters simultaneously, just create a new `play` object.
+
+    ```python
+    bd >> play("x( x)  ")
+    hh >> play("---[--]")
+    sn >> play("  o ")
+    ```
+
+    Grouping characters in round brackets laces the pattern so that on each
+    play through of the sequence of samples, the next character in the group's
+    sample is played. The sequence `(xo)---` would be played back as if it
+    were entered `x---o---`. Using square brackets will force the enclosed samples
+    to played in the same time span as a single character e.g. `--[--]` will play
+    two hi-hat hits at a half beat then two at a quarter beat. You can play a
+    random sample from a selection by using curly braces in your Play String
+    like so:
+
+    ```
+    d1 >> play("x-o{-[--]o[-o]}")
+    ```
+    
 
 """
 
@@ -30,12 +142,10 @@ BufferManager = Buffers.BufferManager()
 
 class Player(Repeatable):
 
-    # These are the PlayerObject attributes NOT included in OSC messages
-    VARS = []
-    # This is an internal flag 
-    INIT = False
-    # Used for visual feedback
-    bang_kwargs = {}
+    # Set private values
+
+    __vars = []
+    __init = False
 
     # These are used by FoxDot
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay',
@@ -46,8 +156,6 @@ class Player(Repeatable):
                        'pan', 'rate', 'amp', 'room', 'buf', 'bits')
     play_attributes = ('scrub', 'cut')
     fx_attributes   = FxList.kwargs()
-    
-    Attributes      = keywords + base_attributes + fx_attributes + play_attributes
 
     metro = None
     server = None
@@ -64,6 +172,8 @@ class Player(Repeatable):
         # Inherit
 
         Repeatable.__init__(self)
+    
+        # General setup
         
         self.synthdef = None
         self.id = None
@@ -114,18 +224,22 @@ class Player(Repeatable):
         
         # List the internal variables we don't want to send to SuperCollider
 
-        self.VARS = self.__dict__.keys()
-
-        self.INIT = True
+        self.__vars = self.__dict__.keys()
+        self.__init = True
 
         self.reset()
 
-        #### end of init
+    # Class methods
 
-    """ The PlayerObject Method >> """
+    @classmethod
+    def Attributes(cls):
+        return cls.keywords + cls.base_attributes + cls.fx_attributes + cls.play_attributes
 
+    # Player Object Manipulation
+    
     def __rshift__(self, other):
-        # Player Object Manipulation
+        """ The PlayerObject Method >> """
+        
         if isinstance(other, SynthDefProxy):
             self.update(other.name, other.degree, **other.kwargs)
             self + other.mod
@@ -137,11 +251,14 @@ class Player(Repeatable):
         return self
 
     def __setattr__(self, name, value):
-        if self.INIT:
+        if self.__init:
             # Force the data into a TimeVar or Pattern if the attribute is used with SuperCollider
-            if name not in self.VARS:
+            if name not in self.__vars:
                 value = asStream(value) if not isinstance(value, (PlayerKey, TimeVar.var)) else value
+                # Update the attribute dict
                 self.attr[name] = value
+                # Update the current event
+                self.event[name] = modi(value, self.event_index)
                 return
         self.__dict__[name] = value
         return
@@ -634,7 +751,7 @@ class Player(Repeatable):
 
         if attr == "degree" and self.following != None:
 
-            if self.following in list(self.queue_block):
+            if self.following in self.queue_block.objects():
 
                 self.queue_block.call(self.following, self)
         
@@ -1049,27 +1166,27 @@ class Player(Repeatable):
 
     def shuffle(self):
         """ Shuffles the degree of a player. If possible, do it visually """
-##        if self.synthdef == SamplePlayer:
-##            self._replace_string(PlayString(self.playstring).shuffle())
-##        else:
-##            #self._replace_degree(self.attr['degree'].shuffle())
-        self.degree = self.attr['degree'].shuffle()
+        if self.synthdef == SamplePlayer:
+            self._replace_string(PlayString(self.playstring).shuffle())
+        else:
+            self._replace_degree(self.attr['degree'].shuffle())
+        # self.degree = self.attr['degree'].shuffle()
         return self
 
     def mirror(self):
-##        if self.synthdef == SamplePlayer:
-##            self._replace_string(PlayString(self.playstring).mirror())
-##        else:
-##            self._replace_degree(self.attr['degree'].mirror())
-        self.degree = self.attr['degree'].mirror()
+        if self.synthdef == SamplePlayer:
+            self._replace_string(PlayString(self.playstring).mirror())
+        else:
+            self._replace_degree(self.attr['degree'].mirror())
+        # self.degree = self.attr['degree'].mirror()
         return self
 
     def rotate(self, n=1):
-##        if self.synthdef == SamplePlayer:
-##            self._replace_string(PlayString(self.playstring).rotate(n))
-##        else:
-##            self._replace_degree(self.attr['degree'].rotate(n))
-        self.degree = self.attr['degree'].rotate(n)
+        if self.synthdef == SamplePlayer:
+            self._replace_string(PlayString(self.playstring).rotate(n))
+        else:
+            self._replace_degree(self.attr['degree'].rotate(n))
+        # self.degree = self.attr['degree'].rotate(n)
         return self
 
     def _replace_string(self, new_string):

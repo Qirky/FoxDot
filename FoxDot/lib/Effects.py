@@ -85,7 +85,7 @@ if SC3_PLUGINS:
 
     fx = FxList.new('bits', 'bitcrush', ['bits', 'sus', 'amp'])
     fx.add("osc = Decimator.ar(osc, rate: 44100, bits: bits)")
-    fx.add("osc = osc * Line.ar(amp * 0.5, 0.0001, sus)") 
+    fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus)") 
     fx.save()
 
 fx = FxList.new('chop', 'chop', ['chop', 'sus'])
