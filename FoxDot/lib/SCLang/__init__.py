@@ -1,6 +1,5 @@
 from SCLang import *
-from SynthDef import SynthDefs
+from SynthDef import SynthDefs, SynthDef
 import Env
-import SynthDef
 
 

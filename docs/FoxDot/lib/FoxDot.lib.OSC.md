@@ -166,80 +166,30 @@ This server forks a new process to handle each incoming request.
 
 #### Methods
 
-##### `printErr(self, txt)`
+##### `__eq__(self, other)`
 
-Writes 'OSCServer: txt' to sys.stderr
+Compare function.
                 
 
-##### `handle_error(self, request, client_address)`
+##### `__init__(self, server_address, client=None, return_port=0)`
 
-Handle an exception in the Server's callbacks gracefully.
-Writes the error to sys.stderr and, if the error_prefix (see setSrvErrorPrefix()) is set,
-sends the error-message as reply to the client
-
-##### `setReturnPort(self, port)`
-
-Set the destination UDP-port for replies returning from this server to the remote client
-                
-
-##### `close(self)`
-
-Stops serving requests, closes server (socket), closes used client
-                
+Instantiate an OSCServer.
+- server_address ((host, port) tuple): the local host & UDP-port
+the server listens on
+- client (OSCClient instance): The OSCClient used to send replies from this server.
+If none is supplied (default) an OSCClient will be created.
+- return_port (int): if supplied, sets the default UDP destination-port
+for replies coming from this server.
 
 ##### `__ne__(self, other)`
 
 Compare function.
                 
 
-##### `setClient(self, client)`
-
-Associate this Server with a new local Client instance, closing the Client this Server is currently using.
-                
-
 ##### `__str__(self)`
 
 Returns a string containing this Server's Class-name, software-version and local bound address (if any)
                 
-
-##### `setSrvErrorPrefix(self, pattern=)`
-
-Set the OSC-address (pattern) this server will use to report errors occuring during
-received message handling to the remote client.
-
-If pattern is empty (default), server-errors are not reported back to the client.
-
-##### `server_bind(self)`
-
-Called by constructor to bind the socket.
-
-May be overridden.
-
-##### `address(self)`
-
-Returns a (host,port) tuple of the local address this server is bound to,
-or None if not bound to any address.
-
-##### `server_close(self)`
-
-Called to clean-up the server.
-
-May be overridden.
-
-##### `reportErr(self, txt, client_address)`
-
-Writes 'OSCServer: txt' to sys.stderr
-If self.error_prefix is defined, sends 'txt' as an OSC error-message to the client(s)
-(see printErr() and sendOSCerror())
-
-##### `_unsubscribe(self, data, client_address)`
-
-Handle the actual unsubscription. the provided 'data' is concatenated together to form a
-'<host>:<port>[<prefix>]' string, which is then passed to 
-parseUrlStr() to actually retreive <host>, <port> & <prefix>.
-
-This 'long way 'round' approach (almost) guarantees that the unsubscription works, 
-regardless of how the bits of the <url> are encoded in 'data'. 
 
 ##### `_handle_request_noblock(self)`
 
@@ -249,35 +199,23 @@ I assume that select.select has returned that the socket is
 readable before this function was called, so there should be
 no risk of blocking in get_request().
 
-##### `dispatchMessage(self, pattern, tags, data, client_address)`
+##### `_subscribe(self, data, client_address)`
 
-Attmept to match the given OSC-address pattern, which may contain '*',
-against all callbacks registered with the OSCServer.
-Calls the matching callback and returns whatever it returns.
-If no match is found, and a 'default' callback is registered, it calls that one,
-or raises NoCallbackError if a 'default' callback is not registered.
+Handle the actual subscription. the provided 'data' is concatenated together to form a
+'<host>:<port>[<prefix>] [<filter>] [...]' string, which is then passed to 
+parseUrlStr() & parseFilterStr() to actually retreive <host>, <port>, etc.
 
-  - pattern (string):  The OSC-address of the receied message
-  - tags (string):  The OSC-typetags of the receied message's arguments, without ','
-  - data (list):  The message arguments
+This 'long way 'round' approach (almost) guarantees that the subscription works, 
+regardless of how the bits of the <url> are encoded in 'data'. 
 
-##### `handle_request(self)`
+##### `_unsubscribe(self, data, client_address)`
 
-Handle one request, possibly blocking.
+Handle the actual unsubscription. the provided 'data' is concatenated together to form a
+'<host>:<port>[<prefix>]' string, which is then passed to 
+parseUrlStr() to actually retreive <host>, <port> & <prefix>.
 
-Respects self.timeout.
-
-##### `sendOSCinfo(self, txt, client_address)`
-
-Sends 'txt', encapsulated in an OSCMessage to the default 'info_prefix' OSC-addres.
-Message is sent to the given client_address, with the default 'return_port' overriding
-the client_address' port, if defined.
-
-##### `handle_timeout(self)`
-
-Wait for zombies after self.timeout seconds of inactivity.
-
-May be extended, do not override.
+This 'long way 'round' approach (almost) guarantees that the unsubscription works, 
+regardless of how the bits of the <url> are encoded in 'data'. 
 
 ##### `addDefaultHandlers(self, prefix=, info_prefix=/info, error_prefix=/error)`
 
@@ -301,19 +239,6 @@ the setSrvInfoPrefix() method (for *replies* to incoming serverinfo requests).
 For example, use '/info' for incoming requests, and '/inforeply' or '/serverinfo' or even just '/print' as the 
 info-reply prefix. 
 
-##### `_subscribe(self, data, client_address)`
-
-Handle the actual subscription. the provided 'data' is concatenated together to form a
-'<host>:<port>[<prefix>] [<filter>] [...]' string, which is then passed to 
-parseUrlStr() & parseFilterStr() to actually retreive <host>, <port>, etc.
-
-This 'long way 'round' approach (almost) guarantees that the subscription works, 
-regardless of how the bits of the <url> are encoded in 'data'. 
-
-##### `serve_forever(self)`
-
-Handle one request at a time until server is closed.
-
 ##### `addMsgHandler(self, address, callback)`
 
 Register a handler for an OSC-address
@@ -322,29 +247,136 @@ the address-string should start with '/' and may not contain '*'
   - 'callback' is the function called for incoming OSCMessages that match 'address'.
 The callback-function will be called with the same arguments as the 'msgPrinter_handler' below
 
-##### `__eq__(self, other)`
+##### `address(self)`
 
-Compare function.
-                
+Returns a (host,port) tuple of the local address this server is bound to,
+or None if not bound to any address.
 
-##### `setSrvInfoPrefix(self, pattern)`
+##### `close(self)`
 
-Set the first part of OSC-address (pattern) this server will use to reply to server-info requests.
+Stops serving requests, closes server (socket), closes used client
                 
 
 ##### `collect_children(self)`
 
 Internal routine to wait for children that have exited.
 
+##### `delMsgHandler(self, address)`
+
+Remove the registered handler for the given OSC-address
+                
+
+##### `dispatchMessage(self, pattern, tags, data, client_address)`
+
+Attmept to match the given OSC-address pattern, which may contain '*',
+against all callbacks registered with the OSCServer.
+Calls the matching callback and returns whatever it returns.
+If no match is found, and a 'default' callback is registered, it calls that one,
+or raises NoCallbackError if a 'default' callback is not registered.
+
+  - pattern (string):  The OSC-address of the receied message
+  - tags (string):  The OSC-typetags of the receied message's arguments, without ','
+  - data (list):  The message arguments
+
+##### `fileno(self)`
+
+Return socket file number.
+
+Interface required by select().
+
 ##### `finish_request(self, request, client_address)`
 
 Finish one request by instantiating RequestHandlerClass.
 
-##### `verify_request(self, request, client_address)`
+##### `getOSCAddressSpace(self)`
 
-Verify the request.  May be overridden.
+Returns a list containing all OSC-addresses registerd with this Server. 
+                
 
-Return True if we should proceed with this request.
+##### `handle_error(self, request, client_address)`
+
+Handle an exception in the Server's callbacks gracefully.
+Writes the error to sys.stderr and, if the error_prefix (see setSrvErrorPrefix()) is set,
+sends the error-message as reply to the client
+
+##### `handle_request(self)`
+
+Handle one request, possibly blocking.
+
+Respects self.timeout.
+
+##### `handle_timeout(self)`
+
+Wait for zombies after self.timeout seconds of inactivity.
+
+May be extended, do not override.
+
+##### `msgPrinter_handler(self, addr, tags, data, client_address)`
+
+Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message
+  (the 'addr' string has already been matched against the handler's registerd OSC-address,
+  but may contain '*'s & such)
+- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
+- data (list): The OSCMessage's arguments
+  Note that len(tags) == len(data)
+- client_address ((host, port) tuple): the host & port this message originated from.
+
+a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.
+
+This handler prints the received message.
+Returns None
+
+##### `noCallback_handler(self, addr, tags, data, client_address)`
+
+Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message
+  (the 'addr' string has already been matched against the handler's registerd OSC-address,
+  but may contain '*'s & such)
+- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
+- data (list): The OSCMessage's arguments
+  Note that len(tags) == len(data)
+- client_address ((host, port) tuple): the host & port this message originated from.
+
+a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.
+
+This handler prints a "No callback registered to handle ..." message.
+Returns None
+
+##### `printErr(self, txt)`
+
+Writes 'OSCServer: txt' to sys.stderr
+                
+
+##### `process_request(self, request, client_address)`
+
+Fork a new subprocess to process the request.
+
+##### `reportErr(self, txt, client_address)`
+
+Writes 'OSCServer: txt' to sys.stderr
+If self.error_prefix is defined, sends 'txt' as an OSC error-message to the client(s)
+(see printErr() and sendOSCerror())
+
+##### `sendOSCerror(self, txt, client_address)`
+
+Sends 'txt', encapsulated in an OSCMessage to the default 'error_prefix' OSC-addres.
+Message is sent to the given client_address, with the default 'return_port' overriding
+the client_address' port, if defined.
+
+##### `sendOSCinfo(self, txt, client_address)`
+
+Sends 'txt', encapsulated in an OSCMessage to the default 'info_prefix' OSC-addres.
+Message is sent to the given client_address, with the default 'return_port' overriding
+the client_address' port, if defined.
+
+##### `serve_forever(self)`
+
+Handle one request at a time until server is closed.
 
 ##### `serverInfo_handler(self, addr, tags, data, client_address)`
 
@@ -370,36 +402,39 @@ about this server, depending on the first argument of the received OSC-message:
 - 'clients' | 'targets' :  Reply is a bundle of 'target osc://<host>:<port>[<prefix>] [<filter>] [...]'
   messages, listing the local Client-instance's subscribed remote clients.
 
-##### `__init__(self, server_address, client=None, return_port=0)`
+##### `server_bind(self)`
 
-Instantiate an OSCServer.
-- server_address ((host, port) tuple): the local host & UDP-port
-the server listens on
-- client (OSCClient instance): The OSCClient used to send replies from this server.
-If none is supplied (default) an OSCClient will be created.
-- return_port (int): if supplied, sets the default UDP destination-port
-for replies coming from this server.
+Called by constructor to bind the socket.
 
-##### `sendOSCerror(self, txt, client_address)`
+May be overridden.
 
-Sends 'txt', encapsulated in an OSCMessage to the default 'error_prefix' OSC-addres.
-Message is sent to the given client_address, with the default 'return_port' overriding
-the client_address' port, if defined.
+##### `server_close(self)`
 
-##### `delMsgHandler(self, address)`
+Called to clean-up the server.
 
-Remove the registered handler for the given OSC-address
+May be overridden.
+
+##### `setClient(self, client)`
+
+Associate this Server with a new local Client instance, closing the Client this Server is currently using.
                 
 
-##### `fileno(self)`
+##### `setReturnPort(self, port)`
 
-Return socket file number.
+Set the destination UDP-port for replies returning from this server to the remote client
+                
 
-Interface required by select().
+##### `setSrvErrorPrefix(self, pattern=)`
 
-##### `process_request(self, request, client_address)`
+Set the OSC-address (pattern) this server will use to report errors occuring during
+received message handling to the remote client.
 
-Fork a new subprocess to process the request.
+If pattern is empty (default), server-errors are not reported back to the client.
+
+##### `setSrvInfoPrefix(self, pattern)`
+
+Set the first part of OSC-address (pattern) this server will use to reply to server-info requests.
+                
 
 ##### `shutdown(self)`
 
@@ -408,29 +443,6 @@ Stops the serve_forever loop.
 Blocks until the loop has finished. This must be called while
 serve_forever() is running in another thread, or it will
 deadlock.
-
-##### `getOSCAddressSpace(self)`
-
-Returns a list containing all OSC-addresses registerd with this Server. 
-                
-
-##### `noCallback_handler(self, addr, tags, data, client_address)`
-
-Example handler for OSCMessages.
-All registerd handlers must accept these three arguments:
-- addr (string): The OSC-address pattern of the received Message
-  (the 'addr' string has already been matched against the handler's registerd OSC-address,
-  but may contain '*'s & such)
-- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
-- data (list): The OSCMessage's arguments
-  Note that len(tags) == len(data)
-- client_address ((host, port) tuple): the host & port this message originated from.
-
-a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
-which then gets sent back to the client.
-
-This handler prints a "No callback registered to handle ..." message.
-Returns None
 
 ##### `subscription_handler(self, addr, tags, data, client_address)`
 
@@ -465,23 +477,11 @@ port and prefix all match the subscription.
 If <prefix> is not specified on unsubscription, the subscribed host is unsubscribed if the host and port 
 match the subscription.
 
-##### `msgPrinter_handler(self, addr, tags, data, client_address)`
+##### `verify_request(self, request, client_address)`
 
-Example handler for OSCMessages.
-All registerd handlers must accept these three arguments:
-- addr (string): The OSC-address pattern of the received Message
-  (the 'addr' string has already been matched against the handler's registerd OSC-address,
-  but may contain '*'s & such)
-- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
-- data (list): The OSCMessage's arguments
-  Note that len(tags) == len(data)
-- client_address ((host, port) tuple): the host & port this message originated from.
+Verify the request.  May be overridden.
 
-a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
-which then gets sent back to the client.
-
-This handler prints the received message.
-Returns None
+Return True if we should proceed with this request.
 
 ---
 
@@ -514,16 +514,6 @@ that isn't subscribed.
 
 #### Methods
 
-##### `getOSCAddressSpace(self)`
-
-Returns a list containing all OSC-addresses registerd with this Server. 
-                
-
-##### `delMsgHandler(self, address)`
-
-Remove the registered handler for the given OSC-address
-                
-
 ##### `addMsgHandler(self, address, callback)`
 
 Register a handler for an OSC-address
@@ -531,6 +521,11 @@ Register a handler for an OSC-address
 the address-string should start with '/' and may not contain '*'
   - 'callback' is the function called for incoming OSCMessages that match 'address'.
 The callback-function will be called with the same arguments as the 'msgPrinter_handler' below
+
+##### `delMsgHandler(self, address)`
+
+Remove the registered handler for the given OSC-address
+                
 
 ##### `dispatchMessage(self, pattern, tags, data, client_address)`
 
@@ -543,6 +538,11 @@ or raises NoCallbackError if a 'default' callback is not registered.
   - pattern (string):  The OSC-address of the receied message
   - tags (string):  The OSC-typetags of the receied message's arguments, without ','
   - data (list):  The message arguments
+
+##### `getOSCAddressSpace(self)`
+
+Returns a list containing all OSC-addresses registerd with this Server. 
+                
 
 ---
 
@@ -564,34 +564,29 @@ OSCBundle objects behave much the same as OSCMessage objects, with these excepti
 
 #### Methods
 
-##### `copy(self)`
+##### `__add__(self, values)`
 
-Returns a deep copy of this OSCBundle
+Returns a copy of self, with the contents of 'values' appended
+(see the 'extend()' method, below)
+
+##### `__contains__(self, val)`
+
+Test if the given value appears in the OSCMessage's arguments
                 
 
-##### `remove(self, val)`
+##### `__delitem__(self, i)`
 
-Removes the first argument with the given value from the OSCMessage.
-Raises ValueError if val isn't found.
-
-##### `index(self, val)`
-
-Returns the index of the first occurence of the given value in the OSCMessage's arguments.
-Raises ValueError if val isn't found
-
-##### `values(self)`
-
-Returns a list of the OSCMessages appended so far
+Removes the indicated argument (or slice)
                 
 
-##### `count(self, val)`
+##### `__eq__(self, other)`
 
-Returns the number of times the given value occurs in the OSCMessage's arguments
+Return True if two OSCBundles have the same timetag & content
                 
 
-##### `__iter__(self)`
+##### `__getitem__(self, i)`
 
-Returns an iterator of the OSCMessage's arguments
+Returns the indicated argument (or slice)
                 
 
 ##### `__iadd__(self, values)`
@@ -600,31 +595,6 @@ Appends the contents of 'values'
 (equivalent to 'extend()', below)
 Returns self
 
-##### `__ne__(self, other)`
-
-Return (not self.__eq__(other))
-                
-
-##### `extend(self, values)`
-
-Append the contents of 'values' to this OSCMessage.
-'values' can be another OSCMessage, or a list/tuple of ints/floats/strings
-
-##### `__getitem__(self, i)`
-
-Returns the indicated argument (or slice)
-                
-
-##### `__radd__(self, values)`
-
-Appends the contents of this OSCMessage to 'values'
-Returns the extended 'values' (list or tuple)
-
-##### `setTimeTag(self, time)`
-
-Set or change the OSCBundle's TimeTag
-In 'Python Time', that's floating seconds since the Epoch
-
 ##### `__init__(self, address=, time=0)`
 
 Instantiate a new OSCBundle.
@@ -632,99 +602,9 @@ The default OSC-address for newly created OSCMessages
 can be specified with the 'address' argument
 The bundle's timetag can be set with the 'time' argument
 
-##### `__str__(self)`
-
-Returns the Bundle's contents (and timetag, if nonzero) as a string.
-                
-
-##### `__repr__(self)`
-
-Returns a string containing the decode Message
-                
-
-##### `insert(self, i, val, typehint=None)`
-
-Insert given value (with optional typehint) into the OSCMessage
-at the given index.
-
-##### `getBinary(self)`
-
-Returns the binary representation of the message
-                
-
-##### `itervalues(self)`
+##### `__iter__(self)`
 
 Returns an iterator of the OSCMessage's arguments
-                
-
-##### `iteritems(self)`
-
-Returns an iterator of the OSCMessage's arguments as
-(typetag, value) tuples
-
-##### `clearData(self)`
-
-Clear any arguments appended so far
-                
-
-##### `__add__(self, values)`
-
-Returns a copy of self, with the contents of 'values' appended
-(see the 'extend()' method, below)
-
-##### `popitem(self, i)`
-
-Delete the indicated argument from the OSCMessage, and return it
-as a (typetag, value) tuple.
-
-##### `__delitem__(self, i)`
-
-Removes the indicated argument (or slice)
-                
-
-##### `getTimeTagStr(self)`
-
-Return the TimeTag as a human-readable string
-                
-
-##### `pop(self, i)`
-
-Delete the indicated argument from the OSCMessage, and return it.
-                
-
-##### `items(self)`
-
-Returns a list of (typetag, value) tuples for 
-the arguments appended so far
-
-##### `setAddress(self, address)`
-
-Set or change the OSC-address
-                
-
-##### `__eq__(self, other)`
-
-Return True if two OSCBundles have the same timetag & content
-                
-
-##### `reverse(self)`
-
-Reverses the arguments of the OSCMessage (in place)
-                
-
-##### `append(self, argument, typehint=None)`
-
-Appends data to the bundle, creating an OSCMessage to encapsulate
-the provided argument unless this is already an OSCMessage.
-Any newly created OSCMessage inherits the OSCBundle's address at the time of creation.
-If 'argument' is an iterable, its elements will be encapsuated by a single OSCMessage.
-Finally, 'argument' can be (or contain) a dict, which will be 'converted' to an OSCMessage;
-  - if 'addr' appears in the dict, its value overrides the OSCBundle's address
-  - if 'args' appears in the dict, its value(s) become the OSCMessage's arguments
-
-##### `setItem(self, i, val, typehint=None)`
-
-Set indicated argument to a new value (with typehint)
                 
 
 ##### `__len__(self)`
@@ -732,29 +612,19 @@ Set indicated argument to a new value (with typehint)
 Returns the number of arguments appended so far
                 
 
-##### `itertags(self)`
+##### `__ne__(self, other)`
 
-Returns an iterator of the OSCMessage's arguments' typetags
+Return (not self.__eq__(other))
                 
 
-##### `_reencode(self, items)`
+##### `__radd__(self, values)`
 
-Erase & rebuild the OSCMessage contents from the given
-list of (typehint, value) tuples
+Appends the contents of this OSCMessage to 'values'
+Returns the extended 'values' (list or tuple)
 
-##### `__contains__(self, val)`
+##### `__repr__(self)`
 
-Test if the given value appears in the OSCMessage's arguments
-                
-
-##### `tags(self)`
-
-Returns a list of typetags of the appended arguments
-                
-
-##### `clear(self, address=)`
-
-Clear (or set a new) OSC-address and clear any arguments appended so far
+Returns a string containing the decode Message
                 
 
 ##### `__reversed__(self)`
@@ -768,6 +638,136 @@ Set indicatated argument (or slice) to a new value.
 'val' can be a single int/float/string, or a (typehint, value) tuple.
 Or, if 'i' is a slice, a list of these or another OSCMessage.
 
+##### `__str__(self)`
+
+Returns the Bundle's contents (and timetag, if nonzero) as a string.
+                
+
+##### `_reencode(self, items)`
+
+Erase & rebuild the OSCMessage contents from the given
+list of (typehint, value) tuples
+
+##### `append(self, argument, typehint=None)`
+
+Appends data to the bundle, creating an OSCMessage to encapsulate
+the provided argument unless this is already an OSCMessage.
+Any newly created OSCMessage inherits the OSCBundle's address at the time of creation.
+If 'argument' is an iterable, its elements will be encapsuated by a single OSCMessage.
+Finally, 'argument' can be (or contain) a dict, which will be 'converted' to an OSCMessage;
+  - if 'addr' appears in the dict, its value overrides the OSCBundle's address
+  - if 'args' appears in the dict, its value(s) become the OSCMessage's arguments
+
+##### `clear(self, address=)`
+
+Clear (or set a new) OSC-address and clear any arguments appended so far
+                
+
+##### `clearData(self)`
+
+Clear any arguments appended so far
+                
+
+##### `copy(self)`
+
+Returns a deep copy of this OSCBundle
+                
+
+##### `count(self, val)`
+
+Returns the number of times the given value occurs in the OSCMessage's arguments
+                
+
+##### `extend(self, values)`
+
+Append the contents of 'values' to this OSCMessage.
+'values' can be another OSCMessage, or a list/tuple of ints/floats/strings
+
+##### `getBinary(self)`
+
+Returns the binary representation of the message
+                
+
+##### `getTimeTagStr(self)`
+
+Return the TimeTag as a human-readable string
+                
+
+##### `index(self, val)`
+
+Returns the index of the first occurence of the given value in the OSCMessage's arguments.
+Raises ValueError if val isn't found
+
+##### `insert(self, i, val, typehint=None)`
+
+Insert given value (with optional typehint) into the OSCMessage
+at the given index.
+
+##### `items(self)`
+
+Returns a list of (typetag, value) tuples for 
+the arguments appended so far
+
+##### `iteritems(self)`
+
+Returns an iterator of the OSCMessage's arguments as
+(typetag, value) tuples
+
+##### `itertags(self)`
+
+Returns an iterator of the OSCMessage's arguments' typetags
+                
+
+##### `itervalues(self)`
+
+Returns an iterator of the OSCMessage's arguments
+                
+
+##### `pop(self, i)`
+
+Delete the indicated argument from the OSCMessage, and return it.
+                
+
+##### `popitem(self, i)`
+
+Delete the indicated argument from the OSCMessage, and return it
+as a (typetag, value) tuple.
+
+##### `remove(self, val)`
+
+Removes the first argument with the given value from the OSCMessage.
+Raises ValueError if val isn't found.
+
+##### `reverse(self)`
+
+Reverses the arguments of the OSCMessage (in place)
+                
+
+##### `setAddress(self, address)`
+
+Set or change the OSC-address
+                
+
+##### `setItem(self, i, val, typehint=None)`
+
+Set indicated argument to a new value (with typehint)
+                
+
+##### `setTimeTag(self, time)`
+
+Set or change the OSCBundle's TimeTag
+In 'Python Time', that's floating seconds since the Epoch
+
+##### `tags(self)`
+
+Returns a list of typetags of the appended arguments
+                
+
+##### `values(self)`
+
+Returns a list of the OSCMessages appended so far
+                
+
 ---
 
 ### `OSCClient(self, server=None)`
@@ -777,22 +777,51 @@ Simple OSC Client. Handles the sending of OSC-Packets (OSCMessage or OSCBundle) 
 
 #### Methods
 
-##### `setServer(self, server)`
+##### `__eq__(self, other)`
 
-Associate this Client with given server.
-The Client will send from the Server's socket.
-The Server will use this Client instance to send replies.
-
-##### `address(self)`
-
-Returns a (host,port) tuple of the remote server this client is
-connected to or None if not connected to any server.
+Compare function.
+                
 
 ##### `__init__(self, server=None)`
 
 Construct an OSC Client.
 - server: Local OSCServer-instance this client will use the socket of for transmissions.
 If none is supplied, a socket will be created.
+
+##### `__ne__(self, other)`
+
+Compare function.
+                
+
+##### `__str__(self)`
+
+Returns a string containing this Client's Class-name, software-version
+and the remote-address it is connected to (if any)
+
+##### `_ensureConnected(self, address)`
+
+Make sure client has a socket connected to address
+
+##### `_setSocket(self, skt)`
+
+Set and configure client socket
+
+##### `address(self)`
+
+Returns a (host,port) tuple of the remote server this client is
+connected to or None if not connected to any server.
+
+##### `close(self)`
+
+Disconnect & close the Client's socket
+                
+
+##### `connect(self, address)`
+
+Bind to a specific OSC server:
+the 'address' argument is a (host, port) tuple
+  - host:  hostname of the remote OSC server,
+  - port:  UDP-port the remote OSC server listens to.
 
 ##### `send(self, msg, timeout=None)`
 
@@ -804,32 +833,6 @@ The Client must be already connected.
 Raises OSCClientError when timing out while waiting for the socket,
 or when the Client isn't connected to a remote server.
 
-##### `connect(self, address)`
-
-Bind to a specific OSC server:
-the 'address' argument is a (host, port) tuple
-  - host:  hostname of the remote OSC server,
-  - port:  UDP-port the remote OSC server listens to.
-
-##### `__eq__(self, other)`
-
-Compare function.
-                
-
-##### `_ensureConnected(self, address)`
-
-Make sure client has a socket connected to address
-
-##### `close(self)`
-
-Disconnect & close the Client's socket
-                
-
-##### `__ne__(self, other)`
-
-Compare function.
-                
-
 ##### `sendto(self, msg, address, timeout=None)`
 
 Send the given OSCMessage to the specified address.
@@ -839,14 +842,11 @@ Send the given OSCMessage to the specified address.
         this call blocks until socket is available for writing. 
 Raises OSCClientError when timing out while waiting for the socket. 
 
-##### `__str__(self)`
+##### `setServer(self, server)`
 
-Returns a string containing this Client's Class-name, software-version
-and the remote-address it is connected to (if any)
-
-##### `_setSocket(self, skt)`
-
-Set and configure client socket
+Associate this Client with given server.
+The Client will send from the Server's socket.
+The Server will use this Client instance to send replies.
 
 ---
 
@@ -901,34 +901,29 @@ Additional methods exist for retreiving typetags or manipulating items as (typet
 
 #### Methods
 
-##### `copy(self)`
+##### `__add__(self, values)`
 
-Returns a deep copy of this OSCMessage
+Returns a copy of self, with the contents of 'values' appended
+(see the 'extend()' method, below)
+
+##### `__contains__(self, val)`
+
+Test if the given value appears in the OSCMessage's arguments
                 
 
-##### `remove(self, val)`
+##### `__delitem__(self, i)`
 
-Removes the first argument with the given value from the OSCMessage.
-Raises ValueError if val isn't found.
-
-##### `index(self, val)`
-
-Returns the index of the first occurence of the given value in the OSCMessage's arguments.
-Raises ValueError if val isn't found
-
-##### `values(self)`
-
-Returns a list of the arguments appended so far
+Removes the indicated argument (or slice)
                 
 
-##### `count(self, val)`
+##### `__eq__(self, other)`
 
-Returns the number of times the given value occurs in the OSCMessage's arguments
+Return True if two OSCMessages have the same address & content
                 
 
-##### `__iter__(self)`
+##### `__getitem__(self, i)`
 
-Returns an iterator of the OSCMessage's arguments
+Returns the indicated argument (or slice)
                 
 
 ##### `__iadd__(self, values)`
@@ -937,112 +932,15 @@ Appends the contents of 'values'
 (equivalent to 'extend()', below)
 Returns self
 
-##### `__ne__(self, other)`
+##### `__init__(self, address=, *args)`
 
-Return (not self.__eq__(other))
-                
+Instantiate a new OSCMessage.
+The OSC-address can be specified with the 'address' argument.
+The rest of the arguments are appended as data.
 
-##### `extend(self, values)`
-
-Append the contents of 'values' to this OSCMessage.
-'values' can be another OSCMessage, or a list/tuple of ints/floats/strings
-
-##### `__getitem__(self, i)`
-
-Returns the indicated argument (or slice)
-                
-
-##### `__radd__(self, values)`
-
-Appends the contents of this OSCMessage to 'values'
-Returns the extended 'values' (list or tuple)
-
-##### `__str__(self)`
-
-Returns the Message's address and contents as a string.
-                
-
-##### `append(self, argument, typehint=None)`
-
-Appends data to the message, updating the typetags based on
-the argument's type. If the argument is a blob (counted
-string) pass in 'b' as typehint.
-'argument' may also be a list or tuple, in which case its elements
-will get appended one-by-one, all using the provided typehint
-
-##### `__repr__(self)`
-
-Returns a string containing the decode Message
-                
-
-##### `insert(self, i, val, typehint=None)`
-
-Insert given value (with optional typehint) into the OSCMessage
-at the given index.
-
-##### `getBinary(self)`
-
-Returns the binary representation of the message
-                
-
-##### `itervalues(self)`
+##### `__iter__(self)`
 
 Returns an iterator of the OSCMessage's arguments
-                
-
-##### `iteritems(self)`
-
-Returns an iterator of the OSCMessage's arguments as
-(typetag, value) tuples
-
-##### `clearData(self)`
-
-Clear any arguments appended so far
-                
-
-##### `__add__(self, values)`
-
-Returns a copy of self, with the contents of 'values' appended
-(see the 'extend()' method, below)
-
-##### `popitem(self, i)`
-
-Delete the indicated argument from the OSCMessage, and return it
-as a (typetag, value) tuple.
-
-##### `__delitem__(self, i)`
-
-Removes the indicated argument (or slice)
-                
-
-##### `pop(self, i)`
-
-Delete the indicated argument from the OSCMessage, and return it.
-                
-
-##### `items(self)`
-
-Returns a list of (typetag, value) tuples for 
-the arguments appended so far
-
-##### `setAddress(self, address)`
-
-Set or change the OSC-address
-                
-
-##### `__eq__(self, other)`
-
-Return True if two OSCMessages have the same address & content
-                
-
-##### `reverse(self)`
-
-Reverses the arguments of the OSCMessage (in place)
-                
-
-##### `setItem(self, i, val, typehint=None)`
-
-Set indicated argument to a new value (with typehint)
                 
 
 ##### `__len__(self)`
@@ -1050,35 +948,19 @@ Set indicated argument to a new value (with typehint)
 Returns the number of arguments appended so far
                 
 
-##### `itertags(self)`
+##### `__ne__(self, other)`
 
-Returns an iterator of the OSCMessage's arguments' typetags
+Return (not self.__eq__(other))
                 
 
-##### `_reencode(self, items)`
+##### `__radd__(self, values)`
 
-Erase & rebuild the OSCMessage contents from the given
-list of (typehint, value) tuples
+Appends the contents of this OSCMessage to 'values'
+Returns the extended 'values' (list or tuple)
 
-##### `__init__(self, address=, *args)`
+##### `__repr__(self)`
 
-Instantiate a new OSCMessage.
-The OSC-address can be specified with the 'address' argument.
-The rest of the arguments are appended as data.
-
-##### `__contains__(self, val)`
-
-Test if the given value appears in the OSCMessage's arguments
-                
-
-##### `tags(self)`
-
-Returns a list of typetags of the appended arguments
-                
-
-##### `clear(self, address=)`
-
-Clear (or set a new) OSC-address and clear any arguments appended so far
+Returns a string containing the decode Message
                 
 
 ##### `__reversed__(self)`
@@ -1092,6 +974,124 @@ Set indicatated argument (or slice) to a new value.
 'val' can be a single int/float/string, or a (typehint, value) tuple.
 Or, if 'i' is a slice, a list of these or another OSCMessage.
 
+##### `__str__(self)`
+
+Returns the Message's address and contents as a string.
+                
+
+##### `_reencode(self, items)`
+
+Erase & rebuild the OSCMessage contents from the given
+list of (typehint, value) tuples
+
+##### `append(self, argument, typehint=None)`
+
+Appends data to the message, updating the typetags based on
+the argument's type. If the argument is a blob (counted
+string) pass in 'b' as typehint.
+'argument' may also be a list or tuple, in which case its elements
+will get appended one-by-one, all using the provided typehint
+
+##### `clear(self, address=)`
+
+Clear (or set a new) OSC-address and clear any arguments appended so far
+                
+
+##### `clearData(self)`
+
+Clear any arguments appended so far
+                
+
+##### `copy(self)`
+
+Returns a deep copy of this OSCMessage
+                
+
+##### `count(self, val)`
+
+Returns the number of times the given value occurs in the OSCMessage's arguments
+                
+
+##### `extend(self, values)`
+
+Append the contents of 'values' to this OSCMessage.
+'values' can be another OSCMessage, or a list/tuple of ints/floats/strings
+
+##### `getBinary(self)`
+
+Returns the binary representation of the message
+                
+
+##### `index(self, val)`
+
+Returns the index of the first occurence of the given value in the OSCMessage's arguments.
+Raises ValueError if val isn't found
+
+##### `insert(self, i, val, typehint=None)`
+
+Insert given value (with optional typehint) into the OSCMessage
+at the given index.
+
+##### `items(self)`
+
+Returns a list of (typetag, value) tuples for 
+the arguments appended so far
+
+##### `iteritems(self)`
+
+Returns an iterator of the OSCMessage's arguments as
+(typetag, value) tuples
+
+##### `itertags(self)`
+
+Returns an iterator of the OSCMessage's arguments' typetags
+                
+
+##### `itervalues(self)`
+
+Returns an iterator of the OSCMessage's arguments
+                
+
+##### `pop(self, i)`
+
+Delete the indicated argument from the OSCMessage, and return it.
+                
+
+##### `popitem(self, i)`
+
+Delete the indicated argument from the OSCMessage, and return it
+as a (typetag, value) tuple.
+
+##### `remove(self, val)`
+
+Removes the first argument with the given value from the OSCMessage.
+Raises ValueError if val isn't found.
+
+##### `reverse(self)`
+
+Reverses the arguments of the OSCMessage (in place)
+                
+
+##### `setAddress(self, address)`
+
+Set or change the OSC-address
+                
+
+##### `setItem(self, i, val, typehint=None)`
+
+Set indicated argument to a new value (with typehint)
+                
+
+##### `tags(self)`
+
+Returns a list of typetags of the appended arguments
+                
+
+##### `values(self)`
+
+Returns a list of the arguments appended so far
+                
+
 ---
 
 ### `OSCMultiClient(self, server=None)`
@@ -1103,17 +1103,67 @@ the OSCTarget's prefix gets prepended to each OSCMessage sent to that target.
 
 #### Methods
 
-##### `setServer(self, server)`
+##### `__eq__(self, other)`
 
-Associate this Client with given server.
-The Client will send from the Server's socket.
-The Server will use this Client instance to send replies.
+Compare function.
+                
 
-##### `getOSCTargetStr(self, address)`
+##### `__init__(self, server=None)`
 
-Returns the OSCTarget matching the given address as a ('osc://<host>:<port>[<prefix>]', ['<filter-string>', ...])' tuple.
-'address' can be a (host, port) tuple, or a 'host' (string), in which case the first matching OSCTarget is returned
-Returns (None, []) if address not found.
+Construct a "Multi" OSC Client.
+- server: Local OSCServer-instance this client will use the socket of for transmissions.
+If none is supplied, a socket will be created.
+
+##### `__ne__(self, other)`
+
+Compare function.
+                
+
+##### `__str__(self)`
+
+Returns a string containing this Client's Class-name, software-version
+and the remote-address it is connected to (if any)
+
+##### `_delTarget(self, address, prefix=None)`
+
+Delete the specified OSCTarget from the Client's dict.
+the 'address' argument must be a (host, port) tuple.
+If the 'prefix' argument is given, the Target is only deleted if the address and prefix match.
+
+##### `_ensureConnected(self, address)`
+
+Make sure client has a socket connected to address
+
+##### `_filterMessage(self, filters, msg)`
+
+Checks the given OSCMessge against the given filters.
+'filters' is a dict containing OSC-address:bool pairs.
+If 'msg' is an OSCBundle, recursively filters its constituents. 
+Returns None if the message is to be filtered, else returns the message.
+or
+Returns a copy of the OSCBundle with the filtered messages removed.
+
+##### `_prefixAddress(self, prefix, msg)`
+
+Makes a copy of the given OSCMessage, then prepends the given prefix to
+The message's OSC-address.
+If 'msg' is an OSCBundle, recursively prepends the prefix to its constituents. 
+
+##### `_searchHostAddr(self, host)`
+
+Search the subscribed OSCTargets for (the first occurence of) given host.
+Returns a (host, port) tuple
+
+##### `_setSocket(self, skt)`
+
+Set and configure client socket
+
+##### `_setTarget(self, address, prefix=None, filters=None)`
+
+Add (i.e. subscribe) a new OSCTarget, or change the prefix for an existing OSCTarget.
+  - address ((host, port) tuple): IP-address & UDP-port 
+  - prefix (string): The OSC-address prefix prepended to the address of each OSCMessage
+sent to this OSCTarget (optional)
 
 ##### `_updateFilters(self, dst, src)`
 
@@ -1122,24 +1172,67 @@ Update a 'filters' dict with values form another 'filters' dict:
 - src[a] == False and dst[a] == True:  del dst[a]
 - a not in dst:  dst[a] == src[a]
 
-##### `connect(self, address)`
+##### `address(self)`
 
-The OSCMultiClient isn't allowed to connect to any specific
-address.
+Returns a (host,port) tuple of the remote server this client is
+connected to or None if not connected to any server.
 
-##### `_ensureConnected(self, address)`
+##### `clearOSCTargets(self)`
 
-Make sure client has a socket connected to address
+Erases all OSCTargets from the Client's dict
+                
 
 ##### `close(self)`
 
 Disconnect & close the Client's socket
                 
 
-##### `__ne__(self, other)`
+##### `connect(self, address)`
 
-Compare function.
+The OSCMultiClient isn't allowed to connect to any specific
+address.
+
+##### `delOSCTarget(self, address, prefix=None)`
+
+Delete the specified OSCTarget from the Client's dict.
+the 'address' argument can be a ((host, port) tuple), or a hostname.
+If the 'prefix' argument is given, the Target is only deleted if the address and prefix match.
+
+##### `getOSCTarget(self, address)`
+
+Returns the OSCTarget matching the given address as a ((host, port), [prefix, filters]) tuple.
+'address' can be a (host, port) tuple, or a 'host' (string), in which case the first matching OSCTarget is returned
+Returns (None, ['',{}]) if address not found.
+
+##### `getOSCTargetStr(self, address)`
+
+Returns the OSCTarget matching the given address as a ('osc://<host>:<port>[<prefix>]', ['<filter-string>', ...])' tuple.
+'address' can be a (host, port) tuple, or a 'host' (string), in which case the first matching OSCTarget is returned
+Returns (None, []) if address not found.
+
+##### `getOSCTargetStrings(self)`
+
+Returns a list of all OSCTargets as ('osc://<host>:<port>[<prefix>]', ['<filter-string>', ...])' tuples.
                 
+
+##### `getOSCTargets(self)`
+
+Returns the dict of OSCTargets: {addr:[prefix, filters], ...}
+                
+
+##### `hasOSCTarget(self, address, prefix=None)`
+
+Return True if the given OSCTarget exists in the Client's dict.
+the 'address' argument can be a ((host, port) tuple), or a hostname.
+If the 'prefix' argument is given, the return-value is only True if the address and prefix match.
+
+##### `send(self, msg, timeout=None)`
+
+Send the given OSCMessage to all subscribed OSCTargets
+  - msg:  OSCMessage (or OSCBundle) to be sent
+  - timeout:  A timeout value for attempting to send. If timeout == None,
+        this call blocks until socket is available for writing. 
+Raises OSCClientError when timing out while waiting for the socket.
 
 ##### `sendto(self, msg, address, timeout=None)`
 
@@ -1152,111 +1245,6 @@ send the message to all subscribed clients.
         this call blocks until socket is available for writing. 
 Raises OSCClientError when timing out while waiting for the socket. 
 
-##### `__str__(self)`
-
-Returns a string containing this Client's Class-name, software-version
-and the remote-address it is connected to (if any)
-
-##### `_prefixAddress(self, prefix, msg)`
-
-Makes a copy of the given OSCMessage, then prepends the given prefix to
-The message's OSC-address.
-If 'msg' is an OSCBundle, recursively prepends the prefix to its constituents. 
-
-##### `_delTarget(self, address, prefix=None)`
-
-Delete the specified OSCTarget from the Client's dict.
-the 'address' argument must be a (host, port) tuple.
-If the 'prefix' argument is given, the Target is only deleted if the address and prefix match.
-
-##### `_filterMessage(self, filters, msg)`
-
-Checks the given OSCMessge against the given filters.
-'filters' is a dict containing OSC-address:bool pairs.
-If 'msg' is an OSCBundle, recursively filters its constituents. 
-Returns None if the message is to be filtered, else returns the message.
-or
-Returns a copy of the OSCBundle with the filtered messages removed.
-
-##### `address(self)`
-
-Returns a (host,port) tuple of the remote server this client is
-connected to or None if not connected to any server.
-
-##### `send(self, msg, timeout=None)`
-
-Send the given OSCMessage to all subscribed OSCTargets
-  - msg:  OSCMessage (or OSCBundle) to be sent
-  - timeout:  A timeout value for attempting to send. If timeout == None,
-        this call blocks until socket is available for writing. 
-Raises OSCClientError when timing out while waiting for the socket.
-
-##### `_setTarget(self, address, prefix=None, filters=None)`
-
-Add (i.e. subscribe) a new OSCTarget, or change the prefix for an existing OSCTarget.
-  - address ((host, port) tuple): IP-address & UDP-port 
-  - prefix (string): The OSC-address prefix prepended to the address of each OSCMessage
-sent to this OSCTarget (optional)
-
-##### `_setSocket(self, skt)`
-
-Set and configure client socket
-
-##### `getOSCTargets(self)`
-
-Returns the dict of OSCTargets: {addr:[prefix, filters], ...}
-                
-
-##### `_searchHostAddr(self, host)`
-
-Search the subscribed OSCTargets for (the first occurence of) given host.
-Returns a (host, port) tuple
-
-##### `hasOSCTarget(self, address, prefix=None)`
-
-Return True if the given OSCTarget exists in the Client's dict.
-the 'address' argument can be a ((host, port) tuple), or a hostname.
-If the 'prefix' argument is given, the return-value is only True if the address and prefix match.
-
-##### `getOSCTargetStrings(self)`
-
-Returns a list of all OSCTargets as ('osc://<host>:<port>[<prefix>]', ['<filter-string>', ...])' tuples.
-                
-
-##### `setOSCTargetFromStr(self, url)`
-
-Adds or modifies a subscribed OSCTarget from the given string, which should be in the
-'<host>:<port>[/<prefix>] [+/<filter>]|[-/<filter>] ...' format.
-
-##### `getOSCTarget(self, address)`
-
-Returns the OSCTarget matching the given address as a ((host, port), [prefix, filters]) tuple.
-'address' can be a (host, port) tuple, or a 'host' (string), in which case the first matching OSCTarget is returned
-Returns (None, ['',{}]) if address not found.
-
-##### `__eq__(self, other)`
-
-Compare function.
-                
-
-##### `updateOSCTargets(self, dict)`
-
-Update the Client's OSCTargets dict with the contents of 'dict'
-The given dict's items MUST be of the form
-  { (host, port):[prefix, filters], ... }
-
-##### `__init__(self, server=None)`
-
-Construct a "Multi" OSC Client.
-- server: Local OSCServer-instance this client will use the socket of for transmissions.
-If none is supplied, a socket will be created.
-
-##### `delOSCTarget(self, address, prefix=None)`
-
-Delete the specified OSCTarget from the Client's dict.
-the 'address' argument can be a ((host, port) tuple), or a hostname.
-If the 'prefix' argument is given, the Target is only deleted if the address and prefix match.
-
 ##### `setOSCTarget(self, address, prefix=None, filters=None)`
 
 Add (i.e. subscribe) a new OSCTarget, or change the prefix for an existing OSCTarget.
@@ -1265,10 +1253,22 @@ the 'address' argument can be a ((host, port) tuple) : The target server address
 - prefix (string): The OSC-address prefix prepended to the address of each OSCMessage
 sent to this OSCTarget (optional)
 
-##### `clearOSCTargets(self)`
+##### `setOSCTargetFromStr(self, url)`
 
-Erases all OSCTargets from the Client's dict
-                
+Adds or modifies a subscribed OSCTarget from the given string, which should be in the
+'<host>:<port>[/<prefix>] [+/<filter>]|[-/<filter>] ...' format.
+
+##### `setServer(self, server)`
+
+Associate this Client with given server.
+The Client will send from the Server's socket.
+The Server will use this Client instance to send replies.
+
+##### `updateOSCTargets(self, dict)`
+
+Update the Client's OSCTargets dict with the contents of 'dict'
+The given dict's items MUST be of the form
+  { (host, port):[prefix, filters], ... }
 
 ---
 
@@ -1279,10 +1279,9 @@ RequestHandler class for the OSCServer
 
 #### Methods
 
-##### `handle(self)`
+##### `_unbundle(self, decoded)`
 
-Handle incoming OSCMessage
-                
+Recursive bundle-unpacking function
 
 ##### `finish(self)`
 
@@ -1290,15 +1289,16 @@ Finish handling OSCMessage.
 Send any reply returned by the callback(s) back to the originating client
 as an OSCMessage or OSCBundle
 
+##### `handle(self)`
+
+Handle incoming OSCMessage
+                
+
 ##### `setup(self)`
 
 Prepare RequestHandler.
 Unpacks request as (packet, source socket address)
 Creates an empty list for replies.
-
-##### `_unbundle(self, decoded)`
-
-Recursive bundle-unpacking function
 
 ---
 
@@ -1313,71 +1313,30 @@ that function is called.
 
 #### Methods
 
-##### `printErr(self, txt)`
+##### `__eq__(self, other)`
 
-Writes 'OSCServer: txt' to sys.stderr
+Compare function.
                 
 
-##### `handle_error(self, request, client_address)`
+##### `__init__(self, server_address, client=None, return_port=0)`
 
-Handle an exception in the Server's callbacks gracefully.
-Writes the error to sys.stderr and, if the error_prefix (see setSrvErrorPrefix()) is set,
-sends the error-message as reply to the client
-
-##### `setReturnPort(self, port)`
-
-Set the destination UDP-port for replies returning from this server to the remote client
-                
-
-##### `close(self)`
-
-Stops serving requests, closes server (socket), closes used client
-                
+Instantiate an OSCServer.
+- server_address ((host, port) tuple): the local host & UDP-port
+the server listens on
+- client (OSCClient instance): The OSCClient used to send replies from this server.
+If none is supplied (default) an OSCClient will be created.
+- return_port (int): if supplied, sets the default UDP destination-port
+for replies coming from this server.
 
 ##### `__ne__(self, other)`
 
 Compare function.
                 
 
-##### `setClient(self, client)`
-
-Associate this Server with a new local Client instance, closing the Client this Server is currently using.
-                
-
 ##### `__str__(self)`
 
 Returns a string containing this Server's Class-name, software-version and local bound address (if any)
                 
-
-##### `setSrvErrorPrefix(self, pattern=)`
-
-Set the OSC-address (pattern) this server will use to report errors occuring during
-received message handling to the remote client.
-
-If pattern is empty (default), server-errors are not reported back to the client.
-
-##### `server_bind(self)`
-
-Called by constructor to bind the socket.
-
-May be overridden.
-
-##### `address(self)`
-
-Returns a (host,port) tuple of the local address this server is bound to,
-or None if not bound to any address.
-
-##### `server_close(self)`
-
-Called to clean-up the server.
-
-May be overridden.
-
-##### `reportErr(self, txt, client_address)`
-
-Writes 'OSCServer: txt' to sys.stderr
-If self.error_prefix is defined, sends 'txt' as an OSC error-message to the client(s)
-(see printErr() and sendOSCerror())
 
 ##### `_handle_request_noblock(self)`
 
@@ -1387,35 +1346,23 @@ I assume that select.select has returned that the socket is
 readable before this function was called, so there should be
 no risk of blocking in get_request().
 
-##### `dispatchMessage(self, pattern, tags, data, client_address)`
+##### `_subscribe(self, data, client_address)`
 
-Attmept to match the given OSC-address pattern, which may contain '*',
-against all callbacks registered with the OSCServer.
-Calls the matching callback and returns whatever it returns.
-If no match is found, and a 'default' callback is registered, it calls that one,
-or raises NoCallbackError if a 'default' callback is not registered.
+Handle the actual subscription. the provided 'data' is concatenated together to form a
+'<host>:<port>[<prefix>] [<filter>] [...]' string, which is then passed to 
+parseUrlStr() & parseFilterStr() to actually retreive <host>, <port>, etc.
 
-  - pattern (string):  The OSC-address of the receied message
-  - tags (string):  The OSC-typetags of the receied message's arguments, without ','
-  - data (list):  The message arguments
+This 'long way 'round' approach (almost) guarantees that the subscription works, 
+regardless of how the bits of the <url> are encoded in 'data'. 
 
-##### `handle_request(self)`
+##### `_unsubscribe(self, data, client_address)`
 
-Handle one request, possibly blocking.
+Handle the actual unsubscription. the provided 'data' is concatenated together to form a
+'<host>:<port>[<prefix>]' string, which is then passed to 
+parseUrlStr() to actually retreive <host>, <port> & <prefix>.
 
-Respects self.timeout.
-
-##### `sendOSCinfo(self, txt, client_address)`
-
-Sends 'txt', encapsulated in an OSCMessage to the default 'info_prefix' OSC-addres.
-Message is sent to the given client_address, with the default 'return_port' overriding
-the client_address' port, if defined.
-
-##### `handle_timeout(self)`
-
-Called if no new request arrives within self.timeout.
-
-Overridden by ForkingMixIn.
+This 'long way 'round' approach (almost) guarantees that the unsubscription works, 
+regardless of how the bits of the <url> are encoded in 'data'. 
 
 ##### `addDefaultHandlers(self, prefix=, info_prefix=/info, error_prefix=/error)`
 
@@ -1439,19 +1386,6 @@ the setSrvInfoPrefix() method (for *replies* to incoming serverinfo requests).
 For example, use '/info' for incoming requests, and '/inforeply' or '/serverinfo' or even just '/print' as the 
 info-reply prefix. 
 
-##### `_subscribe(self, data, client_address)`
-
-Handle the actual subscription. the provided 'data' is concatenated together to form a
-'<host>:<port>[<prefix>] [<filter>] [...]' string, which is then passed to 
-parseUrlStr() & parseFilterStr() to actually retreive <host>, <port>, etc.
-
-This 'long way 'round' approach (almost) guarantees that the subscription works, 
-regardless of how the bits of the <url> are encoded in 'data'. 
-
-##### `serve_forever(self)`
-
-Handle one request at a time until server is closed.
-
 ##### `addMsgHandler(self, address, callback)`
 
 Register a handler for an OSC-address
@@ -1460,34 +1394,134 @@ the address-string should start with '/' and may not contain '*'
   - 'callback' is the function called for incoming OSCMessages that match 'address'.
 The callback-function will be called with the same arguments as the 'msgPrinter_handler' below
 
-##### `__eq__(self, other)`
+##### `address(self)`
 
-Compare function.
+Returns a (host,port) tuple of the local address this server is bound to,
+or None if not bound to any address.
+
+##### `close(self)`
+
+Stops serving requests, closes server (socket), closes used client
                 
 
-##### `setSrvInfoPrefix(self, pattern)`
+##### `delMsgHandler(self, address)`
 
-Set the first part of OSC-address (pattern) this server will use to reply to server-info requests.
+Remove the registered handler for the given OSC-address
                 
 
-##### `_unsubscribe(self, data, client_address)`
+##### `dispatchMessage(self, pattern, tags, data, client_address)`
 
-Handle the actual unsubscription. the provided 'data' is concatenated together to form a
-'<host>:<port>[<prefix>]' string, which is then passed to 
-parseUrlStr() to actually retreive <host>, <port> & <prefix>.
+Attmept to match the given OSC-address pattern, which may contain '*',
+against all callbacks registered with the OSCServer.
+Calls the matching callback and returns whatever it returns.
+If no match is found, and a 'default' callback is registered, it calls that one,
+or raises NoCallbackError if a 'default' callback is not registered.
 
-This 'long way 'round' approach (almost) guarantees that the unsubscription works, 
-regardless of how the bits of the <url> are encoded in 'data'. 
+  - pattern (string):  The OSC-address of the receied message
+  - tags (string):  The OSC-typetags of the receied message's arguments, without ','
+  - data (list):  The message arguments
+
+##### `fileno(self)`
+
+Return socket file number.
+
+Interface required by select().
 
 ##### `finish_request(self, request, client_address)`
 
 Finish one request by instantiating RequestHandlerClass.
 
-##### `verify_request(self, request, client_address)`
+##### `getOSCAddressSpace(self)`
 
-Verify the request.  May be overridden.
+Returns a list containing all OSC-addresses registerd with this Server. 
+                
 
-Return True if we should proceed with this request.
+##### `handle_error(self, request, client_address)`
+
+Handle an exception in the Server's callbacks gracefully.
+Writes the error to sys.stderr and, if the error_prefix (see setSrvErrorPrefix()) is set,
+sends the error-message as reply to the client
+
+##### `handle_request(self)`
+
+Handle one request, possibly blocking.
+
+Respects self.timeout.
+
+##### `handle_timeout(self)`
+
+Called if no new request arrives within self.timeout.
+
+Overridden by ForkingMixIn.
+
+##### `msgPrinter_handler(self, addr, tags, data, client_address)`
+
+Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message
+  (the 'addr' string has already been matched against the handler's registerd OSC-address,
+  but may contain '*'s & such)
+- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
+- data (list): The OSCMessage's arguments
+  Note that len(tags) == len(data)
+- client_address ((host, port) tuple): the host & port this message originated from.
+
+a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.
+
+This handler prints the received message.
+Returns None
+
+##### `noCallback_handler(self, addr, tags, data, client_address)`
+
+Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message
+  (the 'addr' string has already been matched against the handler's registerd OSC-address,
+  but may contain '*'s & such)
+- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
+- data (list): The OSCMessage's arguments
+  Note that len(tags) == len(data)
+- client_address ((host, port) tuple): the host & port this message originated from.
+
+a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.
+
+This handler prints a "No callback registered to handle ..." message.
+Returns None
+
+##### `printErr(self, txt)`
+
+Writes 'OSCServer: txt' to sys.stderr
+                
+
+##### `process_request(self, request, client_address)`
+
+Call finish_request.
+
+Overridden by ForkingMixIn and ThreadingMixIn.
+
+##### `reportErr(self, txt, client_address)`
+
+Writes 'OSCServer: txt' to sys.stderr
+If self.error_prefix is defined, sends 'txt' as an OSC error-message to the client(s)
+(see printErr() and sendOSCerror())
+
+##### `sendOSCerror(self, txt, client_address)`
+
+Sends 'txt', encapsulated in an OSCMessage to the default 'error_prefix' OSC-addres.
+Message is sent to the given client_address, with the default 'return_port' overriding
+the client_address' port, if defined.
+
+##### `sendOSCinfo(self, txt, client_address)`
+
+Sends 'txt', encapsulated in an OSCMessage to the default 'info_prefix' OSC-addres.
+Message is sent to the given client_address, with the default 'return_port' overriding
+the client_address' port, if defined.
+
+##### `serve_forever(self)`
+
+Handle one request at a time until server is closed.
 
 ##### `serverInfo_handler(self, addr, tags, data, client_address)`
 
@@ -1513,38 +1547,39 @@ about this server, depending on the first argument of the received OSC-message:
 - 'clients' | 'targets' :  Reply is a bundle of 'target osc://<host>:<port>[<prefix>] [<filter>] [...]'
   messages, listing the local Client-instance's subscribed remote clients.
 
-##### `__init__(self, server_address, client=None, return_port=0)`
+##### `server_bind(self)`
 
-Instantiate an OSCServer.
-- server_address ((host, port) tuple): the local host & UDP-port
-the server listens on
-- client (OSCClient instance): The OSCClient used to send replies from this server.
-If none is supplied (default) an OSCClient will be created.
-- return_port (int): if supplied, sets the default UDP destination-port
-for replies coming from this server.
+Called by constructor to bind the socket.
 
-##### `sendOSCerror(self, txt, client_address)`
+May be overridden.
 
-Sends 'txt', encapsulated in an OSCMessage to the default 'error_prefix' OSC-addres.
-Message is sent to the given client_address, with the default 'return_port' overriding
-the client_address' port, if defined.
+##### `server_close(self)`
 
-##### `delMsgHandler(self, address)`
+Called to clean-up the server.
 
-Remove the registered handler for the given OSC-address
+May be overridden.
+
+##### `setClient(self, client)`
+
+Associate this Server with a new local Client instance, closing the Client this Server is currently using.
                 
 
-##### `fileno(self)`
+##### `setReturnPort(self, port)`
 
-Return socket file number.
+Set the destination UDP-port for replies returning from this server to the remote client
+                
 
-Interface required by select().
+##### `setSrvErrorPrefix(self, pattern=)`
 
-##### `process_request(self, request, client_address)`
+Set the OSC-address (pattern) this server will use to report errors occuring during
+received message handling to the remote client.
 
-Call finish_request.
+If pattern is empty (default), server-errors are not reported back to the client.
 
-Overridden by ForkingMixIn and ThreadingMixIn.
+##### `setSrvInfoPrefix(self, pattern)`
+
+Set the first part of OSC-address (pattern) this server will use to reply to server-info requests.
+                
 
 ##### `shutdown(self)`
 
@@ -1553,29 +1588,6 @@ Stops the serve_forever loop.
 Blocks until the loop has finished. This must be called while
 serve_forever() is running in another thread, or it will
 deadlock.
-
-##### `getOSCAddressSpace(self)`
-
-Returns a list containing all OSC-addresses registerd with this Server. 
-                
-
-##### `noCallback_handler(self, addr, tags, data, client_address)`
-
-Example handler for OSCMessages.
-All registerd handlers must accept these three arguments:
-- addr (string): The OSC-address pattern of the received Message
-  (the 'addr' string has already been matched against the handler's registerd OSC-address,
-  but may contain '*'s & such)
-- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
-- data (list): The OSCMessage's arguments
-  Note that len(tags) == len(data)
-- client_address ((host, port) tuple): the host & port this message originated from.
-
-a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
-which then gets sent back to the client.
-
-This handler prints a "No callback registered to handle ..." message.
-Returns None
 
 ##### `subscription_handler(self, addr, tags, data, client_address)`
 
@@ -1610,23 +1622,11 @@ port and prefix all match the subscription.
 If <prefix> is not specified on unsubscription, the subscribed host is unsubscribed if the host and port 
 match the subscription.
 
-##### `msgPrinter_handler(self, addr, tags, data, client_address)`
+##### `verify_request(self, request, client_address)`
 
-Example handler for OSCMessages.
-All registerd handlers must accept these three arguments:
-- addr (string): The OSC-address pattern of the received Message
-  (the 'addr' string has already been matched against the handler's registerd OSC-address,
-  but may contain '*'s & such)
-- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
-- data (list): The OSCMessage's arguments
-  Note that len(tags) == len(data)
-- client_address ((host, port) tuple): the host & port this message originated from.
+Verify the request.  May be overridden.
 
-a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
-which then gets sent back to the client.
-
-This handler prints the received message.
-Returns None
+Return True if we should proceed with this request.
 
 ---
 
@@ -1664,19 +1664,25 @@ before the stream request handler because the initialization function
 of the stream request handler calls the setup member which again
 requires an already initialized address space.
 
-##### `setupAddressSpace(self)`
+##### `_receive(self, count)`
 
-Override this function to customize your address space. 
+Receive a certain amount of data from the socket and return it. If the
+remote end should be closed in the meanwhile None is returned.
 
-##### `sendOSC(self, oscData)`
+##### `_receiveMsg(self)`
 
-This member can be used to transmit OSC messages or OSC bundles
-over the client/server connection. It is thread save.
+Receive OSC message from a socket and decode.
+If an error occurs, None is returned, else the message.
 
-##### `delMsgHandler(self, address)`
+##### `_transmitMsg(self, msg)`
 
-Remove the registered handler for the given OSC-address
-                
+Send an OSC message over a streaming socket. Raises exception if it
+should fail. If everything is transmitted properly, True is returned. If
+socket has been closed, False.
+
+##### `_unbundle(self, decoded)`
+
+Recursive bundle-unpacking function
 
 ##### `addMsgHandler(self, address, callback)`
 
@@ -1685,6 +1691,11 @@ Register a handler for an OSC-address
 the address-string should start with '/' and may not contain '*'
   - 'callback' is the function called for incoming OSCMessages that match 'address'.
 The callback-function will be called with the same arguments as the 'msgPrinter_handler' below
+
+##### `delMsgHandler(self, address)`
+
+Remove the registered handler for the given OSC-address
+                
 
 ##### `dispatchMessage(self, pattern, tags, data, client_address)`
 
@@ -1698,15 +1709,6 @@ or raises NoCallbackError if a 'default' callback is not registered.
   - tags (string):  The OSC-typetags of the receied message's arguments, without ','
   - data (list):  The message arguments
 
-##### `_receiveMsg(self)`
-
-Receive OSC message from a socket and decode.
-If an error occurs, None is returned, else the message.
-
-##### `_unbundle(self, decoded)`
-
-Recursive bundle-unpacking function
-
 ##### `getOSCAddressSpace(self)`
 
 Returns a list containing all OSC-addresses registerd with this Server. 
@@ -1716,16 +1718,14 @@ Returns a list containing all OSC-addresses registerd with this Server.
 
 Handle a connection.
 
-##### `_receive(self, count)`
+##### `sendOSC(self, oscData)`
 
-Receive a certain amount of data from the socket and return it. If the
-remote end should be closed in the meanwhile None is returned.
+This member can be used to transmit OSC messages or OSC bundles
+over the client/server connection. It is thread save.
 
-##### `_transmitMsg(self, msg)`
+##### `setupAddressSpace(self)`
 
-Send an OSC message over a streaming socket. Raises exception if it
-should fail. If everything is transmitted properly, True is returned. If
-socket has been closed, False.
+Override this function to customize your address space. 
 
 ---
 
@@ -1745,15 +1745,25 @@ originating from other threads.
 
 #### Methods
 
-##### `sendOSC(self, msg)`
+##### `__eq__(self, other)`
 
-Send an OSC message or bundle to the server. Returns True on success.
+Compare function.
                 
 
-##### `delMsgHandler(self, address)`
+##### `__ne__(self, other)`
 
-Remove the registered handler for the given OSC-address
+Compare function.
                 
+
+##### `__str__(self)`
+
+Returns a string containing this Client's Class-name, software-version
+and the remote-address it is connected to (if any)
+
+##### `_receiveMsgWithTimeout(self)`
+
+Receive OSC message from a socket and decode.
+If an error occurs, None is returned, else the message.
 
 ##### `addMsgHandler(self, address, callback)`
 
@@ -1763,24 +1773,9 @@ the address-string should start with '/' and may not contain '*'
   - 'callback' is the function called for incoming OSCMessages that match 'address'.
 The callback-function will be called with the same arguments as the 'msgPrinter_handler' below
 
-##### `__eq__(self, other)`
+##### `delMsgHandler(self, address)`
 
-Compare function.
-                
-
-##### `_receiveMsgWithTimeout(self)`
-
-Receive OSC message from a socket and decode.
-If an error occurs, None is returned, else the message.
-
-##### `__ne__(self, other)`
-
-Compare function.
-                
-
-##### `getOSCAddressSpace(self)`
-
-Returns a list containing all OSC-addresses registerd with this Server. 
+Remove the registered handler for the given OSC-address
                 
 
 ##### `dispatchMessage(self, pattern, tags, data, client_address)`
@@ -1795,10 +1790,15 @@ or raises NoCallbackError if a 'default' callback is not registered.
   - tags (string):  The OSC-typetags of the receied message's arguments, without ','
   - data (list):  The message arguments
 
-##### `__str__(self)`
+##### `getOSCAddressSpace(self)`
 
-Returns a string containing this Client's Class-name, software-version
-and the remote-address it is connected to (if any)
+Returns a list containing all OSC-addresses registerd with this Server. 
+                
+
+##### `sendOSC(self, msg)`
+
+Send an OSC message or bundle to the server. Returns True on success.
+                
 
 ---
 
@@ -1809,59 +1809,21 @@ A connection oriented (TCP/IP) OSC server.
 
 #### Methods
 
-##### `start(self)`
-
-Start the server thread. 
-
-##### `server_activate(self)`
-
-Called by constructor to activate the server.
-
-May be overridden.
-
-##### `handle_error(self, request, client_address)`
-
-Handle an error gracefully.  May be overridden.
-
-The default is to print a traceback and continue.
-
-##### `_clientRegister(self, client)`
-
-Gets called by each request/connection handler when connection is
-established to add itself to the client list
-
-##### `shutdown_request(self, request)`
-
-Called to shutdown and close an individual request.
-
-##### `_clientUnregister(self, client)`
-
-Gets called by each request/connection handler when connection is
-lost to remove itself from the client list
-
-##### `server_bind(self)`
-
-Called by constructor to bind the socket.
-
-May be overridden.
-
-##### `server_close(self)`
-
-Called to clean-up the server.
-
-May be overridden.
-
 ##### `__init__(self, address)`
 
 Instantiate an OSCStreamingServer.
 - server_address ((host, port) tuple): the local host & UDP-port
 the server listens for new connections.
 
-##### `get_request(self)`
+##### `_clientRegister(self, client)`
 
-Get the request and client address from the socket.
+Gets called by each request/connection handler when connection is
+established to add itself to the client list
 
-May be overridden.
+##### `_clientUnregister(self, client)`
+
+Gets called by each request/connection handler when connection is
+lost to remove itself from the client list
 
 ##### `_handle_request_noblock(self)`
 
@@ -1870,6 +1832,36 @@ Handle one request, without blocking.
 I assume that select.select has returned that the socket is
 readable before this function was called, so there should be
 no risk of blocking in get_request().
+
+##### `broadcastToClients(self, oscData)`
+
+Send OSC message or bundle to all connected clients. 
+
+##### `close_request(self, request)`
+
+Called to clean up an individual request.
+
+##### `fileno(self)`
+
+Return socket file number.
+
+Interface required by select().
+
+##### `finish_request(self, request, client_address)`
+
+Finish one request by instantiating RequestHandlerClass.
+
+##### `get_request(self)`
+
+Get the request and client address from the socket.
+
+May be overridden.
+
+##### `handle_error(self, request, client_address)`
+
+Handle an error gracefully.  May be overridden.
+
+The default is to print a traceback and continue.
 
 ##### `handle_request(self)`
 
@@ -1883,44 +1875,34 @@ Called if no new request arrives within self.timeout.
 
 Overridden by ForkingMixIn.
 
-##### `close_request(self, request)`
+##### `process_request(self, request, client_address)`
 
-Called to clean up an individual request.
+Call finish_request.
+
+Overridden by ForkingMixIn and ThreadingMixIn.
 
 ##### `serve_forever(self)`
 
 Handle one request at a time until server is closed.
 Had to add this since 2.5 does not support server.shutdown()
 
-##### `verify_request(self, request, client_address)`
+##### `server_activate(self)`
 
-Verify the request.  May be overridden.
+Called by constructor to activate the server.
 
-Return True if we should proceed with this request.
+May be overridden.
 
-##### `stop(self)`
+##### `server_bind(self)`
 
-Stop the server thread and close the socket. 
+Called by constructor to bind the socket.
 
-##### `finish_request(self, request, client_address)`
+May be overridden.
 
-Finish one request by instantiating RequestHandlerClass.
+##### `server_close(self)`
 
-##### `broadcastToClients(self, oscData)`
+Called to clean-up the server.
 
-Send OSC message or bundle to all connected clients. 
-
-##### `fileno(self)`
-
-Return socket file number.
-
-Interface required by select().
-
-##### `process_request(self, request, client_address)`
-
-Call finish_request.
-
-Overridden by ForkingMixIn and ThreadingMixIn.
+May be overridden.
 
 ##### `shutdown(self)`
 
@@ -1929,6 +1911,24 @@ Stops the serve_forever loop.
 Blocks until the loop has finished. This must be called while
 serve_forever() is running in another thread, or it will
 deadlock.
+
+##### `shutdown_request(self, request)`
+
+Called to shutdown and close an individual request.
+
+##### `start(self)`
+
+Start the server thread. 
+
+##### `stop(self)`
+
+Stop the server thread and close the socket. 
+
+##### `verify_request(self, request, client_address)`
+
+Verify the request.  May be overridden.
+
+Return True if we should proceed with this request.
 
 ---
 
@@ -1938,65 +1938,21 @@ deadlock.
 
 #### Methods
 
-##### `process_request_thread(self, request, client_address)`
-
-Same as in BaseServer but as a thread.
-
-In addition, exception handling is done here.
-
-##### `start(self)`
-
-Start the server thread. 
-
-##### `server_activate(self)`
-
-Called by constructor to activate the server.
-
-May be overridden.
-
-##### `handle_error(self, request, client_address)`
-
-Handle an error gracefully.  May be overridden.
-
-The default is to print a traceback and continue.
-
-##### `_clientRegister(self, client)`
-
-Gets called by each request/connection handler when connection is
-established to add itself to the client list
-
-##### `shutdown_request(self, request)`
-
-Called to shutdown and close an individual request.
-
-##### `_clientUnregister(self, client)`
-
-Gets called by each request/connection handler when connection is
-lost to remove itself from the client list
-
-##### `server_bind(self)`
-
-Called by constructor to bind the socket.
-
-May be overridden.
-
-##### `server_close(self)`
-
-Called to clean-up the server.
-
-May be overridden.
-
 ##### `__init__(self, address)`
 
 Instantiate an OSCStreamingServer.
 - server_address ((host, port) tuple): the local host & UDP-port
 the server listens for new connections.
 
-##### `get_request(self)`
+##### `_clientRegister(self, client)`
 
-Get the request and client address from the socket.
+Gets called by each request/connection handler when connection is
+established to add itself to the client list
 
-May be overridden.
+##### `_clientUnregister(self, client)`
+
+Gets called by each request/connection handler when connection is
+lost to remove itself from the client list
 
 ##### `_handle_request_noblock(self)`
 
@@ -2005,6 +1961,36 @@ Handle one request, without blocking.
 I assume that select.select has returned that the socket is
 readable before this function was called, so there should be
 no risk of blocking in get_request().
+
+##### `broadcastToClients(self, oscData)`
+
+Send OSC message or bundle to all connected clients. 
+
+##### `close_request(self, request)`
+
+Called to clean up an individual request.
+
+##### `fileno(self)`
+
+Return socket file number.
+
+Interface required by select().
+
+##### `finish_request(self, request, client_address)`
+
+Finish one request by instantiating RequestHandlerClass.
+
+##### `get_request(self)`
+
+Get the request and client address from the socket.
+
+May be overridden.
+
+##### `handle_error(self, request, client_address)`
+
+Handle an error gracefully.  May be overridden.
+
+The default is to print a traceback and continue.
 
 ##### `handle_request(self)`
 
@@ -2018,42 +2004,38 @@ Called if no new request arrives within self.timeout.
 
 Overridden by ForkingMixIn.
 
-##### `close_request(self, request)`
+##### `process_request(self, request, client_address)`
 
-Called to clean up an individual request.
+Start a new thread to process the request.
+
+##### `process_request_thread(self, request, client_address)`
+
+Same as in BaseServer but as a thread.
+
+In addition, exception handling is done here.
 
 ##### `serve_forever(self)`
 
 Handle one request at a time until server is closed.
 Had to add this since 2.5 does not support server.shutdown()
 
-##### `verify_request(self, request, client_address)`
+##### `server_activate(self)`
 
-Verify the request.  May be overridden.
+Called by constructor to activate the server.
 
-Return True if we should proceed with this request.
+May be overridden.
 
-##### `stop(self)`
+##### `server_bind(self)`
 
-Stop the server thread and close the socket. 
+Called by constructor to bind the socket.
 
-##### `finish_request(self, request, client_address)`
+May be overridden.
 
-Finish one request by instantiating RequestHandlerClass.
+##### `server_close(self)`
 
-##### `broadcastToClients(self, oscData)`
+Called to clean-up the server.
 
-Send OSC message or bundle to all connected clients. 
-
-##### `fileno(self)`
-
-Return socket file number.
-
-Interface required by select().
-
-##### `process_request(self, request, client_address)`
-
-Start a new thread to process the request.
+May be overridden.
 
 ##### `shutdown(self)`
 
@@ -2062,6 +2044,24 @@ Stops the serve_forever loop.
 Blocks until the loop has finished. This must be called while
 serve_forever() is running in another thread, or it will
 deadlock.
+
+##### `shutdown_request(self, request)`
+
+Called to shutdown and close an individual request.
+
+##### `start(self)`
+
+Start the server thread. 
+
+##### `stop(self)`
+
+Stop the server thread and close the socket. 
+
+##### `verify_request(self, request, client_address)`
+
+Verify the request.  May be overridden.
+
+Return True if we should proceed with this request.
 
 ---
 
@@ -2072,10 +2072,11 @@ Starts a new RequestHandler thread for each unbundled OSCMessage
 
 #### Methods
 
-##### `handle(self)`
+##### `_unbundle(self, decoded)`
 
-Handle incoming OSCMessage
-                
+Recursive bundle-unpacking function
+This version starts a new thread for each sub-Bundle found in the Bundle,
+then waits for all its children to finish.
 
 ##### `finish(self)`
 
@@ -2083,17 +2084,16 @@ Finish handling OSCMessage.
 Send any reply returned by the callback(s) back to the originating client
 as an OSCMessage or OSCBundle
 
+##### `handle(self)`
+
+Handle incoming OSCMessage
+                
+
 ##### `setup(self)`
 
 Prepare RequestHandler.
 Unpacks request as (packet, source socket address)
 Creates an empty list for replies.
-
-##### `_unbundle(self, decoded)`
-
-Recursive bundle-unpacking function
-This version starts a new thread for each sub-Bundle found in the Bundle,
-then waits for all its children to finish.
 
 ---
 
@@ -2104,77 +2104,30 @@ This server starts a new thread to handle each incoming request.
 
 #### Methods
 
-##### `process_request_thread(self, request, client_address)`
+##### `__eq__(self, other)`
 
-Same as in BaseServer but as a thread.
-
-In addition, exception handling is done here.
-
-##### `printErr(self, txt)`
-
-Writes 'OSCServer: txt' to sys.stderr
+Compare function.
                 
 
-##### `handle_error(self, request, client_address)`
+##### `__init__(self, server_address, client=None, return_port=0)`
 
-Handle an exception in the Server's callbacks gracefully.
-Writes the error to sys.stderr and, if the error_prefix (see setSrvErrorPrefix()) is set,
-sends the error-message as reply to the client
-
-##### `setReturnPort(self, port)`
-
-Set the destination UDP-port for replies returning from this server to the remote client
-                
-
-##### `close(self)`
-
-Stops serving requests, closes server (socket), closes used client
-                
+Instantiate an OSCServer.
+- server_address ((host, port) tuple): the local host & UDP-port
+the server listens on
+- client (OSCClient instance): The OSCClient used to send replies from this server.
+If none is supplied (default) an OSCClient will be created.
+- return_port (int): if supplied, sets the default UDP destination-port
+for replies coming from this server.
 
 ##### `__ne__(self, other)`
 
 Compare function.
                 
 
-##### `setClient(self, client)`
-
-Associate this Server with a new local Client instance, closing the Client this Server is currently using.
-                
-
 ##### `__str__(self)`
 
 Returns a string containing this Server's Class-name, software-version and local bound address (if any)
                 
-
-##### `setSrvErrorPrefix(self, pattern=)`
-
-Set the OSC-address (pattern) this server will use to report errors occuring during
-received message handling to the remote client.
-
-If pattern is empty (default), server-errors are not reported back to the client.
-
-##### `server_bind(self)`
-
-Called by constructor to bind the socket.
-
-May be overridden.
-
-##### `address(self)`
-
-Returns a (host,port) tuple of the local address this server is bound to,
-or None if not bound to any address.
-
-##### `server_close(self)`
-
-Called to clean-up the server.
-
-May be overridden.
-
-##### `reportErr(self, txt, client_address)`
-
-Writes 'OSCServer: txt' to sys.stderr
-If self.error_prefix is defined, sends 'txt' as an OSC error-message to the client(s)
-(see printErr() and sendOSCerror())
 
 ##### `_handle_request_noblock(self)`
 
@@ -2184,35 +2137,23 @@ I assume that select.select has returned that the socket is
 readable before this function was called, so there should be
 no risk of blocking in get_request().
 
-##### `dispatchMessage(self, pattern, tags, data, client_address)`
+##### `_subscribe(self, data, client_address)`
 
-Attmept to match the given OSC-address pattern, which may contain '*',
-against all callbacks registered with the OSCServer.
-Calls the matching callback and returns whatever it returns.
-If no match is found, and a 'default' callback is registered, it calls that one,
-or raises NoCallbackError if a 'default' callback is not registered.
+Handle the actual subscription. the provided 'data' is concatenated together to form a
+'<host>:<port>[<prefix>] [<filter>] [...]' string, which is then passed to 
+parseUrlStr() & parseFilterStr() to actually retreive <host>, <port>, etc.
 
-  - pattern (string):  The OSC-address of the receied message
-  - tags (string):  The OSC-typetags of the receied message's arguments, without ','
-  - data (list):  The message arguments
+This 'long way 'round' approach (almost) guarantees that the subscription works, 
+regardless of how the bits of the <url> are encoded in 'data'. 
 
-##### `handle_request(self)`
+##### `_unsubscribe(self, data, client_address)`
 
-Handle one request, possibly blocking.
+Handle the actual unsubscription. the provided 'data' is concatenated together to form a
+'<host>:<port>[<prefix>]' string, which is then passed to 
+parseUrlStr() to actually retreive <host>, <port> & <prefix>.
 
-Respects self.timeout.
-
-##### `sendOSCinfo(self, txt, client_address)`
-
-Sends 'txt', encapsulated in an OSCMessage to the default 'info_prefix' OSC-addres.
-Message is sent to the given client_address, with the default 'return_port' overriding
-the client_address' port, if defined.
-
-##### `handle_timeout(self)`
-
-Called if no new request arrives within self.timeout.
-
-Overridden by ForkingMixIn.
+This 'long way 'round' approach (almost) guarantees that the unsubscription works, 
+regardless of how the bits of the <url> are encoded in 'data'. 
 
 ##### `addDefaultHandlers(self, prefix=, info_prefix=/info, error_prefix=/error)`
 
@@ -2236,19 +2177,6 @@ the setSrvInfoPrefix() method (for *replies* to incoming serverinfo requests).
 For example, use '/info' for incoming requests, and '/inforeply' or '/serverinfo' or even just '/print' as the 
 info-reply prefix. 
 
-##### `_subscribe(self, data, client_address)`
-
-Handle the actual subscription. the provided 'data' is concatenated together to form a
-'<host>:<port>[<prefix>] [<filter>] [...]' string, which is then passed to 
-parseUrlStr() & parseFilterStr() to actually retreive <host>, <port>, etc.
-
-This 'long way 'round' approach (almost) guarantees that the subscription works, 
-regardless of how the bits of the <url> are encoded in 'data'. 
-
-##### `serve_forever(self)`
-
-Handle one request at a time until server is closed.
-
 ##### `addMsgHandler(self, address, callback)`
 
 Register a handler for an OSC-address
@@ -2257,34 +2185,138 @@ the address-string should start with '/' and may not contain '*'
   - 'callback' is the function called for incoming OSCMessages that match 'address'.
 The callback-function will be called with the same arguments as the 'msgPrinter_handler' below
 
-##### `__eq__(self, other)`
+##### `address(self)`
 
-Compare function.
+Returns a (host,port) tuple of the local address this server is bound to,
+or None if not bound to any address.
+
+##### `close(self)`
+
+Stops serving requests, closes server (socket), closes used client
                 
 
-##### `setSrvInfoPrefix(self, pattern)`
+##### `delMsgHandler(self, address)`
 
-Set the first part of OSC-address (pattern) this server will use to reply to server-info requests.
+Remove the registered handler for the given OSC-address
                 
 
-##### `_unsubscribe(self, data, client_address)`
+##### `dispatchMessage(self, pattern, tags, data, client_address)`
 
-Handle the actual unsubscription. the provided 'data' is concatenated together to form a
-'<host>:<port>[<prefix>]' string, which is then passed to 
-parseUrlStr() to actually retreive <host>, <port> & <prefix>.
+Attmept to match the given OSC-address pattern, which may contain '*',
+against all callbacks registered with the OSCServer.
+Calls the matching callback and returns whatever it returns.
+If no match is found, and a 'default' callback is registered, it calls that one,
+or raises NoCallbackError if a 'default' callback is not registered.
 
-This 'long way 'round' approach (almost) guarantees that the unsubscription works, 
-regardless of how the bits of the <url> are encoded in 'data'. 
+  - pattern (string):  The OSC-address of the receied message
+  - tags (string):  The OSC-typetags of the receied message's arguments, without ','
+  - data (list):  The message arguments
+
+##### `fileno(self)`
+
+Return socket file number.
+
+Interface required by select().
 
 ##### `finish_request(self, request, client_address)`
 
 Finish one request by instantiating RequestHandlerClass.
 
-##### `verify_request(self, request, client_address)`
+##### `getOSCAddressSpace(self)`
 
-Verify the request.  May be overridden.
+Returns a list containing all OSC-addresses registerd with this Server. 
+                
 
-Return True if we should proceed with this request.
+##### `handle_error(self, request, client_address)`
+
+Handle an exception in the Server's callbacks gracefully.
+Writes the error to sys.stderr and, if the error_prefix (see setSrvErrorPrefix()) is set,
+sends the error-message as reply to the client
+
+##### `handle_request(self)`
+
+Handle one request, possibly blocking.
+
+Respects self.timeout.
+
+##### `handle_timeout(self)`
+
+Called if no new request arrives within self.timeout.
+
+Overridden by ForkingMixIn.
+
+##### `msgPrinter_handler(self, addr, tags, data, client_address)`
+
+Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message
+  (the 'addr' string has already been matched against the handler's registerd OSC-address,
+  but may contain '*'s & such)
+- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
+- data (list): The OSCMessage's arguments
+  Note that len(tags) == len(data)
+- client_address ((host, port) tuple): the host & port this message originated from.
+
+a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.
+
+This handler prints the received message.
+Returns None
+
+##### `noCallback_handler(self, addr, tags, data, client_address)`
+
+Example handler for OSCMessages.
+All registerd handlers must accept these three arguments:
+- addr (string): The OSC-address pattern of the received Message
+  (the 'addr' string has already been matched against the handler's registerd OSC-address,
+  but may contain '*'s & such)
+- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
+- data (list): The OSCMessage's arguments
+  Note that len(tags) == len(data)
+- client_address ((host, port) tuple): the host & port this message originated from.
+
+a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
+which then gets sent back to the client.
+
+This handler prints a "No callback registered to handle ..." message.
+Returns None
+
+##### `printErr(self, txt)`
+
+Writes 'OSCServer: txt' to sys.stderr
+                
+
+##### `process_request(self, request, client_address)`
+
+Start a new thread to process the request.
+
+##### `process_request_thread(self, request, client_address)`
+
+Same as in BaseServer but as a thread.
+
+In addition, exception handling is done here.
+
+##### `reportErr(self, txt, client_address)`
+
+Writes 'OSCServer: txt' to sys.stderr
+If self.error_prefix is defined, sends 'txt' as an OSC error-message to the client(s)
+(see printErr() and sendOSCerror())
+
+##### `sendOSCerror(self, txt, client_address)`
+
+Sends 'txt', encapsulated in an OSCMessage to the default 'error_prefix' OSC-addres.
+Message is sent to the given client_address, with the default 'return_port' overriding
+the client_address' port, if defined.
+
+##### `sendOSCinfo(self, txt, client_address)`
+
+Sends 'txt', encapsulated in an OSCMessage to the default 'info_prefix' OSC-addres.
+Message is sent to the given client_address, with the default 'return_port' overriding
+the client_address' port, if defined.
+
+##### `serve_forever(self)`
+
+Handle one request at a time until server is closed.
 
 ##### `serverInfo_handler(self, addr, tags, data, client_address)`
 
@@ -2310,36 +2342,39 @@ about this server, depending on the first argument of the received OSC-message:
 - 'clients' | 'targets' :  Reply is a bundle of 'target osc://<host>:<port>[<prefix>] [<filter>] [...]'
   messages, listing the local Client-instance's subscribed remote clients.
 
-##### `__init__(self, server_address, client=None, return_port=0)`
+##### `server_bind(self)`
 
-Instantiate an OSCServer.
-- server_address ((host, port) tuple): the local host & UDP-port
-the server listens on
-- client (OSCClient instance): The OSCClient used to send replies from this server.
-If none is supplied (default) an OSCClient will be created.
-- return_port (int): if supplied, sets the default UDP destination-port
-for replies coming from this server.
+Called by constructor to bind the socket.
 
-##### `sendOSCerror(self, txt, client_address)`
+May be overridden.
 
-Sends 'txt', encapsulated in an OSCMessage to the default 'error_prefix' OSC-addres.
-Message is sent to the given client_address, with the default 'return_port' overriding
-the client_address' port, if defined.
+##### `server_close(self)`
 
-##### `delMsgHandler(self, address)`
+Called to clean-up the server.
 
-Remove the registered handler for the given OSC-address
+May be overridden.
+
+##### `setClient(self, client)`
+
+Associate this Server with a new local Client instance, closing the Client this Server is currently using.
                 
 
-##### `fileno(self)`
+##### `setReturnPort(self, port)`
 
-Return socket file number.
+Set the destination UDP-port for replies returning from this server to the remote client
+                
 
-Interface required by select().
+##### `setSrvErrorPrefix(self, pattern=)`
 
-##### `process_request(self, request, client_address)`
+Set the OSC-address (pattern) this server will use to report errors occuring during
+received message handling to the remote client.
 
-Start a new thread to process the request.
+If pattern is empty (default), server-errors are not reported back to the client.
+
+##### `setSrvInfoPrefix(self, pattern)`
+
+Set the first part of OSC-address (pattern) this server will use to reply to server-info requests.
+                
 
 ##### `shutdown(self)`
 
@@ -2348,29 +2383,6 @@ Stops the serve_forever loop.
 Blocks until the loop has finished. This must be called while
 serve_forever() is running in another thread, or it will
 deadlock.
-
-##### `getOSCAddressSpace(self)`
-
-Returns a list containing all OSC-addresses registerd with this Server. 
-                
-
-##### `noCallback_handler(self, addr, tags, data, client_address)`
-
-Example handler for OSCMessages.
-All registerd handlers must accept these three arguments:
-- addr (string): The OSC-address pattern of the received Message
-  (the 'addr' string has already been matched against the handler's registerd OSC-address,
-  but may contain '*'s & such)
-- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
-- data (list): The OSCMessage's arguments
-  Note that len(tags) == len(data)
-- client_address ((host, port) tuple): the host & port this message originated from.
-
-a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
-which then gets sent back to the client.
-
-This handler prints a "No callback registered to handle ..." message.
-Returns None
 
 ##### `subscription_handler(self, addr, tags, data, client_address)`
 
@@ -2405,23 +2417,11 @@ port and prefix all match the subscription.
 If <prefix> is not specified on unsubscription, the subscribed host is unsubscribed if the host and port 
 match the subscription.
 
-##### `msgPrinter_handler(self, addr, tags, data, client_address)`
+##### `verify_request(self, request, client_address)`
 
-Example handler for OSCMessages.
-All registerd handlers must accept these three arguments:
-- addr (string): The OSC-address pattern of the received Message
-  (the 'addr' string has already been matched against the handler's registerd OSC-address,
-  but may contain '*'s & such)
-- tags (string):  The OSC-typetags of the received message's arguments. (without the preceding comma)
-- data (list): The OSCMessage's arguments
-  Note that len(tags) == len(data)
-- client_address ((host, port) tuple): the host & port this message originated from.
+Verify the request.  May be overridden.
 
-a Message-handler function may return None, but it could also return an OSCMessage (or OSCBundle),
-which then gets sent back to the client.
-
-This handler prints the received message.
-Returns None
+Return True if we should proceed with this request.
 
 ---
 

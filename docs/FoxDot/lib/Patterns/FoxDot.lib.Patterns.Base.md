@@ -29,55 +29,55 @@ PGroups should only be found within a Pattern object.
 
 Use the '|' symbol to 'pipe' Patterns into on another 
 
-##### `make(self)`
+##### `__ror__(self, other)`
 
-This method automatically laces and groups the data 
+Use the '|' symbol to 'pipe' Patterns into on another 
+
+##### `all(self, func=<lambda>)`
+
+Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
+
+##### `choose(self)`
+
+Returns one randomly selected item 
 
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
 
-##### `stretch(self, size)`
+##### `flat(self)`
 
-Stretches (repeats) the contents until len(Pattern) == size 
+P.flat() -> un-nested pattern 
+
+##### `loop(self, n)`
+
+Repeats this pattern n times 
+
+##### `make(self)`
+
+This method automatically laces and groups the data 
 
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
 
+##### `scale_dur(self, n)`
+
+Scales the dur values for all the items in self.data by n 
+
 ##### `sort(self)`
 
 Used in place of sorted(pattern) to force type 
+
+##### `stretch(self, size)`
+
+Stretches (repeats) the contents until len(Pattern) == size 
 
 ##### `string(self)`
 
 Returns a string made up of all the values:
 
 PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
-
-##### `loop(self, n)`
-
-Repeats this pattern n times 
-
-##### `choose(self)`
-
-Returns one randomly selected item 
-
-##### `__ror__(self, other)`
-
-Use the '|' symbol to 'pipe' Patterns into on another 
-
-##### `flat(self)`
-
-P.flat() -> un-nested pattern 
-
-##### `all(self, func=<lambda>)`
-
-Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
-
-##### `scale_dur(self, n)`
-
-Scales the dur values for all the items in self.data by n 
 
 ---
 
@@ -91,59 +91,59 @@ Scales the dur values for all the items in self.data by n
 
 Use the '|' symbol to 'pipe' Patterns into on another 
 
-##### `make(self)`
+##### `__ror__(self, other)`
 
-This method automatically laces and groups the data 
+Use the '|' symbol to 'pipe' Patterns into on another 
+
+##### `all(self, func=<lambda>)`
+
+Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
+
+##### `choose(self)`
+
+Returns one randomly selected item 
+
+##### `coeff(self)`
+
+Returns a duration value relative to the type of pattern. Most patterns return val unchanged 
 
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
 
-##### `stretch(self, size)`
+##### `flat(self)`
 
-Stretches (repeats) the contents until len(Pattern) == size 
+P.flat() -> un-nested pattern 
+
+##### `getitem(self, key)`
+
+Is called by __getitem__ 
+
+##### `loop(self, n)`
+
+Repeats this pattern n times 
+
+##### `make(self)`
+
+This method automatically laces and groups the data 
 
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
+
+##### `sort(self)`
+
+Used in place of sorted(pattern) to force type 
+
+##### `stretch(self, size)`
+
+Stretches (repeats) the contents until len(Pattern) == size 
 
 ##### `string(self)`
 
 Returns a string made up of all the values:
 
 PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
-
-##### `loop(self, n)`
-
-Repeats this pattern n times 
-
-##### `choose(self)`
-
-Returns one randomly selected item 
-
-##### `__ror__(self, other)`
-
-Use the '|' symbol to 'pipe' Patterns into on another 
-
-##### `flat(self)`
-
-P.flat() -> un-nested pattern 
-
-##### `all(self, func=<lambda>)`
-
-Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
-
-##### `sort(self)`
-
-Used in place of sorted(pattern) to force type 
-
-##### `coeff(self)`
-
-Returns a duration value relative to the type of pattern. Most patterns return val unchanged 
-
-##### `getitem(self, key)`
-
-Is called by __getitem__ 
 
 ---
 
@@ -157,55 +157,55 @@ Is called by __getitem__
 
 Use the '|' symbol to 'pipe' Patterns into on another 
 
-##### `make(self)`
+##### `__ror__(self, other)`
 
-This method automatically laces and groups the data 
+Use the '|' symbol to 'pipe' Patterns into on another 
+
+##### `all(self, func=<lambda>)`
+
+Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
+
+##### `choose(self)`
+
+Returns one randomly selected item 
+
+##### `coeff(self)`
+
+Returns a duration value relative to the type of pattern. Most patterns return val unchanged 
 
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
 
-##### `stretch(self, size)`
+##### `flat(self)`
 
-Stretches (repeats) the contents until len(Pattern) == size 
+P.flat() -> un-nested pattern 
+
+##### `loop(self, n)`
+
+Repeats this pattern n times 
+
+##### `make(self)`
+
+This method automatically laces and groups the data 
 
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
+
+##### `sort(self)`
+
+Used in place of sorted(pattern) to force type 
+
+##### `stretch(self, size)`
+
+Stretches (repeats) the contents until len(Pattern) == size 
 
 ##### `string(self)`
 
 Returns a string made up of all the values:
 
 PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
-
-##### `loop(self, n)`
-
-Repeats this pattern n times 
-
-##### `choose(self)`
-
-Returns one randomly selected item 
-
-##### `__ror__(self, other)`
-
-Use the '|' symbol to 'pipe' Patterns into on another 
-
-##### `flat(self)`
-
-P.flat() -> un-nested pattern 
-
-##### `all(self, func=<lambda>)`
-
-Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
-
-##### `sort(self)`
-
-Used in place of sorted(pattern) to force type 
-
-##### `coeff(self)`
-
-Returns a duration value relative to the type of pattern. Most patterns return val unchanged 
 
 ---
 
@@ -220,55 +220,55 @@ PGroups should only be found within a Pattern object.
 
 Use the '|' symbol to 'pipe' Patterns into on another 
 
-##### `make(self)`
+##### `__ror__(self, other)`
 
-This method automatically laces and groups the data 
+Use the '|' symbol to 'pipe' Patterns into on another 
+
+##### `all(self, func=<lambda>)`
+
+Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
+
+##### `choose(self)`
+
+Returns one randomly selected item 
 
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
 
-##### `stretch(self, size)`
+##### `flat(self)`
 
-Stretches (repeats) the contents until len(Pattern) == size 
+P.flat() -> un-nested pattern 
+
+##### `loop(self, n)`
+
+Repeats this pattern n times 
+
+##### `make(self)`
+
+This method automatically laces and groups the data 
 
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
 
+##### `scale_dur(self, n)`
+
+Scales the dur values for all the items in self.data by n 
+
 ##### `sort(self)`
 
 Used in place of sorted(pattern) to force type 
+
+##### `stretch(self, size)`
+
+Stretches (repeats) the contents until len(Pattern) == size 
 
 ##### `string(self)`
 
 Returns a string made up of all the values:
 
 PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
-
-##### `loop(self, n)`
-
-Repeats this pattern n times 
-
-##### `choose(self)`
-
-Returns one randomly selected item 
-
-##### `__ror__(self, other)`
-
-Use the '|' symbol to 'pipe' Patterns into on another 
-
-##### `flat(self)`
-
-P.flat() -> un-nested pattern 
-
-##### `all(self, func=<lambda>)`
-
-Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
-
-##### `scale_dur(self, n)`
-
-Scales the dur values for all the items in self.data by n 
 
 ---
 
@@ -282,55 +282,55 @@ Scales the dur values for all the items in self.data by n
 
 Use the '|' symbol to 'pipe' Patterns into on another 
 
-##### `make(self)`
+##### `__ror__(self, other)`
 
-This method automatically laces and groups the data 
+Use the '|' symbol to 'pipe' Patterns into on another 
+
+##### `all(self, func=<lambda>)`
+
+Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
+
+##### `choose(self)`
+
+Returns one randomly selected item 
 
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
 
-##### `stretch(self, size)`
+##### `flat(self)`
 
-Stretches (repeats) the contents until len(Pattern) == size 
+P.flat() -> un-nested pattern 
+
+##### `loop(self, n)`
+
+Repeats this pattern n times 
+
+##### `make(self)`
+
+This method automatically laces and groups the data 
 
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
 
+##### `scale_dur(self, n)`
+
+Scales the dur values for all the items in self.data by n 
+
 ##### `sort(self)`
 
 Used in place of sorted(pattern) to force type 
+
+##### `stretch(self, size)`
+
+Stretches (repeats) the contents until len(Pattern) == size 
 
 ##### `string(self)`
 
 Returns a string made up of all the values:
 
 PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
-
-##### `loop(self, n)`
-
-Repeats this pattern n times 
-
-##### `choose(self)`
-
-Returns one randomly selected item 
-
-##### `__ror__(self, other)`
-
-Use the '|' symbol to 'pipe' Patterns into on another 
-
-##### `flat(self)`
-
-P.flat() -> un-nested pattern 
-
-##### `all(self, func=<lambda>)`
-
-Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
-
-##### `scale_dur(self, n)`
-
-Scales the dur values for all the items in self.data by n 
 
 ---
 
@@ -352,17 +352,41 @@ Abstract base class for Patterns
 
 Use the '|' symbol to 'pipe' Patterns into on another 
 
-##### `make(self)`
+##### `__ror__(self, other)`
 
-This method automatically laces and groups the data 
+Use the '|' symbol to 'pipe' Patterns into on another 
+
+##### `all(self, func=<lambda>)`
+
+Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
+
+##### `choose(self)`
+
+Returns one randomly selected item 
+
+##### `coeff(self)`
+
+Returns a duration value relative to the type of pattern. Most patterns return val unchanged 
 
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
 
-##### `stretch(self, size)`
+##### `flat(self)`
 
-Stretches (repeats) the contents until len(Pattern) == size 
+P.flat() -> un-nested pattern 
+
+##### `getitem(self, key)`
+
+Is called by __getitem__ 
+
+##### `loop(self, n)`
+
+Repeats this pattern n times 
+
+##### `make(self)`
+
+This method automatically laces and groups the data 
 
 ##### `pipe(self, pattern)`
 
@@ -372,39 +396,15 @@ Concatonates this patterns stream with another
 
 Used in place of sorted(pattern) to force type 
 
+##### `stretch(self, size)`
+
+Stretches (repeats) the contents until len(Pattern) == size 
+
 ##### `string(self)`
 
 Returns a string made up of all the values:
 
 PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
-
-##### `loop(self, n)`
-
-Repeats this pattern n times 
-
-##### `choose(self)`
-
-Returns one randomly selected item 
-
-##### `__ror__(self, other)`
-
-Use the '|' symbol to 'pipe' Patterns into on another 
-
-##### `flat(self)`
-
-P.flat() -> un-nested pattern 
-
-##### `all(self, func=<lambda>)`
-
-Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
-
-##### `coeff(self)`
-
-Returns a duration value relative to the type of pattern. Most patterns return val unchanged 
-
-##### `getitem(self, key)`
-
-Is called by __getitem__ 
 
 ---
 

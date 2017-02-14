@@ -7,12 +7,12 @@ from Tkinter import *
 import ttk
 import tkFont
 import tkFileDialog
+import tkMessageBox
 
 # Custom app modules
 from Format import *
 from AppFunctions import *
 from Console import console
-from Undo import UndoStack
 from Prompt import TextPrompt
 from BracketHandler import BracketHandler
 from TextBox import ThreadedText
@@ -89,8 +89,7 @@ class workspace:
 
         # --- start create menu
 
-        self.menu_visible = True
-        self.menu = MenuBar(self, visible = False)
+        self.menu = MenuBar(self, visible = True)
 
         # End menu setup ---
 
@@ -149,7 +148,7 @@ class workspace:
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
         self.text.bind("<Alt-period>".format(ctrl),         self.releaseNodes)
-        self.text.bind("<{}-v>".format(ctrl),               self.paste)
+        self.text.bind("<{}-v>".format(ctrl),               self.edit_paste)
         self.text.bind("<{}-bracketright>".format(ctrl),    self.indent)
         self.text.bind("<{}-bracketleft>".format(ctrl),     self.unindent)
         self.text.bind("<{}-equal>".format(ctrl),           self.zoom_in)
@@ -158,7 +157,8 @@ class workspace:
         self.text.bind("<{}-y>".format(ctrl),               self.redo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
         self.text.bind("<{}-o>".format(ctrl),               self.openfile)
-        self.text.bind("<{}-m>".format(ctrl),               self.toggleMenu)
+        self.text.bind("<{}-n>".format(ctrl),               self.newfile)
+        self.text.bind("<{}-m>".format(ctrl),               self.toggle_menu)
 
         # Change ctrl+h on Mac (is used to close)
 
@@ -416,16 +416,13 @@ class workspace:
         text = self.text.get("0.0",END)
         if not self.saved:
             self.filename = tkFileDialog.asksaveasfilename(defaultextension=".py")
-        if self.filename is not None:
+        if self.filename:
             with open(self.filename, 'w') as f:
-                f.write("# {}\n".format(self.filename))
-                f.write("from __future__ import division\n")
-                f.write("from FoxDot import *\n\n")
                 f.write(text)
                 f.close()
                 self.saved = True
-                print "Save successful!"
-        return
+                print "Saved '{}'".format(self.filename)
+        return bool(self.filename)
 
     # Open save
 
@@ -438,20 +435,30 @@ class workspace:
                 f.close()
                 self.saved = True
                 print "Save successful!"
-        return
+        return bool(self.filename)
 
     # Open a file: Ctrl+o
     #--------------------
 
     def openfile(self, event=None):
         f = tkFileDialog.askopenfile()
-        if f is None:
-            return
-        else:
+        if f is not None:
             text = f.read()
             f.close()
             self.set_all(text)
-        return
+        return "break"
+
+    def newfile(self, event=None):
+        ''' Clears the document and asks if the user wants to save '''
+        answer = tkMessageBox.askyesnocancel("", "Save your work before creating a new document?")
+        if answer is not None:
+            if answer is True:
+                if not self.save():
+                    return "break"
+            self.saved = False
+            self.filename = ''
+            self.set_all("")
+        return "break"
 
     # Toggle console: Ctrl+#
     #-----------------------------
@@ -466,19 +473,22 @@ class workspace:
             self.console_visible = True
         return
 
-    def toggleMenu(self, event=None):
-        self.root.config(menu=self.menu if not self.menu_visible else 0)
-        self.menu_visible = not self.menu_visible
+    def toggle_menu(self, event=None):
+        self.menu.toggle()
         return "break"
     
-    def paste(self, event=None):
-        """ Ctrl-V: Pastes any text and updates the IDE """
-        # Insert the data from the clipboard            
-        self.text.insert(self.text.index(INSERT), self.root.clipboard_get())
-
-        # Update the IDE colours
+    def edit_paste(self, event=None):
+        """ Pastes any text and updates the IDE """
+        self.text.event_generate("<<Paste>>")
         self.update_all()
-        
+        return "break"
+
+    def edit_cut(self, event=None):
+        self.text.event_generate("<<Cut>>")
+        return "break"
+
+    def edit_copy(self, event=None):
+        self.text.event_generate("<<Copy>>")
         return "break"
 
     # Newline
@@ -727,8 +737,8 @@ class workspace:
     # Select all: Ctrl+a
     #-------------------
 
-    def selectall(self, event):
-        """ Ctrl-a: Select the contents of the IDE """
+    def selectall(self, event=None):
+        """ Select the contents of the editor """
         self.text.tag_add(SEL, "1.0", END)
         self.text.mark_set(INSERT, "1.0")
         self.text.see(INSERT)

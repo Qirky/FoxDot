@@ -12,16 +12,10 @@ Handles OSC messages being sent to SuperCollider.
 
 #### Methods
 
-##### `setServer(self, server)`
+##### `__eq__(self, other)`
 
-Associate this Client with given server.
-The Client will send from the Server's socket.
-The Server will use this Client instance to send replies.
-
-##### `address(self)`
-
-Returns a (host,port) tuple of the remote server this client is
-connected to or None if not connected to any server.
+Compare function.
+                
 
 ##### `__init__(self, server=None)`
 
@@ -29,31 +23,40 @@ Construct an OSC Client.
 - server: Local OSCServer-instance this client will use the socket of for transmissions.
 If none is supplied, a socket will be created.
 
-##### `connect(self, address)`
-
-Bind to a specific OSC server:
-the 'address' argument is a (host, port) tuple
-  - host:  hostname of the remote OSC server,
-  - port:  UDP-port the remote OSC server listens to.
-
-##### `__eq__(self, other)`
+##### `__ne__(self, other)`
 
 Compare function.
                 
 
+##### `__str__(self)`
+
+Returns a string containing this Client's Class-name, software-version
+and the remote-address it is connected to (if any)
+
 ##### `_ensureConnected(self, address)`
 
 Make sure client has a socket connected to address
+
+##### `_setSocket(self, skt)`
+
+Set and configure client socket
+
+##### `address(self)`
+
+Returns a (host,port) tuple of the remote server this client is
+connected to or None if not connected to any server.
 
 ##### `close(self)`
 
 Disconnect & close the Client's socket
                 
 
-##### `__ne__(self, other)`
+##### `connect(self, address)`
 
-Compare function.
-                
+Bind to a specific OSC server:
+the 'address' argument is a (host, port) tuple
+  - host:  hostname of the remote OSC server,
+  - port:  UDP-port the remote OSC server listens to.
 
 ##### `sendto(self, msg, address, timeout=None)`
 
@@ -64,14 +67,11 @@ Send the given OSCMessage to the specified address.
         this call blocks until socket is available for writing. 
 Raises OSCClientError when timing out while waiting for the socket. 
 
-##### `__str__(self)`
+##### `setServer(self, server)`
 
-Returns a string containing this Client's Class-name, software-version
-and the remote-address it is connected to (if any)
-
-##### `_setSocket(self, skt)`
-
-Set and configure client socket
+Associate this Client with given server.
+The Client will send from the Server's socket.
+The Server will use this Client instance to send replies.
 
 ---
 
@@ -81,17 +81,17 @@ Set and configure client socket
 
 #### Methods
 
-##### `start(self)`
+##### `makeStartupFile(self)`
 
-Boots SuperCollider 
+Boot SuperCollider and connect over OSC 
 
 ##### `sendOSC(self, packet)`
 
 Compiles and sends an OSC message for SuperCollider 
 
-##### `makeStartupFile(self)`
+##### `start(self)`
 
-Boot SuperCollider and connect over OSC 
+Boots SuperCollider 
 
 ---
 

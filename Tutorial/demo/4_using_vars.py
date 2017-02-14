@@ -1,8 +1,3 @@
-from __future__ import division
-from FoxDot import *
-
-#-->> Created with FoxDot <<--#
-
 # A 'var' is a variable that changes over time. It takes two arguments
 # at instantiation; states and a list of durations (this can a single number
 # if all durations are equal).

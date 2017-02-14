@@ -63,16 +63,6 @@ for char1 in alphabet:
 
         FoxDotCode.namespace[char1 + char2] = Player()
 
-# Keep a list of pattern names
-
-PatternTypes = []
-for pattern_name in sorted(classes(Sequences)):
-    if len(PatternTypes) == 0:
-        PatternTypes.append(pattern_name)
-    else:
-        if pattern_name.upper() !=  PatternTypes[-1].upper():
-            PatternTypes.append(pattern_name)
-
 # Give the __when__ statement access to the  global namespace
 
 __when__.set_namespace(FoxDotCode)

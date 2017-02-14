@@ -27,15 +27,15 @@ Returns True if this is in the Tempo Clock
 
 #### Methods
 
-##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
-
-Every n beats, do self.cmd(args) 
-
 ##### `after(self, n, cmd, *args, **kwargs)`
 
 Schedule self.cmd(args, kwargs) in n beats 
 
 ##### `every(self, n, cmd, *args, **kwargs)`
+
+Every n beats, do self.cmd(args) 
+
+##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
 
 Every n beats, do self.cmd(args) 
 

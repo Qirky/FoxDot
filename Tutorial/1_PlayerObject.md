@@ -32,6 +32,15 @@ Creating a Player Object with no arguments will play a single note on middle C, 
 
 Arguments can be floating points, fractions, lists, and even tuples. Lists of values are iterated over as the Player plays notes whereas the values in tuples are used simultaneously i.e. `p1` will play notes in the 5th and 6th octave together.
 
+## Players Following Players
+
+It is possible for one player object to play exactly what another player is. To have one player follow another, just use the `follow` method:
+
+	b1 >> bass([0,1,2,3])
+	b2 >> bell().follow(b1)
+
+No matter what you do to `b1`, `b2` will always play the same note. 
+
 ## Algorithmic Manipulation
 
 The code below plays the first four notes of the default scale on repeat:
@@ -45,6 +54,12 @@ It's possible to manipulate this by adding an array of numbers to the Player obj
 In psedo-code this could be written as "every 3 notes, play two degrees higher". These values can be laced and grouped together:
 
 	p1 >> pads([0,1,2,3]) + [0,1,[0,(0,2)]]
+
+This behaviour is particularly useful when using the `follow` method.
+
+	b1 >> bass([0,4,5,3], dur=2)
+	
+	p1 >> pads().follow(b1) + [2,4,7]
 
 ## Changing Scale
 

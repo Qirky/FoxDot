@@ -14,6 +14,31 @@ Source: http://stackoverflow.com/questions/214881/can-you-add-new-statements-to-
 
 #### Methods
 
+##### `__getattr__(self, name, getattr=<built-in function getattr>)`
+
+Inherit all other methods from the underlying stream.
+        
+
+##### `encode(self, input, errors=strict)`
+
+Encodes the object input and returns a tuple (output
+object, length consumed).
+
+errors defines the error handling to apply. It defaults to
+'strict' handling.
+
+The method may not store state in the Codec instance. Use
+StreamCodec for codecs which have to keep state in order to
+make encoding/decoding efficient.
+
+The encoder must be able to handle zero length input and
+return an empty object of the output object type in this
+situation.
+
+##### `next(self)`
+
+Return the next decoded line from the input stream.
+
 ##### `read(self, size=-1, chars=-1, firstline=False)`
 
 Decodes data from the stream self.stream and returns the
@@ -42,10 +67,6 @@ definition of the encoding and the given size, e.g.  if
 optional encoding endings or state markers are available
 on the stream, these should be read too.
 
-##### `next(self)`
-
-Return the next decoded line from the input stream.
-
 ##### `readline(self, size=None, keepends=True)`
 
 Read one line from the input stream and return the
@@ -54,10 +75,16 @@ decoded data.
 size, if given, is passed as size argument to the
 read() method.
 
-##### `__getattr__(self, name, getattr=<built-in function getattr>)`
+##### `readlines(self, sizehint=None, keepends=True)`
 
-Inherit all other methods from the underlying stream.
-        
+Read all lines available on the input stream
+and return them as list of lines.
+
+Line breaks are implemented using the codec's decoder
+method and are included in the list entries.
+
+sizehint, if given, is ignored since there is no efficient
+way to finding the true end-of-line.
 
 ##### `reset(self)`
 
@@ -72,33 +99,6 @@ from decoding errors.
 Set the input stream's current position.
 
 Resets the codec buffers used for keeping state.
-
-##### `encode(self, input, errors=strict)`
-
-Encodes the object input and returns a tuple (output
-object, length consumed).
-
-errors defines the error handling to apply. It defaults to
-'strict' handling.
-
-The method may not store state in the Codec instance. Use
-StreamCodec for codecs which have to keep state in order to
-make encoding/decoding efficient.
-
-The encoder must be able to handle zero length input and
-return an empty object of the output object type in this
-situation.
-
-##### `readlines(self, sizehint=None, keepends=True)`
-
-Read all lines available on the input stream
-and return them as list of lines.
-
-Line breaks are implemented using the codec's decoder
-method and are included in the list entries.
-
-sizehint, if given, is ignored since there is no efficient
-way to finding the true end-of-line.
 
 ---
 

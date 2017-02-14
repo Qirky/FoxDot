@@ -14,10 +14,6 @@ None
 
 This is required to add the SynthDef to the SuperCollider Server 
 
-##### `write(self)`
-
-Writes the SynthDef to file 
-
 ##### `add_base_class_behaviour(self)`
 
 Defines the initial setup for every SynthDef 
@@ -25,6 +21,10 @@ Defines the initial setup for every SynthDef
 ##### `play(self, freq, **kwargs)`
 
 Plays a single sound 
+
+##### `write(self)`
+
+Writes the SynthDef to file 
 
 ---
 
@@ -38,10 +38,6 @@ Plays a single sound
 
 This is required to add the SynthDef to the SuperCollider Server 
 
-##### `write(self)`
-
-Writes the SynthDef to file 
-
 ##### `add_base_class_behaviour(self)`
 
 Defines the initial setup for every SynthDef 
@@ -49,6 +45,10 @@ Defines the initial setup for every SynthDef
 ##### `play(self, freq, **kwargs)`
 
 Plays a single sound 
+
+##### `write(self)`
+
+Writes the SynthDef to file 
 
 ---
 
@@ -62,10 +62,6 @@ Plays a single sound
 
 This is required to add the SynthDef to the SuperCollider Server 
 
-##### `write(self)`
-
-Writes the SynthDef to file 
-
 ##### `add_base_class_behaviour(self)`
 
 Defines the initial setup for every SynthDef 
@@ -73,6 +69,10 @@ Defines the initial setup for every SynthDef
 ##### `play(self, freq, **kwargs)`
 
 Plays a single sound 
+
+##### `write(self)`
+
+Writes the SynthDef to file 
 
 ---
 
