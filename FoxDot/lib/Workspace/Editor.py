@@ -17,14 +17,16 @@ from Prompt import TextPrompt
 from BracketHandler import BracketHandler
 from TextBox import ThreadedText
 from LineNumbers import LineNumbers
+from MenuBar import MenuBar
 
-from ..Settings import FONT, FOXDOT_ICON
+import webbrowser
 import os
 import re
 
 # Code execution
 from ..Code import execute
- 
+from ..Settings import FONT, FOXDOT_ICON
+
 # App object
 
 class workspace:
@@ -37,7 +39,7 @@ class workspace:
         # Configure FoxDot's namespace to include the editor
 
         CodeClass.namespace['FoxDot'] = self
-        CodeClass.namespace['Player'].widget = self
+        #CodeClass.namespace['Player'].widget = self
         #CodeClass.namespace['Ghost'].widget = self
 
         # Used for docstring prompt
@@ -54,7 +56,7 @@ class workspace:
         self.root.grid_columnconfigure(0, weight=0)
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
-        # Set FoxDot icon
+        # --- Set icon
         
         try:
 
@@ -66,32 +68,38 @@ class workspace:
             # Use .gif if necessary
             self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON))
 
-        # set font
+        # --- Setup font
 
-        self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
-        self.font.configure(**tkFont.nametofont("CodeFont").configure())
+        if self.default_font not in tkFont.families():
 
-        # Create menu
+            if SYSTEM == WINDOWS:
 
-        self.menu_visible = False
+                self.default_font = "Consolas"
 
-        self.menu = Menu(self.root)
-        self.menu.config(font="CodeFont",
-                         bg=colour_map['background'],
-                         fg=colour_map['plaintext'])
+            elif SYSTEM == MAC_OS:
 
-        # self.root.config(menu=self.menu)
+                self.default_font = "Monaco"
+
+            else:
+
+                self.default_font = "Courier New"
         
-        self.menu.add_command(label="Open",       command=self.openfile)
-        self.menu.add_command(label="Save",       command=self.save)
-        self.menu.add_command(label="Save As",    command=self.save)
-        self.menu.add_command(label="Settings",   command=lambda: None)
-        self.menu.add_command(label="Help",       command=lambda: None)
-       
-        # Create Y scrollbar
+        self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
+        self.font.configure(family=self.default_font)
 
-        self.Yscroll = Scrollbar(self.root)
-        self.Yscroll.grid(row=0, column=2, sticky='nsew')
+        # --- start create menu
+
+        self.menu_visible = True
+        self.menu = MenuBar(self, visible = False)
+
+        # End menu setup ---
+
+        # --- init main text box
+       
+        # Create y-axis scrollbar
+
+        self.y_scroll = Scrollbar(self.root)
+        self.y_scroll.grid(row=0, column=2, sticky='nsew')
 
         # Create text box for code
 
@@ -101,12 +109,13 @@ class workspace:
                                  fg=colour_map['plaintext'],
                                  insertbackground="White",
                                  font = "CodeFont",
-                                 yscrollcommand=self.Yscroll.set,
+                                 yscrollcommand=self.y_scroll.set,
                                  width=100, height=20, bd=0,
+                                 undo=True, autoseparators=True,
                                  maxundo=50 )
 
         self.text.grid(row=0, column=1, sticky="nsew")
-        self.Yscroll.config(command=self.text.yview)
+        self.y_scroll.config(command=self.text.yview)
         self.text.focus_set()
 
         # Create box for line numbers
@@ -146,6 +155,7 @@ class workspace:
         self.text.bind("<{}-equal>".format(ctrl),           self.zoom_in)
         self.text.bind("<{}-minus>".format(ctrl),           self.zoom_out)
         self.text.bind("<{}-z>".format(ctrl),               self.undo)
+        self.text.bind("<{}-y>".format(ctrl),               self.redo)
         self.text.bind("<{}-s>".format(ctrl),               self.save)
         self.text.bind("<{}-o>".format(ctrl),               self.openfile)
         self.text.bind("<{}-m>".format(ctrl),               self.toggleMenu)
@@ -180,6 +190,8 @@ class workspace:
         self.file     = None
         self.filename = None
 
+        # --- define bracket behaviour
+
         self.bracketHandler = BracketHandler(self)
 
         # Set tag names and config for specific colours
@@ -190,11 +202,7 @@ class workspace:
 
                 self.text.tag_config(tag_name, foreground=colour_map[tag_name])
 
-        # Create undo-stack
-
-        self.undo_stack = UndoStack(self.text)
-
-        # Create lable for console
+        # --- Create console
 
         self.console = console(self.root, self.default_font)
         self.console_visible = True
@@ -252,7 +260,8 @@ class workspace:
 
             self.text.insert(index, event.char)
 
-            self.undo_stack.append_keystroke(index)
+            # self.undo_stack.append_keystroke(index)
+            self.text.edit_separator()
 
             self.update(event)
 
@@ -296,8 +305,6 @@ class workspace:
         block = [0,0]        
         
         # 1. Get position of cursor
-        #cursor = self.text.index(insert)
-        #cur_x, cur_y   = (int(a) for a in cursor.split('.'))
         cur_x, cur_y = index(self.text.index(insert))
         
         # 2. Go through line by line (back) and see what it's value is
@@ -360,14 +367,21 @@ class workspace:
     #--------------------
 
     def undo(self, event=None):
-        """ Ctrl+z: Remove the last character pressed """
+        try:
+            self.text.edit_undo()
+            self.update_all()
+        except:
+            pass
+             
+        return "break"
 
-        if len(self.undo_stack) > 0:
-
-            self.undo_stack.pop().action()
-            self.update(event)
-            
-        return
+    def redo(self, event=None):
+        try:
+            self.text.edit_redo()
+            self.update_all()
+        except:
+            pass
+        return "break"
 
     # Help feature: Ctrl+H
     #---------------------
@@ -723,7 +737,7 @@ class workspace:
     # Kill all: Ctrl+.
     #-----------------
 
-    def killall(self, event):
+    def killall(self, event=None):
         """ Stops all player objects """
         execute("Clock.clear()")
         return "break"
@@ -731,7 +745,7 @@ class workspace:
     # Zoom in: Ctrl+=
     #----------------
 
-    def zoom_in(self, event):
+    def zoom_in(self, event=None):
         """ Ctrl+= increases text size """
         self.root.grid_propagate(False)
         font = tkFont.nametofont("CodeFont")
@@ -744,7 +758,7 @@ class workspace:
     # Zoom out: Ctrl+-
     #-----------------
 
-    def zoom_out(self, event):
+    def zoom_out(self, event=None):
         """ Ctrl+- decreases text size (minimum of 8) """
         self.root.grid_propagate(False)
         font = tkFont.nametofont("CodeFont")
@@ -1035,4 +1049,11 @@ class workspace:
     def get_all(self):
         return self.text.get("1.0", END)
 
+    def openhomepage(self):
+        webbrowser.open("www.foxdot.org")
+        return
+
+    def opendocumentation(self):
+        webbrowser.open("https://github.com/Qirky/FoxDot/tree/master/docs/FoxDot/lib")
+        return
     

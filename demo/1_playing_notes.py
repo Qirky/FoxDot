@@ -38,7 +38,7 @@ p1.chop = 4
 
 # To see all the names of player attributes, just execute
 
-print Player.Attributes
+print Player.Attributes()
 
 # You can modulate the degree of the player in an algorithmic way by
 # using the '+' and '-' operators

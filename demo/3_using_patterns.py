@@ -1,8 +1,3 @@
-from __future__ import division
-from FoxDot import *
-
-#-->> Created with FoxDot <<--#
-
 # FoxDot Pattern objects are a container type similar to Python lists
 # but behaves differently when performing mathematical operations. A
 # basic pattern is created as you would with a normal list or tuple,

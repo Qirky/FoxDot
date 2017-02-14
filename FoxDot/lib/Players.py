@@ -371,7 +371,7 @@ class Player(Repeatable):
 
         # Play the note
 
-        if self.metro.solo == self and kwargs.get('verbose', True): 
+        if self.metro.solo == self and kwargs.get('verbose', True) and type(self.event['dur']) != rest: 
 
             self.freq = 0 if self.synthdef == SamplePlayer else self.calculate_freq()
 
@@ -406,7 +406,7 @@ class Player(Repeatable):
         now = time if time is not None else self.metro.now()
 
         durations = self.rhythm()
-        total_dur = sum(durations)
+        total_dur = float(sum(durations))
 
         if total_dur == 0:
 
@@ -786,6 +786,12 @@ class Player(Repeatable):
         # Combine attribute and modifier values
 
         try:
+
+##            if attr == "dur" and type(attr_value) == rest:
+##
+##                value = rest(attr_value + modf_value)
+##
+##            else:
             
             value = attr_value + modf_value
 
@@ -1479,4 +1485,40 @@ class GroupAttr(list):
         for p in self:
             if callable(p):
                 p.__call__(*args, **kwargs)
+
+class rest(object):
+    ''' Represents a rest when used with a Player's `dur` keyword
+    '''
+    def __init__(self, dur=1):
+        self.dur = dur
+    def __repr__(self):
+        return "<rest: {}>".format(self.dur)
+    def __add__(self, other):
+        return rest(self.dur + other)
+    def __radd__(self, other):
+        return rest(other + self.dur)
+    def __sub__(self, other):
+        return rest(self.dur - other)
+    def __rsub__(self, other):
+        return rest(other - self.dur)
+    def __mul__(self, other):
+        return rest(self.dur * other)
+    def __rmul__(self, other):
+        return rest(other * self.dur)
+    def __div__(self, other):
+        return rest(self.dur / other)
+    def __rdiv__(self, other):
+        return rest(other / self.dur)
+    def __truediv__(self, other):
+        return rest(float(self.dur) / other)
+    def __rtruediv__(self, other):
+        return rest(other / float(self.dur))
+    def __mod__(self, other):
+        return rest(self.dur % other)
+    def __rmod__(self, other):
+        return rest(other % self.dur)
+    def __int__(self):
+        return int(self.dur)
+    def __float__(self):
+        return float(self.dur)
         
