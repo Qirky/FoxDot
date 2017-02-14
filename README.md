@@ -1,11 +1,17 @@
-FoxDot - Live Coding with Python v0.2.6
+FoxDot - Live Coding with Python v0.2.7
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.2.6 fixes and update
+### v0.2.7 fixes and updates
 
-- OSC Communication is now done through a dedicated SuperCollider Quark
+- Rest class added
+- Undo and Redo functions fixed
+- Infinite loop caused by empty brackets in PlayStrings fixed
+- Menu bar added with several short-cuts
+- Player follow method improved
+- Improved documentation
+- "style" keyword argument changed to "sample"
 
 See `docs/changelog` for more
 
@@ -155,7 +161,7 @@ echo - Sets the decay time for any echo effect in beats, works best on Sample Pl
 
 scrub - Special keyword for Sample Players; changes the playback rate to change like a DJ scratching a record (defaults to 0)
 
-buf - Special keyword for Sample Players; selects another audio file for a sample character.
+sample - Special keyword for Sample Players; selects another audio file for a sample character.
 
 ## Documentation
 

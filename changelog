@@ -1,3 +1,13 @@
+### v0.2.7 fixes and updates
+
+- Rest class added
+- Undo and Redo functions fixed
+- Infinite loop caused by empty brackets in PlayStrings fixed
+- Menu bar added with several short-cuts
+- Player follow method improved
+- Improved documentation
+- "style" keyword argument changed to "sample"
+
 ### v0.2.6 fixes and updates
 
 - OSC Communication is now done through a dedicated SuperCollider Quark

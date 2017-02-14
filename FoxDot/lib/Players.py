@@ -149,7 +149,7 @@ class Player(Repeatable):
 
     # These are used by FoxDot
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay',
-                  'blur', 'amplify', 'scale', 'bpm', 'style')
+                  'blur', 'amplify', 'scale', 'bpm', 'sample')
 
     # Base attributes
     base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom',
@@ -298,7 +298,7 @@ class Player(Repeatable):
         self.fmod   =  0
 
         # Buffer
-        self.style  = 0
+        self.sample  = 0
 
         # --- FoxDot Keywords
         
@@ -858,7 +858,7 @@ class Player(Repeatable):
 
                         # Get the buffer number to play
                         
-                        buf_mod_index = modi(self.event['style'], i)
+                        buf_mod_index = modi(self.event['sample'], i)
 
                         event_buf[i] = char.bufnum(buf_mod_index).bufnum               
 
@@ -868,7 +868,7 @@ class Player(Repeatable):
 
                             char = BufferManager[b]
 
-                            buf_mod_index = modi(self.event['style'], i)
+                            buf_mod_index = modi(self.event['sample'], i)
 
                             delay += (bufchar[n].dur * self.event['dur'])
 
@@ -879,7 +879,7 @@ class Player(Repeatable):
                         char = BufferManager[bufchar]
 
                         # Get the buffer number to play
-                        buf_mod_index = modi(self.event['style'], i)                    
+                        buf_mod_index = modi(self.event['sample'], i)                    
 
                         event_buf[i] = char.bufnum(buf_mod_index).bufnum
 
