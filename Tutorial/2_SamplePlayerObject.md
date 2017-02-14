@@ -14,7 +14,7 @@ If multiple files exist in a sample directory, the first sample (in alphabetical
 	
 This will play the third sample in the directory (counting from 0).  You can also play a sequence of samples from a directory by supplying a list to the 'sample' parameter:
 	
-	p2 >> play("a", sample=[0,1,2,3]
+	p2 >> play("a", sample=[0,1,2,3])
 	
 This will play the first, second, third, and fourth samples in order.  In this example, if there were no fourth sample, playback would 'wrap around' and use the first sample in the list instead.
 
