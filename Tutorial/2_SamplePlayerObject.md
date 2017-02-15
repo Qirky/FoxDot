@@ -8,7 +8,19 @@ For our examples we will be using just three samples; 'x' (a bass drum), 'o' (a 
 
 	p2 >> play("x-o-")
 
+If multiple files exist in a sample directory, the first sample (in alphabetical order) will be played.  In order to play the other samples in the directory, you can target them using the 'sample' parameter, like this:
+
+	p2 >> play("a", sample=2)
+	
+This will play the third sample in the directory (counting from 0).  You can also play a sequence of samples from a directory by supplying a list to the 'sample' parameter:
+	
+	p2 >> play("a", sample=[0,1,2,3])
+	
+This will play the first, second, third, and fourth samples in order.  In this example, if there were no fourth sample, playback would 'wrap around' and use the first sample in the list instead.
 
 ## Manipulating the sequence
 
 ## Using your own audio files
+
+You can use your own samples by simply dropping audio files into the existing FoxDot sample directories; these are found in the 'snd' directory in the root of the FoxDot installation (e.g., 'C:\Python27\Lib\site-packages\FoxDot\snd').
+
