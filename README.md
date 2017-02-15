@@ -31,9 +31,9 @@ See `docs/changelog` for more
 - Install the latest version from the Python Package Index from the command line by executing `pip install FoxDot`
 - Alternatively, you can build from source:
 ``` bash
-git clone https://github.com/Qirky/FoxDot.git
-cd FoxDot
-python setup.py install
+$ git clone https://github.com/Qirky/FoxDot.git
+$ cd FoxDot
+$ python setup.py install
 ```
 - Open SuperCollder and install the FoxDot Quark (this allows FoxDot to communicate with SuperCollider) by entering the following and pressing `Ctrl+Return` (this evaluates a line of code):
 ```supercollider
