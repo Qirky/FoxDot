@@ -8,5 +8,6 @@ amp=(amp / 10);
 osc=(Saw.ar(((freq * [1, 1.01]) + LFNoise2.ar(50).range(-2, 2))) + VarSaw.ar((freq + LFNoise2.ar(50).range(-2, 2)), 1));
 env=EnvGen.ar(Env.perc(level: amp,curve: -10,attackTime: 0.025,releaseTime: sus), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

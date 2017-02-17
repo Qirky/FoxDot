@@ -7,5 +7,6 @@ freq = Vibrato.kr(freq, rate: vib);
 osc=PMOsc.ar(freq, Vibrato.kr(freq, delay: (sus * 0.25), rate: vib, depth: 0.008), 10, mul: (amp / 2));
 env=EnvGen.ar(Env.perc(level: amp,curve: 0,attackTime: (0.25 * sus),releaseTime: (0.75 * sus)), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

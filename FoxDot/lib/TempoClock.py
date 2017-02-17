@@ -209,6 +209,10 @@ class TempoClock:
     def clear(self):
         """ Remove players from clock """
 
+        self.items = []
+        self.queue.clear()
+        self.solo.reset()
+
         for player in self.playing:
 
             player.reset()
@@ -218,10 +222,6 @@ class TempoClock:
             
             try: item.stop()
             except: pass                
-
-        self.items = []
-        self.queue.clear()
-        self.solo.reset()
         
         self.playing = []
         self.ticking = False

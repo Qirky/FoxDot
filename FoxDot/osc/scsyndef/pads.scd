@@ -8,5 +8,6 @@ amp=(amp / 2);
 osc=SinOsc.ar([freq, (freq + 2)], mul: amp);
 env=EnvGen.ar(Env.perc(level: amp,curve: 0,attackTime: 0.01,releaseTime: sus), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

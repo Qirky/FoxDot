@@ -98,13 +98,14 @@ class Parser:
 
                         char.divide(len(chars))
 
-                        if isinstance(char, PCHAR):
+                        #if isinstance(char, PCHAR): 
+                        if isinstance(char, PlayGroup):
 
-                            new_chars.append(char)
+                            new_chars.extend(char)
 
                         else:
 
-                            new_chars.extend(char)
+                            new_chars.append(char)
 
                     items.append( PlayGroup(new_chars) )
 

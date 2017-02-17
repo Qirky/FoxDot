@@ -8,5 +8,6 @@ amp=(amp / 4);
 osc=Pulse.ar(freq);
 env=EnvGen.ar(Env(levels: [0, 1, 1, 0],curve: 'lin',times: [0.01, (sus - 0.01), 0.01]), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

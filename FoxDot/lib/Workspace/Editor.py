@@ -415,7 +415,8 @@ class workspace:
         """ Saves the contents of the text editor """
         text = self.text.get("0.0",END)
         if not self.saved:
-            self.filename = tkFileDialog.asksaveasfilename(defaultextension=".py")
+            self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py"),("FoxDot files", ".fox")],
+                                                           defaultextension=".py")
         if self.filename:
             with open(self.filename, 'w') as f:
                 f.write(text)
@@ -428,7 +429,8 @@ class workspace:
 
     def saveAs(self,event=None):
         text = self.text.get("0.0",END)
-        self.filename = tkFileDialog.asksaveasfilename(defaultextension=".py")
+        self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py"),("FoxDot files", ".fox")],
+                                                       defaultextension=".py")
         if self.filename is not None:
             with open(self.filename, 'w') as f:
                 f.write(text)
@@ -459,6 +461,13 @@ class workspace:
             self.filename = ''
             self.set_all("")
         return "break"
+
+    def export_console(self):
+        fn = tkFileDialog.asksaveasfilename(filetypes=[("Plain Text File", ".txt")],
+                                            defaultextension='.txt')
+        with open(fn, 'w') as f:
+            f.write(self.console.read())
+        return
 
     # Toggle console: Ctrl+#
     #-----------------------------

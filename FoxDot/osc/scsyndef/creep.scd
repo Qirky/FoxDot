@@ -8,5 +8,6 @@ amp=(amp / 4);
 osc=PMOsc.ar(freq, (freq * 2), 10);
 env=EnvGen.ar(Env(levels: [0, amp],curve: 'exp',times: [sus, 0.001]), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

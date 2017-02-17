@@ -35,7 +35,7 @@ class console:
 
     def __str__(self):
         """ str(s) -> string """
-        return self.text.get()   
+        return self.text.get(1.0, "end")   
 
     def write(self, string):
         """ Adds string to the bottom of the console """
@@ -64,7 +64,7 @@ class console:
 
     def read(self):
         """ Returns contents of the console widget """
-        return str(self)
+        return self.text.get(1.0, "end")
 
     def hide(self):
         """ Removes console from interface """

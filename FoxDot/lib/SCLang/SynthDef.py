@@ -85,9 +85,8 @@ class SynthDefBaseClass(object):
         Def += "{}\n".format(self.get_base_class_variables())
         Def += "{}\n".format(self.get_base_class_behaviour())
         Def += "{}".format(self.get_custom_behaviour())
-        # Put oscillator and envelope together, limit, pan -> out?
-##        Def += "osc = Limiter.ar(osc, level: limit);\n"
-        Def += "osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];\n"
+        Def += "osc = Mix(osc) * 0.5;\n"
+        Def += "osc = Pan2.ar(osc, pan);\n"
         Def += "\tReplaceOut.ar(bus, osc)"
         Def += "}).add;\n"
         return Def

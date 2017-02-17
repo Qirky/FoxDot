@@ -44,6 +44,7 @@ class MenuBar(Menu):
         codemenu.add_command(label="Evaluate Line",          command=self.root.exec_line,   accelerator="Alt+Return")
         codemenu.add_command(label="Clear Scheduling Clock", command=self.root.killall,     accelerator="Ctrl+.")
         codemenu.add_command(label="Toggle Console",         command=self.root.toggle_console)
+        codemenu.add_command(label="Export Console Log",     command=self.root.export_console)
         self.add_cascade(label="Code", menu=codemenu)
 
         # Settings

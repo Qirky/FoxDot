@@ -7,5 +7,6 @@ freq = Vibrato.kr(freq, rate: vib);
 amp=(amp * 9);
 freq=(freq / 4);
 osc=Ringz.ar(Impulse.ar(0), [freq, (freq + 2)], sus, amp);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

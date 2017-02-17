@@ -8,5 +8,6 @@ freq=(freq / 4);
 osc=Ringz.ar(Pulse.ar((4 * rate)), freq, sus, amp);
 osc=(osc * XLine.ar(0.5, 1e-06, sus, doneAction: 2));
 osc=osc.cos;
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

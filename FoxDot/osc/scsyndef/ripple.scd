@@ -9,5 +9,6 @@ osc=(Pulse.ar([(freq / 4), ((freq / 4) + 1)], 0.2, 0.25) + Pulse.ar([(freq + 2),
 osc=(osc * SinOsc.ar((rate / sus), 0, 0.5, 1));
 env=EnvGen.ar(Env(levels: [0, amp, 0],curve: 'lin',times: [0.55, 0.55]), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

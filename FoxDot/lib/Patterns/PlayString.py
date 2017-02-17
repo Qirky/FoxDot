@@ -114,8 +114,9 @@ class PlayGroup(list):
         return self
 
 class RandomPlayGroup:
-    def __init__(self, seq):
+    def __init__(self, seq, dur=1):
         self.data = []
+        self.dur  = dur
         for item in seq:
             if type(item) is list:
                 self.data.extend(item)
@@ -127,6 +128,9 @@ class RandomPlayGroup:
         return 1
     def __repr__(self):
         return "<?" + repr(self.data)[1:-1] + ">"
+    def divide(self, value):
+        self.dur /= float(value)
+        return self
             
 class PCHAR:
     def __init__(self, char, dur=1):

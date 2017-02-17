@@ -7,5 +7,6 @@ freq = Vibrato.kr(freq, rate: vib);
 osc=(LFPar.ar(freq, mul: 1) * Blip.ar(((rate + 1) * 4)));
 env=EnvGen.ar(Env.perc(level: amp,curve: 0,attackTime: 0.01,releaseTime: sus), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

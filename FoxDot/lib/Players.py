@@ -381,7 +381,15 @@ class Player(Repeatable):
 
         if self.event['bpm'] is not None:
 
-            dur *= (float(self.metro.bpm) / float(self.event['bpm']))
+            try:
+
+                tempo_shift = float(self.metro.bpm) / float(self.event['bpm'])
+
+            except:
+
+                tempo_shift = 1
+
+            dur *= tempo_shift
 
         # Schedule the next event
 
@@ -653,11 +661,12 @@ class Player(Repeatable):
     # Methods affecting other players - every n times, do a random thing?
 
     def stutter(self, n=2, **kwargs):
-        """ Plays the current note n-1 times over the current durations """
+        """ Plays the current note n-1 times. You can specify some keywords,
+            such as dur, sus, and rate. """
 
         if self.metro.solo == self and n > 0:
 
-            dur = float(kwargs.get("dur", self.event['dur'])) / int(n)
+            dur = float(kwargs.get("dur", self.dur)) / int(n)
 
             delay = 0
 
@@ -866,6 +875,10 @@ class Player(Repeatable):
                     
                         for n, b in enumerate(bufchar[1:]):
 
+                            if hasattr(b, 'now'):
+
+                                b = b.now()
+
                             char = BufferManager[b]
 
                             buf_mod_index = modi(self.event['sample'], i)
@@ -886,8 +899,6 @@ class Player(Repeatable):
                 self.event['buf'] = P(event_buf)
 
             except TypeError:
-
-                pass
             
         return self
 

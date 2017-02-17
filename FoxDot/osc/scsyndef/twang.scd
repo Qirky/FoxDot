@@ -9,5 +9,6 @@ osc=LPF.ar(Impulse.ar([freq, (freq + 1)]), 4000);
 osc=CombL.ar(osc, delaytime: [0.004, 0.003], maxdelaytime: 2);
 env=EnvGen.ar(Env.perc(level: amp,curve: 0,attackTime: 0.01,releaseTime: sus), doneAction: 0);
 osc=(osc * env);
-osc = osc * [min(1, (1-pan)/2), min(1, (pan+1)/2)];
+osc = Mix(osc) * 0.5;
+osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;
