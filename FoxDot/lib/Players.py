@@ -899,6 +899,8 @@ class Player(Repeatable):
                 self.event['buf'] = P(event_buf)
 
             except TypeError:
+
+                pass
             
         return self
 
