@@ -8,14 +8,16 @@ import Env
 with SampleSynthDef("play1") as play:
     play.defaults.update(room=0.1 ,rate=1)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
-    play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate, doneAction=2)
+    play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
+    play.osc  = play.osc * Env.ramp(sus=[play.sus * play.cut, 0.01], amp=[1,1,0.01])
 
 with SampleSynthDef("play2") as play:
     play.defaults.update(room=0.1 ,rate=1)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
-    play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate , doneAction=2)
+    play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
+    play.osc  = play.osc * Env.ramp(sus=[play.sus * play.cut, 0.01], amp=[1,1,0.01])
 
 # Synth Players
 
@@ -208,11 +210,22 @@ snick.env = Env.perc()
 snick.add()
 
 twang = SynthDef("twang")
-twang.freq = twang.freq / 2
-twang.osc = LPF.ar(Impulse.ar([twang.freq, twang.freq + 1]), 4000)
-twang.osc = CombL.ar(twang.osc, delaytime=[0.004,0.003], maxdelaytime= 2);
-twang.env = Env.perc()
+twang.freq = twang.freq / 8
+twang.osc = LPF.ar(Impulse.ar([twang.freq, twang.freq + 2], 0.1), 4000)
+twang.osc = Env.perc() * CombL.ar(twang.osc, delaytime=twang.rate/(twang.freq * 8), maxdelaytime=0.25);
 twang.add()
+
+arpy = SynthDef("arpy")
+arpy.freq = arpy.freq / 2
+arpy.amp = arpy.amp * 2
+arpy.osc = LPF.ar(Impulse.ar([arpy.freq, arpy.freq + 0.5]), 3000)
+arpy.env = Env.perc(sus=arpy.sus * 0.25)
+arpy.add()
+
+soft = SynthDef("soft")
+soft.osc = LFPulse.ar(soft.freq, 0.5, 0.33 * soft.rate, 0.25) + LFPar.ar(soft.freq + 0.5, 1, 0.1, 0.25)
+soft.env = Env.perc(curve=-4, atk=0.000125, sus=Env.sus * 3)
+soft.add()
 
 donk = SynthDef("donk")
 donk.amp = donk.amp * 9

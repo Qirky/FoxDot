@@ -54,6 +54,9 @@ class metaPattern(object):
             except:
                 string += str(item)
         return string
+
+    def asGroup(self):
+        return PGroup(self.data)
     
     """
 
@@ -260,6 +263,12 @@ class metaPattern(object):
                 new.append(modi(self.data,i))
         return Pattern(new)
 
+    def shufflets(self, n):
+        """ Returns a Pattern of 'n' number of PGroups made from shuffled
+            versions of the original Pattern """
+        new = self.data[:]
+        return Pattern([Pattern(new).shuffle().asGroup() for i in range(n)])
+
     # Changing the pattern in place
 
     def append(self, item):
@@ -324,7 +333,6 @@ class metaPattern(object):
     def ltrim(self, size):
         return self[-size:]
 
-
     # Automatic expansion of nested patterns
 
     def make(self):
@@ -347,6 +355,8 @@ class metaPattern(object):
                 self.data[i] = Pattern(data)
             elif type(data) is str and len(data) > 1:
                 self.data[i] = Pattern(data)
+
+        self.data = list(self.data)
                 
         return self
 

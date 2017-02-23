@@ -89,7 +89,7 @@ if SC3_PLUGINS:
     fx.save()
 
 fx = FxList.new('chop', 'chop', ['chop', 'sus'])
-fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.01)")
+fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")
 fx.save()
 
 fx = FxList.new('echo', 'combDelay', ['echo'])

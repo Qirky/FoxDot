@@ -61,7 +61,7 @@ class reverse(EnvGen):
     def __init__(self, sus=None, amp=None, curve="'exp'", doneAction=0):
         self.attr={}
         self.attr['times']  = [instance("sus") if sus is None else sus, 0.001]
-        self.attr['levels'] = [0] + [instance("amp")] if amp is None else amp + [0]
+        self.attr['levels'] = [0.0001] + ([instance("amp")] if amp is None else amp) + [0]
         self.attr['curve']  = curve
         self.doneAction = doneAction
 
