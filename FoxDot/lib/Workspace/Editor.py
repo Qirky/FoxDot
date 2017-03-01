@@ -50,10 +50,11 @@ class workspace:
 
         self.root = Tk()
         self.root.title("FoxDot - Live Coding with Python and SuperCollider")
-        self.root.columnconfigure(1, weight=1)
-        self.root.rowconfigure(0, weight=1)
-        self.root.rowconfigure(1, weight=0)
-        self.root.grid_columnconfigure(0, weight=0)
+        self.root.rowconfigure(0, weight=1) # Text box
+        self.root.rowconfigure(1, weight=0) # Separator
+        self.root.rowconfigure(2, weight=0) # Console
+        self.root.grid_columnconfigure(0, weight=0) # line numbers
+        self.root.columnconfigure(1, weight=1) # Text boxes
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
         # --- Set icon
@@ -109,7 +110,9 @@ class workspace:
                                  insertbackground="White",
                                  font = "CodeFont",
                                  yscrollcommand=self.y_scroll.set,
-                                 width=100, height=20, bd=0,
+                                 width=100,
+                                 height=20,
+                                 bd=0,
                                  undo=True, autoseparators=True,
                                  maxundo=50 )
 
@@ -204,7 +207,7 @@ class workspace:
 
         # --- Create console
 
-        self.console = console(self.root, self.default_font)
+        self.console = console(self, self.default_font)
         self.console_visible = True
         sys.stdout = self.console
 

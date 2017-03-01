@@ -103,12 +103,16 @@ def sliceToRange(s):
 
 def LCM(*args):
     """ Lowest Common Multiple """
+
+    args = [n for n in args if n != 0]
+    
     # Base case
     if len(args) == 0:
         return 1
+    
     elif len(args) == 1:
         return args[0]
-    
+
     X = list(args)
     
     while any([X[0]!=K for K in X]):

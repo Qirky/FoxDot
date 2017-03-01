@@ -41,6 +41,12 @@ class Effect:
             self.server.loadSynthDef(self.filename)
         return
 
+class PreEffect(Effect):
+    """ SynthDef that modulates argumentes such as frequency
+        *before* being used in a UGen. """
+    def __init__(self, *args, **kwargs):
+        Effect.__init__(self, *args, **kwargs)
+
 class Out(Effect):
     def __init__(self):
         Effect.__init__(self, 'makeSound', 'makeSound')
@@ -56,22 +62,38 @@ class Out(Effect):
 
 class EffectManager(dict):
     def __init__(self):
+
         dict.__init__(self)
+        self.pre_kw=[]
         self.kw=[]
+
     def new(self, foxdot_arg_name, synthdef, args):
         self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args)
         self.kw.append(foxdot_arg_name)
         return self[foxdot_arg_name]
+    
+    def new_pre_effect(self, foxdot_arg_name, synthdef, args):
+        self[foxdot_arg_name] = PreEffect(foxdot_arg_name, synthdef, args)
+        self.pre_kw.append(foxdot_arg_name)
+        return self[foxdot_arg_name]
+
     def kwargs(self):
-        return tuple(self.kw)
+        return tuple(self.pre_kw) + tuple(self.kw)
+
     def __iter__(self):
-        for key in self.kw:
+        for key in self.pre_kw + self.kw:
             yield key, self[key]
     
 
 FxList = EffectManager()
 
-# Order matters
+# Frequency Effects
+
+##fx = FxList.new_pre_effect("vibrato", "vibrato", ["vibrato", "freq"])
+##fx.add("osc = Vibrato.ar()")
+##fx.save()
+
+# Sound effects
 
 fx = FxList.new('hpf','highPassFilter',['hpf'])
 fx.add('osc = HPF.ar(osc, hpf)')
@@ -85,7 +107,7 @@ if SC3_PLUGINS:
 
     fx = FxList.new('bits', 'bitcrush', ['bits', 'sus', 'amp'])
     fx.add("osc = Decimator.ar(osc, rate: 44100, bits: bits)")
-    fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus)") 
+    fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()
 
 fx = FxList.new('chop', 'chop', ['chop', 'sus'])
@@ -98,6 +120,10 @@ fx.save()
 
 fx = FxList.new('spin', 'spinPan', ['spin','sus'])
 fx.add('osc = osc * [FSinOsc.ar(spin / 2, iphase: 1, mul: 0.5, add: 0.5), FSinOsc.ar(spin / 2, iphase: 3, mul: 0.5, add: 0.5)]')
+fx.save()
+
+fx = FxList.new("cut", "trimLength", ["cut", "sus"])
+fx.add("osc = osc * EnvGen.ar(Env(levels: [1,1,0.01], curve: 'step', times: [sus * cut, 0.01]))")
 fx.save()
 
 fx = FxList.new('verb', 'reverb', ['verb', 'room'])

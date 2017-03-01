@@ -7,8 +7,16 @@ background = colour_map['background']
 class ThreadedText(Text):
     def __init__(self, master, **options):
         Text.__init__(self, master, **options)
+        self.height = options.get("height", 20)
+        #self.bind("<Configure>", self.on_resize)
         self.queue = Queue.Queue()
         self.update()
+
+    def on_resize(self, event):
+        line_h = self.dlineinfo("@0,0")
+        if line_h is not None:
+            self.height = int((self.winfo_height()-2) / line_h[3])
+        return
     
     def update(self):
         """ Recursively called method that monitors as

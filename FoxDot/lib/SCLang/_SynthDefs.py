@@ -10,14 +10,12 @@ with SampleSynthDef("play1") as play:
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
-    play.osc  = play.osc * Env.ramp(sus=[play.sus * play.cut, 0.01], amp=[1,1,0.01])
 
 with SampleSynthDef("play2") as play:
     play.defaults.update(room=0.1 ,rate=1)
     play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
     play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
-    play.osc  = play.osc * Env.ramp(sus=[play.sus * play.cut, 0.01], amp=[1,1,0.01])
 
 # Synth Players
 
@@ -40,8 +38,7 @@ dab = synth
 with SynthDef("varsaw") as synth:
      synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005], mul=synth.amp / 4, width=synth.rate)
      synth.env = Env.env()
-varsaw = synth
-    
+varsaw = synth    
 
 with SynthDef("growl") as growl:
     growl.sus = growl.sus * 1.5
@@ -89,6 +86,7 @@ with SynthDef("bell") as bell:
 
 with SynthDef("soprano") as soprano:
     soprano.defaults.update(vib=5, verb=0.5)
+    soprano.sus = soprano.sus * 1.75
     soprano.amp = soprano.amp / 2
     soprano.osc = SinOsc.ar(soprano.freq * 3, mul=soprano.amp) + SinOscFB.ar(soprano.freq * 3, mul=soprano.amp / 2)
     soprano.env = Env.env()
@@ -151,7 +149,7 @@ with SynthDef("ripple") as ripple:
     ripple.amp = ripple.amp / 6
     ripple.osc = Pulse.ar([ripple.freq/4, ripple.freq/4+1 ],0.2,0.25) + Pulse.ar([ripple.freq+2,ripple.freq],0.5,0.5)
     ripple.osc = ripple.osc * SinOsc.ar(ripple.rate/ripple.sus,0,0.5,1)
-    ripple.env = Env.env(sus=[0.55,0.55])
+    ripple.env = Env.env(sus=[0.55 * ripple.sus, 0.55*ripple.sus])
 
 with SynthDef("creep") as creep:
     creep.amp = creep.amp / 4
@@ -183,7 +181,7 @@ fuzz = SynthDef("fuzz")
 fuzz.freq = fuzz.freq / 2
 fuzz.amp = fuzz.amp / 6
 fuzz.osc = LFSaw.ar(LFSaw.kr(fuzz.freq,0,fuzz.freq,fuzz.freq * 2))
-fuzz.env = Env.ramp()
+fuzz.env = Env.ramp(amp=[1,1,0.01], sus=[fuzz.sus * 0.8, 0.01])
 fuzz.add()
 
 bug = SynthDef("bug")
@@ -193,14 +191,16 @@ bug.env = Env.perc(bug.sus * 1.5)
 bug.add()
 
 pulse = SynthDef("pulse")
-pulse.amp = pulse.amp / 4
+pulse.amp = pulse.amp / 8
 pulse.osc = Pulse.ar(pulse.freq)
+pulse.osc = pulse.osc * pulse.amp
 pulse.env = Env.mask()
 pulse.add()
 
 saw = SynthDef("saw")
-saw.amp = saw.amp / 4
+saw.amp = saw.amp / 8
 saw.osc = Saw.ar(saw.freq)
+saw.osc = saw.osc * saw.amp
 saw.env = Env.mask()
 saw.add()
 
@@ -217,15 +217,15 @@ twang.add()
 
 arpy = SynthDef("arpy")
 arpy.freq = arpy.freq / 2
-arpy.amp = arpy.amp * 2
-arpy.osc = LPF.ar(Impulse.ar([arpy.freq, arpy.freq + 0.5]), 3000)
-arpy.env = Env.perc(sus=arpy.sus * 0.25)
+arpy.amp  = arpy.amp * 2
+arpy.osc  = LPF.ar(Impulse.ar([arpy.freq, arpy.freq + 0.5]), 3000)
+arpy.env  = Env.perc(sus=arpy.sus * 0.25)
 arpy.add()
 
-soft = SynthDef("soft")
-soft.osc = LFPulse.ar(soft.freq, 0.5, 0.33 * soft.rate, 0.25) + LFPar.ar(soft.freq + 0.5, 1, 0.1, 0.25)
-soft.env = Env.perc(curve=-4, atk=0.000125, sus=Env.sus * 3)
-soft.add()
+nylon = SynthDef("nylon")
+nylon.osc = LFPulse.ar(nylon.freq, 0.5, 0.33 * nylon.rate, 0.25) + LFPar.ar(nylon.freq + 0.5, 1, 0.1, 0.25)
+nylon.env = Env.perc(curve=-4, atk=0.000125, sus=Env.sus * 3)
+nylon.add()
 
 donk = SynthDef("donk")
 donk.amp = donk.amp * 9

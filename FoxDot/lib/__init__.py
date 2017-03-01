@@ -17,11 +17,11 @@ from TimeVar import *
 from Constants import *
 from Midi import *
 from Settings import *
-from SCLang.Definitions import *
+from SCLang._SynthDefs import *
 from SCLang import SynthDefs, Env, SynthDef
 from ServerManager import Server
-import Scale
-import Root
+from Root import Root
+from Scale import Scale
 
 # stdlib imports
 

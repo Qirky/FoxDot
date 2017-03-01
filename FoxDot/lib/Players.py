@@ -130,11 +130,11 @@ from Effects import FxList
 from Repeat import *
 from Patterns import *
 from Midi import *
+from Root import Root
+from Scale import Scale
 
 from Bang import Bang
 
-import Scale
-import Root
 import Buffers
 import TimeVar
 
@@ -291,8 +291,8 @@ class Player(Repeatable):
         self.buf     = 0
 
         # Reverb
-        self.verb   = 0.05
-        self.room   = 0.01
+        self.verb   = 0.25
+        self.room   = 0.00
 
         # Frequency modifier
         self.fmod   =  0
@@ -941,8 +941,8 @@ class Player(Repeatable):
                     message += [key, float(val)]
 
             except:
-                
-              print("Issue in OSC message for '{}'. Problem with {}".format(self.synthdef, key))
+
+               pass
 
         # See if any fx_attributes 
 
@@ -960,7 +960,15 @@ class Player(Repeatable):
 
                     if sub_key in self.event:
 
-                        val = float(modi(kwargs.get(sub_key, self.event[sub_key]), index))
+                        if sub_key in message:
+
+                            i = message.index(sub_key)
+
+                            val = float(message[i + 1])
+
+                        else:
+
+                            val = float(modi(kwargs.get(sub_key, self.event[sub_key]), index))
 
                         # Don't send fx with zero values
 

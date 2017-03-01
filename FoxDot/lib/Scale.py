@@ -1,16 +1,12 @@
 from Patterns.Base import Pattern
 from random import choice
 
-def names():
-    """ Returns a list of all the scales by name """
-    return sorted(Scale.names.keys())
-
 def choose():
     """ Scale.choose() -> Returns a random scale object """
     return choice(Scale.names.values())
     
 
-class Scale(Pattern):
+class ScalePattern(Pattern):
 
     names = {}
     name  = 'unnamed'
@@ -21,13 +17,13 @@ class Scale(Pattern):
 
         if args:
 
-            self.__class__.names[name] = self.data = args[0]
+            ScalePattern.names[name] = self.data = args[0]
 
         else:
 
-            self.data = Scale.names[name]
+            self.data = ScalePattern.names[name]
 
-        self.pentatonic = PentatonicScale(self)
+        self.pentatonic = PentatonicScalePattern(self)
 
     def __call__(self, *args):
 
@@ -38,10 +34,10 @@ class Scale(Pattern):
         return self
 
     def __eq__(self, other):
-        return self.name == other.name if isinstance(other, Scale) else False
+        return self.name == other.name if isinstance(other, ScalePattern) else False
 
     def __ne__(self, other):
-        return self.name != other.name if isinstance(other, Scale) else True
+        return self.name != other.name if isinstance(other, ScalePattern) else True
 
     def set(self, new):
 
@@ -57,19 +53,16 @@ class Scale(Pattern):
         elif isinstance(new, (list, Pattern)):
 
             self.data = new
-            self.name = Scale.name
+            self.name = self.__class__.name
 
         else:
 
             print "Warning: {} is not a valid scale".format(new)       
 
         return self
-
-    def __rshift__(self, other):
-        return self.set(other)
         
 
-class PentatonicScale(Scale):
+class PentatonicScalePattern(ScalePattern):
 
     def __init__(self, scale):
 
@@ -101,61 +94,78 @@ class PentatonicScale(Scale):
 
         return self.values(self.data)[key]
 
-class __freq:
+class _freq:
     def __repr__(self):
         return "[inf]"
 
-#: Define scales
 
-chromatic       = Scale("chromatic", [0,1,2,3,4,5,6,7,8,9,10,11,12])
+# Custom made fibonacci tuing
 
-major           = Scale("major", [0,2,4,5,7,9,11])
-majorPentatonic = Scale("majorPentatonic", [0,2,4,7,9])
-
-minor           = Scale("minor", [0,2,3,5,7,8,10])
-minorPentatonic = Scale("minorPentatonic", [0,3,5,7,10])
-
-mixolydian      = Scale("mixolydian", [0,2,4,5,7,9,10])
-
-melodicMinor    = Scale("melodicMinor", [0,2,3,5,7,9,11])
-melodicMajor    = Scale("melodicMinor", [0,2,4,5,7,8,11])
-
-harmonicMinor   = Scale("harmonicMinor", [0,2,3,5,7,8,11])
-harmonicMajor   = Scale("harmonicMajor", [0,2,4,5,7,8,11])
-
-#justMajor       = Scale("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
-#justMinor       = Scale("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
-
-dorian          = Scale("dorian", [0,2,3,5,7,9,10])
-
-egyptian        = Scale("egyptian", [0,2,5,7,10])
-zgi             = Scale("zhi", [0,2,5,7,9])
-phyrgian        = Scale("phrygian", [0,1,3,5,7,8,10])
-prometheus      = Scale("prometheus", [0,2,4,6,11])
-indian          = Scale("indian", [0,4,5,7,10])
-
-locrian         = Scale("locrian", [0,1,3,5,6,8,10])
-locrianMajor    = Scale("locrianMajor", [0,2,4,5,6,8,10])
-
-lydian          = Scale("lydian", [0,2,4,6,7,9,11])
-lydianMinor     = Scale("lydianMinor", [0,2,4,6,7,8,10])
-
-freq            = Scale("freq", __freq())
-
-# Custom made fibonacci tuning
-
-fib = [0,1]
-for n in range(2,11):
-    fib.append(fib[n-1]+fib[n-2])
-    
-fibonacci = []
-for n in range(3, len(fib)-1):
-    fibonacci.append((n-3) * (fib[n] / float(fib[n-1])))
-
-del n
-
-fibonacci = Scale("fibonacci", fibonacci)
+##fib = [0,1]
+##for n in range(2,11):
+##    fib.append(fib[n-1]+fib[n-2])
+##    
+##fibonacci = []
+##for n in range(3, len(fib)-1):
+##    fibonacci.append((n-3) * (fib[n] / float(fib[n-1])))
+##
+##fibonacci = Scale("fibonacci", fibonacci)
+##
+##del n
 
 # Default scale is major
 
-default = Scale("major")  
+class __scale__:
+
+    chromatic       = ScalePattern("chromatic", [0,1,2,3,4,5,6,7,8,9,10,11,12])
+
+    major           = ScalePattern("major", [0,2,4,5,7,9,11])
+    majorPentatonic = ScalePattern("majorPentatonic", [0,2,4,7,9])
+
+    minor           = ScalePattern("minor", [0,2,3,5,7,8,10])
+    minorPentatonic = ScalePattern("minorPentatonic", [0,3,5,7,10])
+
+    mixolydian      = ScalePattern("mixolydian", [0,2,4,5,7,9,10])
+
+    melodicMinor    = ScalePattern("melodicMinor", [0,2,3,5,7,9,11])
+    melodicMajor    = ScalePattern("melodicMinor", [0,2,4,5,7,8,11])
+
+    harmonicMinor   = ScalePattern("harmonicMinor", [0,2,3,5,7,8,11])
+    harmonicMajor   = ScalePattern("harmonicMajor", [0,2,4,5,7,8,11])
+
+    #justMajor       = ScalePattern("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
+    #justMinor       = ScalePattern("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
+
+    dorian          = ScalePattern("dorian", [0,2,3,5,7,9,10])
+
+    egyptian        = ScalePattern("egyptian", [0,2,5,7,10])
+    zgi             = ScalePattern("zhi", [0,2,5,7,9])
+    phyrgian        = ScalePattern("phrygian", [0,1,3,5,7,8,10])
+    prometheus      = ScalePattern("prometheus", [0,2,4,6,11])
+    indian          = ScalePattern("indian", [0,4,5,7,10])
+
+    locrian         = ScalePattern("locrian", [0,1,3,5,6,8,10])
+    locrianMajor    = ScalePattern("locrianMajor", [0,2,4,5,6,8,10])
+
+    lydian          = ScalePattern("lydian", [0,2,4,6,7,9,11])
+    lydianMinor     = ScalePattern("lydianMinor", [0,2,4,6,7,8,10])
+
+    freq            = ScalePattern("freq", _freq())
+
+    def __init__(self):
+
+        self.default = ScalePattern("major")
+        
+    def __setattr__(self, key, value):
+        if key == "default" and key in vars(self):
+            self.default.set(value)
+        else:
+            self.__dict__[key] = value
+        return
+
+    def names():
+        """ Returns a list of all the scales by name """
+        return sorted(ScalePattern.names.keys())
+
+
+Scale = __scale__()

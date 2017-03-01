@@ -18,6 +18,12 @@ class Note:
     def __repr__(self):
         return str(self.num)
 
+    def __float__(self):
+        return float(self.num)
+
+    def __int__(self):
+        return int(self.num)
+
     def set(self, index):
 
         if type(index) is str:
@@ -51,6 +57,12 @@ class Note:
             self.num = index
             self.char = "<Time-Varying>"
 
+    def __iadd__(self, other):
+        self.num += other
+
+    def __isub__(self, other):
+        self.num -= other
+
     def __add__(self, other):
         return self.num + other
 
@@ -71,4 +83,14 @@ class Note:
 
         return self
 
-default = Note("C")
+class __root__:
+    def __init__(self):
+        self.default = Note("C")
+    def __setattr__(self, key, value):
+        if key == "default" and key in vars(self):
+            self.default.set(value)
+        else:
+            self.__dict__[key] = value
+        return
+
+Root = __root__()
