@@ -358,8 +358,8 @@ class Player(Repeatable):
         while True:
 
             self.get_event()
-            
-            dur = float(self.event['dur'])
+
+            dur = 0 if self.event['dur'] is None else float(self.event['dur'])
 
             if dur == 0:
 
@@ -968,7 +968,15 @@ class Player(Repeatable):
 
                         else:
 
-                            val = float(modi(kwargs.get(sub_key, self.event[sub_key]), index))
+                            try:
+
+                                val = float(modi(kwargs.get(sub_key, self.event[sub_key]), index))
+
+                            except TypeError as e:
+
+                                # If we get None, there was an error, set the value to 0
+
+                                val = 0
 
                         # Don't send fx with zero values
 

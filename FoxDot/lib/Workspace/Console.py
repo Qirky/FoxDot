@@ -17,7 +17,7 @@ class console:
         self.Yscroll.grid(row=1, column=2, sticky='nsew', rowspan=2)
 
         # Create a bar for changing console size
-        self.drag = Frame( self.root , bg="white", height=4, cursor="sb_v_double_arrow")
+        self.drag = Frame( self.root , bg="white", height=2, cursor="sb_v_double_arrow")
 
         # Create text bar
         self.height = 10
@@ -95,12 +95,6 @@ class console:
                 self.text.config(height = self.height)
                 
                 self.app.text.config(height = self.root_h - self.height)
-
-##                self.app.text.height = int((self.app.text.winfo_height()-2) / textbox_line_h[3])
-##
-##                print self.height, self.app.text.height
-
-                self.text.see(END)
 
                 return "break"
         return

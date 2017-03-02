@@ -50,7 +50,7 @@ class PlayString:
                     count -= 1
                 else:
                     return i
-        raise SyntaxError("Bad string: Empty or non-closing brackets")
+        raise ParseError("Closing bracket '%s' missing in string '%s'" % (sub, self.original))
 
     # Return strings
     
@@ -152,3 +152,7 @@ class PCHAR:
         return
     def divide(self, value):
         self.dur /= float(value)
+
+
+class ParseError(Exception):
+    pass

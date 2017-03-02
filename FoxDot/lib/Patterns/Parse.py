@@ -43,12 +43,17 @@ class Parser:
             if char == "(":
 
                 # Parse the contents of the brackets if found
-                j = string.index(")", start=i+2)
+                # j = string.index(")", start=i+2) used to be +2 - why?
+                j = string.index(")", start=i+1)
                 
                 s = string[i+1:j]
                 i = j
 
                 chars, _ = self.parse(s, dur)
+
+                if len(chars) == 0:
+
+                    raise(ParseError("Empty '()' brackets in string"))
 
                 items.append( chars )
 
@@ -58,22 +63,30 @@ class Parser:
             elif char == "{":
 
                 # Parse the contents of the brackets if found
-                j = string.index("}", start=i+2)
+                j = string.index("}", start=i+1)
                 s = string[i+1:j]
                 i = j
 
                 chars, _ = self.parse(s, dur)
+
+                if len(chars) == 0:
+
+                    raise(ParseError("Empty '{}' brackets in string"))
 
                 items.append( RandomPlayGroup(chars) )
                     
             # Look for a '[]'
             elif char == "[":
                 
-                j = string.index("]", start=i+2)
+                j = string.index("]", start=i+1)
                 s = string[i+1:j]
                 i = j
 
                 chars, contains_nest = self.parse(s, dur)
+
+                if len(chars) == 0:
+
+                    raise(ParseError("Empty '[]' brackets in string"))
 
                 # Un-nest
                 if contains_nest:
