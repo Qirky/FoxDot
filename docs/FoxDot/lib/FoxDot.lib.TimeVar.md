@@ -94,6 +94,11 @@ Returns a new TimeVar object
 
 Concatonates this patterns stream with another 
 
+##### `shufflets(self, n)`
+
+Returns a Pattern of 'n' number of PGroups made from shuffled
+versions of the original Pattern 
+
 ##### `sort(self)`
 
 Used in place of sorted(pattern) to force type 

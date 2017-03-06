@@ -249,7 +249,8 @@ Adds a delay to a Synth Envelope
 
 ##### `stutter(self, n=2, **kwargs)`
 
-Plays the current note n-1 times over the current durations 
+Plays the current note n-1 times. You can specify some keywords,
+such as dur, sus, and rate. 
 
 ##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
 

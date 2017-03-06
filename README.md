@@ -1,17 +1,13 @@
-FoxDot - Live Coding with Python v0.2.7
+FoxDot - Live Coding with Python v0.2.8
 =======================================
 
 *FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
 
-### v0.2.7 fixes and updates
+### v0.2.8 fixes and updates
 
-- Rest class added
-- Undo and Redo functions fixed
-- Infinite loop caused by empty brackets in PlayStrings fixed
-- Menu bar added with several short-cuts
-- Player follow method improved
-- Improved documentation
-- "style" keyword argument changed to "sample"
+- Minor bug fixes
+- Improved automatic bracket handling and formatting
+- Console is now resizable
 
 See `docs/changelog` for more
 

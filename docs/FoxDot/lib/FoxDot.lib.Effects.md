@@ -36,11 +36,24 @@ writes to file and sends to server
 
 ---
 
+### `PreEffect(self, *args, **kwargs)`
+
+SynthDef that modulates argumentes such as frequency
+*before* being used in a UGen. 
+
+#### Methods
+
+##### `save(self)`
+
+writes to file and sends to server 
+
+---
+
 ## Functions
 
 ## Data
 
-#### `FxList = {'bits': <Fx 'bitcrush' -- args: bits,sus,amp>, ...,sus>, 'hpf': <Fx 'highPassFilter' -- args: hpf>}`
+#### `FxList = {'cut': <Fx 'trimLength' -- args: cut,sus>, 'bit...,sus>, 'hpf': <Fx 'highPassFilter' -- args: hpf>}`
 
 #### `fx = <Fx 'reverb' -- args: verb,room>`
 

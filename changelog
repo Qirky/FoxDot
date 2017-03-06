@@ -1,3 +1,9 @@
+### v0.2.8 fixes and updates
+
+- Minor bug fixes
+- Improved automatic bracket handling and formatting
+- Console is now resizable
+
 ### v0.2.7 fixes and updates
 
 - Rest class added

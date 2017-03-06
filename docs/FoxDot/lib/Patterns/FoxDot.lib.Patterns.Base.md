@@ -65,6 +65,11 @@ Concatonates this patterns stream with another
 
 Scales the dur values for all the items in self.data by n 
 
+##### `shufflets(self, n)`
+
+Returns a Pattern of 'n' number of PGroups made from shuffled
+versions of the original Pattern 
+
 ##### `sort(self)`
 
 Used in place of sorted(pattern) to force type 
@@ -131,6 +136,11 @@ This method automatically laces and groups the data
 
 Concatonates this patterns stream with another 
 
+##### `shufflets(self, n)`
+
+Returns a Pattern of 'n' number of PGroups made from shuffled
+versions of the original Pattern 
+
 ##### `sort(self)`
 
 Used in place of sorted(pattern) to force type 
@@ -192,6 +202,11 @@ This method automatically laces and groups the data
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
+
+##### `shufflets(self, n)`
+
+Returns a Pattern of 'n' number of PGroups made from shuffled
+versions of the original Pattern 
 
 ##### `sort(self)`
 
@@ -256,6 +271,11 @@ Concatonates this patterns stream with another
 
 Scales the dur values for all the items in self.data by n 
 
+##### `shufflets(self, n)`
+
+Returns a Pattern of 'n' number of PGroups made from shuffled
+versions of the original Pattern 
+
 ##### `sort(self)`
 
 Used in place of sorted(pattern) to force type 
@@ -317,6 +337,11 @@ Concatonates this patterns stream with another
 ##### `scale_dur(self, n)`
 
 Scales the dur values for all the items in self.data by n 
+
+##### `shufflets(self, n)`
+
+Returns a Pattern of 'n' number of PGroups made from shuffled
+versions of the original Pattern 
 
 ##### `sort(self)`
 
@@ -391,6 +416,11 @@ This method automatically laces and groups the data
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
+
+##### `shufflets(self, n)`
+
+Returns a Pattern of 'n' number of PGroups made from shuffled
+versions of the original Pattern 
 
 ##### `sort(self)`
 
