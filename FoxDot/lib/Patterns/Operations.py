@@ -25,7 +25,8 @@ class POperand:
         # Get the dominant pattern type and convert B
 
         cls = Base.Dominant(A, B)
-
+        
+        A = cls(A)
         B = cls(B)
 
         # Calculate total length before operations
