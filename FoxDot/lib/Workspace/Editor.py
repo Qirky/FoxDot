@@ -245,6 +245,8 @@ class workspace:
 
         # For non string characters, return normally
 
+        self.text.tag_delete("tag_open_brackets")
+
         if not event.char or isHex(event.char):
 
             self.inbrackets = False
@@ -263,7 +265,6 @@ class workspace:
 
             self.text.insert(index, event.char)
 
-            # self.undo_stack.append_keystroke(index)
             self.text.edit_separator()
 
             self.update(event)
@@ -513,6 +514,8 @@ class workspace:
 
         self.delete_selection()
 
+        self.text.tag_delete("tag_open_brackets")
+
         # Get the text from this line
 
         i, j = index(self.text.index(insert))
@@ -536,9 +539,9 @@ class workspace:
 
             # Case 2. Open Bracket
 
-            pos = open_bracket(line)
+            # pos = open_bracket(line)
 
-            if pos: break
+            # if pos: break
 
             # Case 2. Keyword with ending ':'
 

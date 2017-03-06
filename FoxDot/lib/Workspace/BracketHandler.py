@@ -15,15 +15,14 @@ class BracketHandler:
 
         self.separators = py_separators
 
-        self.left_brackets  = left_b
+        self.style = bracket_formatting
 
-        self.right_brackets = right_b
-
-        self.all_brackets = dict(zip(self.left_brackets, self.right_brackets))
+        self.left_brackets = dict(zip(left_b, right_b))
+        self.right_brackets = dict(zip(right_b, left_b))
 
         self.queue = []
 
-        for char in self.left_brackets + self.right_brackets:
+        for char in self.left_brackets.keys() + self.right_brackets.keys():
 
             self.text.bind(char, self.handle)
 
@@ -46,7 +45,7 @@ class BracketHandler:
                 a = self.text.index(SEL_FIRST)
                 b = self.text.index(SEL_LAST)
 
-                self.text.insert(b, self.all_brackets[event.char])
+                self.text.insert(b, self.left_brackets[event.char])
                 self.text.insert(a, event.char)
 
                 # unselect
@@ -61,30 +60,73 @@ class BracketHandler:
 
             # B. Needs a closing bracket
 
-            if next_char in whitespace + self.right_brackets:
+            if next_char in whitespace + self.right_brackets.keys() and next_char not in ("'", '"'):
 
-                self.text.insert(self.text.index(insert), event.char + self.all_brackets[event.char])
+                self.text.insert(self.text.index(insert), event.char + self.left_brackets[event.char])
 
                 self.text.mark_set(insert, index(line, column + 1))
 
                 ret = "break"
+
+            # Update line colours
+        
+            self.root.colour_line(line)
 
         # 2. Type right bracket
         elif event.char in self.right_brackets:
 
-            # if there is *the same* right bracket in front of it, just move the cursor
+            # Go back and find an open bracket -> assume the first open bracket is related to *this* one
 
-            if next_char == event.char:
+            self.text.insert("{}.{}".format(line,column), event.char) # Add bracket
 
-                self.text.mark_set(insert, index(line, column + 1))
+            coords = self.find_starting_bracket(line, column, event.char)
 
-                ret = "break"
+            new_col = column + 1
 
-            # TODO - highlight the enclosed area
+            adding_bracket = True
 
-        # Update line colours
-        
-        self.root.colour_line(line)
+            while next_char == event.char:
+
+                coords_ = self.find_starting_bracket(line, new_col, event.char, offset=0)
+
+                # If there is a closing brackets
+
+                if coords_ is None:
+
+                    adding_bracket = False
+
+                    break
+
+                else:
+
+                    adding_bracket = True
+
+                new_col += 1
+                next_char = self.text.get(index(line, new_col))                
+
+            if not adding_bracket:
+
+                self.text.delete(index(line, column+1))
+
+            ret = "break"
+
+            # Update line colours
+            
+            self.root.colour_line(line)
+
+            # Highlight brackets
+
+            if coords is not None:
+
+                row, col = coords
+
+                self.text.tag_config("tag_open_brackets", **self.style)
+                self.text.tag_add("tag_open_brackets", "{}.{}".format(row,col), "{}.{}".format(row,col+1))
+                self.text.tag_add("tag_open_brackets", "{}.{}".format(line,column), "{}.{}".format(line,column+1))
+
+                # Remove bracket highlight after 0.2 sec?
+
+                # self.text.after(200, lambda:  self.text.tag_delete("tag_open_brackets"))
 
         return ret
 
@@ -94,7 +136,41 @@ class BracketHandler:
         prev_char    = self.text.get(index(line, column-1))
 
         if prev_char in self.left_brackets:
-            if next_char == self.all_brackets[prev_char] and column > 0:
+            if next_char == self.left_brackets[prev_char] and column > 0:
                 self.text.delete(index(line, column-1), index(line, column+1))
                 return True
         return False
+
+    def find_starting_bracket(self, line, column, bracket_style, offset = 0):
+        """ Finds the opening bracket to the closing bracket at line, column co-ords.
+            Returns None if not found. """
+        
+        line_length = column - 1
+        used_br = offset
+
+        for row in range(line, 0, -1):
+
+            for col in range(line_length, -1, -1):
+
+                # If the char is a left bracket and not used, break
+
+                if self.text.get("{}.{}".format(row, col)) == self.right_brackets[bracket_style]:
+
+                    # open_br += 1
+                    if used_br == 0:
+
+                        return row, col
+
+                    else:
+
+                        used_br -= 1
+
+                elif self.text.get("{}.{}".format(row, col)) == bracket_style:
+
+                    used_br += 1
+
+            line_length = int(self.text.index("{}.end".format(row-1)).split(".")[1])
+
+        else:
+
+            return None

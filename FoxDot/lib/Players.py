@@ -347,7 +347,13 @@ class Player(Repeatable):
 
         if self.dur_updated():
 
-            self.event_n, self.event_index = self.count()
+            try:
+
+                self.event_n, self.event_index = self.count()
+
+            except TypeError:
+
+                print("TypeError: Innappropriate argument type for 'dur'")
 
             self.old_dur = self.attr['dur']
 
@@ -359,7 +365,25 @@ class Player(Repeatable):
 
             self.get_event()
 
-            dur = 0 if self.event['dur'] is None else float(self.event['dur'])
+            # Set a 'None' to 0
+
+            if self.event['dur'] is None:
+
+                dur = 0
+
+            # If there are more than one dur (happens sometimes because of threading), only use first
+
+            elif hasattr(self.event['dur'], '__iter__'):
+
+                dur = float(self.event['dur'][0])
+
+            else:
+
+            # Normal duration
+
+                dur = float(self.event['dur'])
+
+            # Skip events with durations of 0
 
             if dur == 0:
 

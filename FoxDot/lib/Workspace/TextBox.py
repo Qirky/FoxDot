@@ -8,7 +8,6 @@ class ThreadedText(Text):
     def __init__(self, master, **options):
         Text.__init__(self, master, **options)
         self.height = options.get("height", 20)
-        #self.bind("<Configure>", self.on_resize)
         self.queue = Queue.Queue()
         self.update()
 

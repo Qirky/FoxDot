@@ -145,6 +145,9 @@ re_patterns = {  'functions' : functions,
                  'players'   : players }
 
 
+bracket_formatting = {'borderwidth': 2,
+                      'relief' : 'groove'}
+
 # Weightings (heavier get checked last)
 
 tag_weights = [['numbers'],

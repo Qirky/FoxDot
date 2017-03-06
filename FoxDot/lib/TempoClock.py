@@ -249,7 +249,17 @@ class Queue:
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
 
-        if beat < self.next():
+        try:
+
+            front = beat < self.next()
+
+        except:
+
+            print "beat", beat, "next", self.next()
+
+            front = False
+
+        if front:
 
             self.data.append(QueueItem(item, beat, args, kwargs))
 

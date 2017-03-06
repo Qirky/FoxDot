@@ -159,13 +159,13 @@ class metaPattern(object):
         return PNe(self, other)
     
     def __gt__(self, other):
-        return Pattern([int(value > other) for value in self])
+        return Pattern([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
     def __ge__(self, other):
-        return Pattern([int(value >= other) for value in self])
+        return Pattern([int(value >= modi(asStream(other), i)) for i, value in enumerate(self)])
     def __lt__(self, other):
-        return Pattern([int(value < other) for value in self])
+        return Pattern([int(value < modi(asStream(other), i)) for i, value in enumerate(self)])
     def __le__(self, other):
-        return Pattern([int(value <= other) for value in self])
+        return Pattern([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
 
     #: Methods for strings as pattern
 

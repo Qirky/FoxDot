@@ -35,7 +35,6 @@ class Parser:
         items = []
         contains_nest = False
         i = 0
-        #counter = 0
         while i < len(string):
             char = string[i]
 
@@ -43,7 +42,6 @@ class Parser:
             if char == "(":
 
                 # Parse the contents of the brackets if found
-                # j = string.index(")", start=i+2) used to be +2 - why?
                 j = string.index(")", start=i+1)
                 
                 s = string[i+1:j]
@@ -53,7 +51,9 @@ class Parser:
 
                 if len(chars) == 0:
 
-                    raise(ParseError("Empty '()' brackets in string"))
+                    e = "Empty '()' brackets in string"
+
+                    raise(ParseError(e))
 
                 items.append( chars )
 
@@ -71,7 +71,9 @@ class Parser:
 
                 if len(chars) == 0:
 
-                    raise(ParseError("Empty '{}' brackets in string"))
+                    e = "Empty '{}' brackets in string"
+
+                    raise(ParseError(e))
 
                 items.append( RandomPlayGroup(chars) )
                     
@@ -86,7 +88,9 @@ class Parser:
 
                 if len(chars) == 0:
 
-                    raise(ParseError("Empty '[]' brackets in string"))
+                    e = "Empty '[]' brackets in string"
+
+                    raise(ParseError(e))
 
                 # Un-nest
                 if contains_nest:
