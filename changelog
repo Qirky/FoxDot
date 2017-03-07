@@ -3,6 +3,7 @@
 - Minor bug fixes
 - Improved automatic bracket handling and formatting
 - Console is now resizable
+- Scale and root can be assigned using the equals operator e.g. `Scale.default = "minor"` and `Root.default = var([0,4])`
 
 ### v0.2.7 fixes and updates
 
