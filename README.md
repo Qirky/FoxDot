@@ -65,7 +65,7 @@ Python supports many different programming paradigms, including procedural and f
 p1 = Player()
 ```
 
-Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print Synths` to see all available synths) you would use the following code:
+Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print SynthDefs` to see all available synths) you would use the following code:
 
 ``` python
 p1 >> pads([0,1,2,3])
