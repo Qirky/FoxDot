@@ -8,6 +8,7 @@ FoxDot - Live Coding with Python v0.2.8
 - Minor bug fixes
 - Improved automatic bracket handling and formatting
 - Console is now resizable
+- Scale and root can be assigned using the equals operator e.g. `Scale.default = "minor"` and `Root.default = var([0,4])`
 
 See `docs/changelog` for more
 
@@ -24,7 +25,7 @@ See `docs/changelog` for more
 
 #### Installing FoxDot
 
-- Install the latest version from the Python Package Index from the command line by executing `pip install FoxDot`
+- Install the latest version from the Python Package Index from the command line by executing `pip install FoxDot`. You can update FoxDot to the latest version if it's already installed by adding `-U` or `--upgrade` flag to this command.
 - Alternatively, you can build from source:
 ``` bash
 $ git clone https://github.com/Qirky/FoxDot.git
@@ -170,3 +171,4 @@ For more information on FoxDot, please see the `docs` folder or go to http://fox
 - Sounds in `snd/z/` folder courtesy of Mike Hodnick's live coded album, [Expedition](https://github.com/kindohm/expedition)
 - Many samples have been obtained from http://freesound.org and have been placed in the public domain via the Creative Commons 0 License: http://creativecommons.org/publicdomain/zero/1.0/ - thank you to the original creators
 - Other samples have come from the [Dirt Sample Engine](https://github.com/tidalcycles/Dirt-Samples/tree/c2db9a0dc4ffb911febc613cdb9726cae5175223) which is part of the TidalCycles live coding language created by Yaxu - another huge amount of thanks.
+- Big thanks to those who have used, tested, and submitted bugs, which have all helped improve FoxDot
