@@ -29,10 +29,12 @@ def re_list(string, br="[]"):
                 m = n
                 n += 1
             else:
-                value = re_list(string[n + 1:])
+                sub = string[n + 1:string.rfind(br[1])]
+                value = re_list(sub)
                 n += len(value) + 1
         elif char == br[1]:
-            return string[m:n+1]
+            new_string = string[m:n+1]
+            return new_string
         else:
             n += 1
 

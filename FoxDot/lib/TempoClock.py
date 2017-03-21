@@ -148,15 +148,9 @@ class TempoClock:
 
         # Add to the queue
 
-##        try:
-
         if beat > self.now():
 
             self.queue.add(obj, beat, args, kwargs)
-
-##        except Exception as e:
-##
-##            print e,  beat, self.now()
 
         # Add any events that should have happend, but silence Players
         
@@ -249,17 +243,7 @@ class Queue:
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
 
-        try:
-
-            front = beat < self.next()
-
-        except:
-
-            print "beat", beat, "next", self.next()
-
-            front = False
-
-        if front:
+        if beat < self.next():
 
             self.data.append(QueueItem(item, beat, args, kwargs))
 

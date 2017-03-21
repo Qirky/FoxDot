@@ -2,10 +2,15 @@
 """ Collection of functions used in the App package """
 
 from Format import *
+import sys
+
+def stdout(*args):
+    """ Forces prints to stdout and not console """
+    sys.__stdout__.write(" ".join([str(s) for s in args]) + "\n")
 
 def index(index1, index2=None):
     if type(index1) == str and index2 == None:
-        return [int(n) for n in index1.split('.')]
+        return tuple(int(n) for n in index1.split('.'))
     return str(index1) + '.' + str(index2)
 
 def empty(string):

@@ -20,6 +20,11 @@ class metaPattern(object):
         if type(data) is str:
             
             self.fromString(data)
+
+        elif type(data) is tuple:
+
+            self.data = PGroup(data)
+            self.make()
             
         else:
             
@@ -471,13 +476,20 @@ class PGroup(metaPattern):
 
         metaPattern.__init__(self, data)
 
-        # If the PGroup contains patterns, change it to a Pattern
+        # If the PGroup contains patterns, invert it to a Pattern of PGroups
+        
         l = [len(p) for p in self.data if isinstance(p, Pattern)]
+
         if len(l) > 0:
+
             new_data = []
-            for key in range(max(l)):
+
+            for key in range(LCM(*l)):
+
                 new_data.append(PGroup([item.getitem(key) if isinstance(item, Pattern) else item for item in self.data]))
+
             self.__class__ = Pattern
+
             self.data = new_data
 
     def getitem(self, key):

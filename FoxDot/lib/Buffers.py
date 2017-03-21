@@ -35,7 +35,7 @@ nonalpha = {"&" : "ampersand",
 
 DESCRIPTIONS = { 'a' : "Unknown",
                  'b' : "Unknown",
-                 'c' : "Unknown",
+                 'c' : "Choral",
                  'd' : "Unknown",
                  'e' : "Unknown",
                  'f' : "Wood",
@@ -48,7 +48,7 @@ DESCRIPTIONS = { 'a' : "Unknown",
                  'm' : "Toms",
                  'n' : "Unknown",
                  'o' : "Snare drum",
-                 'p' : "Unknown",
+                 'p' : "Tabla",
                  'q' : "Unknown",
                  'r' : "Metal",
                  's' : "Shaker",
@@ -117,49 +117,17 @@ class BufferManager:
 
             for char in alpha:
 
-                if folder == 'upper':
+                if folder == "upper":
 
                     char = char.upper()
                 
-                path = join(root, char, folder)
-
-                # Start with lower case
+                path = join(root, char.lower(), folder)
 
                 self.symbols[char] = BufChar(char)
 
                 if os.path.isdir(path):
-                    try:
-                        for f in sorted(os.listdir(path)):
-
-                            try:
-
-                                snd = wave.open(join(path, f))
-                                numChannels = snd.getnchannels()
-                                snd.close()
-
-                            except:
-
-                                numChannels = 2
-
-                            self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
-                            self.buffers[bufnum] = self.symbols[char][-1]
-
-                            bufnum += 1
-
-                    except:
-                        pass
-
-        # Go through symbols
-
-        for char in nonalpha:
-
-            self.symbols[char] = BufChar(char)
-
-            folder = join(root, "_", nonalpha[char])
-
-            if (os.path.isdir(folder)):
-                try:
-                    for f in sorted(os.listdir(folder)):
+                
+                    for f in sorted(os.listdir(path)):
 
                         try:
 
@@ -167,17 +135,41 @@ class BufferManager:
                             numChannels = snd.getnchannels()
                             snd.close()
 
-                        except:
+                        except wave.Error as e:
 
-                            numChannels = 2
+                            numChannels = 1
 
-                        self.symbols[char].addbuffer(join(folder, f), bufnum, numChannels)
+                        self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
                         self.buffers[bufnum] = self.symbols[char][-1]
 
                         bufnum += 1
 
-                except Exception as e:
-                    print char, e
+        # Go through symbols
+
+        for char in nonalpha:
+
+            self.symbols[char] = BufChar(char)
+
+            path = join(root, "_", nonalpha[char])
+
+            if (os.path.isdir(path)):
+        
+                for f in sorted(os.listdir(path)):
+
+                    try:
+
+                        snd = wave.open(join(path, f))
+                        numChannels = snd.getnchannels()
+                        snd.close()
+
+                    except wave.Error:
+
+                        numChannels = 1
+
+                    self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
+                    self.buffers[bufnum] = self.symbols[char][-1]
+
+                    bufnum += 1
 
         # Define empty buffer
         self.nil = BufChar(None)

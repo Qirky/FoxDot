@@ -418,7 +418,7 @@ class Player(Repeatable):
         # Schedule the next event
 
         self.event_index = self.event_index + dur
-        
+
         self.metro.schedule(self, self.event_index, kwargs={})
 
         # Change internal marker
@@ -656,6 +656,8 @@ class Player(Repeatable):
             except:
 
                 WarningMsg("Invalid degree / octave arguments for frequency calculation, reset to default")
+
+                print now['degree'], modi(now['degree'], i)
 
                 raise
 
@@ -1057,6 +1059,12 @@ class Player(Repeatable):
 
                 if delay > 0:
 
+                    # Sometimes there are race conditions, so make sure delay is just one value
+
+                    while hasattr(delay, "__len__"):
+
+                        delay = delay[i]
+
                     if (delay, osc_msg, effects) not in delayed_messages:
 
                         self.metro.schedule(send_delay(self, synthdef, osc_msg, effects), self.event_index + delay)
@@ -1229,7 +1237,6 @@ class Player(Repeatable):
             self._replace_string(PlayString(self.playstring).shuffle())
         else:
             self._replace_degree(self.attr['degree'].shuffle())
-        # self.degree = self.attr['degree'].shuffle()
         return self
 
     def mirror(self):
@@ -1237,7 +1244,6 @@ class Player(Repeatable):
             self._replace_string(PlayString(self.playstring).mirror())
         else:
             self._replace_degree(self.attr['degree'].mirror())
-        # self.degree = self.attr['degree'].mirror()
         return self
 
     def rotate(self, n=1):
@@ -1245,7 +1251,6 @@ class Player(Repeatable):
             self._replace_string(PlayString(self.playstring).rotate(n))
         else:
             self._replace_degree(self.attr['degree'].rotate(n))
-        # self.degree = self.attr['degree'].rotate(n)
         return self
 
     def _replace_string(self, new_string):

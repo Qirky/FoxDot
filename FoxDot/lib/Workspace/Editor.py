@@ -39,7 +39,7 @@ class workspace:
         # Configure FoxDot's namespace to include the editor
 
         CodeClass.namespace['FoxDot'] = self
-        #CodeClass.namespace['Player'].widget = self
+        CodeClass.namespace['Player'].widget = self
         #CodeClass.namespace['Ghost'].widget = self
 
         # Used for docstring prompt
@@ -54,7 +54,7 @@ class workspace:
         self.root.rowconfigure(1, weight=0) # Separator
         self.root.rowconfigure(2, weight=0) # Console
         self.root.grid_columnconfigure(0, weight=0) # line numbers
-        self.root.columnconfigure(1, weight=1) # Text boxes
+        self.root.grid_columnconfigure(1, weight=1) # Text boxes
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
         # --- Set icon
@@ -133,34 +133,45 @@ class workspace:
 
         self.prompt = TextPrompt(self.text)        
 
-        # Key bindings
+        # Key bindings (Use command key on Mac)
+
+        ctrl = "Command" if SYSTEM == MAC_OS else "Control"
         
         self.text.bind("<Return>",          self.newline)
-        self.text.bind("<BackSpace>",       self.delete)
-        self.text.bind("<Delete>",          self.delete2)
+        self.text.bind("<BackSpace>",       self.backspace)
+        self.text.bind("<Delete>",          self.delete)
         self.text.bind("<Tab>",             self.tab)
         self.text.bind("<Key>",             self.keypress)
-        
-        # Use command key on Mac (Temporary)
-        
-        ctrl = "Command" if SYSTEM == MAC_OS else "Control"
+
+        self.text.bind("<{}-BackSpace>".format(ctrl),       self.delete_word)
             
         self.text.bind("<{}-Return>".format(ctrl),          self.exec_block)
         self.text.bind("<Alt-Return>",                      self.exec_line)
+        
         self.text.bind("<Alt_L>",                           lambda event: "break")
+
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
+
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
         self.text.bind("<Alt-period>".format(ctrl),         self.releaseNodes)
+
+        self.text.bind("<{}-c>".format(ctrl),               self.edit_copy)
+        self.text.bind("<{}-x>".format(ctrl),               self.edit_cut)
         self.text.bind("<{}-v>".format(ctrl),               self.edit_paste)
+
         self.text.bind("<{}-bracketright>".format(ctrl),    self.indent)
         self.text.bind("<{}-bracketleft>".format(ctrl),     self.unindent)
+
         self.text.bind("<{}-equal>".format(ctrl),           self.zoom_in)
         self.text.bind("<{}-minus>".format(ctrl),           self.zoom_out)
+
         self.text.bind("<{}-z>".format(ctrl),               self.undo)
         self.text.bind("<{}-y>".format(ctrl),               self.redo)
+
         self.text.bind("<{}-s>".format(ctrl),               self.save)
         self.text.bind("<{}-o>".format(ctrl),               self.openfile)
         self.text.bind("<{}-n>".format(ctrl),               self.newfile)
+
         self.text.bind("<{}-m>".format(ctrl),               self.toggle_menu)
 
         # Change ctrl+h on Mac (is used to close)
@@ -210,6 +221,7 @@ class workspace:
         self.console = console(self, self.default_font)
         self.console_visible = True
         sys.stdout = self.console
+        self.text.bind("<Button-1>", lambda e: self.console.canvas.select_clear())
 
         # Store original location of cursor
         self.origin = "origin"
@@ -218,8 +230,10 @@ class workspace:
 
         # Say Hello to the user
 
-        print "Welcome to FoxDot! Press Ctrl+{} for help.".format(self.help_key)
-        print "-----------------------------------------"
+        hello = "Welcome to FoxDot! Press Ctrl+{} for help.".format(self.help_key)
+
+        print hello
+        print "-" * len(hello)
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
@@ -657,7 +671,7 @@ class workspace:
     # Deletion
     #---------
 
-    def delete(self, event=None, insert=INSERT):
+    def backspace(self, event=None, insert=INSERT):
         """ Deletes a character or selected area """
         # If there is a selected area, delete that
 
@@ -710,7 +724,7 @@ class workspace:
 
         return "break"
 
-    def delete2(self, event=None, insert=INSERT):
+    def delete(self, event=None, insert=INSERT):
         """ Delete the next character """
 
         if not self.delete_selection():
@@ -723,13 +737,57 @@ class workspace:
 
         return "break"
 
+    def delete_word(self, event):
+        """ Deletes the preceeding text to the last whitespace or '.' """
+
+        if not self.delete_selection():
+
+            end = self.text.index(INSERT)
+
+            row, col = index(end)
+
+            # If the col is 0, set the index to the end of the previous row (unless first row)
+
+            if row == 0 and col == 0:
+
+                return
+
+            elif row > 0 and col == 0:
+
+                row, col = index(self.text.index("%d.end" % (row - 1)))
+
+                end = index(row, col)                
+
+            # If the left char is whitespace, delete that AND the next word
+
+            start = None
+
+            while col > 0:
+
+                start = index(row, col)
+
+                char = self.text.get(start)
+
+                if char in " \t.(),[]{}":
+
+                    start = index(row, col + 1)
+                    break
+
+                col -= 1
+
+            self.text.delete(start, end)
+
+        self.update(event)
+
+        execute.update_line_numbers(self.text)
+        
+
     def delete_selection(self):
         """ If an area is selected, it is deleted and returns True """
         try:
             text = self.text.get(SEL_FIRST, SEL_LAST)
             a, b = self.text.index(SEL_FIRST), self.text.index(SEL_LAST)
             self.text.delete(SEL_FIRST, SEL_LAST)
-            self.undo_stack.append_delete(text, a, b)
             return True        
         except:
             return False

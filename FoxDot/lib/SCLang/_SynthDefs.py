@@ -215,6 +215,15 @@ twang.osc = LPF.ar(Impulse.ar([twang.freq, twang.freq + 2], 0.1), 4000)
 twang.osc = Env.perc() * CombL.ar(twang.osc, delaytime=twang.rate/(twang.freq * 8), maxdelaytime=0.25);
 twang.add()
 
+karp = SynthDef("karp")
+karp.amp = karp.amp * 0.5
+karp.osc = LFNoise0.ar(400 + (400 * karp.rate), karp.amp)
+karp.osc = karp.osc * XLine.ar(1, 0.000001, karp.sus * 0.1)
+karp.freq = (265 / (karp.freq * 0.666)) * 0.005
+karp.osc = CombL.ar(karp.osc, delaytime=karp.freq, maxdelaytime=2)
+karp.env = Env.ramp()
+karp.add()
+
 arpy = SynthDef("arpy")
 arpy.freq = arpy.freq / 2
 arpy.amp  = arpy.amp * 2

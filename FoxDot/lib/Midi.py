@@ -12,9 +12,9 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     # Force float
     try:
         degree = float(degree)
-    except Exception as e:
+    except TypeError as e:
         print degree, type(degree)
-        raise Exception(e)
+        raise TypeError(e)
 
     # Floor val
     lo = int(degree)

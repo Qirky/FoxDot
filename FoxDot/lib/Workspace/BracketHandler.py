@@ -81,29 +81,47 @@ class BracketHandler:
 
             coords = self.find_starting_bracket(line, column, event.char)
 
-            new_col = column + 1
+            new_line, new_col = line, column + 1
+
+            # Assume we are adding a new bracket
 
             adding_bracket = True
 
-            while next_char == event.char:
+            # Get index of the end of the buffer
 
-                coords_ = self.find_starting_bracket(line, new_col, event.char, offset=0)
+            end_line, end_col = index(self.text.index(END))
 
-                # If there is a closing brackets
+            while (new_line, new_col) != (end_line, end_col):
 
-                if coords_ is None:
+                # If we find a closing bracket,  find it's pair
 
-                    adding_bracket = False
+                next_char = self.text.get(index(new_line, new_col))
 
-                    break
+                if next_char == event.char:
+
+                    coords_ = self.find_starting_bracket(new_line, new_col, event.char, offset=0)
+
+                    # If there is a closing brackets
+
+                    if coords_ is None:
+
+                        adding_bracket = False
+
+                        break
+
+                    else:
+
+                        adding_bracket = True
+
+                if index(new_line, new_col) == self.text.index(index(new_line, "end")):
+                    
+                    new_line += 1
+                    new_col   = 0
 
                 else:
 
-                    adding_bracket = True
-
-                new_col += 1
-                next_char = self.text.get(index(line, new_col))                
-
+                    new_col += 1
+                
             if not adding_bracket:
 
                 self.text.delete(index(line, column+1))
@@ -126,7 +144,7 @@ class BracketHandler:
 
                 # Remove bracket highlight after 0.2 sec?
 
-                # self.text.after(200, lambda:  self.text.tag_delete("tag_open_brackets"))
+                # self.text.after(200, lambda: self.text.tag_delete("tag_open_brackets"))
 
         return ret
 
