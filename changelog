@@ -1,3 +1,15 @@
+### v0.2.9 fixes and updates
+
+- Improved automatic bracket handling and formatting
+- Colour scheme update
+- "Upper-case" samples now read properly
+- `cycle` argument added to the `.every()` player method to denote the cycle length of which to execute the specified method, e.g.
+
+```
+# Shuffles the samples on the 5th beat of each 8 beat cycle
+bd >> play("x-o-").every(5, 'shuffle', cycle=8)
+```
+
 ### v0.2.8 fixes and updates
 
 - Minor bug fixes

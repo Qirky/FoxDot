@@ -1,14 +1,19 @@
-FoxDot - Live Coding with Python v0.2.8
+FoxDot - Live Coding with Python v0.2.9
 =======================================
 
-*FoxDot is a pre-processed Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!*
+FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.2.8 fixes and updates
+### v0.2.9 fixes and updates
 
-- Minor bug fixes
 - Improved automatic bracket handling and formatting
-- Console is now resizable
-- Scale and root can be assigned using the equals operator e.g. `Scale.default = "minor"` and `Root.default = var([0,4])`
+- Colour scheme update
+- "Upper-case" samples now read properly
+- `cycle` argument added to the `.every()` player method to denote the cycle length of which to execute the specified method, e.g.
+
+```
+# Shuffles the samples on the 5th beat of each 8 beat cycle
+bd >> play("x-o-").every(5, 'shuffle', cycle=8)
+```
 
 See `docs/changelog` for more
 
@@ -146,7 +151,7 @@ rate - Variable keyword used for misc. changes to a signal. E.g. Playback rate o
 
 verb - The dry/wet mix of reverb; this should be a value between 0 and 1 (defalts to 0.25)
 
-room - Room size for reverb; this should be a value between 0 and 1 (defaults, to 0.3)
+room - Room size for reverb; this should be a value between 0 and 1 (defaults, to 0)
 
 chop -'Chops' the signal into smaller chunks (defaults to 0)
 
