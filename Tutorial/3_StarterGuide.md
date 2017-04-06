@@ -19,7 +19,7 @@ Change the value of SUPERCOLLIDER to the directory where SuperCollider is instal
 Install the UbuntuMono-R.ttf font, or change the FONT value in the configuration file
 Finally, run main.py (found in the FoxDot-master folder you've just extracted) and you're good to go!
 
-2. Programming with Python and Sound in SuperCollider
+## 2. Programming with Python and Sound in SuperCollider
 
 Python is an object-oriented programming language that focusses on flexibility and readability. It also contains a large library of functions and serves a large user base. So it's about time we were about to live code music with it.
 
@@ -37,7 +37,8 @@ Now try something that spans multiple lines:
 for n in range(10):
     sq = n*n
     print n, sq 
-3. Player Objects
+
+## 3. Player Objects
 
 It is, in fact, possible to create SuperCollider SynthDefs using FoxDot, but that's outside of the scope of the workshop today - don't hesitate to ask if you'd like to more though. To have a look at the existing (but quite small, unfortunately) library of FoxDot SynthDefs, just execute:
 
@@ -74,7 +75,8 @@ hh >> play("---(-=)", pan=0.5)
 Characters in round brackets are alternated in each loop (know as lacing) such that the above player, 'hh', would be writtern literally as hh >> play('-------=') which save you a lot of typing! Putting characters in square brackets will play them twice as fast and can be put in round brackets as if they were one character themselves. Try it out:
 
 d1 >> play("x[--]o(=[-o])")
-4. Patterns
+
+## 4. Patterns
 
 Player Objects use Python lists, known more commonly as arrays in other languages, to sequence themselves. You've already used these previously, but they aren't exactly flexible for manipulation. For example, try multiplying a list by two like so:
 
@@ -118,7 +120,8 @@ george >> pluck(PRange(5) | PRange(5,0,-1), scale=Scale.default.pentatonic)
 The PTri class does this for you:
 
 george >> pluck(PTri(5), scale=Scale.default.pentatonic)
-5. TimeVars
+
+## 5. TimeVars
 
 A TimeVar is an abbreviation of "Time Dependent Variable" and is a key feature of FoxDot. A TimeVar has a series of values that it changes between after a pre-defined number of beats and is created using a var object with the syntax var([list_of_values],[list_of_durations]). Example:
 
