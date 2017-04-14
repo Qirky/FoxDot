@@ -865,28 +865,18 @@ class Player(Repeatable):
 
         # Combine attribute and modifier values
 
-        if self.synthdef == SamplePlayer and attr == "degree":
+        if not (self.synthdef == SamplePlayer and attr == "degree"):
 
-            # Don't bother trying to add values to a play string...?
-
-            pass
-
-        else:
+            # Don't bother trying to add values to a play string...
 
             try:
-
-    ##            if attr == "dur" and type(attr_value) == rest:
-    ##
-    ##                value = rest(attr_value + modf_value)
-    ##
-    ##            else:
                 
-                value = attr_value + modf_value
+                attr_value = attr_value + modf_value
 
             except TypeError:
 
                 pass
-
+            
         return attr_value
 
     def get_event(self):
@@ -1183,7 +1173,10 @@ class Player(Repeatable):
 
                         if kwargs.get("send_now", False):
 
-                            self.server.client.send(compiled_msg)
+                            # If send_now is True, then send is being called from somewhere else and so
+                            # the the osc message is added to the immediate block
+
+                            self.metro.current_block.osc_messages.append(compiled_msg)
 
                         else:
 

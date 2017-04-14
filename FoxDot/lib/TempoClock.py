@@ -38,6 +38,7 @@ class TempoClock:
 
         # Create the queue
         self.queue = Queue()
+        self.current_block = None
 
         # Don't start yet...
         self.ticking = False
@@ -46,8 +47,8 @@ class TempoClock:
         self.midi_clock = None
 
         # Can be configured
-        self.latency = 0.02 
-        self.sleep_time = 0.00025
+        self.latency = 0.1
+        self.sleep_time = 0.001
 
         # Debug
         self.debugging = False
@@ -198,9 +199,9 @@ class TempoClock:
 
                         print("Late: {}".format(delta - self.latency))
 
-                block = self.queue.pop()
+                self.current_block = self.queue.pop()
 
-                threading.Thread(target=self.__run_block, args=(block,)).start()
+                threading.Thread(target=self.__run_block, args=(self.current_block,)).start()
 
             if self.midi_clock is not None:
 
