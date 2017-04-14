@@ -10,6 +10,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - Dubstep samples added to "K", "O", "M" and "V" characters. These are louder than most other audio samples. 
 - Sample banks re-arranged. Use `print Samples` for more information.
 - Sample Player argument, `scrub` removed. You can now use `slide`/`slidefrom` and `vib` as you would do with a normal Player object to manipulate playback rate.
+- Added `rtmidi` support for midi in. Clock's can sync tempo with a midi clock using `Clock.sync_to_midi()`.
 - `Pattern` class now has a `layer` method that takes a name of a `Pattern` method as its first argument and then arguments and keyword arguments for that method and creates a pattern of `PGroups` with their values zipped together.
 
 ```python
