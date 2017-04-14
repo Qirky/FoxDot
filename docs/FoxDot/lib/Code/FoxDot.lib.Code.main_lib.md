@@ -34,7 +34,7 @@ Takes a string of FoxDot code and executes as Python
 
 ## Functions
 
-### `WarningMsg(text)`
+### `WarningMsg(*text)`
 
 None
 

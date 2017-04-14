@@ -6,7 +6,7 @@ PORT2=57120
 FONT='Consolas'
 SUPERCOLLIDER=""
 BOOT_ON_STARTUP=False
-SC3PLUGINS=False
+SC3PLUGINS=True
 MAX_CHANNELS=2
 
 plaintext='#ffffff'

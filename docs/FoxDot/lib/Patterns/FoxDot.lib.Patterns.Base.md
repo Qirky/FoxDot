@@ -49,6 +49,10 @@ Returns true if the pattern contains a nest
 
 P.flat() -> un-nested pattern 
 
+##### `layer(self, method, *args, **kwargs)`
+
+Zips a pattern with a modified version of itself 
+
 ##### `loop(self, n)`
 
 Repeats this pattern n times 
@@ -56,6 +60,10 @@ Repeats this pattern n times
 ##### `make(self)`
 
 This method automatically laces and groups the data 
+
+##### `merge(self, value)`
+
+Merge values into one PGroup 
 
 ##### `pipe(self, pattern)`
 
@@ -124,6 +132,10 @@ P.flat() -> un-nested pattern
 
 Is called by __getitem__ 
 
+##### `layer(self, method, *args, **kwargs)`
+
+Zips a pattern with a modified version of itself 
+
 ##### `loop(self, n)`
 
 Repeats this pattern n times 
@@ -191,6 +203,10 @@ Returns true if the pattern contains a nest
 
 P.flat() -> un-nested pattern 
 
+##### `layer(self, method, *args, **kwargs)`
+
+Zips a pattern with a modified version of itself 
+
 ##### `loop(self, n)`
 
 Repeats this pattern n times 
@@ -255,6 +271,10 @@ Returns true if the pattern contains a nest
 
 P.flat() -> un-nested pattern 
 
+##### `layer(self, method, *args, **kwargs)`
+
+Zips a pattern with a modified version of itself 
+
 ##### `loop(self, n)`
 
 Repeats this pattern n times 
@@ -262,6 +282,10 @@ Repeats this pattern n times
 ##### `make(self)`
 
 This method automatically laces and groups the data 
+
+##### `merge(self, value)`
+
+Merge values into one PGroup 
 
 ##### `pipe(self, pattern)`
 
@@ -322,6 +346,10 @@ Returns true if the pattern contains a nest
 
 P.flat() -> un-nested pattern 
 
+##### `layer(self, method, *args, **kwargs)`
+
+Zips a pattern with a modified version of itself 
+
 ##### `loop(self, n)`
 
 Repeats this pattern n times 
@@ -329,6 +357,10 @@ Repeats this pattern n times
 ##### `make(self)`
 
 This method automatically laces and groups the data 
+
+##### `merge(self, value)`
+
+Merge values into one PGroup 
 
 ##### `pipe(self, pattern)`
 
@@ -404,6 +436,10 @@ P.flat() -> un-nested pattern
 ##### `getitem(self, key)`
 
 Is called by __getitem__ 
+
+##### `layer(self, method, *args, **kwargs)`
+
+Zips a pattern with a modified version of itself 
 
 ##### `loop(self, n)`
 

@@ -70,6 +70,8 @@ None
 
 #### `DelayN = DelayN`
 
+#### `Dust = Dust`
+
 #### `Formant = Formant`
 
 #### `FreeVerb = FreeVerb`

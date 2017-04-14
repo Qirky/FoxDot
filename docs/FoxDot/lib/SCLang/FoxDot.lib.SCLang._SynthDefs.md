@@ -1,4 +1,4 @@
-# `FoxDot.lib.SCLang.Definitions`
+# `FoxDot.lib.SCLang._SynthDefs`
 
 None
 

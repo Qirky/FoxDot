@@ -15,7 +15,7 @@ Time-Dependent Variable Base Class
 
 ## Classes
 
-### `Pvar(self, values, dur=4)`
+### `Pvar(self, values, dur=None, **kwargs)`
 
 Pvar([pat1, pat2], durs) 
 
@@ -64,7 +64,21 @@ Returns the current beat value
 
 ##### `every(self, n, cmd, *args, **kwargs)`
 
-Every n beats, do self.cmd(args) 
+Every n beats, call a method (defined as a string) on the
+object and use the args and kwargs. To call the method
+every n-th beat of a timeframe, use the `cycle` keyword argument
+to specify that timeframe.
+
+```
+# Call the shuffle method every 4 beats
+
+p1.every(4, 'shuffle')
+
+# Call the stutter method on the 5th beat of every 8 beat cycle
+
+p1.every(5, 'stutter', 4, cycle=8)
+
+```
 
 ##### `flat(self)`
 
@@ -73,6 +87,10 @@ P.flat() -> un-nested pattern
 ##### `getitem(self, key)`
 
 Is called by __getitem__ 
+
+##### `layer(self, method, *args, **kwargs)`
+
+Zips a pattern with a modified version of itself 
 
 ##### `length(self)`
 
@@ -117,9 +135,60 @@ PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx"
 
 Updates the TimeVar with new values 
 
-##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
+---
 
-Every n beats, do self.cmd(args) 
+### `_continuous_var(self, *args, **kwargs)`
+
+
+
+#### Methods
+
+##### `__rshift__(self, other)`
+
+var >> var([0,1,2,3],[4,8])
+var >> ([0,1,2,3],[4,8])
+
+##### `after(self, n, cmd, *args, **kwargs)`
+
+Schedule self.cmd(args, kwargs) in n beats 
+
+##### `calculate(self, val)`
+
+Returns val as modified by its dependencies 
+
+##### `current_time(self, beat=None)`
+
+Returns the current beat value 
+
+##### `every(self, n, cmd, *args, **kwargs)`
+
+Every n beats, call a method (defined as a string) on the
+object and use the args and kwargs. To call the method
+every n-th beat of a timeframe, use the `cycle` keyword argument
+to specify that timeframe.
+
+```
+# Call the shuffle method every 4 beats
+
+p1.every(4, 'shuffle')
+
+# Call the stutter method on the 5th beat of every 8 beat cycle
+
+p1.every(5, 'stutter', 4, cycle=8)
+
+```
+
+##### `length(self)`
+
+Returns the duration of one full cycle in beats 
+
+##### `new(self, other)`
+
+Returns a new TimeVar object 
+
+##### `update(self, values, dur=None, **kwargs)`
+
+Updates the TimeVar with new values 
 
 ---
 
@@ -128,6 +197,61 @@ Every n beats, do self.cmd(args)
 Used in TimeVars to stay on certain values until re-evaluated 
 
 #### Methods
+
+---
+
+### `expvar(self, *args, **kwargs)`
+
+
+
+#### Methods
+
+##### `__rshift__(self, other)`
+
+var >> var([0,1,2,3],[4,8])
+var >> ([0,1,2,3],[4,8])
+
+##### `after(self, n, cmd, *args, **kwargs)`
+
+Schedule self.cmd(args, kwargs) in n beats 
+
+##### `calculate(self, val)`
+
+Returns val as modified by its dependencies 
+
+##### `current_time(self, beat=None)`
+
+Returns the current beat value 
+
+##### `every(self, n, cmd, *args, **kwargs)`
+
+Every n beats, call a method (defined as a string) on the
+object and use the args and kwargs. To call the method
+every n-th beat of a timeframe, use the `cycle` keyword argument
+to specify that timeframe.
+
+```
+# Call the shuffle method every 4 beats
+
+p1.every(4, 'shuffle')
+
+# Call the stutter method on the 5th beat of every 8 beat cycle
+
+p1.every(5, 'stutter', 4, cycle=8)
+
+```
+
+##### `length(self)`
+
+Returns the duration of one full cycle in beats 
+
+##### `new(self, other)`
+
+Returns a new TimeVar object 
+
+##### `update(self, values, dur=None, **kwargs)`
+
+Updates the TimeVar with new values 
 
 ---
 
@@ -156,7 +280,21 @@ Returns the current beat value
 
 ##### `every(self, n, cmd, *args, **kwargs)`
 
-Every n beats, do self.cmd(args) 
+Every n beats, call a method (defined as a string) on the
+object and use the args and kwargs. To call the method
+every n-th beat of a timeframe, use the `cycle` keyword argument
+to specify that timeframe.
+
+```
+# Call the shuffle method every 4 beats
+
+p1.every(4, 'shuffle')
+
+# Call the stutter method on the 5th beat of every 8 beat cycle
+
+p1.every(5, 'stutter', 4, cycle=8)
+
+```
 
 ##### `length(self)`
 
@@ -170,13 +308,9 @@ Returns a new TimeVar object
 
 Updates the TimeVar with new values 
 
-##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
-
-Every n beats, do self.cmd(args) 
-
 ---
 
-### `var(self, values, dur=4, **kwargs)`
+### `var(self, values, dur=None, **kwargs)`
 
 Var(values [,durs=[4]]) 
 
@@ -201,7 +335,21 @@ Returns the current beat value
 
 ##### `every(self, n, cmd, *args, **kwargs)`
 
-Every n beats, do self.cmd(args) 
+Every n beats, call a method (defined as a string) on the
+object and use the args and kwargs. To call the method
+every n-th beat of a timeframe, use the `cycle` keyword argument
+to specify that timeframe.
+
+```
+# Call the shuffle method every 4 beats
+
+p1.every(4, 'shuffle')
+
+# Call the stutter method on the 5th beat of every 8 beat cycle
+
+p1.every(5, 'stutter', 4, cycle=8)
+
+```
 
 ##### `length(self)`
 
@@ -214,10 +362,6 @@ Returns a new TimeVar object
 ##### `update(self, values, dur=None, **kwargs)`
 
 Updates the TimeVar with new values 
-
-##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
-
-Every n beats, do self.cmd(args) 
 
 ---
 

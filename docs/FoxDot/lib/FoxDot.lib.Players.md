@@ -89,7 +89,7 @@ There is a special case SynthDef object called `play` which allows you
 to play short audio files rather than specify pitches. In this case
 you use a string of characters as the first argument where each character
 refers to a different folder of audio files. You can see more information
-by evaluating `print BufferManager`. The following line of code creates
+by evaluating `print Samples`. The following line of code creates
 a basic drum beat:
 
 ```python
@@ -184,13 +184,27 @@ amount=0.5 weights the array to equal numbers
 
 ##### `every(self, n, cmd, *args, **kwargs)`
 
-Every n beats, do self.cmd(args) 
+Every n beats, call a method (defined as a string) on the
+object and use the args and kwargs. To call the method
+every n-th beat of a timeframe, use the `cycle` keyword argument
+to specify that timeframe.
+
+```
+# Call the shuffle method every 4 beats
+
+p1.every(4, 'shuffle')
+
+# Call the stutter method on the 5th beat of every 8 beat cycle
+
+p1.every(5, 'stutter', 4, cycle=8)
+
+```
 
 ##### `f(self, *data)`
 
 adds value to frequency modifier 
 
-##### `follow(self, lead, follow=True)`
+##### `follow(self, lead=False)`
 
 Takes a now object and then follows the notes 
 
@@ -204,7 +218,7 @@ Removes this object from the Clock and resets itself
 
 ##### `largest_attribute(self)`
 
-Returns the length of the largest nested tuple in the attr dict 
+Returns the length of the largest nested tuple in the current event dict 
 
 ##### `now(self, attr=degree, x=0)`
 
@@ -252,17 +266,17 @@ Adds a delay to a Synth Envelope
 Plays the current note n-1 times. You can specify some keywords,
 such as dur, sus, and rate. 
 
-##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
-
-Every n beats, do self.cmd(args) 
-
 ---
 
-### `PlayerKey(self, value=None, reference=None)`
+### `PlayerKey(self, value=None, reference=None, parent=None)`
 
 
 
 #### Methods
+
+##### `__nonzero__(self)`
+
+TODO - is this versatile? 
 
 ---
 

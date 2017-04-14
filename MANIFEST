@@ -61,6 +61,7 @@ FoxDot\osc\sceffects\makeSound.scd
 FoxDot\osc\sceffects\reverb.scd
 FoxDot\osc\sceffects\spinPan.scd
 FoxDot\osc\sceffects\trimLength.scd
+FoxDot\osc\scsyndef\ambi.scd
 FoxDot\osc\scsyndef\arpy.scd
 FoxDot\osc\scsyndef\bass.scd
 FoxDot\osc\scsyndef\bell.scd
@@ -76,9 +77,11 @@ FoxDot\osc\scsyndef\donk1.scd
 FoxDot\osc\scsyndef\donk2.scd
 FoxDot\osc\scsyndef\dub.scd
 FoxDot\osc\scsyndef\fuzz.scd
+FoxDot\osc\scsyndef\glass.scd
 FoxDot\osc\scsyndef\growl.scd
 FoxDot\osc\scsyndef\karp.scd
 FoxDot\osc\scsyndef\klank.scd
+FoxDot\osc\scsyndef\lazer.scd
 FoxDot\osc\scsyndef\marimba.scd
 FoxDot\osc\scsyndef\noise.scd
 FoxDot\osc\scsyndef\nylon.scd
@@ -95,89 +98,168 @@ FoxDot\osc\scsyndef\saw.scd
 FoxDot\osc\scsyndef\scatter.scd
 FoxDot\osc\scsyndef\scrap.scd
 FoxDot\osc\scsyndef\scratch.scd
+FoxDot\osc\scsyndef\siren.scd
 FoxDot\osc\scsyndef\snick.scd
 FoxDot\osc\scsyndef\soft.scd
 FoxDot\osc\scsyndef\soprano.scd
 FoxDot\osc\scsyndef\spark.scd
+FoxDot\osc\scsyndef\spick.scd
 FoxDot\osc\scsyndef\squish.scd
+FoxDot\osc\scsyndef\swell.scd
+FoxDot\osc\scsyndef\test.scd
 FoxDot\osc\scsyndef\twang.scd
 FoxDot\osc\scsyndef\varsaw.scd
 FoxDot\osc\scsyndef\viola.scd
 FoxDot\osc\scsyndef\zap.scd
+FoxDot\snd\_\1\one1.wav
+FoxDot\snd\_\1\one2.wav
+FoxDot\snd\_\2\two1.wav
+FoxDot\snd\_\2\two2.wav
+FoxDot\snd\_\3\three1.wav
+FoxDot\snd\_\3\three2.wav
+FoxDot\snd\_\4\four1.wav
+FoxDot\snd\_\4\four2.wav
+FoxDot\snd\_\ampersand\2_triangle.wav
 FoxDot\snd\_\asterix\cp0.wav
 FoxDot\snd\_\asterix\cp1.wav
 FoxDot\snd\_\asterix\cp2.wav
-FoxDot\snd\_\at\0.wav
-FoxDot\snd\_\backslash\0.wav
+FoxDot\snd\_\at\0_robot.wav
+FoxDot\snd\_\at\1_robot.wav
+FoxDot\snd\_\backslash\0_lazer.wav
+FoxDot\snd\_\backslash\1_lazer.wav
+FoxDot\snd\_\backslash\2_lazer.wav
 FoxDot\snd\_\bar\0.wav
 FoxDot\snd\_\caret\0.wav
 FoxDot\snd\_\colon\0.wav
 FoxDot\snd\_\dollar\0.wav
-FoxDot\snd\_\equals\hho0.wav
-FoxDot\snd\_\equals\hho1.wav
-FoxDot\snd\_\equals\hho2.wav
+FoxDot\snd\_\equals\0_hihat_open.wav
+FoxDot\snd\_\equals\1_hihat_open.wav
+FoxDot\snd\_\equals\3_hihat_open.wav
+FoxDot\snd\_\equals\4_hihat_open.wav
+FoxDot\snd\_\equals\5_hihat_open.wav
+FoxDot\snd\_\equals\9_hihat_open.wav
 FoxDot\snd\_\exclamation\0.wav
 FoxDot\snd\_\forwardslash\0_cymrev.wav
+FoxDot\snd\_\forwardslash\1_rev.wav
 FoxDot\snd\_\greaterthan\0.wav
 FoxDot\snd\_\hash\0_crash.wav
 FoxDot\snd\_\hash\1_crash.wav
 FoxDot\snd\_\hash\2_cymbal.wav
-FoxDot\snd\_\hyphen\hh0.wav
-FoxDot\snd\_\hyphen\hh1.wav
-FoxDot\snd\_\hyphen\hh2.wav
+FoxDot\snd\_\hyphen\0_hihat_closed.wav
+FoxDot\snd\_\hyphen\1_hihat_closed.wav
+FoxDot\snd\_\hyphen\2_hihat_closed.wav
+FoxDot\snd\_\hyphen\3_hihat_closed.wav
+FoxDot\snd\_\hyphen\4_hihat_closed.wav
+FoxDot\snd\_\hyphen\9_hihat_closed.wav
 FoxDot\snd\_\lessthan\0.wav
 FoxDot\snd\_\percent\0.wav
-FoxDot\snd\_\plus\cl0.wav
-FoxDot\snd\_\plus\cl1.wav
+FoxDot\snd\_\plus\0_rim.wav
+FoxDot\snd\_\plus\1_rim.wav
+FoxDot\snd\_\plus\2_rim.wav
 FoxDot\snd\_\question\0.wav
-FoxDot\snd\_\tilde\0.wav
-FoxDot\snd\a\lower\jug_0.wav
-FoxDot\snd\a\lower\jug_1.wav
-FoxDot\snd\a\lower\jug_2.wav
-FoxDot\snd\a\lower\jug_3.wav
+FoxDot\snd\_\tilde\0_ride.wav
+FoxDot\snd\_\tilde\1_ride.wav
+FoxDot\snd\a\lower\gb_hihat (1).wav
+FoxDot\snd\a\lower\gb_hihat (2).wav
+FoxDot\snd\a\lower\gb_hihat (3).wav
+FoxDot\snd\a\lower\gb_hihat (4).wav
+FoxDot\snd\a\lower\gb_hihat (5).wav
+FoxDot\snd\a\lower\gb_hihat (6).wav
+FoxDot\snd\a\lower\gb_hihat (7).wav
 FoxDot\snd\a\upper\sword_1.wav
 FoxDot\snd\a\upper\sword_2.wav
-FoxDot\snd\b\lower\0.wav
+FoxDot\snd\b\lower\gb_kick (1).wav
+FoxDot\snd\b\lower\gb_kick (2).wav
+FoxDot\snd\b\lower\gb_kick (3).wav
+FoxDot\snd\b\lower\gb_kick (4).wav
+FoxDot\snd\b\lower\gb_kick (5).wav
+FoxDot\snd\b\lower\gb_kick (6).wav
+FoxDot\snd\b\lower\gb_kick (7).wav
 FoxDot\snd\b\upper\0.wav
 FoxDot\snd\c\lower\plastic_0.wav
 FoxDot\snd\c\lower\plastic_1.wav
-FoxDot\snd\c\upper\0.wav
+FoxDot\snd\c\upper\0_Choral.wav
 FoxDot\snd\d\lower\0.wav
 FoxDot\snd\d\upper\0.wav
-FoxDot\snd\e\lower\0.wav
-FoxDot\snd\e\upper\0.wav
+FoxDot\snd\e\lower\0_cb.wav
+FoxDot\snd\e\lower\1_cb.wav
+FoxDot\snd\e\upper\E1.wav
+FoxDot\snd\e\upper\E2.wav
 FoxDot\snd\f\lower\0.wav
 FoxDot\snd\f\upper\0.wav
 FoxDot\snd\g\lower\0.wav
+FoxDot\snd\g\upper\0_Stab.wav
+FoxDot\snd\g\upper\G1.wav
+FoxDot\snd\g\upper\G2.wav
+FoxDot\snd\g\upper\G3.wav
 FoxDot\snd\h\lower\0.wav
 FoxDot\snd\h\upper\0.wav
-FoxDot\snd\i\lower\sd_high0.wav
-FoxDot\snd\i\lower\sd_high1.WAV
-FoxDot\snd\i\lower\sd_high2.wav
-FoxDot\snd\i\upper\0.wav
-FoxDot\snd\j\lower\glass_0.wav
-FoxDot\snd\j\lower\glass_9.wav
-FoxDot\snd\j\upper\0.wav
+FoxDot\snd\i\lower\0_jungle_snare.wav
+FoxDot\snd\i\lower\1_jungle_snare.wav
+FoxDot\snd\i\lower\2_jungle_snare.wav
+FoxDot\snd\i\lower\3_jungle_snare.wav
+FoxDot\snd\i\upper\0_rock_snare.wav
+FoxDot\snd\i\upper\1_rock_snare.wav
+FoxDot\snd\j\lower\jug_0.wav
+FoxDot\snd\j\lower\jug_1.wav
+FoxDot\snd\j\lower\jug_2.wav
+FoxDot\snd\j\lower\jug_3.wav
+FoxDot\snd\j\upper\0_sweep.wav
 FoxDot\snd\k\lower\0.wav
+FoxDot\snd\k\lower\K4.wav
+FoxDot\snd\k\lower\k7.wav
+FoxDot\snd\k\upper\K1.wav
+FoxDot\snd\k\upper\K2.wav
+FoxDot\snd\k\upper\K3.wav
+FoxDot\snd\k\upper\K5.wav
+FoxDot\snd\k\upper\K6.wav
 FoxDot\snd\l\lower\knock_0.wav
 FoxDot\snd\l\lower\knock_1.wav
 FoxDot\snd\l\lower\knock_2.wav
 FoxDot\snd\l\lower\knock_3.wav
-FoxDot\snd\m\lower\0.wav
-FoxDot\snd\n\lower\01-tabla_ke1.wav
-FoxDot\snd\n\lower\02-tabla_ke2.wav
-FoxDot\snd\n\lower\03-tabla_ke3.wav
-FoxDot\snd\n\upper\04-tabla_na.wav
-FoxDot\snd\n\upper\05-tabla_na_o.wav
-FoxDot\snd\n\upper\06-tabla_na_s.wav
+FoxDot\snd\l\upper\0_bleep.wav
+FoxDot\snd\l\upper\0_long_bleep.wav
+FoxDot\snd\m\lower\0_Tom.wav
+FoxDot\snd\m\lower\1_Tom-Electro.wav
+FoxDot\snd\m\lower\2_Tom-Distort.wav
+FoxDot\snd\m\lower\3_Tom-909.wav
+FoxDot\snd\m\lower\4_Tom-lazer.wav
+FoxDot\snd\m\upper\11_bass_low.wav
+FoxDot\snd\m\upper\12_bass_low.wav
+FoxDot\snd\m\upper\13_bass_low.wav
+FoxDot\snd\n\lower\gb_noise (1).wav
+FoxDot\snd\n\lower\gb_noise (2).wav
+FoxDot\snd\n\lower\gb_noise (3).wav
+FoxDot\snd\n\lower\gb_noise (4).wav
+FoxDot\snd\n\lower\gb_noise (5).wav
+FoxDot\snd\n\lower\gb_noise (6).wav
+FoxDot\snd\n\lower\gb_noise (7).wav
+FoxDot\snd\n\upper\perc (1).wav
+FoxDot\snd\n\upper\perc (10).wav
+FoxDot\snd\n\upper\perc (11).wav
+FoxDot\snd\n\upper\perc (12).wav
+FoxDot\snd\n\upper\perc (2).wav
+FoxDot\snd\n\upper\perc (3).wav
+FoxDot\snd\n\upper\perc (4).wav
+FoxDot\snd\n\upper\perc (5).wav
+FoxDot\snd\n\upper\perc (6).wav
+FoxDot\snd\n\upper\perc (7).wav
+FoxDot\snd\n\upper\perc (8).wav
+FoxDot\snd\n\upper\perc (9).wav
 FoxDot\snd\o\lower\0_snare_drum.wav
 FoxDot\snd\o\lower\1_snare_dru.wav
 FoxDot\snd\o\lower\2_snare_drum.wav
-FoxDot\snd\o\lower\3_snare_drum.wav
-FoxDot\snd\o\lower\4_snare_drum.wav
-FoxDot\snd\o\upper\0_snare_drum.wav
-FoxDot\snd\o\upper\1_snare_drum.wav
-FoxDot\snd\o\upper\2_snare_drum.wav
+FoxDot\snd\o\lower\9_snare_drum.wav
+FoxDot\snd\o\upper\O (1).wav
+FoxDot\snd\o\upper\O (10).wav
+FoxDot\snd\o\upper\O (2).wav
+FoxDot\snd\o\upper\O (3).wav
+FoxDot\snd\o\upper\O (4).wav
+FoxDot\snd\o\upper\O (5).wav
+FoxDot\snd\o\upper\O (6).wav
+FoxDot\snd\o\upper\O (7).wav
+FoxDot\snd\o\upper\O (8).wav
+FoxDot\snd\o\upper\O (9).wav
 FoxDot\snd\p\lower\08-tabla_tas1.wav
 FoxDot\snd\p\lower\09-tabla_tas2.wav
 FoxDot\snd\p\lower\10-tabla_tas3.wav
@@ -189,42 +271,76 @@ FoxDot\snd\q\lower\11-tabla_te1.wav
 FoxDot\snd\q\lower\12-tabla_te2.wav
 FoxDot\snd\q\lower\13-tabla_te_m.wav
 FoxDot\snd\q\lower\14-tabla_te_ne.wav
-FoxDot\snd\q\upper\0.wav
-FoxDot\snd\r\lower\metal_1.wav
-FoxDot\snd\s\lower\sh0.wav
-FoxDot\snd\s\upper\sh0.wav
+FoxDot\snd\q\upper\04-tabla_na.wav
+FoxDot\snd\q\upper\05-tabla_na_o.wav
+FoxDot\snd\q\upper\06-tabla_na_s.wav
+FoxDot\snd\r\lower\0_metal.wav
+FoxDot\snd\r\lower\1_metal.wav
+FoxDot\snd\r\lower\2_metal.wav
+FoxDot\snd\r\lower\3_metal.aiff
+FoxDot\snd\r\upper\0_metallic.wav
+FoxDot\snd\r\upper\1_metallic.wav
+FoxDot\snd\r\upper\2_metallic.wav
+FoxDot\snd\r\upper\3_metallic.wav
+FoxDot\snd\r\upper\4_metallic.wav
+FoxDot\snd\s\lower\0_shaker.wav
+FoxDot\snd\s\lower\1_shaker.wav
+FoxDot\snd\s\lower\2_shaker.wav
+FoxDot\snd\s\upper\0_tamborine.wav
+FoxDot\snd\s\upper\1_tamborine.wav
 FoxDot\snd\t\lower\cb0.wav
 FoxDot\snd\t\lower\cb1.wav
 FoxDot\snd\t\upper\0.wav
 FoxDot\snd\u\lower\pan0.wav
 FoxDot\snd\u\lower\pan1.wav
 FoxDot\snd\u\lower\pan2.wav
-FoxDot\snd\v\lower\00_bass_low.wav
+FoxDot\snd\u\upper\0_misc.wav
+FoxDot\snd\u\upper\1_misc.wav
+FoxDot\snd\u\upper\2_misc.wav
+FoxDot\snd\u\upper\3_misc.wav
+FoxDot\snd\u\upper\4_misc.wav
 FoxDot\snd\v\lower\0_bass_low.wav
 FoxDot\snd\v\lower\1_bass_drum.wav
 FoxDot\snd\v\lower\1_bass_drum_low.wav
 FoxDot\snd\v\lower\1_bass_low.wav
 FoxDot\snd\v\lower\6_bass_drum_lo.wav
 FoxDot\snd\v\lower\9_bass_drum_lo.wav
-FoxDot\snd\v\upper\0_low_kick.wav
-FoxDot\snd\v\upper\1_low_kick.wav
-FoxDot\snd\w\lower\0_soft_kick.wav
-FoxDot\snd\w\lower\1_soft_kick.wav
-FoxDot\snd\w\lower\2_soft_kick.wav
-FoxDot\snd\w\lower\3_soft_kick.wav
-FoxDot\snd\w\upper\03-bd_boom.wav
+FoxDot\snd\v\upper\V (1).wav
+FoxDot\snd\v\upper\V (10).wav
+FoxDot\snd\v\upper\V (11).wav
+FoxDot\snd\v\upper\V (2).wav
+FoxDot\snd\v\upper\V (3).wav
+FoxDot\snd\v\upper\V (4).wav
+FoxDot\snd\v\upper\V (5).wav
+FoxDot\snd\v\upper\V (6).wav
+FoxDot\snd\v\upper\V (7).wav
+FoxDot\snd\v\upper\V (8).wav
+FoxDot\snd\v\upper\V (9).wav
+FoxDot\snd\w\lower\w1.wav
+FoxDot\snd\w\lower\w2.wav
+FoxDot\snd\w\lower\w3.wav
+FoxDot\snd\w\lower\w4.wav
+FoxDot\snd\w\upper\0_distortion.wav
+FoxDot\snd\w\upper\1_distortion.wav
 FoxDot\snd\x\lower\0_kick_drum.wav
 FoxDot\snd\x\lower\1_kick_drum.wav
 FoxDot\snd\x\lower\2_kick_drum.wav
 FoxDot\snd\x\lower\3_kick_drum.wav
 FoxDot\snd\x\lower\4_kick_drum.wav
+FoxDot\snd\x\lower\5_kick_drum.wav
 FoxDot\snd\x\upper\0_bass_drum.wav
 FoxDot\snd\x\upper\1_kick_drum.wav
 FoxDot\snd\x\upper\2_kick_drum_lo.wav
-FoxDot\snd\x\upper\3_kick_drum_hi.wav
-FoxDot\snd\x\upper\4_kick_drum.wav
-FoxDot\snd\y\lower\0.wav
-FoxDot\snd\y\upper\0.wav
+FoxDot\snd\y\lower\0_bleep.wav
+FoxDot\snd\y\lower\1_bleep.wav
+FoxDot\snd\y\lower\2_bleep.wav
+FoxDot\snd\y\lower\3_bleep.wav
+FoxDot\snd\y\upper\0_bleep_up.wav
+FoxDot\snd\y\upper\1_bleep_up.wav
+FoxDot\snd\y\upper\2_bleep_up.wav
+FoxDot\snd\y\upper\3_bleep_up.wav
 FoxDot\snd\z\lower\0_scratch.wav
-FoxDot\snd\z\lower\1_beep.wav
-FoxDot\snd\z\upper\0.wav
+FoxDot\snd\z\lower\1_scratch.wav
+FoxDot\snd\z\lower\2_scratch.wav
+FoxDot\snd\z\upper\0_beep.wav
+FoxDot\snd\z\upper\1_beep.wav

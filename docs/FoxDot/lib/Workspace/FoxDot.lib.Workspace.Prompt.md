@@ -1,10 +1,10 @@
-# `FoxDot.lib.Root`
+# `FoxDot.lib.Workspace.Prompt`
 
 None
 
 ## Classes
 
-### `Note(self, index)`
+### `TextPrompt(self, master)`
 
 
 
@@ -15,6 +15,4 @@ None
 ## Functions
 
 ## Data
-
-#### `default = 0`
 

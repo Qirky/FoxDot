@@ -1,8 +1,45 @@
 # `FoxDot.lib.Midi`
 
-Module sed for converting streams and frequencies 
+Module for converting streams and frequencies 
 
 ## Classes
+
+### `MIDIDeviceNotFound(self)`
+
+
+
+#### Methods
+
+---
+
+### `MidiIn(self, port_id=0)`
+
+
+
+#### Methods
+
+##### `__init__(self, port_id=0)`
+
+Class for listening for MIDI clock messages
+from a midi device 
+
+##### `close(self)`
+
+Closes the active port 
+
+##### `get_beat(self)`
+
+If a beat value has been set, return it, otherwise return None 
+
+---
+
+### `MidiOut(self)`
+
+
+
+#### Methods
+
+---
 
 ## Functions
 

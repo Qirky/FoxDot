@@ -67,6 +67,14 @@ None
 
 None
 
+### `get_expanded_len(data)`
+
+(0,(0,2)) returns 4. int returns 1 
+
+### `group_modi(pgroup, index)`
+
+Returns value from pgroup that modular indexes nested groups 
+
 ### `max_length(*patterns)`
 
 Returns the largest length pattern 

@@ -4,7 +4,7 @@ Repeat.py
 
 ## Classes
 
-### `MethodCall(self, parent, method, n, args=(), kwargs={})`
+### `MethodCall(self, parent, method, n, cycle=None, args=(), kwargs={})`
 
 Class to represent an object's method call that,
 when called, schedules itself in the future 
@@ -18,6 +18,11 @@ Proxy for parent object __call__
 ##### `isScheduled(self)`
 
 Returns True if this is in the Tempo Clock 
+
+##### `update(self, n, cycle, args=(), kwargs={})`
+
+Updates the values of the MethodCall. Re-adjusts
+the index if cycle has been changed 
 
 ---
 
@@ -33,11 +38,21 @@ Schedule self.cmd(args, kwargs) in n beats
 
 ##### `every(self, n, cmd, *args, **kwargs)`
 
-Every n beats, do self.cmd(args) 
+Every n beats, call a method (defined as a string) on the
+object and use the args and kwargs. To call the method
+every n-th beat of a timeframe, use the `cycle` keyword argument
+to specify that timeframe.
 
-##### `whenmod(self, mod, n, cmd, *args, **kwargs)`
+```
+# Call the shuffle method every 4 beats
 
-Every n beats, do self.cmd(args) 
+p1.every(4, 'shuffle')
+
+# Call the stutter method on the 5th beat of every 8 beat cycle
+
+p1.every(5, 'stutter', 4, cycle=8)
+
+```
 
 ---
 
@@ -54,6 +69,11 @@ Proxy for parent object __call__
 ##### `isScheduled(self)`
 
 Returns True if this is in the Tempo Clock 
+
+##### `update(self, n, cycle, args=(), kwargs={})`
+
+Updates the values of the MethodCall. Re-adjusts
+the index if cycle has been changed 
 
 ---
 
