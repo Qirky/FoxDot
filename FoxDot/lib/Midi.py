@@ -1,11 +1,12 @@
 """ Module for converting streams and frequencies """
-
-import rtmidi
-from rtmidi import midiconstants
-
-TIMING_CLOCK          = midiconstants.TIMING_CLOCK
-SONG_POSITION_POINTER = midiconstants.SONG_POSITION_POINTER
-SONG_START            = midiconstants.SONG_START
+try:
+    import rtmidi
+    from rtmidi import midiconstants
+    TIMING_CLOCK          = midiconstants.TIMING_CLOCK
+    SONG_POSITION_POINTER = midiconstants.SONG_POSITION_POINTER
+    SONG_START            = midiconstants.SONG_START
+except ImportError:
+    pass
 
 def miditofreq(midinote):
     """ Converts a midi number to frequency """
@@ -41,7 +42,13 @@ class MidiIn:
     def __init__(self, port_id=0):
         """ Class for listening for MIDI clock messages
             from a midi device """
-        self.device = rtmidi.MidiIn()
+        try:
+
+            self.device = rtmidi.MidiIn()
+
+        except NameError:
+
+            raise rtMidiNotFound
 
         self.available_ports = self.device.get_ports()
 
@@ -96,6 +103,10 @@ class MidiOut:
 class MIDIDeviceNotFound(Exception):
     def __str__(self):
         return self.__class__.__name__ + " Error"
+
+class rtMidiNotFound(Exception):
+    def __str__(self):
+        return self.__class__.__name__ + ": Module 'rtmidi' not found"
 
 
 if __name__ == "__main__":
