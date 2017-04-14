@@ -21,6 +21,8 @@ class SCLangClient(OSCClient):
 
 class SCLangServerManager:
 
+    metro = None
+
     def __init__(self, addr, osc_port, sclang_port):
 
         self.addr = addr
@@ -86,7 +88,7 @@ class SCLangServerManager:
         self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
 
-    def sendPlayerMessage(self, synthdef, packet, effects):
+    def sendPlayerMessage(self, synthdef, packet, effects, player=None):
         # Create a bundle
         bundle = OSCBundle()
 
@@ -102,24 +104,58 @@ class SCLangServerManager:
 
         # Make sure messages release themselves after 8 * the duration at max (temp)
         i = packet.index('sus') + 1
-        max_sus = packet[i] * 8
+        max_sus = float(packet[i] * 8)
 
         # Synth
         msg = OSCMessage("/s_new")
+
+        new_packet = []
+
+        for i in range(0, len(packet), 2):
+
+            try:
+
+                packet[i+1] = float(packet[i+1])
+
+            except TypeError as e:
+
+                print e
+                print "packet val is", packet[i], packet[i+1]
+                raise TypeError(e)
+                
         packet = [synthdef, this_node, 0, group_id, 'bus', this_bus] + packet
         msg.append( packet )
         bundle.append(msg)
 
         # Effects
         for fx in effects:
-            
-            # Get next node ID
-            this_node, last_node = self.nextnodeID(), this_node
 
-            msg = OSCMessage("/s_new")
-            packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + effects[fx]
-            msg.append(packet)
-            bundle.append(msg)
+            this_effect = effects[fx]
+
+            # effects should not have 0 values
+
+            nonzero = True
+
+            for i in range(0, len(this_effect), 2):
+
+                val = float(this_effect[i+1])
+
+                if val == 0:
+
+                    nonzero = False
+
+                else:
+
+                    this_effect[i+1] = val
+
+            if nonzero:
+
+                # Get next node ID
+                this_node, last_node = self.nextnodeID(), this_node
+                msg = OSCMessage("/s_new")
+                packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
+                msg.append(packet)
+                bundle.append(msg)
 
         # Finally, output sound through end node "makeSound"
         msg = OSCMessage("/s_new")
@@ -129,9 +165,19 @@ class SCLangServerManager:
         bundle.append(msg)
 
         # Send to SuperCollider
-        self.client.send( bundle )
-        return
-        
+
+        # Maybe check the time?
+##        if player:
+##            early = player.event_index - self.metro.now()
+##            if early < 0:
+##                print "late:", abs(early)
+##            else:
+##                print "early:", early, "latency:", self.metro.latency
+        #self.client.send( bundle )
+        #return
+        #if player:
+        #    pass#print player.char, player.event_index, player.queue_block
+        return bundle        
 
     def send(self, message):
         self.client.send(OSCMessage(message))

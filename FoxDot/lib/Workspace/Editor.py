@@ -39,7 +39,7 @@ class workspace:
         # Configure FoxDot's namespace to include the editor
 
         CodeClass.namespace['FoxDot'] = self
-        CodeClass.namespace['Player'].widget = self
+        #CodeClass.namespace['Player'].widget = self
         #CodeClass.namespace['Ghost'].widget = self
 
         # Used for docstring prompt
@@ -314,35 +314,43 @@ class workspace:
 
     def exec_block(self, event=None, insert=INSERT):
         """ Method to highlight block of code and execute """
+        try:
 
-        # Get start and end of the buffer
-        start, end = "1.0", self.text.index(END)
-        lastline   = int(end.split('.')[0]) + 1
+            # Evaluate selection
 
-        # Indicies of block to execute
-        block = [0,0]        
-        
-        # 1. Get position of cursor
-        cur_x, cur_y = index(self.text.index(insert))
-        
-        # 2. Go through line by line (back) and see what it's value is
-        
-        for line in range(cur_x, 0, -1):
-            if not self.text.get("%d.0" % line, "%d.end" % line).strip():
-                break
+            a = index(self.text.index(SEL_FIRST))[0]
+            b = index(self.text.index(SEL_LAST))[0] + 1
 
-        block[0] = line
+        except TclError:
 
-        # 3. Iterate forwards until we get two \n\n or index==END
-        for line in range(cur_x, lastline):
-            if not self.text.get("%d.0" % line, "%d.end" % line).strip():
-                break
+            # Get start and end of the buffer
+            start, end = "1.0", self.text.index(END)
+            lastline   = int(end.split('.')[0]) + 1
 
-        block[1] = line
+            # Indicies of block to execute
+            block = [0,0]        
+            
+            # 1. Get position of cursor
+            cur_x, cur_y = index(self.text.index(insert))
+            
+            # 2. Go through line by line (back) and see what it's value is
+            
+            for line in range(cur_x, 0, -1):
+                if not self.text.get("%d.0" % line, "%d.end" % line).strip():
+                    break
 
-        # Now we have the lines of code!
+            block[0] = line
 
-        a, b = block
+            # 3. Iterate forwards until we get two \n\n or index==END
+            for line in range(cur_x, lastline):
+                if not self.text.get("%d.0" % line, "%d.end" % line).strip():
+                    break
+
+            block[1] = line
+
+            # Now we have the lines of code!
+
+            a, b = block
         
         if a == b: b += 1
 

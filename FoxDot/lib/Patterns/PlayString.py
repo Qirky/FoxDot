@@ -95,7 +95,7 @@ class PlayString:
         return string % tuple(chars)
 
 
-class PlayGroup(list):
+class PlayGroup(tuple):
     def __init__(self, seq=[]):
         data = []
         for item in seq:
@@ -103,17 +103,28 @@ class PlayGroup(list):
                 data.extend(item)
             else:
                 data.append(item)
-        list.__init__(self, data)
+        tuple.__init__(self, data)
     def __repr__(self):
-        return "<" + list.__repr__(self)[1:-1] + ">"
+        return "<" + tuple.__repr__(self)[1:-1] + ">"
     def __len__(self):
         return 1
+    def __eq__(self, other):
+        # Can do "[xx]" == PlayGroup(x,x)
+        if type(other) == str:
+            if other[0] == "[" and other[-1] == "]":
+                new_data = other[1:-1]
+                if len(new_data) == len(self.data):
+                    return all([new_data[i] == self.data[i] for i in range(len(new_data))])
+        else:
+            return tuple.__eq__(self, other)
+        return False
+            
     def divide(self, value):
         for item in self:
             item.divide(value)
         return self
 
-class RandomPlayGroup:
+class RandomPlayGroup(object):
     def __init__(self, seq, dur=1):
         self.data = []
         self.dur  = dur
@@ -124,6 +135,8 @@ class RandomPlayGroup:
                 self.data.append(item)
     def now(self):
         return choice(self.data)
+    #def __iter__(self):
+    #    yield self.now()
     def __len__(self):
         return 1
     def __repr__(self):
@@ -145,6 +158,10 @@ class PCHAR:
         return self.char
     def __repr__(self):
         return repr(self.char)
+    def __eq__(self, other):
+        return str(self.char) == str(other)
+    def __ne__(self, other):
+        return str(self.char) != str(other)
     def get_dur(self):
         return self.dur
     def multiply(self, val):

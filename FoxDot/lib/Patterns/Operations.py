@@ -1,6 +1,5 @@
 from __future__ import division
 import Base
-import inspect
 
 """
     Module for key operations on Python lists or FoxDot Patterns
@@ -86,7 +85,7 @@ PPow2 = POperand(rPow)
 
 PGet = POperand(Get)
 
-# Pattern comparisons
+# Pattern comparisons -> need to maybe have a equals func?
 PEq = lambda a, b: (all([a[i]==b[i] for i in range(len(a))]) if len(a) == len(b) else False) if a.__class__ == b.__class__ else False
 PNe = lambda a, b: (any([a[i]!=b[i] for i in range(len(a))]) if len(a) == len(b) else True) if a.__class__ == b.__class__ else True
 
@@ -151,8 +150,28 @@ def modi(array, i, debug=0):
     """ Returns the modulo index i.e. modi([0,1,2],4) will return 1 """
     try:
         return array[i % len(array)]
-    except:        
+    except(TypeError, AttributeError, ZeroDivisionError): 
         return array
+
+def group_modi(pgroup, index):
+    """ Returns value from pgroup that modular indexes nested groups """
+    try:
+        return group_modi(pgroup[index % len(pgroup)], index // len(pgroup))
+    except(TypeError, AttributeError, ZeroDivisionError):
+        return pgroup
+
+def get_expanded_len(data):
+    """ (0,(0,2)) returns 4. int returns 1 """
+    l = []
+    try:
+        for item in data:
+            try:
+                l.append(len(item))
+            except(TypeError, AttributeError):
+                l.append(1)
+        return LCM(*l) * len(data)
+    except TypeError:
+        return 1
 
 def max_length(*patterns):
     """ Returns the largest length pattern """

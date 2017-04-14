@@ -124,7 +124,11 @@ class BracketHandler:
                 
             if not adding_bracket:
 
-                self.text.delete(index(line, column+1))
+                loc = index(line, column+1)
+
+                if self.text.get(loc) == event.char:
+
+                    self.text.delete(loc)
 
             ret = "break"
 
@@ -141,10 +145,6 @@ class BracketHandler:
                 self.text.tag_config("tag_open_brackets", **self.style)
                 self.text.tag_add("tag_open_brackets", "{}.{}".format(row,col), "{}.{}".format(row,col+1))
                 self.text.tag_add("tag_open_brackets", "{}.{}".format(line,column), "{}.{}".format(line,column+1))
-
-                # Remove bracket highlight after 0.2 sec?
-
-                # self.text.after(200, lambda: self.text.tag_delete("tag_open_brackets"))
 
         return ret
 
@@ -174,7 +174,6 @@ class BracketHandler:
 
                 if self.text.get("{}.{}".format(row, col)) == self.right_brackets[bracket_style]:
 
-                    # open_br += 1
                     if used_br == 0:
 
                         return row, col

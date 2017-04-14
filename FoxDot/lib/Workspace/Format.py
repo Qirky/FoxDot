@@ -10,7 +10,7 @@ def path(fn):
 user_defn = r"(?<=def )(\w+)"
 players   = r"(?<=>>)(\s*\w+)"
 comments  = r"^\s*#.*"
-decorator = r"\A@\S+"
+decorator = r"\A\s*@.+"
 numbers   = r"(?<![a-zA-Z])\d+"
 strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
@@ -156,3 +156,6 @@ tag_weights = [['numbers'],
                ['key_types','functions','user_defn','other_kws','dollar','arrow','players'],
                ['strings'],
                ['comments']]
+
+def get_keywords():
+    return list(set(py_indent_kw + py_functions + py_other_kws + py_key_types))

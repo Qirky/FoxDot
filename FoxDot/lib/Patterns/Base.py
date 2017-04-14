@@ -197,12 +197,12 @@ class metaPattern(object):
     # Methods that return augmented versions of original
 
     def shuffle(self):
-        new = asStream(self.data[:])
+        new = self.__class__(self.data[:])
         shuffle(new.data)
         return new
 
-    def mirror(self):
-        new = self[:]
+    def reverse(self):
+        new = self.__class__(self.data[:])
         new.data.reverse()
         return new
     
@@ -211,30 +211,40 @@ class metaPattern(object):
         new = []
         for n in range(size):
             new.append( modi(self.data, n) )
-        self.data = new
-        return self
+        new = self.__class__(new)
+        return new
 
     def loop(self, n):
         """ Repeats this pattern n times """
         new = []
         for i in range(n):
             new += list(self)
-        return Pattern(new)
+        return self.__class__(new)
 
     def sort(self):
         """ Used in place of sorted(pattern) to force type """
-        return Pattern(sorted(self.data))
+        return self.__class__(sorted(self.data))
 
-    def reverse(self):
-        new = [self.data[i-1] for i in range(len(self.data), 0, -1)]
-        return Pattern(new)
+    def mirror(self):
+        new = []
+        for i in range(len(self.data), 0, -1):
+
+            value = self.data[i-1]
+
+            if hasattr(value, 'mirror'):
+
+                value = value.reverse()
+            
+            new.append(value)
+            
+        return self.__class__(new)
 
     def swap(self, n=2):
         new = []
         for pair in [list(val) for val in [reversed(self[i:i+n]) for i in range(0, len(self), n)]]:
             for item in pair:
                 new.append(item)
-        return Pattern(new)
+        return self.__class__(new)
 
     def splice(self, seq, *seqs):
         sequences = (self, seq) + seqs
@@ -243,7 +253,7 @@ class metaPattern(object):
         for i in range(size):
             for seq in sequences:
                 new.append(seq[i])
-        return Pattern(new)
+        return self.__class__(new)
 
     def invert(self):
         new = []
@@ -253,11 +263,12 @@ class metaPattern(object):
                 new.append(item.invert())
             except:
                 new.append((((item / lrg) * -1) + 1) * lrg)
-        return Pattern(new)
+        return self.__class__(new)
 
     def rotate(self, n=1):
+        n = int(n)
         new = self.data[n:] + self.data[0:n]
-        return Pattern(new)
+        return self.__class__(new)
 
     def stutter(self, n=2):
         n = asStream(n)
@@ -266,13 +277,39 @@ class metaPattern(object):
         for i in range(lrg):
             for j in range(modi(n,i)):
                 new.append(modi(self.data,i))
-        return Pattern(new)
+        return self.__class__(new)
 
     def shufflets(self, n):
         """ Returns a Pattern of 'n' number of PGroups made from shuffled
             versions of the original Pattern """
         new = self.data[:]
         return Pattern([Pattern(new).shuffle().asGroup() for i in range(n)])
+
+    def layer(self, method, *args, **kwargs):
+        """ Zips a pattern with a modified version of itself """
+        func = getattr(self, method)
+        assert callable(func)
+
+        p1 = self.data
+        p2 = func(*args, **kwargs)
+
+        size = LCM(len(p1), len(p2))
+
+        data = []
+
+        for i in range(size):
+
+            a, b = modi(p1,i), modi(p2,i)
+
+            #if isinstance(a, PGroup):
+
+            #    data.append(a.merge(b))
+
+            #else:
+
+            data.append((a,b))
+
+        return Pattern(data)
 
     # Changing the pattern in place
 
@@ -509,6 +546,15 @@ class PGroup(metaPattern):
         metaPattern.fromString(self, string)
         self.scale_dur(self.coeff())
         return self
+
+    def merge(self, value):
+        """ Merge values into one PGroup """
+        if hasattr(value, "__len__"):
+            new_data = list(value)
+        else:
+            new_data = [value]
+        return PGroup(list(self.data) + new_data)
+            
 
 Pgroup = PGroup #: Alias for PGroup
 

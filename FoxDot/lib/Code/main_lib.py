@@ -141,8 +141,8 @@ def stdout(code):
     console_text = code.strip().split("\n")
     return ">>> {}".format("\n... ".join(console_text))
 
-def WarningMsg(text):
-    print("Warning: {}".format( text ))
+def WarningMsg(*text):
+    print("Warning: {}".format( " ".join(str(s) for s in text) ))
 
 # These functions return information about an imported module
 

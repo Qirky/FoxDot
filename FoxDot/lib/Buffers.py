@@ -31,44 +31,52 @@ nonalpha = {"&" : "ampersand",
             "+" : "plus",
             "?" : "question",
             "~" : "tilde",
-            "\\" :"backslash" }
+            "\\" :"backslash",
+            "1" : "1",
+            "2" : "2",
+            "3" : "3",
+            "4" : "4" }
 
-DESCRIPTIONS = { 'a' : "Unknown",
-                 'b' : "Unknown",
-                 'c' : "Choral",
-                 'd' : "Unknown",
-                 'e' : "Unknown",
-                 'f' : "Wood",
-                 'g' : "Unknown",
-                 'h' : "Unknown",
-                 'i' : "Unknown",
-                 'j' : "Unknown",
-                 'k' : "Unknown",
-                 'l' : "Unknown",
-                 'm' : "Toms",
-                 'n' : "Unknown",
-                 'o' : "Snare drum",
-                 'p' : "Tabla",
-                 'q' : "Unknown",
-                 'r' : "Metal",
-                 's' : "Shaker",
-                 't' : "Cowbell",
-                 'u' : "Unknown",
-                 'v' : "Unknown",
-                 'w' : "Unknown",
-                 'x' : "Bass drum",
-                 'y' : "Unknown",
-                 'z' : "Unknown",
-                 '-' : "Hi hat closed",
-                 '=' : "Hi hat open",
-                 '*' : "Clap",
+DESCRIPTIONS = { 'a' : "Gameboy hihat", 'A' : "Sword",
+                 'b' : "Cowbell",       'B' : "Short saw",
+                 'c' : "Box",           'C' : "Choral",
+                 'd' : "Click",         'D' : "Buzz",
+                 'e' : "Cowbell",       'E' : "Sparkle",
+                 'f' : "Wood",          'F' : "Swipe",
+                 'g' : "Ominous",       'G' : "Stab",
+                 'h' : "Rough clap",    'H' : "Clap",
+                 'i' : "Jungle snare",  'I' : "Rock snare",
+                 'j' : "Jug",           'J' : "Reverse",
+                 'k' : "Bass",          'K' : "Dub shot",
+                 'l' : "Knock",         'L' : "Siren",
+                 'm' : "Toms",          'M' : "Electro Tom",
+                 'n' : "Noise",         'N' : "Gameboy SFX",
+                 'o' : "Snare drum",    'O' : "Heavy snare",
+                 'p' : "Tabla 1",       'P' : "Tabla long",
+                 'q' : "Table 2",       'Q' : "Tabla long",
+                 'r' : "Metal",         'R' : "Metallic",
+                 's' : "Shaker",        'S' : "Tamborine",
+                 't' : "Cowbell",       'T' : "Cowbell",
+                 'u' : "Frying pan",    'U' : "Misc. Fx",   
+                 'v' : "Kick drum 3",   'V' : "Soft kick",
+                 'w' : "Dub hits",      'W' : "Distorted",
+                 'x' : "Bass drum 1",   'X' : "Heavy kick",
+                 'y' : "Bleep",         'Y' : "High buzz",
+                 'z' : "Scratch",       "Z" : "Buzz",
+                 '-' : "Hi hat closed", "|" : "Glitch",
+                 '=' : "Hi hat open",   "/" : "Reverse sounds",
+                 '*' : "Clap",          "\\" : "Lazer",
                  '~' : "Ride cymbal",
-                 '^' : "'Donks'",
+                 '^' : "'Donk'",
                  '#' : "Crash",
                  '+' : "Clicks",
-                 '@' : "Computer" }
+                 '@' : "Computer",
+                 '1' : "Vocals (One)",
+                 '2' : 'Vocals (Two)',
+                 '3' : 'Vocals (Three)',
+                 '4' : 'Vocals (Four)'}
 
-class Buffer:
+class Buffer(object):
     def __init__(self, fn, number, channels=1):
         self.fn = fn
         self.bufnum   = int(number)
@@ -78,23 +86,30 @@ class Buffer:
     def __int__(self):
         return self.bufnum
 
-class BufChar:
+class BufChar(object):
     server = Server
     def __init__(self, char):
         self.char    = char
         self.buffers = []
     def __str__(self):
-        return "BufChar '{}': '{}'".format(self.char, DESCRIPTIONS.get(self.char, "unknown"))
-    def addbuffer(self, fn, num, num_channels=1):
-        self.buffers.append( Buffer(fn, num, num_channels) )
-        if fn is not None:
-            self.server.bufferRead(fn, num)
-        return
+        return "BufChar '{}': '{}'".format(self.char, DESCRIPTIONS.get(self.char, "----"))
     def __getitem__(self, key):
         return self.buffers[key]
     def __iter__(self):
         for buf in self.buffers:
             yield buf.fn, buf.bufnum
+    # Comparisons
+    def __eq__(self, other):
+        return str(self.char) == str(other)
+    def __ne__(self, other):
+        return str(self.char) != str(other)
+    # Methods
+    def addbuffer(self, fn, num, num_channels=1):
+        self.buffers.append( Buffer(fn, num, num_channels) )
+        self.buffers[-1].char = self.char
+        if fn is not None:
+            self.server.bufferRead(fn, num)
+        return
     def bufnum(self, n):
         return self.buffers[n % len(self.buffers)] if self.buffers else Buffer(None, 0)
 
@@ -187,7 +202,8 @@ class BufferManager:
         return self.buffers[int(bufnum)]
 
     def __str__(self):
-        return "\n".join(["{}: {}".format(symbol, b) for symbol, b in self.symbols.items()])
+        # return "\n".join(["{}: {}".format(symbol, b) for symbol, b in self.symbols.items()])
+        return "\n".join([str(value) for value in self.symbols.values()])
 
     def write_to_file(self):
         f = open(FOXDOT_BUFFERS_FILE, 'w')

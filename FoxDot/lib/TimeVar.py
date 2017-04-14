@@ -42,9 +42,13 @@ class var(Repeatable):
 
     metro = None
 
-    def __init__(self, values, dur=4, **kwargs):
+    def __init__(self, values, dur=None, **kwargs):
 
         Repeatable.__init__(self)
+
+        if dur is None:
+
+            dur = self.metro.bar_length()
 
         self.data   = values
         self.time   = []
@@ -92,6 +96,9 @@ class var(Repeatable):
     # For printing the details
     def info(self):
         return "<TimeVar(%s, %s)>" % (repr(self.values()), repr(self.durs()))
+
+    def all_values(self):
+        return self.data + [self.dependency]
         
     # Mathematical Operators
     # ----------------------
@@ -99,6 +106,8 @@ class var(Repeatable):
 
     # + 
     def __add__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other + item for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self + x for x in other))
@@ -109,6 +118,8 @@ class var(Repeatable):
         return new
     
     def __radd__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[item + other for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x + self for x in other))
@@ -120,6 +131,8 @@ class var(Repeatable):
 
     # -
     def __sub__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[item - other for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self - x for x in other))
@@ -129,6 +142,8 @@ class var(Repeatable):
         new.evaluate = fetch(op.rSub)
         return new
     def __rsub__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other - item for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x - self for x in other))
@@ -140,6 +155,8 @@ class var(Repeatable):
 
     # *
     def __mul__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[item * other for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self * x for x in other))
@@ -148,7 +165,10 @@ class var(Repeatable):
         new = self.new(other)
         new.evaluate = fetch(op.Mul)
         return new
+    
     def __rmul__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other * item for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x * self for x in other))
@@ -161,6 +181,8 @@ class var(Repeatable):
     # **
 
     def __pow__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[item ** other for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self ** x for x in other))
@@ -171,6 +193,8 @@ class var(Repeatable):
         return new
 
     def __rpow__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other ** item for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x ** self for x in other))
@@ -183,6 +207,8 @@ class var(Repeatable):
     
     # /
     def __div__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[item / other for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self / x for x in other))
@@ -193,6 +219,8 @@ class var(Repeatable):
         return new
     
     def __rdiv__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other / item for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x / self for x in other))
@@ -203,6 +231,8 @@ class var(Repeatable):
         return new
     
     def __truediv__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[item / other for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self / x for x in other))
@@ -213,6 +243,8 @@ class var(Repeatable):
         return new
     
     def __rtruediv__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other / item for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x / self for x in other))
@@ -252,6 +284,8 @@ class var(Repeatable):
 
     # %
     def __mod__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other.__rmod__(item) for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x.__rmod__(self) for x in other))
@@ -262,6 +296,8 @@ class var(Repeatable):
         return new
 
     def __rmod__(self, other):
+        # Run an assertion to make sure all values are valid
+        #[other.__mod__(item) for item in self.all_values()]
         if not isinstance(other, (var, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x.__mod__(self) for x in other))
@@ -375,7 +411,7 @@ class var(Repeatable):
     # Finding current values
     def now(self, time=None):
 
-        time = self.current_time(time)
+        time = self.current_time(time) + self.metro.get_latency()
 
         loops = time // sum(self.dur)
         time  = time - (loops * sum(self.dur))
@@ -442,10 +478,11 @@ class var(Repeatable):
 class Pvar(var, Pattern):
     """ Pvar([pat1, pat2], durs) """
     stream = PatternContainer
-    def __init__(self, values, dur=4):
-        var.__init__(self, [asStream(val) for val in values], dur)
+    def __init__(self, values, dur=None, **kwargs):
+        var.__init__(self, [asStream(val) for val in values], dur, **kwargs)
 
-class linvar(var):
+
+class _continuous_var(var):
 
     def __init__(self, *args, **kwargs):
         var.__init__(self, *args, **kwargs)
@@ -454,7 +491,7 @@ class linvar(var):
     # Finding current values
     def now(self, time=None):
 
-        time = self.current_time(time)
+        time = self.current_time(time) + self.metro.get_latency()
 
         loops = time // sum(self.dur)
         time  = time - (loops * sum(self.dur))
@@ -486,7 +523,17 @@ class linvar(var):
 
         p = (float(time % sum(self.dur)) - self.current_time_block[0]) / (self.current_time_block[1] - self.current_time_block[0])
 
-        return (self.current_value * (1-p)) + (self.next_value * p)
+        return self.get_timevar_value(p)
+
+
+class linvar(_continuous_var):
+    def get_timevar_value(self, prop):
+        return (self.current_value * (1-prop)) + (self.next_value * prop)
+
+class expvar(_continuous_var):
+    def get_timevar_value(self, prop):
+        prop *= prop
+        return (self.current_value * (1-prop)) + (self.next_value * prop)
     
 
 class _inf(int):

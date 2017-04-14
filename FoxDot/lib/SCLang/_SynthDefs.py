@@ -6,14 +6,16 @@ import Env
 # Sample Player
 
 with SampleSynthDef("play1") as play:
-    play.defaults.update(room=0.1 ,rate=1)
-    play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
+    play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), play.sus / 2) + 0.0001
+    play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05)
     play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
 
 with SampleSynthDef("play2") as play:
-    play.defaults.update(room=0.1 ,rate=1)
-    play.rate = play.scrub * LFPar.kr(play.scrub / 4) + play.rate - play.scrub
+    play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), play.sus / 2) + 0.0001
+    play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05)
     play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
 
@@ -25,8 +27,9 @@ with SynthDef("pads") as pads:
     pads.env = Env.perc()
 
 with SynthDef("noise") as noise:
+    noise.freq  = noise.freq * 2
     noise.osc = LFNoise0.ar(noise.freq, noise.amp)
-    noise.env = Env.env()
+    noise.env = Env.perc()
 
 with SynthDef("dab") as synth:
      a = HPF.ar(Saw.ar(synth.freq / 4, mul=synth.amp / 2), 2000)
@@ -38,7 +41,13 @@ dab = synth
 with SynthDef("varsaw") as synth:
      synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005], mul=synth.amp / 4, width=synth.rate)
      synth.env = Env.env()
-varsaw = synth    
+varsaw = synth
+
+with SynthDef("lazer") as synth:
+    synth.amp = synth.amp * 0.1
+    synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005],  width=(synth.rate-1)/4) + LFSaw.ar(LFNoise0.ar(synth.rate * 20, add=synth.freq * Pulse.ar((synth.rate-2) + 0.1, add=1), mul=0.5))
+    synth.env = Env.perc(0.1)
+lazer = synth 
 
 with SynthDef("growl") as growl:
     growl.sus = growl.sus * 1.5
@@ -114,6 +123,28 @@ with SynthDef("klank") as klank:
     klank.osc = Decimator.ar(klank.osc, bits=klank.rate - 1)
     klank.env = Env.env(klank.sus*2)
 
+with SynthDef("ambi") as ambi:
+    ambi.sus = ambi.sus * 1.5
+    ambi.amp = ambi.amp / 3
+    ambi.freq = [ambi.freq, ambi.freq * 1.005]
+    ambi.osc = Klank.ar([[1,2,3,3 + ((ambi.rate-1)/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(ambi.freq, add=1), ambi.freq)
+    ambi.env = Env.env(ambi.sus*2)
+
+with SynthDef("glass") as glass:
+    glass.sus = glass.sus * 1.5
+    glass.amp = glass.amp * 1.5
+    glass.freq = [glass.freq, glass.freq * (1 + (0.005 * glass.rate))]
+    glass.osc = Klank.ar([[2,4,9,16],[1,1,1,1],[2,2,2,2]], PinkNoise.ar(0.0005).dup * SinOsc.ar(glass.freq / 4, add=1, mul=0.5), glass.freq)
+    glass.env = Env.env(glass.sus*2)
+
+with SynthDef("soft") as soft:
+    soft.sus = soft.sus * 1.5
+    soft.amp = soft.amp / 30
+    soft.rate = soft.rate + 1
+    soft.osc = Klank.ar([[soft.rate, soft.rate * 2, soft.rate * 3, soft.rate * 4],[1,1,1,1],[2,2,2,2]], Crackle.ar(0.005).dup, soft.freq)
+    soft.env = Env.env(soft.sus*2)
+
+    
 with SynthDef("quin") as synth:
     synth.amp = synth.amp 
     synth.osc = Klank.ar([[1,2,4,2],[100,50,0,10],[1,5,0,1]], Impulse.ar(synth.freq).dup, [synth.freq * 1.01, synth.freq]) / 5000
@@ -216,7 +247,7 @@ twang.osc = Env.perc() * CombL.ar(twang.osc, delaytime=twang.rate/(twang.freq * 
 twang.add()
 
 karp = SynthDef("karp")
-karp.amp = karp.amp * 0.5
+karp.amp = karp.amp * 0.75
 karp.osc = LFNoise0.ar(400 + (400 * karp.rate), karp.amp)
 karp.osc = karp.osc * XLine.ar(1, 0.000001, karp.sus * 0.1)
 karp.freq = (265 / (karp.freq * 0.666)) * 0.005
@@ -248,6 +279,12 @@ squish.osc = Ringz.ar(Pulse.ar(4 * squish.rate), squish.freq, squish.sus, squish
 squish.osc = squish.osc * XLine.ar(1/2, 0.000001, squish.sus, doneAction=2)
 squish.osc = squish.osc.cos
 squish.add()
+
+swell = SynthDef("swell")
+swell.amp = swell.amp / 4
+swell.osc = VarSaw.ar([swell.freq, (swell.freq + 1) / 0.75], width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
+swell.env = Env.perc()
+swell.add()
 
 # Get rid of the variable synth
 

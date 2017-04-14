@@ -5,7 +5,7 @@ from Patterns import asStream, modi
 
         
 
-class Repeatable:
+class Repeatable(object):
     def __init__(self):
         self.repeat_events = {}        
 

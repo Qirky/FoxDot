@@ -22,6 +22,7 @@ from SCLang import SynthDefs, Env, SynthDef
 from ServerManager import Server
 from Root import Root
 from Scale import Scale
+from Workspace import get_keywords
 
 # stdlib imports
 
@@ -37,20 +38,28 @@ Server.setFx(FxList)
 
 # Define any custom functions
 
-def nextBar(f, n=0):
+def nextBar(n=0):
     ''' Schedule functions when you define them with @nextBar'''
-    Clock.schedule(f, Clock.next_bar() + n)
-    return f
+    if callable(n):
+        Clock.schedule(n, Clock.next_bar())
+        return n
+    def wrapper(f):
+        Clock.schedule(f, Clock.next_bar() + n)
+        return f
+    return wrapper
 
 # Assign the clock to time-keeping classes
 
 var.metro     = Clock
 Player.metro  = Clock
+Server.metro  = Clock
+MidiIn.metro  = Clock
 
-# Players and effects need reference to SC server
+# Players and effects etc need reference to SC server
 
 Player.server = Server
 Effect.server = Server
+QueueItem.server = Server
 
 # Create preset Players
 

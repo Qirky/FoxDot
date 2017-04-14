@@ -13,6 +13,7 @@
 import random
 import math
 import functools
+import inspect
 
 from Base import Pattern, GeneratorPattern, PGroup, asStream
 from Operations import *

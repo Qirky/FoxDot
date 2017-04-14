@@ -1,19 +1,45 @@
-FoxDot - Live Coding with Python v0.2.9
-=======================================
+FoxDot - Live Coding with Python v0.2.10
+========================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.2.9 fixes and updates
+### v0.2.10 fixes and updates
 
-- Improved automatic bracket handling and formatting
-- Colour scheme update
-- "Upper-case" samples now read properly
-- `cycle` argument added to the `.every()` player method to denote the cycle length of which to execute the specified method, e.g.
+- New SynthDefs added. Use `print SynthDefs` to view.
+- Improved timing in the `TempoClock` class through use of threading and a latency value. Thanks to Yaxu and Charlie Roberts for the help.
+- Dubstep samples added to "K", "O", "M" and "V" characters. These are louder than most other audio samples. 
+- Sample banks re-arranged. Use `print Samples` for more information.
+- Sample Player argument, `scrub` removed. You can now use `slide`/`slidefrom` and `vib` as you would do with a normal Player object to manipulate playback rate.
+- `Pattern` class now has a `layer` method that takes a name of a `Pattern` method as its first argument and then arguments and keyword arguments for that method and creates a pattern of `PGroups` with their values zipped together.
 
+```python
+>>>  print P[1,2,3,4].layer("reverse")
+P[P(1, 4), P(2, 3), P(3, 2), P(4, 1)]
+
+>>>  print P[1,2,3,4].layer("rotate", 2)
+P[P(1, 3), P(2, 4), P(3, 1), P(4, 2)]
 ```
-# Shuffles the samples on the 5th beat of each 8 beat cycle
-bd >> play("x-o-").every(5, 'shuffle', cycle=8)
+ 
+- New nested `PGroup` behaviour added for players. Each value in each `PGroup` in an event relates to the values in any other `PGroup` in the same index, even if that value is also a `PGroup`. This concept is better described through an example:
+
+```python
+p1 >> pluck((0,2), pan=(0,(-1,1)), vib=(0,(0,12)), dur=4, chop=(0,4))
 ```
+
+The first note, 0, is played with a pan of 0, chop of 0, and with no vibrator added. The second note, 2, is played with a chop of 4 and with no vibrato with a pan of -1 (left) but with a vibrato value of 12 with a pan of 1 (right). 
+
+- Experimental: Players can "follow" other Players' attributes over time by referencing their attributes.
+
+```python
+p1 >> pads([4,5,6,7], dur=2, chop=4)
+
+p2 >> pluck(p1.degree + 2, vib=p1.chop*3)
+``` 
+
+### Known bugs
+
+- Using a `var` type in an object's delay attribute will cause the player to stop playing.
+- Using nested `PGroups` in the oct attribute e.g. `oct=(5,(5,6))` stops the  player from Playing
 
 See `docs/changelog` for more
 
@@ -41,7 +67,9 @@ $ python setup.py install
 ```supercollider
 Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
 ```
+- Install the `BatLib` quark in SuperCollider by evaluating `include("BatLib")` in SuperCollider - this is required for the FoxDot Quark to run correctly.
 - Recompile the SuperCollider class library by going to `Language -> Recompile Class Library` or pressing `Ctrl+Shift+L`
+- If you have installed the sc3 plugins, go to ///
 
 #### Startup
 
@@ -86,7 +114,7 @@ The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - an
 
 ### 'Sample Player' Objects
 
-In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters (known as a "PlayString") as its first argument. Each character in the string refers to one sample (the current list can be seen in the `FoxDot/lib/Settings/samplelib.csv` file, which you can customise if you so wish). To create a basic drum beat, you can execute the following line of code:
+In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters (known as a "PlayString") as its first argument. To see a list of what samples are associated to what characters, use `print Samples`. To create a basic drum beat, you can execute the following line of code:
 
 ``` python
 d1 >> play("x-o-")
@@ -173,7 +201,15 @@ For more information on FoxDot, please see the `docs` folder or go to http://fox
 
 - The SuperCollider development community and, of course, James McCartney, its original developer
 - PyOSC, Artem Baguinski et al
-- Sounds in `snd/z/` folder courtesy of Mike Hodnick's live coded album, [Expedition](https://github.com/kindohm/expedition)
+- Members of the Live Coding community including, but not limited to, Alex McLean, Sean Cotterill, and Dan Hett.
+- Big thanks to those who have used, tested, and submitted bugs, which have all helped improve FoxDot
+
+### Samples
+
+FoxDot's audio files have been obtained from a number of sources but I've lost record of which files are attributed to which original author. Here's a list of thanks for the unknowing creators of FoxDot's sample archive. 
+
+- [Legowelt Sample Kits](https://awolfe.home.xs4all.nl/samples.html)
+- [Game Boy Drum Kit](http://bedroomproducersblog.com/2015/04/08/game-boy-drum-kit/)
+- A number of sounds courtesy of Mike Hodnick's live coded album, [Expedition](https://github.com/kindohm/expedition)
 - Many samples have been obtained from http://freesound.org and have been placed in the public domain via the Creative Commons 0 License: http://creativecommons.org/publicdomain/zero/1.0/ - thank you to the original creators
 - Other samples have come from the [Dirt Sample Engine](https://github.com/tidalcycles/Dirt-Samples/tree/c2db9a0dc4ffb911febc613cdb9726cae5175223) which is part of the TidalCycles live coding language created by Yaxu - another huge amount of thanks.
-- Big thanks to those who have used, tested, and submitted bugs, which have all helped improve FoxDot
