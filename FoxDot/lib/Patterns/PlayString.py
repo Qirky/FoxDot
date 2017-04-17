@@ -104,8 +104,12 @@ class PlayGroup(tuple):
             else:
                 data.append(item)
         tuple.__init__(self, data)
+        self.data = data
     def __repr__(self):
         return "<" + tuple.__repr__(self)[1:-1] + ">"
+    def string(self):
+        """ Returns the form a PlayGroup takes in a PlayString """
+        return "[" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in self]) + "]"
     def __len__(self):
         return 1
     def __eq__(self, other):
@@ -118,11 +122,12 @@ class PlayGroup(tuple):
         else:
             return tuple.__eq__(self, other)
         return False
-            
     def divide(self, value):
         for item in self:
             item.divide(value)
         return self
+    def mirror(self):
+        return self.__class__(list(reversed(self.data)))
 
 class RandomPlayGroup(object):
     def __init__(self, seq, dur=1):
@@ -135,8 +140,9 @@ class RandomPlayGroup(object):
                 self.data.append(item)
     def now(self):
         return choice(self.data)
-    #def __iter__(self):
-    #    yield self.now()
+    def string(self):
+        """ Returns the form a PlayGroup takes in a PlayString """
+        return "{" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in self.data]) + "}"
     def __len__(self):
         return 1
     def __repr__(self):

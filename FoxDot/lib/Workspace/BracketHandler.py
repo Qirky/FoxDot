@@ -58,15 +58,44 @@ class BracketHandler:
                 
                 pass
 
-            # B. Needs a closing bracket
+            # B. Add a closing bracket as well. 
 
-            if next_char in whitespace + self.right_brackets.keys() and next_char not in ("'", '"'):
+            if next_char in whitespace + self.right_brackets.keys():
 
-                self.text.insert(self.text.index(insert), event.char + self.left_brackets[event.char])
+                # If the next char is quote mark, just move the cursor
 
-                self.text.mark_set(insert, index(line, column + 1))
+                if event.char in ("'", '"'):
 
-                ret = "break"
+                    if event.char == next_char:
+
+                        self.text.mark_set(insert, index(line, column + 1))
+
+                        ret = "break"
+
+                    else:
+
+                        # Only add a closing quote mark if there are already an even no. of quotes in the line
+
+                        text = self.text.get(index(line, 0), index(line, "end"))
+
+                        n = text.count(event.char)
+
+                        if n % 2 == 0:
+
+                            self.text.insert(self.text.index(insert), event.char + self.left_brackets[event.char])
+
+                            self.text.mark_set(insert, index(line, column + 1))
+
+                            ret = "break"
+
+                else:
+
+                    self.text.insert(self.text.index(insert), event.char + self.left_brackets[event.char])
+
+                    self.text.mark_set(insert, index(line, column + 1))
+
+                    ret = "break"
+
 
             # Update line colours
         

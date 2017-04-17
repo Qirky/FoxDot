@@ -1,3 +1,14 @@
+### v0.3 fixes and update
+
+- `var` type can be used with Player `delay` and nested groups in the `oct` attribute.
+- Increased `TempoClock` latency to 0.2 seconds for improved performance.
+- Better handling for auto-completed quotation marks 
+
+### v0.2.11 fixes and updates
+
+- Caught `ImportError` if the user does not have `rtmidi` installed.
+- Improved `Player.stutter
+
 ### v0.2.10 fixes and updates
 
 - New SynthDefs added. Use `print SynthDefs` to view.

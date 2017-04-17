@@ -590,9 +590,15 @@ class Player(Repeatable):
 
         # Set the degree
 
-        if synthdef is SamplePlayer:
+        if synthdef == SamplePlayer:
 
-            self.playstring = degree
+            if type(degree) == str:
+
+                self.playstring = degree
+
+            else:
+
+                self.playstring = None
 
             setattr(self, "degree", degree if len(degree) > 0 else " ")
 
@@ -697,21 +703,9 @@ class Player(Repeatable):
 
                 return [self.event['degree']]
 
-        now = {}
-        
-        for attr in ('degree', 'oct'):
+        now = {attr: self.event[attr] for attr in ('degree', 'oct')}
 
-            now[attr] = self.event[attr]
-
-            try:
-
-                now[attr] = list(now[attr])
-
-            except:
-
-                now[attr] = [now[attr]]
-                
-        size = max( len(now['oct']), len(now['degree']) )
+        size = LCM( get_expanded_len(now['oct']), get_expanded_len(now['degree']) )
 
         f = []
 
@@ -719,9 +713,11 @@ class Player(Repeatable):
 
             try:
                 
-                midinum = midi( self.scale, modi(now['oct'], i), modi(now['degree'], i) , self.now('root') )
+                midinum = midi( self.scale, group_modi(now['oct'], i), group_modi(now['degree'], i) , self.now('root') )
 
-            except:
+            except Exception as e:
+
+                print e
 
                 WarningMsg("Invalid degree / octave arguments for frequency calculation, reset to default")
 
@@ -948,7 +944,7 @@ class Player(Repeatable):
 
                     # Get the char / group from the buf_list
 
-                    bufchar = modi(buf_list, i)
+                    bufchar = group_modi(buf_list, i)
 
                     # If it is a group
 
@@ -962,7 +958,7 @@ class Player(Repeatable):
 
                         # Get the buffer number to play for this sample bank (char)
                         
-                        buf_mod_index = int(modi(self.event['sample'], i))
+                        buf_mod_index = int(group_modi(self.event['sample'], i))
 
                         event_buf[i] = char.bufnum(buf_mod_index).bufnum               
 
@@ -1016,10 +1012,10 @@ class Player(Repeatable):
 
 
     def osc_message(self, index=0, **kwargs):
-        """ NEW: Creates an OSC packet to play a SynthDef in SuperCollider,
+        """ Creates an OSC packet to play a SynthDef in SuperCollider,
             use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] """
 
-        freq = float(modi(self.attr['freq'], index))
+        freq = float(group_modi(self.attr['freq'], index))
         
         message = ['freq',  freq ]
         fx_dict = {}
@@ -1052,7 +1048,7 @@ class Player(Repeatable):
 
             except KeyError as e:
 
-                WarningMsg("In osc_message", key, e)
+                WarningMsg("KeyError in function 'osc_message'", key, e)
 
         # See if any fx_attributes 
 
@@ -1140,12 +1136,6 @@ class Player(Repeatable):
                 synthdef = self.get_synth_name(buf)
 
                 if delay > 0:
-
-                    # Sometimes there are race conditions, so make sure delay is just one value
-
-                    while hasattr(delay, "__len__"): # <- I think this is why var's don't wory
-
-                        delay = delay[i]
 
                     if (delay, osc_msg, effects) not in delayed_messages:
 
@@ -1323,18 +1313,6 @@ class Player(Repeatable):
                 if attr.num_ref > num:
                     num = attr.num_ref
         return num
-        
-
-    """
-        State-Shift Methods
-        --------------
-
-        These methods are used in conjunction with Patterns.Feeders functions.
-        They change the state of the Player Object and return the object.
-
-        See 'Player.Feeders' for more info on how to use
-
-    """
 
     def lshift(self, n=1):
         self.event_n -= (n+1)
@@ -1354,42 +1332,40 @@ class Player(Repeatable):
         return self
 
     def shuffle(self):
-        """ Shuffles the degree of a player. If possible, do it visually """
-        if self.synthdef == SamplePlayer:
-            self._replace_string(PlayString(self.playstring).shuffle())
-        else:
-            self._replace_degree(self.attr['degree'].shuffle())
+        """ Shuffles the degree of a player. """
+        # If using a play string for the degree
+        if self.synthdef == SamplePlayer and self.playstring is not None:
+            # Shuffle the contents of playgroups among the whole string
+            new_play_string = PlayString(self.playstring).shuffle()
+            new_degree = Pattern(new_play_string).shuffle()
+        else:            
+            new_degree = self.attr['degree'].shuffle()
+        self._replace_degree(new_degree)
         return self
 
     def mirror(self):
-        if self.synthdef == SamplePlayer:
-            self._replace_string(PlayString(self.playstring).mirror())
-        else:
-            self._replace_degree(self.attr['degree'].mirror())
+        """ The degree pattern is reversed """
+        self._replace_degree(self.attr['degree'].mirror())
         return self
 
     def rotate(self, n=1):
-        if self.synthdef == SamplePlayer:
-            self._replace_string(PlayString(self.playstring).rotate(n))
-        else:
-            self._replace_degree(self.attr['degree'].rotate(n))
+        """ Rotates the values in the degree by 'n' """
+        self._replace_degree(self.attr['degree'].rotate(n))
         return self
-
-    def _replace_string(self, new_string):
-        # Update the GUI if possible
-        if self.widget:
-            # Replace old_string with new string
-            self.widget.addTask(target=self.widget.replace, args=(self.line_number, self.playstring, new_string))
-        self.playstring = new_string
-        setattr(self, 'degree', new_string)
-        return
 
     def _replace_degree(self, new_degree):
         # Update the GUI if possible
         if self.widget:
-            # Replace old_string with new string
-            self.widget.addTask(target=self.widget.replace_re, args=(self.line_number,), kwargs={'new':str(new_degree)})
-        self.playstring = str(new_degree)
+            if self.synthdef == SamplePlayer:
+                if self.playstring is not None:
+                    # Replace old_string with new string (only works with plain string patterns)
+                    new_string = new_degree.string()
+                    self.widget.addTask(target=self.widget.replace, args=(self.line_number, self.playstring, new_string))
+                    self.playstring = new_string
+            else:
+                # Replaces the degree pattern in the widget (experimental)
+                # self.widget.addTask(target=self.widget.replace_re, args=(self.line_number,), kwargs={'new':str(new_degree)})
+                self.playstring = str(new_degree)
         setattr(self, 'degree', new_degree)
         return
 

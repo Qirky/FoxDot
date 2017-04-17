@@ -5,14 +5,14 @@ try:
     TIMING_CLOCK          = midiconstants.TIMING_CLOCK
     SONG_POSITION_POINTER = midiconstants.SONG_POSITION_POINTER
     SONG_START            = midiconstants.SONG_START
-except ImportError:
+except ImportError as _err:
     pass
 
 def miditofreq(midinote):
     """ Converts a midi number to frequency """
     return 440 * (2 ** ((midinote - 69.0)/12.0))
 
-midi2cps = miditofreq
+midi2cps = miditofreq # alias
 
 def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     """ Calculates a midinote from a scale, octave, degree, and root """
@@ -48,7 +48,7 @@ class MidiIn:
 
         except NameError:
 
-            raise rtMidiNotFound
+            raise ImportError(_err)
 
         self.available_ports = self.device.get_ports()
 

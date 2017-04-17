@@ -1,5 +1,6 @@
 from __future__ import division
 import Base
+import PlayString
 
 """
     Module for key operations on Python lists or FoxDot Patterns
@@ -123,6 +124,9 @@ def LCM(*args):
     return X[0]
 
 def EuclidsAlgorithm(n, k):
+    
+    if n == 0: return [n for i in range(k)]
+    
     data = [[1 if i < n else 0] for i in range(k)]
     
     while True:
@@ -155,10 +159,13 @@ def modi(array, i, debug=0):
 
 def group_modi(pgroup, index):
     """ Returns value from pgroup that modular indexes nested groups """
-    try:
-        return group_modi(pgroup[index % len(pgroup)], index // len(pgroup))
-    except(TypeError, AttributeError, ZeroDivisionError):
+    if isinstance(pgroup, (int, float, str, bool, PlayString.PlayGroup)):
         return pgroup
+    else:
+        try:
+            return group_modi(pgroup[index % len(pgroup)], index // len(pgroup))
+        except(TypeError, AttributeError, ZeroDivisionError):
+            return pgroup
 
 def get_expanded_len(data):
     """ (0,(0,2)) returns 4. int returns 1 """

@@ -1,7 +1,7 @@
 from random import choice, shuffle
 from Operations import *
 from Parse import Parse
-from PlayString import PlayString, PlayGroup
+from PlayString import PlayString, PlayGroup, RandomPlayGroup
 
 """
 
@@ -49,14 +49,14 @@ class metaPattern(object):
         return str(self)
 
     def string(self):
-        """ Returns a string made up of all the values:
-
-            PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" """
+        """ Returns a PlayString in string format from the Patterns values """
         string = ""
         for item in self.data:
-            try:
+            if isinstance(item, (PlayGroup, RandomPlayGroup)):
                 string += item.string()
-            except:
+            elif isinstance(item, Pattern):
+                string += "(" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in item.data]) + ")"
+            else:
                 string += str(item)
         return string
 
@@ -226,6 +226,8 @@ class metaPattern(object):
         return self.__class__(sorted(self.data))
 
     def mirror(self):
+        """ Reverses the pattern. Differs to `Pattern.reverse()` in that
+            all nested patters are also reversed. """
         new = []
         for i in range(len(self.data), 0, -1):
 
@@ -233,7 +235,7 @@ class metaPattern(object):
 
             if hasattr(value, 'mirror'):
 
-                value = value.reverse()
+                value = value.mirror()
             
             new.append(value)
             
@@ -286,9 +288,16 @@ class metaPattern(object):
         return Pattern([Pattern(new).shuffle().asGroup() for i in range(n)])
 
     def layer(self, method, *args, **kwargs):
-        """ Zips a pattern with a modified version of itself """
-        func = getattr(self, method)
-        assert callable(func)
+        """ Zips a pattern with a modified version of itself. Method argument
+            can be a function that takes this pattern as its first argument,
+            or the name of a Pattern method as a string. """
+        
+        if callable(method):
+            func = method
+            args = [self.data] + list(args)
+        else:
+            func = getattr(self, method)
+            assert callable(func)
 
         p1 = self.data
         p2 = func(*args, **kwargs)
@@ -300,12 +309,6 @@ class metaPattern(object):
         for i in range(size):
 
             a, b = modi(p1,i), modi(p2,i)
-
-            #if isinstance(a, PGroup):
-
-            #    data.append(a.merge(b))
-
-            #else:
 
             data.append((a,b))
 

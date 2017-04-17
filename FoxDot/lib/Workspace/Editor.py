@@ -39,7 +39,7 @@ class workspace:
         # Configure FoxDot's namespace to include the editor
 
         CodeClass.namespace['FoxDot'] = self
-        #CodeClass.namespace['Player'].widget = self
+        CodeClass.namespace['Player'].widget = self
         #CodeClass.namespace['Ghost'].widget = self
 
         # Used for docstring prompt
