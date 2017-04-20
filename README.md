@@ -35,7 +35,7 @@ $ python setup.py install
 ```supercollider
 Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
 ```
-- Install the `BatLib` quark in SuperCollider by evaluating `include("BatLib")` in SuperCollider - this is required for the FoxDot Quark to run correctly.
+- Install the `BatLib` quark in SuperCollider by evaluating `include("BatLib")` in SuperCollider - this is required for the FoxDot Quark to run correctly (Requires [Git to be installed](http://git-scm.com/) on your machine if it is not already).
 - Recompile the SuperCollider class library by going to `Language -> Recompile Class Library` or pressing `Ctrl+Shift+L`
 - If you have installed the sc3 plugins, go to to the directory where Python is installed. On Windows this is usually `C:/Python27/` and `usr/local/lib/python2.7` on a Unix based system. Go into `site-packages/FoxDot/lib/Settings/conf.py` and change `SC3PLUGINS` to `True`. 
 
