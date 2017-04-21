@@ -33,8 +33,9 @@ class TempoClock:
         self.meter = meter
 
         # Start counting -- first call to clock() is 0
-        self.time = clock() 
-        self.beat = 0 # Fraction() # -- use rational number
+        self.time = 0 # time in secs
+        self.beat = 0 # the number of beats
+        self.start_time = time() # The time at start
 
         # Create the queue
         self.queue = Queue()
@@ -79,6 +80,12 @@ class TempoClock:
     def __contains__(self, item):
         return item in self.items
 
+    def __setattr__(self, attr, value):
+        if attr == "bpm":
+            self.start_time = time()
+            self.time       = 0.0
+        self.__dict__[attr] = value
+
     def bar_length(self):
         """ Returns the length of a bar in terms of beats """
         return (float(self.meter[0]) / self.meter[1]) * 4
@@ -118,7 +125,7 @@ class TempoClock:
 
         # Update clock time
         
-        now = clock()
+        now = time() - self.start_time
 
         self.beat += (now - self.time) * (bpm_val / 60.0)
             
@@ -201,7 +208,9 @@ class TempoClock:
 
                 self.current_block = self.queue.pop()
 
-                threading.Thread(target=self.__run_block, args=(self.current_block,)).start()
+                if len(self.current_block):
+
+                    threading.Thread(target=self.__run_block, args=(self.current_block,)).start()
 
             if self.midi_clock is not None:
 
@@ -215,7 +224,7 @@ class TempoClock:
         """ Set the clock time to 'beat' and update players in the clock """
         self.queue.clear()
         self.beat = beat
-        self.time = clock()
+        self.time = time() - self.start_time
         for player in self.playing:
             player(count=True)
         return
@@ -262,8 +271,6 @@ class TempoClock:
 
                 kwargs['verbose'] = False
 
-            # obj.__call__(*args, **kwargs)
-                
             self.queue.add(obj, self.now(), args, kwargs)
         
         return
@@ -301,7 +308,7 @@ class TempoClock:
 
     def reset(self):
         self.beat = 0
-        self.time = clock()
+        self.time = time() - self.start_time
         return
 
     def shift(self, n):

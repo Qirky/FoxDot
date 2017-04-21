@@ -55,6 +55,8 @@ FoxDot\osc\Buffers.scd
 FoxDot\osc\sceffects\bitcrush.scd
 FoxDot\osc\sceffects\chop.scd
 FoxDot\osc\sceffects\combDelay.scd
+FoxDot\osc\sceffects\dirtortion.scd
+FoxDot\osc\sceffects\disintergator.scd
 FoxDot\osc\sceffects\highPassFilter.scd
 FoxDot\osc\sceffects\lowPassFilter.scd
 FoxDot\osc\sceffects\makeSound.scd
@@ -87,6 +89,7 @@ FoxDot\osc\scsyndef\noise.scd
 FoxDot\osc\scsyndef\nylon.scd
 FoxDot\osc\scsyndef\orient.scd
 FoxDot\osc\scsyndef\pads.scd
+FoxDot\osc\scsyndef\piano.scd
 FoxDot\osc\scsyndef\play1.scd
 FoxDot\osc\scsyndef\play2.scd
 FoxDot\osc\scsyndef\pluck.scd

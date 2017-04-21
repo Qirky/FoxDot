@@ -83,7 +83,15 @@ class EffectManager(dict):
     def __iter__(self):
         for key in self.pre_kw + self.kw:
             yield key, self[key]
-    
+
+
+# -- TODO
+
+# Have ordered effects e.g.
+# 1. Process frequency / playback rate
+# 2. Before envelope
+# 3. After envelope
+
 
 FxList = EffectManager()
 
@@ -110,12 +118,20 @@ if SC3_PLUGINS:
     fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()
 
+##    fx = FxList.new('grate', 'disintergator', ['grate'])
+##    fx.add("osc = Disintegrator.ar(osc, multiplier: grate)")
+##    fx.save()
+
+##    fx = FxList.new("distort", "dirtortion", ["distort"])
+##    fx.add("osc = CrossoverDistortion.ar(osc, amp: distort)")
+##    fx.save()
+
 fx = FxList.new('chop', 'chop', ['chop', 'sus'])
 fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")
 fx.save()
 
-fx = FxList.new('echo', 'combDelay', ['echo'])
-fx.add('osc = osc + CombL.ar(osc, delaytime: echo, maxdelaytime: 2)')
+fx = FxList.new('echo', 'combDelay', ['echo', 'sus'])
+fx.add('osc = osc + CombL.ar(osc, delaytime: echo * sus, maxdelaytime: 2)')
 fx.save()
 
 fx = FxList.new('spin', 'spinPan', ['spin','sus'])

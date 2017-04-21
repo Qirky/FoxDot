@@ -126,7 +126,15 @@ class FoxDotCode:
     
         if len(update) > 0:
 
-            self.__call__("\n".join(update), verbose = False)
+            try:
+
+                self.__call__("\n".join(update), verbose = False)
+
+            except SyntaxError as e:
+
+                # Supress syntax errors
+
+                pass
                 
         return
 

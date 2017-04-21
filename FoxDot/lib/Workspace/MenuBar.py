@@ -1,4 +1,5 @@
-from Tkinter import Menu
+from Tkinter import Menu, BooleanVar
+from ..Settings import SC3_PLUGINS
 
 class MenuBar(Menu):
     def __init__(self, master, visible=True):
@@ -6,6 +7,9 @@ class MenuBar(Menu):
         self.root = master
 
         Menu.__init__(self, master.root)
+
+        self.sc3_plugins = BooleanVar()
+        self.sc3_plugins.set(SC3_PLUGINS)
 
         # Set font
         
@@ -43,8 +47,11 @@ class MenuBar(Menu):
         codemenu.add_command(label="Evaluate Block",         command=self.root.exec_block,  accelerator="Ctrl+Return")
         codemenu.add_command(label="Evaluate Line",          command=self.root.exec_line,   accelerator="Alt+Return")
         codemenu.add_command(label="Clear Scheduling Clock", command=self.root.killall,     accelerator="Ctrl+.")
+        codemenu.add_separator()
         codemenu.add_command(label="Toggle Console",         command=self.root.toggle_console)
         codemenu.add_command(label="Export Console Log",     command=self.root.export_console)
+        codemenu.add_separator()
+        codemenu.add_checkbutton(label="Use SC3 Plugins",    command=self.root.toggle_sc3_plugins, variable=self.sc3_plugins)
         self.add_cascade(label="Code", menu=codemenu)
 
         # Settings

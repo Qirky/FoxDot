@@ -1,4 +1,5 @@
 from __future__ import division
+from ..Settings import *
 from SCLang import *
 from SynthDef import SynthDef, SampleSynthDef
 import Env
@@ -285,6 +286,13 @@ swell.amp = swell.amp / 4
 swell.osc = VarSaw.ar([swell.freq, (swell.freq + 1) / 0.75], width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
 swell.env = Env.perc()
 swell.add()
+
+if SC3_PLUGINS:
+
+    piano = SynthDef("piano")
+    piano.osc = MdaPiano.ar(piano.freq, vel=piano.amp * 65, decay=piano.sus / 4)
+    piano.env = Env.ramp()
+    piano.add()
 
 # Get rid of the variable synth
 

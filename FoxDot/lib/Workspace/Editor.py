@@ -25,7 +25,7 @@ import re
 
 # Code execution
 from ..Code import execute
-from ..Settings import FONT, FOXDOT_ICON
+from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE
 
 # App object
 
@@ -510,6 +510,21 @@ class workspace:
 
     def toggle_menu(self, event=None):
         self.menu.toggle()
+        return "break"
+
+    def toggle_sc3_plugins(self, event=None):
+        """ Allows you to change the SC3 plugins variable from the editor. Restart
+            of the editor is required. """
+        with open(FOXDOT_CONFIG_FILE, "r") as f:
+            lines = f.readlines()
+        with open(FOXDOT_CONFIG_FILE, "w") as f:
+            for line in lines:
+                if "SC3_PLUGINS" in line:
+                    f.write( "SC3_PLUGINS={}\n".format(not bool(SC3_PLUGINS)) )
+                else:
+                    f.write(line)
+        # Pop-up to tell the user a restart is required
+        tkMessageBox.showwarning(title="Just a heads up", message="Restart of FoxDot is required for the changes to take effect")
         return "break"
     
     def edit_paste(self, event=None):

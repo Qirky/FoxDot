@@ -170,7 +170,10 @@ BufDur       = cls("BufDur")
 
 BufGrain  = cls("BufGrain")
 Decimator = cls("Decimator")
+SmoothDecimator = cls("SmoothDecimator")
 CrossoverDistortion = cls("CrossoverDistortion")
+Disintegrator = cls("Disintegrator")
+MdaPiano      = cls("MdaPiano")
 
 # Array manipulation emulator functions
 

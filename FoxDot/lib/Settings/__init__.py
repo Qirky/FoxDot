@@ -45,12 +45,14 @@ def GET_FX_FILES():
 # Set Environment Variables
 
 import conf
+
+FOXDOT_CONFIG_FILE  = conf.filename
     
 ADDRESS       = conf.ADDRESS
 PORT          = conf.PORT
 PORT2         = conf.PORT2
 FONT          = conf.FONT
-SC3_PLUGINS   = conf.SC3PLUGINS
+SC3_PLUGINS   = conf.SC3_PLUGINS
 MAX_CHANNELS  = conf.MAX_CHANNELS
 
 # Name of SamplePlayer SynthDef

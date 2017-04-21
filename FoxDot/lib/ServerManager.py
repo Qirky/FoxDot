@@ -71,7 +71,7 @@ class SCLangServerManager:
         return self.bus
 
     def sendOSC(self, packet):
-        """ Compiles and sends an OSC message for SuperCollider """
+        """ Compiles and sends an 's_new' OSC message for SuperCollider """
         message = OSCMessage("/s_new")
         node = packet[1] = self.nextnodeID()
         message.append(packet)
@@ -163,24 +163,13 @@ class SCLangServerManager:
         packet = ['makeSound', this_node, 1, group_id, 'bus', this_bus, 'sus', max_sus]
         msg.append(packet)
         bundle.append(msg)
-
-        # Send to SuperCollider
-
-        # Maybe check the time?
-##        if player:
-##            early = player.event_index - self.metro.now()
-##            if early < 0:
-##                print "late:", abs(early)
-##            else:
-##                print "early:", early, "latency:", self.metro.latency
-        #self.client.send( bundle )
-        #return
-        #if player:
-        #    pass#print player.char, player.event_index, player.queue_block
         return bundle        
 
-    def send(self, message):
-        self.client.send(OSCMessage(message))
+    def send(self, address, message):
+        """ Sends message (a list) to SuperCollider """
+        msg = OSCMessage(address)
+        msg.append(message)
+        self.client.send(msg)
         return
 
     def free_node(self, node):

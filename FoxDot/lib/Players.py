@@ -1623,13 +1623,14 @@ class send_delay:
         # ---
     def __repr__(self):
         return "<'{}' delay>".format(self.synth)
-    def __call__(self):
-        for key, value in self.update_dict.items():
-            self.master.__dict__[key].update(value)
-            if key == "buf" and value != 0:
-                self.master.__dict__["char"].update( Samples.getBuffer(value).char )
-        compiled_msg = self.server.sendPlayerMessage(self.synth, self.msg, self.fx)
-        self.queue_block.osc_messages.append(compiled_msg)
+    def __call__(self, *args, **kwargs):
+        if kwargs.get("verbose", True):
+            for key, value in self.update_dict.items():
+                self.master.__dict__[key].update(value)
+                if key == "buf" and value != 0:
+                    self.master.__dict__["char"].update( Samples.getBuffer(value).char )
+            compiled_msg = self.server.sendPlayerMessage(self.synth, self.msg, self.fx)
+            self.queue_block.osc_messages.append(compiled_msg)
         return
         
 
