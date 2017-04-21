@@ -20,4 +20,5 @@ setup(name='FoxDot',
                                  'osc/*.scd',
                                  'osc/sceffects/*.scd',
                                  'osc/scsyndef/*.scd'],
-                      'FoxDot.lib.Workspace': ['img/*']})
+                      'FoxDot.lib.Workspace': ['img/*'],
+                      'FoxDot.lib.Settings' : ['conf.txt']})

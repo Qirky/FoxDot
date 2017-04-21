@@ -1,3 +1,9 @@
+### v0.3.1 fixes and updates
+
+- `TempoClock` uses a `start_time` value that, when used on multiple instances of FoxDot, should synchronise the timings. This is a work in progress
+- Added a "use SC3 Plugins" tick-box on the "Code" drop down menu to allow for easier configuration
+- `piano` SynthDef added using th SC3 Plugin "MdaPiano"
+
 ### v0.3 fixes and update
 
 - `var` type can be used with Player `delay` and nested groups in the `oct` attribute.

@@ -1,13 +1,13 @@
-FoxDot - Live Coding with Python v0.3
-=====================================
+FoxDot - Live Coding with Python v0.3.1
+=======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.3 fixes and update
+### v0.3.1 fixes and updates
 
-- `var` type can be used with Player `delay` and nested groups in the `oct` attribute.
-- Increased `TempoClock` latency to 0.2 seconds for improved performance.
-- Better handling for auto-completed quotation marks
+- `TempoClock` uses a `start_time` value that, when used on multiple instances of FoxDot, should synchronise the timings. This is a work in progress
+- Added a "use SC3 Plugins" tick-box on the "Code" drop down menu to allow for easier configuration
+- `piano` SynthDef added using th SC3 Plugin "MdaPiano"
 
 See `docs/changelog` for more
 
@@ -36,13 +36,13 @@ $ python setup.py install
 Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
 ```
 - Install the `BatLib` quark in SuperCollider by evaluating `include("BatLib")` in SuperCollider - this is required for the FoxDot Quark to run correctly (Requires [Git to be installed](http://git-scm.com/) on your machine if it is not already).
-- Recompile the SuperCollider class library by going to `Language -> Recompile Class Library` or pressing `Ctrl+Shift+L`
-- If you have installed the sc3 plugins, go to to the directory where Python is installed. On Windows this is usually `C:/Python27/` and `usr/local/lib/python2.7` on a Unix based system. Go into `site-packages/FoxDot/lib/Settings/conf.py` and change `SC3PLUGINS` to `True`. 
+- Recompile the SuperCollider class library by going to `Language -> Recompile Class Library` or pressing `Ctrl+Shift+L` 
 
 #### Startup
 
 1. Open SuperCollider and type in `FoxDot.start` and evaluate this line. SuperCollider is now listening for messages from FoxDot. 
 2. Start FoxDot by entering `python -m FoxDot` at the command line.
+3. If you have installed the SC3 Plugins, use the "Code" drop-down menu to select "Use SC3 Plugins". Restart FoxDot and you'll have access to classes found in the SC3 Plugins.
 
 #### Troubleshooting
 
