@@ -1,6 +1,6 @@
 SynthDef.new(\highPassFilter,
-{|bus, hpf|
+{|bus, hpf, resonance|
 var osc;
 osc = In.ar(bus, 2);
-osc = HPF.ar(osc, hpf);
+osc = RHPF.ar(osc, hpf, resonance);
 ReplaceOut.ar(bus, osc)}).add;

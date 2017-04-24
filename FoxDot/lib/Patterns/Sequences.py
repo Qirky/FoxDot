@@ -82,7 +82,7 @@ def PAlt(pat1, pat2, *patN):
 def PStretch(seq, size):
     ''' Returns 'seq' as a Pattern and looped until its length is 'size'
         e.g. `PStretch([0,1,2], 5)` returns `P[0, 1, 2, 0, 1]` '''
-    return Pattern(data).stretch(size)
+    return Pattern(seq).stretch(size)
 
 def PPairs(seq, func=lambda n: 8-n):
     """ Laces a sequence with a second sequence obtained

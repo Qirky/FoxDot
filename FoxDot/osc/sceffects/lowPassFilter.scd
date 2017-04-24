@@ -1,6 +1,6 @@
 SynthDef.new(\lowPassFilter,
-{|bus, lpf|
+{|bus, lpf, resonance|
 var osc;
 osc = In.ar(bus, 2);
-osc = LPF.ar(osc, lpf);
+osc = RLPF.ar(osc, lpf, resonance);
 ReplaceOut.ar(bus, osc)}).add;

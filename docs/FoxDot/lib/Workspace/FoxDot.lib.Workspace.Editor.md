@@ -110,6 +110,11 @@ Called on window close. Ends Clock thread process
 
 Returns True if text is selected 
 
+##### `toggle_sc3_plugins(self, event=None)`
+
+Allows you to change the SC3 plugins variable from the editor. Restart
+of the editor is required. 
+
 ##### `unhighlight(self)`
 
 Creates thread to wait 0.2 seconds before removing any highlights from the text 

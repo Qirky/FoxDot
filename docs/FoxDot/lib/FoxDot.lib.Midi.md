@@ -41,6 +41,14 @@ If a beat value has been set, return it, otherwise return None
 
 ---
 
+### `rtMidiNotFound(self)`
+
+
+
+#### Methods
+
+---
+
 ## Functions
 
 ### `midi(scale, octave, degree, root=0, stepsPerOctave=12)`

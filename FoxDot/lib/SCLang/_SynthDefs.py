@@ -7,16 +7,16 @@ import Env
 # Sample Player
 
 with SampleSynthDef("play1") as play:
-    play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0)
-    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), play.sus / 2) + 0.0001
-    play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05)
+    play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=2)
+    play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
 
 with SampleSynthDef("play2") as play:
-    play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0)
-    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), play.sus / 2) + 0.0001
-    play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05)
+    play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=2)
+    play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
 
@@ -269,9 +269,9 @@ nylon.env = Env.perc(curve=-4, atk=0.000125, sus=Env.sus * 3)
 nylon.add()
 
 donk = SynthDef("donk")
-donk.amp = donk.amp * 9
-donk.freq = donk.freq / 4
-donk.osc = Ringz.ar(Impulse.ar(0), [donk.freq, donk.freq + 2], donk.sus, donk.amp)
+donk.freq = donk.freq / 2
+donk.amp  = donk.amp / 1.25
+donk.osc = Ringz.ar(Impulse.ar(0, phase=donk.rate) / (donk.rate+1), [donk.freq, donk.freq + 2], donk.sus, donk.amp)
 donk.add()
 
 squish = SynthDef("squish")

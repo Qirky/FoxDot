@@ -85,9 +85,13 @@ The Server will use this Client instance to send replies.
 
 Boot SuperCollider and connect over OSC 
 
+##### `send(self, address, message)`
+
+Sends message (a list) to SuperCollider 
+
 ##### `sendOSC(self, packet)`
 
-Compiles and sends an OSC message for SuperCollider 
+Compiles and sends an 's_new' OSC message for SuperCollider 
 
 ##### `start(self)`
 

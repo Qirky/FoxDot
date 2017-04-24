@@ -129,7 +129,7 @@ class MethodCall:
     def __repr__(self):
         return "<Future {}() call of '{}' player>".format(self.method.__name__, self.parent.synthdef)
 
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         """ Proxy for parent object __call__ """
 
         self.i += 1

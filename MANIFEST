@@ -38,6 +38,7 @@ FoxDot\lib\SCLang\_SynthDefs.py
 FoxDot\lib\SCLang\__init__.py
 FoxDot\lib\Settings\__init__.py
 FoxDot\lib\Settings\conf.py
+FoxDot\lib\Settings\conf.txt
 FoxDot\lib\Workspace\AppFunctions.py
 FoxDot\lib\Workspace\BracketHandler.py
 FoxDot\lib\Workspace\Console.py

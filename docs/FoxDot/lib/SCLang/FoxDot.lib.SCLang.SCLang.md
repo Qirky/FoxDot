@@ -70,6 +70,8 @@ None
 
 #### `DelayN = DelayN`
 
+#### `Disintegrator = Disintegrator`
+
 #### `Dust = Dust`
 
 #### `Formant = Formant`
@@ -116,6 +118,8 @@ None
 
 #### `Line = Line`
 
+#### `MdaPiano = MdaPiano`
+
 #### `Out = Out`
 
 #### `PMOsc = PMOsc`
@@ -135,6 +139,8 @@ None
 #### `SinOsc = SinOsc`
 
 #### `SinOscFB = SinOscFB`
+
+#### `SmoothDecimator = SmoothDecimator`
 
 #### `VarSaw = VarSaw`
 

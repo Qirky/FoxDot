@@ -346,6 +346,14 @@ class Player(Repeatable):
         self.slide     = 0
         self.slidefrom = 1
 
+        # Echo effect
+
+        self.decay = 1
+
+        # Filters
+
+        self.resonance = 1
+
         # --- FoxDot Keywords
         
         # Duration of notes

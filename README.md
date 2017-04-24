@@ -16,7 +16,7 @@ See `docs/changelog` for more
 ## Installation and startup
 
 #### Prerequisites
-- [Python 2.7](https://www.python.org/downloads/release/python-2712/)
+- [Python 2.7](https://www.python.org/downloads/release/python-2712/) - make sure you say "yes" if you'd like to add Python to your path.
 - [SuperCollider 3.6 and above](http://supercollider.github.io/download)
 
 #### Recommended

@@ -24,18 +24,29 @@ import threading
 import Code
 line = "\n"
 
+# Track tempo changes and the start time of each?
+
 class TempoClock:
 
     def __init__(self, bpm=120.0, meter=(4,4)):
 
-        # General set up
-        self.bpm = bpm
-        self.meter = meter
-
-        # Start counting -- first call to clock() is 0
         self.time = 0 # time in secs
         self.beat = 0 # the number of beats
         self.start_time = time() # The time at start
+
+        # Player Objects stored here
+        self.playing = []
+
+        # All other scheduled items go here
+        self.items   = []
+
+        self.tempo_changes  = []
+        self.historic_beats = 0
+        self.last_bpm       = bpm
+
+        # General set up
+        self.bpm = bpm
+        self.meter = meter
 
         # Create the queue
         self.queue = Queue()
@@ -53,12 +64,6 @@ class TempoClock:
 
         # Debug
         self.debugging = False
-
-        # Player Objects stored here
-        self.playing = []
-
-        # All other scheduled items go here
-        self.items   = []
 
         # If one object is going to played
         self.solo = SoloPlayer()
@@ -83,8 +88,29 @@ class TempoClock:
     def __setattr__(self, attr, value):
         if attr == "bpm":
             self.start_time = time()
-            self.time       = 0.0
+            self.tempo_changes.append([self.start_time, self.beat, value])
+            self.calc_historic_beats()
+            for player in self.playing:
+                player(count=True)
         self.__dict__[attr] = value
+
+    def calc_historic_beats(self):
+        # Work out how many beats have gone at these tempi
+        num_beats = 0
+        for i in range(len(self.tempo_changes)-1):
+            sec = self.tempo_changes[i + 1][0] - self.tempo_changes[i][0]
+            bpm = self.tempo_changes[i][-1]
+            if isinstance(bpm, var):
+                beats = bpm._bpm_to_beats(sec, self.tempo_changes[i][1])
+            else:
+                beats = (sec * (bpm / 60.0))
+            num_beats += beats
+        self.historic_beats = num_beats
+        return
+
+    def set_start_time(self, seconds):
+        self.tempo_changes[-1][0] = self.start_time = seconds
+        return
 
     def bar_length(self):
         """ Returns the length of a bar in terms of beats """
@@ -124,12 +150,24 @@ class TempoClock:
             bpm_val = self.bpm
 
         # Update clock time
-        
-        now = time() - self.start_time
 
-        self.beat += (now - self.time) * (bpm_val / 60.0)
-            
-        self.time = now
+        if isinstance(self.bpm, var):
+
+            # variable bpm's are trickier and harder to sync
+
+            now = time() - self.start_time
+
+            self.beat += (now - self.time) * (bpm_val / 60.0)
+                
+            self.time = now
+
+        else:
+
+            # Use clock time if using stationary bpm
+
+            sec = time() - self.start_time
+
+            self.beat = self.historic_beats + (sec * (bpm_val / 60.0))
 
         return self.beat
         
@@ -269,7 +307,13 @@ class TempoClock:
 
             if isinstance(obj, Player):
 
-                kwargs['verbose'] = False
+                try:
+
+                    kwargs['verbose'] = False
+
+                except TypeError:
+
+                    pass
 
             self.queue.add(obj, self.now(), args, kwargs)
         
@@ -375,20 +419,23 @@ class Queue:
 
                 # If another event is happening at the same time, schedule together
 
-                #if beat == self.data[i].beat:
                 if beat == block.beat:
 
-                    #self.data[i].add(item, args, kwargs)
                     block.add(item, args, kwargs)                    
 
                     break
 
                 # If the event is later than the next event, schedule it here
 
-                #if beat > self.data[i].beat:
                 if beat > block.beat:
 
-                    i = self.data.index(block)
+                    try:
+
+                        i = self.data.index(block)
+
+                    except ValueError:
+
+                        i = 0
 
                     self.data.insert(i, QueueItem(item, beat, args, kwargs))
 
@@ -416,7 +463,7 @@ class Queue:
         return self.data.pop() if len(self.data) > 0 else list()
 
     def next(self):
-        return self.data[-1].beat if len(self.data) > 0 else sys.maxint
+        return self.data[-1].beat if len(self.data) > 0 else sys.maxsize
             
 from types import FunctionType
 class QueueItem:

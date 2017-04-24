@@ -51,7 +51,9 @@ P.flat() -> un-nested pattern
 
 ##### `layer(self, method, *args, **kwargs)`
 
-Zips a pattern with a modified version of itself 
+Zips a pattern with a modified version of itself. Method argument
+can be a function that takes this pattern as its first argument,
+or the name of a Pattern method as a string. 
 
 ##### `loop(self, n)`
 
@@ -64,6 +66,11 @@ This method automatically laces and groups the data
 ##### `merge(self, value)`
 
 Merge values into one PGroup 
+
+##### `mirror(self)`
+
+Reverses the pattern. Differs to `Pattern.reverse()` in that
+all nested patters are also reversed. 
 
 ##### `pipe(self, pattern)`
 
@@ -88,9 +95,7 @@ Stretches (repeats) the contents until len(Pattern) == size
 
 ##### `string(self)`
 
-Returns a string made up of all the values:
-
-PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
+Returns a PlayString in string format from the Patterns values 
 
 ---
 
@@ -134,7 +139,9 @@ Is called by __getitem__
 
 ##### `layer(self, method, *args, **kwargs)`
 
-Zips a pattern with a modified version of itself 
+Zips a pattern with a modified version of itself. Method argument
+can be a function that takes this pattern as its first argument,
+or the name of a Pattern method as a string. 
 
 ##### `loop(self, n)`
 
@@ -143,6 +150,11 @@ Repeats this pattern n times
 ##### `make(self)`
 
 This method automatically laces and groups the data 
+
+##### `mirror(self)`
+
+Reverses the pattern. Differs to `Pattern.reverse()` in that
+all nested patters are also reversed. 
 
 ##### `pipe(self, pattern)`
 
@@ -163,9 +175,7 @@ Stretches (repeats) the contents until len(Pattern) == size
 
 ##### `string(self)`
 
-Returns a string made up of all the values:
-
-PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
+Returns a PlayString in string format from the Patterns values 
 
 ---
 
@@ -205,7 +215,9 @@ P.flat() -> un-nested pattern
 
 ##### `layer(self, method, *args, **kwargs)`
 
-Zips a pattern with a modified version of itself 
+Zips a pattern with a modified version of itself. Method argument
+can be a function that takes this pattern as its first argument,
+or the name of a Pattern method as a string. 
 
 ##### `loop(self, n)`
 
@@ -214,6 +226,11 @@ Repeats this pattern n times
 ##### `make(self)`
 
 This method automatically laces and groups the data 
+
+##### `mirror(self)`
+
+Reverses the pattern. Differs to `Pattern.reverse()` in that
+all nested patters are also reversed. 
 
 ##### `pipe(self, pattern)`
 
@@ -234,9 +251,7 @@ Stretches (repeats) the contents until len(Pattern) == size
 
 ##### `string(self)`
 
-Returns a string made up of all the values:
-
-PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
+Returns a PlayString in string format from the Patterns values 
 
 ---
 
@@ -273,7 +288,9 @@ P.flat() -> un-nested pattern
 
 ##### `layer(self, method, *args, **kwargs)`
 
-Zips a pattern with a modified version of itself 
+Zips a pattern with a modified version of itself. Method argument
+can be a function that takes this pattern as its first argument,
+or the name of a Pattern method as a string. 
 
 ##### `loop(self, n)`
 
@@ -286,6 +303,11 @@ This method automatically laces and groups the data
 ##### `merge(self, value)`
 
 Merge values into one PGroup 
+
+##### `mirror(self)`
+
+Reverses the pattern. Differs to `Pattern.reverse()` in that
+all nested patters are also reversed. 
 
 ##### `pipe(self, pattern)`
 
@@ -310,9 +332,7 @@ Stretches (repeats) the contents until len(Pattern) == size
 
 ##### `string(self)`
 
-Returns a string made up of all the values:
-
-PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
+Returns a PlayString in string format from the Patterns values 
 
 ---
 
@@ -348,7 +368,9 @@ P.flat() -> un-nested pattern
 
 ##### `layer(self, method, *args, **kwargs)`
 
-Zips a pattern with a modified version of itself 
+Zips a pattern with a modified version of itself. Method argument
+can be a function that takes this pattern as its first argument,
+or the name of a Pattern method as a string. 
 
 ##### `loop(self, n)`
 
@@ -361,6 +383,11 @@ This method automatically laces and groups the data
 ##### `merge(self, value)`
 
 Merge values into one PGroup 
+
+##### `mirror(self)`
+
+Reverses the pattern. Differs to `Pattern.reverse()` in that
+all nested patters are also reversed. 
 
 ##### `pipe(self, pattern)`
 
@@ -385,9 +412,7 @@ Stretches (repeats) the contents until len(Pattern) == size
 
 ##### `string(self)`
 
-Returns a string made up of all the values:
-
-PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
+Returns a PlayString in string format from the Patterns values 
 
 ---
 
@@ -439,7 +464,9 @@ Is called by __getitem__
 
 ##### `layer(self, method, *args, **kwargs)`
 
-Zips a pattern with a modified version of itself 
+Zips a pattern with a modified version of itself. Method argument
+can be a function that takes this pattern as its first argument,
+or the name of a Pattern method as a string. 
 
 ##### `loop(self, n)`
 
@@ -448,6 +475,11 @@ Repeats this pattern n times
 ##### `make(self)`
 
 This method automatically laces and groups the data 
+
+##### `mirror(self)`
+
+Reverses the pattern. Differs to `Pattern.reverse()` in that
+all nested patters are also reversed. 
 
 ##### `pipe(self, pattern)`
 
@@ -468,9 +500,7 @@ Stretches (repeats) the contents until len(Pattern) == size
 
 ##### `string(self)`
 
-Returns a string made up of all the values:
-
-PSeq([1,"x",(1,1),("x","x")]).string() -> "1x11xx" 
+Returns a PlayString in string format from the Patterns values 
 
 ---
 

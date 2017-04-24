@@ -67,16 +67,11 @@ class EffectManager(dict):
         self.pre_kw=[]
         self.kw=[]
 
-    def new(self, foxdot_arg_name, synthdef, args):
+    def new(self, foxdot_arg_name, synthdef, args, order=2):
         self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args)
         self.kw.append(foxdot_arg_name)
         return self[foxdot_arg_name]
     
-    def new_pre_effect(self, foxdot_arg_name, synthdef, args):
-        self[foxdot_arg_name] = PreEffect(foxdot_arg_name, synthdef, args)
-        self.pre_kw.append(foxdot_arg_name)
-        return self[foxdot_arg_name]
-
     def kwargs(self):
         return tuple(self.pre_kw) + tuple(self.kw)
 
@@ -88,32 +83,32 @@ class EffectManager(dict):
 # -- TODO
 
 # Have ordered effects e.g.
-# 1. Process frequency / playback rate
-# 2. Before envelope
-# 3. After envelope
+# 0. Process frequency / playback rate
+# 1. Before envelope
+# 2. After envelope
 
 
 FxList = EffectManager()
 
 # Frequency Effects
 
-##fx = FxList.new_pre_effect("vibrato", "vibrato", ["vibrato", "freq"])
+##fx = FxList.new("vibrato", "vibrato", ["vibrato", "freq"], order=0)
 ##fx.add("osc = Vibrato.ar()")
 ##fx.save()
 
 # Sound effects
 
-fx = FxList.new('hpf','highPassFilter',['hpf'])
-fx.add('osc = HPF.ar(osc, hpf)')
+fx = FxList.new('hpf','highPassFilter',['hpf', 'resonance'], order=2)
+fx.add('osc = RHPF.ar(osc, hpf, resonance)')
 fx.save()
 
-fx = FxList.new('lpf','lowPassFilter',['lpf'])
-fx.add('osc = LPF.ar(osc, lpf)')
+fx = FxList.new('lpf','lowPassFilter',['lpf', 'resonance'], order=2)
+fx.add('osc = RLPF.ar(osc, lpf, resonance)')
 fx.save()
 
 if SC3_PLUGINS:
 
-    fx = FxList.new('bits', 'bitcrush', ['bits', 'sus', 'amp'])
+    fx = FxList.new('bits', 'bitcrush', ['bits', 'sus', 'amp'], order=1)
     fx.add("osc = Decimator.ar(osc, rate: 44100, bits: bits)")
     fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()
@@ -126,23 +121,23 @@ if SC3_PLUGINS:
 ##    fx.add("osc = CrossoverDistortion.ar(osc, amp: distort)")
 ##    fx.save()
 
-fx = FxList.new('chop', 'chop', ['chop', 'sus'])
+fx = FxList.new('chop', 'chop', ['chop', 'sus'], order=2)
 fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")
 fx.save()
 
-fx = FxList.new('echo', 'combDelay', ['echo', 'sus'])
-fx.add('osc = osc + CombL.ar(osc, delaytime: echo * sus, maxdelaytime: 2)')
+fx = FxList.new('echo', 'combDelay', ['echo', 'sus', 'decay'], order=2)
+fx.add('osc = osc + CombL.ar(osc, delaytime: echo * sus, maxdelaytime: 2, decaytime: decay)')
 fx.save()
 
-fx = FxList.new('spin', 'spinPan', ['spin','sus'])
+fx = FxList.new('spin', 'spinPan', ['spin','sus'], order=2)
 fx.add('osc = osc * [FSinOsc.ar(spin / 2, iphase: 1, mul: 0.5, add: 0.5), FSinOsc.ar(spin / 2, iphase: 3, mul: 0.5, add: 0.5)]')
 fx.save()
 
-fx = FxList.new("cut", "trimLength", ["cut", "sus"])
+fx = FxList.new("cut", "trimLength", ["cut", "sus"], order=2)
 fx.add("osc = osc * EnvGen.ar(Env(levels: [1,1,0.01], curve: 'step', times: [sus * cut, 0.01]))")
 fx.save()
 
-fx = FxList.new('verb', 'reverb', ['verb', 'room'])
+fx = FxList.new('verb', 'reverb', ['verb', 'room'], order=2)
 fx.add("osc = FreeVerb.ar(osc, verb, room)")
 fx.save()
 

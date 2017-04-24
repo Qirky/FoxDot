@@ -99,6 +99,51 @@ class var(Repeatable):
 
     def all_values(self):
         return self.data + [self.dependency]
+
+    def _bpm_cycle_dur(self):
+        """ Returns the time, in seconds, for a var to loop to its original
+            value and duration if this var is a bpm value. """
+        return sum([(self.dur[i] / self.data[i]) for i in range(op.LCM(len(self.dur), len(self.data)) )]) * 60
+
+    def _bpm_to_beats(self, duration, start=0):
+        """ If self.data are series of bpm, how many beats occur in
+            the time frame 'duration'. Used in TempoClock """
+
+        cycle_dur = self._bpm_cycle_dur()
+
+        start = start % self.length() # What offset to the start to apply
+
+        n = duration // cycle_dur # How many cycles occurred in duration
+
+        r = duration % cycle_dur  # How many seconds of the last cycle occurred
+
+        total = n * self.length()
+
+        i = 0
+
+        while r > 0:
+
+            # Work out their durations and sub from 'r' until 0
+
+            seconds = (self.dur[i]/ self.data[i]) * 60.0
+
+            offset  = (start / self.data[i]) * 60.0
+
+            seconds = seconds - offset
+
+            if seconds > 0:
+                
+                beats = (self.data[i] * min(seconds, r)) / 60.0
+                r    -= seconds
+                start = 0
+                total += beats
+
+            else:
+
+                start -= self.dur[i]
+
+            i += 1
+        return total
         
     # Mathematical Operators
     # ----------------------
@@ -204,8 +249,8 @@ class var(Repeatable):
         new = self.new(other)
         new.evaluate = fetch(op.Pow)
         return new
-    
-    # /
+    ####### todo - integer division doesn't seem to work
+    # //
     def __div__(self, other):
         # Run an assertion to make sure all values are valid
         #[item / other for item in self.all_values()]
@@ -229,7 +274,8 @@ class var(Repeatable):
         new = self.new(other)
         new.evaluate = fetch(op.Div)
         return new
-    
+
+    # /
     def __truediv__(self, other):
         # Run an assertion to make sure all values are valid
         #[item / other for item in self.all_values()]

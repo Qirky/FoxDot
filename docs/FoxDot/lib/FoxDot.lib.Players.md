@@ -220,6 +220,10 @@ Removes this object from the Clock and resets itself
 
 Returns the length of the largest nested tuple in the current event dict 
 
+##### `mirror(self)`
+
+The degree pattern is reversed 
+
 ##### `now(self, attr=degree, x=0)`
 
 Calculates the values for each attr to send to the server at the current clock time 
@@ -235,12 +239,16 @@ Off sets the next event occurence
 
 ##### `osc_message(self, index=0, **kwargs)`
 
-NEW: Creates an OSC packet to play a SynthDef in SuperCollider,
+Creates an OSC packet to play a SynthDef in SuperCollider,
 use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] 
 
 ##### `reverse(self)`
 
 Sets flag to reverse streams 
+
+##### `rotate(self, n=1)`
+
+Rotates the values in the degree by 'n' 
 
 ##### `send(self, **kwargs)`
 
@@ -249,7 +257,7 @@ Use kwargs to overide values in the
 
 ##### `shuffle(self)`
 
-Shuffles the degree of a player. If possible, do it visually 
+Shuffles the degree of a player. 
 
 ##### `stop(self, N=0)`
 

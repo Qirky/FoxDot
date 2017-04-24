@@ -299,8 +299,8 @@ class metaPattern(object):
             func = getattr(self, method)
             assert callable(func)
 
-        p1 = self.data
-        p2 = func(*args, **kwargs)
+        p1 = Pattern(self.data)
+        p2 = Pattern(func(*args, **kwargs))
 
         size = LCM(len(p1), len(p2))
 
@@ -308,9 +308,7 @@ class metaPattern(object):
 
         for i in range(size):
 
-            a, b = modi(p1,i), modi(p2,i)
-
-            data.append((a,b))
+            data.append((p1[i], p2[i]))
 
         return Pattern(data)
 
