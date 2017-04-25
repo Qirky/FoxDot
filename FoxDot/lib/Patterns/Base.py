@@ -78,6 +78,8 @@ class metaPattern(object):
         """ Is called by __getitem__ """
         if isinstance(key, metaPattern):
             val = self.__class__([value for n, value in enumerate(self) if key[n] > 0])
+        elif isinstance(key, slice):
+            val = self.__getslice__(key.start,  key.stop, key.step)
         else:
             i = key % len(self.data)
             val = self.data[i]
@@ -109,9 +111,15 @@ class metaPattern(object):
             yield i, value
 
     def __getslice__(self, start, stop, step=1):
-        stop = min(stop, len(self))
+
+        start = start if start is not None else 0
+        stop  = min(stop, len(self)) if stop is not None else len(self)
+        step  = step if step is not None else 1
+
         if stop < start:
+
             stop = (len(self.data) + start)
+
         return Pattern([self[i] for i in range(start, stop, step) ])
             
     def __setslice__(self, i, j, item):
@@ -254,7 +262,7 @@ class metaPattern(object):
         new = []
         for i in range(size):
             for seq in sequences:
-                new.append(seq[i])
+                new.append(modi(seq, i))
         return self.__class__(new)
 
     def invert(self):
@@ -311,6 +319,31 @@ class metaPattern(object):
             data.append((p1[i], p2[i]))
 
         return Pattern(data)
+
+    def palindrome(self, a=0, b=None):
+        """ Returns the original pattern with mirrored version of itself appended.
+            a removes values from the middle of the pattern, if positive.
+            b removes values from the end of the pattern, should be negative.
+
+            e.g.
+
+            >>> P[:4].palindrome()
+            P[0, 1, 2, 3, 3, 2, 1, 0]
+            >>> P[:4].palindrome(1)
+            P[0, 1, 2, 3, 2, 1, 0]
+            >>> P[:4].palindrome(-1)
+            P[0, 1, 2, 3, 3, 2, 1]
+            >>> P[:4].palindrome(1,-1)
+            P[0, 1, 2, 3, 2, 1]
+
+        """
+        a = int(a)
+
+        if a < 0:
+
+            a, b = 0, a
+        
+        return self | self.mirror()[a:b]
 
     # Changing the pattern in place
 
@@ -427,6 +460,7 @@ class GeneratorPattern(object):
         for i, func in enumerate(self.mod_functions):
             value = func(value, modi(modi(self.mod, i), index))
         return value
+
     def func(self, index):
         return
 
@@ -531,8 +565,11 @@ class PGroup(metaPattern):
             self.data = new_data
 
     def getitem(self, key):
-        key = key % len(self.data)        
-        return self.data[key]
+        if isinstance(key, slice):
+            return self.__getslice__(key.start, key.stop, key.step)
+        else:
+            key = key % len(self.data)        
+            return self.data[key]
 
     def coeff(self):
         return 0.5

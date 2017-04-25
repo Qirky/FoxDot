@@ -212,6 +212,8 @@ class TempoClock:
 
             sleep_time = 0
 
+            print "Clock latency increased to", self.latency
+
         # Wait until the end of the latency period
 
         sleep(sleep_time)
@@ -226,7 +228,6 @@ class TempoClock:
         """ Main loop """
         
         self.ticking = True
-        small_step = False
 
         while self.ticking:
 
@@ -402,8 +403,6 @@ class Queue:
 
             self.data.append(QueueItem(item, beat, args, kwargs))
 
-            # i = 0
-
             block = self.data[-1]
 
         else:
@@ -412,9 +411,7 @@ class Queue:
             # out its position in the queue
 
             # need to be careful in case self.data changes size
-
-            # for i in range(len(self.data)):
-
+            
             for block in self.data:
 
                 # If another event is happening at the same time, schedule together
@@ -445,10 +442,7 @@ class Queue:
 
         # Tell any players about what queue item they are in
 
-        # if isinstance(item, Player):
         if hasattr(item, "queue_block"):
-
-            # print item, block
 
             item.queue_block = block
 
@@ -575,7 +569,7 @@ class QueueObj:
             self.obj.__call__(*self.args, **self.kwargs)
         except TypeError as e:
             print self.obj, e
-            print "QueuObj Call TypeError", self.kwargs
+            print "QueueObj Call TypeError", self.kwargs
 
 ###############################################################
 """ 

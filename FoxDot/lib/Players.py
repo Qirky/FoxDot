@@ -222,6 +222,7 @@ class Player(Repeatable):
 
         self.scale = None
         self.offset  = 0
+        self.following = None
         
         # List the internal variables we don't want to send to SuperCollider
 
@@ -421,7 +422,7 @@ class Player(Repeatable):
         while True:
 
             self.get_event()
-
+            
             # Set a 'None' to 0
 
             if self.event['dur'] is None:
@@ -462,6 +463,7 @@ class Player(Repeatable):
                 break
 
         # Play the note
+        
 
         if self.metro.solo == self and kwargs.get('verbose', True) and type(self.event['dur']) != rest: 
 
@@ -936,7 +938,13 @@ class Player(Repeatable):
                     
                 else:
 
-                    buf_list  = list(event)
+                    try:
+
+                        buf_list  = list(event)
+
+                    except TypeError as e:
+
+                        buf_list = [event]
 
                 # buf_list is our list of samples to play as characters
                 # event_buf is the list of buffer id's
@@ -968,7 +976,9 @@ class Player(Repeatable):
                         
                         buf_mod_index = int(group_modi(self.event['sample'], i))
 
-                        event_buf[i] = char.bufnum(buf_mod_index).bufnum               
+                        event_buf[i] = char.bufnum(buf_mod_index).bufnum
+
+                        # Begin delay
 
                         delay = 0
                     
@@ -1014,7 +1024,7 @@ class Player(Repeatable):
 
             except TypeError as e:
 
-                WarningMsg("In Player.get_event",  e)
+                WarningMsg("Sample player get_event",  e, bufchar)
             
         return self
 
@@ -1074,15 +1084,9 @@ class Player(Repeatable):
 
                     if sub_key in self.event:
 
-                        #for i in range(0, len(message), 2):
-
                         if sub_key in message:
 
-                            # if sub_key == message[i]:
-
                             i = message.index(sub_key) + 1
-
-                            # val = modi(kwargs.get(key, self.event[key]), index)
 
                             val = message[i]
 
@@ -1292,11 +1296,16 @@ class Player(Repeatable):
         return self
 
     def follow(self, lead=False):
-        """ Takes a now object and then follows the notes """
+        """ Takes a Player object and then follows the notes """
 
         if isinstance(lead, self.__class__):
 
             self.degree = lead.degree
+            self.following = lead
+
+        else:
+
+            self.following = None
 
         return self
 
@@ -1564,22 +1573,22 @@ class PlayerKey(object):
     
     def __gt__(self, other):
         new = PlayerKey(other, self)
-        new.calculate = lambda a, b: int(a > b)
+        new.calculate = lambda a, b: int(a < b)
         return new
     
     def __lt__(self, other):
         new = PlayerKey(other, self)
-        new.calculate = lambda a, b: int(a < b)
+        new.calculate = lambda a, b: int(a > b)
         return new
     
     def __ge__(self, other):
         new = PlayerKey(other, self)
-        new.calculate = lambda a, b: int(a >= b)
+        new.calculate = lambda a, b: int(a <= b)
         return new
     
     def __le__(self, other):
         new = PlayerKey(other, self)
-        new.calculate = lambda a, b: int(a <= b)
+        new.calculate = lambda a, b: int(a >= b)
         return new
 
     def __nonzero__(self):
@@ -1597,6 +1606,13 @@ class PlayerKey(object):
         return repr(self.now())
     def __len__(self):
         return len(self.now())
+
+    # Container
+    def __getitem__(self, key):
+        return self.now()[key]
+    def __iter__(self):
+        for item in self.now():
+            yield item
     
     def now(self, step=1):
         if isinstance(self.other, self.__class__):
@@ -1649,7 +1665,8 @@ class func_delay:
         self.kwargs = kwargs.copy()
     def __repr__(self):
         return "<'{}' delay>".format(self.func.__name__)
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
+        # Perhaps update the args and kwargs
         self.func(*self.args, **self.kwargs)
 
 

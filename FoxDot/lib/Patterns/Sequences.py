@@ -226,7 +226,7 @@ def PEuclid(n, k):
     return Pattern( EuclidsAlgorithm(n, k) )
 
 @loop_pattern_func
-def PDur(n, k, dur=0.25):
+def PDur(n, k, start=0, dur=0.25):
     """ Returns the *actual* durations based on Euclidean rhythms (see PEuclid) where dur
         is the length of each step.
         e.g. `PDur(3, 8)` will return `P[0.75, 0.75, 0.5]` """
@@ -242,9 +242,15 @@ def PDur(n, k, dur=0.25):
         else:
             count += 1
 
-    seq.append(count)       
+    seq.append(count)
 
-    return Pattern(seq) * dur
+    pattern = Pattern(seq)
+
+    if start != 0:
+
+        pattern = pattern.rotate(int(start))
+
+    return pattern * dur
 
 #==============================#
 #      2. Generator Types      #

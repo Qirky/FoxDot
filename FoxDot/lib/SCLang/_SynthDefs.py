@@ -6,16 +6,18 @@ import Env
 
 # Sample Player
 
+# TODO -- put the rate effects in their own synthdefs
+
 with SampleSynthDef("play1") as play:
     play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
-    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=2)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=14)
     play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
 
 with SampleSynthDef("play2") as play:
     play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
-    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=2)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=14)
     play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp

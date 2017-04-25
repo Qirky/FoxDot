@@ -85,7 +85,9 @@ class Repeatable(object):
 
         # If the method call already exists, just update it
 
-        key = ('every', cmd)
+        # key = ('every', cmd)
+
+        key = cmd
 
         if key in self.repeat_events:
 
@@ -104,6 +106,11 @@ class Repeatable(object):
             call.schedule()
 
         return self
+
+    def stop_calling(self, method):
+        self.repeat_events[method].stop()
+        del self.repeat_events[method]
+        return
 
 class MethodCall:
     """ Class to represent an object's method call that,
@@ -125,6 +132,8 @@ class MethodCall:
 
         self.args = args
         self.kwargs = kwargs
+
+        self.stopping = False
 
     def __repr__(self):
         return "<Future {}() call of '{}' player>".format(self.method.__name__, self.parent.synthdef)
@@ -153,7 +162,10 @@ class MethodCall:
             print("{} in '{}': {}".format(e.__class__.__name__, self.method.__name__, e))
 
         # Re-schedule the method call
-        self.schedule()
+
+        if not self.stopping:
+
+            self.schedule()
 
         return
 
@@ -165,7 +177,7 @@ class MethodCall:
         return self in self.parent.metro
 
     def stop(self):
-        del self.parent.repeat_events[self.name]
+        self.stopping = True
 
     def update(self, n, cycle, args=(), kwargs={}):
         """ Updates the values of the MethodCall. Re-adjusts
@@ -181,21 +193,3 @@ class MethodCall:
         self.cycle = cycle
         
         return self
-
-class WhenModMethodCall(MethodCall):
-    def __init__(self, parent, method, mod, n, args=(), kwargs={}):
-        MethodCall.__init__(self, parent, method, n, args, kwargs)
-        self.mod    = mod
-
-    def __call__(self):
-        """ Proxy for parent object __call__ """
-
-        self.i += 1
-        self.next += (self.mod + (self.when[self.i] - self.when[self.i-1]))
-
-        self.method.__call__(*self.args, **self.kwargs)
-
-        # Re-schedule the method call
-        self.schedule()
-
-        return

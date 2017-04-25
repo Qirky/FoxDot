@@ -1,13 +1,20 @@
-FoxDot - Live Coding with Python v0.3.1
+FoxDot - Live Coding with Python v0.3.2
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.3.1 fixes and updates
+### v0.3.2 fixes and updates
 
-- `TempoClock` uses a `start_time` value that, when used on multiple instances of FoxDot, should synchronise the timings. This is a work in progress
-- Added a "use SC3 Plugins" tick-box on the "Code" drop down menu to allow for easier configuration
-- `piano` SynthDef added using th SC3 Plugin "MdaPiano"
+- `PlayerKey` data type can handle `PGroup` transformations without crashing, which improves performance when using `follow`
+- `PlayerKey` data type greater than and less than functions fixed and now works with amplitudes.
+- Better handling of scheduled functions that are "late"
+- Experimental: `play` SynthDef can have a rate of -1 to be played in reverse and also uses a keyword `coarse` similar in function to `chop`
+- Added `Pattern` method, palindrome that appends a mirrored version of the pattern to itself.
+- Removed visual feedback for shuffling, rotating, etc patterns in Players as it did not work correctly with nested patterns.
+
+### Known bugs
+
+- Using as `linvar` as the Clock tempo will crash the Clock.
 
 See `docs/changelog` for more
 
@@ -24,8 +31,9 @@ See `docs/changelog` for more
 
 #### Installing FoxDot
 
-- Install the latest version from the Python Package Index from the command line by executing `pip install FoxDot`. You can update FoxDot to the latest version if it's already installed by adding `-U` or `--upgrade` flag to this command.
-- Alternatively, you can build from source:
+- Open up a command prompt and type `pip install FoxDot`. This will download and install the latest stable version of FoxDot from the Python Package Index if you have properly configured Python.
+- You can update FoxDot to the latest version if it's already installed by adding `-U` or `--upgrade` flag to this command.
+- Alternatively, you can build from source from directly from this repository:
 ``` bash
 $ git clone https://github.com/Qirky/FoxDot.git
 $ cd FoxDot

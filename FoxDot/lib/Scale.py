@@ -163,6 +163,7 @@ class __scale__:
             self.__dict__[key] = value
         return
 
+    @staticmethod
     def names():
         """ Returns a list of all the scales by name """
         return sorted(ScalePattern.names.keys())

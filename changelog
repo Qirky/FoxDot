@@ -1,3 +1,12 @@
+### v0.3.2 fixes and updates
+
+- `PlayerKey` data type can handle `PGroup` transformations without crashing, which improves performance when using `follow`
+- `PlayerKey` data type greater than and less than functions fixed and now works with amplitudes.
+- Better handling of scheduled functions that are "late"
+- Experimental: `play` SynthDef can have a rate of -1 to be played in reverse and also uses a keyword `coarse` similar in function to `chop`
+- Added `Pattern` method, palindrome that appends a mirrored version of the pattern to itself.
+- Removed visual feedback for shuffling, rotating, etc patterns in Players as it did not work correctly with nested patterns.
+
 ### v0.3.1 fixes and updates
 
 - `TempoClock` uses a `start_time` value that, when used on multiple instances of FoxDot, should synchronise the timings. This is a work in progress
