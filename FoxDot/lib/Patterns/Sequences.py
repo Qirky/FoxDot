@@ -52,6 +52,9 @@ class __pattern__ :
     def __call__(self, *args):
         return PGroup(args if len(args) > 1 else args[0])
 
+    def __add__(self, other):
+        return PPlus(other)
+
 # This is a pattern creator  
 P = __pattern__()
 
@@ -60,10 +63,6 @@ P = __pattern__()
 #================================#
 
 #: Pattern functions that take patterns as arguments
-
-def PStutter(seq, n=2):
-    """ PStutter(seq, n) -> Creates a pattern such that each item in the array is repeated n times (n can be a pattern) """
-    return Pattern(seq).stutter(n)
 
 def PShuf(seq):
     ''' PShuf(seq) -> Returns a shuffled version of seq'''
@@ -155,6 +154,11 @@ def loop_pattern_func(f):
         return pat
     new_function.argspec = inspect.getargspec(f)
     return new_function
+
+@loop_pattern_func
+def PStutter(x, n=2):
+    """ PStutter(seq, n) -> Creates a pattern such that each item in the array is repeated n times (n can be a pattern) """
+    return Pattern([x for i in range(n)])
 
 @loop_pattern_func
 def PSq(a=1, b=2, c=3):

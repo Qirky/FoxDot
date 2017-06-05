@@ -53,7 +53,12 @@ class CodeString:
         self.iter += 1
         return self.lines[self.iter]
     def __str__(self):
-        return foxdot_tokenize.read(self) if "when" in self.raw else self.raw
+        return (foxdot_tokenize.read(self) if "when" in self.raw else self.raw)
+
+
+def clean(string):
+    """ Removes non-ascii characters from a string """
+    return string.encode("ascii", "replace")
         
 class FoxDotCode:
     namespace={}
@@ -75,6 +80,8 @@ class FoxDotCode:
 
             if type(code) != CodeType:
 
+                code = clean(code)
+
                 response = stdout(code)
 
                 if verbose is True:
@@ -83,11 +90,13 @@ class FoxDotCode:
 
             exec self._compile(code) in self.namespace
 
-        except:
+        except Exception as e:
 
             response = error_stack()
 
-            print(response)
+            if verbose is True:
+
+                print(response)
 
         return response
 
@@ -126,15 +135,7 @@ class FoxDotCode:
     
         if len(update) > 0:
 
-            try:
-
-                self.__call__("\n".join(update), verbose = False)
-
-            except SyntaxError as e:
-
-                # Supress syntax errors
-
-                pass
+            self.__call__("\n".join(update), verbose = False)
                 
         return
 
@@ -148,6 +149,10 @@ def stdout(code):
     """ Shell-based output """
     console_text = code.strip().split("\n")
     return ">>> {}".format("\n... ".join(console_text))
+
+def debug_stdout(*args):
+    """ Forces prints to server-side """
+    sys.__stdout__.write(" ".join([str(s) for s in args]) + "\n")
 
 def WarningMsg(*text):
     print("Warning: {}".format( " ".join(str(s) for s in text) ))

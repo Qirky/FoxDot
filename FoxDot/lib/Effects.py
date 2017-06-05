@@ -26,7 +26,7 @@ class Effect:
         
     def __str__(self):
         s  = "SynthDef.new(\{},\n".format(self.synthdef)
-	s += "{" + "|bus, {}|\n".format(", ".join(self.args))
+        s += "{" + "|bus, {}|\n".format(", ".join(self.args))
         s += "var osc;\n"
         s += "osc = In.ar(bus, 2);\n"
         s += self.list_effects()
@@ -98,28 +98,20 @@ FxList = EffectManager()
 
 # Sound effects
 
-fx = FxList.new('hpf','highPassFilter',['hpf', 'resonance'], order=2)
-fx.add('osc = RHPF.ar(osc, hpf, resonance)')
+fx = FxList.new('hpf','highPassFilter',['hpf', 'hpr'], order=2)
+fx.add('osc = RHPF.ar(osc, hpf, hpr)')
 fx.save()
 
-fx = FxList.new('lpf','lowPassFilter',['lpf', 'resonance'], order=2)
-fx.add('osc = RLPF.ar(osc, lpf, resonance)')
+fx = FxList.new('lpf','lowPassFilter',['lpf', 'lpr'], order=2)
+fx.add('osc = RLPF.ar(osc, lpf, lpr)')
 fx.save()
 
 if SC3_PLUGINS:
 
     fx = FxList.new('bits', 'bitcrush', ['bits', 'sus', 'amp'], order=1)
-    fx.add("osc = Decimator.ar(osc, rate: 44100, bits: bits)")
+    fx.add("osc = Decimator.ar(osc, rate: 44100/8, bits: bits)")
     fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()
-
-##    fx = FxList.new('grate', 'disintergator', ['grate'])
-##    fx.add("osc = Disintegrator.ar(osc, multiplier: grate)")
-##    fx.save()
-
-##    fx = FxList.new("distort", "dirtortion", ["distort"])
-##    fx.add("osc = CrossoverDistortion.ar(osc, amp: distort)")
-##    fx.save()
 
 fx = FxList.new('chop', 'chop', ['chop', 'sus'], order=2)
 fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")
@@ -139,6 +131,15 @@ fx.save()
 
 fx = FxList.new('verb', 'reverb', ['verb', 'room'], order=2)
 fx.add("osc = FreeVerb.ar(osc, verb, room)")
+fx.save()
+
+fx = FxList.new("formant", "formantFilter", ["formant"], order=2)
+fx.add("formant = (formant % 8) + 1")
+fx.add("osc = Formlet.ar(osc, formant * 200, formant / 1000, formant / 500).tanh")
+fx.save()
+
+fx = FxList.new("shape", "wavesShapeDistortion", ["shape"], order=2)
+fx.add("osc = (osc * (shape * 50)).fold2(1).distort / 5")
 fx.save()
 
 Out()

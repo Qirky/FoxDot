@@ -10,6 +10,8 @@
 
 """
 
+from __future__ import division
+from types import FunctionType, MethodType
 from Players import Player, send_delay, func_delay
 from Repeat import MethodCall
 from Patterns import asStream
@@ -22,17 +24,23 @@ from traceback import format_exc as error_stack
 import sys
 import threading
 import Code
-line = "\n"
+import inspect
 
 # Track tempo changes and the start time of each?
 
-class TempoClock:
+class TempoClock(object):
 
     def __init__(self, bpm=120.0, meter=(4,4)):
+
+        # Flag this when done init
+        self.__setup   = False
 
         self.time = 0 # time in secs
         self.beat = 0 # the number of beats
         self.start_time = time() # The time at start
+
+        # Don't start yet...
+        self.ticking = False
 
         # Player Objects stored here
         self.playing = []
@@ -45,25 +53,23 @@ class TempoClock:
         self.last_bpm       = bpm
 
         # General set up
-        self.bpm = bpm
+        self.bpm   = bpm
         self.meter = meter
 
         # Create the queue
         self.queue = Queue()
         self.current_block = None
-
-        # Don't start yet...
-        self.ticking = False
         
         # Midi Clock In
         self.midi_clock = None
 
         # Can be configured
-        self.latency = 0.2
+        self.latency = 0.4
         self.sleep_time = 0.001
 
         # Debug
         self.debugging = False
+        self.__setup   = True
 
         # If one object is going to played
         self.solo = SoloPlayer()
@@ -86,13 +92,14 @@ class TempoClock:
         return item in self.items
 
     def __setattr__(self, attr, value):
-        if attr == "bpm":
-            self.start_time = time()
-            self.tempo_changes.append([self.start_time, self.beat, value])
-            self.calc_historic_beats()
-            for player in self.playing:
-                player(count=True)
-        self.__dict__[attr] = value
+        if attr == "bpm" and self.__setup:
+            # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
+            self.schedule(lambda: object.__setattr__(self, attr, value))
+            # Notify listening clients
+            pass
+        else:
+            self.__dict__[attr] = value
+        return
 
     def calc_historic_beats(self):
         # Work out how many beats have gone at these tempi
@@ -148,28 +155,45 @@ class TempoClock:
             bpm_val = self.midi_clock.bpm
         else:
             bpm_val = self.bpm
+            
+        now = time() - self.start_time
 
-        # Update clock time
-
-        if isinstance(self.bpm, var):
-
-            # variable bpm's are trickier and harder to sync
-
-            now = time() - self.start_time
-
-            self.beat += (now - self.time) * (bpm_val / 60.0)
-                
-            self.time = now
-
-        else:
-
-            # Use clock time if using stationary bpm
-
-            sec = time() - self.start_time
-
-            self.beat = self.historic_beats + (sec * (bpm_val / 60.0))
+        self.beat += (now - self.time) * (bpm_val / 60.0)
+            
+        self.time = now
 
         return self.beat
+##
+##    def now_(self):
+##        """ Returns the total elapsed time (in beats as opposed to seconds) """
+##        if isinstance(self.bpm, var):
+##            bpm_val = self.bpm.now(self.beat)
+##        elif self.midi_clock:
+##            bpm_val = self.midi_clock.bpm
+##        else:
+##            bpm_val = self.bpm
+##
+##        # Update clock time
+##
+##        if isinstance(self.bpm, var):
+##
+##            # variable bpm's are trickier and harder to sync
+##
+##            now = time() - self.start_time
+##
+##            self.beat += (now - self.time) * (bpm_val / 60.0)
+##                
+##            self.time = now
+##
+##        else:
+##
+##            # Use clock time if using stationary bpm
+##
+##            sec = time() - self.start_time
+##
+##            self.beat = self.historic_beats + (sec * (bpm_val / 60.0))
+##
+##        return self.beat
         
     def start(self):
         """ Starts the clock thread """
@@ -184,6 +208,8 @@ class TempoClock:
             events are activated  """
 
         # Call each item in turn (they can call each other if there are dependencies
+
+        # print self.now(),
 
         t1 = clock()
         
@@ -212,6 +238,8 @@ class TempoClock:
 
             sleep_time = 0
 
+            print block
+
             print "Clock latency increased to", self.latency
 
         # Wait until the end of the latency period
@@ -220,7 +248,9 @@ class TempoClock:
 
         # Send all the message to supercollider together
 
-        block.send_osc_messages()
+        if self.ticking:
+
+            block.send_osc_messages()
 
         return
 
@@ -272,6 +302,18 @@ class TempoClock:
         """ TempoClock.schedule(callable, beat=None)
             Add a player / event to the queue """
 
+        # Make sure the object can actually be called
+
+        try:
+
+            assert callable(obj)
+
+        except:
+
+            raise ScheduleError(obj)
+
+        # Start the clock ticking if not already
+
         if self.ticking == False:
 
             self.start()
@@ -306,15 +348,15 @@ class TempoClock:
 
                 print "Object scheduled late:", obj, beat, self.now()
 
+            # print obj, kwargs
+
             if isinstance(obj, Player):
 
-                try:
+                kwargs['verbose'] = False
 
-                    kwargs['verbose'] = False
+                print "Scheduling", obj, "at", self.now(), "when expected at", beat
 
-                except TypeError:
-
-                    pass
+            # maybe don't schedule now?
 
             self.queue.add(obj, self.now(), args, kwargs)
         
@@ -339,6 +381,9 @@ class TempoClock:
     def call(self, obj, dur, args=()):
         """ Returns a 'schedulable' wrapper for any callable object """
         return Wrapper(self, obj, dur, args)
+
+    def players(self, exclude=[]):
+        return [p for p in self.playing if p not in exclude]
 
     # Every n beats, do...
 
@@ -395,6 +440,29 @@ class Queue:
         return "\n".join([str(item) for item in self.data]) if len(self.data) > 0 else "[]"
 
     def add(self, item, beat, args=(), kwargs={}):
+        """ Adds a callable object to the queue at a specified beat, args and kwargs for the
+            callable object must be in a list and dict.
+        """
+        
+        # item must be callable to be schedule, so check args and kwargs are appropriate for it
+
+        try:
+
+            function = inspect.getargspec(item)
+
+        except TypeError:
+
+            function = inspect.getargspec(item.__call__)
+
+        # If the item can't take arbitrary keywords, check any kwargs are valid
+
+        if function.keywords is None: 
+
+            for key in list(kwargs.keys()):
+
+                if key not in function.args:
+
+                    del kwargs[key]
 
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
@@ -565,11 +633,12 @@ class QueueObj:
         return repr(self.obj)
     def __call__(self):
         ### <> getting verbose error
-        try:
-            self.obj.__call__(*self.args, **self.kwargs)
-        except TypeError as e:
-            print self.obj, e
-            print "QueueObj Call TypeError", self.kwargs
+        self.obj.__call__(*self.args, **self.kwargs)
+##        try:
+##            self.obj.__call__(*self.args, **self.kwargs)
+##        except TypeError as e:
+##            print self.obj, e
+##            print "QueueObj Call TypeError", self.kwargs
 
 ###############################################################
 """ 
@@ -634,3 +703,10 @@ class SoloPlayer:
         return (other in self.data) if self.data else True
     def __ne__(self, other):
         return (other not in self.data) if self.data else True
+
+
+class ScheduleError(Exception):
+    def __init__(self, item):
+        self.type = str(type(item))[1:-1]
+    def __str__(self):
+        return "Could not schedule object of {}".format(self.type)

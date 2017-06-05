@@ -13,7 +13,8 @@ class metaPattern(object):
     """ Abstract base class for Patterns """
 
     data = None
-    bracket_style = "[%s]"    
+    bracket_style = "[%s]"
+    debugging = False
 
     def __init__(self, data=[]):
         
@@ -62,6 +63,12 @@ class metaPattern(object):
 
     def asGroup(self):
         return PGroup(self.data)
+
+    def int(self):
+        return self.__class__([value.int() if isinstance(value, metaPattern) else int(value) for value in self.data])
+
+    def float(self):
+        return self.__class__([value.float() if isinstance(value, metaPattern) else int(value) for value in self.data])
     
     """
 
@@ -76,8 +83,8 @@ class metaPattern(object):
 
     def getitem(self, key):
         """ Is called by __getitem__ """
-        if isinstance(key, metaPattern):
-            val = self.__class__([value for n, value in enumerate(self) if key[n] > 0])
+        if isinstance(key, (metaPattern, tuple)):
+            val = self.__class__([self.getitem(n) for n in key])
         elif isinstance(key, slice):
             val = self.__getslice__(key.start,  key.stop, key.step)
         else:
@@ -152,6 +159,11 @@ class metaPattern(object):
     def __truediv__(self, other):  return PDiv(self, other)
     def __rtruediv__(self, other): return PDiv2(self, other)
 
+    def __abs__(self):
+        return self.__class__([abs(item) for item in self])
+    def abs(self):
+        return abs(self)
+
     """
 
         Piping patterns together using the '|' operator
@@ -213,6 +225,23 @@ class metaPattern(object):
         new = self.__class__(self.data[:])
         new.data.reverse()
         return new
+
+    def pivot(self, i):
+        """ Mirrors and rotates the Pattern such that the item at index 'i'
+            is in the same place """
+        if len(self) > 0:
+            mid = len(self) / 2
+            if i > mid:
+                i = len(self) - i - 1
+                new = self.mirror().rotate((2*(i % len(self)))+1)
+            else:
+                new = self.rotate((2*(i % len(self)))+1).mirror()
+        else:
+            new = self.copy()
+        return new
+
+    def copy(self):
+        return self.__class__(self.data[:])
     
     def stretch(self, size):
         """ Stretches (repeats) the contents until len(Pattern) == size """
@@ -345,6 +374,36 @@ class metaPattern(object):
         
         return self | self.mirror()[a:b]
 
+    def normalise(self):
+        """ Returns the pattern with all values between 0 and 1 """
+        pos = self - min(self)
+        return pos / max(pos)
+
+    def unduplicate(self):
+        """ Removes any consecutive duplicate numbers from a Pattern """
+        new = []
+        last_val = None
+        for value in self:
+            if value != last_val:
+                new.append(value)
+            last_val = value                
+        return self.__class__(new)
+
+    def limit(self, func, value):
+        new = []
+        i = 0
+        while func(new) < value:
+            new.append(self[i])
+            i+=1
+        return self.__class__(new)
+            
+            
+
+    #def amen(self, i=2):
+        #""" Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
+        # new = [[self[0], PlayGroup(self[:2].string())]] + list(self[1:-2]) + [[PlayGroup(self[-2:].string())], self[-1]]
+        #return self.__class__(new)
+
     # Changing the pattern in place
 
     def append(self, item):
@@ -413,6 +472,10 @@ class metaPattern(object):
 
     def make(self):
         """ This method automatically laces and groups the data """
+
+        if self.debugging:
+
+            print self.data, type(self.data)
 
         #: Force data into an iterable form
         if isinstance(self.data, str):
@@ -564,12 +627,12 @@ class PGroup(metaPattern):
 
             self.data = new_data
 
-    def getitem(self, key):
-        if isinstance(key, slice):
-            return self.__getslice__(key.start, key.stop, key.step)
-        else:
-            key = key % len(self.data)        
-            return self.data[key]
+##    def getitem(self, key):
+##        if isinstance(key, slice):
+##            return self.__getslice__(key.start, key.stop, key.step)
+##        else:
+##            key = key % len(self.data)        
+##            return self.data[key]
 
     def coeff(self):
         return 0.5

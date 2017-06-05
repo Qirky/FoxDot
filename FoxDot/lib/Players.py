@@ -124,7 +124,7 @@ from random import shuffle, choice
 from copy import copy, deepcopy
 
 from Settings import SamplePlayer
-from Code import WarningMsg
+from Code import WarningMsg, debug_stdout
 from SCLang.SynthDef import SynthDefProxy, SynthDef
 from Effects import FxList
 from Repeat import *
@@ -132,6 +132,8 @@ from Patterns import *
 from Midi import *
 from Root import Root
 from Scale import Scale
+
+from time import sleep
 
 from Bang import Bang
 
@@ -353,7 +355,8 @@ class Player(Repeatable):
 
         # Filters
 
-        self.resonance = 1
+        self.lpr = 1
+        self.hpr = 1
 
         # --- FoxDot Keywords
         
@@ -407,7 +410,9 @@ class Player(Repeatable):
 
             try:
 
-                self.event_n, self.event_index = self.count()
+                # this is where self.reversing goes wrong
+
+                self.event_n, self.event_index = self.count(self.event_index)        
 
             except TypeError:
 
@@ -467,9 +472,9 @@ class Player(Repeatable):
 
         if self.metro.solo == self and kwargs.get('verbose', True) and type(self.event['dur']) != rest: 
 
-            if self.synthdef != SamplePlayer:
+            #if self.synthdef != SamplePlayer:
 
-                self.freq = self.calculate_freq()
+            #    self.freq = self.calculate_freq() # move to Server?
 
             self.send()
 
@@ -500,14 +505,15 @@ class Player(Repeatable):
 
         return
 
-    def count(self, time=None):
-
-        # Count the events that should have taken place between 0 and now()
+    def count(self, time=None, event_after=False):
+        """ Counts the number of events that will have taken place between 0 and `time`. If
+            `time` is not specified the function uses self.metro.now(). Setting `event_after`
+            to `True` will find the next event *after* `time`"""
 
         n = 0
         acc = 0
         dur = 0
-        now = (time if time is not None else self.metro.now()) + self.metro.get_latency()
+        now = (time if time is not None else self.metro.now()) 
 
         durations = self.rhythm()
         total_dur = float(sum(durations))
@@ -534,26 +540,39 @@ class Player(Repeatable):
 
             return 0, 0
 
-        while True:
-            
-            dur = float(modi(durations, n))
+        if acc != now:
 
-            if acc + dur > now:
+            while True:
 
-                break
+                dur = float(modi(durations, n))
 
-            else:
-                
-                acc += dur
-                n += 1
+                if acc + dur == now:
+
+                    acc += dur
+
+                    n += 1
+
+                    break
+
+                elif acc + dur > now:
+
+                    if event_after:
+
+                        acc += dur
+                        n += 1
+
+                    break
+
+                else:
+                    
+                    acc += dur
+                    n += 1
 
         # Store duration times
 
         self.old_dur = self.attr['dur']
 
         # Returns value for self.event_n and self.event_index
-
-        self.notes_played = n
 
         return n, acc
 
@@ -592,7 +611,7 @@ class Player(Repeatable):
         
         if self.metro.solo.active() and self.metro.solo != self:
 
-            self.metro.schedule(lambda: self.metro.solo.add(self), self.metro.next_bar() - 0.001)
+            self.metro.schedule(lambda *args, **kwargs: self.metro.solo.add(self), self.metro.next_bar())
 
         # Update the attribute values
 
@@ -655,13 +674,11 @@ class Player(Repeatable):
             
             self.isplaying = True
             self.stopping = False
-
-            # TODO -- play the player early or later than the bar if they're offbeat for example?
             
             next_bar = self.metro.next_bar()
             self.event_n = 0
 
-            self.event_n, self.event_index = self.count(next_bar)
+            self.event_n, self.event_index = self.count(next_bar, event_after=True)
             
             self.metro.schedule(self, self.event_index)
 
@@ -1024,7 +1041,7 @@ class Player(Repeatable):
 
             except TypeError as e:
 
-                WarningMsg("Sample player get_event",  e, bufchar)
+                WarningMsg("Sample player get_event",  e) # maybe issue with bufchar?
             
         return self
 
@@ -1033,10 +1050,21 @@ class Player(Repeatable):
         """ Creates an OSC packet to play a SynthDef in SuperCollider,
             use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] """
 
-        freq = float(group_modi(self.attr['freq'], index))
-        
-        message = ['freq',  freq ]
+        #freq = float(group_modi(self.attr['freq'], index))
+        message = []
         fx_dict = {}
+
+        # Calculate frequency
+
+        if self.synthdef != SamplePlayer:
+
+            degree = group_modi(kwargs.get("degree", self.event["degree"]), index)
+            octave = group_modi(kwargs.get("oct", self.event["oct"]), index)
+            root   = group_modi(kwargs.get("root", self.event["root"]), index)
+
+            freq   = miditofreq(midi( kwargs.get("scale", self.scale), octave, degree, root ))
+            
+            message = ['freq',  freq ]
 
         attributes = self.attr.copy()
 
@@ -1128,14 +1156,23 @@ class Player(Repeatable):
         banged = False
         sent_messages = []
         delayed_messages = []
+        freq = []
 
         last_msg = None
 
         for i in range(size):
 
+            # Get the basic osc_msg
+
             osc_msg, effects = self.osc_message(i, **kwargs)
 
-            delay = group_modi(kwargs.get('delay', self.event.get('delay', 0)), i)
+            if "freq" in osc_msg:
+
+                freq.append(osc_msg[osc_msg.index("freq")+1])
+
+            # Look at delays and schedule events later if need be
+
+            delay = float(group_modi(kwargs.get('delay', self.event.get('delay', 0)), i))
             
             buf   = group_modi(kwargs.get('buf', self.event['buf']), i)
 
@@ -1153,7 +1190,7 @@ class Player(Repeatable):
 
                         # Schedule the note to play in the future & to update the playerkeys
 
-                        self.metro.schedule(send_delay(self, synthdef, osc_msg, effects), self.event_index + delay)
+                        self.metro.schedule(send_delay(self, synthdef, osc_msg, effects), self.event_index + float(delay))
 
                         delayed_messages.append((delay, osc_msg, effects))
 
@@ -1204,6 +1241,8 @@ class Player(Repeatable):
 
                 for buf_num, buf_delay in self.buf_delay:
 
+                    buf_delay = float(buf_delay)
+
                     # Only send messages with amps > 0
 
                     i = osc_msg.index('amp') + 1
@@ -1237,6 +1276,8 @@ class Player(Repeatable):
                                 delayed_messages.append((buf_delay + delay, osc_msg, effects))
 
                     last_msg = (osc_msg, effects)
+
+        self.freq = freq
             
         return
 
@@ -1341,11 +1382,11 @@ class Player(Repeatable):
 
     def reverse(self):
         """ Sets flag to reverse streams """
-        self.reversing = not self.reversing
-        if self.reversing:
-            self.event_n -= 1
-        else:
-            self.event_n += 1
+        for attr in self.attr:
+            try:
+                self.attr[attr] = self.attr[attr].pivot(self.event_n)
+            except AttributeError:
+                pass
         return self
 
     def shuffle(self):
@@ -1647,6 +1688,7 @@ class send_delay:
         # ---
     def __repr__(self):
         return "<'{}' delay>".format(self.synth)
+
     def __call__(self, *args, **kwargs):
         if kwargs.get("verbose", True):
             for key, value in self.update_dict.items():

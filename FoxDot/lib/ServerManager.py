@@ -11,6 +11,7 @@ import subprocess
 from time import sleep
 from Settings import *
 from OSC import *
+from Code import WarningMsg
 
 class SCLangClient(OSCClient):
     def send(*args, **kwargs):
@@ -119,9 +120,8 @@ class SCLangServerManager:
 
             except TypeError as e:
 
-                print e
-                print "packet val is", packet[i], packet[i+1]
-                raise TypeError(e)
+                WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( packet[i], packet[i+1] ))
+                packet[i+1] = 0.0
                 
         packet = [synthdef, this_node, 0, group_id, 'bus', this_bus] + packet
         msg.append( packet )
@@ -138,7 +138,15 @@ class SCLangServerManager:
 
             for i in range(0, len(this_effect), 2):
 
-                val = float(this_effect[i+1])
+                try:
+
+                    val = float(this_effect[i+1])
+
+                except TypeError as e:
+
+                    WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( this_effect[i], this_effect[i+1] ))
+
+                    val = 0
 
                 if val == 0:
 
@@ -163,6 +171,7 @@ class SCLangServerManager:
         packet = ['makeSound', this_node, 1, group_id, 'bus', this_bus, 'sus', max_sus]
         msg.append(packet)
         bundle.append(msg)
+        
         return bundle        
 
     def send(self, address, message):

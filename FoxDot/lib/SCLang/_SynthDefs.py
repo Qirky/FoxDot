@@ -10,14 +10,14 @@ import Env
 
 with SampleSynthDef("play1") as play:
     play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
-    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=14)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=0)
     play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
 
 with SampleSynthDef("play2") as play:
     play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
-    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=14)
+    play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=0)
     play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)
     play.osc  = play.osc * play.amp
@@ -95,6 +95,17 @@ with SynthDef("bell") as bell:
                        [0.002,0.02,0.001, 0.008,0.02,0.004, 0.02,0.04,0.02, 0.005,0.05,0.05, 0.02, 0.03, 0.04],
                        stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.25), bell.freq, 0, 3)
     bell.env = Env.ramp()
+
+with SynthDef("gong") as gong:
+    gong.amp = gong.amp * 4
+    gong.freq = gong.freq * 2
+    gong.osc=Klank.ar( [[0.501, 1, 0.8, 2.002, 3, 9.6, 2.49, 11, 2.571, 3.05, 6.242, 12.49, 13, 16, 24],
+                        [0.002, 0.02, 0.001, 0.008, 0.02, 0.004, 0.02, 0.04, 0.02, 0.005, 0.05, 0.05, 0.02, 0.03, 0.04], 
+			[1.2, 1.2, 1.2, 0.9, 0.9, 0.9, 0.25, 0.25, 0.25, 0.14, 0.14, 0.14, 0.07, 0.07, 0.07]*gong.sus], 
+			SinOscFB.ar(20, 0, 10), gong.freq, 0, 4)
+    gong.env = Env.ramp(amp=[1,0], curve="'lin'", sus=gong.sus*8)
+    
+
 
 with SynthDef("soprano") as soprano:
     soprano.defaults.update(vib=5, verb=0.5)
