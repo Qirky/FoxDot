@@ -1,4 +1,4 @@
-FoxDot - Live Coding with Python v0.3.2
+FoxDot - Live Coding with Python v0.3.3
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
@@ -27,10 +27,6 @@ d1 >> play("x-o-").every(5, 'stutter', 2, cycle=8, degree="S")
 - New effects have been added; `shape` which is a value between 0 and 1 (can be higher) that relates to a level of distortion, and `formant` which is a value between 0 and 8 and applies different formant filters to the  audio.
 - `hpf` and `lpf` have resonance values now: `hpr` and `lpr`
 - You can open the config file directly from FoxDot by using the "Help & Settings" menu. Likewise you can open the directory that holds where your samples are kept. This can be changed in the config file.
-
-### Known bugs
-
-- Code with lot's of delays and P-Stars is likely to be susceptible to jitter and will cause the Clock latency to increase. 
 
 See `docs/changelog` for more
 

@@ -1,3 +1,28 @@
+### v0.3.3 fixes and updates
+
+- Added a new `Pattern` type data structure called a P-Star or `P*`. It is a subclass of `PGroup` but it has a "behaviour" that effects the current event of Player object, which, in this instance, adds a delay to each value based on the current Player's duration. e.g.
+
+```python
+# Plays the first note, 0, for 4 beats then the pitches 2, 4, and 6 at 4/3 beats each.
+p1 >> pluck([0, P*(2,4,6)], dur=4)
+
+# The can be nested
+p1 >> pluck([0, P*(2,4,P*(6,7)], dur=4)
+
+# Work in the same way that a SamplePlayer uses square brackets
+p2 >> play("x[--]o[-o]")
+```
+- Frequency and buffer number calculation is done per OSCmessage which means these values can be modified in any delayed message i.e. when using the Player `stutter` method like so:
+```python
+p1 >> pluck([0,1,2,3], dur=1).every(4, 'stutter', 4, degree=[10,12], pan=[-1,1] )
+
+d1 >> play("x-o-").every(5, 'stutter', 2, cycle=8, degree="S")
+```
+- Using as `linvar` as the Clock tempo will no longer crash the Clock.
+- New effects have been added; `shape` which is a value between 0 and 1 (can be higher) that relates to a level of distortion, and `formant` which is a value between 0 and 8 and applies different formant filters to the  audio.
+- `hpf` and `lpf` have resonance values now: `hpr` and `lpr`
+- You can open the config file directly from FoxDot by using the "Help & Settings" menu. Likewise you can open the directory that holds where your samples are kept. This can be changed in the config file.
+
 ### v0.3.2 fixes and updates
 
 - `PlayerKey` data type can handle `PGroup` transformations without crashing, which improves performance when using `follow`
