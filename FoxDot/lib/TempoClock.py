@@ -17,7 +17,7 @@ from Repeat import MethodCall
 from Patterns import asStream
 from TimeVar import var
 from Midi import MidiIn, MIDIDeviceNotFound
-from Patterns.Operations import modi
+from Patterns.utils import modi
 from time import sleep, time, clock
 from fractions import Fraction
 from traceback import format_exc as error_stack
@@ -238,7 +238,7 @@ class TempoClock(object):
 
             sleep_time = 0
 
-            print block
+            # print block
 
             print "Clock latency increased to", self.latency
 
@@ -344,19 +344,11 @@ class TempoClock(object):
         
         else:
 
-            if self.debugging:
-
-                print "Object scheduled late:", obj, beat, self.now()
-
-            # print obj, kwargs
-
-            if isinstance(obj, Player):
+            if isinstance(obj, (Player, send_delay)):
 
                 kwargs['verbose'] = False
 
                 print "Scheduling", obj, "at", self.now(), "when expected at", beat
-
-            # maybe don't schedule now?
 
             self.queue.add(obj, self.now(), args, kwargs)
         

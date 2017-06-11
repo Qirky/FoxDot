@@ -54,20 +54,17 @@ class MenuBar(Menu):
         codemenu.add_checkbutton(label="Use SC3 Plugins",    command=self.root.toggle_sc3_plugins, variable=self.sc3_plugins)
         self.add_cascade(label="Code", menu=codemenu)
 
-        # Settings
-
-##        settingsmenu = Menu(self, tearoff=0)
-##        settingsmenu.add_command(label="Preferences...",      command=self.root.toggleMenu)
-##        settingsmenu.add_command(label="Change Colours...",   command=self.root.toggleMenu)
-##        settingsmenu.add_command(label="Open Samples Folder", command=self.root.toggleMenu)
-##        self.add_cascade(label="Settings", menu=settingsmenu)
 
         # Help
 
         helpmenu = Menu(self, tearoff=0)
         helpmenu.add_command(label="Visit FoxDot Homepage", command=self.root.openhomepage)
         helpmenu.add_command(label="Documentation",   command=self.root.opendocumentation)
-        self.add_cascade(label="Help", menu=helpmenu)
+        helpmenu.add_separator()
+        helpmenu.add_command(label="Open Samples Folder",   command=self.root.open_samples_folder)
+        helpmenu.add_command(label="Open config file (advanced)",      command=self.root.open_config_file)
+        ##        settingsmenu.add_command(label="Change Colours...",   command=self.root.toggleMenu)
+        self.add_cascade(label="Help & Settings", menu=helpmenu)
 
         # Add to root
 

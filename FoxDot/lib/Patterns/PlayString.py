@@ -95,69 +95,66 @@ class PlayString:
         return string % tuple(chars)
 
 
-class PlayGroup(tuple):
-    def __init__(self, seq=[]):
-        data = []
-        for item in seq:
-            if isinstance(item, self.__class__):
-                data.extend(item)
-            else:
-                data.append(item)
-        tuple.__init__(self, data)
-        self.data = data
-    def __repr__(self):
-        return "<" + tuple.__repr__(self)[1:-1] + ">"
-    def string(self):
-        """ Returns the form a PlayGroup takes in a PlayString """
-        return "[" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in self]) + "]"
-    def __len__(self):
-        return 1
-    def __eq__(self, other):
-        # Can do "[xx]" == PlayGroup(x,x)
-        if type(other) == str:
-            if other[0] == "[" and other[-1] == "]":
-                new_data = other[1:-1]
-                if len(new_data) == len(self.data):
-                    return all([new_data[i] == self.data[i] for i in range(len(new_data))])
-        else:
-            return tuple.__eq__(self, other)
-        return False
-    def divide(self, value):
-        for item in self:
-            item.divide(value)
-        return self
-    def mirror(self):
-        return self.__class__(list(reversed(self.data)))
+##class PlayGroup(tuple):
+##    def __init__(self, seq=[]):
+##        data = []
+##        for item in seq:
+##            if isinstance(item, self.__class__):
+##                data.extend(item)
+##            else:
+##                data.append(item)
+##        tuple.__init__(self, data)
+##        self.data = data
+##    def __repr__(self):
+##        return "<" + tuple.__repr__(self)[1:-1] + ">"
+##    def string(self):
+##        """ Returns the form a PlayGroup takes in a PlayString """
+##        return "[" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in self]) + "]"
+##    def __len__(self):
+##        return 1
+##    def __eq__(self, other):
+##        # Can do "[xx]" == PlayGroup(x,x)
+##        if type(other) == str:
+##            if other[0] == "[" and other[-1] == "]":
+##                new_data = other[1:-1]
+##                if len(new_data) == len(self.data):
+##                    return all([new_data[i] == self.data[i] for i in range(len(new_data))])
+##        else:
+##            return tuple.__eq__(self, other)
+##        return False
+##    def divide(self, value):
+##        for item in self:
+##            item.divide(value)
+##        return self
+##    def mirror(self):
+##        return self.__class__(list(reversed(self.data)))
 
-class RandomPlayGroup(object):
-    def __init__(self, seq, dur=1):
-        self.data = []
-        self.dur  = dur
-        for item in seq:
-            if type(item) is list:
-                self.data.extend(item)
-            else:
-                self.data.append(item)
-    def now(self):
-        return choice(self.data)
-    def string(self):
-        """ Returns the form a PlayGroup takes in a PlayString """
-        return "{" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in self.data]) + "}"
-    def __len__(self):
-        return 1
-    def __repr__(self):
-        return "<?" + repr(self.data)[1:-1] + ">"
-    def divide(self, value):
-        self.dur /= float(value)
-        return self
+##class RandomPlayGroup(object):
+##    def __init__(self, seq, dur=1):
+##        self.data = []
+##        self.dur  = dur
+##        for item in seq:
+##            if type(item) is list:
+##                self.data.extend(item)
+##            else:
+##                self.data.append(item)
+##    def now(self):
+##        return choice(self.data)
+##    def string(self):
+##        """ Returns the form a PlayGroup takes in a PlayString """
+##        return "{" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in self.data]) + "}"
+##    def __len__(self):
+##        return 1
+##    def __repr__(self):
+##        return "<?" + repr(self.data)[1:-1] + ">"
+##    def divide(self, value):
+##        self.dur /= float(value)
+##        return self
             
 class PCHAR:
     def __init__(self, char, dur=1):
         self.char = char
         self.dur  = dur
-    def __iter__(self):
-        for x in [self]:
-            yield self
     def __len__(self):
         return 1
     def __str__(self):

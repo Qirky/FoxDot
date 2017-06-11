@@ -6,8 +6,10 @@
 """
 
 import re
-from Operations import modi, LCM
+import Main
+from utils import modi, LCM
 from PlayString import *
+
 
 class Parser:
     re_nests  = r"\((.*?)\)"
@@ -75,7 +77,7 @@ class Parser:
 
                     raise(ParseError(e))
 
-                items.append( RandomPlayGroup(chars) )
+                items.append( Main.PRand(chars) )
                     
             # Look for a '[]'
             elif char == "[":
@@ -103,7 +105,8 @@ class Parser:
 
                     for num in range(max([len(ch) for ch in chars])):
 
-                        new_chars.append(PlayGroup([modi(ch, num) for ch in chars]))
+                        # new_chars.append(PlayGroup([modi(ch, num) for ch in chars]))
+                        new_chars.append(Main.PGroupStar([modi(ch, num) for ch in chars]))
 
                     items.append( new_chars )
 
@@ -113,18 +116,22 @@ class Parser:
 
                     for char in chars:
 
-                        char.divide(len(chars))
+                        # char.divide(len(chars))
 
                         #if isinstance(char, PCHAR): 
-                        if isinstance(char, PlayGroup):
+                        #if isinstance(char, PlayGroup):
+##                        if isinstance(char, Main.PGroupStar):
+##
+##                            new_chars.extend(char)
+##
+##                        else:
 
-                            new_chars.extend(char)
+##                            new_chars.append(char)
 
-                        else:
+                        new_chars.append(char)
 
-                            new_chars.append(char)
-
-                    items.append( PlayGroup(new_chars) )
+                    # items.append( PlayGroup(new_chars) )
+                    items.append( Main.PGroupStar(new_chars) )
 
             # Add single character to list
 

@@ -84,7 +84,7 @@ from ..SCLang import SCLang
 
 foxdot_kw = ["Clock","Group","Scale","Server","Root","BufferManager","var","Pvar","linvar","inf","lambda", decorator]
 
-foxdot_funcs = functions(Sequences) + ["P", "PRand", "PWhite"] # TODO PatternGenerator 
+foxdot_funcs = functions(Sequences) + ["P", "P\*", "PRand", "PWhite"] # TODO PatternGenerator 
 
 # Python keywords used in RegEx Group 2
 

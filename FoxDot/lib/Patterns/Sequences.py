@@ -12,11 +12,11 @@
 
 import random
 import math
-import functools
-import inspect
 
-from Base import Pattern, GeneratorPattern, PGroup, asStream
+from Main import Pattern, GeneratorPattern, asStream
+from Main import PGroup, PGroupStar
 from Operations import *
+from utils import *
 
 MAX_SIZE = 2048
 
@@ -28,7 +28,8 @@ class __pattern__ :
     ''' Used to define lists as patterns:
 
         `P[1,2,3]` is equivalent to `Pattern([1,2,3])` and
-        `P(1,2,3)` is equivalent to `Pattern((1,2,3))`.
+        `P(1,2,3)` is equivalent to `Pattern((1,2,3))` and
+        `P+(1,2,3)` is equivalient to `Pattern((1,2,3), delay=True)`.
 
         Ranges can be created using slicing, e.g. `P[1:6:2]` will generate the range
         1 to 6 in steps of 2, thus creating the Pattern `[1, 3, 5]`. Slices can be
@@ -52,8 +53,8 @@ class __pattern__ :
     def __call__(self, *args):
         return PGroup(args if len(args) > 1 else args[0])
 
-    def __add__(self, other):
-        return PPlus(other)
+    def __mul__(self, other):
+        return PGroupStar(other)
 
 # This is a pattern creator  
 P = __pattern__()
@@ -143,17 +144,6 @@ def PZip2(pat1, pat2, rule=lambda a, b: True):
 ##            return f(*args)
 ##    return new_function
 
-def loop_pattern_func(f):
-    ''' Decorator for allowing any Pattern function to create
-        multiple Patterns by using Patterns as arguments '''
-    @functools.wraps(f)
-    def new_function(*args):
-        pat = Pattern()
-        for i in range(LCM(*[len(arg) for arg in args if hasattr(arg, '__len__')])):
-            pat |= f(*[modi(arg, i) for arg in args])
-        return pat
-    new_function.argspec = inspect.getargspec(f)
-    return new_function
 
 @loop_pattern_func
 def PStutter(x, n=2):
@@ -269,19 +259,19 @@ class __generatorpattern__:
         
 R = __generatorpattern__()
 
-class PRand(GeneratorPattern):
-    ''' Returns a random integer between start and stop. If start is a container-type it returns
-        a random item for that container. '''
-    def __init__(self, start, stop=None):
-        GeneratorPattern.__init__(self)
-        if hasattr(start, "__iter__"):
-            self.data = Pattern(start)
-            self.func = lambda index: random.choice(self.data)
-        else:
-            self.low  = start if stop is not None else 0
-            self.high = stop  if stop is not None else start
-    def func(self, index):
-        return random.randrange(self.low, self.high)
+##class PRand(GeneratorPattern):
+##    ''' Returns a random integer between start and stop. If start is a container-type it returns
+##        a random item for that container. '''
+##    def __init__(self, start, stop=None):
+##        GeneratorPattern.__init__(self)
+##        if hasattr(start, "__iter__"):
+##            self.data = Pattern(start)
+##            self.func = lambda index: random.choice(self.data)
+##        else:
+##            self.low  = start if stop is not None else 0
+##            self.high = stop  if stop is not None else start
+##    def func(self, index):
+##        return random.randrange(self.low, self.high)
 
 #TODO
 class PwRand(GeneratorPattern):

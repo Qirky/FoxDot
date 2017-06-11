@@ -1,4 +1,4 @@
-from Patterns.Base import Pattern
+from Patterns.Main import Pattern
 from random import choice
 
 def choose():

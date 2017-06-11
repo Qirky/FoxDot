@@ -1,4 +1,4 @@
-from Patterns.Operations import modi
+from Patterns.utils import modi
 import TimeVar
 
 CHROMATIC_NOTES = ["C"," ","D"," ","E","F"," ","G"," ","A"," ","B"]

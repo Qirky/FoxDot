@@ -5,7 +5,8 @@ import re
 from types import CodeType, FunctionType, TypeType
 from traceback import format_exc as error_stack
 
-from ..Patterns.Operations import modi
+from ..Patterns.utils import modi
+
 import foxdot_tokenize
 
 # Player RegEx

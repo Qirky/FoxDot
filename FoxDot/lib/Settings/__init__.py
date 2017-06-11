@@ -55,6 +55,10 @@ FONT          = conf.FONT
 SC3_PLUGINS   = conf.SC3_PLUGINS
 MAX_CHANNELS  = conf.MAX_CHANNELS
 
+if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
+
+    FOXDOT_SND = os.path.realpath(conf.SAMPLES_DIR)
+
 # Name of SamplePlayer SynthDef
 
 class _SamplePlayer:

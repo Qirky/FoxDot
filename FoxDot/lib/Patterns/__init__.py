@@ -1,4 +1,4 @@
-from Base import *
+from Main import *
 from Operations import *
 from Sequences import *
-from PlayString import PlayString, PlayGroup, RandomPlayGroup
+from PlayString import PlayString

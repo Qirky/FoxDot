@@ -1,7 +1,9 @@
+from __future__ import division
 from random import choice, shuffle
 from Operations import *
+from utils import *
 from Parse import Parse
-from PlayString import PlayString, PlayGroup, RandomPlayGroup
+from PlayString import PlayString
 
 """
 
@@ -17,6 +19,10 @@ class metaPattern(object):
     debugging = False
 
     def __init__(self, data=[]):
+
+        if self.__class__ not in PATTERN_WEIGHTS:
+
+            PATTERN_WEIGHTS.insert(-1, self.__class__)
         
         if type(data) is str:
             
@@ -192,7 +198,7 @@ class metaPattern(object):
     def __le__(self, other):
         return Pattern([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
 
-    #: Methods for strings as pattern
+    # Methods for strings as pattern
 
     def fromString(self, string):
         self.data = Parse(string)
@@ -226,6 +232,7 @@ class metaPattern(object):
         new.data.reverse()
         return new
 
+    @loop_pattern_method
     def pivot(self, i):
         """ Mirrors and rotates the Pattern such that the item at index 'i'
             is in the same place """
@@ -242,7 +249,8 @@ class metaPattern(object):
 
     def copy(self):
         return self.__class__(self.data[:])
-    
+
+    @loop_pattern_method
     def stretch(self, size):
         """ Stretches (repeats) the contents until len(Pattern) == size """
         new = []
@@ -251,6 +259,7 @@ class metaPattern(object):
         new = self.__class__(new)
         return new
 
+    @loop_pattern_method
     def loop(self, n):
         """ Repeats this pattern n times """
         new = []
@@ -278,6 +287,7 @@ class metaPattern(object):
             
         return self.__class__(new)
 
+    @loop_pattern_method
     def swap(self, n=2):
         new = []
         for pair in [list(val) for val in [reversed(self[i:i+n]) for i in range(0, len(self), n)]]:
@@ -294,6 +304,14 @@ class metaPattern(object):
                 new.append(modi(seq, i))
         return self.__class__(new)
 
+    def zip(self, seq1, *seqN):
+        l, p = [], []
+        for pat in [self, seq1] + list(seqN):
+            p.append(Pattern(pat))
+            l.append(len(p[-1]))
+        length = LCM(*l)
+        return self.__class__([tuple(pat[i] for pat in p) for i in range(length)])
+
     def invert(self):
         new = []
         lrg = float(max(self.data))
@@ -304,11 +322,13 @@ class metaPattern(object):
                 new.append((((item / lrg) * -1) + 1) * lrg)
         return self.__class__(new)
 
+    @loop_pattern_method
     def rotate(self, n=1):
         n = int(n)
         new = self.data[n:] + self.data[0:n]
         return self.__class__(new)
 
+    # @loop_pattern_method
     def stutter(self, n=2):
         n = asStream(n)
         lrg = max(len(self.data), len(n))
@@ -349,6 +369,7 @@ class metaPattern(object):
 
         return Pattern(data)
 
+    @loop_pattern_method
     def palindrome(self, a=0, b=None):
         """ Returns the original pattern with mirrored version of itself appended.
             a removes values from the middle of the pattern, if positive.
@@ -389,6 +410,7 @@ class metaPattern(object):
             last_val = value                
         return self.__class__(new)
 
+    @loop_pattern_method
     def limit(self, func, value):
         new = []
         i = 0
@@ -396,20 +418,24 @@ class metaPattern(object):
             new.append(self[i])
             i+=1
         return self.__class__(new)
-            
-            
 
-    #def amen(self, i=2):
-        #""" Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
-        # new = [[self[0], PlayGroup(self[:2].string())]] + list(self[1:-2]) + [[PlayGroup(self[-2:].string())], self[-1]]
-        #return self.__class__(new)
+    def amen(self, i=2):
+        """ Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
+        bd = self[0]
+        h1 = self[1]
+        sn = self[0-i]
+        h2 = self[1-i]
+
+        new = [ [bd, PGroupStar(bd, sn)] ] + list(self[1:-i]) + [[sn, sn, sn, h1]] + [ [PGroupStar(h2, sn), [h2, sn]] ]
+        
+        return self.__class__(new)
 
     # Changing the pattern in place
-
+    
     def append(self, item):
         self[len(self):] = [item]
         return self
-
+    
     def i_rotate(self, n=1):
         self.data = self.data[n:] + self.data[0:n]
         return self
@@ -468,6 +494,9 @@ class metaPattern(object):
     def ltrim(self, size):
         return self[-size:]
 
+    def get_behaviour(self):
+        return None
+
     # Automatic expansion of nested patterns
 
     def make(self):
@@ -500,7 +529,9 @@ class metaPattern(object):
         return self
 
 class Pattern(metaPattern):
+    """ Base type pattern """
     pass
+    
 
 class GeneratorPattern(object):
     """
@@ -581,6 +612,28 @@ class GeneratorPattern(object):
     def stretch(self, n):
         return self
 
+
+# Random Generator Pattern
+
+import random
+
+class PRand(GeneratorPattern):
+    ''' Returns a random integer between start and stop. If start is a container-type it returns
+        a random item for that container. '''
+    def __init__(self, start, stop=None):
+        GeneratorPattern.__init__(self)
+        if hasattr(start, "__iter__"):
+            self.data = Pattern(start)
+            def choose(index):
+                return random.choice(self.data)
+            self.func = choose
+        else:
+            self.low  = start if stop is not None else 0
+            self.high = stop  if stop is not None else start
+    def func(self, index):
+        return random.randrange(self.low, self.high)
+
+
 class PatternContainer(Pattern):
     def getitem(self, key):
         key = key % len(self)
@@ -591,7 +644,7 @@ class PatternContainer(Pattern):
         return str(["%s()" % item.__class__.__name__ for item in self.data])
     def __repr__(self):
         return str(self)
-    
+
 
 class PGroup(metaPattern):
     """
@@ -621,21 +674,22 @@ class PGroup(metaPattern):
 
             for key in range(LCM(*l)):
 
-                new_data.append(PGroup([item.getitem(key) if isinstance(item, Pattern) else item for item in self.data]))
+                new_data.append(self.__class__([item.getitem(key) if isinstance(item, Pattern) else item for item in self.data]))
 
             self.__class__ = Pattern
 
             self.data = new_data
 
-##    def getitem(self, key):
-##        if isinstance(key, slice):
-##            return self.__getslice__(key.start, key.stop, key.step)
-##        else:
-##            key = key % len(self.data)        
-##            return self.data[key]
-
-    def coeff(self):
-        return 0.5
+    def forced_values(self):
+        """ Recursively forces changeable values into non-changeable """
+        data = []
+        for item in self:
+            if isinstance(item, GeneratorPattern):
+                new_item = item[0]
+            else:
+                new_item = item
+            data.append(new_item)
+        return self.__class__(data)
 
     def scale_dur(self, n):
         """ Scales the dur values for all the items in self.data by n """
@@ -654,58 +708,51 @@ class PGroup(metaPattern):
             new_data = list(value)
         else:
             new_data = [value]
-        return PGroup(list(self.data) + new_data)
-            
+        return self.__class__(list(self.data) + new_data)
 
-Pgroup = PGroup #: Alias for PGroup
+    def calculate_step(self, *args):
+        return 0
 
-class Shared_Time_PGroup(PGroup):
-    bracket_style = "{%s}"
-    def coeff(self):
-        return 1.0 / len(self)
+    def calculate_time(self, dur):
+        values = []
+        for i, item in enumerate(self):
+            accum = self.calculate_step(i, dur)
+            if hasattr(item, "calculate_time"):
+                values.append(item.calculate_time(dur-accum) + accum)
+            else:
+                values.append(accum)
+        return PGroup(values)
 
+    def get_behaviour(self):
+        def action(event, key):
+            event['delay'] += self.calculate_time(float(event['dur']))
+            return event
+        return action
 
-# Functions used to separate Groups and Nests from within Patterns
+    def has_behaviour(self):
+        for value in self:
+            if isinstance(value, PGroup):
+                if value.has_behaviour():
+                    return True
+        else:
+            return False
 
-##def nested(data):
-##    """ Returns true is data is any kind of pattern (inc. lists) EXCEPT PGroups or TimeVars """
-##    try:
-##        return data.NEST_ME
-##    except:
-##        return isinstance(data, list)
+class PGroupPrime(PGroup):
+    def has_behaviour(self):
+        return True
 
-##def contains_nest(data):
-##    """ Returns true if any items in data are 'nest-able' patterns """
-##    try:
-##        return any([nested(item) for item in data])
-##    except:
-##        return False
-##
-##def Place(data):
-##    """ nested patterns are stretched
-##        e.g. [[1,0],0,1,0] would be returned as [1,0,1,0,0,0,1,0] """
-##
-##    if contains_nest(data):
-##
-##        #: Works out the largest sub-patterns and loops the overall pattern until it is stretched out
-##        
-##        sub = LCM(*[len(item) for item in data if nested(item)])
-##        new = []
-##
-##        for i in range( sub ):
-##            for j in range(len(data)):
-##                item = data[j]
-##                if nested(item):
-##                    item = modi(item, i)
-##                    if type(item) is tuple:
-##                        item = PGroup(item)
-##                new.append(item)
-##        return new
-##    
-##    else:
-##         #: If the pattern doesn't need lacing, return original
-##        return data
+class PGroupStar(PGroupPrime):
+    """ Acts as a PGroup but Players stutter them """
+    bracket_style="*(%s)"
+    def calculate_step(self, i, dur):
+        return i * (dur / len(self))
 
+##class Shared_Time_PGroup(PGroup):
+##    bracket_style = "{%s}"
+##    def coeff(self):
+##        return 1.0 / len(self)
+
+PATTERN_WEIGHTS = [Pattern,  PGroupPrime, PGroup]
 
 # Used to force any non-pattern data into a Pattern
 
@@ -725,10 +772,14 @@ def Format(data):
     return data
 
 def Dominant(*patterns):
-    for p in patterns:
-        if isinstance(p, (Pattern, list)):
-           return Pattern 
-    return PGroup      
+    classes =  [p.__class__ for p in patterns]
+    for W in PATTERN_WEIGHTS:
+        if W in classes:
+            return W
+    return W
+
+def patternclass(a, b):
+    return PGroup if isinstance(a, PGroup) and isinstance(b, PGroup) else Pattern
 
 def Convert(*args):
     """ Returns tuples/PGroups as PGroups, and anything else as Patterns """

@@ -91,10 +91,6 @@ class workspace:
         # --- start create menu
 
         self.menu = MenuBar(self, visible = True)
-
-        # End menu setup ---
-
-        # --- init main text box
        
         # Create y-axis scrollbar
 
@@ -493,6 +489,28 @@ class workspace:
                                             defaultextension='.txt')
         with open(fn, 'w') as f:
             f.write(self.console.read())
+        return
+
+    def open_config_file(self):
+        from ConfigFile import Config
+        Config(FOXDOT_CONFIG_FILE).start()
+        return
+
+    def open_samples_folder(self):
+        import subprocess
+        
+        if SYSTEM == WINDOWS:
+            cmd = 'explorer'
+        elif SYSTEM == MAC_OS:
+            cmd = 'open'
+        else:
+            cmd = 'xdg-open'
+        try:
+            subprocess.Popen([cmd, FOXDOT_SND])
+        except OSError as e:
+            print(e)
+            print("Hmm... Looks like we couldn't open the directory but you can find the samples in {}".format(FOXDOT_SND))
+            
         return
 
     # Toggle console: Ctrl+#
