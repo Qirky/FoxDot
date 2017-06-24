@@ -177,6 +177,12 @@ is underline the player
 
 Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider 
 
+##### `count(self, time=None, event_after=False)`
+
+Counts the number of events that will have taken place between 0 and `time`. If
+`time` is not specified the function uses self.metro.now(). Setting `event_after`
+to `True` will find the next event *after* `time`
+
 ##### `degrade(self, amount=0.5)`
 
 Sets the amp modifier to a random array of 0s and 1s
@@ -206,7 +212,7 @@ adds value to frequency modifier
 
 ##### `follow(self, lead=False)`
 
-Takes a now object and then follows the notes 
+Takes a Player object and then follows the notes 
 
 ##### `get_event(self)`
 
@@ -232,6 +238,10 @@ Calculates the values for each attr to send to the server at the current clock t
 
 Returns the number of 'references' for the
 attr which references the most other players 
+
+##### `number_of_layers(self)`
+
+Returns the deepest nested item in the event 
 
 ##### `offbeat(self, dur=0.5)`
 

@@ -110,8 +110,8 @@ class BufChar(object):
         if fn is not None:
             self.server.bufferRead(fn, num)
         return
-    def bufnum(self, n):
-        return self.buffers[n % len(self.buffers)] if self.buffers else Buffer(None, 0)
+    def bufnum(self, n):        
+        return self.buffers[int(n % len(self.buffers))] if self.buffers else Buffer(None, 0)
 
 class BufferManager:
     def __init__(self):

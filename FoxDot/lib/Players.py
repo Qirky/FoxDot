@@ -149,6 +149,8 @@ class Player(Repeatable):
 
     # Set private values
 
+    debug = 0
+
     __vars = []
     __init = False
 
@@ -158,9 +160,11 @@ class Player(Repeatable):
 
     # Base attributes
     base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom',
-                       'pan', 'rate', 'amp', 'room', 'bits',)
-    
-    fx_attributes   = FxList.kwargs()
+                       'pan', 'rate', 'amp', 'room', 'bits',
+                       'midinote', 'channel')
+
+    fx_attributes = FxList.all_kwargs()
+    fx_keys   = FxList.kwargs()
 
     metro = None
     server = None
@@ -188,7 +192,7 @@ class Player(Repeatable):
         self.following = None
         self.queue_block = None
         self.playstring = ""
-        self.char = PlayerKey("", parent=self)
+        # self.char = PlayerKey("", parent=self)
         self.buf_delay = []
 
         # Visual feedback information
@@ -211,14 +215,15 @@ class Player(Repeatable):
         self.event = {}
 
         # Used for checking clock updates
-        
-        self.old_dur = None
+
+        self.current_dur = None
         self.old_pattern_dur = None
+        self.old_dur = None
         
         self.isplaying = False
         self.isAlive = True
 
-        # These dicts contain the attribute and modifier values that are sent to SuperCollider
+        # These dicts contain the attribute and modifier values that are sent to SuperCollider     
 
         self.attr  = {}
         self.modf  = {}
@@ -268,29 +273,28 @@ class Player(Repeatable):
                 value = asStream(value) if not isinstance(value, PlayerKey) else value
 
                 # Update the attribute dict
+                
                 self.attr[name] = value
 
-                # Update the current event
-                # self.event[name] = modi(value, self.event_index)
+                # Update any playerkey
 
-##                #  Make sure the object's dict uses PlayerKey instances
-##
-##                if name not in self.__dict__:
-##
-##                    self.__dict__[name] = PlayerKey(self.event[name], parent=self)
-##
-##                elif not isinstance(self.__dict__[name], PlayerKey):
-##
-##                    self.__dict__[name] = PlayerKey(self.event[name], parent=self) 
-##
-##                else:
-##
-##                    self.__dict__[name].update(self.event[name])
-                    
+                if name in self.__dict__:
+
+                    if isinstance(self.__dict__[name], PlayerKey):
+    
+                        self.__dict__[name].update_pattern()
+
                 return
             
         self.__dict__[name] = value
         return
+
+    def __getitem__(self, name):
+        if self.__init:
+            if name not in self.__vars:
+                return self.attr[name]
+            pass
+        return self.__dict__[name]
 
     def __eq__(self, other):
         return self is other
@@ -312,11 +316,11 @@ class Player(Repeatable):
 
                 if key not in self.__dict__:
 
-                    self.__dict__[key] = PlayerKey(0, parent=self)
+                    self.__dict__[key] = PlayerKey(0, parent=self, attr=key)
 
                 elif not isinstance(self.__dict__[key], PlayerKey):
 
-                    self.__dict__[key] = PlayerKey(0, parent=self) 
+                    self.__dict__[key] = PlayerKey(0, parent=self, attr=key) 
 
                 else:
 
@@ -391,10 +395,6 @@ class Player(Repeatable):
 
         # Offbeat delay
         self.offset = 0
-
-        # Modifier dict
-        
-        self.modf = dict([(key, [0]) for key in self.attr])
         
         return self
 
@@ -410,19 +410,28 @@ class Player(Repeatable):
 
         # If the duration has changed, work out where the internal markers should be
 
-        if self.dur_updated() or kwargs.get("count", False) is True:
+        force_count = kwargs.get("count", False)
+        dur_updated = self.dur_updated()
+
+        if dur_updated or force_count is True:
 
             try:
 
-                # this is where self.reversing goes wrong
+                self.event_n, self.event_index = self.count(self.event_index if not force_count else None)
 
-                self.event_n, self.event_index = self.count(self.event_index)        
+                if self.debug:
 
-            except TypeError:
+                    if dur_updated:
+
+                        print self.event_index, self.metro.now()
+
+            except TypeError as e:
+
+                print e
 
                 print("TypeError: Innappropriate argument type for 'dur'")
 
-            self.old_dur = self.attr['dur']
+            # self.old_dur = self.attr['dur']
 
         # Get the current state
 
@@ -439,7 +448,6 @@ class Player(Repeatable):
                 dur = 0
 
             # If there are more than one dur (happens sometimes because of threading), only use first
-            # This is a temporary solution <-- TODO
 
             try:
 
@@ -453,13 +461,7 @@ class Player(Repeatable):
 
             finally:
 
-                if isinstance(self.event['dur'], TimeVar.var):
-
-                    dur = float(self.event['dur'].now(self.event_index))
-
-                else:
-
-                    dur = float(self.event['dur'])
+                dur = float(self.event['dur'])
 
             # Skip events with durations of 0
 
@@ -485,7 +487,7 @@ class Player(Repeatable):
 
                 tempo_shift = float(self.metro.bpm) / float(self.event['bpm'])
 
-            except (AttributeError, TypeError):
+            except (AttributeError, TypeError, ZeroDivisionError):
 
                 tempo_shift = 1
 
@@ -512,9 +514,10 @@ class Player(Repeatable):
         n = 0
         acc = 0
         dur = 0
-        now = (time if time is not None else self.metro.now()) 
+        now = (time if time is not None else self.metro.now())
+        bpm = float(self.metro.bpm if self.bpm == None else self.bpm) # TODO: use this to better caclulate event_index
 
-        durations = self.rhythm()
+        durations = self.rhythm() if self.current_dur is None else self.current_dur
         total_dur = float(sum(durations))
 
         if total_dur == 0:
@@ -569,32 +572,21 @@ class Player(Repeatable):
 
         # Store duration times
 
-        self.old_dur = self.attr['dur']
+        # self.old_dur = self.attr['dur']
 
         # Returns value for self.event_n and self.event_index
 
         return n, acc
 
     def rhythm(self):
-        # If a Pattern TimeVar
-        if isinstance(self.attr['dur'], TimeVar.Pvar):
-            r = asStream(self.attr['dur'].now().data)
-            
-        # If duration is a TimeVar
-        elif isinstance(self.attr['dur'], TimeVar.var):
-            r = asStream(self.attr['dur'].now())
-            
-        else:
-            r = asStream(self.attr['dur']) 
-
-        # TODO: Make sure degree is a string
-        if self.synthdef is SamplePlayer:
-            try:
-                d = self.attr['degree'].now()
-            except:
-                d = self.attr['degree']
-            r = r * [(char.dur if hasattr(char, "dur") else 1) for char in d.flat()]
-        return r
+        rhythm = []
+        for value in self.attr['dur']:
+            if isinstance(value, TimeVar.TimeVar):
+                rhythm.append(value.now())
+            else:
+                rhythm.append(value)
+        self.current_dur = asStream(rhythm)
+        return self.current_dur
 
     def update(self, synthdef, degree, **kwargs):
 
@@ -604,7 +596,7 @@ class Player(Repeatable):
 
         if self.isplaying is False:
 
-            self.reset() # <--
+            self.reset() # <-- need to reset effects
 
         # If there is a designated solo player when updating, add this at next bar
         
@@ -686,14 +678,14 @@ class Player(Repeatable):
         return self
 
     def dur_updated(self):
-        dur_updated = self.attr['dur'] != self.old_dur
-        if self.synthdef == SamplePlayer:
-            dur_updated = (self.pattern_rhythm_updated() or dur_updated)
-        return dur_updated
+        dur = self.rhythm()
+        if dur != self.old_dur:
+            self.old_dur = dur
+            return True
+        return False
 
     def step_duration(self):
-        return 0.5 if self.synthdef is SamplePlayer else 1    
-
+        return 0.5 if self.synthdef is SamplePlayer else 1
 
     def pattern_rhythm_updated(self):
         r = self.rhythm()
@@ -782,9 +774,11 @@ class Player(Repeatable):
         """ Plays the current note n-1 times. You can specify some keywords,
             such as dur, sus, and rate. """
 
+        n = int(n)
+
         if self.metro.solo == self and n > 0:
 
-            dur = float(kwargs.get("dur", self.dur)) / int(n)
+            dur = float(kwargs.get("dur", self.dur)) / n
 
             delay = 0
 
@@ -812,14 +806,18 @@ class Player(Repeatable):
 
     def __add__(self, data):
         """ Change the degree modifier stream """
-        self.modf['degree'] = asStream(data)
+        if self.synthdef == SamplePlayer:
+            self.modf['sample'] = asStream(data)
+        else:
+            self.modf['degree'] = asStream(data)
         return self
 
     def __sub__(self, data):
         """ Change the degree modifier stream """
-        data = asStream(data)
-        data = [d * -1 for d in data]
-        self.modf['degree'] = data
+        if self.synthdef == SamplePlayer:
+            self.modf['sample'] = asStream(data) * -1
+        else:
+            self.modf['degree'] = asStream(data) * -1
         return self
 
     def __mul__(self, data):
@@ -881,7 +879,7 @@ class Player(Repeatable):
     def now(self, attr="degree", x=0):
         """ Calculates the values for each attr to send to the server at the current clock time """
 
-        modifier_event_n = self.event_n
+        index = self.event_n + x
 
         attr_value = self.attr[attr]
 
@@ -895,31 +893,23 @@ class Player(Repeatable):
 
         else:
 
-            attr_value = modi(asStream(attr_value), self.event_n + x)
+            attr_value = modi(asStream(attr_value), index)
 
-        # If the item is a PGroup - make sure any generator values are forced into one type
+        # If we have a modifier
 
-        if isinstance(attr_value, PGroup):
+        if attr in self.modf:
 
-            attr_value = attr_value.forced_values()
-        
-        # If the attribute isn't in the modf dictionary, default to 0
+            modf_value = modi(self.modf[attr], index)
 
-        modf_value = modi(self.modf[attr], modifier_event_n + x) if attr in self.modf else 0
+            if modf_value != 0:
 
-        # Combine attribute and modifier values
+                try:
 
-        if not (self.synthdef == SamplePlayer and attr == "degree"):
+                    attr_value = attr_value + modf_value
 
-            # Don't bother trying to add values to a play string...
+                except TypeError:
 
-            try:
-                
-                attr_value = attr_value + modf_value
-
-            except TypeError:
-
-                pass
+                    pass
             
         return attr_value
 
@@ -935,19 +925,18 @@ class Player(Repeatable):
 
             value = self.event[key] = self.now(key)
 
-            if isinstance(value, PlayerKey):
+            if isinstance(value, (PlayerKey, TimeVar.TimeVar)):
 
                 value = value.now()
 
             # Look for PGroupPrimes
 
             if isinstance(value, PGroup):
-                
+
                 if value.has_behaviour():
 
-                    cls = value.__class__
-                    name = cls.__name__
-
+                    name = value.__class__.__name__
+                    
                     getaction = True
 
                     if name in prime_funcs:
@@ -964,11 +953,11 @@ class Player(Repeatable):
 
             if key not in self.__dict__:
 
-                self.__dict__[key] = PlayerKey(value, parent=self)
+                self.__dict__[key] = PlayerKey(value, parent=self, attr=key)
 
             elif not isinstance(self.__dict__[key], PlayerKey):
 
-                self.__dict__[key] = PlayerKey(value, parent=self) 
+                self.__dict__[key] = PlayerKey(value, parent=self, attr=key) 
 
             else:
 
@@ -1002,9 +991,11 @@ class Player(Repeatable):
             octave = group_modi(kwargs.get("oct", self.event["oct"]), index)
             root   = group_modi(kwargs.get("root", self.event["root"]), index)
 
-            freq   = miditofreq(midi( kwargs.get("scale", self.scale), octave, degree, root ))
+            midinote = midi( kwargs.get("scale", self.scale), octave, degree, root )
+
+            freq   = miditofreq(midinote)
             
-            message = ['freq',  freq ]
+            message = ['freq',  freq, 'midinote', midinote]
 
         else:
 
@@ -1029,7 +1020,7 @@ class Player(Repeatable):
 
                     group_value = kwargs.get(key, self.event[key])
 
-                    val = group_modi(group_value, index)
+                    val = float(group_modi(group_value, index))
 
                     ## DEBUG
 
@@ -1041,11 +1032,11 @@ class Player(Repeatable):
 
                     if key == "sus":
 
-                        val = val * self.metro.beat_dur() * group_modi(kwargs.get('blur', self.event['blur']), index)
+                        val = val * float(self.metro.beat_dur()) * float(group_modi(kwargs.get('blur', self.event['blur']), index))
 
                     elif key == "amp":
 
-                        val = val * group_modi(kwargs.get('amplify', self.event['amplify']), index)
+                        val = val * float(group_modi(kwargs.get('amplify', self.event['amplify']), index))
 
                     message += [key, val]
 
@@ -1055,7 +1046,7 @@ class Player(Repeatable):
 
         # See if any fx_attributes 
 
-        for key in self.fx_attributes:
+        for key in self.fx_keys:
 
             if key in attributes: 
 
@@ -1283,7 +1274,7 @@ class Player(Repeatable):
 
         if isinstance(lead, self.__class__):
 
-            self.degree = lead.degree
+            self.degree = lead.degree + self.modf['degree']
             self.following = lead
 
         else:
@@ -1450,13 +1441,16 @@ class Player(Repeatable):
         return self
 
 ####
+
 class PlayerKey(object):
-    def __init__(self, value=None, reference=None, parent=None):
+    def __init__(self, value=None, reference=None, parent=None, attr=None):
 
         # Reference to the Player object that is using this
         self.parent = parent
-        
-        self.value = asStream(value)
+
+        self.value   = asStream(value)
+        self.key     = attr
+        self.pattern = asStream(self.parent.attr[self.key])
         self.index = 0
         
         if reference is None:
@@ -1476,101 +1470,107 @@ class PlayerKey(object):
     
     def update(self, value):
         self.value = asStream(value)
+
+    def update_pattern(self):
+        self.pattern[:] = asStream(self.parent.attr[self.key])               
         return
+
+    def child(self, other):
+        return PlayerKey(other, self, self.parent, self.key)
     
     def __add__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = Add
         return new
     def __radd__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = rAdd
+        new = self.child(other)
+        new.calculate = Add
         return new
     def __sub__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = Sub
-        return new
-    def __rsub__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = rSub
         return new
+    def __rsub__(self, other):
+        new = self.child(other)
+        new.calculate = Sub
+        return new
     def __mul__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = Mul
         return new
     def __rmul__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = Mul
         return new
     def __div__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = Div
+        new = self.child(other)
+        new.calculate = rDiv
         return new
     def __rdiv__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = rDiv
-        return new
-    def __mod__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = Mod
-        return new
-    def __rmod__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = rMod
-        return new
-    def __pow__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = Pow
-        return new
-    def __rpow__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = rPow
-        return new
-    def __xor__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = Pow
-        return new
-    def __rxor__(self, other):
-        new = PlayerKey(other, self)
-        new.calculate = rPow
-        return new
-    def __truediv__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = Div
         return new
-    def __rtruediv__(self, other):
-        new = PlayerKey(other, self)
+    def __mod__(self, other):
+        new = self.child(other)
+        new.calculate = rMod
+        return new
+    def __rmod__(self, other):
+        new = self.child(other)
+        new.calculate = Mod
+        return new
+    def __pow__(self, other):
+        new = self.child(other)
+        new.calculate = rPow
+        return new
+    def __rpow__(self, other):
+        new = self.child(other)
+        new.calculate = Pow
+        return new
+    def __xor__(self, other):
+        new = self.child(other)
+        new.calculate = rPow
+        return new
+    def __rxor__(self, other):
+        new = self.child(other)
+        new.calculate = Pow
+        return new
+    def __truediv__(self, other):
+        new = self.child(other)
         new.calculate = rDiv
+        return new
+    def __rtruediv__(self, other):
+        new = self.child(other)
+        new.calculate = Div
         return new
 
     # Comparisons
     def __eq__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = lambda a, b: int(a == b)
         return new
     
     def __ne__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = lambda a, b: int(a != b)
         return new
     
     def __gt__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = lambda a, b: int(a < b)
         return new
     
     def __lt__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = lambda a, b: int(a > b)
         return new
     
     def __ge__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = lambda a, b: int(a <= b)
         return new
     
     def __le__(self, other):
-        new = PlayerKey(other, self)
+        new = self.child(other)
         new.calculate = lambda a, b: int(a >= b)
         return new
 
@@ -1636,8 +1636,13 @@ class send_delay:
         if kwargs.get("verbose", True):
             for key, value in self.update_dict.items():
                 self.master.__dict__[key].update(value)
+
+                #degree = group_modi(kwargs.get("degree", self.event['degree']), index)
+                #sample = group_modi(kwargs.get("sample", self.event["sample"]), index)
+                #buf  = int(Samples[str(degree)].bufnum(sample))
+
                 if key == "buf" and value != 0:
-                    self.master.__dict__["char"].update( Samples.getBuffer(value).char )
+                    self.master.__dict__["degree"].update( Samples.getBuffer(value).char ) # this might have to change -----
             compiled_msg = self.server.sendPlayerMessage(self.synth, self.msg, self.fx)
             self.queue_block.osc_messages.append(compiled_msg)
         return
@@ -1698,7 +1703,7 @@ class Group:
         else:
             delay, on = 0, float(dur) / len(self.players)
             for player in self.players:
-                player.amplify=TimeVar.var([0,1,0],[delay, on, dur-delay])
+                player.amplify=TimeVar.TimeVar([0,1,0],[delay, on, dur-delay])
                 delay += on
         return           
 

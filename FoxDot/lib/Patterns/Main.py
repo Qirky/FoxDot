@@ -1,8 +1,8 @@
 from __future__ import division
 from random import choice, shuffle
+from copy import deepcopy
 from Operations import *
 from utils import *
-from Parse import Parse
 from PlayString import PlayString
 
 """
@@ -15,13 +15,12 @@ class metaPattern(object):
     """ Abstract base class for Patterns """
 
     data = None
-    bracket_style = "[%s]"
+    bracket_style = "[]"
     debugging = False
 
     def __init__(self, data=[]):
 
         if self.__class__ not in PATTERN_WEIGHTS:
-
             PATTERN_WEIGHTS.insert(-1, self.__class__)
         
         if type(data) is str:
@@ -40,7 +39,7 @@ class metaPattern(object):
             
     def __len__(self):
         lengths = [1] + [len(p) for p in self.data if isinstance(p, Pattern)]
-        return LCM(*lengths) * len(self.data)
+        return LCM(*lengths) * len([item for item in self.data if not isinstance(item, EmptyItem)])
     
     def __str__(self):
         try:
@@ -50,7 +49,7 @@ class metaPattern(object):
                 val = self.data
         except AttributeError:
             val = self.data
-        return "P" + self.bracket_style % repr(val)[1:-1]
+        return "P" + self.bracket_style[:-1] + ( repr(val)[1:-1] ) + self.bracket_style[-1]
 
     def __repr__(self):
         return str(self)
@@ -59,7 +58,7 @@ class metaPattern(object):
         """ Returns a PlayString in string format from the Patterns values """
         string = ""
         for item in self.data:
-            if isinstance(item, (PlayGroup, RandomPlayGroup)):
+            if isinstance(item, (PGroup, GeneratorPattern)):
                 string += item.string()
             elif isinstance(item, Pattern):
                 string += "(" + "".join([(s.string() if hasattr(s, "string") else str(s)) for s in item.data]) + ")"
@@ -96,9 +95,11 @@ class metaPattern(object):
         else:
             i = key % len(self.data)
             val = self.data[i]
-            if isinstance(val, (Pattern, GeneratorPattern)):
+            if isinstance(val, Pattern):
                 j = key // len(self.data)
                 val = val.getitem(j)
+            elif isinstance(val, GeneratorPattern):
+                val = val.getitem()
         return val
     
     def __setitem__(self, key, value):
@@ -182,6 +183,17 @@ class metaPattern(object):
     def __ror__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return asStream(other).pipe(self)
+
+    """
+
+        Zipping patterns together using the '&' operator
+
+    """
+
+    def __and__(self, other):
+        return self.zip(other)
+    def __rand__(self, other):
+        return asStream(other).zip(self)
     
     #: Comparisons
     def __eq__(self, other):
@@ -201,7 +213,8 @@ class metaPattern(object):
     # Methods for strings as pattern
 
     def fromString(self, string):
-        self.data = Parse(string)
+        import Parse
+        self.data = Parse.Parse(string)
         self.make()
         return self
 
@@ -271,6 +284,9 @@ class metaPattern(object):
         """ Used in place of sorted(pattern) to force type """
         return self.__class__(sorted(self.data))
 
+    def __invert__(self):
+        return self.mirror()
+
     def mirror(self):
         """ Reverses the pattern. Differs to `Pattern.reverse()` in that
             all nested patters are also reversed. """
@@ -303,14 +319,6 @@ class metaPattern(object):
             for seq in sequences:
                 new.append(modi(seq, i))
         return self.__class__(new)
-
-    def zip(self, seq1, *seqN):
-        l, p = [], []
-        for pat in [self, seq1] + list(seqN):
-            p.append(Pattern(pat))
-            l.append(len(p[-1]))
-        length = LCM(*l)
-        return self.__class__([tuple(pat[i] for pat in p) for i in range(length)])
 
     def invert(self):
         new = []
@@ -477,10 +485,15 @@ class metaPattern(object):
         
     def pipe(self, pattern):
         """ Concatonates this patterns stream with another """
-        data = list(self)
-        for item in asStream(pattern):
-            data.append(item)
-        return Pattern(data)
+        return Pattern(self.data + asStream(pattern).data)
+
+    def zip(self, seq1, *seqN):
+        l, p = [], []
+        for pat in [self, seq1] + list(seqN):
+            p.append(Pattern(pat))
+            l.append(len(p[-1]))
+        length = LCM(*l)
+        return self.__class__([tuple(pat[i] for pat in p) for i in range(length)])
 
     # Returns individual elements / slices
 
@@ -511,7 +524,7 @@ class metaPattern(object):
 
             self.data = list(self.data)
             
-        if not isinstance(self.data, (PatternType, PlayString)):
+        if not isinstance(self.data, (PatternType, PlayString)): # not sure about PlayString data
     
             self.data = [self.data]
 
@@ -530,8 +543,7 @@ class metaPattern(object):
 
 class Pattern(metaPattern):
     """ Base type pattern """
-    pass
-    
+    debug = False
 
 class GeneratorPattern(object):
     """
@@ -542,24 +554,40 @@ class GeneratorPattern(object):
     def __init__(self):
         self.mod = Pattern()
         self.mod_functions = []
-        self.name = self.__class__.__name__
+        self.name  = self.__class__.__name__
+        self.data  = []
+
+        self.index   = 0
+        self.history = {}
 
     def __repr__(self):
-        return "[GeneratorPattern <{}>]".format(self.name)
+        return "{}({})".format(self.name, self.data)
         
-    def getitem(self, index):
+    def getitem(self, index=None):
         """ Calls self.func(index) to get an item, and also calculates
             performs any arithmetic operation assigned """
+        if index is None:
+            index, self.index = self.index, self.index + 1
+        if index in self.history:
+            return self.history[index]
+        # Calculate value
         value = self.func(index)
         for i, func in enumerate(self.mod_functions):
             value = func(value, modi(modi(self.mod, i), index))
+        # Store if we refer to the same index
+        self.history[index] = value
         return value
 
     def func(self, index):
-        return
+        return index
 
     def __len__(self):
         return 1
+
+    def __int__(self):  
+        return int(self.getitem())
+    def __float__(self):
+        return  float(self.getitem())
     
     # Arithmetic operations create new GeneratorPatterns
     def __add__(self, other):
@@ -608,40 +636,14 @@ class GeneratorPattern(object):
             c = key.step if key.step else 1
             return Pattern([self[i] for i in range(a, b, c)])
 
-    # Pattern methods that don't return anything
-    def stretch(self, n):
-        return self
-
-
-# Random Generator Pattern
-
-import random
-
-class PRand(GeneratorPattern):
-    ''' Returns a random integer between start and stop. If start is a container-type it returns
-        a random item for that container. '''
-    def __init__(self, start, stop=None):
-        GeneratorPattern.__init__(self)
-        if hasattr(start, "__iter__"):
-            self.data = Pattern(start)
-            def choose(index):
-                return random.choice(self.data)
-            self.func = choose
-        else:
-            self.low  = start if stop is not None else 0
-            self.high = stop  if stop is not None else start
-    def func(self, index):
-        return random.randrange(self.low, self.high)
-
-
-class PatternContainer(Pattern):
+class PatternContainer(metaPattern):
     def getitem(self, key):
         key = key % len(self)
         return self.data[key]
     def __len__(self):
         return len(self.data)
     def __str__(self):
-        return str(["%s()" % item.__class__.__name__ for item in self.data])
+        return str(self.data)
     def __repr__(self):
         return str(self)
 
@@ -653,7 +655,7 @@ class PGroup(metaPattern):
         
     """
     
-    bracket_style = "(%s)"
+    bracket_style = "()"
 
     def __init__(self, data=[], *args):
         if not args:
@@ -680,16 +682,19 @@ class PGroup(metaPattern):
 
             self.data = new_data
 
-    def forced_values(self):
-        """ Recursively forces changeable values into non-changeable """
+    def force_values(self):
+        """ Recursively (in place) forces changeable values into non-changeable """
         data = []
         for item in self:
             if isinstance(item, GeneratorPattern):
                 new_item = item[0]
+            elif isinstance(item, PGroup):
+                new_item = item.force_values()
             else:
                 new_item = item
             data.append(new_item)
-        return self.__class__(data)
+        self.data = data
+        return self
 
     def scale_dur(self, n):
         """ Scales the dur values for all the items in self.data by n """
@@ -740,29 +745,34 @@ class PGroup(metaPattern):
 class PGroupPrime(PGroup):
     def has_behaviour(self):
         return True
-
-class PGroupStar(PGroupPrime):
-    """ Acts as a PGroup but Players stutter them """
-    bracket_style="*(%s)"
     def calculate_step(self, i, dur):
         return i * (dur / len(self))
 
-##class Shared_Time_PGroup(PGroup):
-##    bracket_style = "{%s}"
-##    def coeff(self):
-##        return 1.0 / len(self)
+class PGroupStar(PGroupPrime):
+    """ Stutters the values over the length of and event's 'dur' """    
+    bracket_style="*()"
+    def string(self):
+        """ Used for SamplePlayerStrings """
+        return "[" + PGroupPrime.string(self) + "]"
 
-PATTERN_WEIGHTS = [Pattern,  PGroupPrime, PGroup]
+# Empty items
+
+class EmptyItem(object):
+    """ Can be used in a pattern and and is essentially not there """
+    def __init__(self):
+        pass
+    def __repr__(self):
+        return "_"
 
 # Used to force any non-pattern data into a Pattern
 
+PATTERN_WEIGHTS = [Pattern, PGroupPrime, PGroup]
+
 PatternType = (Pattern, list)
-                
+
 def asStream(data):
     """ Forces any data into a [pattern] form """
-    if isinstance(data, (Pattern, GeneratorPattern)):
-        return data
-    return Pattern(data)
+    return data if isinstance(data, Pattern) else Pattern(data)
 
 def Format(data):
     if isinstance(data, list):

@@ -34,6 +34,16 @@ Use the '|' symbol to 'pipe' Patterns into on another
 var >> var([0,1,2,3],[4,8])
 var >> ([0,1,2,3],[4,8])
 
+##### `_bpm_cycle_dur(self)`
+
+Returns the time, in seconds, for a var to loop to its original
+value and duration if this var is a bpm value. 
+
+##### `_bpm_to_beats(self, duration, start=0)`
+
+If self.data are series of bpm, how many beats occur in
+the time frame 'duration'. Used in TempoClock 
+
 ##### `after(self, n, cmd, *args, **kwargs)`
 
 Schedule self.cmd(args, kwargs) in n beats 
@@ -41,6 +51,10 @@ Schedule self.cmd(args, kwargs) in n beats
 ##### `all(self, func=<lambda>)`
 
 Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
+
+##### `amen(self, i=2)`
+
+Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" 
 
 ##### `calculate(self, val)`
 
@@ -98,7 +112,7 @@ or the name of a Pattern method as a string.
 
 Returns the duration of one full cycle in beats 
 
-##### `loop(self, n)`
+##### `loop((((((('self',),),),),),), (((((('n',),),),),),))`
 
 Repeats this pattern n times 
 
@@ -115,9 +129,35 @@ all nested patters are also reversed.
 
 Returns a new TimeVar object 
 
+##### `normalise(self)`
+
+Returns the pattern with all values between 0 and 1 
+
+##### `palindrome((((((('self',),),),),),), (((((('a', 0), 0), 0), 0), 0), 0)=0, (((((('b', None), None), None), None), None), None)=None)`
+
+Returns the original pattern with mirrored version of itself appended.
+a removes values from the middle of the pattern, if positive.
+b removes values from the end of the pattern, should be negative.
+
+e.g.
+
+>>> P[:4].palindrome()
+P[0, 1, 2, 3, 3, 2, 1, 0]
+>>> P[:4].palindrome(1)
+P[0, 1, 2, 3, 2, 1, 0]
+>>> P[:4].palindrome(-1)
+P[0, 1, 2, 3, 3, 2, 1]
+>>> P[:4].palindrome(1,-1)
+P[0, 1, 2, 3, 2, 1]
+
 ##### `pipe(self, pattern)`
 
 Concatonates this patterns stream with another 
+
+##### `pivot((((((('self',),),),),),), (((((('i',),),),),),))`
+
+Mirrors and rotates the Pattern such that the item at index 'i'
+is in the same place 
 
 ##### `shufflets(self, n)`
 
@@ -128,13 +168,17 @@ versions of the original Pattern
 
 Used in place of sorted(pattern) to force type 
 
-##### `stretch(self, size)`
+##### `stretch((((((('self',),),),),),), (((((('size',),),),),),))`
 
 Stretches (repeats) the contents until len(Pattern) == size 
 
 ##### `string(self)`
 
 Returns a PlayString in string format from the Patterns values 
+
+##### `unduplicate(self)`
+
+Removes any consecutive duplicate numbers from a Pattern 
 
 ##### `update(self, values, dur=None, **kwargs)`
 
@@ -152,6 +196,16 @@ Updates the TimeVar with new values
 
 var >> var([0,1,2,3],[4,8])
 var >> ([0,1,2,3],[4,8])
+
+##### `_bpm_cycle_dur(self)`
+
+Returns the time, in seconds, for a var to loop to its original
+value and duration if this var is a bpm value. 
+
+##### `_bpm_to_beats(self, duration, start=0)`
+
+If self.data are series of bpm, how many beats occur in
+the time frame 'duration'. Used in TempoClock 
 
 ##### `after(self, n, cmd, *args, **kwargs)`
 
@@ -216,6 +270,16 @@ Used in TimeVars to stay on certain values until re-evaluated
 var >> var([0,1,2,3],[4,8])
 var >> ([0,1,2,3],[4,8])
 
+##### `_bpm_cycle_dur(self)`
+
+Returns the time, in seconds, for a var to loop to its original
+value and duration if this var is a bpm value. 
+
+##### `_bpm_to_beats(self, duration, start=0)`
+
+If self.data are series of bpm, how many beats occur in
+the time frame 'duration'. Used in TempoClock 
+
 ##### `after(self, n, cmd, *args, **kwargs)`
 
 Schedule self.cmd(args, kwargs) in n beats 
@@ -271,6 +335,16 @@ Updates the TimeVar with new values
 var >> var([0,1,2,3],[4,8])
 var >> ([0,1,2,3],[4,8])
 
+##### `_bpm_cycle_dur(self)`
+
+Returns the time, in seconds, for a var to loop to its original
+value and duration if this var is a bpm value. 
+
+##### `_bpm_to_beats(self, duration, start=0)`
+
+If self.data are series of bpm, how many beats occur in
+the time frame 'duration'. Used in TempoClock 
+
 ##### `after(self, n, cmd, *args, **kwargs)`
 
 Schedule self.cmd(args, kwargs) in n beats 
@@ -325,6 +399,16 @@ Var(values [,durs=[4]])
 
 var >> var([0,1,2,3],[4,8])
 var >> ([0,1,2,3],[4,8])
+
+##### `_bpm_cycle_dur(self)`
+
+Returns the time, in seconds, for a var to loop to its original
+value and duration if this var is a bpm value. 
+
+##### `_bpm_to_beats(self, duration, start=0)`
+
+If self.data are series of bpm, how many beats occur in
+the time frame 'duration'. Used in TempoClock 
 
 ##### `after(self, n, cmd, *args, **kwargs)`
 

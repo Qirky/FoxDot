@@ -11,7 +11,7 @@ when called, schedules itself in the future
 
 #### Methods
 
-##### `__call__(self)`
+##### `__call__(self, *args, **kwargs)`
 
 Proxy for parent object __call__ 
 
@@ -53,27 +53,6 @@ p1.every(4, 'shuffle')
 p1.every(5, 'stutter', 4, cycle=8)
 
 ```
-
----
-
-### `WhenModMethodCall(self, parent, method, mod, n, args=(), kwargs={})`
-
-
-
-#### Methods
-
-##### `__call__(self)`
-
-Proxy for parent object __call__ 
-
-##### `isScheduled(self)`
-
-Returns True if this is in the Tempo Clock 
-
-##### `update(self, n, cycle, args=(), kwargs={})`
-
-Updates the values of the MethodCall. Re-adjusts
-the index if cycle has been changed 
 
 ---
 

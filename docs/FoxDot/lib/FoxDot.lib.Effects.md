@@ -53,7 +53,7 @@ writes to file and sends to server
 
 ## Data
 
-#### `FxList = {'cut': <Fx 'trimLength' -- args: cut,sus>, 'bit...,sus>, 'hpf': <Fx 'highPassFilter' -- args: hpf>}`
+#### `FxList = {'formant': <Fx 'formantFilter' -- args: formant...>, 'hpf': <Fx 'highPassFilter' -- args: hpf,hpr>}`
 
-#### `fx = <Fx 'reverb' -- args: verb,room>`
+#### `fx = <Fx 'wavesShapeDistortion' -- args: shape>`
 

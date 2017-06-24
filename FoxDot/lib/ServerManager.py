@@ -89,7 +89,24 @@ class SCLangServerManager:
         self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
 
+    def sendMidiMessage(self, event):
+        pass
+
     def sendPlayerMessage(self, synthdef, packet, effects, player=None):
+
+        ## todo -- should packet be a dict?
+
+        ## todo -- make this more elegant
+
+        if synthdef == "MidiOut":
+
+            note    = packet[packet.index("midinote") + 1]
+            vel     = min(127, (packet[packet.index("amp") + 1] * 128) - 1)
+            sus     = packet[packet.index("sus") + 1]
+            channel = packet[packet.index("channel") + 1]
+
+            return [synthdef, note, vel, sus, channel]
+        
         # Create a bundle
         bundle = OSCBundle()
 
@@ -194,6 +211,16 @@ class SCLangServerManager:
         message = OSCMessage("/b_allocRead")
         message.append([bufnum, path])
         self.client.send( message )
+        return
+
+    # Midi Messages
+    # -------------
+
+    def sendMidi(self, data, cmd="/foxdot_midi"):
+        msg = OSCMessage()
+        msg.append(data)
+        msg.setAddress(cmd)
+        self.sclang.send(msg)
         return
 
     # SynthDef Commmunication

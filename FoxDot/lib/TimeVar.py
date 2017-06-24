@@ -36,8 +36,8 @@ def fetch(func):
         return func(a, b)
     return eval_now
 
-  
-class var(Repeatable):
+ 
+class TimeVar(Repeatable):
     """ Var(values [,durs=[4]]) """
 
     metro = None
@@ -95,7 +95,7 @@ class var(Repeatable):
 
     # For printing the details
     def info(self):
-        return "<TimeVar(%s, %s)>" % (repr(self.values()), repr(self.durs()))
+        return "<{}({}, {})>".format(self.__class__.__name__, repr(self.values()), repr(self.durs()))
 
     def all_values(self):
         return self.data + [self.dependency]
@@ -153,7 +153,7 @@ class var(Repeatable):
     def __add__(self, other):
         # Run an assertion to make sure all values are valid
         #[other + item for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self + x for x in other))
             else:
@@ -165,7 +165,7 @@ class var(Repeatable):
     def __radd__(self, other):
         # Run an assertion to make sure all values are valid
         #[item + other for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x + self for x in other))
             else:
@@ -178,7 +178,7 @@ class var(Repeatable):
     def __sub__(self, other):
         # Run an assertion to make sure all values are valid
         #[item - other for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self - x for x in other))
             else:
@@ -189,7 +189,7 @@ class var(Repeatable):
     def __rsub__(self, other):
         # Run an assertion to make sure all values are valid
         #[other - item for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x - self for x in other))
             else:
@@ -202,7 +202,7 @@ class var(Repeatable):
     def __mul__(self, other):
         # Run an assertion to make sure all values are valid
         #[item * other for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self * x for x in other))
             else:
@@ -214,7 +214,7 @@ class var(Repeatable):
     def __rmul__(self, other):
         # Run an assertion to make sure all values are valid
         #[other * item for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x * self for x in other))
             else:
@@ -228,7 +228,7 @@ class var(Repeatable):
     def __pow__(self, other):
         # Run an assertion to make sure all values are valid
         #[item ** other for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self ** x for x in other))
             else:
@@ -240,7 +240,7 @@ class var(Repeatable):
     def __rpow__(self, other):
         # Run an assertion to make sure all values are valid
         #[other ** item for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x ** self for x in other))
             else:
@@ -254,7 +254,7 @@ class var(Repeatable):
     def __div__(self, other):
         # Run an assertion to make sure all values are valid
         #[item / other for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self / x for x in other))
             else:
@@ -266,7 +266,7 @@ class var(Repeatable):
     def __rdiv__(self, other):
         # Run an assertion to make sure all values are valid
         #[other / item for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x / self for x in other))
             else:
@@ -279,7 +279,7 @@ class var(Repeatable):
     def __truediv__(self, other):
         # Run an assertion to make sure all values are valid
         #[item / other for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((self / x for x in other))
             else:
@@ -291,7 +291,7 @@ class var(Repeatable):
     def __rtruediv__(self, other):
         # Run an assertion to make sure all values are valid
         #[other / item for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x / self for x in other))
             else:
@@ -332,19 +332,19 @@ class var(Repeatable):
     def __mod__(self, other):
         # Run an assertion to make sure all values are valid
         #[other.__rmod__(item) for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x.__rmod__(self) for x in other))
             else:
                 return other.__rmod__(self)
         new = self.new(other)
-        new.evaulate = fetch(op.rMod)
+        new.evaluate = fetch(op.rMod)
         return new
 
     def __rmod__(self, other):
         # Run an assertion to make sure all values are valid
         #[other.__mod__(item) for item in self.all_values()]
-        if not isinstance(other, (var, int, float)):
+        if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
                 return other.__class__((x.__mod__(self) for x in other))
             else:
@@ -457,7 +457,7 @@ class var(Repeatable):
     # Finding current values
     def now(self, time=None):
 
-        time = self.current_time(time) + self.metro.get_latency()
+        time = self.current_time(time)
 
         loops = time // sum(self.dur)
         time  = time - (loops * sum(self.dur))
@@ -521,23 +521,23 @@ class var(Repeatable):
     def shuf(self):
         pass
 
-class Pvar(var, Pattern):
+class Pvar(TimeVar, Pattern):
     """ Pvar([pat1, pat2], durs) """
     stream = PatternContainer
     def __init__(self, values, dur=None, **kwargs):
-        var.__init__(self, [asStream(val) for val in values], dur, **kwargs)
+        TimeVar.__init__(self, [asStream(val) for val in values], dur, **kwargs)
 
 
-class _continuous_var(var):
+class _continuous_var(TimeVar):
 
     def __init__(self, *args, **kwargs):
-        var.__init__(self, *args, **kwargs)
+        TimeVar.__init__(self, *args, **kwargs)
         self.next_value = None
 
     # Finding current values
     def now(self, time=None):
 
-        time = self.current_time(time) + self.metro.get_latency()
+        time = self.current_time(time)
 
         loops = time // sum(self.dur)
         time  = time - (loops * sum(self.dur))
@@ -612,8 +612,9 @@ inf = _inf()
 # TimeVar indexing of patterns
 
 def _timevar_index(self, key):
-    if isinstance(key, var):
-        item = Pvar([self.data])
+    if isinstance(key, TimeVar):
+        # Create a TimeVar of a PGroup that can then be indexed by the key
+        item = TimeVar(tuple(self.data))
         item.dependency = key
         item.evaluate = fetch(op.Get)
         return item
@@ -621,3 +622,39 @@ def _timevar_index(self, key):
         return self.getitem(key)
 
 Pattern.__getitem__ = _timevar_index
+
+# Store and updates TimeVars
+
+class _var_dict(object):
+    """
+        This is the TimeVar generator used in FoxDot. Calling it like `var()`
+        returns a TimeVar but setting an attribute `var.n = var([1,2],4)` will
+        update the TimeVar that is already in `var.n`.
+
+        In short, using `var.name = var([i, j])` means you don't have to delete
+        some of the text and replace it with `var.name.update([k, l])` you can
+        just use `var.name = var([k, l])` and the contents of the var will be
+        updated everywhere else in the program.
+    """
+    
+    def __init__(self):
+        self.__vars = {}
+    def __call__(self, *args, **kwargs):
+        return TimeVar(*args, **kwargs)
+    def __setattr__(self, name, value):
+        if name != "__vars" and isinstance(value, TimeVar):
+            if name in self.__vars:
+                if value.__class__ != self.__vars[name].__class__:
+                    self.__vars[name].__class__ = value.__class__
+                self.__vars[name].__dict__ = value.__dict__
+            else:
+                self.__vars[name] = value
+        object.__setattr__(self, name, value)
+    def __getattr__(self, name):
+        if name in self.__vars:
+            value = self.__vars[name]
+        else:
+            value = object.__getattr__(self, name)
+        return value
+
+var = _var_dict()

@@ -42,6 +42,14 @@ None
 
 Returns a list of class names defined in module 
 
+### `clean(string)`
+
+Removes non-ascii characters from a string 
+
+### `debug_stdout(*args)`
+
+Forces prints to server-side 
+
 ### `functions(module)`
 
 Returns a list of function names defined in module 

@@ -27,17 +27,9 @@ None
 
 None
 
-### `EuclidsAlgorithm(n, k)`
-
-None
-
 ### `Get(a, b)`
 
 None
-
-### `LCM(*args)`
-
-Lowest Common Multiple 
 
 ### `Mod(a, b)`
 
@@ -67,26 +59,6 @@ None
 
 None
 
-### `get_expanded_len(data)`
-
-(0,(0,2)) returns 4. int returns 1 
-
-### `group_modi(pgroup, index)`
-
-Returns value from pgroup that modular indexes nested groups 
-
-### `max_length(*patterns)`
-
-Returns the largest length pattern 
-
-### `modi(array, i, debug=0)`
-
-Returns the modulo index i.e. modi([0,1,2],4) will return 1 
-
-### `patternclass(a, b)`
-
-None
-
 ### `rAdd(a, b)`
 
 None
@@ -108,10 +80,6 @@ None
 None
 
 ### `rSub(a, b)`
-
-None
-
-### `sliceToRange(s)`
 
 None
 

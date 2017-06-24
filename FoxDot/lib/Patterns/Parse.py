@@ -7,9 +7,9 @@
 
 import re
 import Main
+import Generators
 from utils import modi, LCM
 from PlayString import *
-
 
 class Parser:
     re_nests  = r"\((.*?)\)"
@@ -31,7 +31,7 @@ class Parser:
                 output.append(item)
         return output
 
-    def parse(self, string, dur=1):
+    def parse(self, string):
         # Iterate over the string
         string = PlayString(string)
         items = []
@@ -49,7 +49,7 @@ class Parser:
                 s = string[i+1:j]
                 i = j
 
-                chars, _ = self.parse(s, dur)
+                chars, _ = self.parse(s)
 
                 if len(chars) == 0:
 
@@ -69,7 +69,7 @@ class Parser:
                 s = string[i+1:j]
                 i = j
 
-                chars, _ = self.parse(s, dur)
+                chars, _ = self.parse(s)
 
                 if len(chars) == 0:
 
@@ -77,7 +77,7 @@ class Parser:
 
                     raise(ParseError(e))
 
-                items.append( Main.PRand(chars) )
+                items.append( Generators.PRand(chars) )
                     
             # Look for a '[]'
             elif char == "[":
@@ -86,7 +86,7 @@ class Parser:
                 s = string[i+1:j]
                 i = j
 
-                chars, contains_nest = self.parse(s, dur)
+                chars, contains_nest = self.parse(s)
 
                 if len(chars) == 0:
 
@@ -99,13 +99,12 @@ class Parser:
 
                     # May contain sub-nests, so re-parse with calculated duration
 
-                    chars, _ = self.parse(s, dur / float(len(chars)))
+                    chars, _ = self.parse(s)
 
                     new_chars = []
 
                     for num in range(max([len(ch) for ch in chars])):
 
-                        # new_chars.append(PlayGroup([modi(ch, num) for ch in chars]))
                         new_chars.append(Main.PGroupStar([modi(ch, num) for ch in chars]))
 
                     items.append( new_chars )
@@ -116,28 +115,15 @@ class Parser:
 
                     for char in chars:
 
-                        # char.divide(len(chars))
-
-                        #if isinstance(char, PCHAR): 
-                        #if isinstance(char, PlayGroup):
-##                        if isinstance(char, Main.PGroupStar):
-##
-##                            new_chars.extend(char)
-##
-##                        else:
-
-##                            new_chars.append(char)
-
                         new_chars.append(char)
 
-                    # items.append( PlayGroup(new_chars) )
                     items.append( Main.PGroupStar(new_chars) )
 
             # Add single character to list
 
             elif char not in ")]":
 
-                items.append( PCHAR(char, dur) )
+                items.append( PCHAR(char) )
 
             # Increase iterator
             i += 1

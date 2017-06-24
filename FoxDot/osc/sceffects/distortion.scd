@@ -1,6 +1,6 @@
 SynthDef.new(\distortion,
-{|bus, shape|
+{|bus, dist|
 var osc;
 osc = In.ar(bus, 2);
-osc = osc;
+osc = CrossoverDistortion.ar(osc, smooth:1-dist);
 ReplaceOut.ar(bus, osc)}).add;

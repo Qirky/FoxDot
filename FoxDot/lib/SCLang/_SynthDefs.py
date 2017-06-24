@@ -178,13 +178,14 @@ with SynthDef("spark") as synth:
     synth.amp  = synth.amp + 0.00001
     synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
     synth.osc  = LFSaw.ar(freq * 1.002, iphase=Saw.ar(0.1)) * 0.3 + LFSaw.ar(freq, iphase=Saw.ar(0.1)) * 0.3
-    synth.osc  = synth.osc * Line.ar(synth.amp, synth.amp/10000, synth.sus * 1.5) * 0.3
+    synth.osc  = (synth.osc * Line.ar(synth.amp, synth.amp/10000, synth.sus * 1.5) * 0.3) * Line.ar(0.01, 1, synth.sus * 0.033)
 spark = synth
 
 with SynthDef("blip") as synth:
     freq = instance('freq')
     synth.amp  = synth.amp + 0.00001
     synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
+    synth.freq = synth.freq * 2
     synth.osc  = (LFCub.ar(freq * 1.002, iphase=1.5) + LFTri.ar(freq, iphase=Line.ar(2,0,0,2)) * 0.3) * Blip.ar(freq / 2, synth.rate)
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 2) * 0.3
 blip = synth

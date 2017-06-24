@@ -111,6 +111,8 @@ def group_modi(pgroup, index):
 
 def get_expanded_len(data):
     """ (0,(0,2)) returns 4. int returns 1 """
+    if type(data) is str and len(data) == 1:
+        return 1
     l = []
     try:
         for item in data:

@@ -94,11 +94,11 @@ class MidiIn:
         self.device.close_port()
         return
                 
-            
+from SCLang import SynthDefProxy
 
-class MidiOut:
-    pass
-
+class MidiOut(SynthDefProxy):
+    def __init__(self, degree=0, **kwargs):
+        SynthDefProxy.__init__(self, self.__class__.__name__, degree, kwargs)
 
 class MIDIDeviceNotFound(Exception):
     def __str__(self):

@@ -15,7 +15,7 @@ from types import FunctionType, MethodType
 from Players import Player, send_delay, func_delay
 from Repeat import MethodCall
 from Patterns import asStream
-from TimeVar import var
+from TimeVar import TimeVar
 from Midi import MidiIn, MIDIDeviceNotFound
 from Patterns.utils import modi
 from time import sleep, time, clock
@@ -26,8 +26,6 @@ import threading
 import Code
 import inspect
 
-# Track tempo changes and the start time of each?
-
 class TempoClock(object):
 
     def __init__(self, bpm=120.0, meter=(4,4)):
@@ -35,8 +33,10 @@ class TempoClock(object):
         # Flag this when done init
         self.__setup   = False
 
+        self.nudge   = 0.0
+
         self.time = 0 # time in secs
-        self.beat = 0 # the number of beats
+        self.beat = 0 # the number of beats since the epoch
         self.start_time = time() # The time at start
 
         # Don't start yet...
@@ -64,8 +64,8 @@ class TempoClock(object):
         self.midi_clock = None
 
         # Can be configured
-        self.latency = 0.4
-        self.sleep_time = 0.001
+        self.latency = 0.1
+        self.sleep_time = 0.0001
 
         # Debug
         self.debugging = False
@@ -75,17 +75,13 @@ class TempoClock(object):
         self.solo = SoloPlayer()
 
     def __str__(self):
-
         return str(self.queue)
 
     def __iter__(self):
-
         for x in self.queue:
-
             yield x
 
     def __len__(self):
-
         return len(self.queue)
 
     def __contains__(self, item):
@@ -95,28 +91,10 @@ class TempoClock(object):
         if attr == "bpm" and self.__setup:
             # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
             self.schedule(lambda: object.__setattr__(self, attr, value))
-            # Notify listening clients
+            # Notify listening clients -- future
             pass
         else:
             self.__dict__[attr] = value
-        return
-
-    def calc_historic_beats(self):
-        # Work out how many beats have gone at these tempi
-        num_beats = 0
-        for i in range(len(self.tempo_changes)-1):
-            sec = self.tempo_changes[i + 1][0] - self.tempo_changes[i][0]
-            bpm = self.tempo_changes[i][-1]
-            if isinstance(bpm, var):
-                beats = bpm._bpm_to_beats(sec, self.tempo_changes[i][1])
-            else:
-                beats = (sec * (bpm / 60.0))
-            num_beats += beats
-        self.historic_beats = num_beats
-        return
-
-    def set_start_time(self, seconds):
-        self.tempo_changes[-1][0] = self.start_time = seconds
         return
 
     def bar_length(self):
@@ -125,10 +103,24 @@ class TempoClock(object):
 
     def beat_dur(self, n=1):
         """ Returns the length of n beats in seconds """
-        return (60.0 / float(self.bpm)) * n
+        return (60.0 / self.get_bpm()) * n
+
+    def seconds_to_beats(self, seconds):
+        """ Returns the number of beats that occur in a time period  """
+        return (self.get_bpm() / 60.0) * seconds
+
+    def get_bpm(self):
+        if isinstance(self.bpm, TimeVar):
+            bpm_val = self.bpm.now(self.beat)
+        elif self.midi_clock:
+            bpm_val = self.midi_clock.bpm
+        else:
+            bpm_val = self.bpm
+        return float(bpm_val)
 
     def get_latency(self):
-        return self.latency
+        """ Returns self.latency (which is in seconds) as a fraction of a beat """
+        return self.seconds_to_beats(self.latency)
 
     def sync_to_midi(self, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
@@ -149,51 +141,11 @@ class TempoClock(object):
 
     def now(self):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
-        if isinstance(self.bpm, var):
-            bpm_val = self.bpm.now(self.beat)
-        elif self.midi_clock:
-            bpm_val = self.midi_clock.bpm
-        else:
-            bpm_val = self.bpm
-            
-        now = time() - self.start_time
-
+        bpm_val = self.get_bpm()
+        now     = time() - self.start_time
         self.beat += (now - self.time) * (bpm_val / 60.0)
-            
         self.time = now
-
         return self.beat
-##
-##    def now_(self):
-##        """ Returns the total elapsed time (in beats as opposed to seconds) """
-##        if isinstance(self.bpm, var):
-##            bpm_val = self.bpm.now(self.beat)
-##        elif self.midi_clock:
-##            bpm_val = self.midi_clock.bpm
-##        else:
-##            bpm_val = self.bpm
-##
-##        # Update clock time
-##
-##        if isinstance(self.bpm, var):
-##
-##            # variable bpm's are trickier and harder to sync
-##
-##            now = time() - self.start_time
-##
-##            self.beat += (now - self.time) * (bpm_val / 60.0)
-##                
-##            self.time = now
-##
-##        else:
-##
-##            # Use clock time if using stationary bpm
-##
-##            sec = time() - self.start_time
-##
-##            self.beat = self.historic_beats + (sec * (bpm_val / 60.0))
-##
-##        return self.beat
         
     def start(self):
         """ Starts the clock thread """
@@ -208,8 +160,6 @@ class TempoClock(object):
             events are activated  """
 
         # Call each item in turn (they can call each other if there are dependencies
-
-        # print self.now(),
 
         t1 = clock()
         
@@ -238,9 +188,7 @@ class TempoClock(object):
 
             sleep_time = 0
 
-            # print block
-
-            print "Clock latency increased to", self.latency
+            print("Clock latency increased to", self.latency)
 
         # Wait until the end of the latency period
 
@@ -256,6 +204,8 @@ class TempoClock(object):
 
     def run(self):
         """ Main loop """
+
+        counter = True
         
         self.ticking = True
 
@@ -263,17 +213,12 @@ class TempoClock(object):
 
             now        = self.now()
             next_event = self.queue.next()
-            latency    = self.get_latency()
 
-            delta = now - (next_event - latency)
+            delta = (self.beat - next_event) + self.nudge
+
+            # When the counter gets to the desired time minus latency, begin preparing it
 
             if delta >= 0:
-
-                if self.debugging:
-
-                    if delta > self.latency:
-
-                        print("Late: {}".format(delta - self.latency))
 
                 self.current_block = self.queue.pop()
 
@@ -348,7 +293,9 @@ class TempoClock(object):
 
                 kwargs['verbose'] = False
 
-                print "Scheduling", obj, "at", self.now(), "when expected at", beat
+                if self.debugging:
+
+                    print "Scheduling", obj, "at", self.now(), "when expected at", beat
 
             self.queue.add(obj, self.now(), args, kwargs)
         
@@ -358,13 +305,6 @@ class TempoClock(object):
         """ Returns the beat value for the start of the next bar """
         beat = self.now()
         return beat + (self.meter[0] - (beat % self.meter[0]))
-
-    def get_bpm(self):
-        if hasattr(self.bpm, 'now'):
-            bpm = float(self.bpm.now(self.beat))
-        else:
-            bpm = float(self.bpm)
-        return bpm
 
     def next_event(self):
         """ Returns the beat index for the next event to be called """
@@ -386,11 +326,6 @@ class TempoClock(object):
     def stop(self):
         self.ticking = False
         self.reset()
-        return
-
-    def reset(self):
-        self.beat = 0
-        self.time = time() - self.start_time
         return
 
     def shift(self, n):
@@ -418,7 +353,6 @@ class TempoClock(object):
         
         self.playing = []
         self.ticking = False
-        self.reset()
 
         return
 
@@ -561,7 +495,10 @@ class QueueItem:
 
     def send_osc_messages(self):
         for msg in self.osc_messages:
-            self.server.client.send(msg)
+            if msg[0] == "MidiOut": # TODO -- make this more elegant
+                self.server.sendMidi(msg)
+            else:
+                self.server.client.send(msg)
         return
 
     def called(self, item):

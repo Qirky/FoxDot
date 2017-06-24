@@ -65,15 +65,24 @@ class EffectManager(dict):
 
         dict.__init__(self)
         self.pre_kw=[]
+
         self.kw=[]
+
+        self.all_kw=[]
 
     def new(self, foxdot_arg_name, synthdef, args, order=2):
         self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args)
         self.kw.append(foxdot_arg_name)
+        for arg in args:
+            if arg not in self.kw:
+                self.all_kw.append(arg)
         return self[foxdot_arg_name]
     
     def kwargs(self):
         return tuple(self.pre_kw) + tuple(self.kw)
+
+    def all_kwargs(self):
+        return tuple(self.all_kw)
 
     def __iter__(self):
         for key in self.pre_kw + self.kw:
@@ -112,6 +121,11 @@ if SC3_PLUGINS:
     fx.add("osc = Decimator.ar(osc, rate: 44100/8, bits: bits)")
     fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()
+
+    fx = FxList.new('dist', 'distortion', ['dist'], order=1)
+    fx.add("osc = CrossoverDistortion.ar(osc, smooth:1-dist)")
+    fx.save()
+    
 
 fx = FxList.new('chop', 'chop', ['chop', 'sus'], order=2)
 fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")

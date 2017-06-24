@@ -50,7 +50,7 @@ def nextBar(n=0):
 
 # Assign the clock to time-keeping classes
 
-var.metro     = Clock
+TimeVar.metro = Clock
 Player.metro  = Clock
 Server.metro  = Clock
 MidiIn.metro  = Clock
@@ -68,9 +68,21 @@ numbers  = list('0123456789') + [""]
 
 for char1 in alphabet:
 
+    group = []
+
     for char2 in alphabet + numbers:
 
-        FoxDotCode.namespace[char1 + char2] = Player()
+        arg = char1 + char2
+
+        FoxDotCode.namespace[arg] = Player()
+
+        group.append(arg)
+
+    FoxDotCode.namespace[char1 + "_"] = Group(*[FoxDotCode.namespace[char1+str(n)] for n in range(10)])
+
+# Create an empty item
+
+FoxDotCode.namespace["_"] = EmptyItem()
 
 # Give the __when__ statement access to the  global namespace
 

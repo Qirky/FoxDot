@@ -13,8 +13,9 @@
 import random
 import math
 
-from Main import Pattern, GeneratorPattern, asStream
-from Main import PGroup, PGroupStar
+from Main import Pattern, asStream
+from Generators import *
+from PGroups import *
 from Operations import *
 from utils import *
 
@@ -24,12 +25,12 @@ MAX_SIZE = 2048
 #         1. P[] & P()         #
 #==============================#
  
-class __pattern__ :
+class __pattern__(object):
     ''' Used to define lists as patterns:
 
         `P[1,2,3]` is equivalent to `Pattern([1,2,3])` and
         `P(1,2,3)` is equivalent to `Pattern((1,2,3))` and
-        `P+(1,2,3)` is equivalient to `Pattern((1,2,3), delay=True)`.
+        `P+(1,2,3)` is equivalient to `Pattern((1,2,3))`.
 
         Ranges can be created using slicing, e.g. `P[1:6:2]` will generate the range
         1 to 6 in steps of 2, thus creating the Pattern `[1, 3, 5]`. Slices can be
@@ -54,7 +55,37 @@ class __pattern__ :
         return PGroup(args if len(args) > 1 else args[0])
 
     def __mul__(self, other):
-        return PGroupStar(other)
+        """ P*[0,1,2] returns PRand([0,1,2])
+            P*(0,1,2) returns PGroupStar(0,1,2)
+        """
+        if isinstance(other, (list, Pattern)):
+            return PRand(list(other))
+        else:
+            return PGroupStar(other)
+
+    def __pow__(self, other):
+        """ Returns scrambled version """
+        return PGroupPow(other)
+
+    def __add__(self, other):
+        return PGroupPlus(other)
+
+    def __truediv__(self, other):
+        return PGroupDiv(other)
+
+    def __mod__(self, other):
+        return PGroupMod(other)
+
+    def __and__(self, other):
+        return PGroupAnd(other)
+
+    def __invert__(self):
+        return __reverse_pattern__()
+
+class __reverse_pattern__(__pattern__):
+    def __getattr__(self, name):
+        return ~object.__getattr__(self, name)
+    
 
 # This is a pattern creator  
 P = __pattern__()
@@ -246,48 +277,3 @@ def PDur(n, k, start=0, dur=0.25):
 
     return pattern * dur
 
-#==============================#
-#      2. Generator Types      #
-#==============================#
-
-class __generatorpattern__:
-    ''' Pseudo-RandomGenerator.
-        R[1,2,3]
-    '''
-    def __getitem__(self, args):
-        return PRand(list(args) if hasattr(args, '__iter__') else args)
-        
-R = __generatorpattern__()
-
-##class PRand(GeneratorPattern):
-##    ''' Returns a random integer between start and stop. If start is a container-type it returns
-##        a random item for that container. '''
-##    def __init__(self, start, stop=None):
-##        GeneratorPattern.__init__(self)
-##        if hasattr(start, "__iter__"):
-##            self.data = Pattern(start)
-##            self.func = lambda index: random.choice(self.data)
-##        else:
-##            self.low  = start if stop is not None else 0
-##            self.high = stop  if stop is not None else start
-##    def func(self, index):
-##        return random.randrange(self.low, self.high)
-
-#TODO
-class PwRand(GeneratorPattern):
-    pass
-
-class PWhite(GeneratorPattern):
-    ''' Returns random floating point values between 'lo' and 'hi' '''
-    def __init__(self, lo=0, hi=1):
-        GeneratorPattern.__init__(self)
-        self.low = float(lo)
-        self.high = float(hi)
-        self.mid = (lo + hi) / 2.0
-    def func(self, index):
-        return random.triangular(self.low, self.high, self.mid)
-
-class PSquare(GeneratorPattern):
-    ''' Returns the square of the index being accessed '''
-    def func(self, index):
-        return index * index
