@@ -9,6 +9,7 @@ class Effect:
         self.synthdef  = synthdef
         self.filename  = EFFECTS_DIR + "/{}.scd".format(self.synthdef)
         self.args      = args
+        self.title     = args[0] if len(args) > 0 else ""
         self.effects   = []
         
     def __repr__(self):
@@ -79,9 +80,11 @@ class EffectManager(dict):
         return self[foxdot_arg_name]
     
     def kwargs(self):
+        """ Returns the title keywords for each effect """
         return tuple(self.pre_kw) + tuple(self.kw)
 
     def all_kwargs(self):
+        """ Returns *all" keywords for all effects """
         return tuple(self.all_kw)
 
     def __iter__(self):
@@ -95,7 +98,6 @@ class EffectManager(dict):
 # 0. Process frequency / playback rate
 # 1. Before envelope
 # 2. After envelope
-
 
 FxList = EffectManager()
 
@@ -115,6 +117,13 @@ fx = FxList.new('lpf','lowPassFilter',['lpf', 'lpr'], order=2)
 fx.add('osc = RLPF.ar(osc, lpf, lpr)')
 fx.save()
 
+fx = FxList.new("bpf", "bandPassFilter", ["bpf", "bpr","bpnoise", "sus"], order=2)
+fx.add("bpnoise = bpnoise / sus")
+fx.add("bpf = LFNoise1.kr(bpnoise).exprange(bpf * 0.5, bpf * 2)")
+fx.add("bpr = LFNoise1.kr(bpnoise).exprange(bpr * 0.5, bpr * 2)")
+fx.add("osc = BPF.ar(osc, bpf, bpr)")
+fx.save()
+       
 if SC3_PLUGINS:
 
     fx = FxList.new('bits', 'bitcrush', ['bits', 'sus', 'amp'], order=1)
@@ -143,7 +152,7 @@ fx = FxList.new("cut", "trimLength", ["cut", "sus"], order=2)
 fx.add("osc = osc * EnvGen.ar(Env(levels: [1,1,0.01], curve: 'step', times: [sus * cut, 0.01]))")
 fx.save()
 
-fx = FxList.new('verb', 'reverb', ['verb', 'room'], order=2)
+fx = FxList.new('room', 'reverb', ['room', 'verb'], order=2)
 fx.add("osc = FreeVerb.ar(osc, verb, room)")
 fx.save()
 

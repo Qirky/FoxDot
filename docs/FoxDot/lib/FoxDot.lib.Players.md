@@ -163,6 +163,10 @@ The PlayerObject Method >>
 
 Change the degree modifier stream 
 
+##### `accompany(self, other, values=[0, 2, 4])`
+
+Similar to "follow" but when the value has changed 
+
 ##### `after(self, n, cmd, *args, **kwargs)`
 
 Schedule self.cmd(args, kwargs) in n beats 
@@ -286,7 +290,7 @@ such as dur, sus, and rate.
 
 ---
 
-### `PlayerKey(self, value=None, reference=None, parent=None)`
+### `PlayerKey(self, value=None, reference=None, parent=None, attr=None)`
 
 
 

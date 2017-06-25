@@ -22,6 +22,14 @@ writes to file and sends to server
 
 #### Methods
 
+##### `all_kwargs(self)`
+
+Returns *all" keywords for all effects 
+
+##### `kwargs(self)`
+
+Returns the title keywords for each effect 
+
 ---
 
 ### `Out(self)`

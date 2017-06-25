@@ -10,6 +10,7 @@ import Env
 
 with SampleSynthDef("play1") as play:
     play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
+    play.rate = play.rate * (1.059463**play.pshift)
     play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=0)
     play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
@@ -17,6 +18,7 @@ with SampleSynthDef("play1") as play:
 
 with SampleSynthDef("play2") as play:
     play.defaults.update(room=0.1 ,rate=1, slide=0, slidefrom=1, vib=0, coarse=0)
+    play.rate = play.rate * (1.059463**play.pshift)
     play.rate = Line.ar(play.rate, play.rate * (1+play.slide), BufDur.kr(play.buf), doneAction=0)
     play.rate = Vibrato.kr(play.rate, rate=play.vib, depth=0.05) * LFPulse.ar(play.coarse / play.sus)
     play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)

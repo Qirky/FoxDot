@@ -308,6 +308,8 @@ class Player(Repeatable):
 
         # Add all keywords to the dict, then set non-zero defaults
 
+        # TODO - add nonzero value from effects
+
         for key in Player.Attributes():
 
             if key != "scale":
@@ -361,10 +363,11 @@ class Player(Repeatable):
 
         self.decay = 1
 
-        # Filters
+        # Filter resonancess
 
         self.lpr = 1
         self.hpr = 1
+        self.bpr = 1
 
         # --- FoxDot Keywords
         
@@ -1050,15 +1053,15 @@ class Player(Repeatable):
 
             if key in attributes: 
 
-                # All effects use sustain to release nodes
-
                 fx_dict[key] = []
 
                 # Look for any other attributes require e.g. room and verb
 
-                for sub_key in FxList[key].args:
+                for n, sub_key in enumerate(FxList[key].args):
 
                     if sub_key in self.event:
+
+                        # If the sub_key is another attribute like sus, get it from the message
 
                         if sub_key in message:
 
@@ -1066,15 +1069,13 @@ class Player(Repeatable):
 
                             val = message[i]
 
+                        # Get the value from the event
+
                         else:
 
                             try:
 
                                 val = group_modi(kwargs.get(sub_key, self.event[sub_key]), index)
-
-                                if isinstance(val, Pattern):
-
-                                    print sub_key, val
 
                             except TypeError as e:
 
@@ -1083,19 +1084,10 @@ class Player(Repeatable):
                             except KeyError as e:
 
                                 del fx_dict[key]
+
                                 break
 
-                        # Don't send fx with zero values, unless it is a timevar or playerkey i.e. has a "now" attr
-
-                        if val == 0 and not hasattr(val, 'now'):
-
-                            del fx_dict[key]
-
-                            break
-
-                        else:
-
-                            fx_dict[key] += [sub_key, val]
+                        fx_dict[key] += [sub_key, val]
 
         return message, fx_dict
 
@@ -1269,12 +1261,28 @@ class Player(Repeatable):
 
         return self
 
+    def accompany(self, other, values=[0,2,4]):
+        """ Similar to "follow" but when the value has changed """
+
+        if isinstance(lead, self.__class__):
+
+            self.accompanying = lead.degree
+
+        else:
+
+            self.accompanying = None
+        
+        return self
+
+    def find_accompanying(self, value):
+        pass
+
     def follow(self, lead=False):
         """ Takes a Player object and then follows the notes """
 
         if isinstance(lead, self.__class__):
 
-            self.degree = lead.degree + self.modf['degree']
+            self.degree = lead.degree
             self.following = lead
 
         else:

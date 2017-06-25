@@ -33,7 +33,7 @@ If a beat value has been set, return it, otherwise return None
 
 ---
 
-### `MidiOut(self)`
+### `MidiOut(self, degree=0, **kwargs)`
 
 
 

@@ -11,45 +11,6 @@ All patterns inherit from Base.Pattern. There are two types of pattern:
 
 ## Classes
 
-### `PSquare(self)`
-
-Returns the square of the index being accessed 
-
-#### Methods
-
-##### `getitem(self, index)`
-
-Calls self.func(index) to get an item, and also calculates
-performs any arithmetic operation assigned 
-
----
-
-### `PWhite(self, lo=0, hi=1)`
-
-Returns random floating point values between 'lo' and 'hi' 
-
-#### Methods
-
-##### `getitem(self, index)`
-
-Calls self.func(index) to get an item, and also calculates
-performs any arithmetic operation assigned 
-
----
-
-### `PwRand(self)`
-
-
-
-#### Methods
-
-##### `getitem(self, index)`
-
-Calls self.func(index) to get an item, and also calculates
-performs any arithmetic operation assigned 
-
----
-
 ## Functions
 
 ### `P10(n)`
@@ -130,7 +91,5 @@ Like `PZip` but only uses two Patterns. Zips together values if they satisfy the
 
 ## Data
 
-#### `P = <FoxDot.lib.Patterns.Sequences.__pattern__ instance>`
-
-#### `R = <FoxDot.lib.Patterns.Sequences.__generatorpattern__ instance>`
+#### `P = <FoxDot.lib.Patterns.Sequences.__pattern__ object>`
 

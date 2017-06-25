@@ -149,7 +149,7 @@ class SCLangServerManager:
 
             this_effect = effects[fx]
 
-            # effects should not have 0 values
+            # effects should not have 0 values for the first argument
 
             nonzero = True
 
@@ -165,7 +165,7 @@ class SCLangServerManager:
 
                     val = 0
 
-                if val == 0:
+                if i == 0 and val == 0:
 
                     nonzero = False
 

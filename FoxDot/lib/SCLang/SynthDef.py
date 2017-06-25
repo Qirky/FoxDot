@@ -258,10 +258,12 @@ class SampleSynthDef(SynthDefBaseClass):
         self.buf   = instance("buf")
         self.scrub = instance("scrub")
         self.cut   = instance("cut")
+        self.pshift = instance("pshift")
         # Sample Player Default Values
         self.defaults['buf']   = 0
         self.defaults['scrub'] = 0
         self.defaults['cut']   = 1
+        self.defaults['pshift'] = 0
         
         # self.base.append("Line.kr(0,1, BufDur.kr(buf) * cut * (1 / rate), doneAction: 2);")
 

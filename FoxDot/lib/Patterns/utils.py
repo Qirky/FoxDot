@@ -94,8 +94,8 @@ def pattern_depth(pat):
     for item in pat:
         if isinstance(item, Main.PGroup):
             depth = pattern_depth(item)
-            if depth > total:
-                total = depth
+            if depth + 1 > total:
+                total = depth + 1
     return total
 
 def group_modi(pgroup, index):

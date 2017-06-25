@@ -64,7 +64,7 @@ class TempoClock(object):
         self.midi_clock = None
 
         # Can be configured
-        self.latency = 0.1
+        self.latency = 0.2
         self.sleep_time = 0.0001
 
         # Debug
