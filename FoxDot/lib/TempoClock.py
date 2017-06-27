@@ -33,7 +33,7 @@ class TempoClock(object):
         # Flag this when done init
         self.__setup   = False
 
-        self.nudge   = 0.0
+        self.largest_sleep_time = 0
 
         self.time = 0 # time in secs
         self.beat = 0 # the number of beats since the epoch
@@ -64,8 +64,9 @@ class TempoClock(object):
         self.midi_clock = None
 
         # Can be configured
-        self.latency = 0.2
-        self.sleep_time = 0.0001
+        self.latency    = 0.25
+        self.nudge      = 0.0
+        self.sleep_time = 0
 
         # Debug
         self.debugging = False
@@ -90,7 +91,7 @@ class TempoClock(object):
     def __setattr__(self, attr, value):
         if attr == "bpm" and self.__setup:
             # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
-            self.schedule(lambda: object.__setattr__(self, attr, value))
+            self.schedule(lambda *args, **kwargs: object.__setattr__(self, attr, value))
             # Notify listening clients -- future
             pass
         else:
@@ -141,11 +142,13 @@ class TempoClock(object):
 
     def now(self):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
-        bpm_val = self.get_bpm()
-        now     = time() - self.start_time
-        self.beat += (now - self.time) * (bpm_val / 60.0)
-        self.time = now
-        return self.beat
+        # Get number of seconds elapsed
+        now = ((time() - self.start_time) - self.latency) + self.nudge
+        # Increment the beat counter
+        self.beat += (now - self.time) * (self.get_bpm() / 60.0)
+        # Store time
+        self.time  = now
+        return self.beat    
         
     def start(self):
         """ Starts the clock thread """
@@ -178,7 +181,9 @@ class TempoClock(object):
 
         t2 = clock()
 
-        sleep_time = self.latency - (t2-t1)
+        duration = (t2-t1)
+
+        sleep_time = self.latency - duration
 
         # If blocks are taking longer to iterate over than the latency, adjust accordingly
 
@@ -192,13 +197,13 @@ class TempoClock(object):
 
         # Wait until the end of the latency period
 
-        sleep(sleep_time)
+        sleep(sleep_time) #--- this is a problem?
 
         # Send all the message to supercollider together
 
         if self.ticking:
 
-            block.send_osc_messages()
+           block.send_osc_messages()
 
         return
 
@@ -211,14 +216,11 @@ class TempoClock(object):
 
         while self.ticking:
 
-            now        = self.now()
+            self.now() # get current time
+
             next_event = self.queue.next()
 
-            delta = (self.beat - next_event) + self.nudge
-
-            # When the counter gets to the desired time minus latency, begin preparing it
-
-            if delta >= 0:
+            if (self.beat - next_event) >= 0:
 
                 self.current_block = self.queue.pop()
 
@@ -226,11 +228,15 @@ class TempoClock(object):
 
                     threading.Thread(target=self.__run_block, args=(self.current_block,)).start()
 
+            # If using a midi-clock, update the values
+
             if self.midi_clock is not None:
 
                 self.midi_clock.update()
 
-            sleep(self.sleep_time)
+            if self.sleep_time > 0:
+
+                sleep(self.sleep_time) #--- CPU vs jitter
 
         return
 
@@ -253,7 +259,7 @@ class TempoClock(object):
 
             assert callable(obj)
 
-        except:
+        except AssertionError:
 
             raise ScheduleError(obj)
 
@@ -291,14 +297,14 @@ class TempoClock(object):
 
             if isinstance(obj, (Player, send_delay)):
 
-                kwargs['verbose'] = False
+                # kwargs['verbose'] = False
 
                 if self.debugging:
 
                     print "Scheduling", obj, "at", self.now(), "when expected at", beat
 
-            self.queue.add(obj, self.now(), args, kwargs)
-        
+            self.queue.add(obj, self.now() + (self.sleep_time + 0.0001), args, kwargs)
+
         return
 
     def next_bar(self):
@@ -358,7 +364,7 @@ class TempoClock(object):
 
 #####
 
-class Queue:
+class Queue(object):
     def __init__(self):
         self.data = []
 
@@ -451,10 +457,15 @@ class Queue:
         return self.data.pop() if len(self.data) > 0 else list()
 
     def next(self):
-        return self.data[-1].beat if len(self.data) > 0 else sys.maxsize
+        if len(self.data) > 0:
+            try:
+                return self.data[-1].beat
+            except IndexError:
+                pass
+        return sys.maxsize
             
 from types import FunctionType
-class QueueItem:
+class QueueItem(object):
     priority_levels = [
                         lambda x: type(x) == FunctionType,   # Any functions are called first
                         lambda x: isinstance(x, func_delay), # Then scheduled functions
@@ -493,6 +504,9 @@ class QueueItem:
                 break
         return
 
+    def __call__(self):
+        self.send_osc_messages()
+
     def send_osc_messages(self):
         for msg in self.osc_messages:
             if msg[0] == "MidiOut": # TODO -- make this more elegant
@@ -506,7 +520,7 @@ class QueueItem:
 
     def call(self, item, caller = None):
         """ Calls all items in queue slot """
-        # TODO -> Make more efficient
+        # TODO -> Make more efficient -> and understand what is going on
         
         if caller is not None:
 
@@ -549,7 +563,7 @@ class QueueItem:
         return [item.obj for level in self.events for item in level]
         
 
-class QueueObj:
+class QueueObj(object):
     def __init__(self, obj, args=(), kwargs={}):
         self.obj = obj
         self.args = args
@@ -579,30 +593,30 @@ class QueueObj:
         
 """
 
-class Wrapper(Code.LiveObject):
-    
-    def __init__(self, metro, obj, dur, args=()):
-        self.args  = asStream(args)
-        self.obj   = obj
-        self.step  = dur
-        self.metro = metro
-        self.n     = 0
-        self.s     = self.obj.__class__.__name__
-
-    def __str__(self):
-        return "<Scheduled Call '%s'>" % self.s
-
-    def __repr__(self):
-        return  str(self)
-
-    def __call__(self):
-        """ Call the wrapped object and re-schedule """
-        args = modi(self.args, self.n)
-        try:
-            self.obj.__call__(*args)
-        except:
-            self.obj.__call__(args)
-        Code.LiveObject.__call__(self)
+##class Wrapper(Code.LiveObject):
+##    
+##    def __init__(self, metro, obj, dur, args=()):
+##        self.args  = asStream(args)
+##        self.obj   = obj
+##        self.step  = dur
+##        self.metro = metro
+##        self.n     = 0
+##        self.s     = self.obj.__class__.__name__
+##
+##    def __str__(self):
+##        return "<Scheduled Call '%s'>" % self.s
+##
+##    def __repr__(self):
+##        return  str(self)
+##
+##    def __call__(self):
+##        """ Call the wrapped object and re-schedule """
+##        args = modi(self.args, self.n)
+##        try:
+##            self.obj.__call__(*args)
+##        except:
+##            self.obj.__call__(args)
+##        Code.LiveObject.__call__(self)
 
 class SoloPlayer:
     """ SoloPlayer objects """

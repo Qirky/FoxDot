@@ -1,32 +1,24 @@
-FoxDot - Live Coding with Python v0.3.3
+FoxDot - Live Coding with Python v0.3.5
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.3.3 fixes and updates
+### v0.3.5 fixes and updates
 
-- Added a new `Pattern` type data structure called a P-Star or `P*`. It is a subclass of `PGroup` but it has a "behaviour" that effects the current event of Player object, which, in this instance, adds a delay to each value based on the current Player's duration. e.g.
-
+- In addition to P\*, P+, P/, and P\** have been added. P+ refers uses the sustain values in a player to derive its delay. P/ delays the events every other time it is accessed, and P\** shuffles the order the values are delayed.
+- Added `PWalk` generator pattern. 
+- TimeVars are easier to update once created. 
 ```python
-# Plays the first note, 0, for 4 beats then the pitches 2, 4, and 6 at 4/3 beats each.
-p1 >> pluck([0, P*(2,4,6)], dur=4)
+# Creates a named instance called foo
+var.foo = var([0,1],4)
 
-# The can be nested
-p1 >> pluck([0, P*(2,4,P*(6,7)], dur=4)
-
-# Work in the same way that a SamplePlayer uses square brackets
-p2 >> play("x[--]o[-o]")
+# Reassigning a var to a named var updates the values instead of creating a new var
+var.foo = var([2,3,4,5],2)
 ```
-- Frequency and buffer number calculation is done per OSCmessage which means these values can be modified in any delayed message i.e. when using the Player `stutter` method like so:
+- Removed `sleep` from scheduling clock loop to increase performance. If you want to decrease the amount of CPU FoxDot uses, change the sleep duration to a small number around 0.001 like so
 ```python
-p1 >> pluck([0,1,2,3], dur=1).every(4, 'stutter', 4, degree=[10,12], pan=[-1,1] )
-
-d1 >> play("x-o-").every(5, 'stutter', 2, cycle=8, degree="S")
-```
-- Using as `linvar` as the Clock tempo will no longer crash the Clock.
-- New effects have been added; `shape` which is a value between 0 and 1 (can be higher) that relates to a level of distortion, and `formant` which is a value between 0 and 8 and applies different formant filters to the  audio.
-- `hpf` and `lpf` have resonance values now: `hpr` and `lpr`
-- You can open the config file directly from FoxDot by using the "Help & Settings" menu. Likewise you can open the directory that holds where your samples are kept. This can be changed in the config file.
+Clock.sleep_time = 0.001
+``` 
 
 See `docs/changelog` for more
 
@@ -108,7 +100,7 @@ In FoxDot, sound files can be played through using a specific SynthDef called `p
 d1 >> play("x-o-")
 ```
 
-To have samples play simultaneously, just create a new 'Sample Player' object for some more complex patterns.
+To have samples play simultaneously, you can create a new 'Sample Player' object for some more complex patterns.
 
 ``` python
 bd >> play("x( x)  ")
@@ -116,10 +108,17 @@ hh >> play("---[--]")
 sn >> play("  o ")
 ```
 
-**New in v0.2.3:** You can merge multiple PlayStrings together by using the `PZip` pattern:
+Alternatively you can use `PZip`, the `zip` method, or the `&` sign to create one pattern that does this:
 
 ``` python
-d1 >> play( PZip("x( x)  ", "--[--]", "  o( [ o])") )
+# The following are equivalent
+d1 >> play( PZip("x( x)  ", "--[--]", "  o "))
+
+d1 >> play(P["x( x)  "].zip("---[--]").zip("  o "))  
+
+# Note that first string is wrapped in a Pattern P[] 
+
+d1 >> play(P["x( x)  "] & "---[--]" & "  o ")
 ```
 
 Grouping characters in round brackets laces the pattern so that on each play through of the sequence of samples, the next character in the group's sample is played. The sequence `(xo)---` would be played back as if it were entered `x---o---`. Using square brackets will force the enclosed samples to played in the same time span as a single character e.g. `--[--]` will play two hi-hat hits at a half beat then two at a quarter beat. You can play a random sample from a selection by using curly braces in your Play String like so:

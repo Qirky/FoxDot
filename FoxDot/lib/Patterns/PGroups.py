@@ -12,8 +12,8 @@ class PGroupPlus(PGroupPrime):
 class PGroupPow(PGroupPrime):
     """ Stutters a shuffled version the values over the length of and event's 'dur' """
     bracket_style="**()"
-    def calculate_time(self):
-        return PGroupPrime.calculate_time(self).shuffle()    
+    def calculate_time(self, dur):
+        return PGroupPrime.calculate_time(self, dur).shuffle()    
 
 class PGroupDiv(PGroupPrime):
     """ Stutter every other request """
@@ -21,8 +21,9 @@ class PGroupDiv(PGroupPrime):
     counter = 0
     def __init__(self, *args, **kwargs):
         PGroupPrime.__init__(self, *args, **kwargs)
-    def calculate_time(self, dur):
+    def change_state(self):
         self.counter += 1
+    def calculate_time(self, dur):
         if self.counter % 2 == 1:
             return PGroupPrime.calculate_time(self, dur)
         else:

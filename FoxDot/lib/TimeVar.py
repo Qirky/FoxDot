@@ -50,6 +50,8 @@ class TimeVar(Repeatable):
 
             dur = self.metro.bar_length()
 
+        self.name   = "un-named"
+
         self.data   = values
         self.time   = []
         self.dur    = dur
@@ -527,7 +529,6 @@ class Pvar(TimeVar, Pattern):
     def __init__(self, values, dur=None, **kwargs):
         TimeVar.__init__(self, [asStream(val) for val in values], dur, **kwargs)
 
-
 class _continuous_var(TimeVar):
 
     def __init__(self, *args, **kwargs):
@@ -628,8 +629,8 @@ Pattern.__getitem__ = _timevar_index
 class _var_dict(object):
     """
         This is the TimeVar generator used in FoxDot. Calling it like `var()`
-        returns a TimeVar but setting an attribute `var.n = var([1,2],4)` will
-        update the TimeVar that is already in `var.n`.
+        returns a TimeVar but setting an attribute `var.foo = var([1,2],4)` will
+        update the TimeVar that is already in `var.foo`.
 
         In short, using `var.name = var([i, j])` means you don't have to delete
         some of the text and replace it with `var.name.update([k, l])` you can
@@ -639,7 +640,8 @@ class _var_dict(object):
     
     def __init__(self):
         self.__vars = {}
-    def __call__(self, *args, **kwargs):
+    @staticmethod
+    def __call__(*args, **kwargs):
         return TimeVar(*args, **kwargs)
     def __setattr__(self, name, value):
         if name != "__vars" and isinstance(value, TimeVar):
@@ -649,6 +651,7 @@ class _var_dict(object):
                 self.__vars[name].__dict__ = value.__dict__
             else:
                 self.__vars[name] = value
+            return
         object.__setattr__(self, name, value)
     def __getattr__(self, name):
         if name in self.__vars:

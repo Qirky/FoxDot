@@ -3,13 +3,13 @@ from ServerManager import Server
 
 class Effect:
     server=Server
-    def __init__(self, foxdot_name, synthdef, args=[]):
+    def __init__(self, foxdot_name, synthdef, args={}):
 
         self.name      = foxdot_name
         self.synthdef  = synthdef
         self.filename  = EFFECTS_DIR + "/{}.scd".format(self.synthdef)
-        self.args      = args
-        self.title     = args[0] if len(args) > 0 else ""
+        self.args      = args.keys()
+        self.defaults  = args
         self.effects   = []
         
     def __repr__(self):
@@ -18,6 +18,10 @@ class Effect:
     def add(self, string):
         self.effects.append(string)
         return
+
+    def doc(self, string):
+        """ Set a docstring for the effects"""
+        return 
 
     def list_effects(self):
         s = ""
@@ -65,18 +69,32 @@ class EffectManager(dict):
     def __init__(self):
 
         dict.__init__(self)
+
         self.pre_kw=[]
 
         self.kw=[]
 
         self.all_kw=[]
 
+        self.defaults={}
+
     def new(self, foxdot_arg_name, synthdef, args, order=2):
         self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args)
+
+        # Store the main keywords together
+
         self.kw.append(foxdot_arg_name)
+
+        # Store other sub-keys
+
         for arg in args:
-            if arg not in self.kw:
+            if arg not in self.all_kw:
                 self.all_kw.append(arg)
+
+            # Store the default value
+            
+            self.defaults[arg] = args[arg]
+
         return self[foxdot_arg_name]
     
     def kwargs(self):
@@ -109,15 +127,16 @@ FxList = EffectManager()
 
 # Sound effects
 
-fx = FxList.new('hpf','highPassFilter',['hpf', 'hpr'], order=2)
+fx = FxList.new('hpf','highPassFilter', {'hpf': 0, 'hpr': 1}, order=2)
+fx.doc("Highpass filter")
 fx.add('osc = RHPF.ar(osc, hpf, hpr)')
 fx.save()
 
-fx = FxList.new('lpf','lowPassFilter',['lpf', 'lpr'], order=2)
+fx = FxList.new('lpf','lowPassFilter', {'lpf': 0, 'lpr': 1}, order=2)
 fx.add('osc = RLPF.ar(osc, lpf, lpr)')
 fx.save()
 
-fx = FxList.new("bpf", "bandPassFilter", ["bpf", "bpr","bpnoise", "sus"], order=2)
+fx = FxList.new("bpf", "bandPassFilter", {"bpf": 0, "bpr": 1, "bpnoise": 0, "sus": 1}, order=2)
 fx.add("bpnoise = bpnoise / sus")
 fx.add("bpf = LFNoise1.kr(bpnoise).exprange(bpf * 0.5, bpf * 2)")
 fx.add("bpr = LFNoise1.kr(bpnoise).exprange(bpr * 0.5, bpr * 2)")
@@ -126,42 +145,42 @@ fx.save()
        
 if SC3_PLUGINS:
 
-    fx = FxList.new('bits', 'bitcrush', ['bits', 'sus', 'amp'], order=1)
+    fx = FxList.new('bits', 'bitcrush', {'bits': 0, 'sus': 1, 'amp': 1}, order=1)
     fx.add("osc = Decimator.ar(osc, rate: 44100/8, bits: bits)")
     fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()
 
-    fx = FxList.new('dist', 'distortion', ['dist'], order=1)
+    fx = FxList.new('dist', 'distortion', {'dist': 0}, order=1)
     fx.add("osc = CrossoverDistortion.ar(osc, smooth:1-dist)")
     fx.save()
     
 
-fx = FxList.new('chop', 'chop', ['chop', 'sus'], order=2)
+fx = FxList.new('chop', 'chop', {'chop': 0, 'sus': 1}, order=2)
 fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")
 fx.save()
 
-fx = FxList.new('echo', 'combDelay', ['echo', 'sus', 'decay'], order=2)
+fx = FxList.new('echo', 'combDelay', {'echo': 0, 'sus': 1, 'decay': 1}, order=2)
 fx.add('osc = osc + CombL.ar(osc, delaytime: echo * sus, maxdelaytime: 2, decaytime: decay)')
 fx.save()
 
-fx = FxList.new('spin', 'spinPan', ['spin','sus'], order=2)
+fx = FxList.new('spin', 'spinPan', {'spin': 0,'sus': 1}, order=2)
 fx.add('osc = osc * [FSinOsc.ar(spin / 2, iphase: 1, mul: 0.5, add: 0.5), FSinOsc.ar(spin / 2, iphase: 3, mul: 0.5, add: 0.5)]')
 fx.save()
 
-fx = FxList.new("cut", "trimLength", ["cut", "sus"], order=2)
+fx = FxList.new("cut", "trimLength", {"cut": 0, "sus": 1}, order=2)
 fx.add("osc = osc * EnvGen.ar(Env(levels: [1,1,0.01], curve: 'step', times: [sus * cut, 0.01]))")
 fx.save()
 
-fx = FxList.new('room', 'reverb', ['room', 'verb'], order=2)
+fx = FxList.new('room', 'reverb', {'room': 0, 'verb': 0.25}, order=2)
 fx.add("osc = FreeVerb.ar(osc, verb, room)")
 fx.save()
 
-fx = FxList.new("formant", "formantFilter", ["formant"], order=2)
+fx = FxList.new("formant", "formantFilter", {"formant": 0}, order=2)
 fx.add("formant = (formant % 8) + 1")
 fx.add("osc = Formlet.ar(osc, formant * 200, formant / 1000, formant / 500).tanh")
 fx.save()
 
-fx = FxList.new("shape", "wavesShapeDistortion", ["shape"], order=2)
+fx = FxList.new("shape", "wavesShapeDistortion", {"shape":0}, order=2)
 fx.add("osc = (osc * (shape * 50)).fold2(1).distort / 5")
 fx.save()
 

@@ -50,16 +50,15 @@ def nextBar(n=0):
 
 # Assign the clock to time-keeping classes
 
-TimeVar.metro = Clock
-Player.metro  = Clock
-Server.metro  = Clock
-MidiIn.metro  = Clock
+for item in (TimeVar.TimeVar, Player, Server, MidiIn):
+
+    item.metro = Clock
 
 # Players and effects etc need reference to SC server
 
-Player.server = Server
-Effect.server = Server
-QueueItem.server = Server
+for item in (Player, Effect, QueueItem):
+
+    item.server = Server
 
 # Create preset Players
 

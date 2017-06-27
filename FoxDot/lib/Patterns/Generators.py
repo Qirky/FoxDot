@@ -30,6 +30,39 @@ class PwRand(Main.GeneratorPattern):
 class PxRand(Main.GeneratorPattern):
     pass
 
+class PWalk(Main.GeneratorPattern):
+    def __init__(self, max=7, step=1, start=0):
+
+        Main.GeneratorPattern.__init__(self)
+        
+        self.max   = abs(max)
+        self.min   = self.max * -1
+        
+        self.step  = Main.asStream(step).abs()
+        self.start = start
+
+        self.data = [self.start, self.step, self.max]
+
+        self.directions = [lambda x, y: x + y, lambda x, y: x - y]
+
+        self.last_value = None
+
+    def func(self, index):
+        if self.last_value is None:
+            self.last_value = 0
+        else:
+            if self.last_value >= self.max: # force subtraction
+                f = self.directions[1]
+            elif self.last_value <= self.min: # force addition
+                f = self.directions[0]
+            else:
+                f = random.choice(self.directions)
+            self.last_value = f(self.last_value, self.step.choose())
+        return self.last_value
+
+            
+        
+
 class PWhite(Main.GeneratorPattern):
     ''' Returns random floating point values between 'lo' and 'hi' '''
     def __init__(self, lo=0, hi=1):

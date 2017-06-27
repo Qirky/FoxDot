@@ -8,6 +8,10 @@ try:
 except ImportError as _err:
     pass
 
+from Patterns import asStream
+import TimeVar
+import Scale
+
 def miditofreq(midinote):
     """ Converts a midi number to frequency """
     return 440 * (2 ** ((midinote - 69.0)/12.0))
@@ -17,20 +21,26 @@ midi2cps = miditofreq # alias
 def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     """ Calculates a midinote from a scale, octave, degree, and root """
 
-    # Force float
-    try:
-        degree = float(degree)
-    except TypeError as e:
-        print degree, type(degree)
-        raise TypeError(e)
+    # Make sure we force timevars into real values
 
+    if isinstance(scale, Scale.ScalePattern):
+
+        if isinstance(scale.data, TimeVar.TimeVar):
+
+            scale = asStream(scale.data.now())
+
+    # Force float
+    octave = float(octave)   
+    degree = float(degree)
+    root   = float(root)
+    
     # Floor val
     lo = int(degree)
     hi = lo + 1
 
     octave = octave + (lo / len(scale))
 
-    chroma = range(stepsPerOctave)
+    chroma = range(int(stepsPerOctave))
 
     scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
 

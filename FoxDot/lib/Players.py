@@ -164,7 +164,7 @@ class Player(Repeatable):
                        'midinote', 'channel')
 
     fx_attributes = FxList.all_kwargs()
-    fx_keys   = FxList.kwargs()
+    fx_keys       = FxList.kwargs()
 
     metro = None
     server = None
@@ -308,8 +308,6 @@ class Player(Repeatable):
 
         # Add all keywords to the dict, then set non-zero defaults
 
-        # TODO - add nonzero value from effects
-
         for key in Player.Attributes():
 
             if key != "scale":
@@ -328,76 +326,41 @@ class Player(Repeatable):
 
                     self.__dict__[key].update(0)
 
-        # --- SuperCollider Keywords
+        # Set any non zero defaults for effects, e.g. verb=0.25
 
-        # Left-Right panning (-1,1)
-        self.pan     = 0
+        for key in Player.fx_attributes:
 
-        # Sustain
+            value = FxList.defaults[key]
+
+            setattr(self, key, value)
+
+        # Set any non-zero values for FoxDot
+
+        # Sustain & Legato
         self.sus     = 1
+        self.blur    = 1
 
         # Amplitude
         self.amp     = 1
+        self.amplify = 1
 
         # Rate - varies between SynthDef
         self.rate    = 1
-        
-        # Audio sample buffer number
-        self.buf     = 0
 
-        # Reverb
-        self.verb   = 0.25
-        self.room   = 0.00
-
-        # Frequency modifier
-        self.fmod   =  0
-
-        # Buffer
-        self.sample  = 0
-
-        # Frequency / rate modifier
-        self.slide     = 0
+        # TODO - Move this into an effect
         self.slidefrom = 1
 
-        # Echo effect
-
-        self.decay = 1
-
-        # Filter resonancess
-
-        self.lpr = 1
-        self.hpr = 1
-        self.bpr = 1
-
-        # --- FoxDot Keywords
-        
         # Duration of notes
         self.dur     = 0.5 if self.synthdef == SamplePlayer else 1
-        self.old_pattern_dur = self.old_dur = self.attr['dur']
-
-        self.delay   = 0
 
         # Degree of scale / Characters of samples
-
         self.degree  = " " if self.synthdef is SamplePlayer else 0
 
         # Octave of the note
         self.oct     = 5
-
-        # Amplitude mod
-        self.amplify = 1
-        
-        # Legato
-        self.blur    = 1
         
         # Tempo
         self.bpm     = None 
-
-        # Frequency and modifier
-        self.freq   =  0
-
-        # Offbeat delay
-        self.offset = 0
         
         return self
 
@@ -877,6 +840,10 @@ class Player(Repeatable):
                 size = l
         return size
 
+    def number_attr(self, attr):
+        """ Returns true if the attribute should be a number """
+        return not (self.synthdef == SamplePlayer and attr in ("degree", "freq"))
+
     # --- Methods for preparing and sending OSC messages to SuperCollider
 
     def now(self, attr="degree", x=0):
@@ -898,21 +865,65 @@ class Player(Repeatable):
 
             attr_value = modi(asStream(attr_value), index)
 
-        # If we have a modifier
+        # bpm values, for example, might be None so ignore
 
-        if attr in self.modf:
+        if attr_value is not None:
 
-            modf_value = modi(self.modf[attr], index)
+            if isinstance(attr_value, TimeVar.TimeVar):
 
-            if modf_value != 0:
+                attr_value = attr_value.now()
+
+            # Ignore frequency for sample player
+
+            if self.number_attr(attr):
 
                 try:
 
-                    attr_value = attr_value + modf_value
+                    if isinstance(attr_value, PGroup):
 
-                except TypeError:
+                        attr_value = attr_value.convert_data()
 
-                    pass
+                    else:
+
+                        attr_value = float(attr_value)
+
+                except Exception as e:
+
+                    print(attr, attr_value, e)
+
+            # If we have a modifier
+
+            if attr in self.modf:
+
+                modf_value = modi(self.modf[attr], index)
+
+                if isinstance(modf_value, TimeVar.TimeVar):
+
+                    modf_value = modf_value.now()
+
+                try:
+
+                    if isinstance(modf_value, PGroup):
+
+                        modf_value = modf_value.convert_data()
+
+                    else:
+
+                        modf_value = float(modf_value)
+
+                except Exception as e:
+
+                    print(attr, modf_value, e)
+
+                if modf_value != 0:
+
+                    try:
+
+                        attr_value = attr_value + modf_value
+
+                    except TypeError:
+
+                        pass
             
         return attr_value
 
@@ -922,13 +933,12 @@ class Player(Repeatable):
         attributes = copy(self.attr)
 
         prime_funcs = {}
-        # self.event  = {}
         
         for key in attributes:
 
             value = self.event[key] = self.now(key)
 
-            if isinstance(value, (PlayerKey, TimeVar.TimeVar)):
+            if isinstance(value, (PlayerKey, TimeVar.TimeVar)): ##
 
                 value = value.now()
 
@@ -1053,41 +1063,45 @@ class Player(Repeatable):
 
             if key in attributes: 
 
-                fx_dict[key] = []
+                # Only use effects where the "title" effect value is not 0
 
-                # Look for any other attributes require e.g. room and verb
+                if self.event[key] != 0:
 
-                for n, sub_key in enumerate(FxList[key].args):
+                    fx_dict[key] = []
 
-                    if sub_key in self.event:
+                    # Look for any other attributes require e.g. room and verb
 
-                        # If the sub_key is another attribute like sus, get it from the message
+                    for n, sub_key in enumerate(FxList[key].args):
 
-                        if sub_key in message:
+                        if sub_key in self.event:
 
-                            i = message.index(sub_key) + 1
+                            # If the sub_key is another attribute like sus, get it from the message
 
-                            val = message[i]
+                            if sub_key in message:
 
-                        # Get the value from the event
+                                i = message.index(sub_key) + 1
 
-                        else:
+                                val = message[i]
 
-                            try:
+                            # Get the value from the event
 
-                                val = group_modi(kwargs.get(sub_key, self.event[sub_key]), index)
+                            else:
 
-                            except TypeError as e:
+                                try:
 
-                                val = 0
+                                    val = group_modi(kwargs.get(sub_key, self.event[sub_key]), index)
 
-                            except KeyError as e:
+                                except TypeError as e:
 
-                                del fx_dict[key]
+                                    val = 0
 
-                                break
+                                except KeyError as e:
 
-                        fx_dict[key] += [sub_key, val]
+                                    del fx_dict[key]
+
+                                    break
+
+                            fx_dict[key] += [sub_key, val]
 
         return message, fx_dict
 
@@ -1124,13 +1138,7 @@ class Player(Repeatable):
 
             # Look at delays and schedule events later if need be
 
-            try:
-
-                delay = float(group_modi(kwargs.get('delay', self.event.get('delay', 0)), i))
-
-            except:
-
-                print "delay is", self.event['delay']
+            delay = float(group_modi(kwargs.get('delay', self.event.get('delay', 0)), i))
 
             if 'buf' in osc_msg:
                     
@@ -1619,6 +1627,7 @@ class PlayerKey(object):
 class send_delay:
     """ Holds the state of a player whose send has
         been scheduled in the future """
+    debug=False
     def __init__(self, p, synthdef, message, fx={}):
         self.master = p
         self.server = p.server
@@ -1640,15 +1649,10 @@ class send_delay:
     def __repr__(self):
         return "<'{}' delay>".format(self.synth)
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, *args, **kwargs):            
         if kwargs.get("verbose", True):
             for key, value in self.update_dict.items():
                 self.master.__dict__[key].update(value)
-
-                #degree = group_modi(kwargs.get("degree", self.event['degree']), index)
-                #sample = group_modi(kwargs.get("sample", self.event["sample"]), index)
-                #buf  = int(Samples[str(degree)].bufnum(sample))
-
                 if key == "buf" and value != 0:
                     self.master.__dict__["degree"].update( Samples.getBuffer(value).char ) # this might have to change -----
             compiled_msg = self.server.sendPlayerMessage(self.synth, self.msg, self.fx)

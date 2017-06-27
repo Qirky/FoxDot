@@ -149,38 +149,12 @@ class SCLangServerManager:
 
             this_effect = effects[fx]
 
-            # effects should not have 0 values for the first argument
-
-            nonzero = True
-
-            for i in range(0, len(this_effect), 2):
-
-                try:
-
-                    val = float(this_effect[i+1])
-
-                except TypeError as e:
-
-                    WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( this_effect[i], this_effect[i+1] ))
-
-                    val = 0
-
-                if i == 0 and val == 0:
-
-                    nonzero = False
-
-                else:
-
-                    this_effect[i+1] = val
-
-            if nonzero:
-
-                # Get next node ID
-                this_node, last_node = self.nextnodeID(), this_node
-                msg = OSCMessage("/s_new")
-                packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
-                msg.append(packet)
-                bundle.append(msg)
+            # Get next node ID
+            this_node, last_node = self.nextnodeID(), this_node
+            msg = OSCMessage("/s_new")
+            packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
+            msg.append(packet)
+            bundle.append(msg)
 
         # Finally, output sound through end node "makeSound"
         msg = OSCMessage("/s_new")

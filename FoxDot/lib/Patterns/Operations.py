@@ -14,7 +14,7 @@ class POperand:
         self.operate = func
 
     def __call__(self, A, B):
-        """ A is always a pattern.
+        """ A is always a Pattern or PGroup.
         """
 
         # If the first pattern is empty, return the other as a pattern
@@ -25,7 +25,9 @@ class POperand:
 
         # Get the dominant pattern type and convert B
 
-        cls = Main.Dominant(A, B)
+        cls, key = Main.Dominant(A, B)
+
+        # Instead of coverting the dominant to its own class, make a true_copy
         
         A = cls(A)
         B = cls(B)
@@ -49,7 +51,9 @@ class POperand:
             P1.append(val)
             i += 1
 
-        return cls(P1)
+        # Copy the dominant pattern and set the new data vals
+
+        return key.true_copy(P1)
 
 # General operations
 def Nil(a, b):  return a

@@ -69,11 +69,12 @@ class metaPattern(object):
     def asGroup(self):
         return PGroup(self.data)
 
-    def int(self):
-        return self.__class__([value.int() if isinstance(value, metaPattern) else int(value) for value in self.data])
+    def convert_data(self, dtype=float):
+        """ Makes a true copy and converts the data to a given data type """
+        return self.true_copy([(item.convert_data(dtype) if isinstance(item, metaPattern) else dtype(item)) for item in self.data])
 
-    def float(self):
-        return self.__class__([value.float() if isinstance(value, metaPattern) else int(value) for value in self.data])
+    def map(self, func):
+        return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])
     
     """
 
@@ -235,6 +236,16 @@ class metaPattern(object):
 
     # Methods that return augmented versions of original
 
+    def copy(self):
+        return self.__class__(self.data[:])
+
+    def true_copy(self, new_data=None):
+        new = self.__class__()
+        new.__dict__ = {key: value for key, value in self.__dict__.items()}
+        if new_data is not None:
+            new.data = new_data
+        return new
+
     def shuffle(self):
         new = self.__class__(self.data[:])
         shuffle(new.data)
@@ -259,9 +270,6 @@ class metaPattern(object):
         else:
             new = self.copy()
         return new
-
-    def copy(self):
-        return self.__class__(self.data[:])
 
     @loop_pattern_method
     def stretch(self, size):
@@ -721,11 +729,11 @@ class PGroup(metaPattern):
     def calculate_time(self, dur):
         values = []
         for i, item in enumerate(self):
-            accum = self.calculate_step(i, dur)
+            step  = self.calculate_step(dur)
+            delay = i * step
             if hasattr(item, "calculate_time"):
-                values.append(item.calculate_time(dur-accum) + accum)
-            else:
-                values.append(accum)
+                delay += item.calculate_time( step ) 
+            values.append( delay )
         return PGroup(values)
 
     def get_behaviour(self):
@@ -743,10 +751,16 @@ class PGroup(metaPattern):
             return False
 
 class PGroupPrime(PGroup):
+    def change_state(self):
+        """ To be overridden by any PGroupPrime that changes state after access by a Player """
+        return
+    def convert_data(self, *args, **kwargs):
+        self.change_state()
+        return PGroup.convert_data(self, *args, **kwargs)
     def has_behaviour(self):
         return True
-    def calculate_step(self, i, dur):
-        return i * (dur / len(self))
+    def calculate_step(self, dur):
+        return float(dur) / len(self)
 
 class PGroupStar(PGroupPrime):
     """ Stutters the values over the length of and event's 'dur' """    
@@ -783,10 +797,9 @@ def Format(data):
 
 def Dominant(*patterns):
     classes =  [p.__class__ for p in patterns]
-    for W in PATTERN_WEIGHTS:
-        if W in classes:
-            return W
-    return W
+    for i, cls in enumerate(PATTERN_WEIGHTS):
+        if cls in classes: break
+    return cls, patterns[classes.index(cls)]
 
 def patternclass(a, b):
     return PGroup if isinstance(a, PGroup) and isinstance(b, PGroup) else Pattern
