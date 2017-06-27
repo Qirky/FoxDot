@@ -19,6 +19,7 @@ var.foo = var([2,3,4,5],2)
 ```python
 Clock.sleep_time = 0.001
 ``` 
+- Added pitch shift (`pshift`) to Sample Players, which increases the pitch of a sample by the number of semitones. You can use `Scale.default.semitones()` to generate semitones from the current scale.
 
 See `docs/changelog` for more
 

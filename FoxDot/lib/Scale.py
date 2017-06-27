@@ -1,3 +1,5 @@
+from __future__ import division
+
 from Patterns.Main import Pattern
 from random import choice
 
@@ -38,6 +40,15 @@ class ScalePattern(Pattern):
 
     def __ne__(self, other):
         return self.name != other.name if isinstance(other, ScalePattern) else True
+
+    def semitones(self, pitches, steps=12):
+        """ Returns the semitone values for a series of pitches in this scale """        
+        tones = []
+        for pitch in pitches:
+            i = pitch % len(self.data) # should be wary of number of pitches per scale -- todo
+            n = (pitch // len(self.data)) * steps
+            tones.append( self.data[i] + n)
+        return Pattern(tones)
 
     def set(self, new):
 

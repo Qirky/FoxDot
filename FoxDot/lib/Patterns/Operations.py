@@ -64,6 +64,7 @@ def Div(a, b):  return a / b
 def Mod(a, b):  return a % b
 def Pow(a, b):  return a ** b
 def Get(a, b):  return a[b]
+def FloorDiv(a, b): return a // b
 
 def rAdd(a, b): return b + a
 def rGet(a, b): return b[a]
@@ -71,6 +72,7 @@ def rSub(a, b): return b - a
 def rDiv(a, b): return b / a
 def rMod(a, b): return b % a
 def rPow(a, b): return b ** a
+def rFloorDiv(a, b): return b // a
 
 # Pattern operations
 PAdd = POperand(Add)

@@ -253,28 +253,28 @@ class TimeVar(Repeatable):
         return new
     ####### todo - integer division doesn't seem to work
     # //
-    def __div__(self, other):
+    def __floordiv__(self, other):
         # Run an assertion to make sure all values are valid
         #[item / other for item in self.all_values()]
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((self / x for x in other))
+                return other.__class__((self // x for x in other))
             else:
-                return other.__rdiv__(self)
+                return other.__rfloordiv__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.rDiv)
+        new.evaluate = fetch(op.rFloorDiv)
         return new
     
-    def __rdiv__(self, other):
+    def __rfloordiv__(self, other):
         # Run an assertion to make sure all values are valid
         #[other / item for item in self.all_values()]
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
-                return other.__class__((x / self for x in other))
+                return other.__class__((x // self for x in other))
             else:
-                return other.__div__(self)
+                return other.__floordiv__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.Div)
+        new.evaluate = fetch(op.FloorDiv)
         return new
 
     # /
