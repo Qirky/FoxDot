@@ -66,7 +66,7 @@ class TempoClock(object):
         # Can be configured
         self.latency    = 0.25
         self.nudge      = 0.0
-        self.sleep_time = 0
+        self.sleep_time = 0.0001
 
         # Debug
         self.debugging = False
