@@ -85,8 +85,6 @@ class Repeatable(object):
 
         # If the method call already exists, just update it
 
-        # key = ('every', cmd)
-
         key = cmd
 
         if key in self.repeat_events:
@@ -126,14 +124,62 @@ class MethodCall:
         self.this_when = self.when[0]
         self.last_when = 0
         
-        self.i    = 0
-        
-        self.next = self.parent.metro.next_bar() + self.this_when
+        self.i, self.next = self.count()
 
         self.args = args
         self.kwargs = kwargs
 
         self.stopping = False
+
+    def count(self):
+        """ Counts the number of times this method would have been called between clock start and now """
+
+        n = 0
+        acc = 0
+        dur = 0
+        now = float(self.parent.metro.now())
+
+        # Get durations
+
+        durations = self.when if self.cycle is None else asStream(self.cycle)
+        total_dur = float(sum(durations))
+
+        # How much time left to fit remainder in
+    
+        acc = now - (now % total_dur)
+
+        # n is the index to return for calculating self.when[n]
+        # acc is when to start
+
+        n = int(len(durations) * (acc / total_dur))
+
+        if acc != now:
+
+            while True:
+
+                dur = float(modi(durations, n))
+
+                if acc + dur == now:
+
+                    acc += dur
+
+                    n += 1
+
+                    break
+
+                elif acc + dur > now:
+
+                    acc += dur
+                    n += 1
+
+                    break
+
+                else:
+                    
+                    acc += dur
+                    n += 1
+
+        return n, acc
 
     def __repr__(self):
         return "<Future {}() call of '{}' player>".format(self.method.__name__, self.parent.synthdef)
@@ -186,9 +232,11 @@ class MethodCall:
         self.args = args
         self.kwargs = kwargs
 
-        if cycle is not None and cycle != self.cycle:
+        self.i, self.next = self.count()
 
-            self.next = self.parent.metro.next_bar() + self.when[self.i]
+##        if cycle is not None and cycle != self.cycle:
+##
+##            self.next = self.parent.metro.next_bar() + self.when[self.i]
 
         self.cycle = cycle
         

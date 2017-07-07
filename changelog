@@ -1,3 +1,38 @@
+### v0.3.6 fixes and updates
+
+- Any delay or stutter behaviour in Players is now handed over to SuperCollider by timestamping the OSCBundle, which should make FoxDot a lot more efficient & removed `send_delay` and `func_delay` classes.
+- Using a `TimeVar` in a pattern function, such as `PDur`, now creates a time-varying pattern as opposed to a pattern that uses the `TimeVar`'s current value. e.g.
+``` python
+>>> test = PDur(var([3,5], 4), 8)
+>>> print test # time is 0
+P[0.75, 0.75, 0.5]
+>>> print test # time is 4
+P[0.5, 0.25, 0.5, 0.25, 0.5]
+```
+- Adding values to a player performs the whole operation as opposed to adding each value in turn when the Player is called. This improves efficiency when using data structures such as `TimeVar`s as it only creates a new once `TimeVar` when the addition is done.
+- Improved usability of `PlayerKey` class, accessed when get the attribute of a Player e.g. `p1.degree`.
+- Sleep time set to small value. 0 sleep time would crash FoxDot on startup on some systems.
+- Made the behaviour of the `every` method more consistent rather than just starting the cycle at the next bar.
+
+### v0.3.5 fixes and updates
+
+- In addition to P\*, P+, P/, and P\** have been added. P+ refers uses the sustain values in a player to derive its delay. P/ delays the events every other time it is accessed, and P\** shuffles the order the values are delayed.
+- Added `PWalk` generator pattern. 
+- TimeVars are easier to update once created. 
+```python
+# Creates a named instance called foo
+var.foo = var([0,1],4)
+
+# Reassigning a var to a named var updates the values instead of creating a new var
+var.foo = var([2,3,4,5],2)
+```
+- Removed `sleep` from scheduling clock loop to increase performance. If you want to decrease the amount of CPU FoxDot uses, change the sleep duration to a small number around 0.001 like so
+```python
+Clock.sleep_time = 0.001
+``` 
+- Added pitch shift (`pshift`) to Sample Players, which increases the pitch of a sample by the number of semitones. You can use `Scale.default.semitones()` to generate semitones from the current scale.
+
+
 ### v0.3.3 fixes and updates
 
 - Added a new `Pattern` type data structure called a P-Star or `P*`. It is a subclass of `PGroup` but it has a "behaviour" that effects the current event of Player object, which, in this instance, adds a delay to each value based on the current Player's duration. e.g.

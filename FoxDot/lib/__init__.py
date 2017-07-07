@@ -56,7 +56,7 @@ for item in (TimeVar.TimeVar, Player, Server, MidiIn):
 
 # Players and effects etc need reference to SC server
 
-for item in (Player, Effect, QueueItem):
+for item in (Player, Effect, QueueItem, Clock):
 
     item.server = Server
 
@@ -86,7 +86,3 @@ FoxDotCode.namespace["_"] = EmptyItem()
 # Give the __when__ statement access to the  global namespace
 
 __when__.set_namespace(FoxDotCode)
-
-# Start the TempoClock
-
-Clock.start()

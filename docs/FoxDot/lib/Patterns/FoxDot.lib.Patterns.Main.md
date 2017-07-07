@@ -45,7 +45,7 @@ Use the '|' symbol to 'pipe' Patterns into on another
 
 Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
 
-##### `amen(self, i=2)`
+##### `amen(self, size=2)`
 
 Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" 
 
@@ -60,6 +60,10 @@ Returns a duration value relative to the type of pattern. Most patterns return v
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
+
+##### `convert_data(self, dtype=<type 'float'>)`
+
+Makes a true copy and converts the data to a given data type 
 
 ##### `flat(self)`
 
@@ -171,9 +175,13 @@ Use the '|' symbol to 'pipe' Patterns into on another
 
 Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
 
-##### `amen(self, i=2)`
+##### `amen(self, size=2)`
 
 Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" 
+
+##### `change_state(self)`
+
+To be overridden by any PGroupPrime that changes state after access by a Player 
 
 ##### `choose(self)`
 
@@ -297,9 +305,13 @@ Use the '|' symbol to 'pipe' Patterns into on another
 
 Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
 
-##### `amen(self, i=2)`
+##### `amen(self, size=2)`
 
 Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" 
+
+##### `change_state(self)`
+
+To be overridden by any PGroupPrime that changes state after access by a Player 
 
 ##### `choose(self)`
 
@@ -423,7 +435,7 @@ Use the '|' symbol to 'pipe' Patterns into on another
 
 Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
 
-##### `amen(self, i=2)`
+##### `amen(self, size=2)`
 
 Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" 
 
@@ -438,6 +450,10 @@ Returns a duration value relative to the type of pattern. Most patterns return v
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
+
+##### `convert_data(self, dtype=<type 'float'>)`
+
+Makes a true copy and converts the data to a given data type 
 
 ##### `flat(self)`
 
@@ -537,7 +553,7 @@ Use the '|' symbol to 'pipe' Patterns into on another
 
 Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
 
-##### `amen(self, i=2)`
+##### `amen(self, size=2)`
 
 Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" 
 
@@ -552,6 +568,10 @@ Returns a duration value relative to the type of pattern. Most patterns return v
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
+
+##### `convert_data(self, dtype=<type 'float'>)`
+
+Makes a true copy and converts the data to a given data type 
 
 ##### `flat(self)`
 
@@ -655,7 +675,7 @@ Use the '|' symbol to 'pipe' Patterns into on another
 
 Returns true if all of the patterns contents satisfies func(x) - default is nonzero 
 
-##### `amen(self, i=2)`
+##### `amen(self, size=2)`
 
 Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" 
 
@@ -670,6 +690,10 @@ Returns a duration value relative to the type of pattern. Most patterns return v
 ##### `contains_nest(self)`
 
 Returns true if the pattern contains a nest 
+
+##### `convert_data(self, dtype=<type 'float'>)`
+
+Makes a true copy and converts the data to a given data type 
 
 ##### `flat(self)`
 

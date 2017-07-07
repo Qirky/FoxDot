@@ -140,6 +140,7 @@ class workspace:
         self.text.bind("<Key>",             self.keypress)
 
         self.text.bind("<{}-BackSpace>".format(ctrl),       self.delete_word)
+        self.text.bind("<{}-Delete>".format(ctrl),          self.delete_next_word)
             
         self.text.bind("<{}-Return>".format(ctrl),          self.exec_block)
         self.text.bind("<Alt-Return>",                      self.exec_line)
@@ -778,49 +779,100 @@ class workspace:
 
         return "break"
 
-    def delete_word(self, event):
-        """ Deletes the preceeding text to the last whitespace or '.' """
+    def look(self, direction=-1):
+        """ Finds the start of the next / previous word """
 
-        if not self.delete_selection():
+        num_words = abs(direction)
+        direction = 1 if direction > 0 else -1
+        
+        end = self.text.index(INSERT)
 
-            end = self.text.index(INSERT)
+        row, col = index(end)
 
-            row, col = index(end)
+        # If the col is 0, set the index to the end of the previous row (unless first row)
 
-            # If the col is 0, set the index to the end of the previous row (unless first row)
+        if direction == -1:
 
-            if row == 0 and col == 0:
+            if row == 1 and col == 0:
 
-                return
+                return "1.0", "1.0"
 
-            elif row > 0 and col == 0:
+            elif row > 1 and col == 0:
 
-                row, col = index(self.text.index("%d.end" % (row - 1)))
+                row, col = index(self.text.index("%d.end" % (row + direction)))
 
                 end = index(row, col)                
 
-            # If the left char is whitespace, delete that AND the next word
+        # If the left char is whitespace, delete that AND the next word
 
-            start = None
+        start = None
 
-            while col > 0:
+        if direction == -1:
+
+            not_at_end = lambda x: x > 0
+
+        else:
+
+            _, end_point = index(self.text.index("%d.end" % row))
+
+            not_at_end = lambda x: x < end_point
+
+            print row, col, end_point, not_at_end(col)
+
+        while not_at_end(col):
+
+            start = index(row, col + direction)
+
+            char = self.text.get(start)
+
+            # if the character is a space, delete that
+            if char in " \t":
 
                 start = index(row, col)
+                break
 
-                char = self.text.get(start)
+            elif char in ".,()[]{}=\"'":
 
-                if char in " \t.(),[]{}":
+                start = index(row, col + (1 if direction == -1 else 0))
+                break
 
-                    start = index(row, col + 1)
-                    break
+            col = col + direction
 
-                col -= 1
+        # return the "larger index" second
+
+        if index(start) > index(end):
+
+            start, end = end, start
+
+        return start, end
+
+    def delete_word(self, event):
+        """ Deletes the preceeding text """
+
+        if not self.delete_selection():
+
+            start, end = self.look(-1)
 
             self.text.delete(start, end)
 
         self.update(event)
 
         execute.update_line_numbers(self.text)
+
+    def delete_next_word(self, event):
+        """ Deletes the following word """
+
+        if not self.delete_selection():
+
+            start, end = self.look(1)
+
+            self.text.delete(start, end)
+
+        self.update(event)
+
+        execute.update_line_numbers(self.text)
+
+        return
         
 
     def delete_selection(self):

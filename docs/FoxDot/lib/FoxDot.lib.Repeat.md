@@ -15,6 +15,10 @@ when called, schedules itself in the future
 
 Proxy for parent object __call__ 
 
+##### `count(self)`
+
+Counts the number of times this method would have been called between clock start and now 
+
 ##### `isScheduled(self)`
 
 Returns True if this is in the Tempo Clock 

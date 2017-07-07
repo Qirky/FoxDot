@@ -27,8 +27,8 @@ class POperand:
 
         cls, key = Main.Dominant(A, B)
 
-        # Instead of coverting the dominant to its own class, make a true_copy
-        
+        # Instead of coverting the dominant to its own class, make a true_copy?
+
         A = cls(A)
         B = cls(B)
 
@@ -42,7 +42,7 @@ class POperand:
 
             try:
 
-                val = self.operate(A[i], B[i])
+                val = self.operate(modi(A.data, i), modi(B.data, i))
 
             except ZeroDivisionError:
 
@@ -65,6 +65,8 @@ def Mod(a, b):  return a % b
 def Pow(a, b):  return a ** b
 def Get(a, b):  return a[b]
 def FloorDiv(a, b): return a // b
+def Xor(a, b): return a ^ b
+def Or(a, b):  return a | b
 
 def rAdd(a, b): return b + a
 def rGet(a, b): return b[a]
@@ -73,6 +75,8 @@ def rDiv(a, b): return b / a
 def rMod(a, b): return b % a
 def rPow(a, b): return b ** a
 def rFloorDiv(a, b): return b // a
+def rXor(a, b): return b ^ a
+def rOr(a, b):  return b | a
 
 # Pattern operations
 PAdd = POperand(Add)

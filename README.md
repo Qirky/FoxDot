@@ -1,25 +1,23 @@
-FoxDot - Live Coding with Python v0.3.5
+FoxDot - Live Coding with Python v0.3.6
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.3.5 fixes and updates
+### v0.3.6 fixes and updates
 
-- In addition to P\*, P+, P/, and P\** have been added. P+ refers uses the sustain values in a player to derive its delay. P/ delays the events every other time it is accessed, and P\** shuffles the order the values are delayed.
-- Added `PWalk` generator pattern. 
-- TimeVars are easier to update once created. 
-```python
-# Creates a named instance called foo
-var.foo = var([0,1],4)
-
-# Reassigning a var to a named var updates the values instead of creating a new var
-var.foo = var([2,3,4,5],2)
+- Any delay or stutter behaviour in Players is now handed over to SuperCollider by timestamping the OSCBundle, which should make FoxDot a lot more efficient & removed `send_delay` and `func_delay` classes.
+- Using a `TimeVar` in a pattern function, such as `PDur`, now creates a time-varying pattern as opposed to a pattern that uses the `TimeVar`'s current value. e.g.
+``` python
+>>> test = PDur(var([3,5], 4), 8)
+>>> print test # time is 0
+P[0.75, 0.75, 0.5]
+>>> print test # time is 4
+P[0.5, 0.25, 0.5, 0.25, 0.5]
 ```
-- Removed `sleep` from scheduling clock loop to increase performance. If you want to decrease the amount of CPU FoxDot uses, change the sleep duration to a small number around 0.001 like so
-```python
-Clock.sleep_time = 0.001
-``` 
-- Added pitch shift (`pshift`) to Sample Players, which increases the pitch of a sample by the number of semitones. You can use `Scale.default.semitones()` to generate semitones from the current scale.
+- Adding values to a player performs the whole operation as opposed to adding each value in turn when the Player is called. This improves efficiency when using data structures such as `TimeVar`s as it only creates a new once `TimeVar` when the addition is done.
+- Improved usability of `PlayerKey` class, accessed when get the attribute of a Player e.g. `p1.degree`.
+- Sleep time set to small value. 0 sleep time would crash FoxDot on startup on some systems.
+- Made the behaviour of the `every` method more consistent rather than just starting the cycle at the next bar.
 
 See `docs/changelog` for more
 
@@ -144,40 +142,6 @@ You can schedule these methods by calling the `every` method, which takes a list
 ```python
 bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 ```
-
-## Player Object Keywords
-
-dur - Durations (defaults to 1 and 1/2 for the Sample Player)
-
-sus - Sustain (defaults to `dur`)
-
-amp - Amplitude (defaults to 1)
-
-pan - Panning, where -1 is far left, 1 is far right (defaults to 0)
-
-vib - Vibrato (defaults to 0)
-
-hpf - High-pass filter; only frequences **above** this value are kept in the final signal (defaults to 0)
-
-lpf - Low-pass filter; only frequences **below** this value are kept in final signal (defaults to 20000)
-
-bits - The bit depth that the signal is reduced to; this is a value between 1 and 24 where other values are ignored (defaults to 0)
-
-rate - Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
-
-verb - The dry/wet mix of reverb; this should be a value between 0 and 1 (defalts to 0.25)
-
-room - Room size for reverb; this should be a value between 0 and 1 (defaults, to 0)
-
-chop -'Chops' the signal into smaller chunks (defaults to 0)
-
-delay - A duration of time to wait before sending the information to SuperCollider (defaults to 0)
-
-slide - 'Slides' the frequency value of a signal to `freq * (slide+1)` over the  duration of a note (defaults to 0)
-
-echo - Sets the decay time for any echo effect in beats, works best on Sample Player (defaults to 0)
-
-sample - Special keyword for Sample Players; selects another audio file from the bank of samples for a sample character.
 
 ## Documentation
 

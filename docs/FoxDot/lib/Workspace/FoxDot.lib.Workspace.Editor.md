@@ -32,7 +32,7 @@ If an area is selected, it is deleted and returns True
 
 ##### `delete_word(self, event)`
 
-Deletes the preceeding text to the last whitespace or '.' 
+Deletes the preceeding text 
 
 ##### `edit_paste(self, event=None)`
 

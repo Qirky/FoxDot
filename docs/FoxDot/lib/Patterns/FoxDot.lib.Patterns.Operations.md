@@ -12,7 +12,7 @@ None
 
 ##### `__call__(self, A, B)`
 
-A is always a pattern.
+A is always a Pattern or PGroup.
         
 
 ---
@@ -24,6 +24,10 @@ A is always a pattern.
 None
 
 ### `Div(a, b)`
+
+None
+
+### `FloorDiv(a, b)`
 
 None
 
@@ -43,6 +47,10 @@ None
 
 None
 
+### `Or(a, b)`
+
+None
+
 ### `PEq(a, b)`
 
 None
@@ -59,11 +67,19 @@ None
 
 None
 
+### `Xor(a, b)`
+
+None
+
 ### `rAdd(a, b)`
 
 None
 
 ### `rDiv(a, b)`
+
+None
+
+### `rFloorDiv(a, b)`
 
 None
 
@@ -75,11 +91,19 @@ None
 
 None
 
+### `rOr(a, b)`
+
+None
+
 ### `rPow(a, b)`
 
 None
 
 ### `rSub(a, b)`
+
+None
+
+### `rXor(a, b)`
 
 None
 

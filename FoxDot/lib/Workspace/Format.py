@@ -9,12 +9,14 @@ def path(fn):
 # RegEx Group 1
 user_defn = r"(?<=def )(\w+)"
 players   = r"(?<=>>)(\s*\w+)"
-comments  = r"^\s*#.*"
+comments  = r"^\s*#.*|[^\"']*(#[^\"']*$)"
 decorator = r"\A\s*@.+"
 numbers   = r"(?<![a-zA-Z])\d+"
 strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
+
+
 
 # RegEx Group 2
 def re_list(string, br="[]"):
@@ -60,9 +62,35 @@ def findstyles(line, *args):
 
     for tag in tags:
 
+        match_start = match_end = 0
+
         for match in re.finditer(re_patterns[tag], line):
 
-            pos.append((tag, match.start(), match.end()))
+            looking = True
+
+            i = 0
+
+            while looking:
+
+                try:
+
+                    start  = match.start(i)
+                    end    = match.end(i)
+
+                    if start == end == -1:
+
+                        raise IndexError # this is hacky af
+
+                    match_start = start
+                    match_end   = end
+
+                except IndexError:
+
+                    looking = False
+
+                i += 1
+
+            pos.append((tag, match_start, match_end))
 
     return pos
 
@@ -79,12 +107,12 @@ def userdefined(line):
 
 # Use our regex to read patterns.py and add all the functions to key_types
     
-from ..Patterns import Sequences
+from ..Patterns import Main, Sequences, Generators
 from ..SCLang import SCLang
 
-foxdot_kw = ["Clock","Group","Scale","Server","Root","BufferManager","var","Pvar","linvar","inf","lambda", decorator]
+foxdot_kw = ["Clock","Group","Scale","Server","Root","Samples","var","Pvar","linvar","inf","lambda", decorator]
 
-foxdot_funcs = functions(Sequences) + ["P", "P\*", "PRand", "PWhite"] # TODO PatternGenerator 
+foxdot_funcs = classes(Main) + functions(Sequences) + classes(Generators) + ["P"]
 
 # Python keywords used in RegEx Group 2
 
@@ -118,9 +146,9 @@ tabsize = 4
 
 # RegEx Group 2
 
-functions = r"(?<![a-zA-Z.])(" + "|".join(py_functions) + ")(?![a-zA-Z])"
-key_types = r"(?<![a-zA-Z.])(" + "|".join(py_key_types) + ")(?![a-zA-Z])"
-other_kws = r"(?<![a-zA-Z.])(" + "|".join(py_other_kws) + ")(?![a-zA-Z])"
+functions = r"(?<![a-zA-Z._])(" + "|".join(py_functions) + ")(?![_a-zA-Z])"
+key_types = r"(?<![a-zA-Z._])(" + "|".join(py_key_types) + ")(?![_a-zA-Z])"
+other_kws = r"(?<![a-zA-Z._])(" + "|".join(py_other_kws) + ")(?![_a-zA-Z])"
 
 colour_map = {'plaintext'  : COLOURS.plaintext,
               'background' : COLOURS.background,

@@ -9,6 +9,10 @@ def loop_pattern_func(f):
         multiple Patterns by using Patterns as arguments '''
     @functools.wraps(f)
     def new_function(*args):
+        # Return any functions that use TimeVars as PvarGenerators
+        timevars = [arg for arg in args if isinstance(arg, Main.Pattern.TimeVar)]
+        if len(timevars) > 0:
+            return Main.Pattern.TimeVar.CreatePvarGenerator(f, *args)
         pat = Main.Pattern()
         for i in range(LCM(*[len(arg) for arg in args if (hasattr(arg, '__len__') and not isinstance(arg, Main.PGroup))])):
             pat |= f(*[(modi(arg, i) if not isinstance(arg, Main.PGroup) else arg) for arg in args])

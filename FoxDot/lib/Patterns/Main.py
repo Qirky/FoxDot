@@ -31,6 +31,10 @@ class metaPattern(object):
 
             self.data = PGroup(data)
             self.make()
+
+        elif isinstance(data, self.__class__):
+
+            self.data = data.data
             
         else:
             
@@ -372,18 +376,7 @@ class metaPattern(object):
             func = getattr(self, method)
             assert callable(func)
 
-        p1 = Pattern(self.data)
-        p2 = Pattern(func(*args, **kwargs))
-
-        size = LCM(len(p1), len(p2))
-
-        data = []
-
-        for i in range(size):
-
-            data.append((p1[i], p2[i]))
-
-        return Pattern(data)
+        return self.zip(func(*args, **kwargs))
 
     @loop_pattern_method
     def palindrome(self, a=0, b=None):
@@ -435,14 +428,34 @@ class metaPattern(object):
             i+=1
         return self.__class__(new)
 
-    def amen(self, i=2):
+    def amen(self, size=2):
         """ Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
-        bd = self[0]
-        h1 = self[1]
-        sn = self[0-i]
-        h2 = self[1-i]
+##        bd = self[0]
+##        h1 = self[1]
+##        sn = self[0-i]
+##        h2 = self[1-i]
+##
+##        new = [ [bd, PGroupStar(bd, sn)] ] + list(self[1:-i]) + [[sn, sn, sn, h1]] + [ [PGroupStar(h2, sn), [h2, sn]] ]
 
-        new = [ [bd, PGroupStar(bd, sn)] ] + list(self[1:-i]) + [[sn, sn, sn, h1]] + [ [PGroupStar(h2, sn), [h2, sn]] ]
+        new = []
+
+        for n in range(len(self.data)):
+
+            if  n % 4 == 0:
+
+                new.append([self.data[n], PGroupStar(self.data[n], modi(self.data, n + size))])
+
+            elif n % 4 == 2:
+
+                new.append( [self.data[n]]*3+[self.data[n-1]] )
+
+            elif n % 4 == 3:
+
+                new.append( [PGroupStar(self.data[n], self.data[n-1]), [self.data[n], self.data[n-1]] ] )
+
+            else:
+
+                new.append(self.data[n])
         
         return self.__class__(new)
 
@@ -495,13 +508,42 @@ class metaPattern(object):
         """ Concatonates this patterns stream with another """
         return Pattern(self.data + asStream(pattern).data)
 
-    def zip(self, seq1, *seqN):
-        l, p = [], []
-        for pat in [self, seq1] + list(seqN):
-            p.append(Pattern(pat))
-            l.append(len(p[-1]))
-        length = LCM(*l)
-        return self.__class__([tuple(pat[i] for pat in p) for i in range(length)])
+    def zip(self, other):
+        new = []
+        other = asStream(other)
+        for i in range(LCM(len(self), len(other))):
+            new.append((self[i], other[i]))
+        return self.__class__(new)
+    
+    def deepzip(self, other):
+        new = []
+        other = asStream(other)
+        for i in range(LCM(len(self), len(other))):
+            p1 = self[i]
+            p2 = other[i]
+            if isinstance(p1, metaPattern):
+                value = p1.deepzip(p2)
+            elif isinstance(p2, metaPattern):
+                value = p2.deeprzip(p1)
+            else:
+                value = (p1, p2)
+            new.append(value)
+        return self.__class__(new)
+
+    def deeprzip(self, other):
+        new = []
+        other = asStream(other)
+        for i in range(LCM(len(self), len(other))):
+            p1 = self[i]
+            p2 = other[i]
+            if isinstance(p1, metaPattern):
+                value = p1.deeprzip(p2)
+            elif isinstance(p2, metaPattern):
+                value = p2.deepzip(p1)
+            else:
+                value = (p2, p1)
+            new.append(value)
+        return self.__class__(new)
 
     # Returns individual elements / slices
 
@@ -723,16 +765,19 @@ class PGroup(metaPattern):
             new_data = [value]
         return self.__class__(list(self.data) + new_data)
 
-    def calculate_step(self, *args):
+    def calculate_step(self, dur):
+        return dur
+
+    def calculate_delay(self, delay):
         return 0
 
     def calculate_time(self, dur):
         values = []
+        step  = self.calculate_step(dur)
         for i, item in enumerate(self):
-            step  = self.calculate_step(dur)
-            delay = i * step
+            delay = self.calculate_delay( i * step )
             if hasattr(item, "calculate_time"):
-                delay += item.calculate_time( step ) 
+                delay += item.calculate_time( step )
             values.append( delay )
         return PGroup(values)
 
@@ -761,6 +806,8 @@ class PGroupPrime(PGroup):
         return True
     def calculate_step(self, dur):
         return float(dur) / len(self)
+    def calculate_delay(self, delay):
+        return delay
 
 class PGroupStar(PGroupPrime):
     """ Stutters the values over the length of and event's 'dur' """    

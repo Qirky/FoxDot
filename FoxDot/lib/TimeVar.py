@@ -17,7 +17,7 @@
 from __future__ import division
 
 from sys import maxint as MAX_SIZE
-from Patterns import Pattern, asStream, PatternContainer, GeneratorPattern
+from Patterns import metaPattern, Pattern, asStream, PatternContainer, GeneratorPattern
 from Repeat import *
 import Patterns.Operations as op
 import Code
@@ -82,6 +82,10 @@ class TimeVar(Repeatable):
     @staticmethod
     def stream(values):
         return asStream(values)
+
+    @staticmethod
+    def CreatePvarGenerator(func, *args):
+        return PvarGenerator(func, *args)
 
     # Standard Methods
     def __str__(self):
@@ -385,7 +389,7 @@ class TimeVar(Repeatable):
 
     def new(self, other):
         """ Returns a new TimeVar object """
-        new = var(other, self.dur, bpm=self.bpm)
+        new = self.__class__(other, self.dur, bpm=self.bpm)
         new.dependency = self
         return new
 
@@ -524,10 +528,145 @@ class TimeVar(Repeatable):
         pass
 
 class Pvar(TimeVar, Pattern):
-    """ Pvar([pat1, pat2], durs) """
+    """ A TimeVar that represents Patterns that change over time e.g.
+        ```
+        >>> a = Pvar([ [0,1,2,3], [4,5] ], 4)
+        >>> print a # time is 0
+        P[0, 1, 2, 3]
+        >>> print a # time is 4
+        P[4, 5]
+    """
     stream = PatternContainer
     def __init__(self, values, dur=None, **kwargs):
-        TimeVar.__init__(self, [asStream(val) for val in values], dur, **kwargs)
+
+        try:
+
+            data = [asStream(val) for val in values]
+
+        except:
+
+            data = [values]
+        
+        TimeVar.__init__(self, data, dur, **kwargs)
+
+    def __add__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.Add)
+        return new
+
+    def __radd__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rAdd)
+        return new
+    
+    def __sub__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.Sub)
+        return new
+    
+    def __rsub__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rSub)
+        return new
+
+    def __mul__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.Mul)
+        return new
+    
+    def __rmul__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rMul)
+        return new
+    
+    def __div__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.Div)
+        return new
+    
+    def __rdiv__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rDiv)
+        return new
+    
+    def __truediv__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.Div)
+        return new
+    
+    def __rtruediv__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rDiv)
+        return new
+    
+    def __floordiv__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.FloorDiv)
+        return new
+    
+    def __rfloordiv__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rFloorDiv)
+        return new
+
+    def __pow__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.Pow)
+        return new
+
+    def __rpow__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rPow)
+        return new
+
+    def __mod__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.Mod)
+        return new
+
+    def __rmod__(self, other):
+        new = self.new(asStream(other))
+        new.evaluate = fetch(op.rMod)
+        return new
+
+    def __or__(self, other):
+        # Used when piping patterns together
+        new = self.new(PatternContainer(other))
+        new.evaluate = fetch(op.rOr)
+        return new
+
+    def __ror__(self, other):
+        # Used when piping patterns together
+        new = self.new(PatternContainer(other))
+        new.evaluate = fetch(op.Or)
+        return new
+
+
+class PvarGenerator(Pvar):
+    """ If a TimeVar is used in a Pattern function e.g. `PDur(var([3,5]), 8)`
+        then a `PvarGenerator` is returned. Each argument is stored as a TimeVar
+        and the function is called whenever the arguments are changed
+    """
+    def __init__(self, func, *args):
+        self.func = func
+        self.args = [(arg if isinstance(arg, TimeVar) else TimeVar(arg)) for arg in args]
+        self.last_args = []
+        self.last_data = []
+        self.evaluate = fetch(op.Nil) 
+        self.dependency = 1
+        
+    def now(self):
+        new_args = [arg.now() for arg in self.args]
+        if new_args != self.last_args:
+            self.last_args = new_args
+            self.last_data = self.func(*self.last_args)
+        return self.calculate(self.last_data)
+
+    def new(self, other):
+        new = self.__class__(lambda x: x, other)
+        new.dependency = self
+        return new
+    
 
 class _continuous_var(TimeVar):
 
@@ -661,3 +800,7 @@ class _var_dict(object):
         return value
 
 var = _var_dict()
+
+# Give Main.Pattern a reference to TimeVar class
+
+Pattern.TimeVar = TimeVar

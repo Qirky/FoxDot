@@ -117,6 +117,21 @@ like so:
 d1 >> play("x-o{-[--]o[-o]}")
 ```
 
+FoxDot Player Object Keywords
+-----------------------------
+
+dur - Durations (defaults to 1 and 1/2 for the Sample Player)
+
+sus - Sustain (defaults to `dur`)
+
+amp - Amplitude (defaults to 1)
+
+rate - Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
+
+delay - A duration of time to wait before sending the information to SuperCollider (defaults to 0)
+
+sample - Special keyword for Sample Players; selects another audio file from the bank of samples for a sample character.
+
 ## Classes
 
 ### `Group(self, *args)`
@@ -148,12 +163,6 @@ Returns a Pattern object containing the desired attribute for each player in the
 ##### `__add__(self, data)`
 
 Change the degree modifier stream 
-
-##### `__mul__(self, data)`
-
-Multiplying an instrument player multiplies each amp value by
-the input, or circularly if the input is a list. The input is
-stored here and calculated at the update stage 
 
 ##### `__rshift__(self, other)`
 
@@ -243,6 +252,10 @@ Calculates the values for each attr to send to the server at the current clock t
 Returns the number of 'references' for the
 attr which references the most other players 
 
+##### `number_attr(self, attr)`
+
+Returns true if the attribute should be a number 
+
 ##### `number_of_layers(self)`
 
 Returns the deepest nested item in the event 
@@ -285,8 +298,11 @@ Adds a delay to a Synth Envelope
 
 ##### `stutter(self, n=2, **kwargs)`
 
-Plays the current note n-1 times. You can specify some keywords,
-such as dur, sus, and rate. 
+Plays the current note n-1 times. You can specify keywords. 
+
+##### `unpack(self, item)`
+
+Converts a pgroup to floating point values and updates and time var or playerkey relations 
 
 ---
 
@@ -296,17 +312,9 @@ such as dur, sus, and rate.
 
 #### Methods
 
-##### `__nonzero__(self)`
+##### `__add__(self, other)`
 
-TODO - is this versatile? 
-
----
-
-### `func_delay(self, func, *args, **kwargs)`
-
-
-
-#### Methods
+If adding a pattern, return a pattern of values 
 
 ---
 
@@ -314,15 +322,6 @@ TODO - is this versatile?
 
 Represents a rest when used with a Player's `dur` keyword
     
-
-#### Methods
-
----
-
-### `send_delay(self, p, synthdef, message, fx={})`
-
-Holds the state of a player whose send has
-been scheduled in the future 
 
 #### Methods
 

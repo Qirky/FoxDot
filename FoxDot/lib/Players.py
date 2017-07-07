@@ -115,6 +115,21 @@
     ```
     d1 >> play("x-o{-[--]o[-o]}")
     ```
+
+    FoxDot Player Object Keywords
+    -----------------------------
+
+    dur - Durations (defaults to 1 and 1/2 for the Sample Player)
+
+    sus - Sustain (defaults to `dur`)
+
+    amp - Amplitude (defaults to 1)
+
+    rate - Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
+
+    delay - A duration of time to wait before sending the information to SuperCollider (defaults to 0)
+
+    sample - Special keyword for Sample Players; selects another audio file from the bank of samples for a sample character.
     
 
 """
@@ -160,8 +175,7 @@ class Player(Repeatable):
 
     # Base attributes
     base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom',
-                       'pan', 'rate', 'amp', 'room', 'bits',
-                       'midinote', 'channel')
+                       'pan', 'rate', 'amp', 'midinote', 'channel')
 
     fx_attributes = FxList.all_kwargs()
     fx_keys       = FxList.kwargs()
@@ -192,8 +206,8 @@ class Player(Repeatable):
         self.following = None
         self.queue_block = None
         self.playstring = ""
-        # self.char = PlayerKey("", parent=self)
         self.buf_delay = []
+        self.timestamp = 0
 
         # Visual feedback information
 
@@ -226,7 +240,8 @@ class Player(Repeatable):
         # These dicts contain the attribute and modifier values that are sent to SuperCollider     
 
         self.attr  = {}
-        self.modf  = {}
+        self.modifier = []
+        self.mod_data = 0
 
         # Keyword arguments that are used internally
 
@@ -270,11 +285,17 @@ class Player(Repeatable):
             
             if name not in self.__vars:
 
-                value = asStream(value) if not isinstance(value, PlayerKey) else value
+                value = asStream(value)
 
                 # Update the attribute dict
                 
                 self.attr[name] = value
+
+                # keep track of what values we change with +-
+
+                if (self.synthdef == SamplePlayer and name == "sample") or (self.synthdef != SamplePlayer and name == "degree"):
+
+                    self.modifier = value
 
                 # Update any playerkey
 
@@ -481,7 +502,7 @@ class Player(Repeatable):
         acc = 0
         dur = 0
         now = (time if time is not None else self.metro.now())
-        bpm = float(self.metro.bpm if self.bpm == None else self.bpm) # TODO: use this to better caclulate event_index
+        bpm = float(self.metro.bpm if self.bpm == None else self.bpm) # TODO: use this to better caclulate event_index -- why?
 
         durations = self.rhythm() if self.current_dur is None else self.current_dur
         total_dur = float(sum(durations))
@@ -737,12 +758,17 @@ class Player(Repeatable):
     # Methods affecting other players - every n times, do a random thing?
 
     def stutter(self, n=2, **kwargs):
-        """ Plays the current note n-1 times. You can specify some keywords,
-            such as dur, sus, and rate. """
+        """ Plays the current note n-1 times. You can specify keywords. """
+
+        self.get_event()
 
         n = int(n)
 
         if self.metro.solo == self and n > 0:
+
+            other_kwarg = { "timestamp": self.metro.osc_message_time(),
+                            "delay": 0,
+                            }
 
             dur = float(kwargs.get("dur", self.dur)) / n
 
@@ -752,13 +778,13 @@ class Player(Repeatable):
 
             for stutter in range(1, n):
 
-                delay += dur
+                other_kwarg["delay"] = other_kwarg["delay"] + dur
 
                 # Use a custom attr dict and specify the first delay to play "immediately"
 
-                sub = {kw:modi(val, stutter-1) for kw, val in kwargs.items() + [("send_now", True)]}
+                sub = {kw: modi(val, stutter-1) for kw, val in kwargs.items() + other_kwarg.items()}
 
-                self.metro.schedule(func_delay(self.send,  **sub), self.event_index + delay)
+                self.send(**sub)
                 
         return self
     
@@ -772,42 +798,26 @@ class Player(Repeatable):
 
     def __add__(self, data):
         """ Change the degree modifier stream """
+        self.mod_data = data
         if self.synthdef == SamplePlayer:
-            self.modf['sample'] = asStream(data)
+            self.attr['sample'] = self.modifier + self.mod_data
         else:
-            self.modf['degree'] = asStream(data)
+            self.attr['degree'] = self.modifier + self.mod_data
         return self
 
     def __sub__(self, data):
         """ Change the degree modifier stream """
+        self.mod_data = 0 - data
         if self.synthdef == SamplePlayer:
-            self.modf['sample'] = asStream(data) * -1
+            self.attr['sample'] = self.modifier + self.mod_data
         else:
-            self.modf['degree'] = asStream(data) * -1
+            self.attr['degree'] = self.modifier + self.mod_data
         return self
 
     def __mul__(self, data):
-
-        """ Multiplying an instrument player multiplies each amp value by
-            the input, or circularly if the input is a list. The input is
-            stored here and calculated at the update stage """
-
-        if type(data) in (int, float):
-
-            data = [data]
-
-        self.modf['amp'] = asStream(data)
-
         return self
 
     def __div__(self, data):
-
-        if type(data) in (int, float):
-
-            data = [data]
-
-        self.modf['amp'] = [1.0 / d for d in data]
-
         return self
 
     # --- Data methods
@@ -846,85 +856,38 @@ class Player(Repeatable):
 
     # --- Methods for preparing and sending OSC messages to SuperCollider
 
+    def unpack(self, item):
+        """ Converts a pgroup to floating point values and updates and time var or playerkey relations """
+
+        if isinstance(item, TimeVar.TimeVar):
+
+                item = item.now()
+
+        if isinstance(item, PlayerKey):
+            
+            if item.parent in self.queue_block.objects() and item.parent is not self:
+
+                self.queue_block.call(item.parent, self)
+
+            item = item.now()
+
+        if isinstance(item, PGroup):
+
+            item =  item.convert_data(self.unpack)
+
+        return item
+
     def now(self, attr="degree", x=0):
         """ Calculates the values for each attr to send to the server at the current clock time """
 
         index = self.event_n + x
 
-        attr_value = self.attr[attr]
-
-        # If we are referencing other players' values, make sure they're updated first
-
-        if isinstance(attr_value, PlayerKey):
-            
-            if attr_value.parent in self.queue_block.objects() and attr_value.parent is not self:
-
-                self.queue_block.call(attr_value.parent, self)
-
-        else:
-
-            attr_value = modi(asStream(attr_value), index)
-
-        # bpm values, for example, might be None so ignore
+        attr_value = modi(self.attr[attr], index)
 
         if attr_value is not None:
 
-            if isinstance(attr_value, TimeVar.TimeVar):
+            attr_value = self.unpack(attr_value)
 
-                attr_value = attr_value.now()
-
-            # Ignore frequency for sample player
-
-            if self.number_attr(attr):
-
-                try:
-
-                    if isinstance(attr_value, PGroup):
-
-                        attr_value = attr_value.convert_data()
-
-                    else:
-
-                        attr_value = float(attr_value)
-
-                except Exception as e:
-
-                    print(attr, attr_value, e)
-
-            # If we have a modifier
-
-            if attr in self.modf:
-
-                modf_value = modi(self.modf[attr], index)
-
-                if isinstance(modf_value, TimeVar.TimeVar):
-
-                    modf_value = modf_value.now()
-
-                try:
-
-                    if isinstance(modf_value, PGroup):
-
-                        modf_value = modf_value.convert_data()
-
-                    else:
-
-                        modf_value = float(modf_value)
-
-                except Exception as e:
-
-                    print(attr, modf_value, e)
-
-                if modf_value != 0:
-
-                    try:
-
-                        attr_value = attr_value + modf_value
-
-                    except TypeError:
-
-                        pass
-            
         return attr_value
 
     def get_event(self):
@@ -993,7 +956,7 @@ class Player(Repeatable):
         """ Creates an OSC packet to play a SynthDef in SuperCollider,
             use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] """
 
-        message = []
+        message = {}
         fx_dict = {}
 
         # Calculate frequency / buffer number
@@ -1008,7 +971,7 @@ class Player(Repeatable):
 
             freq   = miditofreq(midinote)
             
-            message = ['freq',  freq, 'midinote', midinote]
+            message = {'freq':  freq, 'midinote': midinote}
 
         else:
 
@@ -1017,7 +980,7 @@ class Player(Repeatable):
 
             buf  = int(Samples[str(degree)].bufnum(sample))
             
-            message = ['buf', buf]
+            message = {'buf': buf}
 
         attributes = self.attr.copy()
 
@@ -1029,7 +992,7 @@ class Player(Repeatable):
 
                 # Don't use fx keywords or foxdot keywords
 
-                if key not in FxList.kwargs() and key not in self.keywords:
+                if (key not in self.keywords) and (key not in self.fx_attributes or key in self.base_attributes):
 
                     group_value = kwargs.get(key, self.event[key])
 
@@ -1051,7 +1014,7 @@ class Player(Repeatable):
 
                         val = val * float(group_modi(kwargs.get('amplify', self.event['amplify']), index))
 
-                    message += [key, val]
+                    message[key] = val
 
             except KeyError as e:
 
@@ -1065,7 +1028,9 @@ class Player(Repeatable):
 
                 # Only use effects where the "title" effect value is not 0
 
-                if self.event[key] != 0:
+                val = group_modi(kwargs.get(key, self.event[key]), index)
+
+                if val != 0:
 
                     fx_dict[key] = []
 
@@ -1079,9 +1044,7 @@ class Player(Repeatable):
 
                             if sub_key in message:
 
-                                i = message.index(sub_key) + 1
-
-                                val = message[i]
+                                val = message[sub_key]
 
                             # Get the value from the event
 
@@ -1110,6 +1073,8 @@ class Player(Repeatable):
         """ Sends the current event data to SuperCollder.
             Use kwargs to overide values in the """
 
+        timestamp = kwargs.get("timestamp", self.queue_block.time)
+
         size  = self.largest_attribute() * pattern_depth(self.event.values())
         
         banged = False
@@ -1130,7 +1095,7 @@ class Player(Repeatable):
 
             if "freq" in osc_msg:
 
-                freq_value = osc_msg[osc_msg.index("freq")+1]
+                freq_value = osc_msg["freq"]
 
                 if freq_value not in freq:
 
@@ -1142,7 +1107,7 @@ class Player(Repeatable):
 
             if 'buf' in osc_msg:
                     
-                buf = group_modi(kwargs.get('buf', osc_msg[osc_msg.index('buf') + 1]), i)
+                buf = group_modi(kwargs.get('buf', osc_msg['buf']), i)
 
             else:
 
@@ -1152,7 +1117,7 @@ class Player(Repeatable):
 
                 bufnum.append( buf )
 
-            amp = group_modi(kwargs.get('amp', osc_msg[osc_msg.index('amp') + 1]), i)
+            amp = group_modi(kwargs.get('amp', osc_msg['amp']), i)
 
             # Any messages with zero amps or 0 buf are not sent <- maybe change that for "now" classes
 
@@ -1160,54 +1125,31 @@ class Player(Repeatable):
 
                 synthdef = self.get_synth_name(buf)
 
-                if delay > 0:
+                key = (osc_msg, effects, delay)
 
-                    if (delay, osc_msg, effects) not in delayed_messages:
+                if key not in sent_messages:
 
-                        # Schedule the note to play in the future & to update the playerkeys
+                    # Keep note of what messages we are sending
 
-                        self.metro.schedule(send_delay(self, synthdef, osc_msg, effects), self.event_index + float(delay))
+                    sent_messages.append(key)
 
-                        delayed_messages.append((delay, osc_msg, effects))
+                    # Compile the message with time tag
 
-                    if self.bang_kwargs:
+                    delay = self.metro.beat_dur(delay)
 
-                        self.metro.schedule(self.bang, self.metro.now() + delay)
-                    
-                else:
+                    compiled_msg = self.server.get_bundle(synthdef, osc_msg, effects, timestamp = timestamp + delay)
 
-                    # Don't send duplicate messages
+                    # Add the message to the appropriate queue block
 
-                    if (osc_msg, effects) not in sent_messages:
+                    self.queue_block.osc_messages.append(compiled_msg)
 
-                        # --- New way of sending messages all at once
-                    
-                        compiled_msg = self.server.sendPlayerMessage(synthdef, osc_msg, effects,)
+                    # "bang" the line
 
-                        # -- We can specify to send immediately as opposed to all together at the end of the block
-
-                        if kwargs.get("send_now", False):
-
-                            # If send_now is True, then send is being called from somewhere else and so
-                            # the the osc message is added to the immediate block
-
-                            self.metro.current_block.osc_messages.append(compiled_msg)
-
-                        else:
-
-                            self.queue_block.osc_messages.append(compiled_msg)
-
-                        sent_messages.append((osc_msg, effects))
-                        
                     if not banged and self.bang_kwargs:
 
                         self.bang()
 
                         banged = True
-
-            # Store the last message so we can compare if delayed
-
-            last_msg = (osc_msg, effects)
 
         self.freq = freq
         self.buf = bufnum
@@ -1290,12 +1232,13 @@ class Player(Repeatable):
 
         if isinstance(lead, self.__class__):
 
-            self.degree = lead.degree
-            self.following = lead
+            self.degree = lead.degree + self.mod_data
 
-        else:
+            # self.following = lead
 
-            self.following = None
+        # else:
+
+            # self.following = None
 
         return self
 
@@ -1450,8 +1393,6 @@ class Player(Repeatable):
 
         elif self.bang_kwargs:
 
-            print self.bang_kwargs
-
             bang = Bang(self, self.bang_kwargs)
 
         return self
@@ -1467,6 +1408,7 @@ class PlayerKey(object):
         self.value   = asStream(value)
         self.key     = attr
         self.pattern = asStream(self.parent.attr[self.key])
+
         self.index = 0
         
         if reference is None:
@@ -1495,103 +1437,162 @@ class PlayerKey(object):
         return PlayerKey(other, self, self.parent, self.key)
     
     def __add__(self, other):
+        """ If adding a pattern, return a pattern of values """
+        if isinstance(other, metaPattern):
+            return other.__radd__(self)
         new = self.child(other)
         new.calculate = Add
         return new
+
     def __radd__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__add__(self)
         new = self.child(other)
         new.calculate = Add
         return new
+    
     def __sub__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rsub__(self)
         new = self.child(other)
         new.calculate = rSub
         return new
+    
     def __rsub__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__sub__(self)
         new = self.child(other)
         new.calculate = Sub
         return new
+    
     def __mul__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rmul__(self)
         new = self.child(other)
         new.calculate = Mul
         return new
+
     def __rmul__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__mul__(self)
         new = self.child(other)
         new.calculate = Mul
         return new
+    
     def __div__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rdiv__(self)
         new = self.child(other)
         new.calculate = rDiv
         return new
+
     def __rdiv__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__div__(self)
         new = self.child(other)
         new.calculate = Div
         return new
+    
     def __mod__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rmod__(self)
         new = self.child(other)
         new.calculate = rMod
         return new
+    
     def __rmod__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__mod__(self)
         new = self.child(other)
         new.calculate = Mod
         return new
+    
     def __pow__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rpow__(self)
         new = self.child(other)
         new.calculate = rPow
         return new
+    
     def __rpow__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__pow__(self)
         new = self.child(other)
         new.calculate = Pow
         return new
+    
     def __xor__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rxor__(self)
         new = self.child(other)
         new.calculate = rPow
         return new
+    
     def __rxor__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__xor__(self)
         new = self.child(other)
         new.calculate = Pow
         return new
+
     def __truediv__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rtruediv__(self)
         new = self.child(other)
         new.calculate = rDiv
         return new
+    
     def __rtruediv__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__truediv__(self)
         new = self.child(other)
         new.calculate = Div
         return new
 
     # Comparisons
     def __eq__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__ne__(self)
         new = self.child(other)
         new.calculate = lambda a, b: int(a == b)
         return new
     
     def __ne__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__eq__(self)
         new = self.child(other)
         new.calculate = lambda a, b: int(a != b)
         return new
     
     def __gt__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__lt__(self)
         new = self.child(other)
         new.calculate = lambda a, b: int(a < b)
         return new
     
     def __lt__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__gt__(self)
         new = self.child(other)
         new.calculate = lambda a, b: int(a > b)
         return new
     
     def __ge__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__le__(self)
         new = self.child(other)
         new.calculate = lambda a, b: int(a <= b)
         return new
     
     def __le__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__ge__(self)
         new = self.child(other)
         new.calculate = lambda a, b: int(a >= b)
         return new
 
     def __nonzero__(self):
-        """ TODO - is this versatile? """
         return int(self.now())
 
     # Values
@@ -1622,55 +1623,6 @@ class PlayerKey(object):
         value = self.calculate(self.value[self.index], other)
         self.index += step
         return value
-
-
-class send_delay:
-    """ Holds the state of a player whose send has
-        been scheduled in the future """
-    debug=False
-    def __init__(self, p, synthdef, message, fx={}):
-        self.master = p
-        self.server = p.server
-        self.synth = synthdef
-        self.msg = list(message[:])
-        self.fx = {}
-        self.update_dict = {}
-        self.queue_block = None
-        # Store a dict of values to update the player with when called
-        for key, value in fx.items():
-            osc = []
-            for i in range(0, len(value), 2): # an osc message
-                self.update_dict[str(value[i])] = value[i+1]
-                osc += [str(value[i]), value[i+1]]
-            self.fx[str(key)] = osc
-        for i in range(0, len(self.msg), 2):
-            self.update_dict[str(self.msg[i])] = self.msg[i+1]
-        # ---
-    def __repr__(self):
-        return "<'{}' delay>".format(self.synth)
-
-    def __call__(self, *args, **kwargs):            
-        if kwargs.get("verbose", True):
-            for key, value in self.update_dict.items():
-                self.master.__dict__[key].update(value)
-                if key == "buf" and value != 0:
-                    self.master.__dict__["degree"].update( Samples.getBuffer(value).char ) # this might have to change -----
-            compiled_msg = self.server.sendPlayerMessage(self.synth, self.msg, self.fx)
-            self.queue_block.osc_messages.append(compiled_msg)
-        return
-        
-
-class func_delay:
-    def __init__(self, func, *args, **kwargs):
-        self.func = func
-        self.args = args[:]
-        self.kwargs = kwargs.copy()
-    def __repr__(self):
-        return "<'{}' delay>".format(self.func.__name__)
-    def __call__(self, *args, **kwargs):
-        # Perhaps update the args and kwargs
-        self.func(*self.args, **self.kwargs)
-
 
 ###### GROUP OBJECT
 

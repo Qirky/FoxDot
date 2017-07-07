@@ -12,7 +12,7 @@
 
 from __future__ import division
 from types import FunctionType, MethodType
-from Players import Player, send_delay, func_delay
+from Players import Player
 from Repeat import MethodCall
 from Patterns import asStream
 from TimeVar import TimeVar
@@ -28,6 +28,8 @@ import inspect
 
 class TempoClock(object):
 
+    server = None
+
     def __init__(self, bpm=120.0, meter=(4,4)):
 
         # Flag this when done init
@@ -35,9 +37,11 @@ class TempoClock(object):
 
         self.largest_sleep_time = 0
 
-        self.time = 0 # time in secs
-        self.beat = 0 # the number of beats since the epoch
-        self.start_time = time() # The time at start
+        # Store time as a rational number
+        
+        self.time = Fraction(0)
+        self.beat = Fraction(0)
+        self.start_time = Fraction(time())
 
         # Don't start yet...
         self.ticking = False
@@ -47,10 +51,6 @@ class TempoClock(object):
 
         # All other scheduled items go here
         self.items   = []
-
-        self.tempo_changes  = []
-        self.historic_beats = 0
-        self.last_bpm       = bpm
 
         # General set up
         self.bpm   = bpm
@@ -104,7 +104,7 @@ class TempoClock(object):
 
     def beat_dur(self, n=1):
         """ Returns the length of n beats in seconds """
-        return (60.0 / self.get_bpm()) * n
+        return 0 if n == 0 else (60.0 / self.get_bpm()) * n
 
     def seconds_to_beats(self, seconds):
         """ Returns the number of beats that occur in a time period  """
@@ -140,12 +140,22 @@ class TempoClock(object):
         self.debugging = bool(on)
         return
 
+    def set_time(self, beat):
+        """ Set the clock time to 'beat' and update players in the clock """
+        self.start_time = time()
+        self.queue.clear()
+        self.beat = beat
+        self.time = time() - self.start_time
+        for player in self.playing:
+            player(count=True)
+        return
+
     def now(self):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
         # Get number of seconds elapsed
-        now = ((time() - self.start_time) - self.latency) + self.nudge
+        now = Fraction((time() - self.start_time) + self.nudge)
         # Increment the beat counter
-        self.beat += (now - self.time) * (self.get_bpm() / 60.0)
+        self.beat += (now - self.time) * (Fraction(self.get_bpm()) / 60)
         # Store time
         self.time  = now
         return self.beat    
@@ -157,53 +167,37 @@ class TempoClock(object):
         main.start()
         return
 
+    def osc_message_time(self):
+        return time() + self.latency - self.nudge
+
     def __run_block(self, block):
         """ Private method for calling all the items in the queue block.
             This means the clock can still 'tick' while a large number of
             events are activated  """
 
-        # Call each item in turn (they can call each other if there are dependencies
+        # Set the time to "activate" messages on SC
 
-        t1 = clock()
+        block.time = self.osc_message_time()
         
         for item in block:
 
             if not block.called(item):
 
                 try:
+
                     block.call(item)
 
                 except SystemExit:
+
                     sys.exit()
 
                 except:
+
                     print(error_stack())
-
-        t2 = clock()
-
-        duration = (t2-t1)
-
-        sleep_time = self.latency - duration
-
-        # If blocks are taking longer to iterate over than the latency, adjust accordingly
-
-        if sleep_time < 0:
-
-            self.latency -= sleep_time
-
-            sleep_time = 0
-
-            print("Clock latency increased to", self.latency)
-
-        # Wait until the end of the latency period
-
-        sleep(sleep_time) #--- this is a problem?
 
         # Send all the message to supercollider together
 
-        if self.ticking:
-
-           block.send_osc_messages()
+        block.send_osc_messages()
 
         return
 
@@ -216,11 +210,11 @@ class TempoClock(object):
 
         while self.ticking:
 
-            self.now() # get current time
+            self.now() # get current time (self.beat)
 
             next_event = self.queue.next()
 
-            if (self.beat - next_event) >= 0:
+            if self.beat >= next_event:
 
                 self.current_block = self.queue.pop()
 
@@ -236,18 +230,10 @@ class TempoClock(object):
 
             if self.sleep_time > 0:
 
-                sleep(self.sleep_time) #--- CPU vs jitter
+                sleep(self.sleep_time)
 
         return
 
-    def set_time(self, beat):
-        """ Set the clock time to 'beat' and update players in the clock """
-        self.queue.clear()
-        self.beat = beat
-        self.time = time() - self.start_time
-        for player in self.playing:
-            player(count=True)
-        return
 
     def schedule(self, obj, beat=None, args=(), kwargs={}):
         """ TempoClock.schedule(callable, beat=None)
@@ -295,7 +281,7 @@ class TempoClock(object):
         
         else:
 
-            if isinstance(obj, (Player, send_delay)):
+            if isinstance(obj, Player):
 
                 # kwargs['verbose'] = False
 
@@ -468,9 +454,7 @@ from types import FunctionType
 class QueueItem(object):
     priority_levels = [
                         lambda x: type(x) == FunctionType,   # Any functions are called first
-                        lambda x: isinstance(x, func_delay), # Then scheduled functions
                         lambda x: isinstance(x, MethodCall), # Then scheduled player methods
-                        lambda x: isinstance(x, send_delay), # Then delayed player messages
                         lambda x: isinstance(x, Player),     # Then players themselves
                         lambda x: True                       # And anything else
                       ]
@@ -486,12 +470,14 @@ class QueueItem(object):
         self.osc_messages   = []
 
         self.beat = t
+        self.time = 0
         self.add(obj, args, kwargs)
         
     def __repr__(self):
         return "{}: {}".format(self.beat, list(self))
     
     def add(self, obj, args=(), kwargs={}):
+        """ Adds a callable object to the QueueItem """
 
         q_obj = QueueObj(obj, args, kwargs)
 
@@ -508,14 +494,16 @@ class QueueItem(object):
         self.send_osc_messages()
 
     def send_osc_messages(self):
+        """ Sends all compiled osc messages to the SuperCollider server """
         for msg in self.osc_messages:
-            if msg[0] == "MidiOut": # TODO -- make this more elegant
-                self.server.sendMidi(msg)
+            if msg.address == "/foxdot_midi":
+                self.server.sclang.send(msg)
             else:
                 self.server.client.send(msg)
         return
 
     def called(self, item):
+        """ Returns True if the item is in this QueueItem and has already been called """
         return item in self.called_events
 
     def call(self, item, caller = None):
@@ -549,9 +537,8 @@ class QueueItem(object):
 
     def __getitem__(self, key):
         for event in self:
-            # Possible need to be key.obj?
             if event == key:
-                return event
+                return event # Possible need to be key.obj?
 
     def __iter__(self):
         return (item for level in self.events for item in level)
@@ -575,13 +562,7 @@ class QueueObj(object):
     def __repr__(self):
         return repr(self.obj)
     def __call__(self):
-        ### <> getting verbose error
         self.obj.__call__(*self.args, **self.kwargs)
-##        try:
-##            self.obj.__call__(*self.args, **self.kwargs)
-##        except TypeError as e:
-##            print self.obj, e
-##            print "QueueObj Call TypeError", self.kwargs
 
 ###############################################################
 """ 

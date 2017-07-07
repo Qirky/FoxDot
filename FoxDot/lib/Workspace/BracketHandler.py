@@ -19,6 +19,7 @@ class BracketHandler:
 
         self.left_brackets = dict(zip(left_b, right_b))
         self.right_brackets = dict(zip(right_b, left_b))
+        self.right_brackets_only = list("]})")
 
         self.queue = []
 
@@ -58,9 +59,9 @@ class BracketHandler:
                 
                 pass
 
-            # B. Add a closing bracket as well. 
+            # B. If next character is a whitespace or a right bracket add a closing bracket as well. 
 
-            if next_char in whitespace + self.right_brackets.keys():
+            if next_char in whitespace + self.right_brackets_only:
 
                 # If the next char is quote mark, just move the cursor
 

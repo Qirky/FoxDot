@@ -1,6 +1,8 @@
 # `FoxDot.lib.Patterns.Generators`
 
-None
+Generator patterns are similar to Pattern objects but instead of being
+a set of values, they return a value when accessed / indexed based on
+a function.
 
 ## Classes
 
@@ -16,11 +18,44 @@ a random item for that container.
 Calls self.func(index) to get an item, and also calculates
 performs any arithmetic operation assigned 
 
+##### `string(self)`
+
+Used in PlayString to show a PRand in curly braces 
+
 ---
 
 ### `PSquare(self)`
 
 Returns the square of the index being accessed 
+
+#### Methods
+
+##### `getitem(self, index=None)`
+
+Calls self.func(index) to get an item, and also calculates
+performs any arithmetic operation assigned 
+
+---
+
+### `PTree(self, n=0, f=<lambda>, choose=<lambda>)`
+
+Takes a starting value and two functions as arguments. The first function, f, must
+take one value and return a container-type of values and the second function, choose,
+must take a container-type and return a single value. In essence you are creating a
+tree based on the f(n) where n is the last value chosen by choose.
+
+#### Methods
+
+##### `getitem(self, index=None)`
+
+Calls self.func(index) to get an item, and also calculates
+performs any arithmetic operation assigned 
+
+---
+
+### `PWalk(self, max=7, step=1, start=0)`
+
+
 
 #### Methods
 

@@ -92,23 +92,40 @@ class SCLangServerManager:
     def sendMidiMessage(self, event):
         pass
 
-    def sendPlayerMessage(self, synthdef, packet, effects, player=None):
+    @staticmethod
+    def create_osc_msg(dictionary):
+        """ Converts a Python dictionary into an OSC style list """
+        msg = []
+        for key, value in dictionary.items():
+            msg += [key, value]
+        return msg
+
+    def get_bundle(self, synthdef, packet, effects, timestamp=0):
 
         ## todo -- should packet be a dict?
+        
+        # Create a bundle
+        
+        bundle = OSCBundle(time=timestamp)
 
-        ## todo -- make this more elegant
+        # Create a specific message for midi
 
         if synthdef == "MidiOut":
 
-            note    = packet[packet.index("midinote") + 1]
-            vel     = min(127, (packet[packet.index("amp") + 1] * 128) - 1)
-            sus     = packet[packet.index("sus") + 1]
-            channel = packet[packet.index("channel") + 1]
+            bundle.setAddress("/foxdot_midi")
 
-            return [synthdef, note, vel, sus, channel]
-        
-        # Create a bundle
-        bundle = OSCBundle()
+            msg = OSCMessage()
+
+            note    = packet["midinote"]
+            vel     = min(127, (packet["amp"] * 128) - 1)
+            sus     = packet["sus"]
+            channel = packet["channel"]
+
+            msg.append( [synthdef, note, vel, sus, channel] )
+
+            bundle.append(msg)
+
+            return bundle
 
         # Create a group for the note
         group_id = self.nextnodeID()
@@ -121,26 +138,23 @@ class SCLangServerManager:
         this_node = self.nextnodeID()
 
         # Make sure messages release themselves after 8 * the duration at max (temp)
-        i = packet.index('sus') + 1
-        max_sus = float(packet[i] * 8)
+        max_sus = float(packet["sus"] * 8)
 
         # Synth
         msg = OSCMessage("/s_new")
 
-        new_packet = []
-
-        for i in range(0, len(packet), 2):
+        for key in packet:
 
             try:
 
-                packet[i+1] = float(packet[i+1])
+                packet[key] = float(packet[key])
 
             except TypeError as e:
 
                 WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( packet[i], packet[i+1] ))
-                packet[i+1] = 0.0
+                packet[key] = 0.0
                 
-        packet = [synthdef, this_node, 0, group_id, 'bus', this_bus] + packet
+        packet = [synthdef, this_node, 0, group_id, 'bus', this_bus] + self.create_osc_msg(packet)
         msg.append( packet )
         bundle.append(msg)
 
@@ -190,9 +204,7 @@ class SCLangServerManager:
     # Midi Messages
     # -------------
 
-    def sendMidi(self, data, cmd="/foxdot_midi"):
-        msg = OSCMessage()
-        msg.append(data)
+    def sendMidi(self, msg, cmd="/foxdot_midi"):
         msg.setAddress(cmd)
         self.sclang.send(msg)
         return

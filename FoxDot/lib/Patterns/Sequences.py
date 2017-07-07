@@ -13,7 +13,7 @@
 import random
 import math
 
-from Main import Pattern, asStream
+from Main import Pattern, asStream, GeneratorPattern
 from Generators import *
 from PGroups import *
 from Operations import *
@@ -38,7 +38,7 @@ class __pattern__(object):
         the Pattern `P[0, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
     '''
     def __getitem__(self, args):
-        if hasattr(args, '__iter__'):
+        if hasattr(args, '__iter__') and not isinstance(args, GeneratorPattern):
             data = []
             for item in args:
                 if type(item) is slice:
@@ -151,30 +151,6 @@ def PZip2(pat1, pat2, rule=lambda a, b: True):
             data.append((a,b))
         i += 1
     return Pattern(data)
-
-
-# PDur(var([3,5], 4), 8) -> Pvar([PDur(3,8), PDur(5,8)], 4)
-
-##def find_time_vars(f):
-##    # f -> PDur
-##    # args -> var([2,3],4), var([8,10],4)
-##    # out  -> Pvar([f(args[0].data[0], args[1].data[0]), f(args[0].data[1], args[1].data[1])])
-##    def new_function(*args):
-##        if any([isinstance(arg, var) for arg in args]):                
-##            data = [] # The functions
-##            time = [] # The durations
-##            # How many patterns?
-##            num_patterns = LCM() # Lowest common multiple of the lengths of each pattern
-##            for i in range(len(args)):
-##                if isinstance(args[i], var):
-##                    pass
-##                else:
-##                    data.append(args[i])
-##            return Pvar([f()])
-##        else:
-##            return f(*args)
-##    return new_function
-
 
 @loop_pattern_func
 def PStutter(x, n=2):

@@ -2,6 +2,8 @@ from Code import execute
 
 class Bang:
 
+    duration = 0.1
+
     def __init__(self, player, kwargs):
 
         self.widget = execute.namespace['FoxDot']
@@ -55,19 +57,20 @@ class Bang:
                 start = "%d.%d" % (row, col)
                 end   = "%d.end" % row
 
-                try:
-
+                def bang():
                     self.widget.addTask(target=self.widget.text.tag_add, args=(self.id, start, end))
                     self.widget.addTask(target=self.widget.text.tag_config, args=(self.id,), kwargs=kwargs)
+                    return
 
-                    self.duration = 0.1
+                clock = player.metro
 
-                    player.metro.schedule(self.remove, player.metro.now() + self.duration)
+                t = clock.seconds_to_beats(clock.latency)
 
-                except:
+                clock.schedule(bang, player.metro.now() + t )
 
-                    pass
+                clock.schedule(self.remove, player.metro.now() + self.duration + t)
 
+            return
 
     def remove(self):
         self.widget.addTask(target=self.widget.text.tag_delete, args=(self.id,))

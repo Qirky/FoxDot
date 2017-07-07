@@ -1,3 +1,10 @@
+"""
+    Generator patterns are similar to Pattern objects but instead of being
+    a set of values, they return a value when accessed / indexed based on
+    a function.
+
+"""
+
 import Main
 
 # Random Generator Pattern
@@ -22,7 +29,26 @@ class PRand(Main.GeneratorPattern):
     def func(self, index):
         return random.randrange(self.low, self.high)
     def string(self):
+        """ Used in PlayString to show a PRand in curly braces """
         return "{" + self.data.string() + "}"
+
+class PTree(Main.GeneratorPattern):
+    """ Takes a starting value and two functions as arguments. The first function, f, must
+        take one value and return a container-type of values and the second function, choose,
+        must take a container-type and return a single value. In essence you are creating a
+        tree based on the f(n) where n is the last value chosen by choose.
+    """
+    def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x)):
+        Main.GeneratorPattern.__init__(self)
+        self.f  = f
+        self.choose = choose
+        self.values = [n]
+
+    def func(self, index):
+        self.values.append( self.choose(self.f( self.values[-1] )) )
+        return self.value
+        
+        
 
 class PwRand(Main.GeneratorPattern):
     pass
