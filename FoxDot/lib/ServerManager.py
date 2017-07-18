@@ -23,6 +23,7 @@ class SCLangClient(OSCClient):
 class SCLangServerManager:
 
     metro = None
+    fxlist = None
 
     def __init__(self, addr, osc_port, sclang_port):
 
@@ -66,8 +67,8 @@ class SCLangServerManager:
         return
 
     def nextbusID(self):
-        if self.bus > 100:
-            self.bus = 4
+        if self.bus > 102:
+            self.bus = 1
         self.bus += 1
         return self.bus
 
@@ -86,6 +87,7 @@ class SCLangServerManager:
         return
 
     def setFx(self, fx_list):
+        self.fxlist   = fx_list
         self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
 
@@ -102,8 +104,6 @@ class SCLangServerManager:
 
     def get_bundle(self, synthdef, packet, effects, timestamp=0):
 
-        ## todo -- should packet be a dict?
-        
         # Create a bundle
         
         bundle = OSCBundle(time=timestamp)
@@ -140,7 +140,37 @@ class SCLangServerManager:
         # Make sure messages release themselves after 8 * the duration at max (temp)
         max_sus = float(packet["sus"] * 8)
 
-        # Synth
+        # Effects of order 0 go first - then the synth, then order 1, then envelope (todo) then order 2
+
+        # IN
+        
+        msg = OSCMessage("/s_new")
+        key = "rate" if synthdef in (SamplePlayer, LoopPlayer) else "freq"
+        if key in packet:
+            value = ["rate", packet[key]]
+        else:
+            value = []
+        osc_packet = ["startSound", this_node, 0, group_id, 'bus', this_bus, "sus", max_sus] + value
+        msg.append( osc_packet )
+        bundle.append(msg)
+
+        # ORDER 0
+
+        for fx in self.fxlist.order[0]:
+
+            if fx in effects:
+
+                this_effect = effects[fx]
+
+                # Get next node ID
+                this_node, last_node = self.nextnodeID(), this_node
+                msg = OSCMessage("/s_new")
+                osc_packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
+                msg.append(osc_packet)
+                bundle.append(msg)
+
+        # SYNTH
+            
         msg = OSCMessage("/s_new")
 
         for key in packet:
@@ -151,30 +181,54 @@ class SCLangServerManager:
 
             except TypeError as e:
 
-                WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( packet[i], packet[i+1] ))
+                WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( key, packet[key] ))
                 packet[key] = 0.0
-                
-        packet = [synthdef, this_node, 0, group_id, 'bus', this_bus] + self.create_osc_msg(packet)
-        msg.append( packet )
+
+        # Get next node ID
+        this_node, last_node = self.nextnodeID(), this_node                
+        osc_packet = [synthdef, this_node, 1, group_id, 'bus', this_bus] + self.create_osc_msg(packet)        
+        msg.append( osc_packet )
         bundle.append(msg)
 
-        # Effects
-        for fx in effects:
+        # ORDER 1
 
-            this_effect = effects[fx]
+        for fx in self.fxlist.order[1]:
 
-            # Get next node ID
-            this_node, last_node = self.nextnodeID(), this_node
-            msg = OSCMessage("/s_new")
-            packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
-            msg.append(packet)
-            bundle.append(msg)
+            if fx in effects:
 
-        # Finally, output sound through end node "makeSound"
+                this_effect = effects[fx]
+
+                # Get next node ID
+                this_node, last_node = self.nextnodeID(), this_node
+                msg = OSCMessage("/s_new")
+                osc_packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
+                msg.append( osc_packet )
+                bundle.append(msg)
+
+        # ENVELOPE (TODO)
+
+        # ORDER 2
+
+        for fx in self.fxlist.order[2]:
+
+            if fx in effects:
+
+                this_effect = effects[fx]
+
+                # Get next node ID
+                this_node, last_node = self.nextnodeID(), this_node
+                msg = OSCMessage("/s_new")
+                osc_packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
+                msg.append( osc_packet )
+                bundle.append(msg)
+
+        # OUT
+        
         msg = OSCMessage("/s_new")
         this_node, last_node = self.nextnodeID(), this_node
-        packet = ['makeSound', this_node, 1, group_id, 'bus', this_bus, 'sus', max_sus]
-        msg.append(packet)
+        osc_packet = ['makeSound', this_node, 1, group_id, 'bus', this_bus, 'sus', max_sus]
+        msg.append( osc_packet )
+
         bundle.append(msg)
         
         return bundle        

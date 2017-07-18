@@ -10,6 +10,7 @@ from Code import __when__
 FoxDotCode.namespace = globals()
 
 from TempoClock import *
+from Buffers import *
 from Players import *
 from Patterns import *
 from Effects import *
@@ -31,6 +32,10 @@ from random import choice as choose
 # Create a clock and define functions
 
 Clock = TempoClock()
+
+# Give Players a reference to the Sample Library
+
+Player.samples = Samples
 
 # Give the server information about Effects
 

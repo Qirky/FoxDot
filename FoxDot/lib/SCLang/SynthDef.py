@@ -54,16 +54,15 @@ class SynthDefBaseClass(object):
         self.amp         = instance("amp")
         self.pan         = instance("pan")
         self.rate        = instance("rate")
-        self.bits        = instance("bits")
         
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
                             "pan"       : 0,
                             "freq"      : 0,
-                            "fmod"      : 0,
-                            "rate"      : 1,
-                            "bus"       : 0,
-                            "bits"      : 0 } # This is an effect in the synthdef - bad idea?
+                            "vib"       : 0,
+                            "fmod"      : 0, # could be put in an Effect?
+                            "rate"      : 0,
+                            "bus"       : 0 }
 
         self.add_base_class_behaviour()
 
@@ -120,6 +119,7 @@ class SynthDefBaseClass(object):
         defaults    = object.__getattribute__(self, 'defaults')
         var         = object.__getattribute__(self, 'var')
         synth_added = object.__getattribute__(self, 'synth_added')
+        
         attr = defaults.keys() + var
         
         if synth_added:
@@ -217,6 +217,10 @@ class SynthDefBaseClass(object):
         new.name = str(newname)
         return new
 
+    @staticmethod
+    def new_attr_instance(name):
+        return instance(name)
+
     def play(self, freq, **kwargs):
         ''' Plays a single sound '''
         message = ["freq", freq]
@@ -225,47 +229,28 @@ class SynthDefBaseClass(object):
         self.server.sendNote(self.name, message)
         return
 
-###
-
 class SynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
         SynthDefBaseClass.__init__(self, *args, **kwargs)
-        # Player Keywords
-        self.vib         = instance("vib")
-        self.vibDelay    = instance("vibDelay")
-        self.vibVar      = instance("vibVar")
-        self.depthVar    = instance("depthVar")
-        self.depth       = instance("depth")
-        self.slide       = instance("slide")
-        self.slidefrom   = instance("slidefrom")
-        # Player Default Values
-        self.defaults.update( {"vib"       : 0,
-                               "slide"     : 0,
-                               "slidefrom" : 1 } )
+        # add vib depth?
 
     def add_base_class_behaviour(self):
         """ Defines the initial setup for every SynthDef """
         SynthDefBaseClass.add_base_class_behaviour(self)
+        self.base.append("freq = In.kr(bus, 1);")
         self.base.append("freq = freq + fmod;")
-        self.base.append("freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);")
         self.base.append("freq = Vibrato.kr(freq, rate: vib);")
         return
         
 class SampleSynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
         SynthDefBaseClass.__init__(self, *args, **kwargs)
-        # Sample Player Keywords
-        self.buf   = instance("buf")
-        self.scrub = instance("scrub")
-        self.cut   = instance("cut")
-        self.pshift = instance("pshift")
-        # Sample Player Default Values
+        self.buf               = instance("buf")
         self.defaults['buf']   = 0
-        self.defaults['scrub'] = 0
-        self.defaults['cut']   = 1
-        self.defaults['pshift'] = 0
-        
-        # self.base.append("Line.kr(0,1, BufDur.kr(buf) * cut * (1 / rate), doneAction: 2);")
+        self.defaults['room']  = 0.1
+        self.defaults['rate']  = 1.0
+        self.base.append("rate = In.kr(bus, 1);")
+        self.base.append("rate = Vibrato.kr(rate, rate: vib, depth: 0.05);")
 
         
 

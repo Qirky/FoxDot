@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import re
 from os.path import abspath, join, dirname
 from ..Code import classes, functions, instances
@@ -110,7 +112,7 @@ def userdefined(line):
 from ..Patterns import Main, Sequences, Generators
 from ..SCLang import SCLang
 
-foxdot_kw = ["Clock","Group","Scale","Server","Root","Samples","var","Pvar","linvar","inf","lambda", decorator]
+foxdot_kw = ["Clock","Group","Scale","Server","Root","Samples","var","Pvar","linvar","inf","lambda", u"λ", decorator]
 
 foxdot_funcs = classes(Main) + functions(Sequences) + classes(Generators) + ["P"]
 

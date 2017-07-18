@@ -4,6 +4,7 @@
 
 from os.path import abspath, join, dirname
 from Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
+from Settings import FOXDOT_LOOP
 from ServerManager import Server
 import wave
 import os
@@ -113,6 +114,10 @@ class BufChar(object):
     def bufnum(self, n):        
         return self.buffers[int(n % len(self.buffers))] if self.buffers else Buffer(None, 0)
 
+class LoopFile(BufChar):
+    def __str__(self):
+        return "LoopFile '{}' loaded in buffer {}".format(self.char, self.buffers[0])
+
 class BufferManager:
     def __init__(self):
 
@@ -121,6 +126,7 @@ class BufferManager:
 
         # Dictionary of buffer numbers to character
         self.buffers = {}
+        self.loop_files = {}
 
         # Load buffers
         bufnum = 1
@@ -190,6 +196,19 @@ class BufferManager:
         self.nil = BufChar(None)
         self.nil.addbuffer(None, 0)
 
+        # Sort out loop buffers
+
+        for filename in os.listdir(FOXDOT_LOOP):
+
+            path = join(root, FOXDOT_LOOP)
+
+            name = "".join(filename.split(".")[:-1])
+
+            self.loop_files[name] = LoopFile(name)
+            self.loop_files[name].addbuffer(join(path, filename), bufnum, 2)
+
+            bufnum += 1
+
         # Write to file
         self.write_to_file()
 
@@ -207,16 +226,44 @@ class BufferManager:
 
     def write_to_file(self):
         f = open(FOXDOT_BUFFERS_FILE, 'w')
-        for char in self.symbols:
-            for fn, buf in self.symbols[char]:
-                f.write('Buffer.read(s, "{}", bufnum:{});\n'.format(path(fn).replace("\\","/"), buf))
+        for data_list in [self.symbols, self.loop_files]:
+            for char in data_list:
+                for fn, buf in data_list[char]:
+                    f.write('Buffer.read(s, "{}", bufnum:{});\n'.format(path(fn).replace("\\","/"), buf))
         return
 
     def load(self):
-        for char in self.symbols:
-            for fn, buf in self.symbols[char]:
-                self.server.bufferRead(buf, path(fn))
+        for data_list in [self.symbols, self.loop_files]:
+            for char in data_list:
+                for fn, buf in data_list[char]:
+                    self.server.bufferRead(buf, path(fn))
         return
 
     def bufnum(self, char):
         return self.symbols.get(char, 0)
+
+Samples = BufferManager()
+
+def FindBuffer(name):
+    if name in Samples.loop_files:
+        return int(Samples.loop_files[name].bufnum(0))
+    else:
+        print("File '{}' not found".format(name))
+        return 0
+
+from SCLang import SampleSynthDef
+
+class LoopSynthDef(SampleSynthDef):
+    def __init__(self):
+        SampleSynthDef.__init__(self, "loop")
+        self.pos = self.new_attr_instance("pos")
+        self.defaults['pos']   = 0
+        self.base.append("osc = PlayBuf.ar(2, buf, BufRateScale.kr(buf) * rate, startPos: BufSampleRate.kr(buf) * pos);") # * rate
+        self.base.append("osc = osc * EnvGen.ar(Env([0,1,1,0],[0.05, sus-0.05, 0.05]));")
+        self.osc = self.osc * self.amp
+        self.add()
+    def __call__(self, filename, pos=0, **kwargs):
+        kwargs["buf"] = FindBuffer(filename)
+        return SampleSynthDef.__call__(self, pos, **kwargs)
+
+loop = LoopSynthDef()

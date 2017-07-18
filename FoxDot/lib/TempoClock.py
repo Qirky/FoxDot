@@ -35,13 +35,18 @@ class TempoClock(object):
         # Flag this when done init
         self.__setup   = False
 
+        # debug
+
         self.largest_sleep_time = 0
+        self.last_block_dur = 0.0
+
+        self.dtype=Fraction
 
         # Store time as a rational number
         
-        self.time = Fraction(0)
-        self.beat = Fraction(0)
-        self.start_time = Fraction(time())
+        self.time = self.dtype(0)
+        self.beat = self.dtype(0)
+        self.start_time = self.dtype(time())
 
         # Don't start yet...
         self.ticking = False
@@ -150,15 +155,25 @@ class TempoClock(object):
             player(count=True)
         return
 
-    def now(self):
-        """ Returns the total elapsed time (in beats as opposed to seconds) """
+    def true_now(self):
+        """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
         # Get number of seconds elapsed
-        now = Fraction((time() - self.start_time) + self.nudge)
+        now = self.dtype(((time() - self.start_time) - self.latency) + self.nudge)
         # Increment the beat counter
-        self.beat += (now - self.time) * (Fraction(self.get_bpm()) / 60)
+        self.beat += (now - self.time) * (self.dtype(self.get_bpm()) / 60)
         # Store time
         self.time  = now
-        return self.beat    
+        return self.beat
+
+    def now(self):
+        """ Returns the total elapsed time (in beats as opposed to seconds) """
+        if not self.ticking:
+            self.beat = self.true_now()
+        return self.beat + self.beat_dur(self.latency)
+
+    def osc_message_time(self):
+        """ Returns the true time that an osc message should be run i.e. now + latency """
+        return time() + self.latency - self.nudge
         
     def start(self):
         """ Starts the clock thread """
@@ -166,9 +181,6 @@ class TempoClock(object):
         main.daemon = True
         main.start()
         return
-
-    def osc_message_time(self):
-        return time() + self.latency - self.nudge
 
     def __run_block(self, block):
         """ Private method for calling all the items in the queue block.
@@ -178,7 +190,7 @@ class TempoClock(object):
         # Set the time to "activate" messages on SC
 
         block.time = self.osc_message_time()
-        
+
         for item in block:
 
             if not block.called(item):
@@ -203,22 +215,22 @@ class TempoClock(object):
 
     def run(self):
         """ Main loop """
-
-        counter = True
         
         self.ticking = True
 
         while self.ticking:
 
-            self.now() # get current time (self.beat)
+            beat = self.true_now() # get current time
 
             next_event = self.queue.next()
 
-            if self.beat >= next_event:
+            if beat >= next_event:
 
                 self.current_block = self.queue.pop()
 
                 if len(self.current_block):
+
+                    # print float(self.now()), self.current_block
 
                     threading.Thread(target=self.__run_block, args=(self.current_block,)).start()
 
@@ -273,23 +285,7 @@ class TempoClock(object):
 
         # Add to the queue
 
-        if beat > self.now():
-
-            self.queue.add(obj, beat, args, kwargs)
-
-        # Add any events that should have happend, but silence Players
-        
-        else:
-
-            if isinstance(obj, Player):
-
-                # kwargs['verbose'] = False
-
-                if self.debugging:
-
-                    print "Scheduling", obj, "at", self.now(), "when expected at", beat
-
-            self.queue.add(obj, self.now() + (self.sleep_time + 0.0001), args, kwargs)
+        self.queue.add(obj, beat, args, kwargs)
 
         return
 
@@ -499,7 +495,7 @@ class QueueItem(object):
             if msg.address == "/foxdot_midi":
                 self.server.sclang.send(msg)
             else:
-                self.server.client.send(msg)
+                self.server.client.send(msg)        
         return
 
     def called(self, item):

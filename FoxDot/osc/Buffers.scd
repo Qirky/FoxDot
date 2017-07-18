@@ -269,3 +269,5 @@ Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/z/lower/2_scrat
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/bar/0.wav", bufnum:269);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/tilde/0_ride.wav", bufnum:270);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/tilde/1_ride.wav", bufnum:271);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/__loop/sparkfest.wav", bufnum:273);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/__loop/billions.wav", bufnum:272);

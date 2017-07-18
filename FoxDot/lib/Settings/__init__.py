@@ -26,6 +26,7 @@ USER_CWD     = os.path.realpath(".")
 FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../../")
 FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon" + (".ico" if SYSTEM != LINUX else ".gif"))
 FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
+FOXDOT_LOOP  = os.path.realpath(FOXDOT_ROOT + "/snd/__loop/")
 
 SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 SYNTHDEF_DIR = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
@@ -59,7 +60,7 @@ if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
 
     FOXDOT_SND = os.path.realpath(conf.SAMPLES_DIR)
 
-# Name of SamplePlayer SynthDef
+# Name of SamplePlayer and LoopPlayer SynthDef
 
 class _SamplePlayer:
     names = ('play1', 'play2')
@@ -68,7 +69,15 @@ class _SamplePlayer:
     def __ne__(self, other):
         return other not in self.names
 
+class _LoopPlayer:
+    name = "loop"
+    def __eq__(self, other):
+        return other == self.name
+    def __ne__(self, other):
+        return other != self.name
+
 SamplePlayer = _SamplePlayer()
+LoopPlayer   = _LoopPlayer()
 
 # Colours
 

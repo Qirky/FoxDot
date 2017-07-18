@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 
 """ Tkinter interface made for Live Coding with Python syntax highlighting """  
@@ -170,6 +171,8 @@ class workspace:
         self.text.bind("<{}-n>".format(ctrl),               self.newfile)
 
         self.text.bind("<{}-m>".format(ctrl),               self.toggle_menu)
+
+        self.text.bind("<{}-l>".format(ctrl),               self.insert_lambda_symbol)
 
         # Change ctrl+h on Mac (is used to close)
 
@@ -384,6 +387,12 @@ class workspace:
     # ----------------
     def addTask(self, target, args=(), kwargs={}):
         self.text.queue.put((target, args, kwargs))
+        return
+
+
+    def insert_lambda_symbol(self, event):
+        self.text.insert(INSERT, u"\u03BB")
+        self.update(event)
         return
 
     # Undo action: Ctrl+Z

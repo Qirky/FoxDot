@@ -1,8 +1,8 @@
 SynthDef.new(\scratch,
-{|vib=0, depth=0.5, bus=0, slide=0, rate=0.04, sus=1, slidefrom=1, fmod=0, amp=1, freq=0, bits=0, pan=0|
+{|vib=0, rate=0.04, sus=1, fmod=0, bus=0, amp=1, freq=0, depth=0.5, pan=0|
 var osc, env;
+freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
 freq = Vibrato.kr(freq, rate: vib);
 freq=(freq * Crackle.ar(1.5));
 osc=SinOsc.ar(Vibrato.kr(freq, 2, 3, depthVariation: depth, rateVariation: rate), mul: amp);

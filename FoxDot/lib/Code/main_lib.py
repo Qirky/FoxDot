@@ -11,6 +11,7 @@ import foxdot_tokenize
 
 # Player RegEx
 re_player = re.compile(r"(\s*?)(\w+)\s*?>>\s*?\w+")
+re_lambda = re.compile("u'03BB'", re.UNICODE)
 
 """
     Live Object
@@ -59,6 +60,7 @@ class CodeString:
 
 def clean(string):
     """ Removes non-ascii characters from a string """
+    string = string.replace(u"\u03BB", "lambda")
     return string.encode("ascii", "replace")
         
 class FoxDotCode:

@@ -1,6 +1,6 @@
 SynthDef.new(\pitchShift,
-{|bus, shift|
+{|bus, pshift|
 var osc;
-osc = In.ar(bus, 2);
-osc = PitchShift.ar(osc, 0.02, shift);
-ReplaceOut.ar(bus, osc)}).add;
+osc = In.kr(bus, 1);
+osc = osc * (1.059463**pshift);
+ReplaceOut.kr(bus, osc)}).add;

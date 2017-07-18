@@ -1,8 +1,8 @@
 SynthDef.new(\quin,
-{|vib=0, bus=0, slide=0, rate=1, sus=1, slidefrom=1, fmod=0, amp=1, freq=0, bits=0, pan=0|
+{|vib=0, rate=0, sus=1, fmod=0, bus=0, amp=1, freq=0, pan=0|
 var osc, env;
+freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Line.ar(freq * slidefrom, freq * (1 + slide), sus);
 freq = Vibrato.kr(freq, rate: vib);
 osc=(Klank.ar(`[[1, 2, 4, 2], [100, 50, 0, 10], [1, 5, 0, 1]], Impulse.ar(freq).dup, [(freq * 1.01), freq]) / 5000);
 osc=(osc * LFSaw.ar((freq * rate)));

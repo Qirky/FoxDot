@@ -1,23 +1,31 @@
-FoxDot - Live Coding with Python v0.3.6
+FoxDot - Live Coding with Python v0.3.7
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.3.6 fixes and updates
+### v0.3.7 fixes and updates
 
-- Any delay or stutter behaviour in Players is now handed over to SuperCollider by timestamping the OSCBundle, which should make FoxDot a lot more efficient & removed `send_delay` and `func_delay` classes.
-- Using a `TimeVar` in a pattern function, such as `PDur`, now creates a time-varying pattern as opposed to a pattern that uses the `TimeVar`'s current value. e.g.
-``` python
->>> test = PDur(var([3,5], 4), 8)
->>> print test # time is 0
-P[0.75, 0.75, 0.5]
->>> print test # time is 4
-P[0.5, 0.25, 0.5, 0.25, 0.5]
+- Nested pattern bug fixed so that they no longer cause patterns to loop
+- Improved clock scheduling after proper "latency" implementation
+- Added a new SynthDef, `loop`, to play longer samples:
+
+```python
+# First argument is the name of the file minus the extension
+
+p1 >> loop("billions")
+
+# Use the dur keyword to specify when to loop the file
+
+p1 >> loop("billions", dur=8)
+
+# The second argument is the starting point in beats such that the following 2 lines are equivalent
+
+p1 >> loop("billions", dur=16)
+
+p1 >> loop("billions", [0,8], dur=8)
 ```
-- Adding values to a player performs the whole operation as opposed to adding each value in turn when the Player is called. This improves efficiency when using data structures such as `TimeVar`s as it only creates a new once `TimeVar` when the addition is done.
-- Improved usability of `PlayerKey` class, accessed when get the attribute of a Player e.g. `p1.degree`.
-- Sleep time set to small value. 0 sleep time would crash FoxDot on startup on some systems.
-- Made the behaviour of the `every` method more consistent rather than just starting the cycle at the next bar.
+- Added ability to use the lambda symbol in place of the word lambda. Insert it by using `Ctrl+L`.
+- Put `slide`, `slidefrom`, `coarse`, `pshift` into their own effects 
 
 See `docs/changelog` for more
 
@@ -60,14 +68,11 @@ Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
 ##### Buffer mismatch error
 If you are getting an error similar to "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider this just means that a mono audio file is being played back where SuperCollider was expecting stereo. Nothing to worry about!
 
-##### `Decimator` class not defined
-This is a class that is found in the SC3 plugins (link at the top) but if you don't have it installed, go to `lib/Settings/conf.py` and set `SC3_PLUGINS` to `False`.
-
 ## Basics
 
 ### Executing Code
 
-A 'block' of code in FoxDot is made up of consecutive lines of code with no empty lines. Pressing `Ctrl+Return` (or `Cmd-Return` on a Mac) will execute the block of code that the cursor is currently in. Try `print 1 + 1` to see what happens!
+A 'block' of code in FoxDot is made up of consecutive lines of code with no empty lines. Pressing `Ctrl+Return` (or `Cmd+Return` on a Mac) will execute the block of code that the cursor is currently in. Try `print 1 + 1` to see what happens!
 
 ### Player Objects
 

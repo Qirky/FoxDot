@@ -141,7 +141,7 @@ from random import shuffle, choice
 from copy import copy, deepcopy
 from time import sleep
 
-from Settings import SamplePlayer
+from Settings import SamplePlayer, LoopPlayer
 from Code import WarningMsg, debug_stdout
 from SCLang.SynthDef import SynthDefProxy, SynthDef
 from Effects import FxList
@@ -158,8 +158,6 @@ from Bang import Bang
 import Buffers
 import TimeVar
 
-Samples = Buffers.BufferManager()
-
 class Player(Repeatable):
 
     # Set private values
@@ -173,15 +171,17 @@ class Player(Repeatable):
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'buf',
                   'blur', 'amplify', 'scale', 'bpm', 'sample')
 
+    internal_keywords = tuple(value for value in keywords if value != "degree")
+
     # Base attributes
-    base_attributes = ('sus', 'fmod', 'vib', 'slide', 'slidefrom',
-                       'pan', 'rate', 'amp', 'midinote', 'channel')
+    base_attributes = ('sus', 'fmod', 'vib', 'pan', 'rate', 'amp', 'midinote', 'channel')
 
     fx_attributes = FxList.all_kwargs()
     fx_keys       = FxList.kwargs()
 
-    metro = None
-    server = None
+    metro   = None
+    server  = None
+    samples = None
 
     # Tkinter Window
     widget = None
@@ -366,10 +366,7 @@ class Player(Repeatable):
         self.amplify = 1
 
         # Rate - varies between SynthDef
-        self.rate    = 1
-
-        # TODO - Move this into an effect
-        self.slidefrom = 1
+        # self.rate    = 1
 
         # Duration of notes
         self.dur     = 0.5 if self.synthdef == SamplePlayer else 1
@@ -632,12 +629,6 @@ class Player(Repeatable):
 
                 self.sus = self.attr['dur']
 
-        if synthdef is SamplePlayer: pass
-
-            # self.old_pattern_dur
-
-            # self.old_dur = self.attr['dur']
-
         # Set any other attributes
 
         for name, value in kwargs.items():
@@ -685,13 +676,13 @@ class Player(Repeatable):
         if other is not None:
             try:
                 if type(other) == str and len(other) == 1: #char
-                    return Samples.bufnum(self.now('buf')) == other
+                    return self.samples.bufnum(self.now('buf')) == other
                 raise TypeError("Argument should be a one character string")
             except:
                 return False
         else:
             try:
-                return Samples.bufnum(self.now('buf'))
+                return self.samples.bufnum(self.now('buf'))
             except:
                 return None
 
@@ -961,7 +952,47 @@ class Player(Repeatable):
 
         # Calculate frequency / buffer number
 
-        if self.synthdef != SamplePlayer:
+        if self.synthdef == SamplePlayer:
+
+            degree = group_modi(kwargs.get("degree", self.event['degree']), index)
+            sample = group_modi(kwargs.get("sample", self.event["sample"]), index)
+
+            buf  = int(self.samples[str(degree)].bufnum(sample))
+            
+            message = {'buf': buf}
+
+        elif self.synthdef == LoopPlayer:
+
+            pos = group_modi(kwargs.get("degree", self.event["degree"]), index)
+            # sus = group_modi(kwargs.get("dur", self.event["dur"]), index)
+
+            buf = group_modi(kwargs.get("buf", self.event["buf"]), index)
+
+            # Work out the position from the rhythm
+
+##            if pos > 0: # not quite right? does it in number of beats somehow
+##
+##                durations = self.rhythm() if self.current_dur is None else self.current_dur
+##
+##                total_dur, num_dur = float(sum(durations)), len(durations)
+##
+##                loops = pos // total_dur
+##
+##                rmndr = pos % num_dur
+##
+##                steps = int(rmndr)
+##
+##                rmndr = rmndr - steps
+##
+##                accum = (loops * total_dur) + sum(durations[n] for n in range(steps)) + rmndr
+##
+##                pos = self.metro.beat_dur(acc)
+
+            pos *= self.metro.beat_dur(1)
+
+            message = {'pos': pos, 'buf': buf}
+
+        else:
 
             degree = group_modi(kwargs.get("degree", self.event["degree"]), index)
             octave = group_modi(kwargs.get("oct", self.event["oct"]), index)
@@ -973,15 +1004,6 @@ class Player(Repeatable):
             
             message = {'freq':  freq, 'midinote': midinote}
 
-        else:
-
-            degree = group_modi(kwargs.get("degree", self.event['degree']), index)
-            sample = group_modi(kwargs.get("sample", self.event["sample"]), index)
-
-            buf  = int(Samples[str(degree)].bufnum(sample))
-            
-            message = {'buf': buf}
-
         attributes = self.attr.copy()
 
         # Go through the attr dictionary and add kwargs
@@ -990,7 +1012,7 @@ class Player(Repeatable):
 
             try:
 
-                # Don't use fx keywords or foxdot keywords
+                # Don't use fx keywords or foxdot keywords except "degree"
 
                 if (key not in self.keywords) and (key not in self.fx_attributes or key in self.base_attributes):
 
@@ -1014,7 +1036,11 @@ class Player(Repeatable):
 
                         val = val * float(group_modi(kwargs.get('amplify', self.event['amplify']), index))
 
-                    message[key] = val
+                    # Only send non-zero values
+
+                    if val != 0 or key in ("sus", "amp"):
+
+                        message[key] = val
 
             except KeyError as e:
 
@@ -1158,7 +1184,7 @@ class Player(Repeatable):
 
     def get_synth_name(self, buf=0):
         if self.synthdef == SamplePlayer:
-            numChannels = Samples.getBuffer(buf).channels
+            numChannels = self.samples.getBuffer(buf).channels
             if numChannels == 1:
                 synthdef = "play1"
             else:
@@ -1437,7 +1463,9 @@ class PlayerKey(object):
         return PlayerKey(other, self, self.parent, self.key)
     
     def __add__(self, other):
-        """ If adding a pattern, return a pattern of values """
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__radd__(self)
         new = self.child(other)
@@ -1445,6 +1473,9 @@ class PlayerKey(object):
         return new
 
     def __radd__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__add__(self)
         new = self.child(other)
@@ -1452,6 +1483,9 @@ class PlayerKey(object):
         return new
     
     def __sub__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__rsub__(self)
         new = self.child(other)
@@ -1459,6 +1493,9 @@ class PlayerKey(object):
         return new
     
     def __rsub__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__sub__(self)
         new = self.child(other)
@@ -1466,6 +1503,9 @@ class PlayerKey(object):
         return new
     
     def __mul__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__rmul__(self)
         new = self.child(other)
@@ -1473,6 +1513,9 @@ class PlayerKey(object):
         return new
 
     def __rmul__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__mul__(self)
         new = self.child(other)
@@ -1487,6 +1530,9 @@ class PlayerKey(object):
         return new
 
     def __rdiv__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__div__(self)
         new = self.child(other)
@@ -1494,6 +1540,9 @@ class PlayerKey(object):
         return new
     
     def __mod__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__rmod__(self)
         new = self.child(other)
@@ -1501,6 +1550,9 @@ class PlayerKey(object):
         return new
     
     def __rmod__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__mod__(self)
         new = self.child(other)
@@ -1508,6 +1560,9 @@ class PlayerKey(object):
         return new
     
     def __pow__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__rpow__(self)
         new = self.child(other)
@@ -1515,6 +1570,9 @@ class PlayerKey(object):
         return new
     
     def __rpow__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__pow__(self)
         new = self.child(other)
@@ -1522,6 +1580,9 @@ class PlayerKey(object):
         return new
     
     def __xor__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__rxor__(self)
         new = self.child(other)
@@ -1529,6 +1590,9 @@ class PlayerKey(object):
         return new
     
     def __rxor__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__xor__(self)
         new = self.child(other)
@@ -1536,6 +1600,9 @@ class PlayerKey(object):
         return new
 
     def __truediv__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__rtruediv__(self)
         new = self.child(other)
@@ -1543,6 +1610,9 @@ class PlayerKey(object):
         return new
     
     def __rtruediv__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__truediv__(self)
         new = self.child(other)
@@ -1551,6 +1621,9 @@ class PlayerKey(object):
 
     # Comparisons
     def __eq__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__ne__(self)
         new = self.child(other)
@@ -1558,6 +1631,9 @@ class PlayerKey(object):
         return new
     
     def __ne__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__eq__(self)
         new = self.child(other)
@@ -1565,6 +1641,9 @@ class PlayerKey(object):
         return new
     
     def __gt__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__lt__(self)
         new = self.child(other)
@@ -1572,6 +1651,9 @@ class PlayerKey(object):
         return new
     
     def __lt__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__gt__(self)
         new = self.child(other)
@@ -1579,6 +1661,9 @@ class PlayerKey(object):
         return new
     
     def __ge__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__le__(self)
         new = self.child(other)
@@ -1586,6 +1671,9 @@ class PlayerKey(object):
         return new
     
     def __le__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
         if isinstance(other, metaPattern):
             return other.__ge__(self)
         new = self.child(other)

@@ -65,7 +65,7 @@ from ServerManager import Server
 
 class Effect:
     server=Server
-    def __init__(self, foxdot_name, synthdef, args={}):
+    def __init__(self, foxdot_name, synthdef, args={}, control=False):
 
         self.name      = foxdot_name
         self.synthdef  = synthdef
@@ -73,6 +73,13 @@ class Effect:
         self.args      = args.keys()
         self.defaults  = args
         self.effects   = []
+        self.control   = control
+
+        self.suffix    = "kr" if self.control else "ar"
+        self.channels  = 1 if self.control else 2
+
+        self.input     = "osc = In.{}(bus, {});\n".format(self.suffix, self.channels)
+        self.output    = "ReplaceOut.{}".format(self.suffix)
         
     def __repr__(self):
         return "<Fx '{}' -- args: {}>".format(self.synthdef, ",".join(self.args))
@@ -95,9 +102,10 @@ class Effect:
         s  = "SynthDef.new(\{},\n".format(self.synthdef)
         s += "{" + "|bus, {}|\n".format(", ".join(self.args))
         s += "var osc;\n"
-        s += "osc = In.ar(bus, 2);\n"
+        s += self.input
         s += self.list_effects()
-        s += "ReplaceOut.ar(bus, osc)}).add;"
+        s += self.output
+        s += "(bus, osc)}).add;"
         return s
 
     def save(self):
@@ -108,11 +116,15 @@ class Effect:
             self.server.loadSynthDef(self.filename)
         return
 
-class PreEffect(Effect):
-    """ SynthDef that modulates argumentes such as frequency
-        *before* being used in a UGen. """
-    def __init__(self, *args, **kwargs):
-        Effect.__init__(self, *args, **kwargs)
+class In(Effect):
+    def __init__(self):
+        Effect.__init__(self, 'startSound', 'startSound')
+        self.save()      
+    def __str__(self):
+        s  = "SynthDef.new(\startSound,\n"
+	s += "{ arg bus, rate=1, sus; var osc;\n"
+	s += "	ReplaceOut.kr(bus, rate)}).add;\n"
+	return s
 
 class Out(Effect):
     def __init__(self):
@@ -124,24 +136,29 @@ class Out(Effect):
 	s += "	osc = In.ar(bus, 2);\n"
 	s += "	Line.ar(dur: sus, doneAction: 14);\n"
 	s += "	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);\n"
-	s += "	Out.ar(0, osc)}).add;\n"
+	s += "	Out.ar(0, osc);\n"
+	s+= " }).add;\n"
 	return s
 
 class EffectManager(dict):
     def __init__(self):
 
         dict.__init__(self)
-
-        self.pre_kw=[]
-
         self.kw=[]
-
         self.all_kw=[]
-
         self.defaults={}
+        self.order={}
 
     def new(self, foxdot_arg_name, synthdef, args, order=2):
-        self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args)
+        self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args, order==0)
+
+        if order in self.order:
+
+            self.order[order].append(foxdot_arg_name)
+
+        else:
+
+            self.order[order] = [foxdot_arg_name]
 
         # Store the main keywords together
 
@@ -161,7 +178,7 @@ class EffectManager(dict):
     
     def kwargs(self):
         """ Returns the title keywords for each effect """
-        return tuple(self.pre_kw) + tuple(self.kw)
+        return tuple(self.kw)
 
     def all_kwargs(self):
         """ Returns *all" keywords for all effects """
@@ -183,9 +200,25 @@ FxList = EffectManager()
 
 # Frequency Effects
 
-##fx = FxList.new("vibrato", "vibrato", ["vibrato", "freq"], order=0)
-##fx.add("osc = Vibrato.ar()")
+##fx = FxList.new("vib", "vibrato", {"vib": 0, "rate": 1}, order=0)
+##fx.add("osc = Vibrato.ar(A2K.kr(rate), vib, depth: 0.05)")
 ##fx.save()
+
+fx = FxList.new("slide", "slideTo", {"slide":0, "sus":1}, order = 0)
+fx.add("osc = Line.ar(osc, osc * (slide + 1), sus)")
+fx.save()
+
+fx = FxList.new("slidefrom", "slideFrom", {"slidefrom": 0, "sus": 1}, order=0)
+fx.add("osc = Line.ar(osc * slidefrom, osc, sus)")
+fx.save()
+
+fx = FxList.new("coarse", "coarse", {"coarse": 0, "sus": 1}, order=0)
+fx.add("osc = osc * LFPulse.ar(coarse / sus)")
+fx.save()
+
+fx = FxList.new("pshift", "pitchShift", {"pshift":0}, order=0)
+fx.add("osc = osc * (1.059463**pshift)")
+fx.save()
 
 # Sound effects
 
@@ -246,6 +279,6 @@ fx = FxList.new("shape", "wavesShapeDistortion", {"shape":0}, order=2)
 fx.add("osc = (osc * (shape * 50)).fold2(1).distort / 5")
 fx.save()
 
-Out()
+In(); Out()
 
     

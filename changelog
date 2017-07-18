@@ -1,3 +1,27 @@
+### v0.3.7 fixes and updates
+
+- Nested pattern bug fixed so that they no longer cause patterns to loop
+- Improved clock scheduling after proper "latency" implementation
+- Added a new SynthDef, `loop`, to play longer samples:
+
+```python
+# First argument is the name of the file minus the extension
+
+p1 >> loop("billions")
+
+# Use the dur keyword to specify when to loop the file
+
+p1 >> loop("billions", dur=8)
+
+# The second argument is the starting point in beats such that the following 2 lines are equivalent
+
+p1 >> loop("billions", dur=16)
+
+p1 >> loop("billions", [0,8], dur=8)
+```
+- Added ability to use the lambda symbol in place of the word lambda. Insert it by using `Ctrl+L`.
+- Put `slide`, `slidefrom`, `coarse`, `pshift` into their own effects
+
 ### v0.3.6 fixes and updates
 
 - Any delay or stutter behaviour in Players is now handed over to SuperCollider by timestamping the OSCBundle, which should make FoxDot a lot more efficient & removed `send_delay` and `func_delay` classes.

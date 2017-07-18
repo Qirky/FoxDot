@@ -34,7 +34,7 @@ class POperand:
 
         # Calculate total length before operations
 
-        i, length = 0, LCM(len(A), len(B))
+        i, length = 0, LCM(len(A.data), len(B.data))
 
         P1 = []
 
