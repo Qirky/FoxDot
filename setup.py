@@ -17,7 +17,7 @@ setup(name='FoxDot',
                 'FoxDot.lib.SCLang',
                 'FoxDot.lib.Settings'],
       package_data = {'FoxDot': ['snd/*/*/*.*',
-                                 'snd/_loop_/*.*'
+                                 'snd/_loop_/*.*',
                                  'osc/*.scd',
                                  'osc/sceffects/*.scd',
                                  'osc/scsyndef/*.scd'],

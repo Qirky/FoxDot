@@ -57,7 +57,6 @@ FoxDot\lib\Workspace\__init__.py
 FoxDot\lib\Workspace\img\foxdot.ico
 FoxDot\lib\Workspace\img\icon.gif
 FoxDot\lib\Workspace\img\icon.ico
-FoxDot\osc\Buffers.scd
 FoxDot\osc\sceffects\bandPassFilter.scd
 FoxDot\osc\sceffects\bitcrush.scd
 FoxDot\osc\sceffects\chop.scd
