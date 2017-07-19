@@ -6,6 +6,7 @@ FoxDot\lib\Bang.py
 FoxDot\lib\Buffers.py
 FoxDot\lib\Constants.py
 FoxDot\lib\Effects.py
+FoxDot\lib\Loop.py
 FoxDot\lib\Midi.py
 FoxDot\lib\OSC.py
 FoxDot\lib\Players.py
@@ -60,6 +61,7 @@ FoxDot\osc\Buffers.scd
 FoxDot\osc\sceffects\bandPassFilter.scd
 FoxDot\osc\sceffects\bitcrush.scd
 FoxDot\osc\sceffects\chop.scd
+FoxDot\osc\sceffects\coarse.scd
 FoxDot\osc\sceffects\combDelay.scd
 FoxDot\osc\sceffects\distortion.scd
 FoxDot\osc\sceffects\formantFilter.scd
@@ -68,8 +70,12 @@ FoxDot\osc\sceffects\lowPassFilter.scd
 FoxDot\osc\sceffects\makeSound.scd
 FoxDot\osc\sceffects\pitchShift.scd
 FoxDot\osc\sceffects\reverb.scd
+FoxDot\osc\sceffects\slideFrom.scd
+FoxDot\osc\sceffects\slideTo.scd
 FoxDot\osc\sceffects\spinPan.scd
+FoxDot\osc\sceffects\startSound.scd
 FoxDot\osc\sceffects\trimLength.scd
+FoxDot\osc\sceffects\vibrato.scd
 FoxDot\osc\sceffects\wavesShapeDistortion.scd
 FoxDot\osc\scsyndef\ambi.scd
 FoxDot\osc\scsyndef\arpy.scd
@@ -93,6 +99,7 @@ FoxDot\osc\scsyndef\growl.scd
 FoxDot\osc\scsyndef\karp.scd
 FoxDot\osc\scsyndef\klank.scd
 FoxDot\osc\scsyndef\lazer.scd
+FoxDot\osc\scsyndef\loop.scd
 FoxDot\osc\scsyndef\marimba.scd
 FoxDot\osc\scsyndef\noise.scd
 FoxDot\osc\scsyndef\nylon.scd

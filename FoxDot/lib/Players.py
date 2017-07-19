@@ -43,7 +43,11 @@
 
     ```python
     p1 >> pads([0,7,6,4])
-    ```    
+    ```
+
+    Play multiple pitches together by putting them in round brackets:
+
+    p1 >> pads([0,2,4,(0,2,4)])
 
     When you start FoxDot up, your clock is ticking at 120bpm and your player
     objects are all playing in the major scale. With 8 pitches in the major scale,
@@ -65,7 +69,7 @@
     # See a list of scales
     print Scale.names()
 
-    # Change the tempo
+    # Change the tempo (this takes effect at the next bar)
     Clock.bpm = 144
     ```
 
@@ -95,13 +99,14 @@
     d1 >> play("x-o-")
     ```
 
-    To play multiple patters simultaneously, just create a new `play` object.
+    To play multiple patterns simultaneously, you can create a new `play` object. This
+    is useful if you want to have different attributes for each player.
 
     ```python
-    bd >> play("x( x)  ")
-    hh >> play("---[--]")
-    sn >> play("  o ")
-    ```
+    bd >> play("x( x)  ", dur=1)
+    hh >> play("---[--]", dur=[1/2,1/2,1/4], rate=4)
+    sn >> play("  o ", rate=(.9,1), pan=(-1,1))
+    ```    
 
     Grouping characters in round brackets laces the pattern so that on each
     play through of the sequence of samples, the next character in the group's
@@ -265,7 +270,7 @@ class Player(Repeatable):
     # Player Object Manipulation
     
     def __rshift__(self, other):
-        """ The PlayerObject Method >> """
+        """ Handles the allocation of SynthDef objects using >> syntax """
         
         if isinstance(other, SynthDefProxy):
             self.update(other.name, other.degree, **other.kwargs)
@@ -326,6 +331,7 @@ class Player(Repeatable):
     # --- Startup methods
 
     def reset(self):
+        """ Sets all Player attributes to 0 unless their default is specified by an effect """
 
         # Add all keywords to the dict, then set non-zero defaults
 
@@ -364,9 +370,6 @@ class Player(Repeatable):
         # Amplitude
         self.amp     = 1
         self.amplify = 1
-
-        # Rate - varies between SynthDef
-        # self.rate    = 1
 
         # Duration of notes
         self.dur     = 0.5 if self.synthdef == SamplePlayer else 1

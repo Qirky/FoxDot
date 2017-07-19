@@ -3,7 +3,7 @@
 from distutils.core import setup   
 
 setup(name='FoxDot',
-      version='0.3.7',
+      version='0.3.8',
       description='Live Coding with SuperCollider',
       author='Ryan Kirkbride',
       author_email='sc10rpk@leeds.ac.uk',
@@ -17,6 +17,7 @@ setup(name='FoxDot',
                 'FoxDot.lib.SCLang',
                 'FoxDot.lib.Settings'],
       package_data = {'FoxDot': ['snd/*/*/*.*',
+                                 'snd/_loop_/*.*'
                                  'osc/*.scd',
                                  'osc/sceffects/*.scd',
                                  'osc/scsyndef/*.scd'],

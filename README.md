@@ -1,9 +1,9 @@
-FoxDot - Live Coding with Python v0.3.7
+FoxDot - Live Coding with Python v0.3.8
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.3.7 fixes and updates
+### v0.3.8 fixes and updates
 
 - Nested pattern bug fixed so that they no longer cause patterns to loop
 - Improved clock scheduling after proper "latency" implementation
@@ -62,11 +62,13 @@ Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
 1. Open SuperCollider and type in `FoxDot.start` and evaluate this line. SuperCollider is now listening for messages from FoxDot. 
 2. Start FoxDot by entering `python -m FoxDot` at the command line.
 3. If you have installed the SC3 Plugins, use the "Code" drop-down menu to select "Use SC3 Plugins". Restart FoxDot and you'll have access to classes found in the SC3 Plugins.
+4. Check out the [YouTube tutorials](https://www.youtube.com/channel/UCRyrNX07lFcfRSymZEWwl6w) for some in-depth tutorial videos on getting to grips with FoxDot
 
 #### Troubleshooting
 
 ##### Buffer mismatch error
 If you are getting an error similar to "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider this just means that a mono audio file is being played back where SuperCollider was expecting stereo. Nothing to worry about!
+
 
 ## Basics
 
