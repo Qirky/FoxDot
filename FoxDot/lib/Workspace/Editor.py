@@ -826,8 +826,6 @@ class workspace:
 
             not_at_end = lambda x: x < end_point
 
-            print row, col, end_point, not_at_end(col)
-
         while not_at_end(col):
 
             start = index(row, col + direction)
@@ -867,6 +865,8 @@ class workspace:
         self.update(event)
 
         execute.update_line_numbers(self.text)
+
+        return
 
     def delete_next_word(self, event):
         """ Deletes the following word """

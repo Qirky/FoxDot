@@ -57,6 +57,7 @@ FoxDot\lib\Workspace\__init__.py
 FoxDot\lib\Workspace\img\foxdot.ico
 FoxDot\lib\Workspace\img\icon.gif
 FoxDot\lib\Workspace\img\icon.ico
+FoxDot\osc\Buffers.scd
 FoxDot\osc\sceffects\bandPassFilter.scd
 FoxDot\osc\sceffects\bitcrush.scd
 FoxDot\osc\sceffects\chop.scd
@@ -196,6 +197,8 @@ FoxDot\snd\_\plus\2_rim.wav
 FoxDot\snd\_\question\0.wav
 FoxDot\snd\_\tilde\0_ride.wav
 FoxDot\snd\_\tilde\1_ride.wav
+FoxDot\snd\_loop_\billions.wav
+FoxDot\snd\_loop_\sparkfest.wav
 FoxDot\snd\a\lower\gb_hihat (1).wav
 FoxDot\snd\a\lower\gb_hihat (2).wav
 FoxDot\snd\a\lower\gb_hihat (3).wav
