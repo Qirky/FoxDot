@@ -12,17 +12,19 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 ```python
 # First argument is the name of the file minus the extension
 
-p1 >> loop("billions")
+p1 >> loop("foxdot")
 
 # Use the dur keyword to specify when to loop the file
 
-p1 >> loop("billions", dur=8)
+p1 >> loop("foxdot", dur=4)
 
-# The second argument is the starting point in beats such that the following 2 lines are equivalent
+# The second argument is the starting point in beats such that the following 2 lines are essentially equivalent. 
 
-p1 >> loop("billions", dur=16)
+p1 >> loop("foxdot", dur=16)
 
-p1 >> loop("billions", [0,8], dur=8)
+p1 >> loop("foxdot", P[:16], dur=1)
+
+# Beware that FoxDot stops a synth if it detects silence so use the second option to get around that
 ```
 - Added ability to use the lambda symbol in place of the word lambda. Insert it by using `Ctrl+L`.
 - Put `slide`, `slidefrom`, `coarse`, `pshift` into their own effects 
