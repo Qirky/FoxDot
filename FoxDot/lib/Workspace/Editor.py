@@ -49,7 +49,7 @@ class workspace:
 
         # Set up master widget  
 
-        self.root = Tk()
+        self.root = Tk(className='FoxDot')
         self.root.title("FoxDot - Live Coding with Python and SuperCollider")
         self.root.rowconfigure(0, weight=1) # Text box
         self.root.rowconfigure(1, weight=0) # Separator
