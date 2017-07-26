@@ -6,7 +6,7 @@ import os.path
 
 class Config:
     def __init__(self, path):
-        self.root = Tk()
+        self.root = Tk(className='FoxDot')
         self.root.title("conf.txt")
 
         try:
