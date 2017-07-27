@@ -1512,7 +1512,7 @@ class PlayerKey(object):
             if time == self.last_updated:
                 try:
                     self.value.append(value)
-                else AttributeError:
+                except AttributeError:
                     self.value = PGroup(self.value, value)
             else:
                 self.value = value

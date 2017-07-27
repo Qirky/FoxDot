@@ -6,6 +6,7 @@ FoxDot/data/*
 FoxDot/lib/Settings/conf.py
 build/*
 dist/*
+FoxDot/snd/_loop_/*
 
 # To-do list
 TODO.txt
