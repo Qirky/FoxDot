@@ -1,4 +1,4 @@
-from SCLang import instance, cls
+from .SCLang import instance, cls
 
 class EnvGen(instance):
     value = "Env"

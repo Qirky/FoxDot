@@ -1,17 +1,22 @@
-from __future__ import division #, print_function
+from __future__ import absolute_import, division, print_function
 
 import sys
 import re
-from types import CodeType, FunctionType, TypeType
 from traceback import format_exc as error_stack
+from types import CodeType, FunctionType
 
-from ..Patterns.utils import modi
+try:
 
-import foxdot_tokenize
+    from types import TypeType
+
+except ImportError:
+
+    TypeType = type
+    
+from ..Utils import modi
 
 # Player RegEx
 re_player = re.compile(r"(\s*?)(\w+)\s*?>>\s*?\w+")
-re_lambda = re.compile("u'03BB'", re.UNICODE)
 
 """
     Live Object
@@ -55,13 +60,20 @@ class CodeString:
         self.iter += 1
         return self.lines[self.iter]
     def __str__(self):
-        return (foxdot_tokenize.read(self) if "when" in self.raw else self.raw)
+        return self.raw
 
+if sys.version_info[0] > 2:
 
-def clean(string):
-    """ Removes non-ascii characters from a string """
-    string = string.replace(u"\u03BB", "lambda")
-    return string.encode("ascii", "replace")
+    def clean(string):
+        string = string.replace("\u03BB", "lambda")
+        return string
+
+else:
+
+    def clean(string):
+        """ Removes non-ascii characters from a string """
+        string = string.replace(u"\u03BB", "lambda")
+        return string.encode("ascii", "replace")
         
 class FoxDotCode:
     namespace={}
@@ -91,7 +103,7 @@ class FoxDotCode:
 
                     print(response)
 
-            exec self._compile(code) in self.namespace
+            exec(self._compile(code), self.namespace)
 
         except Exception as e:
 

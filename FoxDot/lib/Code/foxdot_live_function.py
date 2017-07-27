@@ -1,5 +1,7 @@
 """ Allows you continually update a function """
 
+from __future__ import absolute_import, division, print_function
+
 # TODO: dependencies
 
 _live_functions_dict = {}
@@ -50,4 +52,4 @@ if __name__ == "__main__":
 
     part1()
 
-    print part1.__class__
+    print(part1.__class__)

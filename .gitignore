@@ -1,5 +1,6 @@
 # demo and debug folders
 myTests/*
+__pycache__/
 FoxDot/lib/debug/*
 FoxDot/data/*
 FoxDot/lib/Settings/conf.py

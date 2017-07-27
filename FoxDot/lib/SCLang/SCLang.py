@@ -2,11 +2,12 @@
     SCLang.py
 """
 
+from __future__ import absolute_import, division, print_function
+
 from ..Code import WarningMsg
 from ..Settings import SC3_PLUGINS
 
 from copy import copy
-import StringIO
 import os
 
 def format_args(args=[], kwargs={}, delim=': '):
@@ -87,7 +88,7 @@ class instance:
     
     def __call__(self, *args, **kwargs):
 
-        for arg in set(self.defaults.keys() + self.shortarg.keys()):
+        for arg in set(list(self.defaults.keys()) + list(self.shortarg.keys())):
             
             if arg in self.shortarg:
 

@@ -4,29 +4,28 @@
 
 """
 
-# from __future__ import absolute_import, division, print_function
-from __future__ import print_function
+from __future__ import absolute_import, division, print_function
 
-from Code import *
-from Code import __when__
+from .Code import *
+from .Code import __when__
 
 FoxDotCode.namespace = globals()
 
-from TempoClock import *
-from Buffers import *
-from Players import *
-from Patterns import *
-from Effects import *
-from TimeVar import *
-from Constants import *
-from Midi import *
-from Settings import *
-from SCLang._SynthDefs import *
-from SCLang import SynthDefs, Env, SynthDef
-from ServerManager import Server
-from Root import Root
-from Scale import Scale
-from Workspace import get_keywords
+from .TempoClock import *
+from .Buffers import *
+from .Players import *
+from .Patterns import *
+from .Effects import *
+from .TimeVar import *
+from .Constants import *
+from .Midi import *
+from .Settings import *
+from .SCLang._SynthDefs import *
+from .SCLang import SynthDefs, Env, SynthDef
+from .ServerManager import Server
+from .Root import Root
+from .Scale import Scale
+from .Workspace import get_keywords
 
 # stdlib imports
 
@@ -58,7 +57,7 @@ def nextBar(n=0):
 
 # Assign the clock to time-keeping classes
 
-for item in (TimeVar.TimeVar, Player, Server, MidiIn):
+for item in (TimeVar, Player, Server, MidiIn):
 
     item.metro = Clock
 

@@ -10,14 +10,14 @@
 
 """
 
+from __future__ import absolute_import, division, print_function
+
 import random
 import math
 
-from Main import Pattern, asStream, GeneratorPattern
-from Generators import *
-from PGroups import *
-from Operations import *
-from utils import *
+from .Main import *
+from .PGroups import *
+from .Operations import *
 
 MAX_SIZE = 2048
 
@@ -38,7 +38,7 @@ class __pattern__(object):
         the Pattern `P[0, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
     '''
     def __getitem__(self, args):
-        if hasattr(args, '__iter__') and not isinstance(args, GeneratorPattern):
+        if hasattr(args, '__iter__') and not isinstance(args, (str, bytes, GeneratorPattern)):
             data = []
             for item in args:
                 if type(item) is slice:

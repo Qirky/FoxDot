@@ -1,6 +1,7 @@
-from __future__ import division
+from __future__ import absolute_import, division, print_function
 
-from Patterns.Main import Pattern
+from .Patterns import Pattern
+
 from random import choice
 
 def choose():
@@ -68,7 +69,7 @@ class ScalePattern(Pattern):
 
         else:
 
-            print "Warning: {} is not a valid scale".format(new)       
+            print("Warning: {} is not a valid scale".format(new))
 
         return self
         

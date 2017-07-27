@@ -1,11 +1,12 @@
 #!/usr/bin/python
 
 """ This module manages the allocation of buffer numbers and samples """
+from __future__ import absolute_import, division, print_function
 
 from os.path import abspath, join, dirname
-from Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
-from Settings import FOXDOT_LOOP
-from ServerManager import Server
+from .Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
+from .Settings import FOXDOT_LOOP
+from .ServerManager import Server
 import wave
 import os
 
@@ -251,7 +252,7 @@ def FindBuffer(name):
         print("File '{}' not found".format(name))
         return 0
 
-from SCLang import SampleSynthDef
+from .SCLang import SampleSynthDef
 
 class LoopSynthDef(SampleSynthDef):
     def __init__(self):

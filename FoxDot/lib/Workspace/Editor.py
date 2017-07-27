@@ -1,24 +1,34 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
 
+from __future__ import absolute_import, division, print_function
+
 """ Tkinter interface made for Live Coding with Python syntax highlighting """  
 
 # Tkinter Interface
-from Tkinter import *
-import ttk
-import tkFont
-import tkFileDialog
-import tkMessageBox
+
+try:
+    from Tkinter import *
+    import ttk
+    import tkFont
+    import tkFileDialog
+    import tkMessageBox
+except ImportError:
+    from tkinter import *
+    from tkinter import ttk
+    from tkinter import font as tkFont
+    from tkinter import filedialog as tkFileDialog
+    from tkinter import messagebox as tkMessageBox
 
 # Custom app modules
-from Format import *
-from AppFunctions import *
-from Console import console
-from Prompt import TextPrompt
-from BracketHandler import BracketHandler
-from TextBox import ThreadedText
-from LineNumbers import LineNumbers
-from MenuBar import MenuBar
+from .Format import *
+from .AppFunctions import *
+from .Console import console
+from .Prompt import TextPrompt
+from .BracketHandler import BracketHandler
+from .TextBox import ThreadedText
+from .LineNumbers import LineNumbers
+from .MenuBar import MenuBar
 
 import webbrowser
 import os
@@ -232,8 +242,8 @@ class workspace:
 
         hello = "Welcome to FoxDot! Press Ctrl+{} for help.".format(self.help_key)
 
-        print hello
-        print "-" * len(hello)
+        print(hello)
+        print("-" * len(hello))
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
@@ -425,19 +435,19 @@ class workspace:
         else:
             ctrl = "Ctrl"
             
-        print "FoxDot Help:"
-        print "--------------------------------------------"
-        print "{}+Return  : Execute code".format(ctrl)
-        print "{}+.       : Stop all sound".format(ctrl)
-        print "{}+=       : Increase font size".format(ctrl)
-        print "{}+-       : Decrease font size".format(ctrl)
-        print "{}+S       : Save your work".format(ctrl)
-        print "{}+O       : Open a file".format(ctrl)
-        print "{}+M       : Toggle the menu".format(ctrl)
-        print "{}+{}       : Toggle console window".format(ctrl, self.toggle_key)
-        print "--------------------------------------------"
-        print "Please visit foxdot.org for more information"
-        print "--------------------------------------------"
+        print("FoxDot Help:")
+        print("--------------------------------------------")
+        print("{}+Return  : Execute code".format(ctrl))
+        print("{}+.       : Stop all sound".format(ctrl))
+        print("{}+=       : Increase font size".format(ctrl))
+        print("{}+-       : Decrease font size".format(ctrl))
+        print("{}+S       : Save your work".format(ctrl))
+        print("{}+O       : Open a file".format(ctrl))
+        print("{}+M       : Toggle the menu".format(ctrl))
+        print("{}+{}       : Toggle console window".format(ctrl, self.toggle_key))
+        print("--------------------------------------------")
+        print("Please visit foxdot.org for more information")
+        print("--------------------------------------------")
         return "break"
 
     # Save the current text: Ctrl+s
@@ -454,7 +464,7 @@ class workspace:
                 f.write(text)
                 f.close()
                 self.saved = True
-                print "Saved '{}'".format(self.filename)
+                print("Saved '{}'".format(self.filename))
         return bool(self.filename)
 
     # Open save
@@ -468,7 +478,7 @@ class workspace:
                 f.write(text)
                 f.close()
                 self.saved = True
-                print "Save successful!"
+                print("Save successful!")
         return bool(self.filename)
 
     # Open a file: Ctrl+o
@@ -707,14 +717,17 @@ class workspace:
         sel_b = index(index(self.text.index(SEL_LAST))[0],'end')
             
         start, end = (index(a) for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
+
         for row in range(start[0], end[0]+1):
             # Unindent
             line = self.text.get(index(row,0), index(row,'end'))
             for n, char in enumerate(line[:tabsize]):
                 if char != " ":
                     break
-            self.text.delete(index(row,0),index(row,n+1))
-            #self.text.insert(index(row,0), self.tabspace())
+
+            if n > 0:
+                
+                self.text.delete(index(row,0),index(row,n+1))
 
         self.text.tag_add(SEL, sel_a, sel_b)    
         return "break"
@@ -752,7 +765,7 @@ class workspace:
 
             # Update player line numbers
 
-            execute.update_line_numbers(self.text, start="%d.0" % (i-1), remove=int(i!=1))
+            execute.update_line_numbers(self.text, start="%d.0" % (line-1), remove=int(line!=1))
 
             self.text.delete(index(line-1, END), insert)
 
@@ -962,7 +975,7 @@ class workspace:
 
         except Exception as e:
 
-            print e
+            print(e)
 
     def highlight(self, start, end, colour="Red"):
         """ Highlights an area of text """
@@ -1102,8 +1115,9 @@ class workspace:
 
         except Exception as e:
 
-            print e
-                    
+            print(e)
+
+        return                    
 
     def get_last_word(self):
 
@@ -1221,7 +1235,7 @@ class workspace:
 
         except Exception as e:
 
-            print e
+            print(e)
 
             return
 

@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 class const:
     """ A number value that cannot be changed """
     def __init__(self, value):

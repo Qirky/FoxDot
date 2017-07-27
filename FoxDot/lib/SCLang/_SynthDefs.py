@@ -1,8 +1,10 @@
-from __future__ import division
+from __future__ import absolute_import, division, print_function
+
 from ..Settings import *
-from SCLang import *
-from SynthDef import SynthDef, SampleSynthDef
-import Env
+from .SCLang import *
+from .SynthDef import SynthDef, SampleSynthDef
+
+from . import Env
 
 # Sample Player
 

@@ -1,4 +1,6 @@
-from Main import Pattern, PGroup, PGroupPrime, PGroupStar
+from __future__ import absolute_import, division, print_function
+
+from .Main import Pattern, PGroup, PGroupPrime, PGroupStar
 
 class PGroupPlus(PGroupPrime):
     """ Stutters the values over the length of and event's 'sus' """

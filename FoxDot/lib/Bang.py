@@ -1,4 +1,6 @@
-from Code import execute
+from __future__ import absolute_import, division, print_function
+
+from .Code import execute
 
 class Bang:
 

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function
 
 import re
 from os.path import abspath, join, dirname
+
 from ..Code import classes, functions, instances
 from ..Settings import *
 
@@ -109,12 +111,12 @@ def userdefined(line):
 
 # Use our regex to read patterns.py and add all the functions to key_types
     
-from ..Patterns import Main, Sequences, Generators
+from ..Patterns import Main, Sequences
 from ..SCLang import SCLang
 
 foxdot_kw = ["Clock","Group","Scale","Server","Root","Samples","var","Pvar","linvar","inf","lambda", u"λ", decorator]
 
-foxdot_funcs = classes(Main) + functions(Sequences) + classes(Generators) + ["P"]
+foxdot_funcs = classes(Main) + functions(Sequences) + ["P"]
 
 # Python keywords used in RegEx Group 2
 

@@ -1,5 +1,7 @@
-from Patterns.utils import modi
-import TimeVar
+from __future__ import absolute_import, division, print_function
+
+from .Utils   import modi
+from .TimeVar import TimeVar
 
 CHROMATIC_NOTES = ["C"," ","D"," ","E","F"," ","G"," ","A"," ","B"]
 
@@ -52,7 +54,7 @@ class Note:
             self.num = index
             self.char = "<Micro-Tuned>"
 
-        if isinstance(index, TimeVar.TimeVar):
+        if isinstance(index, TimeVar):
 
             self.num = index
             self.char = "<Time-Varying>"

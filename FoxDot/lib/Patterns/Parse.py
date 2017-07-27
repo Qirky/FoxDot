@@ -5,20 +5,33 @@
     Handles the parsing of Sample Player Object Strings
 """
 
+from __future__ import absolute_import, division, print_function
+
 import re
-import Main
-import Generators
-from utils import modi, LCM
-from PlayString import *
+
+from .PlayString import *
+
+from ..Utils import modi, LCM
 
 class Parser:
     re_nests  = r"\((.*?)\)"
     re_square = r"\[.*?\]"
     re_curly  = r"\{.*?\}"
 
+    def __init__(self):
+        self.nested_type=lambda *args: None
+        self.square_type=lambda *args: None
+        self.braces_type=lambda *args: None
+
     def __call__(self, string):
         output, _ = self.parse(string)
         return output
+
+    def set_data_types(self, square=None, nested=None, braces=None):
+        self.square_type = square if square is not None else self.square_type
+        self.nested_type = nested if nested is not None else self.nested_type
+        self.braces_type = braces if braces is not None else self.braces_type
+        return
 
     @staticmethod
     def expand(nested_list):
@@ -77,7 +90,7 @@ class Parser:
 
                     raise(ParseError(e))
 
-                items.append( Generators.PRand(chars) )
+                items.append( self.braces_type(chars) )
                     
             # Look for a '[]'
             elif char == "[":
@@ -105,7 +118,7 @@ class Parser:
 
                     for num in range(max([len(ch) for ch in chars])):
 
-                        new_chars.append(Main.PGroupStar([modi(ch, num) for ch in chars]))
+                        new_chars.append(self.square_type([modi(ch, num) for ch in chars]))
 
                     items.append( new_chars )
 
@@ -117,17 +130,17 @@ class Parser:
 
                         new_chars.append(char)
 
-                    items.append( Main.PGroupStar(new_chars) )
+                    items.append( self.square_type(new_chars) )
 
             # Add single character to list
 
             elif char not in ")]":
 
-                items.append( PCHAR(char) )
+                items.append( char )
 
             # Increase iterator
             i += 1
 
         return items, contains_nest
 
-Parse = Parser()
+ParsePlayString = Parser()

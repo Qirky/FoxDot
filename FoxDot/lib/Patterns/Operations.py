@@ -1,11 +1,23 @@
-from __future__ import division
-from utils import *
-import Main
-import PlayString
+from __future__ import absolute_import, division, print_function
+
+from ..Utils import *
 
 """
     Module for key operations on Python lists or FoxDot Patterns
 """
+
+PATTERN_WEIGHTS = ["Pattern", "PGroupPrime", "PGroup"]
+
+def DominantPattern(*patterns):
+    """ Returns the class (and the relative pattern) for the
+        type of Pattern to use in a mathematical operation """
+    classes =  [p.__class__.__name__ for p in patterns]
+    for i, name in enumerate(PATTERN_WEIGHTS):
+        if name in classes:
+            break
+    pat = patterns[classes.index(name)]
+    cls = pat.__class__    
+    return cls, pat    
 
 class POperand:
 
@@ -21,11 +33,11 @@ class POperand:
 
         if len(A) == 0:
 
-            return Main.Pattern(B)
+            return A.__class__(B)
 
         # Get the dominant pattern type and convert B
 
-        cls, key = Main.Dominant(A, B)
+        cls, key = DominantPattern(A, B)
 
         # Instead of coverting the dominant to its own class, make a true_copy?
 

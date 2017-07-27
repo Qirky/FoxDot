@@ -1,6 +1,16 @@
-from Tkinter import Text
-from Format import *
-import Queue
+from __future__ import absolute_import, division, print_function
+
+try:
+    from Tkinter import Text
+except ImportError:
+    from tkinter import Text
+
+from .Format import *
+
+try:
+    import Queue
+except ImportError:
+    import queue as Queue
 
 background = colour_map['background']
 
@@ -38,7 +48,7 @@ class ThreadedText(Text):
 
         except Exception as e:
 
-            print e
+            print(e)
 
         # Recursive call
         self.after(10, self.update)

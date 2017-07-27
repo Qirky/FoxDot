@@ -6,4 +6,4 @@ with open(filename) as f:
 for line in lines:
     if not line[0] == "#":
         code = compile(line.strip(), "FoxDot", "exec")
-        exec code in globals()
+        exec(code, globals())

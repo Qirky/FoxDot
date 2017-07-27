@@ -5,13 +5,22 @@
 
 """
 
-import os, socket
-import signal
-import subprocess 
+from __future__ import absolute_import, division, print_function
+
+import os
+import subprocess
+import sys
+
 from time import sleep
-from Settings import *
-from OSC import *
-from Code import WarningMsg
+
+from .Settings import *
+from .Code import WarningMsg
+
+if sys.version_info[0] > 2:
+    from .OSC3 import *
+else:
+    from .OSC import *
+    
 
 class SCLangClient(OSCClient):
     def send(*args, **kwargs):
@@ -115,11 +124,12 @@ class SCLangServerManager:
             bundle.setAddress("/foxdot_midi")
 
             msg = OSCMessage()
+            msg.setAddress("/foxdot_midi")
 
-            note    = packet["midinote"]
-            vel     = min(127, (packet["amp"] * 128) - 1)
-            sus     = packet["sus"]
-            channel = packet["channel"]
+            note    = packet.get("midinote", 60)
+            vel     = min(127, (packet.get("amp", 1) * 128) - 1)
+            sus     = packet.get("sus", 0.5)
+            channel = packet.get("channel", 0)
 
             msg.append( [synthdef, note, vel, sus, channel] )
 
@@ -342,7 +352,7 @@ class SCLangServerManager:
 
 if __name__ != "__main__":
 
-    from Settings import ADDRESS, PORT, PORT2
+    from .Settings import ADDRESS, PORT, PORT2
 
     Server = SCLangServerManager(ADDRESS, PORT, PORT2)
 

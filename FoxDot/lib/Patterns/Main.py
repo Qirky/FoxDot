@@ -1,15 +1,46 @@
-from __future__ import division
+from __future__ import absolute_import, division, print_function
+
 from random import choice, shuffle
 from copy import deepcopy
-from Operations import *
-from utils import *
-from PlayString import PlayString
 
-"""
+from .Operations import *
+from .PlayString import PlayString
+from .Parse      import ParsePlayString
 
-    metaPattern: Abstract Base Class for Pattern behaviour
+from ..Utils import *
 
-"""
+import functools
+import inspect
+
+def loop_pattern_func(f):
+    ''' Decorator for allowing any Pattern function to create
+        multiple Patterns by using Patterns as arguments '''
+    @functools.wraps(f)
+    def new_function(*args):
+        # Return any functions that use TimeVars as PvarGenerators
+        timevars = [arg for arg in args if isinstance(arg, Pattern.TimeVar)]
+        if len(timevars) > 0:
+            return Pattern.TimeVar.CreatePvarGenerator(f, *args)
+        pat = Pattern()
+        for i in range(LCM(*[len(arg) for arg in args if (hasattr(arg, '__len__') and not isinstance(arg, PGroup))])):
+            pat |= f(*[(modi(arg, i) if not isinstance(arg, PGroup) else arg) for arg in args])
+        return pat
+    new_function.argspec = inspect.getargspec(f)
+    return new_function
+
+def loop_pattern_method(f):
+    ''' Decorator for allowing any Pattern method to create
+        multiple (or rather, longer) Patterns by using Patterns as arguments '''
+    @functools.wraps(f)
+    def new_function(self, *args):
+        pat = Pattern()
+        for i in range(LCM(*[len(arg) for arg in args if (hasattr(arg, '__len__') and not isinstance(arg, PGroup))])):
+            pat |= f(self, *[(modi(arg, i) if not isinstance(arg, PGroup) else arg) for arg in args])
+        return pat
+    new_function.argspec = inspect.getargspec(f)
+    return new_function
+
+# Begin Pattern ABC
 
 class metaPattern(object):
     """ Abstract base class for Patterns """
@@ -20,8 +51,11 @@ class metaPattern(object):
 
     def __init__(self, data=[]):
 
-        if self.__class__ not in PATTERN_WEIGHTS:
-            PATTERN_WEIGHTS.insert(-1, self.__class__)
+        # Keep track of the names of any Pattern sub-classes that
+        # might be created during runtime
+
+        if self.__class__.__name__ not in PATTERN_WEIGHTS:
+            PATTERN_WEIGHTS.insert(-1, self.__class__.__name__)
         
         if type(data) is str:
             
@@ -108,15 +142,19 @@ class metaPattern(object):
         return val
     
     def __setitem__(self, key, value):
-        i = key % len(self.data)
-        if isinstance(self.data[i], metaPattern):
-            j = key // len(self.data)
-            self.data[i][j] = value
+        if isinstance(key, slice):
+            self.data[key] = Format(value) # TODO - make sure this works
         else:
-            if key >= len(self.data):
-                self.data[i] = Pattern([self.data[i], Format(value)]).stutter([key // len(self.data) , 1])
+            i = key % len(self.data)
+            if isinstance(self.data[i], metaPattern):
+                j = key // len(self.data)
+                self.data[i][j] = value
             else:
-                self.data[i] = Format(value)
+                if key >= len(self.data):
+                    self.data[i] = Pattern([self.data[i], Format(value)]).stutter([key // len(self.data) , 1])
+                else:
+                    self.data[i] = Format(value)
+        return
 
     def setitem(self, key, value):
         self.data[key] = Format(value)
@@ -142,6 +180,7 @@ class metaPattern(object):
         return Pattern([self[i] for i in range(start, stop, step) ])
             
     def __setslice__(self, i, j, item):
+        """ Only works in Python 2 """
         self.data[i:j] = Format(item)
 
     # count all values that occur?
@@ -218,8 +257,7 @@ class metaPattern(object):
     # Methods for strings as pattern
 
     def fromString(self, string):
-        import Parse
-        self.data = Parse.Parse(string)
+        self.data = ParsePlayString(string)
         self.make()
         return self
 
@@ -459,6 +497,28 @@ class metaPattern(object):
         
         return self.__class__(new)
 
+    def replace(self, sub, repl):
+        """ Replaces any occurrences of "sub" with "repl" """
+        new = []
+        for item in self.data:
+            if isinstance(item, metaPattern):
+                new.append(item.replace(sub, repl))
+            elif item == sub:
+                new.append(repl)
+            else:
+                new.append(item)
+        return self.__class__(new)
+
+    def map(self, mapping):
+        """ Similar to Pattern.replace, but takes a dictionary of values """
+        new = []
+        for item in self.data:
+            if isinstance(item, metaPattern):
+                new.append(item.map(mapping))
+            else:
+                new.append(mapping.get(item, 0))
+        return self.__class__(new)
+
     # Changing the pattern in place
     
     def append(self, item):
@@ -567,7 +627,7 @@ class metaPattern(object):
 
         if self.debugging:
 
-            print self.data, type(self.data)
+            print(self.data, type(self.data))
 
         #: Force data into an iterable form
         if isinstance(self.data, str):
@@ -698,6 +758,9 @@ class PatternContainer(metaPattern):
         return str(self)
 
 
+# PGroups
+# ------- 
+
 class PGroup(metaPattern):
     """
         Class to represent any groupings of notes as denoted by brackets.
@@ -825,9 +888,115 @@ class EmptyItem(object):
     def __repr__(self):
         return "_"
 
-# Used to force any non-pattern data into a Pattern
+"""
 
-PATTERN_WEIGHTS = [Pattern, PGroupPrime, PGroup]
+    Generator Patterns
+    ------------------
+
+"""
+
+import random
+
+class PRand(GeneratorPattern):
+    ''' Returns a random integer between start and stop. If start is a container-type it returns
+        a random item for that container. '''
+    def __init__(self, start, stop=None):
+        GeneratorPattern.__init__(self)
+        if hasattr(start, "__iter__"):
+            self.data = Pattern(start)
+            def choose(index):
+                return random.choice(self.data)
+            self.func = choose
+            self.low = self.high = None
+        else:
+            self.low  = start if stop is not None else 0
+            self.high = stop  if stop is not None else start
+            self.data = "{}, {}".format(self.low, self.high)
+    def func(self, index):
+        return random.randrange(self.low, self.high)
+    def string(self):
+        """ Used in PlayString to show a PRand in curly braces """
+        return "{" + self.data.string() + "}"
+
+class PTree(GeneratorPattern):
+    """ Takes a starting value and two functions as arguments. The first function, f, must
+        take one value and return a container-type of values and the second function, choose,
+        must take a container-type and return a single value. In essence you are creating a
+        tree based on the f(n) where n is the last value chosen by choose.
+    """
+    def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x)):
+        GeneratorPattern.__init__(self)
+        self.f  = f
+        self.choose = choose
+        self.values = [n]
+
+    def func(self, index):
+        self.values.append( self.choose(self.f( self.values[-1] )) )
+        return self.value
+
+class PwRand(GeneratorPattern):
+    pass
+
+class PxRand(GeneratorPattern):
+    pass
+
+class PWalk(GeneratorPattern):
+    def __init__(self, max=7, step=1, start=0):
+
+        GeneratorPattern.__init__(self)
+        
+        self.max   = abs(max)
+        self.min   = self.max * -1
+        
+        self.step  = asStream(step).abs()
+        self.start = start
+
+        self.data = [self.start, self.step, self.max]
+
+        self.directions = [lambda x, y: x + y, lambda x, y: x - y]
+
+        self.last_value = None
+
+    def func(self, index):
+        if self.last_value is None:
+            self.last_value = 0
+        else:
+            if self.last_value >= self.max: # force subtraction
+                f = self.directions[1]
+            elif self.last_value <= self.min: # force addition
+                f = self.directions[0]
+            else:
+                f = random.choice(self.directions)
+            self.last_value = f(self.last_value, self.step.choose())
+        return self.last_value   
+
+class PWhite(GeneratorPattern):
+    ''' Returns random floating point values between 'lo' and 'hi' '''
+    def __init__(self, lo=0, hi=1):
+        GeneratorPattern.__init__(self)
+        self.low = float(lo)
+        self.high = float(hi)
+        self.mid = (lo + hi) / 2.0
+        self.data = "{}, {}".format(self.low, self.high)
+    def func(self, index):
+        return random.triangular(self.low, self.high, self.mid)
+
+class PSquare(GeneratorPattern):
+    ''' Returns the square of the index being accessed '''
+    def func(self, index):
+        return index * index
+
+"""
+
+    Utility functions and data
+
+"""
+
+# Define what data-types to return with the parser
+
+ParsePlayString.set_data_types(square=PGroupStar, braces=PRand)
+
+# Used to force any non-pattern data into a Pattern
 
 PatternType = (Pattern, list)
 
@@ -841,12 +1010,6 @@ def Format(data):
     if isinstance(data, tuple):
         return PGroup(data)
     return data
-
-def Dominant(*patterns):
-    classes =  [p.__class__ for p in patterns]
-    for i, cls in enumerate(PATTERN_WEIGHTS):
-        if cls in classes: break
-    return cls, patterns[classes.index(cls)]
 
 def patternclass(a, b):
     return PGroup if isinstance(a, PGroup) and isinstance(b, PGroup) else Pattern
@@ -863,7 +1026,23 @@ def Convert(*args):
             PatternTypes.append(Pattern(val))
     return PatternTypes if len(PatternTypes) > 0 else PatternTypes[0]
 
-class dots:        
-    """ Class for representing long Patterns in strings """
-    def __repr__(self):
-        return '...'
+def pattern_depth(pat):
+    """ Returns the level of nested arrays """	
+    total = 1
+    for item in pat:
+        if isinstance(item, PGroup):
+            depth = pattern_depth(item)
+            if depth + 1 > total:
+                total = depth + 1
+    return total
+
+def group_modi(pgroup, index):
+    """ Returns value from pgroup that modular indexes nested groups """
+    if isinstance(pgroup, (int, float, str, bool)):
+        return pgroup
+    try:
+        sub_index = index // len(pgroup)
+        mod_index = int(sub_index / pattern_depth(pgroup))
+        return group_modi(pgroup[index % len(pgroup)], mod_index)
+    except(TypeError, AttributeError, ZeroDivisionError):
+        return pgroup

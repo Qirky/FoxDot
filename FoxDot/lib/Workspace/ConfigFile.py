@@ -1,5 +1,11 @@
+from __future__ import absolute_import, division, print_function
+
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
+
 from ..Settings import FOXDOT_ICON
-from Tkinter import *
 import tkMessageBox
 import os.path
 

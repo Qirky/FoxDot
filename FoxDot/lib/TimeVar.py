@@ -14,13 +14,12 @@
 
 """
 
-from __future__ import division
+from __future__ import absolute_import, division, print_function
 
-from sys import maxint as MAX_SIZE
-from Patterns import metaPattern, Pattern, asStream, PatternContainer, GeneratorPattern
-from Repeat import *
-import Patterns.Operations as op
-import Code
+from .Patterns import metaPattern, Pattern, asStream, PatternContainer, GeneratorPattern
+from .Repeat import *
+from .Utils  import *
+from .Patterns.Operations import *
 
 def fetch(func):
     """ Function to wrap basic lambda operators for TimeVars  """
@@ -61,8 +60,8 @@ class TimeVar(Repeatable):
         self.inf_value = None
 
         # Dynamic method for calculating values
-        self.func     = op.Nil
-        self.evaluate = fetch(op.Nil) 
+        self.func     = Nil
+        self.evaluate = fetch(Nil) 
         self.dependency = 1
         
         self.update(values, dur)
@@ -109,7 +108,7 @@ class TimeVar(Repeatable):
     def _bpm_cycle_dur(self):
         """ Returns the time, in seconds, for a var to loop to its original
             value and duration if this var is a bpm value. """
-        return sum([(self.dur[i] / self.data[i]) for i in range(op.LCM(len(self.dur), len(self.data)) )]) * 60
+        return sum([(self.dur[i] / self.data[i]) for i in range(LCM(len(self.dur), len(self.data)) )]) * 60
 
     def _bpm_to_beats(self, duration, start=0):
         """ If self.data are series of bpm, how many beats occur in
@@ -165,7 +164,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__radd__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.Add)
+        new.evaluate = fetch(Add)
         return new
     
     def __radd__(self, other):
@@ -177,7 +176,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__add__( self)
         new = self.new(other)
-        new.evaluate = fetch(op.rAdd)
+        new.evaluate = fetch(rAdd)
         return new
 
     # -
@@ -190,7 +189,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__rsub__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.rSub)
+        new.evaluate = fetch(rSub)
         return new
     def __rsub__(self, other):
         # Run an assertion to make sure all values are valid
@@ -201,7 +200,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__sub__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.Sub)
+        new.evaluate = fetch(Sub)
         return new
 
     # *
@@ -214,7 +213,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__rmul__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.Mul)
+        new.evaluate = fetch(Mul)
         return new
     
     def __rmul__(self, other):
@@ -226,7 +225,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__mul__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.Mul)
+        new.evaluate = fetch(Mul)
         return new
 
     # **
@@ -240,7 +239,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__rpow__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.rPow)
+        new.evaluate = fetch(rPow)
         return new
 
     def __rpow__(self, other):
@@ -253,7 +252,7 @@ class TimeVar(Repeatable):
                 return other.__pow__(self)
         
         new = self.new(other)
-        new.evaluate = fetch(op.Pow)
+        new.evaluate = fetch(Pow)
         return new
     ####### todo - integer division doesn't seem to work
     # //
@@ -266,7 +265,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__rfloordiv__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.rFloorDiv)
+        new.evaluate = fetch(rFloorDiv)
         return new
     
     def __rfloordiv__(self, other):
@@ -278,7 +277,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__floordiv__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.FloorDiv)
+        new.evaluate = fetch(FloorDiv)
         return new
 
     # /
@@ -291,7 +290,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__rtruediv__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.rDiv)
+        new.evaluate = fetch(rDiv)
         return new
     
     def __rtruediv__(self, other):
@@ -303,7 +302,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__truediv__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.Div)
+        new.evaluate = fetch(Div)
         return new
 
     # Incremental operators (use in place of var = var + n)
@@ -344,7 +343,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__rmod__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.rMod)
+        new.evaluate = fetch(rMod)
         return new
 
     def __rmod__(self, other):
@@ -356,7 +355,7 @@ class TimeVar(Repeatable):
             else:
                 return other.__mod__(self)
         new = self.new(other)
-        new.evaluate = fetch(op.Mod)
+        new.evaluate = fetch(Mod)
         return new
 
     #  Comparisons
@@ -378,7 +377,7 @@ class TimeVar(Repeatable):
     def __getitem__(self, other):
         new = self.new(other)
         new.dependency = self
-        new.evaluate = fetch(op.rGet)
+        new.evaluate = fetch(rGet)
         return new
 
     def __iter__(self):
@@ -409,7 +408,7 @@ class TimeVar(Repeatable):
             values, dur = other
             
         else:
-            print "Invalid arguments"
+            print("Invalid arguments")
             return self
 
         self.update(values, dur)
@@ -551,94 +550,94 @@ class Pvar(TimeVar, Pattern):
 
     def __add__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.Add)
+        new.evaluate = fetch(Add)
         return new
 
     def __radd__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rAdd)
+        new.evaluate = fetch(rAdd)
         return new
     
     def __sub__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.Sub)
+        new.evaluate = fetch(Sub)
         return new
     
     def __rsub__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rSub)
+        new.evaluate = fetch(rSub)
         return new
 
     def __mul__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.Mul)
+        new.evaluate = fetch(Mul)
         return new
     
     def __rmul__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rMul)
+        new.evaluate = fetch(rMul)
         return new
     
     def __div__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.Div)
+        new.evaluate = fetch(Div)
         return new
     
     def __rdiv__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rDiv)
+        new.evaluate = fetch(rDiv)
         return new
     
     def __truediv__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.Div)
+        new.evaluate = fetch(Div)
         return new
     
     def __rtruediv__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rDiv)
+        new.evaluate = fetch(rDiv)
         return new
     
     def __floordiv__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.FloorDiv)
+        new.evaluate = fetch(FloorDiv)
         return new
     
     def __rfloordiv__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rFloorDiv)
+        new.evaluate = fetch(rFloorDiv)
         return new
 
     def __pow__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.Pow)
+        new.evaluate = fetch(Pow)
         return new
 
     def __rpow__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rPow)
+        new.evaluate = fetch(rPow)
         return new
 
     def __mod__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.Mod)
+        new.evaluate = fetch(Mod)
         return new
 
     def __rmod__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(op.rMod)
+        new.evaluate = fetch(rMod)
         return new
 
     def __or__(self, other):
         # Used when piping patterns together
         new = self.new(PatternContainer(other))
-        new.evaluate = fetch(op.rOr)
+        new.evaluate = fetch(rOr)
         return new
 
     def __ror__(self, other):
         # Used when piping patterns together
         new = self.new(PatternContainer(other))
-        new.evaluate = fetch(op.Or)
+        new.evaluate = fetch(Or)
         return new
 
 
@@ -652,7 +651,7 @@ class PvarGenerator(Pvar):
         self.args = [(arg if isinstance(arg, TimeVar) else TimeVar(arg)) for arg in args]
         self.last_args = []
         self.last_data = []
-        self.evaluate = fetch(op.Nil) 
+        self.evaluate = fetch(Nil) 
         self.dependency = 1
         
     def now(self):
@@ -729,7 +728,7 @@ class _inf(int):
     wait = 2
     done = 3
     def __new__(cls):
-        return int.__new__(cls, MAX_SIZE)
+        return int.__new__(cls, 0)
     def __add__(self, other):
         return self
     def __radd__(self,other):
@@ -756,7 +755,7 @@ def _timevar_index(self, key):
         # Create a TimeVar of a PGroup that can then be indexed by the key
         item = TimeVar(tuple(self.data))
         item.dependency = key
-        item.evaluate = fetch(op.Get)
+        item.evaluate = fetch(Get)
         return item
     else:
         return self.getitem(key)

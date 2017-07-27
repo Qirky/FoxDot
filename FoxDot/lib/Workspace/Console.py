@@ -1,9 +1,19 @@
-from Tkinter import *
-from Format  import *
-from AppFunctions import stdout
+from __future__ import absolute_import, division, print_function
+
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
+    
+from .Format  import *
+from .AppFunctions import stdout
 import math
 import random
-import Queue
+
+try:
+    import Queue
+except ImportError:
+    import queue as Queue
 
 #!/usr/bin/python
 """ Console widget that displays the true Python input """
@@ -79,7 +89,10 @@ class console:
 
     def __str__(self):
         """ str(s) -> string """
-        return self.text.get(1.0, "end")   
+        return self.text.get(1.0, "end")
+
+    def flush(self):
+        return
 
     def write(self, string):
         """ Adds string to the bottom of the console """

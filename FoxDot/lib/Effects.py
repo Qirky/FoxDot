@@ -60,8 +60,10 @@
 
 """
 
-from Settings import EFFECTS_DIR, SC3_PLUGINS
-from ServerManager import Server
+from __future__ import absolute_import, division, print_function
+
+from .Settings import EFFECTS_DIR, SC3_PLUGINS
+from .ServerManager import Server
 
 class Effect:
     server=Server
@@ -122,9 +124,9 @@ class In(Effect):
         self.save()      
     def __str__(self):
         s  = "SynthDef.new(\startSound,\n"
-	s += "{ arg bus, rate=1, sus; var osc;\n"
-	s += "	ReplaceOut.kr(bus, rate)}).add;\n"
-	return s
+        s += "{ arg bus, rate=1, sus; var osc;\n"
+        s += "	ReplaceOut.kr(bus, rate)}).add;\n"
+        return s
 
 class Out(Effect):
     def __init__(self):
@@ -132,13 +134,13 @@ class Out(Effect):
         self.save()
     def __str__(self):
         s  = "SynthDef.new(\makeSound,\n"
-	s += "{ arg bus, sus; var osc;\n"
-	s += "	osc = In.ar(bus, 2);\n"
-	s += "	Line.ar(dur: sus, doneAction: 14);\n"
-	s += "	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);\n"
-	s += "	Out.ar(0, osc);\n"
-	s+= " }).add;\n"
-	return s
+        s += "{ arg bus, sus; var osc;\n"
+        s += "	osc = In.ar(bus, 2);\n"
+        s += "	Line.ar(dur: sus, doneAction: 14);\n"
+        s += "	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);\n"
+        s += "	Out.ar(0, osc);\n"
+        s += " }).add;\n"
+        return s
 
 class EffectManager(dict):
     def __init__(self):

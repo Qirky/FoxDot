@@ -8,6 +8,8 @@
 
 """
 
+from __future__ import absolute_import, division, print_function
+
 from lib import FoxDotCode
 from lib.Workspace import workspace
 

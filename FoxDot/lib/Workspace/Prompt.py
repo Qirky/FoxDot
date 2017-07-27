@@ -1,6 +1,13 @@
+from __future__ import absolute_import, division, print_function
+
+try:
+    from Tkinter import *
+    import tkFont
+except ImportError:
+    from tkinter import *
+    from tkinter import font as tkFont
+
 from ..Settings import FONT
-from Tkinter import *
-import tkFont
 
 class TextPrompt:
     def __init__(self, master):

@@ -10,20 +10,23 @@
 
 """
 
-from __future__ import division
+from __future__ import absolute_import, division, print_function
+
 from types import FunctionType, MethodType
-from Players import Player
-from Repeat import MethodCall
-from Patterns import asStream
-from TimeVar import TimeVar
-from Midi import MidiIn, MIDIDeviceNotFound
-from Patterns.utils import modi
+
+from .Players import Player
+from .Repeat import MethodCall
+from .Patterns import asStream
+from .TimeVar import TimeVar
+from .Midi import MidiIn, MIDIDeviceNotFound
+from .Utils import modi
+
 from time import sleep, time, clock
 from fractions import Fraction
 from traceback import format_exc as error_stack
+
 import sys
 import threading
-import Code
 import inspect
 
 class TempoClock(object):
@@ -53,6 +56,9 @@ class TempoClock(object):
 
         # Player Objects stored here
         self.playing = []
+
+        # Store history of osc messages and functions in here
+        self.history = History()
 
         # All other scheduled items go here
         self.items   = []
@@ -211,6 +217,10 @@ class TempoClock(object):
 
         block.send_osc_messages()
 
+        # Store the osc messages
+
+        self.history.add(block.beat, block.osc_messages)
+
         return
 
     def run(self):
@@ -229,8 +239,6 @@ class TempoClock(object):
                 self.current_block = self.queue.pop()
 
                 if len(self.current_block):
-
-                    # print float(self.now()), self.current_block
 
                     threading.Thread(target=self.__run_block, args=(self.current_block,)).start()
 
@@ -308,12 +316,16 @@ class TempoClock(object):
     # Every n beats, do...
 
     def every(self, n, cmd, args=()):
-        self.schedule(self.call(cmd, n, args))
+        def event(f, n, args):
+            f(*args)
+            self.schedule(event, self.now() + n, (f, n, args))
+            return
+        self.schedule(event, self.now() + n, args=(cmd, n, args))
         return
 
     def stop(self):
         self.ticking = False
-        self.reset()
+        self.clear()
         return
 
     def shift(self, n):
@@ -470,7 +482,7 @@ class QueueItem(object):
         self.add(obj, args, kwargs)
         
     def __repr__(self):
-        return "{}: {}".format(self.beat, list(self))
+        return "{}: {}".format(self.beat, self.players())
     
     def add(self, obj, args=(), kwargs={}):
         """ Adds a callable object to the QueueItem """
@@ -536,6 +548,9 @@ class QueueItem(object):
             if event == key:
                 return event # Possible need to be key.obj?
 
+    def players(self):
+        return [item for level in self.events[1:3] for item in level]
+
     def __iter__(self):
         return (item for level in self.events for item in level)
 
@@ -560,16 +575,19 @@ class QueueObj(object):
     def __call__(self):
         self.obj.__call__(*self.args, **self.kwargs)
 
-###############################################################
-""" 
-        TempoClock.Wrapper Class
-        ========================
+class History(object):
+    """
+    Stores osc messages send from the TempoClock so that if the
+    Clock is reveresed we can just send the osc messages already sent
 
-        Wraps any callable object as a self-scheduling object
-        like a When() or Player() object.
-        
-"""
+    """
+    def __init__(self):
+        self.data = []
+    def add(self, beat, osc_messages):
+        self.data.append(osc_messages)
 
+##import Code
+##
 ##class Wrapper(Code.LiveObject):
 ##    
 ##    def __init__(self, metro, obj, dur, args=()):

@@ -1,7 +1,8 @@
 #!/usr/bin/python
-""" Collection of functions used in the App package """
+""" Collection of functions used in the Workspace package """
 
-from Format import *
+from __future__ import absolute_import, division, print_function
+from .Format import *
 import sys
 
 def stdout(*args):

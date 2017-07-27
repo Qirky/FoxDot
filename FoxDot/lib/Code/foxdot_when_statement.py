@@ -45,7 +45,9 @@
 
 """
 
-from foxdot_func_cmp import *
+from __future__ import absolute_import, division, print_function
+
+from .foxdot_func_cmp import *
 from threading import Thread
 from time import sleep
 
@@ -81,7 +83,7 @@ class _whenStatement:
                 
                 # Execute the values
                 for action in self.action:
-                    exec compile(action, "FoxDot", "exec") in self.namespace
+                    exec(compile(action, "FoxDot", "exec"), self.namespace)
                     
                 self.toggle_live_functions(True)
                 self.do_switch = True
@@ -91,7 +93,7 @@ class _whenStatement:
                 
                 # Execute the values
                 for action in self.notaction:
-                    exec compile(action, "FoxDot", "exec") in self.namespace
+                    exec(compile(action, "FoxDot", "exec"), self.namespace)
 
                 self.toggle_live_functions(False)
                 self.do_switch = False

@@ -1,3 +1,7 @@
+### v0.4 fixes and updates
+
+- FoxDot is now Python 3 compatible, so make sure you treat your print statements as functions i.e. use `print("Hello, World!")`
+ 
 ### v0.3.7 fixes and updates
 
 - Nested pattern bug fixed so that they no longer cause patterns to loop

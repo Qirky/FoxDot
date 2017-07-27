@@ -1,4 +1,6 @@
 """ Module for converting streams and frequencies """
+from __future__ import absolute_import, division, print_function
+
 try:
     import rtmidi
     from rtmidi import midiconstants
@@ -8,9 +10,9 @@ try:
 except ImportError as _err:
     pass
 
-from Patterns import asStream
-import TimeVar
-import Scale
+from .Patterns import asStream
+from .Scale    import ScalePattern
+from .TimeVar  import TimeVar
 
 def miditofreq(midinote):
     """ Converts a midi number to frequency """
@@ -23,9 +25,9 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
 
     # Make sure we force timevars into real values
 
-    if isinstance(scale, Scale.ScalePattern):
+    if isinstance(scale, ScalePattern):
 
-        if isinstance(scale.data, TimeVar.TimeVar):
+        if isinstance(scale.data, TimeVar):
 
             scale = asStream(scale.data.now())
 
@@ -38,13 +40,15 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     lo = int(degree)
     hi = lo + 1
 
-    octave = octave + (lo / len(scale))
+    octave = octave + (lo // len(scale))
 
     chroma = range(int(stepsPerOctave))
 
     scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
 
-    return scale_val + (octave * len(chroma)) + float(root)
+    midival = scale_val + (octave * len(chroma)) + float(root)
+
+    return midival
 
 
 class MidiIn:
@@ -104,7 +108,7 @@ class MidiIn:
         self.device.close_port()
         return
                 
-from SCLang import SynthDefProxy
+from .SCLang import SynthDefProxy
 
 class MidiOut(SynthDefProxy):
     def __init__(self, degree=0, **kwargs):

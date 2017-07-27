@@ -1,9 +1,9 @@
 """ Repeat.py """
 
-from Code import WarningMsg
-from Patterns import asStream, modi
+from __future__ import absolute_import, division, print_function
 
-        
+from .Code import WarningMsg
+from .Patterns import asStream, modi
 
 class Repeatable(object):
     def __init__(self):

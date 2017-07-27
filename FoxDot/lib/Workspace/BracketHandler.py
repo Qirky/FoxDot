@@ -1,6 +1,12 @@
-from Tkinter import *
-from Format import *
-from AppFunctions import *
+from __future__ import absolute_import, division, print_function
+
+try:
+    from Tkinter import *
+except ImportError:
+    from tkinter import *
+    
+from .Format import *
+from .AppFunctions import *
 
 whitespace = [" ","\t","\n","\r","\f","\v"]
 
@@ -23,7 +29,7 @@ class BracketHandler:
 
         self.queue = []
 
-        for char in self.left_brackets.keys() + self.right_brackets.keys():
+        for char in list(self.left_brackets.keys()) + list(self.right_brackets.keys()):
 
             self.text.bind(char, self.handle)
 

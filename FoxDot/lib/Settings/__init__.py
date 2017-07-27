@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 import os
 import sys
 
@@ -45,7 +47,7 @@ def GET_FX_FILES():
 
 # Set Environment Variables
 
-import conf
+from . import conf
 
 FOXDOT_CONFIG_FILE  = conf.filename
     

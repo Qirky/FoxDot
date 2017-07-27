@@ -1,4 +1,9 @@
-import Tkinter as Tk
+from __future__ import absolute_import, division, print_function
+
+try:
+    import Tkinter as Tk
+except ImportError:
+    import tkinter as Tk
 
 class LineNumbers(Tk.Canvas):
     def __init__(self, master, *args, **kwargs):

@@ -1,6 +1,8 @@
+from __future__ import absolute_import, division, print_function
+
 import os
-import Env
-from SCLang import *
+from . import Env
+from .SCLang import *
 from ..ServerManager import Server
 from ..Settings import SYNTHDEF_DIR
 
@@ -120,7 +122,7 @@ class SynthDefBaseClass(object):
         var         = object.__getattribute__(self, 'var')
         synth_added = object.__getattribute__(self, 'synth_added')
         
-        attr = defaults.keys() + var
+        attr = list(defaults.keys()) + var
         
         if synth_added:
             return object.__getattribute__(self, key)
@@ -132,7 +134,7 @@ class SynthDefBaseClass(object):
 
     def __setattr__(self, key, value):
         try:
-            if key in self.var + self.defaults.keys():
+            if key in self.var + list(self.defaults.keys()):
                 self.attr.append((key, value))
         except:
             pass
@@ -163,7 +165,7 @@ class SynthDefBaseClass(object):
 
     def get_custom_behaviour2(self):
         string = ""
-        for arg in self.defaults.keys() + self.var:
+        for arg in list(self.defaults.keys()) + self.var:
             if arg in self.__dict__:
                 # Don't add redundant lines e.g. sus=sus;
                 if str(arg) != str(self.__dict__[arg]):
