@@ -155,7 +155,7 @@ class EffectManager(dict):
         self.kw=[]
         self.all_kw=[]
         self.defaults={}
-        self.order={}
+        self.order={N:[] for N in range(3)}
 
     def new(self, foxdot_arg_name, synthdef, args, order=2):
         self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args, order==0)

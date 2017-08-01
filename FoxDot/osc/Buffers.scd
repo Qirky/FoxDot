@@ -178,7 +178,7 @@ Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/c/lower/voice_1
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/c/lower/voice_2.wav", bufnum:10);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/c/lower/voice_3.wav", bufnum:11);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/c/lower/voice_4.wav", bufnum:12);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/c/lower/voice_5.wav", bufnum:13);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/c/lower/voice_6.wav", bufnum:13);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/b/lower/dot (1).wav", bufnum:5);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/b/lower/dot (2).wav", bufnum:6);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/b/lower/dot (3).wav", bufnum:7);

@@ -573,10 +573,6 @@ class Player(Repeatable):
                     acc += dur
                     n += 1
 
-        # Store duration times
-
-        self.old_dur = self.attr['dur']
-
         # Returns value for self.event_n and self.event_index
 
         return n, acc
@@ -867,7 +863,7 @@ class Player(Repeatable):
 
             item = item.now()
 
-        if isinstance(item, PlayerKey):
+        if isinstance(item, NumberKey):
             
             if item.parent in self.queue_block.objects() and item.parent is not self:
 
@@ -1287,18 +1283,16 @@ class Player(Repeatable):
     def accompany(self, other, values=[0,2,4]):
         """ Similar to "follow" but when the value has changed """
 
-        if isinstance(lead, self.__class__):
+        if isinstance(other, self.__class__):
 
-            self.accompanying = lead.degree
+            self.degree = AccompanyKey(other.degree)
 
-        else:
-
-            self.accompanying = None
+            self + self.mod_data
         
         return self
 
     def find_accompanying(self, value):
-        pass
+        return
 
     def follow(self, lead=False):
         """ Takes a Player object and then follows the notes """
@@ -1446,53 +1440,19 @@ class Player(Repeatable):
 
         return self
 
-####
+# NumberKey & Sub-classes
 
-class PlayerKey(object):
-    def __init__(self, value=None, reference=None, parent=None, attr=None):
+class NumberKey(object):
+    def __init__(self, value, reference):
+        self.value = value
+        self.other = reference
+        self.parent = self.other.parent if isinstance(self.other, NumberKey) else None
 
-        # Reference to the Player object that is using this
-        self.parent = parent
+    # Storing mathematical operations
 
-        self.value   = value
-        self.key     = attr
-        self.pattern = asStream(self.parent.attr[self.key])
-
-        if reference is None:
-
-            self.other   = 0
-            self.num_ref = 0
-
-        else:
-
-            self.other   = reference
-            self.parent  = reference.parent
-            self.num_ref = reference.num_ref + 1
-
-        self.last_updated = 0
-            
     @staticmethod
     def calculate(x, y):
         return x
-    
-    def update(self, value, time):
-        if value != self.value:
-            if time == self.last_updated:
-                try:
-                    self.value.append(value)
-                except AttributeError:
-                    self.value = PGroup(self.value, value)
-            else:
-                self.value = value
-        self.last_updated = time
-        return
-
-    def update_pattern(self):
-        self.pattern[:] = asStream(self.parent.attr[self.key])               
-        return
-
-    def child(self, other):
-        return PlayerKey(other, self, self.parent, self.key)
     
     def __add__(self, other):
         """ If operating with a pattern, return a pattern of values """
@@ -1757,9 +1717,12 @@ class PlayerKey(object):
                 yield item
         except TypeError:
             yield self.now()
+
+    def child(self, other):
+        return NumberKey(self.value, other)
     
     def now(self):
-        if isinstance(self.other, self.__class__):
+        if isinstance(self.other, NumberKey):
             other = self.other.now()
         else:
             other = self.other
@@ -1768,6 +1731,89 @@ class PlayerKey(object):
         except:
             print(self.value, other)
             raise
+
+class PlayerKey(NumberKey):
+    def __init__(self, value=None, reference=None, parent=None, attr=None):
+
+        NumberKey.__init__(self, value, reference)
+        
+        # Reference to the Player object that is using this
+        self.parent  = parent
+        self.key     = attr
+        self.pattern = asStream(self.parent.attr[self.key]) if self.parent is not None else asStream([])
+
+        if reference is None:
+
+            self.other   = 0
+            self.num_ref = 0
+
+        else:
+
+            self.other   = reference
+            self.parent  = reference.parent
+            self.num_ref = reference.num_ref + 1
+
+        self.last_updated = 0
+    
+    def update(self, value, time):
+        if value != self.value:
+            if time == self.last_updated:
+                try:
+                    self.value.append(value)
+                except AttributeError:
+                    self.value = PGroup(self.value, value)
+            else:
+                self.value = value
+        self.last_updated = time
+        return
+
+    def update_pattern(self):
+        self.pattern[:] = asStream(self.parent.attr[self.key])               
+        return
+
+    def child(self, other):
+        return PlayerKey(other, self, self.parent, self.key)
+    
+class AccompanyKey(NumberKey):
+    """ Like PlayerKey except it returns """
+    def __init__(self, other, rel=[0,2,4]):
+
+        NumberKey.__init__(self, other, None)
+
+        assert(isinstance(other, PlayerKey))
+
+        self.parent = other.parent
+        
+        self.last_value = self.value.now()
+        self.acmp_value = self.last_value
+        self.up       = list(rel)
+        self.down     = list(val - 7 for val in rel) # change 7 for scale size
+
+    def find_new_value(self, val):
+        """ Finds the item in self.data that is closest to self.acmp_value """
+        data = random.choice((self.up, self.down))
+        if len(data) == 1:
+            return data[0]
+        else:
+            _min, _val = abs(val + data[0] - self.acmp_value), data[0]
+            for item in data[1:]:
+                dis = abs(val + item - self.acmp_value)
+                if dis < _min:
+                    _min = dis
+                    _val = item
+            return val + _val
+
+    def child(self, other):
+        return NumberKey(other, self)
+
+    def now(self):
+        value = self.calculate(self.value.now(), self.other)
+        if value != self.last_value:
+            self.acmp_value = self.find_new_value(value)
+            self.last_value = value
+        return self.acmp_value
+        
+        
 
 ###### GROUP OBJECT
 
