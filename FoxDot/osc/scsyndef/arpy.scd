@@ -3,7 +3,6 @@ SynthDef.new(\arpy,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 freq=(freq / 2);
 amp=(amp * 2);
 osc=LPF.ar(Impulse.ar([freq, (freq + 0.5)]), 3000);

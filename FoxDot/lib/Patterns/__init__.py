@@ -4,4 +4,6 @@ from .Main       import *
 from .Operations import *
 from .Sequences  import *
 from .PGroups    import *
-from .PlayString import PlayString
+from .Generators import *
+from .PlayString import *
+from .Parse      import *

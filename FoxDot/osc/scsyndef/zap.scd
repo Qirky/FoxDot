@@ -3,7 +3,6 @@ SynthDef.new(\zap,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp / 10);
 osc=(Saw.ar(((freq * [1, 1.01]) + LFNoise2.ar(50).range(-2, 2))) + VarSaw.ar((freq + LFNoise2.ar(50).range(-2, 2)), 1));
 env=EnvGen.ar(Env.perc(level: amp,curve: -10,attackTime: 0.025,releaseTime: sus), doneAction: 0);

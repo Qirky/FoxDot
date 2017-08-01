@@ -3,7 +3,6 @@ SynthDef.new(\dub,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 freq=(freq / 4);
 amp=(amp * 2);
 osc=(LFTri.ar(freq, mul: amp) + SinOscFB.ar(freq, mul: amp));

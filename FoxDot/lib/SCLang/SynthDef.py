@@ -241,18 +241,18 @@ class SynthDef(SynthDefBaseClass):
         SynthDefBaseClass.add_base_class_behaviour(self)
         self.base.append("freq = In.kr(bus, 1);")
         self.base.append("freq = freq + fmod;")
-        self.base.append("freq = Vibrato.kr(freq, rate: vib);")
         return
         
 class SampleSynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
         SynthDefBaseClass.__init__(self, *args, **kwargs)
-        self.buf               = instance("buf")
+        self.buf = self.new_attr_instance("buf")
+        self.pos = self.new_attr_instance("pos")
         self.defaults['buf']   = 0
+        self.defaults['pos']   = 0
         self.defaults['room']  = 0.1
         self.defaults['rate']  = 1.0
         self.base.append("rate = In.kr(bus, 1);")
-        self.base.append("rate = Vibrato.kr(rate, rate: vib, depth: 0.05);")
 
         
 

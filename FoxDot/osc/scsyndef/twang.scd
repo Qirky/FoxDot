@@ -3,7 +3,6 @@ SynthDef.new(\twang,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 freq=(freq / 8);
 osc=LPF.ar(Impulse.ar([freq, (freq + 2)], 0.1), 4000);
 osc=(EnvGen.ar(Env.perc(level: amp,curve: 0,attackTime: 0.01,releaseTime: sus), doneAction: 0) * CombL.ar(osc, delaytime: (rate / (freq * 8)), maxdelaytime: 0.25));

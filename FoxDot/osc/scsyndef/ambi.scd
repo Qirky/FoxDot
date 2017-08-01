@@ -3,11 +3,10 @@ SynthDef.new(\ambi,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 sus=(sus * 1.5);
 amp=(amp / 3);
 freq=[freq, (freq * 1.005)];
-osc=Klank.ar(`[[1, 2, 3, (3 + ((rate - 1) / 10))], [1, 1, 1, 1], [2, 2, 2, 2]], (Impulse.ar(0.0005) * Saw.ar(freq, add: 1)), freq);
+osc=Klank.ar(`[[1, 2, 3, (3 + (rate / 10))], [1, 1, 1, 1], [2, 2, 2, 2]], (Impulse.ar(0.0005) * Saw.ar(freq, add: 1)), freq);
 env=EnvGen.ar(Env(levels: [0, amp, 0],curve: 'lin',times: (sus * 2)), doneAction: 0);
 osc=(osc * env);
 osc = Mix(osc) * 0.5;

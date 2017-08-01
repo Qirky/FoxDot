@@ -160,12 +160,14 @@ Crackle  = cls("Crackle")
 Limiter  = cls("Limiter")
 Ringz    = cls("Ringz")
 Dust     = cls("Dust")
+ClipNoise = cls("ClipNoise")
 
-ClipNoise    = cls("ClipNoise")
-BufRateScale = cls("BufRateScale")
-BufChannels  = cls("BufChannels")
-BufFrames    = cls("BufFrames")
-BufDur       = cls("BufDur")
+BufRateScale  = cls("BufRateScale")
+BufSampleRate = cls("BufSampleRate")
+BufFrames     = cls("BufFrames")
+BufChannels   = cls("BufChannels")
+BufFrames     = cls("BufFrames")
+BufDur        = cls("BufDur")
 
 # sc3 Plugins
 

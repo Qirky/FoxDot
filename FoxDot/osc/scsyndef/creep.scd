@@ -3,7 +3,6 @@ SynthDef.new(\creep,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp / 4);
 osc=PMOsc.ar(freq, (freq * 2), 10);
 env=EnvGen.ar(Env(levels: [0.0001, amp, 0],curve: 'exp',times: [sus, 0.001]), doneAction: 0);

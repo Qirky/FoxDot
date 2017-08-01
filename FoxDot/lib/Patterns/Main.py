@@ -4,17 +4,16 @@ from random import choice, shuffle
 from copy import deepcopy
 
 from .Operations import *
-from .PlayString import PlayString
-from .Parse      import ParsePlayString
-
 from ..Utils import *
 
 import functools
 import inspect
 
+# Decorator functions for nested expansion of pattern functions and methods
+
 def loop_pattern_func(f):
     ''' Decorator for allowing any Pattern function to create
-        multiple Patterns by using Patterns as arguments '''
+        multiple Patterns by using Patterns or TimeVars as arguments '''
     @functools.wraps(f)
     def new_function(*args):
         # Return any functions that use TimeVars as PvarGenerators
@@ -40,7 +39,22 @@ def loop_pattern_method(f):
     new_function.argspec = inspect.getargspec(f)
     return new_function
 
-# Begin Pattern ABC
+def PatternMethod(f):
+    ''' Decorator that makes a function into a metaPattern method'''
+    setattr(metaPattern, f.__name__, f)
+    return
+
+def StaticPatternMethod(f):
+    ''' Decorator that makes a function into a metaPattern static  method'''
+    setattr(metaPattern, f.__name__, staticmethod(f))
+    return
+
+def ClassPatternMethod(f):
+    ''' Decorator that makes a function into a metaPattern class method'''
+    setattr(metaPattern, f.__name__, classmethod(f))
+    return
+
+# Begin Pattern Abstratct Base Class
 
 class metaPattern(object):
     """ Abstract base class for Patterns """
@@ -92,6 +106,8 @@ class metaPattern(object):
     def __repr__(self):
         return str(self)
 
+    # Conversion methods
+
     def string(self):
         """ Returns a PlayString in string format from the Patterns values """
         string = ""
@@ -111,18 +127,20 @@ class metaPattern(object):
         """ Makes a true copy and converts the data to a given data type """
         return self.true_copy([(item.convert_data(dtype) if isinstance(item, metaPattern) else dtype(item)) for item in self.data])
 
-    def map(self, func):
-        return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])
+    def copy(self):
+        return self.__class__(self.data[:])
+
+    def true_copy(self, new_data=None):
+        new = self.__class__()
+        new.__dict__ = {key: value for key, value in self.__dict__.items()}
+        if new_data is not None:
+            new.data = new_data
+        return new
     
-    """
-
-        Pattern container methods
-        -------------------------
-
-    """
-
-    # this is replaced in FoxDot.TimeVar
+    # Pattern container methods
+ 
     def __getitem__(self, key):
+        """ Place holder replaced in FoxDot.lib.TimeVar """
         return self.getitem(key)
 
     def getitem(self, key):
@@ -183,7 +201,8 @@ class metaPattern(object):
         """ Only works in Python 2 """
         self.data[i:j] = Format(item)
 
-    # count all values that occur?
+    # Integer returning
+    
     def count(self, item):
         return self.data.count(item)
 
@@ -212,14 +231,14 @@ class metaPattern(object):
 
     def __abs__(self):
         return self.__class__([abs(item) for item in self])
+    
     def abs(self):
         return abs(self)
 
-    """
+    def __invert__(self):
+        return self.mirror()
 
-        Piping patterns together using the '|' operator
-
-    """
+    # Piping patterns together using the '|' operator
     
     def __or__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
@@ -228,23 +247,18 @@ class metaPattern(object):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return asStream(other).pipe(self)
 
-    """
-
-        Zipping patterns together using the '&' operator
-
-    """
+    # Zipping patterns together using the '&' operator
 
     def __and__(self, other):
         return self.zip(other)
     def __rand__(self, other):
         return asStream(other).zip(self)
     
-    #: Comparisons
+    #  Comparisons
     def __eq__(self, other):
         return PEq(self, other)
     def __ne__(self, other):
         return PNe(self, other)
-    
     def __gt__(self, other):
         return Pattern([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
     def __ge__(self, other):
@@ -254,39 +268,7 @@ class metaPattern(object):
     def __le__(self, other):
         return Pattern([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
 
-    # Methods for strings as pattern
-
-    def fromString(self, string):
-        self.data = ParsePlayString(string)
-        self.make()
-        return self
-
-    def flat(self):
-        """ P.flat() -> un-nested pattern """
-        new = []
-        for item in self.data:
-            try:
-                item = item.flat()
-                new += [i for i in item]
-            except:
-                new.append(item)
-        return Pattern(new)
-    
-    def coeff(self):
-        """ Returns a duration value relative to the type of pattern. Most patterns return val unchanged """
-        return 1.0
-
     # Methods that return augmented versions of original
-
-    def copy(self):
-        return self.__class__(self.data[:])
-
-    def true_copy(self, new_data=None):
-        new = self.__class__()
-        new.__dict__ = {key: value for key, value in self.__dict__.items()}
-        if new_data is not None:
-            new.data = new_data
-        return new
 
     def shuffle(self):
         new = self.__class__(self.data[:])
@@ -297,6 +279,70 @@ class metaPattern(object):
         new = self.__class__(self.data[:])
         new.data.reverse()
         return new
+
+    def sort(self):
+        """ Used in place of sorted(pattern) to force type """
+        return self.__class__(sorted(self.data))
+
+    def mirror(self):
+        """ Reverses the pattern. Differs to `Pattern.reverse()` in that
+            all nested patters are also reversed. """
+        new = []
+        for i in range(len(self.data), 0, -1):
+
+            value = self.data[i-1]
+
+            if hasattr(value, 'mirror'):
+
+                value = value.mirror()
+            
+            new.append(value)
+            
+        return self.__class__(new)
+
+    def stutter(self, n=2):
+        n = asStream(n)
+        lrg = max(len(self.data), len(n))
+        new = []
+        for i in range(lrg):
+            for j in range(modi(n,i)):
+                new.append(modi(self.data,i))
+        return self.__class__(new)
+
+    def splice(self, seq, *seqs):
+        """ Takes at least list / Pattern and creates a new Pattern by
+            adding a value from each pattern in turn to the new pattern.
+            e.g.
+            ```
+            >>> P[0,1,2,3].splice([4,5,6,7],[8,9])
+            P[0,4,8,1,5,9,2,6,8,3,7,9]
+            ```
+        """
+        sequences = (self, seq) + seqs
+        size = LCM(*[len(s) for s in sequences])
+        new = []
+        for i in range(size):
+            for seq in sequences:
+                new.append(modi(seq, i))
+        return self.__class__(new)
+
+    def invert(self):
+        new = []
+        lrg = float(max(self.data))
+        for item in self.data:
+            try:
+                new.append(item.invert())
+            except:
+                new.append((((item / lrg) * -1) + 1) * lrg)
+        return self.__class__(new)
+
+    def shufflets(self, n):
+        """ Returns a Pattern of 'n' number of PGroups made from shuffled
+            versions of the original Pattern """
+        new = self.data[:]
+        return Pattern([Pattern(new).shuffle().asGroup() for i in range(n)])
+
+    # Loop methods
 
     @loop_pattern_method
     def pivot(self, i):
@@ -330,29 +376,6 @@ class metaPattern(object):
             new += list(self)
         return self.__class__(new)
 
-    def sort(self):
-        """ Used in place of sorted(pattern) to force type """
-        return self.__class__(sorted(self.data))
-
-    def __invert__(self):
-        return self.mirror()
-
-    def mirror(self):
-        """ Reverses the pattern. Differs to `Pattern.reverse()` in that
-            all nested patters are also reversed. """
-        new = []
-        for i in range(len(self.data), 0, -1):
-
-            value = self.data[i-1]
-
-            if hasattr(value, 'mirror'):
-
-                value = value.mirror()
-            
-            new.append(value)
-            
-        return self.__class__(new)
-
     @loop_pattern_method
     def swap(self, n=2):
         new = []
@@ -361,60 +384,16 @@ class metaPattern(object):
                 new.append(item)
         return self.__class__(new)
 
-    def splice(self, seq, *seqs):
-        sequences = (self, seq) + seqs
-        size = LCM(*[len(s) for s in sequences])
-        new = []
-        for i in range(size):
-            for seq in sequences:
-                new.append(modi(seq, i))
-        return self.__class__(new)
-
-    def invert(self):
-        new = []
-        lrg = float(max(self.data))
-        for item in self.data:
-            try:
-                new.append(item.invert())
-            except:
-                new.append((((item / lrg) * -1) + 1) * lrg)
-        return self.__class__(new)
-
     @loop_pattern_method
     def rotate(self, n=1):
         n = int(n)
         new = self.data[n:] + self.data[0:n]
         return self.__class__(new)
 
-    # @loop_pattern_method
-    def stutter(self, n=2):
-        n = asStream(n)
-        lrg = max(len(self.data), len(n))
-        new = []
-        for i in range(lrg):
-            for j in range(modi(n,i)):
-                new.append(modi(self.data,i))
-        return self.__class__(new)
-
-    def shufflets(self, n):
-        """ Returns a Pattern of 'n' number of PGroups made from shuffled
-            versions of the original Pattern """
-        new = self.data[:]
-        return Pattern([Pattern(new).shuffle().asGroup() for i in range(n)])
-
-    def layer(self, method, *args, **kwargs):
-        """ Zips a pattern with a modified version of itself. Method argument
-            can be a function that takes this pattern as its first argument,
-            or the name of a Pattern method as a string. """
-        
-        if callable(method):
-            func = method
-            args = [self.data] + list(args)
-        else:
-            func = getattr(self, method)
-            assert callable(func)
-
-        return self.zip(func(*args, **kwargs))
+    @loop_pattern_method
+    def sample(self, n):
+        """ Returns an n-length pattern from a sample"""
+        return self.__class__(random.sample(list(self), n))
 
     @loop_pattern_method
     def palindrome(self, a=0, b=None):
@@ -466,36 +445,7 @@ class metaPattern(object):
             i+=1
         return self.__class__(new)
 
-    def amen(self, size=2):
-        """ Merges and laces the first and last two items such that a drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
-##        bd = self[0]
-##        h1 = self[1]
-##        sn = self[0-i]
-##        h2 = self[1-i]
-##
-##        new = [ [bd, PGroupStar(bd, sn)] ] + list(self[1:-i]) + [[sn, sn, sn, h1]] + [ [PGroupStar(h2, sn), [h2, sn]] ]
-
-        new = []
-
-        for n in range(len(self.data)):
-
-            if  n % 4 == 0:
-
-                new.append([self.data[n], PGroupStar(self.data[n], modi(self.data, n + size))])
-
-            elif n % 4 == 2:
-
-                new.append( [self.data[n]]*3+[self.data[n-1]] )
-
-            elif n % 4 == 3:
-
-                new.append( [PGroupStar(self.data[n], self.data[n-1]), [self.data[n], self.data[n-1]] ] )
-
-            else:
-
-                new.append(self.data[n])
-        
-        return self.__class__(new)
+    # Methods that take a non number / pattern argument
 
     def replace(self, sub, repl):
         """ Replaces any occurrences of "sub" with "repl" """
@@ -518,6 +468,23 @@ class metaPattern(object):
             else:
                 new.append(mapping.get(item, 0))
         return self.__class__(new)
+
+    def layer(self, method, *args, **kwargs):
+        """ Zips a pattern with a modified version of itself. Method argument
+            can be a function that takes this pattern as its first argument,
+            or the name of a Pattern method as a string. """
+        
+        if callable(method):
+            func = method
+            args = [self.data] + list(args)
+        else:
+            func = getattr(self, method)
+            assert callable(func)
+
+        return self.zip(func(*args, **kwargs))
+
+    def map(self, func):
+        return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])
 
     # Changing the pattern in place
     
@@ -563,6 +530,8 @@ class metaPattern(object):
             if not func(item):
                 return False
         return True
+
+    # Extension methods
         
     def pipe(self, pattern):
         """ Concatonates this patterns stream with another """
@@ -625,16 +594,12 @@ class metaPattern(object):
     def make(self):
         """ This method automatically laces and groups the data """
 
-        if self.debugging:
-
-            print(self.data, type(self.data))
-
         #: Force data into an iterable form
         if isinstance(self.data, str):
 
             self.data = list(self.data)
             
-        if not isinstance(self.data, (PatternType, PlayString)): # not sure about PlayString data
+        if not isinstance(self.data, PatternType): # not sure about PlayString data
     
             self.data = [self.data]
 
@@ -655,6 +620,103 @@ class Pattern(metaPattern):
     """ Base type pattern """
     debug = False
 
+class PGroup(metaPattern):
+    """
+        Class to represent any groupings of notes as denoted by brackets.
+        PGroups should only be found within a Pattern object.
+        
+    """
+    
+    bracket_style = "()"
+
+    def __init__(self, data=[], *args):
+        if not args:
+            if isinstance(data, (PGroup, tuple)):
+                data = list(data)
+        else:
+            data = [data] + list(args)
+
+        metaPattern.__init__(self, data)
+
+        # If the PGroup contains patterns, invert it to a Pattern of PGroups
+        
+        l = [len(p) for p in self.data if isinstance(p, Pattern)]
+
+        if len(l) > 0:
+
+            new_data = []
+
+            for key in range(LCM(*l)):
+
+                new_data.append(self.__class__([item.getitem(key) if isinstance(item, Pattern) else item for item in self.data]))
+
+            self.__class__ = Pattern
+
+            self.data = new_data
+
+    def force_values(self):
+        """ Recursively (in place) forces changeable values into non-changeable """
+        data = []
+        for item in self:
+            if isinstance(item, PGroup):
+                new_item = item.force_values()
+            elif isinstance(item, GeneratorPattern):
+                new_item = item.getitem()
+            else:
+                new_item = item
+            data.append(new_item)
+        self.data = data
+        return self
+
+    def scale_dur(self, n):
+        """ Scales the dur values for all the items in self.data by n """
+        for item in self.data:
+            item.scale_dur(n)
+        return
+
+    def fromString(self, string):
+        metaPattern.fromString(self, string)
+        self.scale_dur(self.coeff())
+        return self
+
+    def merge(self, value):
+        """ Merge values into one PGroup """
+        if hasattr(value, "__len__"):
+            new_data = list(value)
+        else:
+            new_data = [value]
+        return self.__class__(list(self.data) + new_data)
+
+    def calculate_step(self, dur):
+        return dur
+
+    def calculate_delay(self, delay):
+        return 0
+
+    def calculate_time(self, dur):
+        values = []
+        step  = self.calculate_step(dur)
+        for i, item in enumerate(self):
+            delay = self.calculate_delay( i * step )
+            if hasattr(item, "calculate_time"):
+                delay += item.calculate_time( step )
+            values.append( delay )
+        return PGroup(values)
+
+    def get_behaviour(self):
+        def action(event, key):
+            event['delay'] += self.calculate_time(float(event['dur']))
+            return event
+        return action
+
+    def has_behaviour(self):
+        for value in self:
+            if isinstance(value, PGroup):
+                if value.has_behaviour():
+                    return True
+        else:
+            return False
+
 class GeneratorPattern(object):
     """
         Used for when a Pattern does not generate a set length pattern,
@@ -666,7 +728,6 @@ class GeneratorPattern(object):
         self.mod_functions = []
         self.name  = self.__class__.__name__
         self.data  = []
-
         self.index   = 0
         self.history = {}
 
@@ -757,130 +818,6 @@ class PatternContainer(metaPattern):
     def __repr__(self):
         return str(self)
 
-
-# PGroups
-# ------- 
-
-class PGroup(metaPattern):
-    """
-        Class to represent any groupings of notes as denoted by brackets.
-        PGroups should only be found within a Pattern object.
-        
-    """
-    
-    bracket_style = "()"
-
-    def __init__(self, data=[], *args):
-        if not args:
-            if isinstance(data, (PGroup, tuple)):
-                data = list(data)
-        else:
-            data = [data] + list(args)
-
-        metaPattern.__init__(self, data)
-
-        # If the PGroup contains patterns, invert it to a Pattern of PGroups
-        
-        l = [len(p) for p in self.data if isinstance(p, Pattern)]
-
-        if len(l) > 0:
-
-            new_data = []
-
-            for key in range(LCM(*l)):
-
-                new_data.append(self.__class__([item.getitem(key) if isinstance(item, Pattern) else item for item in self.data]))
-
-            self.__class__ = Pattern
-
-            self.data = new_data
-
-    def force_values(self):
-        """ Recursively (in place) forces changeable values into non-changeable """
-        data = []
-        for item in self:
-            if isinstance(item, GeneratorPattern):
-                new_item = item[0]
-            elif isinstance(item, PGroup):
-                new_item = item.force_values()
-            else:
-                new_item = item
-            data.append(new_item)
-        self.data = data
-        return self
-
-    def scale_dur(self, n):
-        """ Scales the dur values for all the items in self.data by n """
-        for item in self.data:
-            item.scale_dur(n)
-        return
-
-    def fromString(self, string):
-        metaPattern.fromString(self, string)
-        self.scale_dur(self.coeff())
-        return self
-
-    def merge(self, value):
-        """ Merge values into one PGroup """
-        if hasattr(value, "__len__"):
-            new_data = list(value)
-        else:
-            new_data = [value]
-        return self.__class__(list(self.data) + new_data)
-
-    def calculate_step(self, dur):
-        return dur
-
-    def calculate_delay(self, delay):
-        return 0
-
-    def calculate_time(self, dur):
-        values = []
-        step  = self.calculate_step(dur)
-        for i, item in enumerate(self):
-            delay = self.calculate_delay( i * step )
-            if hasattr(item, "calculate_time"):
-                delay += item.calculate_time( step )
-            values.append( delay )
-        return PGroup(values)
-
-    def get_behaviour(self):
-        def action(event, key):
-            event['delay'] += self.calculate_time(float(event['dur']))
-            return event
-        return action
-
-    def has_behaviour(self):
-        for value in self:
-            if isinstance(value, PGroup):
-                if value.has_behaviour():
-                    return True
-        else:
-            return False
-
-class PGroupPrime(PGroup):
-    def change_state(self):
-        """ To be overridden by any PGroupPrime that changes state after access by a Player """
-        return
-    def convert_data(self, *args, **kwargs):
-        self.change_state()
-        return PGroup.convert_data(self, *args, **kwargs)
-    def has_behaviour(self):
-        return True
-    def calculate_step(self, dur):
-        return float(dur) / len(self)
-    def calculate_delay(self, delay):
-        return delay
-
-class PGroupStar(PGroupPrime):
-    """ Stutters the values over the length of and event's 'dur' """    
-    bracket_style="*()"
-    def string(self):
-        """ Used for SamplePlayerStrings """
-        return "[" + PGroupPrime.string(self) + "]"
-
-# Empty items
-
 class EmptyItem(object):
     """ Can be used in a pattern and and is essentially not there """
     def __init__(self):
@@ -888,113 +825,8 @@ class EmptyItem(object):
     def __repr__(self):
         return "_"
 
+"""    Utility functions and data
 """
-
-    Generator Patterns
-    ------------------
-
-"""
-
-import random
-
-class PRand(GeneratorPattern):
-    ''' Returns a random integer between start and stop. If start is a container-type it returns
-        a random item for that container. '''
-    def __init__(self, start, stop=None):
-        GeneratorPattern.__init__(self)
-        if hasattr(start, "__iter__"):
-            self.data = Pattern(start)
-            def choose(index):
-                return random.choice(self.data)
-            self.func = choose
-            self.low = self.high = None
-        else:
-            self.low  = start if stop is not None else 0
-            self.high = stop  if stop is not None else start
-            self.data = "{}, {}".format(self.low, self.high)
-    def func(self, index):
-        return random.randrange(self.low, self.high)
-    def string(self):
-        """ Used in PlayString to show a PRand in curly braces """
-        return "{" + self.data.string() + "}"
-
-class PTree(GeneratorPattern):
-    """ Takes a starting value and two functions as arguments. The first function, f, must
-        take one value and return a container-type of values and the second function, choose,
-        must take a container-type and return a single value. In essence you are creating a
-        tree based on the f(n) where n is the last value chosen by choose.
-    """
-    def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x)):
-        GeneratorPattern.__init__(self)
-        self.f  = f
-        self.choose = choose
-        self.values = [n]
-
-    def func(self, index):
-        self.values.append( self.choose(self.f( self.values[-1] )) )
-        return self.value
-
-class PwRand(GeneratorPattern):
-    pass
-
-class PxRand(GeneratorPattern):
-    pass
-
-class PWalk(GeneratorPattern):
-    def __init__(self, max=7, step=1, start=0):
-
-        GeneratorPattern.__init__(self)
-        
-        self.max   = abs(max)
-        self.min   = self.max * -1
-        
-        self.step  = asStream(step).abs()
-        self.start = start
-
-        self.data = [self.start, self.step, self.max]
-
-        self.directions = [lambda x, y: x + y, lambda x, y: x - y]
-
-        self.last_value = None
-
-    def func(self, index):
-        if self.last_value is None:
-            self.last_value = 0
-        else:
-            if self.last_value >= self.max: # force subtraction
-                f = self.directions[1]
-            elif self.last_value <= self.min: # force addition
-                f = self.directions[0]
-            else:
-                f = random.choice(self.directions)
-            self.last_value = f(self.last_value, self.step.choose())
-        return self.last_value   
-
-class PWhite(GeneratorPattern):
-    ''' Returns random floating point values between 'lo' and 'hi' '''
-    def __init__(self, lo=0, hi=1):
-        GeneratorPattern.__init__(self)
-        self.low = float(lo)
-        self.high = float(hi)
-        self.mid = (lo + hi) / 2.0
-        self.data = "{}, {}".format(self.low, self.high)
-    def func(self, index):
-        return random.triangular(self.low, self.high, self.mid)
-
-class PSquare(GeneratorPattern):
-    ''' Returns the square of the index being accessed '''
-    def func(self, index):
-        return index * index
-
-"""
-
-    Utility functions and data
-
-"""
-
-# Define what data-types to return with the parser
-
-ParsePlayString.set_data_types(square=PGroupStar, braces=PRand)
 
 # Used to force any non-pattern data into a Pattern
 

@@ -1,6 +1,6 @@
 SynthDef.new(\vibrato,
-{|bus, vib, rate|
+{|bus, vib, vibdepth|
 var osc;
-osc = In.ar(bus, 2);
-osc = Vibrato.ar(A2K.kr(rate), vib, depth: 0.05);
-ReplaceOut.ar(bus, osc)}).add;
+osc = In.kr(bus, 1);
+osc = Vibrato.ar(osc, vib, depth: vibdepth);
+ReplaceOut.kr(bus, osc)}).add;

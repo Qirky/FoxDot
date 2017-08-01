@@ -3,7 +3,6 @@ SynthDef.new(\ripple,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp / 6);
 osc=(Pulse.ar([(freq / 4), ((freq / 4) + 1)], 0.2, 0.25) + Pulse.ar([(freq + 2), freq], 0.5, 0.5));
 osc=(osc * SinOsc.ar((rate / sus), 0, 0.5, 1));

@@ -3,7 +3,6 @@ SynthDef.new(\karp,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp * 0.75);
 osc=LFNoise0.ar((400 + (400 * rate)), amp);
 osc=(osc * XLine.ar(1, 1e-06, (sus * 0.1)));

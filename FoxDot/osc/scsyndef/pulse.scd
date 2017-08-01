@@ -3,7 +3,6 @@ SynthDef.new(\pulse,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp / 8);
 osc=Pulse.ar(freq);
 osc=(osc * amp);

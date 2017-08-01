@@ -3,7 +3,6 @@ SynthDef.new(\varsaw,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 osc=VarSaw.ar([freq, (freq * 1.005)], mul: (amp / 4), width: rate);
 env=EnvGen.ar(Env(levels: [0, amp, 0],curve: 'lin',times: [(sus / 2), (sus / 2)]), doneAction: 0);
 osc=(osc * env);

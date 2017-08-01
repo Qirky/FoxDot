@@ -3,12 +3,10 @@ SynthDef.new(\soft,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
-sus=(sus * 1.5);
-amp=(amp / 30);
-rate=(rate + 1);
-osc=Klank.ar(`[[rate, (rate * 2), (rate * 3), (rate * 4)], [1, 1, 1, 1], [2, 2, 2, 2]], Crackle.ar(0.005).dup, freq);
-env=EnvGen.ar(Env(levels: [0, amp, 0],curve: 'lin',times: (sus * 2)), doneAction: 0);
+freq=(freq / 2);
+amp=(amp / (40 * (1 + rate)));
+osc=Klank.ar(`[[7, 5, 3, 1], [8, 4, 2, 1], [2, 4, 8, 16]], LFNoise0.ar((rate / sus)), freq);
+env=EnvGen.ar(Env(levels: [0, amp, 0],curve: 'lin',times: sus), doneAction: 0);
 osc=(osc * env);
 osc = Mix(osc) * 0.5;
 osc = Pan2.ar(osc, pan);

@@ -9,11 +9,11 @@ from . import Env
 # Sample Player
 
 with SampleSynthDef("play1") as play:
-    play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate)
+    play.osc  = PlayBuf.ar(1, play.buf, BufRateScale.ir(play.buf) * play.rate, startPos=BufSampleRate.kr(play.buf) * play.pos)
     play.osc  = play.osc * play.amp
 
 with SampleSynthDef("play2") as play:
-    play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate)
+    play.osc  = PlayBuf.ar(2, play.buf, BufRateScale.ir(play.buf) * play.rate, startPos=BufSampleRate.kr(play.buf) * play.pos)
     play.osc  = play.osc * play.amp
 
 # Synth Players
@@ -52,10 +52,11 @@ with SynthDef("growl") as growl:
     growl.env = Env.env()
 
 with SynthDef("bass") as bass:
-    bass.amp  = bass.amp
+    bass.defaults.update(rate=8.5)
+    bass.amp  = bass.amp / 2
     bass.freq = bass.freq / 4
-    bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=0.85, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
-    bass.env  = Env.perc(curve="'lin'")
+    bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar([bass.freq, bass.freq + 0.1], width=bass.rate / 10, mul=bass.amp) + SinOscFB.ar(bass.freq + 0.2, mul=bass.amp / 2)
+    bass.env  = Env.perc(atk=0.02, curve=4, )
 
 with SynthDef("dirt") as dirt:
     dirt.freq = dirt.freq / 4
@@ -135,7 +136,7 @@ with SynthDef("ambi") as ambi:
     ambi.sus = ambi.sus * 1.5
     ambi.amp = ambi.amp / 3
     ambi.freq = [ambi.freq, ambi.freq * 1.005]
-    ambi.osc = Klank.ar([[1,2,3,3 + ((ambi.rate-1)/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(ambi.freq, add=1), ambi.freq)
+    ambi.osc = Klank.ar([[1,2,3,3 + (ambi.rate/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(ambi.freq, add=1), ambi.freq)
     ambi.env = Env.env(ambi.sus*2)
 
 with SynthDef("glass") as glass:
@@ -146,17 +147,16 @@ with SynthDef("glass") as glass:
     glass.env = Env.env(glass.sus*2)
 
 with SynthDef("soft") as soft:
-    soft.sus = soft.sus * 1.5
-    soft.amp = soft.amp / 30
-    soft.rate = soft.rate + 1
-    soft.osc = Klank.ar([[soft.rate, soft.rate * 2, soft.rate * 3, soft.rate * 4],[1,1,1,1],[2,2,2,2]], Crackle.ar(0.005).dup, soft.freq)
-    soft.env = Env.env(soft.sus*2)
+    soft.freq= soft.freq/2
+    soft.amp = soft.amp / (40 * (1 + soft.rate))
+    soft.osc = Klank.ar([[7, 5, 3, 1],[8,4,2,1],[2,4,8,16]], LFNoise0.ar(soft.rate/soft.sus), soft.freq)
+    soft.env = Env.env(soft.sus) 
 
     
 with SynthDef("quin") as synth:
     synth.amp = synth.amp 
     synth.osc = Klank.ar([[1,2,4,2],[100,50,0,10],[1,5,0,1]], Impulse.ar(synth.freq).dup, [synth.freq * 1.01, synth.freq]) / 5000
-    synth.osc = synth.osc * LFSaw.ar(synth.freq * synth.rate)
+    synth.osc = synth.osc * LFSaw.ar(synth.freq * (1 + synth.rate))
     synth.env = Env.perc(atk=0.01, sus=synth.sus, curve=1)
 quin = synth
 
@@ -183,7 +183,6 @@ with SynthDef("blip") as synth:
     synth.osc  = (LFCub.ar(freq * 1.002, iphase=1.5) + LFTri.ar(freq, iphase=Line.ar(2,0,0,2)) * 0.3) * Blip.ar(freq / 2, synth.rate)
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 2) * 0.3
 blip = synth
-
 
 with SynthDef("ripple") as ripple:
     ripple.amp = ripple.amp / 6
@@ -299,9 +298,9 @@ swell.add()
 if SC3_PLUGINS:
 
     piano = SynthDef("piano")
-    piano.osc = MdaPiano.ar(piano.freq, vel=piano.amp * 65, decay=piano.sus / 4)
+    piano.amp = piano.amp / 2
+    piano.osc = MdaPiano.ar(piano.freq, vel=40 + (piano.amp * 60), decay=piano.sus / 4)
     piano.env = Env.ramp()
-    piano.add()
 
 # Get rid of the variable synth
 

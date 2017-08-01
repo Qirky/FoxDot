@@ -3,7 +3,6 @@ SynthDef.new(\blip,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp + 1e-05);
 freq=[freq, (freq + LFNoise2.ar(50).range(-2, 2))];
 freq=(freq * 2);

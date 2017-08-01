@@ -1,6 +1,28 @@
 from __future__ import absolute_import, division, print_function
 
-from .Main import Pattern, PGroup, PGroupPrime, PGroupStar
+from .Main import PGroup, PatternMethod
+from ..Utils import modi
+
+class PGroupPrime(PGroup):
+    def change_state(self):
+        """ To be overridden by any PGroupPrime that changes state after access by a Player """
+        return
+    def convert_data(self, *args, **kwargs):
+        self.change_state()
+        return PGroup.convert_data(self, *args, **kwargs)
+    def has_behaviour(self):
+        return True
+    def calculate_step(self, dur):
+        return float(dur) / len(self)
+    def calculate_delay(self, delay):
+        return delay
+
+class PGroupStar(PGroupPrime):
+    """ Stutters the values over the length of and event's 'dur' """    
+    bracket_style="*()"
+    def string(self):
+        """ Used for SamplePlayerStrings """
+        return "[" + PGroupPrime.string(self) + "]"
 
 class PGroupPlus(PGroupPrime):
     """ Stutters the values over the length of and event's 'sus' """
@@ -62,6 +84,30 @@ class PGroupOr(PGroupPrime):
     """ Unused """
     bracket_style="|()"
 
-# Here we can define methods for Pattern that return Patterns of PGroups
+# Define any pattern methods that use PGroupPrimes
     
+@PatternMethod
+def amen(self, size=2):
+    """ Merges and laces the first and last two items such that a
+        drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
+    new = []
 
+    for n in range(len(self.data)):
+
+        if  n % 4 == 0:
+
+            new.append([self.data[n], PGroupStar(self.data[n], modi(self.data, n + size))])
+
+        elif n % 4 == 2:
+
+            new.append( [self.data[n]]*3+[self.data[n-1]] )
+
+        elif n % 4 == 3:
+
+            new.append( [PGroupStar(self.data[n], self.data[n-1]), [self.data[n], self.data[n-1]] ] )
+
+        else:
+
+            new.append(self.data[n])
+    
+    return self.__class__(new)

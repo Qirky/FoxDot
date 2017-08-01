@@ -3,7 +3,6 @@ SynthDef.new(\soprano,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 sus=(sus * 1.75);
 amp=(amp / 2);
 osc=(SinOsc.ar((freq * 3), mul: amp) + SinOscFB.ar((freq * 3), mul: (amp / 2)));

@@ -3,7 +3,6 @@ SynthDef.new(\glass,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 sus=(sus * 1.5);
 amp=(amp * 1.5);
 freq=[freq, (freq * (1 + (0.005 * rate)))];

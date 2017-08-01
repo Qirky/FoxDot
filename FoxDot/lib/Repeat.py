@@ -3,7 +3,8 @@
 from __future__ import absolute_import, division, print_function
 
 from .Code import WarningMsg
-from .Patterns import asStream, modi
+from .Patterns import asStream
+from .Utils import modi
 
 class Repeatable(object):
     def __init__(self):
@@ -105,10 +106,20 @@ class Repeatable(object):
 
         return self
 
+    def stop_calling_all(self):
+        for method in list(self.repeat_events.keys()):
+            self.stop_calling(method)
+        return self
+            
+
     def stop_calling(self, method):
-        self.repeat_events[method].stop()
-        del self.repeat_events[method]
-        return
+        try:
+            self.repeat_events[method].stop()
+            del self.repeat_events[method]
+        except KeyError:
+            err = "Player method '{}' no longer repeating".format(method)
+            raise KeyError(err)
+        return self
 
 class MethodCall:
     """ Class to represent an object's method call that,

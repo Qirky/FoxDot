@@ -14,8 +14,11 @@ br_pairs = {"(":")",
             "{":"}",
             "}":"{"}
 
+class ParseError(Exception):
+    pass
+
 class PlayString:
-    """ Container for PCHAR objects """
+    """ Container for character objects """
     contains_nest = False
     def __init__(self, string):
         self.string   = list(string)
@@ -95,20 +98,5 @@ class PlayString:
         chars = chars[n:] + chars[:n]
 
         return string % tuple(chars)
-            
-class PCHAR:
-    def __init__(self, char):
-        self.char = char
-    def __len__(self):
-        return 1
-    def __str__(self):
-        return self.char
-    def __repr__(self):
-        return repr(self.char)
-    def __eq__(self, other):
-        return str(self.char) == str(other)
-    def __ne__(self, other):
-        return str(self.char) != str(other)
 
-class ParseError(Exception):
-    pass
+

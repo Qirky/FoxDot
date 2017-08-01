@@ -3,7 +3,6 @@ SynthDef.new(\pads,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp / 2);
 osc=SinOsc.ar([freq, (freq + 2)], mul: amp);
 env=EnvGen.ar(Env.perc(level: amp,curve: 0,attackTime: 0.01,releaseTime: sus), doneAction: 0);

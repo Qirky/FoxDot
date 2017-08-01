@@ -175,13 +175,15 @@ class Player(Repeatable):
     __vars = []
     __init = False
 
-    # These are used by FoxDot
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'buf',
                   'blur', 'amplify', 'scale', 'bpm', 'sample')
 
+    required_keys = ("amp", "sus")
+    
     internal_keywords = tuple(value for value in keywords if value != "degree")
 
     # Base attributes
+    
     base_attributes = ('sus', 'fmod', 'vib', 'pan', 'rate', 'amp', 'midinote', 'channel')
 
     fx_attributes = FxList.all_kwargs()
@@ -191,12 +193,11 @@ class Player(Repeatable):
     server  = None
     samples = None
 
-    # Tkinter Window
-    widget = None
-
     default_scale = Scale.default()
     default_root  = Root.default()
 
+    # Tkinter Window
+    widget = None
 
     def __init__( self ):
 
@@ -208,16 +209,26 @@ class Player(Repeatable):
         
         self.synthdef = None
         self.id = None
+        
         self.quantise = False
+
         self.stopping = False
         self.stop_point = 0
-        self.following = None
+        
         self.queue_block = None
+        self.bus = None
+
         self.playstring = ""
+
         self.buf_delay = []
         self.timestamp = 0
         self.condition = lambda: True
         self.sent_messages = []
+
+        self.case_modulation = {
+            "sus" : lambda val, i, *args, **kwargs: val * float(self.metro.beat_dur()) * float(self.get_key("blur", i, **kwargs)),
+            "amp" : lambda val, i, *args, **kwargs: val * float(self.get_key("amplify", i, **kwargs))
+            }
 
         # Visual feedback information
 
@@ -340,23 +351,15 @@ class Player(Repeatable):
 
         # Add all keywords to the dict, then set non-zero defaults
 
+        reset = []
+
         for key in Player.Attributes():
 
             if key != "scale":
 
-                self.attr[key] = asStream(0)
+                setattr(self, key, 0)
 
-                if key not in self.__dict__:
-
-                    self.__dict__[key] = PlayerKey(0, parent=self, attr=key)
-
-                elif not isinstance(self.__dict__[key], PlayerKey):
-
-                    self.__dict__[key] = PlayerKey(0, parent=self, attr=key) 
-
-                else:
-
-                    self.__dict__[key].update(0, self.event_index)
+            reset.append(key)
 
         # Set any non zero defaults for effects, e.g. verb=0.25
 
@@ -365,6 +368,16 @@ class Player(Repeatable):
             value = FxList.defaults[key]
 
             setattr(self, key, value)
+
+            reset.append(key)
+
+        # Any other attribute that might have been used - set to 0
+
+        for key in self.attr:
+
+            if key not in reset:
+
+                setattr(self, key, 0)
 
         # Set any non-zero values for FoxDot
 
@@ -562,11 +575,19 @@ class Player(Repeatable):
 
         # Store duration times
 
-        # self.old_dur = self.attr['dur']
+        self.old_dur = self.attr['dur']
 
         # Returns value for self.event_n and self.event_index
 
         return n, acc
+
+    def dur_updated(self):
+        dur = self.rhythm()
+        if dur != self.old_dur:
+            self.old_dur = dur
+            return True
+        return False
+
 
     def rhythm(self):
         rhythm = []
@@ -661,126 +682,78 @@ class Player(Repeatable):
 
         return self
 
-    def dur_updated(self):
-        dur = self.rhythm()
-        if dur != self.old_dur:
-            self.old_dur = dur
-            return True
-        return False
-
-    def step_duration(self):
-        return 0.5 if self.synthdef is SamplePlayer else 1
-
-    def pattern_rhythm_updated(self):
-        r = self.rhythm()
-        if self.old_pattern_dur != r:
-            self.old_pattern_dur = r
-            return True
-        return False
-
-    def char(self, other=None):
-        if other is not None:
-            try:
-                if type(other) == str and len(other) == 1: #char
-                    return self.samples.bufnum(self.now('buf')) == other
-                raise TypeError("Argument should be a one character string")
-            except:
-                return False
-        else:
-            try:
-                return self.samples.bufnum(self.now('buf'))
-            except:
-                return None
-
-    def calculate_freq(self):
-        """ Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider """
-
-        # If the scale is frequency only, just return the degree
-
-        if self.scale == Scale.freq:
-            
-            try:
-
-                return list(self.event['degree'])
-
-            except:
-
-                return [self.event['degree']]
-
-        now = {attr: self.event[attr] for attr in ('degree', 'oct')}
-
-        size = LCM( get_expanded_len(now['oct']), get_expanded_len(now['degree']) )
-
-        f = []
-
-        for i in range(size):
-
-            try:
-                
-                midinum = midi( self.scale, group_modi(now['oct'], i), group_modi(now['degree'], i) , self.now('root') )
-
-            except Exception as e:
-
-                print(e)
-
-                WarningMsg("Invalid degree / octave arguments for frequency calculation, reset to default")
-
-                print(now['degree'], modi(now['degree'], i))
-
-                raise
-
-            f.append( miditofreq(midinum) )
-            
-        return f
-
-    def f(self, *data):
-
-        """ adds value to frequency modifier """
-
-        self.fmod = tuple(data)
-
-        p = []
-        for val in self.attr['fmod']:
-
-            try:
-                pan = tuple((item / ((len(val)-1) / 2.0))-1 for item in range(len(val)))
-            except:
-                pan = 0
-            p.append(pan)
-
-        self.pan = p
-
-        return self
-
-    # Methods affecting other players - every n times, do a random thing?
-
     def stutter(self, n=2, **kwargs):
         """ Plays the current note n-1 times. You can specify keywords. """
 
+        # Get the current values (this might be called between events)
+        
         self.get_event()
+        new_event = {}
 
         n = int(n)
 
         if self.metro.solo == self and n > 0:
 
-            other_kwarg = { "timestamp": self.metro.osc_message_time(),
-                            "delay": 0,
-                            }
-
             dur = float(kwargs.get("dur", self.dur)) / n
 
             delay = 0
 
-            for stutter in range(1, n):
+            for key, val in kwargs.items():
 
-                other_kwarg["delay"] = other_kwarg["delay"] + dur
+                new_event[key] = [group_modi(val, i) for i in range(n-1)]
 
-                # Use a custom attr dict and specify the first delay to play "immediately"
+            new_event["timestamp"] = self.metro.osc_message_time()
+            new_event["delay"] = [dur * (i+1) for i in range(n-1)]
 
-                sub = {kw: group_modi(val, stutter-1) for kw, val in kwargs.items() + other_kwarg.items()}
-
-                self.send(**sub)
+            self.send(**new_event)
                 
+        return self
+
+    def lshift(self, n=1):
+        self.event_n -= (n+1)
+        return self
+
+    def rshift(self, n=1):
+        self.event_n += n
+        return self
+
+    def reverse(self):
+        """ Sets flag to reverse streams """
+        for attr in self.attr:
+            try:
+                self.attr[attr] = self.attr[attr].pivot(self.event_n)
+            except AttributeError:
+                pass
+        return self
+
+    def shuffle(self):
+        """ Shuffles the degree of a player. """
+        # If using a play string for the degree
+        if self.synthdef == SamplePlayer and self.playstring is not None:
+            # Shuffle the contents of playgroups among the whole string
+            new_play_string = PlayString(self.playstring).shuffle()
+            new_degree = Pattern(new_play_string).shuffle()
+        else:            
+            new_degree = self.attr['degree'].shuffle()
+        self._replace_degree(new_degree)
+        return self
+
+    def mirror(self):
+        """ The degree pattern is reversed """
+        self._replace_degree(self.attr['degree'].mirror())
+        return self
+
+    def rotate(self, n=1):
+        """ Rotates the values in the degree by 'n' """
+        self._replace_degree(self.attr['degree'].rotate(n))
+        return self
+
+    def map(self, key1, key2, mapping):
+        self.attr[key2] = self.attr[key1].map(mapping)
+        return self
+
+    def smap(self, kwargs):
+        self.map("degree", "sample", kwargs)
         return self
     
     # --- Misc. Standard Object methods
@@ -821,10 +794,11 @@ class Player(Repeatable):
         for _, value in self.event.items():
             yield value
 
-    def number_of_layers(self):
+    def number_of_layers(self, **kwargs):
         """ Returns the deepest nested item in the event """
         num = 1
         for attr, value in self.event.items():
+            value = kwargs.get(attr, value)
             if isinstance(value, PGroup):
                 l = pattern_depth(value)
             else:
@@ -833,13 +807,14 @@ class Player(Repeatable):
                 num = l
         return num                
 
-    def largest_attribute(self):
+    def largest_attribute(self, **kwargs):
         """ Returns the length of the largest nested tuple in the current event dict """
 
         size = 1
         values = []
 
         for attr, value in self.event.items():
+            value = kwargs.get(attr, value)
             l = get_expanded_len(value)
             if l > size:
                 size = l
@@ -912,6 +887,9 @@ class Player(Repeatable):
 
         return item
 
+    def get_key(self, key, i, **kwargs):
+        return group_modi(kwargs.get(key, self.event[key]), i)
+
     def now(self, attr="degree", x=0):
         """ Calculates the values for each attr to send to the server at the current clock time """
 
@@ -970,37 +948,62 @@ class Player(Repeatable):
 
         return self
 
-
-    def osc_message(self, index=0, **kwargs):
-        """ Creates an OSC packet to play a SynthDef in SuperCollider,
-            use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] """
-
-        message = {}
-        fx_dict = {}
-
-        # Calculate frequency / buffer number
+    def new_message(self, index=0, **kwargs):
+        """ Returns the header of an osc message to be added to by osc_message() """
+        message = {}      
 
         if self.synthdef == SamplePlayer:
 
             degree = group_modi(kwargs.get("degree", self.event['degree']), index)
             sample = group_modi(kwargs.get("sample", self.event["sample"]), index)
+            rate   = group_modi(kwargs.get("rate", self.event["rate"]), index)
 
+            if rate < 0:
+
+                sus = group_modi(kwargs.get("sus", self.event["sus"]), index)
+
+                pos = self.metro.beat_dur(sus)
+
+            else:
+
+                pos = 0 
+ 
             buf  = int(self.samples[str(degree)].bufnum(sample))
             
-            message = {'buf': buf}
+            message = {'buf': buf, 'pos': pos}
 
         elif self.synthdef == LoopPlayer:
 
             pos = group_modi(kwargs.get("degree", self.event["degree"]), index)
             buf = group_modi(kwargs.get("buf", self.event["buf"]), index)
 
+            # Get a user-specified tempo
+
+            given_tempo = group_modi(kwargs.get("tempo", self.event.get("tempo", self.metro.bpm)), index)
+
+            if given_tempo is None:
+
+                tempo = 1
+
+            else:
+
+                tempo = self.metro.bpm / given_tempo
+
             # Set the position in "beats"
 
-            pos *= self.metro.beat_dur(1)
+            pos = pos * tempo * self.metro.beat_dur(1)
 
             # If there is a negative rate, move the pos forward
 
             rate = group_modi(kwargs.get("rate", self.event["rate"]), index)
+
+            if rate == 0:
+
+                rate = 1
+
+            # Adjust the rate to a given tempo
+
+            rate = tempo * rate
 
             if rate < 0:
 
@@ -1008,7 +1011,7 @@ class Player(Repeatable):
 
                 pos += self.metro.beat_dur(sus)
 
-            message = {'pos': pos, 'buf': buf}
+            message = {'pos': pos, 'buf': buf, 'rate': rate}
 
         else:
 
@@ -1021,6 +1024,15 @@ class Player(Repeatable):
             freq   = miditofreq(midinote)
             
             message = {'freq':  freq, 'midinote': midinote}
+            
+        return message
+
+    def osc_message(self, index=0, **kwargs):
+        """ Creates an OSC packet to play a SynthDef in SuperCollider,
+            use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] """
+
+        fx_dict = {}
+        message = self.new_message(index, **kwargs)
 
         attributes = self.attr.copy()
 
@@ -1034,29 +1046,27 @@ class Player(Repeatable):
 
                 if (key not in self.keywords) and (key not in self.fx_attributes or key in self.base_attributes):
 
-                    group_value = kwargs.get(key, self.event[key])
+                    # Ignore any keys we might already have processed
 
-                    val = float(group_modi(group_value, index))
+                    if key in message:
 
-                    ## DEBUG
+                        continue
 
-                    if isinstance(val, (Pattern, PGroup)):
+                    # Convert to float
 
-                        print("In osc_message:", key, group_value, self.event[key], val)
+                    val = float(group_modi(kwargs.get(key, self.event[key]), index))
 
                     # Special case modulation
 
-                    if key == "sus":
+                    if key in self.case_modulation:
 
-                        val = val * float(self.metro.beat_dur()) * float(group_modi(kwargs.get('blur', self.event['blur']), index))
+                        func = self.case_modulation[key]
 
-                    elif key == "amp":
-
-                        val = val * float(group_modi(kwargs.get('amplify', self.event['amplify']), index))
+                        val = func(val, index, **kwargs)
 
                     # Only send non-zero values
 
-                    if val != 0 or key in ("sus", "amp"):
+                    if val != 0 or key in self.required_keys: # ("sus", "amp"):
 
                         message[key] = val
 
@@ -1115,14 +1125,16 @@ class Player(Repeatable):
 
     def send(self, **kwargs):
         """ Sends the current event data to SuperCollder.
-            Use kwargs to overide values in the """
+            Use kwargs to overide values in the current event """
 
         timestamp = kwargs.get("timestamp", self.queue_block.time)
 
         verbose   = kwargs.get("verbose", True)
 
-        size  = self.largest_attribute() * pattern_depth(self.event.values())
-        
+        length = self.largest_attribute(**kwargs)
+        depth  = self.number_of_layers(**kwargs)
+        size   = length * depth
+
         banged = False
 
         freq = []
@@ -1135,6 +1147,8 @@ class Player(Repeatable):
             # Get the basic osc_msg
 
             osc_msg, effects = self.osc_message(i, **kwargs)
+
+            # Keep track of the frequency
 
             if "freq" in osc_msg:
 
@@ -1188,8 +1202,6 @@ class Player(Repeatable):
 
                         compiled_msg = self.server.get_bundle(synthdef, osc_msg, effects, timestamp = timestamp + delay)
 
-                        # Add the message to the appropriate queue block
-
                         # We can set a condition to only send messages
 
                         if self.condition(): 
@@ -1220,12 +1232,15 @@ class Player(Repeatable):
             synthdef = str(self.synthdef)
         return synthdef
 
+    def addfx(self, **kwargs):
+        return self
+
     #: Methods for stop/starting players
 
     def kill(self):
         """ Removes this object from the Clock and resets itself"""
         self.isplaying = False
-        self.repeat_events = {}
+        self.stop_calling_all()
         self.reset()
         return
         
@@ -1336,53 +1351,6 @@ class Player(Repeatable):
                 if attr.num_ref > num:
                     num = attr.num_ref
         return num
-
-    def lshift(self, n=1):
-        self.event_n -= (n+1)
-        return self
-
-    def rshift(self, n=1):
-        self.event_n += n
-        return self
-
-    def reverse(self):
-        """ Sets flag to reverse streams """
-        for attr in self.attr:
-            try:
-                self.attr[attr] = self.attr[attr].pivot(self.event_n)
-            except AttributeError:
-                pass
-        return self
-
-    def shuffle(self):
-        """ Shuffles the degree of a player. """
-        # If using a play string for the degree
-        if self.synthdef == SamplePlayer and self.playstring is not None:
-            # Shuffle the contents of playgroups among the whole string
-            new_play_string = PlayString(self.playstring).shuffle()
-            new_degree = Pattern(new_play_string).shuffle()
-        else:            
-            new_degree = self.attr['degree'].shuffle()
-        self._replace_degree(new_degree)
-        return self
-
-    def mirror(self):
-        """ The degree pattern is reversed """
-        self._replace_degree(self.attr['degree'].mirror())
-        return self
-
-    def rotate(self, n=1):
-        """ Rotates the values in the degree by 'n' """
-        self._replace_degree(self.attr['degree'].rotate(n))
-        return self
-
-    def map(self, key1, key2, mapping):
-        self.attr[key2] = self.attr[key1].map(mapping)
-        return self
-
-    def smap(self, kwargs):
-        self.map("degree", "sample", kwargs)
-        return self
 
     def _replace_degree(self, new_degree):
         # Update the GUI if possible
@@ -1784,8 +1752,11 @@ class PlayerKey(object):
         return self.now()[key]
     
     def __iter__(self):
-        for item in self.now():
-            yield item
+        try:
+            for item in self.now():
+                yield item
+        except TypeError:
+            yield self.now()
     
     def now(self):
         if isinstance(self.other, self.__class__):

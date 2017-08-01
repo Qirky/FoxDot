@@ -3,7 +3,6 @@ SynthDef.new(\squish,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 freq=(freq / 4);
 osc=Ringz.ar(Pulse.ar((4 * rate)), freq, sus, amp);
 osc=(osc * XLine.ar(0.5, 1e-06, sus, doneAction: 2));

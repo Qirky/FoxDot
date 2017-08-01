@@ -210,6 +210,8 @@ class BufferManager:
 
             bufnum += 1
 
+        self.loops = list(self.loop_files.keys())
+
         # Write to file
         self.write_to_file()
 
@@ -259,7 +261,7 @@ class LoopSynthDef(SampleSynthDef):
         SampleSynthDef.__init__(self, "loop")
         self.pos = self.new_attr_instance("pos")
         self.defaults['pos']   = 0
-        self.base.append("osc = PlayBuf.ar(2, buf, BufRateScale.kr(buf) * rate, startPos: BufSampleRate.kr(buf) * pos);") # * rate
+        self.base.append("osc = PlayBuf.ar(2, buf, BufRateScale.kr(buf) * rate, startPos: BufSampleRate.kr(buf) * pos);")
         self.base.append("osc = osc * EnvGen.ar(Env([0,1,1,0],[0.05, sus-0.05, 0.05]));")
         self.osc = self.osc * self.amp
         self.add()

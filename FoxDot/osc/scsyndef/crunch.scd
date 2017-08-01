@@ -3,7 +3,6 @@ SynthDef.new(\crunch,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp * 0.5);
 osc=LFNoise0.ar(((Crackle.kr(1.95) * freq) * 15), mul: amp);
 env=EnvGen.ar(Env.perc(level: (amp / 4),curve: 0,attackTime: 0.01,releaseTime: 0.1), doneAction: 0);

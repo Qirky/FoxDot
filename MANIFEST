@@ -26,6 +26,7 @@ FoxDot\lib\Code\main_lib.py
 FoxDot\lib\Custom\Fractal.py
 FoxDot\lib\Custom\__init__.py
 FoxDot\lib\Custom\webcam.py
+FoxDot\lib\Patterns\Generators.py
 FoxDot\lib\Patterns\Main.py
 FoxDot\lib\Patterns\Operations.py
 FoxDot\lib\Patterns\PGroups.py
@@ -41,6 +42,7 @@ FoxDot\lib\SCLang\__init__.py
 FoxDot\lib\Settings\__init__.py
 FoxDot\lib\Settings\conf.py
 FoxDot\lib\Settings\conf.txt
+FoxDot\lib\Utils\__init__.py
 FoxDot\lib\Workspace\AppFunctions.py
 FoxDot\lib\Workspace\BracketHandler.py
 FoxDot\lib\Workspace\ConfigFile.py
@@ -56,6 +58,7 @@ FoxDot\lib\Workspace\img\foxdot.ico
 FoxDot\lib\Workspace\img\icon.gif
 FoxDot\lib\Workspace\img\icon.ico
 FoxDot\osc\Buffers.scd
+FoxDot\osc\sceffects\FilterSwell.scd
 FoxDot\osc\sceffects\bandPassFilter.scd
 FoxDot\osc\sceffects\bitcrush.scd
 FoxDot\osc\sceffects\chop.scd
@@ -195,21 +198,17 @@ FoxDot\snd\_\plus\2_rim.wav
 FoxDot\snd\_\question\0.wav
 FoxDot\snd\_\tilde\0_ride.wav
 FoxDot\snd\_\tilde\1_ride.wav
+FoxDot\snd\_loop_\dirty120.wav
+FoxDot\snd\_loop_\drums130.wav
 FoxDot\snd\_loop_\foxdot.wav
-FoxDot\snd\a\lower\gb_hihat (1).wav
-FoxDot\snd\a\lower\gb_hihat (2).wav
-FoxDot\snd\a\lower\gb_hihat (3).wav
-FoxDot\snd\a\lower\gb_hihat (4).wav
-FoxDot\snd\a\lower\gb_hihat (5).wav
-FoxDot\snd\a\lower\gb_hihat (6).wav
-FoxDot\snd\a\lower\gb_hihat (7).wav
-FoxDot\snd\a\upper\kick (1).wav
-FoxDot\snd\a\upper\kick (10).wav
-FoxDot\snd\a\upper\kick (11).wav
-FoxDot\snd\a\upper\kick (2).wav
-FoxDot\snd\a\upper\kick (3).wav
-FoxDot\snd\a\upper\kick (5).wav
-FoxDot\snd\a\upper\kick (8).wav
+FoxDot\snd\a\lower\gb_hihat 0.wav
+FoxDot\snd\a\lower\gb_hihat 1.wav
+FoxDot\snd\a\lower\gb_hihat 3.wav
+FoxDot\snd\a\lower\gb_hihat 4.wav
+FoxDot\snd\a\upper\gb_kick 1.wav
+FoxDot\snd\a\upper\gb_kick 3.wav
+FoxDot\snd\a\upper\gb_kick 4.wav
+FoxDot\snd\a\upper\gb_kick 5.wav
 FoxDot\snd\b\lower\dot (1).wav
 FoxDot\snd\b\lower\dot (2).wav
 FoxDot\snd\b\lower\dot (3).wav
@@ -227,18 +226,16 @@ FoxDot\snd\c\upper\hit074.wav
 FoxDot\snd\c\upper\hit085.wav
 FoxDot\snd\d\lower\0.wav
 FoxDot\snd\d\upper\0.wav
-FoxDot\snd\e\lower\0_cb.wav
-FoxDot\snd\e\lower\199.wav
-FoxDot\snd\e\lower\1_cb.wav
-FoxDot\snd\e\lower\200.wav
-FoxDot\snd\e\lower\Acen Synth 7.wav
+FoxDot\snd\e\lower\beep (1).wav
+FoxDot\snd\e\lower\beep (2).wav
+FoxDot\snd\e\lower\beep (3).wav
+FoxDot\snd\e\lower\beep (4).wav
 FoxDot\snd\e\upper\E1.wav
 FoxDot\snd\e\upper\E2.wav
 FoxDot\snd\e\upper\E3.wav
 FoxDot\snd\f\lower\Stab 7.wav
 FoxDot\snd\f\lower\brand new.wav
 FoxDot\snd\f\lower\flared funk1.wav
-FoxDot\snd\f\lower\flared funk2.wav
 FoxDot\snd\f\lower\horn swipe.wav
 FoxDot\snd\f\upper\27.wav
 FoxDot\snd\f\upper\30.wav
@@ -248,10 +245,10 @@ FoxDot\snd\g\lower\om0.wav
 FoxDot\snd\g\lower\om1.wav
 FoxDot\snd\g\lower\om2.wav
 FoxDot\snd\g\upper\0_Stab.wav
-FoxDot\snd\g\upper\G1.wav
-FoxDot\snd\g\upper\G2.wav
-FoxDot\snd\g\upper\G3.wav
-FoxDot\snd\h\lower\0.wav
+FoxDot\snd\g\upper\GHOST.wav
+FoxDot\snd\h\lower\snap_0.wav
+FoxDot\snd\h\lower\snap_1.wav
+FoxDot\snd\h\lower\snap_3.wav
 FoxDot\snd\h\upper\0.wav
 FoxDot\snd\i\lower\0_jungle_snare.wav
 FoxDot\snd\i\lower\1_jungle_snare.wav
@@ -259,6 +256,7 @@ FoxDot\snd\i\lower\2_jungle_snare.wav
 FoxDot\snd\i\lower\3_jungle_snare.wav
 FoxDot\snd\i\upper\0_rock_snare.wav
 FoxDot\snd\i\upper\1_rock_snare.wav
+FoxDot\snd\i\upper\2_rock_snare.wav
 FoxDot\snd\j\lower\44.wav
 FoxDot\snd\j\lower\45.wav
 FoxDot\snd\j\lower\46.wav
@@ -279,17 +277,25 @@ FoxDot\snd\k\upper\K4.wav
 FoxDot\snd\k\upper\K5.wav
 FoxDot\snd\k\upper\K6.wav
 FoxDot\snd\k\upper\k7.wav
-FoxDot\snd\l\lower\knock_0.wav
-FoxDot\snd\l\lower\knock_2.wav
-FoxDot\snd\l\lower\knock_3.wav
-FoxDot\snd\l\lower\plastic_0.wav
-FoxDot\snd\l\lower\plastic_1.wav
-FoxDot\snd\l\upper\0_bleep.wav
+FoxDot\snd\l\lower\perc_0.wav
+FoxDot\snd\l\lower\perc_1.wav
+FoxDot\snd\l\lower\perc_2.wav
+FoxDot\snd\l\lower\perc_3.wav
+FoxDot\snd\l\lower\perc_4.wav
+FoxDot\snd\l\lower\perc_5.wav
+FoxDot\snd\l\lower\perc_6.wav
+FoxDot\snd\l\lower\perc_7.wav
+FoxDot\snd\l\lower\perc_8.wav
+FoxDot\snd\l\upper\glitch_0.wav
+FoxDot\snd\l\upper\glitch_1.wav
+FoxDot\snd\l\upper\glitch_2.wav
+FoxDot\snd\l\upper\glitch_3.wav
+FoxDot\snd\l\upper\glitch_4.wav
+FoxDot\snd\l\upper\glitch_40.wav
 FoxDot\snd\m\lower\0_Tom.wav
 FoxDot\snd\m\lower\1_Tom-Electro.wav
 FoxDot\snd\m\lower\2_Tom-Distort.wav
 FoxDot\snd\m\lower\3_Tom-909.wav
-FoxDot\snd\m\lower\4_Tom-lazer.wav
 FoxDot\snd\m\upper\11_bass_low.wav
 FoxDot\snd\m\upper\12_bass_low.wav
 FoxDot\snd\m\upper\13_bass_low.wav
@@ -298,7 +304,6 @@ FoxDot\snd\n\lower\gb_noise (2).wav
 FoxDot\snd\n\lower\gb_noise (3).wav
 FoxDot\snd\n\lower\gb_noise (4).wav
 FoxDot\snd\n\lower\gb_noise (5).wav
-FoxDot\snd\n\lower\perc (5).wav
 FoxDot\snd\n\upper\gb_noise_0.wav
 FoxDot\snd\n\upper\gb_noise_1.wav
 FoxDot\snd\n\upper\gb_noise_2.wav
@@ -322,19 +327,21 @@ FoxDot\snd\o\upper\O (7).wav
 FoxDot\snd\o\upper\O (8).wav
 FoxDot\snd\o\upper\O (9).wav
 FoxDot\snd\p\lower\07-tabla_re.wav
-FoxDot\snd\p\lower\08-tabla_tas1.wav
-FoxDot\snd\p\lower\09-tabla_tas2.wav
-FoxDot\snd\p\lower\10-tabla_tas3.wav
 FoxDot\snd\p\lower\11-tabla_te1.wav
 FoxDot\snd\p\lower\12-tabla_te2.wav
 FoxDot\snd\p\lower\13-tabla_te_m.wav
 FoxDot\snd\p\lower\14-tabla_te_ne.wav
+FoxDot\snd\p\upper\08-tabla_tas1.wav
+FoxDot\snd\p\upper\09-tabla_tas2.wav
+FoxDot\snd\p\upper\10-tabla_tas3.wav
 FoxDot\snd\p\upper\15-tabla_tun1.wav
 FoxDot\snd\p\upper\16-tabla_tun2.wav
 FoxDot\snd\p\upper\17-tabla_tun3.wav
 FoxDot\snd\q\lower\113.wav
 FoxDot\snd\q\lower\Apex & Motivation Synth 1.wav
-FoxDot\snd\q\upper\GHOST.wav
+FoxDot\snd\q\upper\G1.wav
+FoxDot\snd\q\upper\G2.wav
+FoxDot\snd\q\upper\G3.wav
 FoxDot\snd\r\lower\0_metal.wav
 FoxDot\snd\r\lower\1_metal.wav
 FoxDot\snd\r\lower\2_metal.wav
@@ -351,7 +358,8 @@ FoxDot\snd\s\upper\1_tamborine.wav
 FoxDot\snd\s\upper\2_tamborine.wav
 FoxDot\snd\t\lower\cb0.wav
 FoxDot\snd\t\lower\cb1.wav
-FoxDot\snd\t\upper\0.wav
+FoxDot\snd\t\upper\cb0.wav
+FoxDot\snd\t\upper\cb1.wav
 FoxDot\snd\u\lower\pan0.wav
 FoxDot\snd\u\lower\pan1.wav
 FoxDot\snd\u\lower\pan2.wav

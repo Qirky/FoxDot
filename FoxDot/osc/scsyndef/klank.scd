@@ -3,7 +3,6 @@ SynthDef.new(\klank,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 sus=(sus * 1.5);
 osc=Klank.ar(`[[1, 2, 3, 4], [1, 1, 1, 1], [2, 2, 2, 2]], ClipNoise.ar(0.0005).dup, freq);
 osc=Decimator.ar(osc, bits: (rate - 1));

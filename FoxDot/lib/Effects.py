@@ -73,6 +73,7 @@ class Effect:
         self.synthdef  = synthdef
         self.filename  = EFFECTS_DIR + "/{}.scd".format(self.synthdef)
         self.args      = args.keys()
+        self.vars      = ["osc"]
         self.defaults  = args
         self.effects   = []
         self.control   = control
@@ -99,11 +100,16 @@ class Effect:
         for p in self.effects:
             s += p + ";\n"
         return s
+
+    def add_var(self, name):
+        if name not in self.vars:
+            self.vars.append(name)
+        return
         
     def __str__(self):
         s  = "SynthDef.new(\{},\n".format(self.synthdef)
         s += "{" + "|bus, {}|\n".format(", ".join(self.args))
-        s += "var osc;\n"
+        s += "var {};\n".format(",".join(self.vars))
         s += self.input
         s += self.list_effects()
         s += self.output
@@ -136,7 +142,7 @@ class Out(Effect):
         s  = "SynthDef.new(\makeSound,\n"
         s += "{ arg bus, sus; var osc;\n"
         s += "	osc = In.ar(bus, 2);\n"
-        s += "	Line.ar(dur: sus, doneAction: 14);\n"
+        s += "  osc = EnvGen.ar(Env([1,1,0],[sus, 0.1])) * osc;\n"
         s += "	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);\n"
         s += "	Out.ar(0, osc);\n"
         s += " }).add;\n"
@@ -202,9 +208,9 @@ FxList = EffectManager()
 
 # Frequency Effects
 
-##fx = FxList.new("vib", "vibrato", {"vib": 0, "rate": 1}, order=0)
-##fx.add("osc = Vibrato.ar(A2K.kr(rate), vib, depth: 0.05)")
-##fx.save()
+fx = FxList.new("vib", "vibrato", {"vib": 0, "vibdepth": 0.02}, order=0)
+fx.add("osc = Vibrato.ar(osc, vib, depth: vibdepth)")
+fx.save()
 
 fx = FxList.new("slide", "slideTo", {"slide":0, "sus":1}, order = 0)
 fx.add("osc = Line.ar(osc, osc * (slide + 1), sus)")
@@ -232,6 +238,13 @@ fx.save()
 fx = FxList.new('lpf','lowPassFilter', {'lpf': 0, 'lpr': 1}, order=2)
 fx.add('osc = RLPF.ar(osc, lpf, lpr)')
 fx.save()
+
+fx = FxList.new('swell','filterSwell', {'swell': 0, 'sus': 1, 'hpr': 1}, order=2)
+fx.add_var("env")
+fx.add("env = EnvGen.kr(Env([0,1,0], times:[(sus*0.125), (sus*0.25)], curve:4))")
+fx.add('osc = RHPF.ar(osc, env * swell, hpr)')
+fx.save()
+
 
 fx = FxList.new("bpf", "bandPassFilter", {"bpf": 0, "bpr": 1, "bpnoise": 0, "sus": 1}, order=2)
 fx.add("bpnoise = bpnoise / sus")

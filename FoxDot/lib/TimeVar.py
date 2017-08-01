@@ -16,7 +16,7 @@
 
 from __future__ import absolute_import, division, print_function
 
-from .Patterns import metaPattern, Pattern, asStream, PatternContainer, GeneratorPattern
+from .Patterns import * # metaPattern, Pattern, asStream, PatternContainer, GeneratorPattern, PatternMethod
 from .Repeat import *
 from .Utils  import *
 from .Patterns.Operations import *
@@ -97,6 +97,8 @@ class TimeVar(Repeatable):
         return int(self.now())
     def __float__(self):
         return float(self.now())
+    def __abs__(self):
+        return abs(self.now())
 
     # For printing the details
     def info(self):
@@ -748,20 +750,6 @@ class _inf(int):
 
 inf = _inf()
 
-# TimeVar indexing of patterns
-
-def _timevar_index(self, key):
-    if isinstance(key, TimeVar):
-        # Create a TimeVar of a PGroup that can then be indexed by the key
-        item = TimeVar(tuple(self.data))
-        item.dependency = key
-        item.evaluate = fetch(Get)
-        return item
-    else:
-        return self.getitem(key)
-
-Pattern.__getitem__ = _timevar_index
-
 # Store and updates TimeVars
 
 class _var_dict(object):
@@ -801,5 +789,15 @@ class _var_dict(object):
 var = _var_dict()
 
 # Give Main.Pattern a reference to TimeVar class
-
 Pattern.TimeVar = TimeVar
+
+@PatternMethod
+def __getitem__(self, key):
+    if isinstance(key, TimeVar):
+        # Create a TimeVar of a PGroup that can then be indexed by the key
+        item = TimeVar(tuple(self.data))
+        item.dependency = key
+        item.evaluate = fetch(Get)
+        return item
+    else:
+        return self.getitem(key)

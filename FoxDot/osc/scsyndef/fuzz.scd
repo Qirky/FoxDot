@@ -3,7 +3,6 @@ SynthDef.new(\fuzz,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 freq=(freq / 2);
 amp=(amp / 6);
 osc=LFSaw.ar(LFSaw.kr(freq, 0, freq, (freq * 2)));
