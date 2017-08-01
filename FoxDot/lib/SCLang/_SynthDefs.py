@@ -301,6 +301,7 @@ if SC3_PLUGINS:
     piano.amp = piano.amp / 2
     piano.osc = MdaPiano.ar(piano.freq, vel=40 + (piano.amp * 60), decay=piano.sus / 4)
     piano.env = Env.ramp()
+    piano.add()
 
 # Get rid of the variable synth
 
