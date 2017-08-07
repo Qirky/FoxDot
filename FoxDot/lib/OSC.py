@@ -1153,7 +1153,7 @@ class OSCClient(object):
 		try:
 			self._ensureConnected(address)
 			self.client_address = address
-		except socket.error, e:
+		except socket.error as e:
 			self.client_address = None
 			raise OSCClientError("SocketError: %s" % str(e))
 		
@@ -1185,7 +1185,7 @@ class OSCClient(object):
 			if self.client_address:
 				self.socket.connect(self.client_address)
 			
-		except socket.error, e:
+		except socket.error as e:
 			if e[0] in (7, 65):	# 7 = 'no address associated with nodename',  65 = 'no route to host'
 				raise e
 			else:
@@ -1215,7 +1215,7 @@ class OSCClient(object):
 		
 		try:
 			self.socket.sendall(msg.getBinary())
-		except socket.error, e:
+		except socket.error as e:
 			if e[0] in (7, 65):	# 7 = 'no address associated with nodename',  65 = 'no route to host'
 				raise e
 			else:
@@ -1675,7 +1675,7 @@ class OSCMultiClient(OSCClient):
 					sent = self.socket.sendto(binary, address)
 					binary = binary[sent:]
 				
-			except socket.error, e:
+			except socket.error as e:
 				if e[0] in (7, 65):	# 7 = 'no address associated with nodename',  65 = 'no route to host'
 					raise e
 				else:
@@ -2262,7 +2262,7 @@ class OSCServer(UDPServer, OSCAddressSpace):
 		
 		try:
 			self.client._delTarget(addr)
-		except NotSubscribedError, e:
+		except NotSubscribedError as e:
 			txt = "%s: %s" % (e.__class__.__name__, str(e))
 			self.printErr(txt)
 
@@ -2492,7 +2492,7 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 			if self._transmit(len_big_endian) and self._transmit(binary):
 				return True
 			return False			
-		except socket.error, e:
+		except socket.error as e:
 			if e[0] == errno.EPIPE: # broken pipe
 				return False
 			raise e
@@ -2573,7 +2573,7 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 				if not txOk:
 					break
 		
-		except socket.error, e:
+		except socket.error as e:
 			if e[0] == errno.ECONNRESET:
 				# if connection has been reset by client, we do not care much
 				# about it, we just assume our duty fullfilled
@@ -2721,7 +2721,7 @@ class OSCStreamingClient(OSCAddressSpace):
 					return None
 				else:
 					continue
-			except socket.error, e:
+			except socket.error as e:
 				if e[0] == errno.ECONNRESET:
 					print("CLIENT: Connection reset by peer.")
 					return None
@@ -2814,7 +2814,7 @@ class OSCStreamingClient(OSCAddressSpace):
 					return False
 				else:
 					continue
-			except socket.error, e:
+			except socket.error as e:
 				if e[0] == errno.ECONNRESET:
 					print("CLIENT: Connection reset by peer.")
 					return False
