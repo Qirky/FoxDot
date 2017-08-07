@@ -808,7 +808,7 @@ def _readInt(data):
 	as a 32-bit integer. """
 	
 	if(len(data)<4):
-		print "Error: too few bytes for int", data, len(data)
+		print("Error: too few bytes for int", data, len(data))
 		rest = data
 		integer = 0
 	else:
@@ -845,7 +845,7 @@ def _readFloat(data):
 	"""
 	
 	if(len(data)<4):
-		print "Error: too few bytes for float", data, len(data)
+		print("Error: too few bytes for float", data, len(data))
 		rest = data
 		float = 0
 	else:
@@ -860,7 +860,7 @@ def _readDouble(data):
 	"""
 	
 	if(len(data)<8):
-		print "Error: too few bytes for double", data, len(data)
+		print("Error: too few bytes for double", data, len(data))
 		rest = data
 		float = 0
 	else:
@@ -913,7 +913,7 @@ def decodeOSC(data):
 def hexDump(bytes):
 	""" Useful utility; prints the string in hexadecimal.
 	"""
-	print "byte   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F"
+	print("byte   0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F")
 
 	num = len(bytes)
 	for i in range(num):
@@ -921,12 +921,12 @@ def hexDump(bytes):
 			line = "%02X0 : " % (i/16)
 		line += "%02X " % ord(bytes[i])
 		if (i+1) % 16 == 0:
-			print "%s: %s" % (line, repr(bytes[i-15:i+1]))
+			print("%s: %s" % (line, repr(bytes[i-15:i+1])))
 			line = ""
 
 	bytes_left = num % 16
 	if bytes_left:
-		print "%s: %s" % (line.ljust(54), repr(bytes[-bytes_left:]))
+		print("%s: %s" % (line.ljust(54), repr(bytes[-bytes_left:])))
 
 def getUrlStr(*args):
 	"""Convert provided arguments to a string in 'host:port/prefix' format
@@ -2454,7 +2454,7 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 			
 	def setup(self):
 		StreamRequestHandler.setup(self)
-		print "SERVER: New client connection."
+		print("SERVER: New client connection.")
 		self.setupAddressSpace()
 		self.server._clientRegister(self)
 		
@@ -2465,7 +2465,7 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 	def finish(self):
 		StreamRequestHandler.finish(self)
 		self.server._clientUnregister(self)
-		print "SERVER: Client connection handled."
+		print("SERVER: Client connection handled.")
 	def _transmit(self, data):
 		sent = 0
 		while sent < len(data):
@@ -2518,14 +2518,14 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 		# get OSC packet size from stream which is prepended each transmission
 		chunk = self._receive(4)
 		if chunk == None:
-			print "SERVER: Socket has been closed."
+			print("SERVER: Socket has been closed.")
 			return None
 		# extract message length from big endian unsigned long (32 bit) 
 		slen = struct.unpack(">L", chunk)[0]
 		# receive the actual message
 		chunk = self._receive(slen)
 		if chunk == None:
-			print "SERVER: Socket has been closed."
+			print("SERVER: Socket has been closed.")
 			return None
 		# decode OSC data and dispatch
 		msg = decodeOSC(chunk)
@@ -2544,7 +2544,7 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 		# clean and blocking behaviour here
 		self.connection.settimeout(None)
 		
-		print "SERVER: Entered server loop"
+		print("SERVER: Entered server loop")
 		try:
 			while True:
 				decoded = self._receiveMsg()
@@ -2552,7 +2552,7 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 					return
 				elif len(decoded) <= 0:
 					# if message decoding fails we try to stay in sync but print a message
-					print "OSC stream server: Spurious message received."
+					print("OSC stream server: Spurious message received.")
 					continue
 
 				self.replies = []
@@ -2577,7 +2577,7 @@ class OSCStreamRequestHandler(StreamRequestHandler, OSCAddressSpace):
 			if e[0] == errno.ECONNRESET:
 				# if connection has been reset by client, we do not care much
 				# about it, we just assume our duty fullfilled
-				print "SERVER: Connection has been reset by peer."
+				print("SERVER: Connection has been reset by peer.")
 			else:
 				raise e
 		
@@ -2717,18 +2717,18 @@ class OSCStreamingClient(OSCAddressSpace):
 				tmp = self.socket.recv(count - len(chunk))
 			except socket.timeout:
 				if not self._running:
-					print "CLIENT: Socket timed out and termination requested."
+					print("CLIENT: Socket timed out and termination requested.")
 					return None
 				else:
 					continue
 			except socket.error, e:
 				if e[0] == errno.ECONNRESET:
-					print "CLIENT: Connection reset by peer."
+					print("CLIENT: Connection reset by peer.")
 					return None
 				else:
 					raise e
 			if not tmp or len(tmp) == 0:
-				print "CLIENT: Socket has been closed."
+				print("CLIENT: Socket has been closed.")
 				return None
 			chunk = chunk + tmp
 		return chunk
@@ -2753,7 +2753,7 @@ class OSCStreamingClient(OSCAddressSpace):
 		return msg
 
 	def _receiving_thread_entry(self):
-		print "CLIENT: Entered receiving thread."
+		print("CLIENT: Entered receiving thread.")
 		self._running = True
 		while self._running:
 			decoded = self._receiveMsgWithTimeout()
@@ -2777,7 +2777,7 @@ class OSCStreamingClient(OSCAddressSpace):
 			self._txMutex.release()
 			if not txOk:
 				break
-		print "CLIENT: Receiving thread terminated."
+		print("CLIENT: Receiving thread terminated.")
 		
 	def _unbundle(self, decoded):
 		if decoded[0] != "#bundle":
@@ -2810,13 +2810,13 @@ class OSCStreamingClient(OSCAddressSpace):
 				tmp = self.socket.send(data[sent:])
 			except socket.timeout:
 				if not self._running:
-					print "CLIENT: Socket timed out and termination requested."
+					print("CLIENT: Socket timed out and termination requested.")
 					return False
 				else:
 					continue
 			except socket.error, e:
 				if e[0] == errno.ECONNRESET:
-					print "CLIENT: Connection reset by peer."
+					print("CLIENT: Connection reset by peer.")
 					return False
 				else:
 					raise e
