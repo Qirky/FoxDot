@@ -778,7 +778,7 @@ def OSCTimeTag(time):
 		secs = secs - NTP_epoch
 		binary = struct.pack('>LL', long(secs), long(fract * NTP_units_per_second))
 	else:
-		binary = struct.pack('>LL', 0L, 1L)
+		binary = struct.pack('>LL', 0, 1)
 
 	return binary
 
