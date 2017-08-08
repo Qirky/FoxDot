@@ -154,7 +154,7 @@ class connect:
 
             except Exception as e:
 
-                print e
+                print(e)
 
             # Show the image
 
