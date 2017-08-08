@@ -27,6 +27,11 @@ None
 
 None
 
+### `DominantPattern(*patterns)`
+
+Returns the class (and the relative pattern) for the
+type of Pattern to use in a mathematical operation 
+
 ### `FloorDiv(a, b)`
 
 None

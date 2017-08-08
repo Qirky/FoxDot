@@ -1,6 +1,6 @@
 # `FoxDot.lib.Workspace.Editor`
 
-Tkinter interface made for Live Coding with Python syntax highlighting 
+None
 
 ## Classes
 
@@ -25,6 +25,10 @@ Checks a line for any tags that match regex and updates IDE colours
 ##### `delete(self, event=None, insert=insert)`
 
 Delete the next character 
+
+##### `delete_next_word(self, event)`
+
+Deletes the following word 
 
 ##### `delete_selection(self)`
 
@@ -65,6 +69,10 @@ Proper exit function
 ##### `killall(self, event=None)`
 
 Stops all player objects 
+
+##### `look(self, direction=-1)`
+
+Finds the start of the next / previous word 
 
 ##### `newfile(self, event=None)`
 

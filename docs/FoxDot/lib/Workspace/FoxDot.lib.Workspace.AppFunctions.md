@@ -1,6 +1,6 @@
 # `FoxDot.lib.Workspace.AppFunctions`
 
-Collection of functions used in the App package 
+Collection of functions used in the Workspace package 
 
 ## Classes
 

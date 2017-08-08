@@ -254,19 +254,23 @@ class metaPattern(object):
     def __rand__(self, other):
         return asStream(other).zip(self)
     
-    #  Comparisons
+    #  Comparisons --> this might be a tricky one
     def __eq__(self, other):
         return PEq(self, other)
     def __ne__(self, other):
         return PNe(self, other)
+    def eq(self, other):
+        return self.__class__([int(value == modi(asStream(other), i)) for i, value in enumerate(self)])
+    def ne(self, other):
+        return self.__class__([int(value != modi(asStream(other), i)) for i, value in enumerate(self)])
     def __gt__(self, other):
-        return Pattern([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
+        return self.__class__([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
     def __ge__(self, other):
-        return Pattern([int(value >= modi(asStream(other), i)) for i, value in enumerate(self)])
+        return self.__class__([int(value >= modi(asStream(other), i)) for i, value in enumerate(self)])
     def __lt__(self, other):
-        return Pattern([int(value < modi(asStream(other), i)) for i, value in enumerate(self)])
+        return self.__class__([int(value < modi(asStream(other), i)) for i, value in enumerate(self)])
     def __le__(self, other):
-        return Pattern([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
+        return self.__class__([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
 
     # Methods that return augmented versions of original
 

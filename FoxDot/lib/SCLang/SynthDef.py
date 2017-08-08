@@ -270,7 +270,7 @@ class SynthDefProxy:
         self.degree = degree
         self.mod = 0
         self.kwargs = kwargs
-        self.methods = {}
+        self.methods = []
         self.vars = vars(self)
     def __str__(self):
         return "<SynthDef Proxy '{}'>".format(self.name)
@@ -282,7 +282,7 @@ class SynthDefProxy:
     def __getattr__(self, name):
         if name not in self.vars:
             def func(*args, **kwargs):
-                self.methods[name] = (args, kwargs)
+                self.methods.append((name, (args, kwargs)))
                 return self
             return func
         else:

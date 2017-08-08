@@ -44,7 +44,11 @@ below) with a duration of 1 beat per note. To change the pitch just give the
 
 ```python
 p1 >> pads([0,7,6,4])
-```    
+```
+
+Play multiple pitches together by putting them in round brackets:
+
+p1 >> pads([0,2,4,(0,2,4)])
 
 When you start FoxDot up, your clock is ticking at 120bpm and your player
 objects are all playing in the major scale. With 8 pitches in the major scale,
@@ -66,7 +70,7 @@ Scale.default.set([0,2,3,5,7,8,10])
 # See a list of scales
 print Scale.names()
 
-# Change the tempo
+# Change the tempo (this takes effect at the next bar)
 Clock.bpm = 144
 ```
 
@@ -96,13 +100,14 @@ a basic drum beat:
 d1 >> play("x-o-")
 ```
 
-To play multiple patters simultaneously, just create a new `play` object.
+To play multiple patterns simultaneously, you can create a new `play` object. This
+is useful if you want to have different attributes for each player.
 
 ```python
-bd >> play("x( x)  ")
-hh >> play("---[--]")
-sn >> play("  o ")
-```
+bd >> play("x( x)  ", dur=1)
+hh >> play("---[--]", dur=[1/2,1/2,1/4], rate=4)
+sn >> play("  o ", rate=(.9,1), pan=(-1,1))
+```    
 
 Grouping characters in round brackets laces the pattern so that on each
 play through of the sequence of samples, the next character in the group's
@@ -134,6 +139,111 @@ sample - Special keyword for Sample Players; selects another audio file from the
 
 ## Classes
 
+### `AccompanyKey(self, other, rel=[0, 2, 4])`
+
+Like PlayerKey except it returns 
+
+#### Methods
+
+##### `__add__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__eq__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__ge__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__gt__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__le__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__lt__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__mod__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__mul__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__ne__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__pow__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__radd__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rdiv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rmod__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rmul__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rpow__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rsub__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rtruediv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rxor__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__sub__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__truediv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__xor__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `find_new_value(self, val)`
+
+Finds the item in self.data that is closest to self.acmp_value 
+
+##### `map(self, mapping)`
+
+Creates a new Player key that maps the values in the dictionary (mapping)
+to new values. Example use case:
+
+```
+d1 >> play("x-o-", sample=d1.degree.map( { "-" : -1, "o" : var([0,2]) }))
+```
+
+---
+
 ### `Group(self, *args)`
 
 
@@ -154,6 +264,107 @@ Returns a Pattern object containing the desired attribute for each player in the
 
 ---
 
+### `NumberKey(self, value, reference)`
+
+
+
+#### Methods
+
+##### `__add__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__eq__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__ge__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__gt__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__le__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__lt__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__mod__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__mul__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__ne__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__pow__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__radd__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rdiv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rmod__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rmul__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rpow__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rsub__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rtruediv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rxor__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__sub__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__truediv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__xor__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `map(self, mapping)`
+
+Creates a new Player key that maps the values in the dictionary (mapping)
+to new values. Example use case:
+
+```
+d1 >> play("x-o-", sample=d1.degree.map( { "-" : -1, "o" : var([0,2]) }))
+```
+
+---
+
 ### `Player(self)`
 
 
@@ -166,7 +377,7 @@ Change the degree modifier stream
 
 ##### `__rshift__(self, other)`
 
-The PlayerObject Method >> 
+Handles the allocation of SynthDef objects using >> syntax 
 
 ##### `__sub__(self, data)`
 
@@ -185,10 +396,6 @@ Schedule self.cmd(args, kwargs) in n beats
 Triggered when sendNote is called. Responsible for any
 action to be triggered by a note being played. Default action
 is underline the player
-
-##### `calculate_freq(self)`
-
-Uses the scale, octave, and degree to calculate the frequency values to send to SuperCollider 
 
 ##### `count(self, time=None, event_after=False)`
 
@@ -219,10 +426,6 @@ p1.every(5, 'stutter', 4, cycle=8)
 
 ```
 
-##### `f(self, *data)`
-
-adds value to frequency modifier 
-
 ##### `follow(self, lead=False)`
 
 Takes a Player object and then follows the notes 
@@ -235,13 +438,17 @@ Returns a dictionary of attr -> now values
 
 Removes this object from the Clock and resets itself
 
-##### `largest_attribute(self)`
+##### `largest_attribute(self, **kwargs)`
 
 Returns the length of the largest nested tuple in the current event dict 
 
 ##### `mirror(self)`
 
 The degree pattern is reversed 
+
+##### `new_message(self, index=0, **kwargs)`
+
+Returns the header of an osc message to be added to by osc_message() 
 
 ##### `now(self, attr=degree, x=0)`
 
@@ -256,7 +463,7 @@ attr which references the most other players
 
 Returns true if the attribute should be a number 
 
-##### `number_of_layers(self)`
+##### `number_of_layers(self, **kwargs)`
 
 Returns the deepest nested item in the event 
 
@@ -269,6 +476,10 @@ Off sets the next event occurence
 Creates an OSC packet to play a SynthDef in SuperCollider,
 use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] 
 
+##### `reset(self)`
+
+Sets all Player attributes to 0 unless their default is specified by an effect 
+
 ##### `reverse(self)`
 
 Sets flag to reverse streams 
@@ -280,7 +491,7 @@ Rotates the values in the degree by 'n'
 ##### `send(self, **kwargs)`
 
 Sends the current event data to SuperCollder.
-Use kwargs to overide values in the 
+Use kwargs to overide values in the current event 
 
 ##### `shuffle(self)`
 
@@ -304,6 +515,17 @@ Plays the current note n-1 times. You can specify keywords.
 
 Converts a pgroup to floating point values and updates and time var or playerkey relations 
 
+##### `update_player_key(self, key, value, time)`
+
+Forces object's dict uses PlayerKey instances
+        
+
+##### `versus(self, other, key=<lambda>, f=<built-in function max>)`
+
+Takes another Player object and a function that takes
+two player arguments and returns one, default is the higher
+pitched
+
 ---
 
 ### `PlayerKey(self, value=None, reference=None, parent=None, attr=None)`
@@ -314,7 +536,96 @@ Converts a pgroup to floating point values and updates and time var or playerkey
 
 ##### `__add__(self, other)`
 
-If adding a pattern, return a pattern of values 
+If operating with a pattern, return a pattern of values 
+
+##### `__eq__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__ge__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__gt__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__le__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__lt__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__mod__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__mul__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__ne__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__pow__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__radd__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rdiv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rmod__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rmul__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rpow__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rsub__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rtruediv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__rxor__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__sub__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__truediv__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `__xor__(self, other)`
+
+If operating with a pattern, return a pattern of values 
+
+##### `map(self, mapping)`
+
+Creates a new Player key that maps the values in the dictionary (mapping)
+to new values. Example use case:
+
+```
+d1 >> play("x-o-", sample=d1.degree.map( { "-" : -1, "o" : var([0,2]) }))
+```
 
 ---
 

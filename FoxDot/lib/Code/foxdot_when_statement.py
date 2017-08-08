@@ -55,13 +55,21 @@ class _whenStatement:
 
     namespace = {}
 
-    def __init__(self, func):
+    def __init__(self, func=lambda: True):
         self.expr = func
         self.reset()
         self.remove_me = False
 
     def __repr__(self):
         return func_str(self.expr)
+
+    def __enter__(self):
+        when.editing = self
+        return self
+
+    def __exit__(self, *args):
+        when.editing = None
+        return self
 
     @classmethod
     def set_namespace(cls, ns):
@@ -70,8 +78,8 @@ class _whenStatement:
 
     def reset(self):
         ''' Sets the `when` and `else` actions to nothing '''
-        self.action = ()
-        self.notaction = ()
+        self.action = lambda: None
+        self.notaction = lambda: None
         self.do_switch = False
         self.elsedo_switch = False
 
@@ -82,18 +90,22 @@ class _whenStatement:
             if not self.do_switch:
                 
                 # Execute the values
-                for action in self.action:
-                    exec(compile(action, "FoxDot", "exec"), self.namespace)
+##                for action in self.action:
+##                    exec(compile(action, "FoxDot", "exec"), self.namespace)
+
+                self.action()
                     
                 self.toggle_live_functions(True)
                 self.do_switch = True
                 self.elsedo_switch = False
         else:
             if not self.elsedo_switch:
+
+                self.notaction()
                 
                 # Execute the values
-                for action in self.notaction:
-                    exec(compile(action, "FoxDot", "exec"), self.namespace)
+##                for action in self.notaction:
+##                    exec(compile(action, "FoxDot", "exec"), self.namespace)
 
                 self.toggle_live_functions(False)
                 self.do_switch = False
@@ -110,17 +122,21 @@ class _whenStatement:
         except:
             pass
         return
+
+    def when(self, func):
+        self.expr = func
+        return self
                 
-    def do(self, *instructions):
+    def then(self, func):
         ''' Set the instructions for when the test expression is True. Should
             be a list of strings. '''
-        self.action = instructions
+        self.action = func
         return self
     
-    def elsedo(self, *instructions):
+    def elsedo(self, func):
         ''' Set the instructions for when the test expression is False. Should
             be a list of strings. '''
-        self.notaction = instructions
+        self.notaction = func
         return self
     
     def stop(self):
@@ -135,8 +151,10 @@ class _whenStatement:
 class _whenLibrary:
     """  Used to store 'when statements'. Is accessed through the `__when__` object.
     """
+    
     def __init__(self):
-        self.library = []
+        self.library = {}
+        self.editing = None
         
     def start_thread(self):
         self.thread = Thread(target=self.run)
@@ -158,11 +176,11 @@ class _whenLibrary:
         """
         while len(self.library) > 0:
             
-            for expression in self.library[:]:
+            for name, expression in self.library.items():
 
                 if expression.remove_me == True:
 
-                    self.library.remove(expression)
+                    del self.library[name]
 
                 else:
 
@@ -172,50 +190,50 @@ class _whenLibrary:
 
         return
         
-    def __call__(self, func=None, **kwargs):
+    def __call__(self, name, **kwargs):
         """ Calling when() with no arguments will evaluate all expressions
             stored in self.library. Calling with func as a valid function
             will see if the function is in self.library and add it if not,
             or update the 
 
-        """
-
-        # Giving it a function will return the corresponding when statement
-        # or create a new one if it doesn't exist
-        
-        if callable(func):                
+        """   
             
-            for stmt in self.library:
+        if name in self.library:
 
-                if func_cmp(func, stmt.expr):
-
-                    return stmt
-
-            else:
-
-                # Make a new statement
-
-                self.library.append(_whenStatement(func))
-
-                # If that is the first statement, start the thread
-
-                if len(self.library) == 1:
-
-                    self.start_thread()
-
-                # Return the last added expression
-
-                return self.library[-1]
+            return self.library[name]
 
         else:
 
-            print("{} is not callable".format(func))
+            # Make a new statement
 
-        return self
+            self.library[name] = _whenStatement()
+
+            # If that is the first statement, start the thread
+
+            if len(self.library) == 1:
+
+                self.start_thread()
+
+            # Return the last added expression
+
+            return self.library[name]
+
+    def a(self, expr):
+        if self.editing is not None:
+            self.editing.when(expr)            
+        return None
+    def b(self, expr):
+        if self.editing is not None:
+            self.editing.then(expr)
+        return None
+    def c(self, expr):
+        if self.editing is not None:
+            self.editing.elsedo(expr)
+        return None
 
     def reset(self):
         """ Clears the library and stop scheduling """
-        self.library = []
+        self.library = {}
         return self
 
-__when__ = _whenLibrary()
+when = _whenLibrary()

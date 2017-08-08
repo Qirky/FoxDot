@@ -113,6 +113,10 @@ class TempoClock(object):
         """ Returns the length of a bar in terms of beats """
         return (float(self.meter[0]) / self.meter[1]) * 4
 
+    def bars(self, n=1):
+        """ Returns the number of beats in 'n' bars """
+        return self.bar_length() * n
+
     def beat_dur(self, n=1):
         """ Returns the length of n beats in seconds """
         return 0 if n == 0 else (60.0 / self.get_bpm()) * n

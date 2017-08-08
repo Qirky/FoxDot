@@ -7,7 +7,6 @@
 from __future__ import absolute_import, division, print_function
 
 from .Code import *
-from .Code import __when__
 
 FoxDotCode.namespace = globals()
 
@@ -92,4 +91,4 @@ FoxDotCode.namespace["_"] = EmptyItem()
 
 # Give the __when__ statement access to the  global namespace
 
-__when__.set_namespace(FoxDotCode)
+when.set_namespace(FoxDotCode)

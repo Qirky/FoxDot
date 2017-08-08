@@ -50,6 +50,8 @@ None
 
 #### `BufRateScale = BufRateScale`
 
+#### `BufSampleRate = BufSampleRate`
+
 #### `ClipNoise = ClipNoise`
 
 #### `CombC = CombC`

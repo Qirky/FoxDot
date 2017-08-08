@@ -60,7 +60,7 @@ Undocumented: Spin, Shape, Formant, BandPassFilter
 
 ## Classes
 
-### `Effect(self, foxdot_name, synthdef, args={})`
+### `Effect(self, foxdot_name, synthdef, args={}, control=False)`
 
 
 
@@ -92,7 +92,7 @@ Returns the title keywords for each effect
 
 ---
 
-### `Out(self)`
+### `In(self)`
 
 
 
@@ -108,10 +108,9 @@ writes to file and sends to server
 
 ---
 
-### `PreEffect(self, *args, **kwargs)`
+### `Out(self)`
 
-SynthDef that modulates argumentes such as frequency
-*before* being used in a UGen. 
+
 
 #### Methods
 
@@ -129,7 +128,7 @@ writes to file and sends to server
 
 ## Data
 
-#### `FxList = {'formant': <Fx 'formantFilter' -- args: formant...>, 'hpf': <Fx 'highPassFilter' -- args: hpr,hpf>}`
+#### `FxList = {'vib': <Fx 'vibrato' -- args: vib,vibdepth>, 'f...defrom': <Fx 'slideFrom' -- args: sus,slidefrom>}`
 
 #### `fx = <Fx 'wavesShapeDistortion' -- args: shape>`
 

@@ -3,7 +3,6 @@ SynthDef.new(\piano,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
-freq = Vibrato.kr(freq, rate: vib);
 amp=(amp / 2);
 osc=MdaPiano.ar(freq, vel: (40 + (amp * 60)), decay: (sus / 4));
 env=EnvGen.ar(Env(levels: [(amp * 1), (amp * 1)],curve: 'step',times: [sus]), doneAction: 0);

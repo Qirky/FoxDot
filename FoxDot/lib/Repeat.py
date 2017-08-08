@@ -7,8 +7,10 @@ from .Patterns import asStream
 from .Utils import modi
 
 class Repeatable(object):
+    after_update_methods = []
+    method_synonyms      = {}
     def __init__(self):
-        self.repeat_events = {}        
+        self.repeat_events        = {}
 
     def after(self, n, cmd, *args, **kwargs):
         """ Schedule self.cmd(args, kwargs) in n beats """
@@ -57,14 +59,21 @@ class Repeatable(object):
 
             # Make sure cmd is a method
 
-            attr = cmd.split(".")
+            if cmd in self.method_synonyms:
+
+                attr = [ self.method_synonyms[cmd] ]
+
+            else:
+
+                attr = cmd.split(".")
 
             if len(attr) == 1:
-                method = getattr(self, attr[0])
+
+                method_name = attr[0]
+
+                method = getattr(self, method_name)
 
             elif len(attr) == 2:
-
-                #sub_method = getattr(self.attr[attr[0]], attr[1])
 
                 sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
 
@@ -117,7 +126,7 @@ class Repeatable(object):
             self.repeat_events[method].stop()
             del self.repeat_events[method]
         except KeyError:
-            err = "Player method '{}' no longer repeating".format(method)
+            err = "Player method '{}' not active".format(method)
             raise KeyError(err)
         return self
 
@@ -139,6 +148,8 @@ class MethodCall:
 
         self.args = args
         self.kwargs = kwargs
+
+        self.after_update = False
 
         self.stopping = False
 

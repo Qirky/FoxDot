@@ -1,11 +1,17 @@
-FoxDot - Live Coding with Python v0.4
-=====================================
+FoxDot - Live Coding with Python v0.4.7
+=======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.4 fixes and updates
+### v0.4.7 fixes and updates
 
 - FoxDot is now Python 3 compatible, so make sure you treat your print statements as functions i.e. use `print("Hello, World!")`
+- Added `audioin` SynthDef for processing audio from the default recording device.
+- Fixed bugs relating to chaining multiple `every` methods and ending their call cycle when the parent player is stopped
+- Improved flexibility of referencing player attributes e.g.
+```
+p1 >> pads([0,1,2,3], dur=2).every(8, "stutter", 4, degree=p1.degree+[2,4,7])
+```
 
 ---
 
@@ -52,7 +58,7 @@ If you are getting an error similar to "Buffer UGen channel mismatch: expected 2
 
 ### Executing Code
 
-A 'block' of code in FoxDot is made up of consecutive lines of code with no empty lines. Pressing `Ctrl+Return` (or `Cmd+Return` on a Mac) will execute the block of code that the cursor is currently in. Try `print 1 + 1` to see what happens!
+A 'block' of code in FoxDot is made up of consecutive lines of code with no empty lines. Pressing `Ctrl+Return` (or `Cmd+Return` on a Mac) will execute the block of code that the cursor is currently in. Try `print(1 + 1)` to see what happens!
 
 ### Player Objects
 
@@ -62,7 +68,7 @@ Python supports many different programming paradigms, including procedural and f
 p1 = Player()
 ```
 
-Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print SynthDefs` to see all available synths) you would use the following code:
+Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print(SynthDefs)` to see all available synths) you would use the following code:
 
 ``` python
 p1 >> pads([0,1,2,3])
@@ -78,7 +84,7 @@ The keyword arguments `dur`, `oct`, and `scale` apply to all player objects - an
 
 ### 'Sample Player' Objects
 
-In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters (known as a "PlayString") as its first argument. To see a list of what samples are associated to what characters, use `print Samples`. To create a basic drum beat, you can execute the following line of code:
+In FoxDot, sound files can be played through using a specific SynthDef called `play`. A player object that uses this SynthDef is referred to as a Sample Player object. Instead of specifying a list of numbers to generate notes, the Sample Player takes a string of characters (known as a "PlayString") as its first argument. To see a list of what samples are associated to what characters, use `print(Samples)`. To create a basic drum beat, you can execute the following line of code:
 
 ``` python
 d1 >> play("x-o-")

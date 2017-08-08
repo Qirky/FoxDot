@@ -1,10 +1,21 @@
 # `FoxDot.lib.Patterns.Generators`
 
-Generator patterns are similar to Pattern objects but instead of being
-a set of values, they return a value when accessed / indexed based on
-a function.
+None
 
 ## Classes
+
+### `PChain(self, mapping)`
+
+
+
+#### Methods
+
+##### `getitem(self, index=None)`
+
+Calls self.func(index) to get an item, and also calculates
+performs any arithmetic operation assigned 
+
+---
 
 ### `PRand(self, start, stop=None)`
 
@@ -79,7 +90,7 @@ performs any arithmetic operation assigned
 
 ---
 
-### `PwRand(self)`
+### `PwRand(self, values, weights)`
 
 
 
@@ -92,7 +103,7 @@ performs any arithmetic operation assigned
 
 ---
 
-### `PxRand(self)`
+### `PxRand(self, start, stop=None)`
 
 
 
@@ -102,6 +113,10 @@ performs any arithmetic operation assigned
 
 Calls self.func(index) to get an item, and also calculates
 performs any arithmetic operation assigned 
+
+##### `string(self)`
+
+Used in PlayString to show a PRand in curly braces 
 
 ---
 

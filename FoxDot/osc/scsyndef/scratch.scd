@@ -3,6 +3,7 @@ SynthDef.new(\scratch,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = freq + fmod;
+amp=(amp / 4);
 freq=(freq * Crackle.ar(1.5));
 osc=SinOsc.ar(Vibrato.kr(freq, 2, 3, depthVariation: depth, rateVariation: rate), mul: amp);
 env=EnvGen.ar(Env(levels: [0, amp, 0],curve: 'lin',times: [(sus / 2), (sus / 2)]), doneAction: 0);

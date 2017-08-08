@@ -18,6 +18,10 @@ with SampleSynthDef("play2") as play:
 
 # Synth Players
 
+with SynthDef("audioin") as audioin:
+    audioin.osc = AudioIn.ar(1)
+    audioin.env = Env.mask()
+
 with SynthDef("pads") as pads:
     pads.amp = pads.amp / 2
     pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
@@ -53,7 +57,6 @@ with SynthDef("growl") as growl:
 
 with SynthDef("bass") as bass:
     bass.defaults.update(rate=8.5)
-    # bass.amp  = bass.amp / 1.5
     bass.freq = bass.freq / 4
     bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=bass.rate / 10, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
     bass.env  = Env.perc(atk=0.02, curve="'lin'", )
@@ -122,6 +125,7 @@ with SynthDef("viola") as viola:
 
 with SynthDef("scratch") as scratch:
     scratch.defaults.update(depth=0.5, rate=0.04)
+    scratch.amp  = scratch.amp / 4
     scratch.freq = scratch.freq * Crackle.ar(1.5)
     scratch.osc  = SinOsc.ar(Vibrato.kr(scratch.freq, 2, 3, rateVariation=scratch.rate, depthVariation=scratch.depth), mul=scratch.amp )
     scratch.env  = Env.env()
@@ -289,8 +293,9 @@ squish.osc = squish.osc.cos
 squish.add()
 
 swell = SynthDef("swell")
+swell.defaults.update(rate=1)
 swell.amp = swell.amp / 4
-swell.osc = VarSaw.ar([swell.freq, (swell.freq + 1) / 0.75], width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
+swell.osc = VarSaw.ar([swell.freq, (swell.freq + 1) / 0.5], width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
 swell.env = Env.perc()
 swell.add()
 

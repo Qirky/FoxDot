@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function
+
 """
     Making music with FoxDot Players
     --------------------------------
@@ -139,7 +141,7 @@
 
 """
 
-from __future__ import absolute_import, division, print_function
+
 
 from os.path import dirname
 from random import shuffle, choice
@@ -152,6 +154,7 @@ from .SCLang.SynthDef import SynthDefProxy, SynthDef
 from .Effects import FxList
 from .Utils import stdout
 
+from .Key import *
 from .Repeat import *
 from .Patterns import *
 from .Midi import *
@@ -161,9 +164,6 @@ from .Scale import Scale
 
 from .Bang import Bang
 
-# this will be confusing
-
-# import Buffers
 from .TimeVar import TimeVar
 
 class Player(Repeatable):
@@ -196,30 +196,40 @@ class Player(Repeatable):
     default_scale = Scale.default()
     default_root  = Root.default()
 
+    after_update_methods = ["stutter"]
+
     # Tkinter Window
     widget = None
 
     def __init__( self ):
 
-        # Inherit
+        # Inherit from repeatable i.e. x.every
 
         Repeatable.__init__(self)
+
+        self.method_synonyms["->"] = "rshift"
+        self.method_synonyms["<-"] = "lshift"
     
         # General setup
         
         self.synthdef = None
         self.id = None
-        
+
+        # not sure what this does
         self.quantise = False
 
+        # Stopping flag
         self.stopping = False
         self.stop_point = 0
-        
+
+        # Reference to other objects in the clock played at the same time
         self.queue_block = None
         self.bus = None
 
+        # The string representation of the degree of the player
         self.playstring = ""
 
+        # Information used in generating OSC messages
         self.buf_delay = []
         self.timestamp = 0
         self.condition = lambda: True
@@ -237,7 +247,7 @@ class Player(Repeatable):
         self.whitespace  = None
         self.bang_kwargs = {}
 
-        # Modifiers
+        # Modifiers -- could be removed?
         
         self.reversing = False
         self.degrading = False
@@ -291,7 +301,7 @@ class Player(Repeatable):
         if isinstance(other, SynthDefProxy):
             self.update(other.name, other.degree, **other.kwargs)
             self + other.mod
-            for method, arguments in other.methods.items():
+            for method, arguments in other.methods:
                 args, kwargs = arguments
                 getattr(self, method).__call__(*args, **kwargs)                
             return self
@@ -325,6 +335,10 @@ class Player(Repeatable):
                     if isinstance(self.__dict__[name], PlayerKey):
     
                         self.__dict__[name].update_pattern()
+
+                else:
+
+                    self.update_player_key(name, value, 0)
 
                 return
             
@@ -696,7 +710,7 @@ class Player(Repeatable):
 
             for key, val in kwargs.items():
 
-                new_event[key] = [group_modi(val, i) for i in range(n-1)]
+                new_event[key] = [float(self.unpack(group_modi(val, i))) for i in range(n-1)]
 
             new_event["timestamp"] = self.metro.osc_message_time()
             new_event["delay"] = [dur * (i+1) for i in range(n-1)]
@@ -856,7 +870,7 @@ class Player(Repeatable):
 
     # --- Methods for preparing and sending OSC messages to SuperCollider
 
-    def unpack(self, item):
+    def unpack(self, item, debug=False):
         """ Converts a pgroup to floating point values and updates and time var or playerkey relations """
 
         if isinstance(item, TimeVar):
@@ -864,22 +878,26 @@ class Player(Repeatable):
             item = item.now()
 
         if isinstance(item, NumberKey):
-            
-            if item.parent in self.queue_block.objects() and item.parent is not self:
+
+            # If this *is* the parent, just get the current value
+
+            if item.parent is self:
+
+                self.update_player_key(item.key, self.now(item.key), 0)
+
+            elif item.parent in self.queue_block.objects():
+
+                # Call the parent of the number key to update
 
                 self.queue_block.call(item.parent, self)
 
-            # Only get "now" version of a playerkey if its a PGroup
+            item = item.now()
 
-            new_data = item.now()
+        if isinstance(item, PGroup):
 
-            if isinstance(new_data, PGroup):
+            # Make sure any values in the PGroup have their "now" methods called
 
-                item = new_data.convert_data(self.unpack)
-
-        elif isinstance(item, PGroup):
-
-            item =  item.convert_data(self.unpack)
+            item = item.convert_data(self.unpack)
 
         return item
 
@@ -1280,19 +1298,16 @@ class Player(Repeatable):
     # e.g. follow
     #
 
-    def accompany(self, other, values=[0,2,4]):
+    def accompany(self, other, values=[0,2,4], debug=False):
         """ Similar to "follow" but when the value has changed """
 
         if isinstance(other, self.__class__):
 
-            self.degree = AccompanyKey(other.degree)
+            self.degree = AccompanyKey(other.degree, values, debug)
 
             self + self.mod_data
         
         return self
-
-    def find_accompanying(self, value):
-        return
 
     def follow(self, lead=False):
         """ Takes a Player object and then follows the notes """
@@ -1305,15 +1320,21 @@ class Player(Repeatable):
 
         return self
 
-    def solo(self, arg=True):
+    def solo(self, action=1):
 
-        if arg:
+        action=int(action)
+
+        if action == 0:
+
+            self.metro.solo.reset()
+
+        elif action == 1:
             
             self.metro.solo.set(self)
 
-        else:
+        elif action == 2:
 
-            self.metro.solo.reset()
+            pass
 
         return self
 
@@ -1333,6 +1354,8 @@ class Player(Repeatable):
             self._versus.condition = lambda: True
             self._versus = None
         return self
+
+    
 
     # Utils
 
@@ -1439,380 +1462,6 @@ class Player(Repeatable):
             bang = Bang(self, self.bang_kwargs)
 
         return self
-
-# NumberKey & Sub-classes
-
-class NumberKey(object):
-    def __init__(self, value, reference):
-        self.value = value
-        self.other = reference
-        self.parent = self.other.parent if isinstance(self.other, NumberKey) else None
-
-    # Storing mathematical operations
-
-    @staticmethod
-    def calculate(x, y):
-        return x
-    
-    def __add__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__radd__(self)
-        new = self.child(other)
-        new.calculate = Add
-        return new
-
-    def __radd__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__add__(self)
-        new = self.child(other)
-        new.calculate = Add
-        return new
-    
-    def __sub__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__rsub__(self)
-        new = self.child(other)
-        new.calculate = rSub
-        return new
-    
-    def __rsub__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__sub__(self)
-        new = self.child(other)
-        new.calculate = Sub
-        return new
-    
-    def __mul__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__rmul__(self)
-        new = self.child(other)
-        new.calculate = Mul
-        return new
-
-    def __rmul__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__mul__(self)
-        new = self.child(other)
-        new.calculate = Mul
-        return new
-    
-    def __div__(self, other):
-        if isinstance(other, metaPattern):
-            return other.__rdiv__(self)
-        new = self.child(other)
-        new.calculate = rDiv
-        return new
-
-    def __rdiv__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__div__(self)
-        new = self.child(other)
-        new.calculate = Div
-        return new
-    
-    def __mod__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__rmod__(self)
-        new = self.child(other)
-        new.calculate = rMod
-        return new
-    
-    def __rmod__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__mod__(self)
-        new = self.child(other)
-        new.calculate = Mod
-        return new
-    
-    def __pow__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__rpow__(self)
-        new = self.child(other)
-        new.calculate = rPow
-        return new
-    
-    def __rpow__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__pow__(self)
-        new = self.child(other)
-        new.calculate = Pow
-        return new
-    
-    def __xor__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__rxor__(self)
-        new = self.child(other)
-        new.calculate = rPow
-        return new
-    
-    def __rxor__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__xor__(self)
-        new = self.child(other)
-        new.calculate = Pow
-        return new
-
-    def __truediv__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__rtruediv__(self)
-        new = self.child(other)
-        new.calculate = rDiv
-        return new
-    
-    def __rtruediv__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__truediv__(self)
-        new = self.child(other)
-        new.calculate = Div
-        return new
-
-    # Comparisons
-    def __eq__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__ne__(self)
-        new = self.child(other)
-        new.calculate = lambda a, b: int(a == b)
-        return new
-    
-    def __ne__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__eq__(self)
-        new = self.child(other)
-        new.calculate = lambda a, b: int(a != b)
-        return new
-    
-    def __gt__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__lt__(self)
-        new = self.child(other)
-        new.calculate = lambda a, b: int(a < b)
-        return new
-    
-    def __lt__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__gt__(self)
-        new = self.child(other)
-        new.calculate = lambda a, b: int(a > b)
-        return new
-    
-    def __ge__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__le__(self)
-        new = self.child(other)
-        new.calculate = lambda a, b: int(a <= b)
-        return new
-    
-    def __le__(self, other):
-        """ If operating with a pattern, return a pattern of values """
-        if isinstance(other, (list, tuple)):
-            other=asStream(other)
-        if isinstance(other, metaPattern):
-            return other.__ge__(self)
-        new = self.child(other)
-        new.calculate = lambda a, b: int(a >= b)
-        return new
-
-    def __abs__(self):
-        new = self.child(0)
-        new.calculate = lambda a, b: abs(float(b))
-        return new
-
-    def map(self, mapping):
-        """ Creates a new Player key that maps the values in the dictionary (mapping)
-            to new values. Example use case:
-
-            ```
-            d1 >> play("x-o-", sample=d1.degree.map( { "-" : -1, "o" : var([0,2]) }))
-            ```
-
-        """
-        data = [(self == key) * value for key, value in mapping.items()]
-        new_key = data[0]
-        for i in data[1:]:
-            new_key = new_key + i
-        return new_key
-    
-    # Values
-    
-    def __nonzero__(self):
-        return int(self.now())
-    def __int__(self):
-        return int(self.now())
-    def __float__(self):
-        return float(self.now())
-    def __str__(self):
-        return str(self.now())
-    def __repr__(self):
-        return repr(self.now())
-    def __len__(self):
-        return len(self.now())
-
-    # Container
-    def __getitem__(self, key):
-        return self.now()[key]
-    
-    def __iter__(self):
-        try:
-            for item in self.now():
-                yield item
-        except TypeError:
-            yield self.now()
-
-    def child(self, other):
-        return NumberKey(self.value, other)
-    
-    def now(self):
-        if isinstance(self.other, NumberKey):
-            other = self.other.now()
-        else:
-            other = self.other
-        try:
-            return self.calculate(self.value, other)
-        except:
-            print(self.value, other)
-            raise
-
-class PlayerKey(NumberKey):
-    def __init__(self, value=None, reference=None, parent=None, attr=None):
-
-        NumberKey.__init__(self, value, reference)
-        
-        # Reference to the Player object that is using this
-        self.parent  = parent
-        self.key     = attr
-        self.pattern = asStream(self.parent.attr[self.key]) if self.parent is not None else asStream([])
-
-        if reference is None:
-
-            self.other   = 0
-            self.num_ref = 0
-
-        else:
-
-            self.other   = reference
-            self.parent  = reference.parent
-            self.num_ref = reference.num_ref + 1
-
-        self.last_updated = 0
-    
-    def update(self, value, time):
-        if value != self.value:
-            if time == self.last_updated:
-                try:
-                    self.value.append(value)
-                except AttributeError:
-                    self.value = PGroup(self.value, value)
-            else:
-                self.value = value
-        self.last_updated = time
-        return
-
-    def update_pattern(self):
-        self.pattern[:] = asStream(self.parent.attr[self.key])               
-        return
-
-    def child(self, other):
-        return PlayerKey(other, self, self.parent, self.key)
-    
-class AccompanyKey(NumberKey):
-    """ Like PlayerKey except it returns """
-    def __init__(self, other, rel=[0,2,4]):
-
-        NumberKey.__init__(self, other, None)
-
-        assert(isinstance(other, PlayerKey))
-
-        self.parent = other.parent
-        
-        self.last_value = self.value.now()
-        self.acmp_value = self.last_value
-        self.up       = list(rel)
-        self.down     = list(val - 7 for val in rel) # change 7 for scale size
-
-    def find_new_value(self, val):
-        """ Finds the item in self.data that is closest to self.acmp_value """
-        data = random.choice((self.up, self.down))
-        if len(data) == 1:
-            return data[0]
-        else:
-            _min, _val = abs(val + data[0] - self.acmp_value), data[0]
-            for item in data[1:]:
-                dis = abs(val + item - self.acmp_value)
-                if dis < _min:
-                    _min = dis
-                    _val = item
-            return val + _val
-
-    def child(self, other):
-        return NumberKey(other, self)
-
-    def now(self):
-        value = self.calculate(self.value.now(), self.other)
-        if value != self.last_value:
-            self.acmp_value = self.find_new_value(value)
-            self.last_value = value
-        return self.acmp_value
-        
         
 
 ###### GROUP OBJECT

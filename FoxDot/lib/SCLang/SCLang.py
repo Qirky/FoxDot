@@ -141,6 +141,7 @@ Klank     = cls("Klank", ref="`")
 # Other
 
 Out      = cls("Out")
+AudioIn  = cls("AudioIn")
 Vibrato  = cls("Vibrato")
 Line     = cls("Line")
 XLine    = cls("XLine")

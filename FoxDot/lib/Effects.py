@@ -255,7 +255,7 @@ fx.save()
        
 if SC3_PLUGINS:
 
-    fx = FxList.new('bits', 'bitcrush', {'bits': 0, 'sus': 1, 'amp': 1, 'crush': 8}, order=1)
+    fx = FxList.new('bits', 'bitcrush', {'bits': 0, 'sus': 1, 'amp': 1, 'crush': 1}, order=1)
     fx.add("osc = Decimator.ar(osc, rate: 44100/crush, bits: bits)")
     fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()

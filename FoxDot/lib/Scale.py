@@ -151,7 +151,7 @@ class __scale__:
     dorian          = ScalePattern("dorian", [0,2,3,5,7,9,10])
 
     egyptian        = ScalePattern("egyptian", [0,2,5,7,10])
-    zgi             = ScalePattern("zhi", [0,2,5,7,9])
+    zhi             = ScalePattern("zhi", [0,2,5,7,9])
     phyrgian        = ScalePattern("phrygian", [0,1,3,5,7,8,10])
     prometheus      = ScalePattern("prometheus", [0,2,4,6,11])
     indian          = ScalePattern("indian", [0,4,5,7,10])
