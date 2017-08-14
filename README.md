@@ -34,11 +34,10 @@ $ git clone https://github.com/Qirky/FoxDot.git
 $ cd FoxDot
 $ python setup.py install
 ```
-- Open SuperCollder and install the FoxDot Quark (this allows FoxDot to communicate with SuperCollider) by entering the following and pressing `Ctrl+Return` (this evaluates a line of code):
+- Open SuperCollder and install the FoxDot Quark and its dependencies (this allows FoxDot to communicate with SuperCollider) by entering the following and pressing `Ctrl+Return` (Note: this requires [Git to be installed](http://git-scm.com/) on your machine if it is not already):
 ```supercollider
-Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
+Quarks.install("FoxDot")
 ```
-- Install the `BatLib` quark in SuperCollider by evaluating `include("BatLib")` in SuperCollider - this is required for the FoxDot Quark to run correctly (Requires [Git to be installed](http://git-scm.com/) on your machine if it is not already).
 - Recompile the SuperCollider class library by going to `Language -> Recompile Class Library` or pressing `Ctrl+Shift+L` 
 
 #### Startup
@@ -52,7 +51,6 @@ Quarks.install("https://github.com/Qirky/FoxDotQuark.git")
 
 ##### Buffer mismatch error
 If you are getting an error similar to "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider this just means that a mono audio file is being played back where SuperCollider was expecting stereo. Nothing to worry about!
-
 
 ## Basics
 
@@ -136,7 +134,7 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 
 ## Documentation
 
-For more information on FoxDot, please see the `docs` folder or go to http://foxdot.org/index.php/documentation/ (although largely unwritten)
+For more information on FoxDot, please see the `docs` folder (although largely unwritten).
 
 ## Thanks
 
