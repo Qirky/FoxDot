@@ -390,7 +390,7 @@ class TimeVar(Repeatable):
 
     def new(self, other):
         """ Returns a new TimeVar object """
-        new = self.__class__(other, self.dur, bpm=self.bpm)
+        new = TimeVar(other, self.dur, bpm=self.bpm)
         new.dependency = self
         return new
 
@@ -677,7 +677,6 @@ class _continuous_var(TimeVar):
 
     # Finding current values
     def now(self, time=None):
-
         time = self.current_time(time)
 
         loops = time // sum(self.dur)
