@@ -247,11 +247,15 @@ class workspace:
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
-        try:
-            self.root.mainloop()
-        except (KeyboardInterrupt, SystemExit):
-            execute("Clock.stop()")
-            execute("Server.quit()")
+        while True:
+            try:
+                self.root.mainloop()
+                break
+            except(UnicodeDecodeError):
+                pass
+            except (KeyboardInterrupt, SystemExit):
+                execute("Clock.stop()")
+                execute("Server.quit()")
         return
 
     def read(self):
