@@ -127,6 +127,8 @@ class workspace:
         self.y_scroll.config(command=self.text.yview)
         self.text.focus_set()
 
+        self.text_as_string = ""
+
         # Create box for line numbers
 
         self.linenumbers = LineNumbers(self.text, width=25,
@@ -245,17 +247,51 @@ class workspace:
         print(hello)
         print("-" * len(hello))
 
+        # Check temporary file
+
+        with open(FOXDOT_TEMP_FILE) as f:
+
+            text = f.read()
+
+        if len(text):
+
+            loading = tkMessageBox.askyesno("Load unsaved work?", "Your code wasn't saved last time you used FoxDot, do you want to load any unsaved work?")
+
+            if loading:
+
+                self.set_all(text)
+
+            else:
+
+                self.clear_temp_file()
+
     def run(self):
         """ Starts the Tk mainloop for the master widget """
         while True:
             try:
+                
                 self.root.mainloop()
                 break
+
+            # Temporary fix to unicode issues with Mac OS
             except(UnicodeDecodeError):
                 pass
+            
             except (KeyboardInterrupt, SystemExit):
+
+                # Clean exit
+                
                 execute("Clock.stop()")
                 execute("Server.quit()")
+                
+                break
+
+        # If the work has not been saved, store in a temporary file
+
+        if not self.saved:
+
+            self.set_temp_file(self.text_as_string)
+
         return
 
     def read(self):
@@ -296,6 +332,11 @@ class workspace:
             self.text.edit_separator()
 
             self.update(event)
+
+            # File is unsaved
+
+            self.saved = False
+            self.text_as_string = self.get_all()
 
         return "break"
 
@@ -469,6 +510,11 @@ class workspace:
                 f.close()
                 self.saved = True
                 print("Saved '{}'".format(self.filename))
+
+            # Remove tmp file
+
+            self.clear_temp_file()
+                
         return bool(self.filename)
 
     # Open save
@@ -1260,3 +1306,10 @@ class workspace:
         webbrowser.open("https://github.com/Qirky/FoxDot/tree/master/docs/FoxDot/lib")
         return
     
+    def set_temp_file(self, text):
+        with open(FOXDOT_TEMP_FILE, "w") as f:
+            f.write(text)
+        return
+
+    def clear_temp_file(self):
+        return

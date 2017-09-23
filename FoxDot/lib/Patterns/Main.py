@@ -27,6 +27,8 @@ def loop_pattern_func(f):
     new_function.argspec = inspect.getargspec(f)
     return new_function
 
+# TODO -- if it isn't looped, return the original if it is a group
+
 def loop_pattern_method(f):
     ''' Decorator for allowing any Pattern method to create
         multiple (or rather, longer) Patterns by using Patterns as arguments '''
@@ -90,6 +92,15 @@ class metaPattern(object):
             self.make()
             
     def __len__(self):
+        """ Returns the *expanded" length of the pattern. e.g. the following
+            are identical.
+            ```
+            >>> print( len(P[0,1,2,[3,4]]) )
+            8
+            >>> print( len(P[0,1,2,3,0,1,2,4]) )
+            8
+            ```
+        """
         lengths = [1] + [len(p) for p in self.data if isinstance(p, Pattern)]
         return LCM(*lengths) * len([item for item in self.data if not isinstance(item, EmptyItem)])
     
@@ -121,6 +132,11 @@ class metaPattern(object):
         return string
 
     def asGroup(self):
+        """ Returns the Pattern as a PGroup """
+        return PGroup(self.data)
+
+    def group(self):
+        """ Returns the Pattern as a PGroup """
         return PGroup(self.data)
 
     def convert_data(self, dtype=float):
@@ -128,9 +144,15 @@ class metaPattern(object):
         return self.true_copy([(item.convert_data(dtype) if isinstance(item, metaPattern) else dtype(item)) for item in self.data])
 
     def copy(self):
+        """ Returns a copy of the Pattern such that alterations to the
+            Pattern.data do not affect the original.
+        """
         return self.__class__(self.data[:])
 
     def true_copy(self, new_data=None):
+        """ Returns a copy of the Pattern such that items within the
+            Pattern hold the same state as the original.
+        """
         new = self.__class__()
         new.__dict__ = {key: value for key, value in self.__dict__.items()}
         if new_data is not None:
@@ -178,10 +200,12 @@ class metaPattern(object):
         self.data[key] = Format(value)
             
     def __iter__(self):
+        """ Returns a generator object for this Pattern """
         for i in range(len(self)):
             yield self.getitem(i)
 
     def items(self):
+        """ Returns a generator object equivalent to using enumerate() """
         for i, value in enumerate(self):
             yield i, value
 
@@ -204,6 +228,7 @@ class metaPattern(object):
     # Integer returning
     
     def count(self, item):
+        """ Returns the number of occurrences of item in the Pattern"""
         return self.data.count(item)
 
     """
@@ -236,6 +261,11 @@ class metaPattern(object):
         return abs(self)
 
     def __invert__(self):
+        """ Using the ~ symbol as a prefix to a Pattern will reverse it.
+            >>> a = P[:4]
+            >>> print(a, ~a)
+            P[0, 1, 2, 3], P[3, 2, 1, 0]
+        """
         return self.mirror()
 
     # Piping patterns together using the '|' operator
@@ -274,12 +304,47 @@ class metaPattern(object):
 
     # Methods that return augmented versions of original
 
-    def shuffle(self):
-        new = self.__class__(self.data[:])
-        shuffle(new.data)
-        return new
+    def shuffle(self, n=1):
+        """ Returns a new Pattern with shuffled contents. Note: nested patterns
+            stay together. To shuffle the contents of nested patterns, use
+            `deep_shuffle` or `true_shuffle`.
+        """
+        items = []
+
+        for i in range(n):
+            data = self.data[:]
+            shuffle(data)
+            items.extend(data)
+        return self.__class__(items)
+
+    def deep_shuffle(self, n=1):
+        """ Returns a new Pattern with shuffled contents and shuffles
+            any nested patterns. To shuffle the contents of nested patterns
+            with the rest of the Pattern's contents, use `true_shuffle`.
+        """
+        items = []
+        for i in range(n):
+            data = [(item if not isinstance(item, metaPattern) else item) for item in self.data[:]]
+            shuffle(data)
+            items.extend(data)
+        return self.__class__(items)
+
+    def true_shuffle(self, n=1):
+        """ Returns a new Pattern with completely shuffle contents such
+            that nested Patterns are shuffled within the larger Pattern
+        """
+        items = []
+        for i in range(n):
+            data = list(self)
+            shuffle(data)
+            items.extend(data)
+        return self.__class__(items)
 
     def reverse(self):
+        """ Reverses the contents of the Pattern. Nested patterns are
+            not reversed. To reverse the contents of nester patterns
+            use `Pattern.mirror()`
+        """
         new = self.__class__(self.data[:])
         new.data.reverse()
         return new
@@ -305,6 +370,14 @@ class metaPattern(object):
         return self.__class__(new)
 
     def stutter(self, n=2):
+        """ Returns a new Pattern with each item repeated by `n`. Use
+            a list of numbers for stutter different items by different
+            amount. e.g.
+            ```
+            >>> P[0, 1, 2, 3].stutter([1,3])
+            P[0, 1, 1, 1, 2, 3, 3, 3]
+            ```
+        """
         n = asStream(n)
         lrg = max(len(self.data), len(n))
         new = []
@@ -331,6 +404,8 @@ class metaPattern(object):
         return self.__class__(new)
 
     def invert(self):
+        """ Inverts the values with the Pattern.
+        """
         new = []
         lrg = float(max(self.data))
         for item in self.data:
@@ -362,6 +437,17 @@ class metaPattern(object):
         else:
             new = self.copy()
         return new
+
+    @loop_pattern_method
+    def accum(self, n=None):
+        """ Returns a Pattern that is equivalent to list of sums of that
+            Pattern up to that index."""
+        if n is None:
+            n = len(self)
+        new = [0]
+        for i in range(n-1):
+            new.append( new[-1] + self[i] )
+        return self.__class__(new)
 
     @loop_pattern_method
     def stretch(self, size):
@@ -442,6 +528,15 @@ class metaPattern(object):
 
     @loop_pattern_method
     def limit(self, func, value):
+        """ Returns a new Pattern generated by adding elements from
+            this Pattern to a new list and repeatedly calling
+            `func()` on this list until `func(l)` is greater than `value`
+            e.g.
+            ```
+            >>> print( P[0, 1, 2, 3].limit(sum, 10) )
+            P[0, 1, 2, 3, 0, 1, 2]
+            ```
+        """
         new = []
         i = 0
         while func(new) < value:
@@ -492,8 +587,13 @@ class metaPattern(object):
 
     # Changing the pattern in place
     
-    def append(self, item):
+    def extend(self, item):
         self[len(self):] = [item]
+        return self
+
+    def append(self, item):
+        self.data.append(item)
+        self.make()
         return self
     
     def i_rotate(self, n=1):

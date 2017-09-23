@@ -253,3 +253,37 @@ def PDur(n, k, start=0, dur=0.25):
 
     return pattern * dur
 
+@loop_pattern_func # forces it into a stream instead of Group
+def PDelay(*args):
+    return PDur(*args).accum().group() 
+
+
+def PRhythm(durations):
+    """ [1,(3,8)] -> [(1,2.75,3.5),2]
+    *work in progress*
+    """
+    if len(durations) == 1:
+        item = durations[0]
+        if isinstance(item, (tuple, PGroup)):
+            return PDur(*item)
+        else:
+            return durations
+    else:
+        durations = asStream(durations).data
+        output = Pattern()
+        delays = Pattern()
+        for i in range(len( asStream(durations).data ) ):
+            item = durations[i]
+            if isinstance(item, (list, Pattern)):
+                value = PRhythm(item)
+                delay = 0
+            elif isinstance(item, (tuple, PGroup)):
+                dur   = PDur(*item)
+                delay = dur.accum().group()
+                value = sum(dur)
+            else:
+                value = item
+                delay = 0
+            output.append(value)
+            delays.append(delay)
+        return output + delays.rotate(1)

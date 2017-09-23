@@ -228,6 +228,7 @@ fuzz.env = Env.ramp(amp=[1,1,0.01], sus=[fuzz.sus * 0.8, 0.01])
 fuzz.add()
 
 bug = SynthDef("bug")
+bug.defaults.update(rate=1)
 bug.amp = bug.amp / 5
 bug.osc = Pulse.ar([bug.freq, bug.freq * 1.0001], width=[0.09,0.16,0.25]) * SinOsc.ar(bug.rate * 4)
 bug.env = Env.perc(bug.sus * 1.5)

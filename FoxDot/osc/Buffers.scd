@@ -294,7 +294,8 @@ Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/dirty120
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/bill96.wav", bufnum:293);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/foxdot.wav", bufnum:298);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/break170.wav", bufnum:295);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/sparkfest.wav", bufnum:300);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/sparkfest.wav", bufnum:301);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/glass.wav", bufnum:299);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/billions.wav", bufnum:294);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/drums130.wav", bufnum:297);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/mojo.wav", bufnum:299);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/mojo.wav", bufnum:300);

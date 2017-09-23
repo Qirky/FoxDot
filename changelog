@@ -1,3 +1,13 @@
+### v0.4.7 fixes and updates
+
+- FoxDot is now Python 3 compatible, so make sure you treat your print statements as functions i.e. use `print("Hello, World!")`
+- Added `audioin` SynthDef for processing audio from the default recording device.
+- Fixed bugs relating to chaining multiple `every` methods and ending their call cycle when the parent player is stopped
+- Improved flexibility of referencing player attributes e.g.
+```
+p1 >> pads([0,1,2,3], dur=2).every(8, "stutter", 4, degree=p1.degree+[2,4,7])
+```
+
 ### v0.4 fixes and updates
 
 - FoxDot is now Python 3 compatible, so make sure you treat your print statements as functions i.e. use `print("Hello, World!")`

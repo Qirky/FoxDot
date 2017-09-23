@@ -1,3 +1,23 @@
+"""
+
+autodoc.py
+----------
+
+Import this module and generate documentation as .md files
+
+e.g.
+
+```
+from autodoc import *
+import FoxDot
+
+docs = GenerateDocs(FoxDot, 'docs')
+docs.write()
+```
+
+"""
+
+
 import inspect
 import pydoc
 import os.path
@@ -45,6 +65,8 @@ def getdetails(function, name=None):
 class GenerateDocs:
     def __init__(self, package, dir='docs'):
 
+        # Info on the package
+
         self.package = package
         self.name    = package.__name__
         self.root    = os.path.dirname(self.package.__file__)
@@ -59,6 +81,10 @@ class GenerateDocs:
         if not os.path.isdir(self.dir):
 
             self.makedir(self.dir)
+
+        # Create a sub folder containing all the files
+
+        self.dir = os.path.join(self.dir, "files")
         
         self.modules     = []
         self.subpackages = []
@@ -215,5 +241,5 @@ if __name__ == "__main__":
 
     import FoxDot
 
-    docs = GenerateDocs(FoxDot, 'docs')
+    docs = GenerateDocs(FoxDot, 'docs', title="FoxDot Documentation")
     docs.write()

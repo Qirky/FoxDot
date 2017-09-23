@@ -53,7 +53,7 @@ Used to store 'when statements'. Is accessed through the `__when__` object.
 
 #### Methods
 
-##### `__call__(self, func=None, **kwargs)`
+##### `__call__(self, name, **kwargs)`
 
 Calling when() with no arguments will evaluate all expressions
 stored in self.library. Calling with func as a valid function
@@ -71,18 +71,13 @@ Continual loop evaluating when_statements
 
 ---
 
-### `_whenStatement(self, func)`
+### `_whenStatement(self, func=<lambda>)`
 
 
 
 #### Methods
 
-##### `do(self, *instructions)`
-
-Set the instructions for when the test expression is True. Should
-be a list of strings. 
-
-##### `elsedo(self, *instructions)`
+##### `elsedo(self, func)`
 
 Set the instructions for when the test expression is False. Should
 be a list of strings. 
@@ -100,6 +95,11 @@ Sets the `when` and `else` actions to nothing
 
 Define the namespace to execute the actions. Should be a `dict` 
 
+##### `then(self, func)`
+
+Set the instructions for when the test expression is True. Should
+be a list of strings. 
+
 ##### `toggle_live_functions(self, switch)`
 
 If the action functions are @livefunctions, turn them on/off 
@@ -110,5 +110,5 @@ If the action functions are @livefunctions, turn them on/off
 
 ## Data
 
-#### `__when__ = []`
+#### `when = {}`
 

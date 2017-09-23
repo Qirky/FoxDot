@@ -16,7 +16,7 @@
 
 from __future__ import absolute_import, division, print_function
 
-from .Patterns import * # metaPattern, Pattern, asStream, PatternContainer, GeneratorPattern, PatternMethod
+from .Patterns import *
 from .Repeat import *
 from .Utils  import *
 from .Patterns.Operations import *
@@ -51,7 +51,7 @@ class TimeVar(Repeatable):
 
         self.name   = "un-named"
 
-        self.data   = values
+        self.data   = values # may have to change self.data to self.values
         self.time   = []
         self.dur    = dur
         self.bpm    = kwargs.get('bpm', None)
@@ -371,8 +371,7 @@ class TimeVar(Repeatable):
     # Storing functions etc
 
     def __call__(self, *args, **kwargs):
-        self.now().__call__(*args, **kwargs)
-        return
+        return self.now().__call__(*args, **kwargs)
 
     # Emulating container types 
 
@@ -449,7 +448,7 @@ class TimeVar(Repeatable):
 
     # Evaluation methods
  
-    def calculate(self, val):
+    def calculate(self, val): # maybe rename to resolve
         """ Returns val as modified by its dependencies """
         return self.evaluate(val, self.dependency)
 
@@ -661,13 +660,30 @@ class PvarGenerator(Pvar):
         if new_args != self.last_args:
             self.last_args = new_args
             self.last_data = self.func(*self.last_args)
-        return self.calculate(self.last_data)
+        pat = self.calculate(self.last_data)
+        return pat
 
     def new(self, other):
+        # new = Pvar([other]) # TODO -- test this
         new = self.__class__(lambda x: x, other)
         new.dependency = self
         return new
-    
+
+    def transform(self, func):
+        """ Returns a PvarGenerator based on a transformation on another, not just
+            a mathematical operation"""
+        new = self.new(0)
+        new.evaluate = func
+        return new
+
+class PvarGeneratorEx(PvarGenerator):
+    def __init__(self, func, *args):
+        self.func = func
+        self.args = list(args)
+        self.last_args = []
+        self.last_data = []
+        self.evaluate = fetch(Nil) 
+        self.dependency = 1
 
 class _continuous_var(TimeVar):
 
@@ -789,6 +805,7 @@ var = _var_dict()
 
 # Give Main.Pattern a reference to TimeVar class
 Pattern.TimeVar = TimeVar
+Pattern.PvarGenerator = PvarGenerator
 
 @PatternMethod
 def __getitem__(self, key):

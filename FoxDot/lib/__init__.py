@@ -92,3 +92,6 @@ FoxDotCode.namespace["_"] = EmptyItem()
 # Give the __when__ statement access to the  global namespace
 
 when.set_namespace(FoxDotCode)
+
+def Master():
+    return Group(*Clock.playing)

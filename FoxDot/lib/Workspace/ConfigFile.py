@@ -52,7 +52,7 @@ class Config:
 
     def save_changes(self):
         text = self.textbox.get("0.0", END)
-        f = open(self.filepath, "w")
+        f = open(self.filepath, "w") # writing a file
         f.write(text)
         f.close()
         self.root.destroy()

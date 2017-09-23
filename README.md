@@ -1,17 +1,21 @@
-FoxDot - Live Coding with Python v0.4.7
+FoxDot - Live Coding with Python v0.4.8
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.4.7 fixes and updates
+### v0.4.8 fixes and updates
 
-- FoxDot is now Python 3 compatible, so make sure you treat your print statements as functions i.e. use `print("Hello, World!")`
-- Added `audioin` SynthDef for processing audio from the default recording device.
-- Fixed bugs relating to chaining multiple `every` methods and ending their call cycle when the parent player is stopped
-- Improved flexibility of referencing player attributes e.g.
+- Unsaved work
+- Player objects can now take tuples as an argument, which delays the next event (similar to the `delay` argument but works with the following event)
+```python
+# The Player object uses the smallest duration in the tuple to move to the next event
+p1 >> pluck([0,1,2], dur=[1,1,(0.5,1)])
 ```
-p1 >> pads([0,1,2,3], dur=2).every(8, "stutter", 4, degree=p1.degree+[2,4,7])
-```
+- Pattern function `PRhythm` takes a list of single durations and tuples that contain values that can be supplied to the `PDur` e.g.
+```python
+# The following plays the hi hat with a Euclidean Rhythm of 3 pulses in 8 steps
+d1 >> play("x-o-", dur=PRhythm([2,(3,8)]))
+``` 
 
 ---
 
