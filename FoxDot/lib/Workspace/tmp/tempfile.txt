@@ -1,1 +1,3 @@
-p1 >> pluck([0,1,2,4], dur=[1,1,(0.5,1)])
+a = PRand([0,1], seed=1)
+
+print(PWhite(0,1, seed=4)[:10])

@@ -139,6 +139,8 @@ class metaPattern(object):
         """ Returns the Pattern as a PGroup """
         return PGroup(self.data)
 
+    # TODO -- this is super hacky vv
+
     def convert_data(self, dtype=float):
         """ Makes a true copy and converts the data to a given data type """
         return self.true_copy([(item.convert_data(dtype) if isinstance(item, metaPattern) else dtype(item)) for item in self.data])
@@ -162,23 +164,25 @@ class metaPattern(object):
     # Pattern container methods
  
     def __getitem__(self, key):
-        """ Place holder replaced in FoxDot.lib.TimeVar """
+        """ Calls self.getitem. Is overridden in `FoxDot.lib.TimeVar`
+            for indexing with TimeVars """
         return self.getitem(key)
 
     def getitem(self, key):
         """ Is called by __getitem__ """
+        # We can get multiple values by indexing with a pattern or tuple
         if isinstance(key, (metaPattern, tuple)):
             val = self.__class__([self.getitem(n) for n in key])
+        # We can get items using a slice
         elif isinstance(key, slice):
             val = self.__getslice__(key.start,  key.stop, key.step)
         else:
+            # Get the "nested" single value
             i = key % len(self.data)
             val = self.data[i]
-            if isinstance(val, Pattern):
-                j = key // len(self.data)
+            if isinstance(val, (Pattern, GeneratorPattern)):
+                j   = key // len(self.data)
                 val = val.getitem(j)
-            elif isinstance(val, GeneratorPattern):
-                val = val.getitem()
         return val
     
     def __setitem__(self, key, value):
@@ -642,18 +646,24 @@ class metaPattern(object):
         return Pattern(self.data + asStream(pattern).data)
 
     def zip(self, other):
+        """ Returns a `Pattern` of `PGroups`, where each `PGroup` contains the i-th
+            element from each of the argument sequences. The length of the pattern
+            is the lowest common multiple of the lengths of the two joining patterns. """
         new = []
         other = asStream(other)
-        for i in range(LCM(len(self), len(other))):
-            new.append((self[i], other[i]))
+        for i in range(LCM(len(self.data), len(other.data))):
+            item1 = self.data[i % len(self.data)]
+            item2 = other.data[i % len(other.data)]
+            new.append((item1, item2))
         return self.__class__(new)
+
     
     def deepzip(self, other):
         new = []
         other = asStream(other)
-        for i in range(LCM(len(self), len(other))):
-            p1 = self[i]
-            p2 = other[i]
+        for i in range(LCM(len(self.data), len(other.data))):
+            p1 = self.data[i % len(self.data)]
+            p2 = other.data[i % len(other.data)]
             if isinstance(p1, metaPattern):
                 value = p1.deepzip(p2)
             elif isinstance(p2, metaPattern):
@@ -666,9 +676,9 @@ class metaPattern(object):
     def deeprzip(self, other):
         new = []
         other = asStream(other)
-        for i in range(LCM(len(self), len(other))):
-            p1 = self[i]
-            p2 = other[i]
+        for i in range(LCM(len(self.data), len(other.data))):
+            p1 = self.data[i % len(self.data)]
+            p2 = other.data[i % len(other.data)]
             if isinstance(p1, metaPattern):
                 value = p1.deeprzip(p2)
             elif isinstance(p2, metaPattern):
@@ -733,14 +743,22 @@ class PGroup(metaPattern):
     
     bracket_style = "()"
 
-    def __init__(self, data=[], *args):
-        if not args:
-            if isinstance(data, (PGroup, tuple)):
-                data = list(data)
-        else:
-            data = [data] + list(args)
+    def __init__(self, seq=[], *args):
 
-        metaPattern.__init__(self, data)
+        if not args:
+            
+            if isinstance(seq, metaPattern):
+
+                seq = seq.data
+
+            elif isinstance(seq, tuple):
+
+                seq = list(seq)
+        else:
+
+            seq = [seq] + list(args)
+
+        metaPattern.__init__(self, seq)
 
         # If the PGroup contains patterns, invert it to a Pattern of PGroups
         
@@ -760,6 +778,7 @@ class PGroup(metaPattern):
 
     def force_values(self):
         """ Recursively (in place) forces changeable values into non-changeable """
+        # todo-get rid of this
         data = []
         for item in self:
             if isinstance(item, PGroup):
@@ -798,6 +817,7 @@ class PGroup(metaPattern):
         return 0
 
     def calculate_time(self, dur):
+        """ TODO - fix me """
         values = []
         step  = self.calculate_step(dur)
         for i, item in enumerate(self):
@@ -821,37 +841,65 @@ class PGroup(metaPattern):
         else:
             return False
 
-class GeneratorPattern(object):
+import random
+
+class GeneratorPattern(random.Random):
     """
         Used for when a Pattern does not generate a set length pattern,
         e.g. random patterns
     """
-    MAX_SIZE = 2048
-    def __init__(self):
+    def __new__(cls, *args, **kwargs):
+        """ Override random.Random using first argument as a seed """
+        return super(GeneratorPattern, cls).__new__ (cls)
+
+    def __init__(self, **kwargs):
+
+        random.Random.__init__(self)
+
+        # Set the seed if a random pattern
+        
+        if kwargs.get("seed", None) is not None:
+            
+            self.seed(kwargs["seed"])
+            
         self.mod = Pattern()
         self.mod_functions = []
         self.name  = self.__class__.__name__
+        self.parent = None
+        self.last_value = None
         self.data  = []
         self.index   = 0
         self.history = {}
 
     def __repr__(self):
+        """ String version is the name of the class and its arguments """
         return "{}({})".format(self.name, self.data)
         
     def getitem(self, index=None):
-        """ Calls self.func(index) to get an item, and also calculates
-            performs any arithmetic operation assigned """
+        """ Calls self.func(index) to get an item if index is not in
+            self.history, otherwise returns self.history[index] """
         if index is None:
             index, self.index = self.index, self.index + 1
+        # If we have already accessed by this index, return the value
         if index in self.history:
             return self.history[index]
-        # Calculate value
-        value = self.func(index)
-        for i, func in enumerate(self.mod_functions):
-            value = func(value, modi(modi(self.mod, i), index))
-        # Store if we refer to the same index
-        self.history[index] = value
-        return value
+        else:
+            # Calculate new value
+            value = self.func(index)
+            # Store if we refer to the same index
+            self.history[index] = value
+            return value
+
+    def new(self, other, func=Nil):
+        """ Creates a new `GeneratorPattern` that references
+            this pattern but returns a modified value based on
+            func. """
+        new = GeneratorPattern()
+        new.parent = self
+        new.name   = new.parent.name
+        new.data   = "{} {}".format(func.__name__, other)
+        new.func   = lambda index: func(new.parent.getitem(index), other)
+        return new
 
     def func(self, index):
         return index
@@ -884,20 +932,7 @@ class GeneratorPattern(object):
     def __rdiv__(self, other):
         return self.new(other, rDiv)
     def __rtruediv__(self, other):
-        return self.new(other, rDiv)
-
-    def new(self, other, func=Nil):
-        # Create and empty GeneratorPattern
-        new = GeneratorPattern()
-        # Give it a list of previous mod_functions
-        new.mod_functions = self.mod_functions + [func]
-        # Update the base function to be the same
-        new.func = self.func
-        # Update it's list of modifying values
-        new.mod  = Pattern([item for item in self.mod])
-        new.mod.append(tuple(asStream(other)))
-        return new
-        
+        return self.new(other, rDiv)        
     # Container methods
     def __iter__(self):
         for i in range(self.MAX_SIZE):
@@ -977,8 +1012,6 @@ def group_modi(pgroup, index):
     if isinstance(pgroup, (int, float, str, bool)):
         return pgroup
     try:
-        sub_index = index // len(pgroup)
-        mod_index = int(sub_index / pattern_depth(pgroup))
-        return group_modi(pgroup[index % len(pgroup)], mod_index)
+        return group_modi(pgroup[index % len(pgroup)], index // len(pgroup))
     except(TypeError, AttributeError, ZeroDivisionError):
         return pgroup

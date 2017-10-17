@@ -5,7 +5,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 
 ### v0.4.8 fixes and updates
 
-- Unsaved work
+- Unsaved work is stored in a temporary filed that can be loaded on the next startup.
 - Player objects can now take tuples as an argument, which delays the next event (similar to the `delay` argument but works with the following event)
 ```python
 # The Player object uses the smallest duration in the tuple to move to the next event
@@ -16,7 +16,8 @@ p1 >> pluck([0,1,2], dur=[1,1,(0.5,1)])
 # The following plays the hi hat with a Euclidean Rhythm of 3 pulses in 8 steps
 d1 >> play("x-o-", dur=PRhythm([2,(3,8)]))
 ``` 
-
+- Fixed issues with indexing `GeneratorPattern` and using `var`s in Player methods.
+- Random `GeneratorPattern` objects, such as `PRand` can take a `seed` keyword that will give you the same sequence of values for the same value of seed (must be an integer). 
 ---
 
 ## Installation and startup

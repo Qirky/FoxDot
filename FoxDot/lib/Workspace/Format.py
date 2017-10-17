@@ -123,7 +123,7 @@ foxdot_funcs = classes(Main) + classes(Generators) + functions(Sequences) + ["P"
 py_indent_kw = ["for","if","elif","else","def","while","class","try","except"]
 
 py_functions = ["if","elif","else","return","def","print","when","from",
-                 "and","or","not","is","in","for","as","with",
+                 "and","or","not","is","in","for","as","with", "global",
                  "while", "class", "import", "try","except","from"]
 
 py_other_kws = foxdot_kw + ["True", "False", "None", "self"]

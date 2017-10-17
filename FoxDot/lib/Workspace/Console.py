@@ -42,7 +42,7 @@ class console:
         self.canvas = Canvas(self.root,
                              bg="black",
                              bd=0,
-                             height=200,
+                             height=300,
                              yscrollincrement=1,
                              highlightthickness=0)
 

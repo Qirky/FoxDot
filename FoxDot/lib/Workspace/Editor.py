@@ -3,7 +3,15 @@
 
 from __future__ import absolute_import, division, print_function
 
-""" Tkinter interface made for Live Coding with Python syntax highlighting """  
+""" Tkinter interface made for Live Coding with Python syntax highlighting """
+
+
+# This removed blurry fonts on Windows
+try:
+    from ctypes import windll
+    windll.shcore.SetProcessDpiAwareness(1)
+except:
+    pass
 
 # Tkinter Interface
 
@@ -131,7 +139,7 @@ class workspace:
 
         # Create box for line numbers
 
-        self.linenumbers = LineNumbers(self.text, width=25,
+        self.linenumbers = LineNumbers(self.text, width=50,
                                        bg=colour_map['background'],
                                        bd=0, highlightthickness=0 )
         

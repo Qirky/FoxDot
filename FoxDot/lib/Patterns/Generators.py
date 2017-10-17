@@ -2,23 +2,22 @@ from __future__ import absolute_import, division, print_function
 
 from .Main  import GeneratorPattern, Pattern, asStream
 
-import random
-
 class PRand(GeneratorPattern):
     ''' Returns a random integer between start and stop. If start is a container-type it returns
         a random item for that container. '''
-    def __init__(self, start, stop=None):
-        GeneratorPattern.__init__(self)
-        self.choosing = False
+    def __init__(self, start, stop=None, **kwargs):
+        GeneratorPattern.__init__(self, **kwargs)
+        # If we're given a list, choose from that list
         if hasattr(start, "__iter__"):
             self.data = Pattern(start)
             try:
-                assert(len(self.data)>1)
+                assert(len(self.data)>0)
             except AssertionError:
-                raise AssertionError("{}: Argument size must be greater than 1".format(self.name))
+                raise AssertionError("{}: Argument size must be greater than 0".format(self.name))
             self.choosing = True
             self.low = self.high = None
         else:
+            self.choosing = False
             self.low  = start if stop is not None else 0
             self.high = stop  if stop is not None else start
             try:
@@ -29,9 +28,9 @@ class PRand(GeneratorPattern):
             
     def func(self, index):
         if self.choosing:
-            value = random.choice(self.data)
+            value = self.choice(self.data)
         else:
-            value = random.randint(self.low, self.high)
+            value = self.randint(self.low, self.high)
         return value
 
     def string(self):
@@ -47,8 +46,8 @@ class PxRand(PRand):
         return self.last_value
 
 class PwRand(GeneratorPattern):
-    def __init__(self, values, weights):
-        GeneratorPattern.__init__(self)
+    def __init__(self, values, weights, **kwargs):
+        GeneratorPattern.__init__(self, **kwargs)
         try:
             assert(all(type(x) == int for x in weights))
         except AssertionError:
@@ -59,15 +58,23 @@ class PwRand(GeneratorPattern):
         self.items   = self.data.stutter(self.weights)
 
     def func(self, index):
-        return random.choice(self.items)     
+        return self.choice(self.items)     
 
 class PChain(GeneratorPattern):
-    def __init__(self, mapping):
-        GeneratorPattern.__init__(self)
-        self.mapping = mapping
-        self.last_value = self.mapping[self.mapping.keys()[0]][0]
+    def __init__(self, mapping, **kwargs):
+        GeneratorPattern.__init__(self, **kwargs)
+        self.last_value = 0
+        self.mapping = {}
+        i = 0
+        for key, value in mapping.items():
+            self.mapping[key] = asStream(value)
+            # Use the first key to start with
+            if i == 0:
+                self.last_value = key
+                i += 1
+                
     def func(self, index):
-        self.last_value = random.choice(self.mapping[self.last_value])
+        self.last_value = self.choice(self.mapping[self.last_value])
         return self.last_value
 
 class PTree(GeneratorPattern):
@@ -76,8 +83,8 @@ class PTree(GeneratorPattern):
         must take a container-type and return a single value. In essence you are creating a
         tree based on the f(n) where n is the last value chosen by choose.
     """
-    def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x)):
-        GeneratorPattern.__init__(self)
+    def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x), **kwargs):
+        GeneratorPattern.__init__(self, **kwargs)
         self.f  = f
         self.choose = choose
         self.values = [n]
@@ -87,9 +94,9 @@ class PTree(GeneratorPattern):
         return self.values[-1]
 
 class PWalk(GeneratorPattern):
-    def __init__(self, max=7, step=1, start=0):
+    def __init__(self, max=7, step=1, start=0, **kwargs):
 
-        GeneratorPattern.__init__(self)
+        GeneratorPattern.__init__(self, **kwargs)
         
         self.max   = abs(max)
         self.min   = self.max * -1
@@ -112,20 +119,20 @@ class PWalk(GeneratorPattern):
             elif self.last_value <= self.min: # force addition
                 f = self.directions[0]
             else:
-                f = random.choice(self.directions)
+                f = self.choice(self.directions)
             self.last_value = f(self.last_value, self.step.choose())
         return self.last_value   
 
 class PWhite(GeneratorPattern):
     ''' Returns random floating point values between 'lo' and 'hi' '''
-    def __init__(self, lo=0, hi=1):
-        GeneratorPattern.__init__(self)
+    def __init__(self, lo=0, hi=1, **kwargs):
+        GeneratorPattern.__init__(self, **kwargs)
         self.low = float(lo)
         self.high = float(hi)
         self.mid = (lo + hi) / 2.0
         self.data = "{}, {}".format(self.low, self.high)
     def func(self, index):
-        return random.triangular(self.low, self.high, self.mid)
+        return self.triangular(self.low, self.high, self.mid)
 
 class PSquare(GeneratorPattern):
     ''' Returns the square of the index being accessed '''

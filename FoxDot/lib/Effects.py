@@ -212,12 +212,12 @@ fx = FxList.new("vib", "vibrato", {"vib": 0, "vibdepth": 0.02}, order=0)
 fx.add("osc = Vibrato.ar(osc, vib, depth: vibdepth)")
 fx.save()
 
-fx = FxList.new("slide", "slideTo", {"slide":0, "sus":1}, order = 0)
-fx.add("osc = Line.ar(osc, osc * (slide + 1), sus)")
+fx = FxList.new("slide", "slideTo", {"slide":0, "sus":1, "slidedelay": 0.75}, order = 0)
+fx.add("osc = osc * EnvGen.ar(Env([1, 1, slide + 1], [sus*slidedelay, sus*(1-slidedelay)]))")
 fx.save()
 
-fx = FxList.new("slidefrom", "slideFrom", {"slidefrom": 0, "sus": 1}, order=0)
-fx.add("osc = Line.ar(osc * slidefrom, osc, sus)")
+fx = FxList.new("slidefrom", "slideFrom", {"slidefrom": 0, "sus": 1, "slidedelay": 0.75}, order=0)
+fx.add("osc = osc * EnvGen.ar(Env([slidefrom + 1, slidefrom + 1, 1], [sus*slidedelay, sus*(1-slidedelay)]))")
 fx.save()
 
 fx = FxList.new("coarse", "coarse", {"coarse": 0, "sus": 1}, order=0)

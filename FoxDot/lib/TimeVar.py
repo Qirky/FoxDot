@@ -1,16 +1,5 @@
 """
-    Time-Dependent Variable Base Class
-    ==================================
-
-    - Function of time
-    - Duck typing
-
-    - Explain inf stages: 0, 1, 2, 3
-
-        - Stage 0: No inf value present
-        - Stage 1: inf value is present but other values haven't been accessed yet
-        - Stage 2: Starting values have been accessed so we are free to return a value for inf duration
-        - State 3: Returning the inf value
+    Time-Dependent Variables (TimeVar)
 
 """
 
@@ -40,6 +29,7 @@ class TimeVar(Repeatable):
     """ Var(values [,durs=[4]]) """
 
     metro = None
+    depth = 128
 
     def __init__(self, values, dur=None, **kwargs):
 
@@ -51,13 +41,9 @@ class TimeVar(Repeatable):
 
         self.name   = "un-named"
 
-        self.data   = values # may have to change self.data to self.values
-        self.time   = []
+        self.values   = values # may have to change self.values to self.values
         self.dur    = dur
         self.bpm    = kwargs.get('bpm', None)
-
-        self.inf_found = _inf.zero
-        self.inf_value = None
 
         # Dynamic method for calculating values
         self.func     = Nil
@@ -69,6 +55,8 @@ class TimeVar(Repeatable):
         self.current_value = None
         self.current_index = None
         self.next_value    = None
+
+        self.proportion    = 0
 
         self.current_time_block  = None
 
@@ -86,7 +74,7 @@ class TimeVar(Repeatable):
     def CreatePvarGenerator(func, *args):
         return PvarGenerator(func, *args)
 
-    # Standard Methods
+    # Standard dunder methods 
     def __str__(self):
         return str(self.now())
     def __repr__(self):
@@ -102,18 +90,19 @@ class TimeVar(Repeatable):
 
     # For printing the details
     def info(self):
-        return "<{}({}, {})>".format(self.__class__.__name__, repr(self.values()), repr(self.durs()))
+        return "<{}({}, {})>".format(self.__class__.__name__, repr(self.get_values()), repr(self.get_durs()))
 
     def all_values(self):
-        return self.data + [self.dependency]
+        """ Displays the values and the dependency value - useful for debugging """
+        return self.value + [self.dependency]
 
     def _bpm_cycle_dur(self):
         """ Returns the time, in seconds, for a var to loop to its original
             value and duration if this var is a bpm value. """
-        return sum([(self.dur[i] / self.data[i]) for i in range(LCM(len(self.dur), len(self.data)) )]) * 60
+        return sum([(self.dur[i] / self.values[i]) for i in range(LCM(len(self.dur), len(self.values)) )]) * 60
 
     def _bpm_to_beats(self, duration, start=0):
-        """ If self.data are series of bpm, how many beats occur in
+        """ If self.values are series of bpm, how many beats occur in
             the time frame 'duration'. Used in TempoClock """
 
         cycle_dur = self._bpm_cycle_dur()
@@ -132,15 +121,15 @@ class TimeVar(Repeatable):
 
             # Work out their durations and sub from 'r' until 0
 
-            seconds = (self.dur[i]/ self.data[i]) * 60.0
+            seconds = (self.dur[i]/ self.values[i]) * 60.0
 
-            offset  = (start / self.data[i]) * 60.0
+            offset  = (start / self.values[i]) * 60.0
 
             seconds = seconds - offset
 
             if seconds > 0:
                 
-                beats = (self.data[i] * min(seconds, r)) / 60.0
+                beats = (self.values[i] * min(seconds, r)) / 60.0
                 r    -= seconds
                 start = 0
                 total += beats
@@ -151,239 +140,6 @@ class TimeVar(Repeatable):
 
             i += 1
         return total
-        
-    # Mathematical Operators
-    # ----------------------
-    # Only resolve to a new TimeVar if a var, int, or float
-
-    # + 
-    def __add__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other + item for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self + x for x in other))
-            else:
-                return other.__radd__(self)
-        new = self.new(other)
-        new.evaluate = fetch(Add)
-        return new
-    
-    def __radd__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[item + other for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x + self for x in other))
-            else:
-                return other.__add__( self)
-        new = self.new(other)
-        new.evaluate = fetch(rAdd)
-        return new
-
-    # -
-    def __sub__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[item - other for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self - x for x in other))
-            else:
-                return other.__rsub__(self)
-        new = self.new(other)
-        new.evaluate = fetch(rSub)
-        return new
-    def __rsub__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other - item for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x - self for x in other))
-            else:
-                return other.__sub__(self)
-        new = self.new(other)
-        new.evaluate = fetch(Sub)
-        return new
-
-    # *
-    def __mul__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[item * other for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self * x for x in other))
-            else:
-                return other.__rmul__(self)
-        new = self.new(other)
-        new.evaluate = fetch(Mul)
-        return new
-    
-    def __rmul__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other * item for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x * self for x in other))
-            else:
-                return other.__mul__(self)
-        new = self.new(other)
-        new.evaluate = fetch(Mul)
-        return new
-
-    # **
-
-    def __pow__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[item ** other for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self ** x for x in other))
-            else:
-                return other.__rpow__(self)
-        new = self.new(other)
-        new.evaluate = fetch(rPow)
-        return new
-
-    def __rpow__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other ** item for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x ** self for x in other))
-            else:
-                return other.__pow__(self)
-        
-        new = self.new(other)
-        new.evaluate = fetch(Pow)
-        return new
-    ####### todo - integer division doesn't seem to work
-    # //
-    def __floordiv__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[item / other for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self // x for x in other))
-            else:
-                return other.__rfloordiv__(self)
-        new = self.new(other)
-        new.evaluate = fetch(rFloorDiv)
-        return new
-    
-    def __rfloordiv__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other / item for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x // self for x in other))
-            else:
-                return other.__floordiv__(self)
-        new = self.new(other)
-        new.evaluate = fetch(FloorDiv)
-        return new
-
-    # /
-    def __truediv__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[item / other for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self / x for x in other))
-            else:
-                return other.__rtruediv__(self)
-        new = self.new(other)
-        new.evaluate = fetch(rDiv)
-        return new
-    
-    def __rtruediv__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other / item for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x / self for x in other))
-            else:
-                return other.__truediv__(self)
-        new = self.new(other)
-        new.evaluate = fetch(Div)
-        return new
-
-    # Incremental operators (use in place of var = var + n)
-    def __iadd__(self, other):
-        self.data = self.data + other
-        return self
-    def __isub__(self, other):
-        self.data = self.data - other
-        return self
-    def __imul__(self, other):
-        self.data = self.data * other
-        return self
-    def __idiv__(self, other):
-        self.data = self.data / other
-        return self
-
-    # Comparisons
-
-    def __gt__(self, other):
-        return float(self.now()) > float(other)
-
-    def __lt__(self, other):
-        return float(self.now()) < float(other)
-
-    def __ge__(self, other):
-        return float(self.now()) >= float(other)
-
-    def __le__(self, other):
-        return float(self.now()) >= float(other)
-
-    # %
-    def __mod__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other.__rmod__(item) for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x.__rmod__(self) for x in other))
-            else:
-                return other.__rmod__(self)
-        new = self.new(other)
-        new.evaluate = fetch(rMod)
-        return new
-
-    def __rmod__(self, other):
-        # Run an assertion to make sure all values are valid
-        #[other.__mod__(item) for item in self.all_values()]
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x.__mod__(self) for x in other))
-            else:
-                return other.__mod__(self)
-        new = self.new(other)
-        new.evaluate = fetch(Mod)
-        return new
-
-    #  Comparisons
-
-    def __eq__(self, other):
-        return other == self.now()
-
-    def __ne__(self, other):
-        return other != self.now()
-
-    # Storing functions etc
-
-    def __call__(self, *args, **kwargs):
-        return self.now().__call__(*args, **kwargs)
-
-    # Emulating container types 
-
-    def __getitem__(self, other):
-        new = self.new(other)
-        new.dependency = self
-        new.evaluate = fetch(rGet)
-        return new
-
-    def __iter__(self):
-        for item in self.now():
-            yield item
 
     # Update methods
 
@@ -397,45 +153,32 @@ class TimeVar(Repeatable):
         """ Returns the duration of one full cycle in beats """
         return self.time[-1][1]
 
-    def __rshift__(self, other):
-        """ var >> var([0,1,2,3],[4,8])
-            var >> ([0,1,2,3],[4,8])
-        """
-        if type(other) == type(self):
-            values = other.data
-            dur    = other.dur
-
-        elif type(other) is tuple:
-            values, dur = other
-            
-        else:
-            print("Invalid arguments")
-            return self
-
-        self.update(values, dur)
-        return self
-
     def update(self, values, dur=None, **kwargs):
-        """ Updates the TimeVar with new values """
+        """ Updates the TimeVar with new values. If `dur` is a `GeneratorPattern`
+            type, then it is converted to a normal `Pattern` of length `TimeVar.depth`,
+            which is 128 by default but can be changed.
+        """
 
         self.bpm = kwargs.get('bpm', self.bpm)
 
         # if isinstance(values, str): values = [values]
 
-        self.data = []
+        self.values = []
         self.time = []
 
         #: Update the durations of each state
 
         if dur is not None:
 
-            self.dur = asStream(dur)
+            if isinstance(dur, GeneratorPattern):
 
-            if any([isinstance(i, _inf) for i in self.dur]):
+                self.dur = dur[:self.depth]
 
-                self.inf_found = _inf.here
+            else:
 
-        self.data = self.stream(values)
+                self.dur = asStream(dur)
+
+        self.values = self.stream(values)
         
         a, b = 0, 0
         
@@ -458,53 +201,82 @@ class TimeVar(Repeatable):
             beat = self.metro.now()
         if self.bpm is not None:
             beat *= (self.bpm / float(self.metro.bpm))
-        return beat
+        return float(beat)
 
-    # Finding current values
-    def now(self, time=None):
+    def get_current_index(self, time=None):
+        """ Returns the index of the value currently represented """
+
+        # Get the time value if not from the Clock
 
         time = self.current_time(time)
 
-        loops = time // sum(self.dur)
-        time  = time - (loops * sum(self.dur))
+        # Work out how many cycles have already passed
 
-        index = int(loops * len(self.dur))
+        total_dur = float(sum(self.dur))
 
-        for i in range(len(self.dur)):
+        loops = time // total_dur
 
-            time_block = self.time[i]
-            
-            if time_block[0] <= time < time_block[1]:
+        # And therefore how much time we are into one cycle
+        
+        time  = time - (loops * total_dur)
 
-                i = i + index
-                self.current_value = self.calculate(self.data[i])
+        # And how many events have passed
+
+        total_events = int(loops * len(self.dur))
+
+        count = 0
+
+        for i, value in enumerate(self.dur):
+
+            acc = count + value
+
+            if acc > time:
+
+                i = i + total_events
 
                 break
+
+            else:
+
+                count = acc
+        else:
+
+            i = i + total_events
+
+        # Store the % way through this value's time
+
+        self.proportion = (float(time % total_dur) - count) / (acc - count)
             
+        return i
+
+    def now(self, time=None):
+        """ Returns the value currently represented by this TimeVar """
+        i = self.get_current_index(time)
+        self.current_value = self.calculate(self.values[i])
         return self.current_value
 
     def copy(self):
-        new = var(self.data, self.dur, bpm=self.bpm)
+        new = var(self.values, self.dur, bpm=self.bpm)
         return new
                    
-    def durs(self):
+    def get_durs(self):
         return self.dur
 
-    def values(self):
-        return self.data
+    def get_values(self):
+        return self.values
 
     # 1. Methods that change the 'var' in place
     def i_invert(self):
-        lrg = float(max(self.data))
-        for i, item in enumerate(self.data):
-            self.data[i] = (((item / lrg) * -1) + 1) * lrg
+        lrg = float(max(self.values))
+        for i, item in enumerate(self.values):
+            self.values[i] = (((item / lrg) * -1) + 1) * lrg
         return
         
 
     # Method that return an augmented NEW version of the 'var'
 
     def invert(self):
-        new = self.new(self.data)
+        new = self.new(self.values)
         lrg = float(max(new.data))
         for i, item in enumerate(new.data):
             new.data[i] = (((item / lrg) * -1) + 1) * lrg
@@ -512,20 +284,239 @@ class TimeVar(Repeatable):
 
     def lshift(self, duration):
         time = [self.dur[0]-duration] + list(self.dur[1:]) + [duration]
-        return self.__class__(self.data, time)        
+        return self.__class__(self.values, time)        
 
     def rshift(self, duration):
         time = [duration] + list(self.dur[:-1]) + [self.dur[-1]-duration]
-        data = [self.data[-1]] + list(self.data)
+        data = [self.values[-1]] + list(self.values)
         return self.__class__(data, time)
 
     def extend(self, values, dur=None):
-        data = list(self.data) + list(values)
+        data = list(self.values) + list(values)
         durs = self.dur if not dur else list(self.dur) + list(asStream(dur))
         return self.__class__(data, durs)
 
     def shuf(self):
         pass
+
+    # Mathmetical operators
+    
+    def __add__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((self + x for x in other))
+            else:
+                return other.__radd__(self)
+        new = self.new(other)
+        new.evaluate = fetch(Add)
+        return new
+    
+    def __radd__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x + self for x in other))
+            else:
+                return other.__add__( self)
+        new = self.new(other)
+        new.evaluate = fetch(rAdd)
+        return new
+
+    def __sub__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((self - x for x in other))
+            else:
+                return other.__rsub__(self)
+        new = self.new(other)
+        new.evaluate = fetch(rSub)
+        return new
+    def __rsub__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x - self for x in other))
+            else:
+                return other.__sub__(self)
+        new = self.new(other)
+        new.evaluate = fetch(Sub)
+        return new
+
+    # *
+    def __mul__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((self * x for x in other))
+            else:
+                return other.__rmul__(self)
+        new = self.new(other)
+        new.evaluate = fetch(Mul)
+        return new
+    
+    def __rmul__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x * self for x in other))
+            else:
+                return other.__mul__(self)
+        new = self.new(other)
+        new.evaluate = fetch(Mul)
+        return new
+
+    def __pow__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((self ** x for x in other))
+            else:
+                return other.__rpow__(self)
+        new = self.new(other)
+        new.evaluate = fetch(rPow)
+        return new
+
+    def __rpow__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x ** self for x in other))
+            else:
+                return other.__pow__(self)
+        
+        new = self.new(other)
+        new.evaluate = fetch(Pow)
+        return new
+
+    # //
+    def __floordiv__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((self // x for x in other))
+            else:
+                return other.__rfloordiv__(self)
+        new = self.new(other)
+        new.evaluate = fetch(rFloorDiv)
+        return new
+    
+    def __rfloordiv__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x // self for x in other))
+            else:
+                return other.__floordiv__(self)
+        new = self.new(other)
+        new.evaluate = fetch(FloorDiv)
+        return new
+
+    # /
+    def __truediv__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((self / x for x in other))
+            else:
+                return other.__rtruediv__(self)
+        new = self.new(other)
+        new.evaluate = fetch(rDiv)
+        return new
+    
+    def __rtruediv__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x / self for x in other))
+            else:
+                return other.__truediv__(self)
+        new = self.new(other)
+        new.evaluate = fetch(Div)
+        return new
+
+    # Incremental operators (use in place of var = var + n)
+    def __iadd__(self, other):
+        self.values = self.values + other
+        return self
+    def __isub__(self, other):
+        self.values = self.values - other
+        return self
+    def __imul__(self, other):
+        self.values = self.values * other
+        return self
+    def __idiv__(self, other):
+        self.values = self.values / other
+        return self
+
+    # Comparisons
+
+    def __gt__(self, other):
+        return float(self.now()) > float(other)
+
+    def __lt__(self, other):
+        return float(self.now()) < float(other)
+
+    def __ge__(self, other):
+        return float(self.now()) >= float(other)
+
+    def __le__(self, other):
+        return float(self.now()) >= float(other)
+
+    # %
+    def __mod__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__rmod__(self) for x in other))
+            else:
+                return other.__rmod__(self)
+        new = self.new(other)
+        new.evaluate = fetch(rMod)
+        return new
+
+    def __rmod__(self, other):
+        if not isinstance(other, (TimeVar, int, float)):
+            if type(other) in (tuple, list):
+                return other.__class__((x.__mod__(self) for x in other))
+            else:
+                return other.__mod__(self)
+        new = self.new(other)
+        new.evaluate = fetch(Mod)
+        return new
+
+    #  Comparisons
+
+    def __eq__(self, other):
+        return other == self.now()
+
+    def __ne__(self, other):
+        return other != self.now()
+
+    # Storing functions etc
+
+    def __call__(self, *args, **kwargs):
+        """ A TimeVar can store functions and will call the current item with this method """
+        return self.now().__call__(*args, **kwargs)
+
+    # Emulating container types 
+
+    def __getitem__(self, other):
+        new = self.new(other)
+        new.dependency = self
+        new.evaluate = fetch(rGet)
+        return new
+
+    def __iter__(self):
+        for item in self.now():
+            yield item
+
+
+class linvar(TimeVar):
+    def now(self, time=None):
+        """ Returns the value currently represented by this TimeVar """
+        i = self.get_current_index(time)
+        self.current_value = self.calculate(self.values[i])
+        self.next_value    = self.calculate(self.values[i + 1])
+        return self.get_timevar_value()
+
+    def get_timevar_value(self):
+        return (self.current_value * (1-self.proportion)) + (self.next_value * self.proportion)
+
+class expvar(linvar):
+    def get_timevar_value(self, prop):
+        self.proportion *= self.proportion
+        return (self.current_value * (1-self.proportion)) + (self.next_value * self.proportion)
+
+# TODO sinvar
 
 class Pvar(TimeVar, Pattern):
     """ A TimeVar that represents Patterns that change over time e.g.
@@ -677,6 +668,7 @@ class PvarGenerator(Pvar):
         return new
 
 class PvarGeneratorEx(PvarGenerator):
+    """ Un-Documented """
     def __init__(self, func, *args):
         self.func = func
         self.args = list(args)
@@ -684,62 +676,10 @@ class PvarGeneratorEx(PvarGenerator):
         self.last_data = []
         self.evaluate = fetch(Nil) 
         self.dependency = 1
-
-class _continuous_var(TimeVar):
-
-    def __init__(self, *args, **kwargs):
-        TimeVar.__init__(self, *args, **kwargs)
-        self.next_value = None
-
-    # Finding current values
-    def now(self, time=None):
-        time = self.current_time(time)
-
-        loops = time // sum(self.dur)
-        time  = time - (loops * sum(self.dur))
-
-        index = int(loops * len(self.dur))
-
-        for i in range(len(self.dur)):
-
-            time_block = self.time[i]
-            
-            if time_block[0] <= time < time_block[1]:
-
-                # We have our index
-
-                i = i + index
-
-                if i != self.current_index:
-
-                    self.current_index = i
-                    
-                    self.current_value = self.calculate(self.data[i])
-                    self.next_value    = self.calculate(self.data[i+1])
-                    
-                    self.current_time_block  = time_block
-
-                break
-            
-        # Calculate the proportion through this time block
-
-        p = (float(time % sum(self.dur)) - self.current_time_block[0]) / (self.current_time_block[1] - self.current_time_block[0])
-
-        return self.get_timevar_value(p)
-
-
-class linvar(_continuous_var):
-    def get_timevar_value(self, prop):
-        return (self.current_value * (1-prop)) + (self.next_value * prop)
-
-class expvar(_continuous_var):
-    def get_timevar_value(self, prop):
-        prop *= prop
-        return (self.current_value * (1-prop)) + (self.next_value * prop)
     
 
 class _inf(int):
-    """ Used in TimeVars to stay on certain values until re-evaluated """
+    """ Un-implemented """
     zero = 0
     here = 1
     wait = 2
@@ -811,7 +751,7 @@ Pattern.PvarGenerator = PvarGenerator
 def __getitem__(self, key):
     if isinstance(key, TimeVar):
         # Create a TimeVar of a PGroup that can then be indexed by the key
-        item = TimeVar(tuple(self.data))
+        item = TimeVar(tuple(self.values))
         item.dependency = key
         item.evaluate = fetch(Get)
         return item

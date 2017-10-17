@@ -148,7 +148,8 @@ class __scale__:
     #justMajor       = ScalePattern("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
     #justMinor       = ScalePattern("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
 
-    dorian          = ScalePattern("dorian", [0,2,3,5,7,9,10])
+    dorian          = ScalePattern("dorian",  [0,2,3,5,7,9,10])
+    dorian2         = ScalePattern("dorian2", [0,1,3,5,6,8,9,11])
 
     egyptian        = ScalePattern("egyptian", [0,2,5,7,10])
     zhi             = ScalePattern("zhi", [0,2,5,7,9])
@@ -162,6 +163,8 @@ class __scale__:
     lydian          = ScalePattern("lydian", [0,2,4,6,7,9,11])
     lydianMinor     = ScalePattern("lydianMinor", [0,2,4,6,7,8,10])
 
+    #ryan            = ScalePattern("ryan", [0,2,3,5,6,9,10])
+
     freq            = ScalePattern("freq", _freq())
 
     def __init__(self):
@@ -174,6 +177,9 @@ class __scale__:
         else:
             self.__dict__[key] = value
         return
+
+    def __getitem__(self, key):
+        return getattr(self, key)
 
     @staticmethod
     def names():

@@ -120,6 +120,7 @@ with SynthDef("dub") as dub:
 
 with SynthDef("viola") as viola:
     viola.defaults.update(verb=0.33, vib=6)
+    viola.amp = viola.amp/2
     viola.osc = PMOsc.ar(viola.freq, Vibrato.kr(viola.freq, rate=viola.vib, depth=0.008, delay=viola.sus*0.25), 10, mul=viola.amp / 2)
     viola.env = Env.perc( 1/4 * viola.sus, 3/4 * viola.sus )
 
@@ -300,6 +301,16 @@ swell.osc = VarSaw.ar([swell.freq, (swell.freq + 1) / 0.5], width=SinOsc.ar(swel
 swell.env = Env.perc()
 swell.add()
 
+# Credit to Thor Magnusson for brass
+
+razz = SynthDef("razz")
+razz.defaults.update(rate=0.3)
+razz.rate = Lag.ar(K2A.ar(razz.freq + [0,1]), razz.rate)
+razz.osc  = Saw.ar(razz.rate * [1,1/2], [1,1/3]) + Saw.ar(razz.rate+LFNoise2.ar(4).range(0.5, 2.5), 1)
+razz.osc  = BPF.ar(razz.osc, razz.freq * 2.5, 0.3)
+razz.osc  = RLPF.ar(razz.osc, 1300, 0.78)
+razz.env = Env.perc(atk=0.125)
+razz.add()
 
 if SC3_PLUGINS:
 

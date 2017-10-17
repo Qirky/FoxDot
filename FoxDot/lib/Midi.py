@@ -32,7 +32,7 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
             scale = asStream(scale.data.now())
 
     # Force float
-    octave = float(octave)   
+    octave = float(octave)
     degree = float(degree)
     root   = float(root)
     

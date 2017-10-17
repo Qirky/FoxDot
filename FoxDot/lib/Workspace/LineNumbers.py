@@ -33,8 +33,17 @@ class LineNumbers(Tk.Canvas):
                 break
 
             y = dline[1]
+            h = dline[3]
 
-            linenum = str(i).split(".")[0]
+            linenum  = int(str(i).split(".")[0])
+            curr_row = int(self.textwidget.index(Tk.INSERT).split(".")[0])
+
+            if linenum == curr_row:
+
+                x1, y1 = 0, y
+                x2, y2 = w - 2, y + h
+
+                self.create_rectangle(x1, y1, x2, y2, fill="gray30", outline="gray30")
 
             self.create_text(w - 4, y, anchor="ne",
                              justify=Tk.RIGHT,
@@ -42,6 +51,6 @@ class LineNumbers(Tk.Canvas):
                              font="CodeFont",
                              fill="gray")
 
-            i = self.textwidget.index("%s+1line" % i)
+            i = self.textwidget.index("{}+1line".format(i))
 
         self.after(30, self.redraw)

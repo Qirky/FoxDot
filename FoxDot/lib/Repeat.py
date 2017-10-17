@@ -13,7 +13,12 @@ class Repeatable(object):
         self.repeat_events        = {}
 
     def after(self, n, cmd, *args, **kwargs):
-        """ Schedule self.cmd(args, kwargs) in n beats """
+        """ Schedule self.cmd(args, kwargs) in 'n' beats time
+            ```
+            # Stop the player looping after 16 beats
+            p1 >> pads().after(16, "stop")
+            ```
+        """
         quantise = kwargs.get("quantise", True)
 
         try:
@@ -67,6 +72,8 @@ class Repeatable(object):
 
                 attr = cmd.split(".")
 
+            # We can also schedule attribute methods
+
             if len(attr) == 1:
 
                 method_name = attr[0]
@@ -74,6 +81,8 @@ class Repeatable(object):
                 method = getattr(self, method_name)
 
             elif len(attr) == 2:
+
+                # TODO -- add this functionality to PlayerKey class
 
                 sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
 
@@ -95,21 +104,19 @@ class Repeatable(object):
 
         # If the method call already exists, just update it
 
-        key = cmd
+        if cmd in self.repeat_events:
 
-        if key in self.repeat_events:
+            self.repeat_events[cmd].update(n, cycle, args, kwargs)
 
-            self.repeat_events[key].update(n, cycle, args, kwargs)
+            if not self.repeat_events[cmd].isScheduled():
 
-            if not self.repeat_events[key].isScheduled():
-
-                self.repeat_events[key].schedule()
+                self.repeat_events[cmd].schedule()
 
         else:
 
             call = MethodCall(self, method, n, cycle, args, kwargs)
 
-            self.repeat_events[key] = call
+            self.repeat_events[cmd] = call
 
             call.schedule()
 
@@ -141,7 +148,7 @@ class MethodCall:
         self.cycle = cycle
         self.when  = asStream(n)
 
-        self.this_when = self.when[0]
+        self.this_when = float(self.when[0])
         self.last_when = 0
         
         self.i, self.next = self.count()
@@ -167,8 +174,14 @@ class MethodCall:
         total_dur = float(sum(durations))
 
         # How much time left to fit remainder in
-    
-        acc = now - (now % total_dur)
+
+        try:
+       
+            acc = now - (now % total_dur)
+
+        except ZeroDivisionError:
+
+            acc = 0
 
         # n is the index to return for calculating self.when[n]
         # acc is when to start
@@ -179,7 +192,7 @@ class MethodCall:
 
             while True:
 
-                dur = float(modi(durations, n))
+                dur = float(durations[n])
 
                 if acc + dur == now:
 
@@ -207,15 +220,16 @@ class MethodCall:
         return "<Future {}() call of '{}' player>".format(self.method.__name__, self.parent.synthdef)
 
     def __call__(self, *args, **kwargs):
-        """ Proxy for parent object __call__ """
+        """ Proxy for parent object __call__, calls the enclosed method
+            and schedules it in the future. """
 
         self.i += 1
 
-        self.last_when, self.this_when = self.this_when, modi(self.when, self.i)
+        self.last_when, self.this_when = self.this_when, float(self.when[self.i])
 
         if self.cycle:
             
-            self.next += (modi(self.cycle, self.i) + (self.this_when - self.last_when))
+            self.next += (float(modi(self.cycle, self.i)) + (self.this_when - self.last_when))
 
         else:
 

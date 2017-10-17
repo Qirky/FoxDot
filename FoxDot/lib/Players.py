@@ -215,6 +215,10 @@ class Player(Repeatable):
         self.synthdef = None
         self.id = None
 
+        self.current_event_size   = 0
+        self.current_event_length = 0
+        self.current_event_depth  = 0
+
         # not sure what this does
         self.quantise = False
 
@@ -308,7 +312,7 @@ class Player(Repeatable):
                 args, kwargs = arguments
                 getattr(self, method).__call__(*args, **kwargs)
             # Add the modifier
-            self + other.mod
+            self + other.mod # need to account for minus
             return self
         
         raise TypeError("{} is an innapropriate argument type for PlayerObject".format(other))
@@ -348,7 +352,6 @@ class Player(Repeatable):
                 else:
 
                     self.update_player_key(name, value, 0)
-
                 return
             
         self.__dict__[name] = value
@@ -626,13 +629,14 @@ class Player(Repeatable):
         return self.current_dur
 
     def update(self, synthdef, degree, **kwargs):
-        """ Updates the attributes of the player. Called using the
-            >> syntax.
+        """ Updates the attributes of the player. Called using the >> syntax.
         """
 
         # SynthDef name
         
         self.synthdef = synthdef
+
+        # Make sure all values are reset to start
 
         if self.isplaying is False:
 
@@ -757,6 +761,16 @@ class Player(Repeatable):
     def rshift(self, n=1):
         """ Plays the event in front """
         self.event_n += n
+        return self
+
+    def spread(self, on=1):
+        """ Sets pan to (-1, 1) and pshift to (0, 0.125)"""
+        if on:
+            self.pan=(-1,1)
+            self.pshift=(0,0.125)
+        else:
+            self.pan=0
+            self.pshift=0
         return self
 
     def reverse(self):
@@ -930,11 +944,17 @@ class Player(Repeatable):
 
             item = item.now()
 
+        if isinstance(item, GeneratorPattern):
+
+            # Unpack any generator patterns nested in a PGroup
+
+            item = item.getitem() ## TODO -- get the correct index
+
         if isinstance(item, PGroup):
 
             # Make sure any values in the PGroup have their "now" methods called
 
-            item = item.convert_data(self.unpack)
+            item = item.convert_data(self.unpack)        
 
         return item
 
@@ -953,7 +973,7 @@ class Player(Repeatable):
 
         index = self.event_n + x
 
-        attr_value = modi(self.attr[attr], index)
+        attr_value = self.attr[attr][index]
 
         if attr_value is not None:
 
@@ -1189,9 +1209,9 @@ class Player(Repeatable):
 
         verbose   = kwargs.get("verbose", True)
 
-        length = self.largest_attribute(**kwargs)
-        depth  = self.number_of_layers(**kwargs)
-        size   = length * depth
+        self.current_event_length = self.largest_attribute(**kwargs)
+        self.current_event_depth  = self.number_of_layers(**kwargs)
+        self.current_event_size   = self.current_event_length * self.current_event_depth
 
         banged = False
 
@@ -1200,7 +1220,7 @@ class Player(Repeatable):
 
         last_msg = None
 
-        for i in range(size):
+        for i in range(self.current_event_size):
 
             # Get the basic osc_msg
 
