@@ -34,6 +34,7 @@ FoxDot\lib\Patterns\PGroups.py
 FoxDot\lib\Patterns\Parse.py
 FoxDot\lib\Patterns\PlayString.py
 FoxDot\lib\Patterns\Sequences.py
+FoxDot\lib\Patterns\Utils.py
 FoxDot\lib\Patterns\__init__.py
 FoxDot\lib\SCLang\Env.py
 FoxDot\lib\SCLang\SCLang.py
@@ -85,6 +86,7 @@ FoxDot\osc\scsyndef\audioin.scd
 FoxDot\osc\scsyndef\bass.scd
 FoxDot\osc\scsyndef\bell.scd
 FoxDot\osc\scsyndef\blip.scd
+FoxDot\osc\scsyndef\brass.scd
 FoxDot\osc\scsyndef\bug.scd
 FoxDot\osc\scsyndef\charm.scd
 FoxDot\osc\scsyndef\creep.scd
@@ -115,6 +117,7 @@ FoxDot\osc\scsyndef\pluck.scd
 FoxDot\osc\scsyndef\pulse.scd
 FoxDot\osc\scsyndef\quin.scd
 FoxDot\osc\scsyndef\rave.scd
+FoxDot\osc\scsyndef\razz.scd
 FoxDot\osc\scsyndef\ripple.scd
 FoxDot\osc\scsyndef\saw.scd
 FoxDot\osc\scsyndef\scatter.scd
@@ -265,6 +268,7 @@ FoxDot\snd\i\lower\1_jungle_snare.wav
 FoxDot\snd\i\lower\2_jungle_snare.wav
 FoxDot\snd\i\lower\3_jungle_snare.wav
 FoxDot\snd\i\lower\4_jungle_snare.wav
+FoxDot\snd\i\lower\5_jungle_snare.wav
 FoxDot\snd\i\upper\0_rock_snare.wav
 FoxDot\snd\i\upper\1_rock_snare.wav
 FoxDot\snd\i\upper\2_rock_snare.wav
@@ -324,8 +328,8 @@ FoxDot\snd\n\upper\noise_hat_open_0.wav
 FoxDot\snd\o\lower\0_snare_drum.wav
 FoxDot\snd\o\lower\1_snare_dru.wav
 FoxDot\snd\o\lower\2_snare_drum.wav
+FoxDot\snd\o\lower\3_snare_drum.wav
 FoxDot\snd\o\lower\9_snare_drum.wav
-FoxDot\snd\o\lower\Snare.wav
 FoxDot\snd\o\upper\O (1).wav
 FoxDot\snd\o\upper\O (10).wav
 FoxDot\snd\o\upper\O (2).wav

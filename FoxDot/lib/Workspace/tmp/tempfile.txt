@@ -1,3 +1,0 @@
-a = PRand([0,1], seed=1)
-
-print(PWhite(0,1, seed=4)[:10])

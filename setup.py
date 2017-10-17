@@ -3,10 +3,10 @@
 from distutils.core import setup   
 
 setup(name='FoxDot',
-      version='0.4.7',
+      version='0.4.9',
       description='Live Coding with SuperCollider',
       author='Ryan Kirkbride',
-      author_email='sc10rpk@leeds.ac.uk',
+      author_email='ryan@foxdot.org',
       url='http://foxdot.org/',
       packages=['FoxDot',
                 'FoxDot.lib',
@@ -23,6 +23,6 @@ setup(name='FoxDot',
                                  'snd/_loop_/dirty120.wav',
                                  'osc/*.scd',
                                  'osc/sceffects/*.scd',
-                                 'osc/scsyndef/*.scd'],
-                      'FoxDot.lib.Workspace': ['img/*'],
+                                 'osc/scsyndef/*.scd',],
+                      'FoxDot.lib.Workspace': ['img/*', 'tmp/*'],
                       'FoxDot.lib.Settings' : ['conf.txt']})

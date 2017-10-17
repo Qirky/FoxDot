@@ -1,23 +1,14 @@
-FoxDot - Live Coding with Python v0.4.8
+FoxDot - Live Coding with Python v0.4.9
 =======================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.4.8 fixes and updates
+### v0.4.9 fixes and updates
 
-- Unsaved work is stored in a temporary filed that can be loaded on the next startup.
-- Player objects can now take tuples as an argument, which delays the next event (similar to the `delay` argument but works with the following event)
-```python
-# The Player object uses the smallest duration in the tuple to move to the next event
-p1 >> pluck([0,1,2], dur=[1,1,(0.5,1)])
-```
-- Pattern function `PRhythm` takes a list of single durations and tuples that contain values that can be supplied to the `PDur` e.g.
-```python
-# The following plays the hi hat with a Euclidean Rhythm of 3 pulses in 8 steps
-d1 >> play("x-o-", dur=PRhythm([2,(3,8)]))
-``` 
-- Fixed issues with indexing `GeneratorPattern` and using `var`s in Player methods.
-- Random `GeneratorPattern` objects, such as `PRand` can take a `seed` keyword that will give you the same sequence of values for the same value of seed (must be an integer). 
+- Fixed issues with indexing `GeneratorPattern` and using `var` in Player methods.
+- Random `GeneratorPattern` objects, such as `PRand` can take a `seed` keyword that will give you the same sequence of values for the same value of seed (must be an integer).
+- Creates empty tempfile if it doesn't exist
+ 
 ---
 
 ## Installation and startup
