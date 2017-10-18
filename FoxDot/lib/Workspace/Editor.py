@@ -570,7 +570,7 @@ class workspace:
         return
 
     def open_config_file(self):
-        from ConfigFile import Config
+        from .ConfigFile import Config
         Config(FOXDOT_CONFIG_FILE).start()
         return
 
