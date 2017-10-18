@@ -14,6 +14,8 @@ from .Patterns import asStream
 from .Scale    import ScalePattern
 from .TimeVar  import TimeVar
 
+import math
+
 def miditofreq(midinote):
     """ Converts a midi number to frequency """
     return 440 * (2 ** ((midinote - 69.0)/12.0))
@@ -37,16 +39,32 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     root   = float(root)
     
     # Floor val
-    lo = int(degree)
+    lo = int(math.floor(degree))
     hi = lo + 1
 
     octave = octave + (lo // len(scale))
+    index  = lo % len(scale)
 
-    chroma = range(int(stepsPerOctave))
+    # Work out any microtones
 
-    scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
+    micro = (degree - lo)
 
-    midival = scale_val + (octave * len(chroma)) + float(root)
+    if micro > 0:
+
+        ex_scale = list(scale) + [stepsPerOctave]
+
+        diff  = ex_scale[index + 1] - scale[index]
+
+        micro = micro * diff
+
+    midival = stepsPerOctave * octave # Root note of scale
+    midival = midival + root          # Adjust for key
+    midival = midival + scale[index]  # Add the note
+    midival = midival + micro         # And any microtonal
+
+    #chroma = range(int(stepsPerOctave))
+    #scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
+    #midival = scale_val + (octave * len(chroma)) + float(root)
 
     return midival
 

@@ -1,0 +1,27 @@
+p1 >> swell((0,2,4,6), dur=8, oct=PRand([4,5]), delay=(0,PRand(5)), lpf=800) + [0,1]
+
+p2 >> blip([var([0,1],8),7,6,4,2], dur=1/4, sus=2, amp=1/2).every(6, "reverse") + var([0,(0,2)],[6,2])
+p3 >> piano(b1.degree, dur=1/4, amp=PRand([1,0])[:16]) + var([0,2],[3,1])
+
+b1 >> bass(var([0,1,5,3],8), dur=PDur(3,8)*2, sus=2, amp=[1,.8,.8], shape=0.2, hpf=linvar([0,400],8), hpr=linvar([0.1,1],12)) + PRand([(0,9),(0,11)])
+d1 >> play("X-m{-[--]}", dur=PRhythm([2,2,(3,8)]), rate=.8, room=1).spread()
+d2 >> play("  (ou) ", sample=3, dur=1, room=1, echo=var([0,0.75],[12,4]))
+
+d3 >> play("{d+-Hs}", rate=PWhite(10,15), dur=1/4).every(5, "stutter", var([2,4]), pan=[-1,1], dur=1/2)
+d4 >> play("#", dur=32).spread()
+a
+d5 >> play("[ss]")
+
+Master().hpf=var([0,5000],[28,4])
+
+@nextBar
+def change():
+    Root.default=2
+    Scale.default="major"
+
+
+
+
+
+
+
