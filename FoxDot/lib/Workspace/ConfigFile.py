@@ -6,7 +6,12 @@ except ImportError:
     from tkinter import *
 
 from ..Settings import FOXDOT_ICON
-import tkMessageBox
+
+try:
+    import tkMessageBox
+except ImportError:
+    from tkinter import messagebox as tkMessageBox
+
 import os.path
 
 
