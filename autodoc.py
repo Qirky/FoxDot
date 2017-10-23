@@ -130,7 +130,7 @@ class GenerateDocs:
                 # For each sub-package
                 f.write("### Sub Packages\n")
                 for sub in self.subpackages:
-                    f.write("- [{}](./{})\n".format(sub.title, sub.dir.replace("\\", "/")))
+                    f.write("- [{}]({})\n".format(sub.title, sub.dir.replace("\\", "/")))
         return
                         
     def write(self):

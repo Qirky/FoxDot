@@ -15,8 +15,8 @@ Copyright Ryan Kirkbride 2015
 - [ServerManager](ServerManager.md)
 
 ### Sub Packages
-- [Code](./docs/Code)
-- [Patterns](./docs/Patterns)
-- [SCLang](./docs/SCLang)
-- [Settings](./docs/Settings)
-- [Workspace](./docs/Workspace)
+- [Code](docs/Code)
+- [Patterns](docs/Patterns)
+- [SCLang](docs/SCLang)
+- [Settings](docs/Settings)
+- [Workspace](docs/Workspace)
