@@ -17,7 +17,6 @@ docs.write()
 
 """
 
-
 import inspect
 import pydoc
 import os.path
@@ -63,7 +62,7 @@ def getdetails(function, name=None):
     return (function.__name__ if name is None else name) + '(' + ', '.join(output) + ')'
 
 class GenerateDocs:
-    def __init__(self, package, dir='docs'):
+    def __init__(self, package, dir='docs', **kwargs):
 
         # Info on the package
 
@@ -71,6 +70,9 @@ class GenerateDocs:
         self.name    = package.__name__
         self.root    = os.path.dirname(self.package.__file__)
         self.dir     = dir
+        self.title   = kwargs.get("title", self.name.split(".")[-1])
+
+        self.docstring = inspect.getdoc(self.package)
 
         # Don't use duplicates
 
@@ -81,10 +83,6 @@ class GenerateDocs:
         if not os.path.isdir(self.dir):
 
             self.makedir(self.dir)
-
-        # Create a sub folder containing all the files
-
-        self.dir = os.path.join(self.dir, "files")
         
         self.modules     = []
         self.subpackages = []
@@ -95,7 +93,7 @@ class GenerateDocs:
 
                 if item not in EXC_PACKAGES:
 
-                    self.subpackages.append(GenerateDocs(item, os.path.join(self.dir, pkgname(item.__name__))))
+                    self.subpackages.append(GenerateDocs(item, os.path.join(self.dir, self.get_pkgname(item.__name__))))
 
             elif self.ismodule(item):
 
@@ -105,9 +103,41 @@ class GenerateDocs:
 
     def __repr__(self):
         return '<doc for ' + self.name + '>'
+
+    def get_pkgname(self, pkg):
+        """ Returns the folder that pkg will unpack the docs into """
+        return pkg.replace(self.name + ".", "").replace('.', '\\')
+
+    def generate_readme(self):
+        '''Set the README text''' 
+        with open(os.path.join(self.dir, "README.md"), "w") as f:
+            # Display title
+            f.write("{}\n".format(self.title))
+            f.write("{}\n\n".format("="*len(self.title)))
+            
+            # Get the description from __init__.py
+            if self.docstring is not None:
+                f.write("{}\n\n".format(self.docstring))
+
+            # For each module, provide a "link" to the location
+            f.write("### Modules\n")
+            for mod in self.modules:
+                f.write("- [{}]({})\n".format(mod.title, mod.filename))
+            f.write("\n")
+
+            # If we have subpackages
+            if len(self.subpackages) > 0:
+                # For each sub-package
+                f.write("### Sub Packages\n")
+                for sub in self.subpackages:
+                    f.write("- [{}](./{})\n".format(sub.title, sub.dir.replace("\\", "/")))
+        return
                         
     def write(self):
         ''' Generate markdown for the package '''
+
+        self.generate_readme()
+
         for module in self.modules:
 
             module.write(self.dir)
@@ -146,10 +176,11 @@ class ModuleDoc:
 
     def __init__(self, module, dir=''):
 
-        self.module    = module
-        self.title     = module.__name__
+        self.module      = module
+        self.module_name = module.__name__
         self.docstring = inspect.getdoc(module)
         self.file      = None
+        self.title     = self.module_name.split(".")[-1]
         self.filename  = self.title + '.md'
 
         EXC_MODULES.append(self.module)
@@ -207,7 +238,8 @@ class ModuleDoc:
 
     def _write_title(self):
         self.file.write('# `{}`\n\n'.format(self.title))
-        self.file.write('{}\n\n'.format(self.docstring))
+        if self.docstring is not None: 
+            self.file.write('{}\n\n'.format(self.docstring))
 
     def _write_section(self, header, level=3):
         self.file.write('## {}\n\n'.format(header.title()))
@@ -241,5 +273,5 @@ if __name__ == "__main__":
 
     import FoxDot
 
-    docs = GenerateDocs(FoxDot, 'docs', title="FoxDot Documentation")
+    docs = GenerateDocs(FoxDot.lib, 'docs', title="FoxDot Documentation")
     docs.write()

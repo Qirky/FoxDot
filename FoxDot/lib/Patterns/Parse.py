@@ -11,7 +11,7 @@ import re
 
 from .PlayString import *
 from .Generators import PRand
-from .PGroups    import PGroupStar
+from .PGroups    import PGroupPlus
 from .Main       import metaPattern, PatternMethod
 
 from ..Utils import modi, LCM
@@ -19,7 +19,7 @@ from ..Utils import modi, LCM
 re_nests  = r"\((.*?)\)"
 re_square = r"\[.*?\]"
 re_curly  = r"\{.*?\}"
-square_type=PGroupStar
+square_type=PGroupPlus
 braces_type=PRand
 
 def ParsePlayString(string):

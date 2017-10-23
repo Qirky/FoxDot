@@ -255,7 +255,17 @@ def PDur(n, k, start=0, dur=0.25):
 
 @loop_pattern_func # forces it into a stream instead of Group
 def PDelay(*args):
-    return PDur(*args).accum().group() 
+    return PDur(*args).accum().group()
+
+def PQuicken(dur=1/2, stepsize=3, steps=6):
+    delay = []
+    count = 0
+    for i in range(steps):
+        for j in range(stepsize-1):
+            delay.append( count )
+            count += dur / stepsize
+        dur /= stepsize
+    return PGroup(delay)
 
 
 def PRhythm(durations):

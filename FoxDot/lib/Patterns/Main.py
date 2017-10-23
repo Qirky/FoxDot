@@ -776,32 +776,6 @@ class PGroup(metaPattern):
 
             self.data = new_data
 
-    def force_values(self):
-        """ Recursively (in place) forces changeable values into non-changeable """
-        # todo-get rid of this
-        data = []
-        for item in self:
-            if isinstance(item, PGroup):
-                new_item = item.force_values()
-            elif isinstance(item, GeneratorPattern):
-                new_item = item.getitem()
-            else:
-                new_item = item
-            data.append(new_item)
-        self.data = data
-        return self
-
-    def scale_dur(self, n):
-        """ Scales the dur values for all the items in self.data by n """
-        for item in self.data:
-            item.scale_dur(n)
-        return
-
-    def fromString(self, string):
-        metaPattern.fromString(self, string)
-        self.scale_dur(self.coeff())
-        return self
-
     def merge(self, value):
         """ Merge values into one PGroup """
         if hasattr(value, "__len__"):
@@ -817,7 +791,8 @@ class PGroup(metaPattern):
         return 0
 
     def calculate_time(self, dur):
-        """ TODO - fix me """
+        """ Returns a PGroup of durations to use as the delay argument
+            when this is a sub-class of `PGroupPrime` """
         values = []
         step  = self.calculate_step(dur)
         for i, item in enumerate(self):
@@ -827,19 +802,52 @@ class PGroup(metaPattern):
             values.append( delay )
         return PGroup(values)
 
+##    def calculate_time(self, dur):
+##        """ Returns a PGroup of durations to use as the delay argument
+##            when this is a sub-class of `PGroupPrime` """
+##        values = []
+##        step  = self.calculate_step(dur)
+##        for i, item in enumerate(self):
+##            delay = self.calculate_delay( i * step )
+##            if isinstance(item, PGroup):
+##                delay += item.calculate_time( step )
+##                values.extend(list(delay))
+##            else:
+##                values.append( delay )
+##        return PGroup(values)
+
+    def flatten(self):
+        """ Returns a nested PGroup as un-nested e.g.
+            ``` >>> P(0,(3,5)).flatten()
+            ``` P(0, 3, 5)
+        """
+        values = []
+        for item in self:
+            if isinstance(item, PGroup):
+                values.extend(list(item))
+            else:
+                values.append(item)
+        return PGroup(values)
+
     def get_behaviour(self):
+        """ Returns a function that modulates a player event dictionary """
         def action(event, key):
             event['delay'] += self.calculate_time(float(event['dur']))
             return event
         return action
 
     def has_behaviour(self):
+        """ Returns True if this is a PGroupPrime or any elements are
+            instances of PGroupPrime or its sub-classes"""
         for value in self:
             if isinstance(value, PGroup):
                 if value.has_behaviour():
                     return True
         else:
             return False
+
+    def get_name(self):
+        return self.__class__.__name__
 
 import random
 

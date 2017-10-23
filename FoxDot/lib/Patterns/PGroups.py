@@ -8,7 +8,7 @@ class PGroupPrime(PGroup):
         """ To be overridden by any PGroupPrime that changes state after access by a Player """
         return
     def convert_data(self, *args, **kwargs):
-        self.change_state()
+        self.change_state() ## this is hacky AF
         return PGroup.convert_data(self, *args, **kwargs)
     def has_behaviour(self):
         return True
@@ -96,7 +96,7 @@ def amen(self, size=2):
 
         if  n % 4 == 0:
 
-            new.append([self.data[n], PGroupStar(self.data[n], modi(self.data, n + size))])
+            new.append([self.data[n], PGroupPlus(self.data[n], modi(self.data, n + size))])
 
         elif n % 4 == 2:
 
@@ -104,7 +104,7 @@ def amen(self, size=2):
 
         elif n % 4 == 3:
 
-            new.append( [PGroupStar(self.data[n], self.data[n-1]), [self.data[n], self.data[n-1]] ] )
+            new.append( [PGroupPlus(self.data[n], self.data[n-1]), [self.data[n], self.data[n-1]] ] )
 
         else:
 

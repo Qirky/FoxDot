@@ -881,6 +881,13 @@ class Player(Repeatable):
                 size = l
         return size
 
+    def get_event_length(self, **kwargs):
+        sizes = []
+        for attr, value in self.event.items():
+            value = kwargs.get(attr, value)
+            sizes.append( get_expanded_len(value) )
+        return LCM(*sizes)
+
     def number_attr(self, attr):
         """ Returns true if the attribute should be a number """
         return not (self.synthdef == SamplePlayer and attr in ("degree", "freq"))
@@ -1000,7 +1007,7 @@ class Player(Repeatable):
 
                     if value.has_behaviour():
 
-                        name = value.__class__.__name__ # should be get_name or something
+                        name = value.get_name()
                         
                         getaction = True
 
@@ -1209,9 +1216,7 @@ class Player(Repeatable):
 
         verbose   = kwargs.get("verbose", True)
 
-        self.current_event_length = self.largest_attribute(**kwargs)
-        self.current_event_depth  = self.number_of_layers(**kwargs)
-        self.current_event_size   = self.current_event_length * self.current_event_depth
+        self.current_event_length = self.get_event_length(**kwargs)
 
         banged = False
 
@@ -1220,7 +1225,7 @@ class Player(Repeatable):
 
         last_msg = None
 
-        for i in range(self.current_event_size):
+        for i in range(self.current_event_length):
 
             # Get the basic osc_msg
 
