@@ -157,6 +157,7 @@ Original Comments
 > 	Added a generic callback handler.
 > 	- dwh
 """
+from __future__ import print_function
 
 import math, re, socket, select, string, struct, sys, threading, time, types, array, errno, inspect
 from SocketServer import UDPServer, DatagramRequestHandler, ForkingMixIn, ThreadingMixIn, StreamRequestHandler, TCPServer
@@ -166,10 +167,10 @@ global version
 version = ("0.3","6", "$Rev: 6382 $"[6:-2])
 
 global FloatTypes
-FloatTypes = [types.FloatType]
+FloatTypes = [float]
 
 global IntTypes
-IntTypes = [types.IntType]
+IntTypes = [int]
 
 global NTP_epoch
 from calendar import timegm
@@ -274,7 +275,7 @@ class OSCMessage(object):
 		'argument' may also be a list or tuple, in which case its elements
 		will get appended one-by-one, all using the provided typehint
 		"""
-		if type(argument) == types.DictType:
+		if type(argument) == dict:
 			argument = argument.items()
 		elif isinstance(argument, OSCMessage):
 			raise TypeError("Can only append 'OSCMessage' to 'OSCBundle'")
@@ -357,7 +358,7 @@ class OSCMessage(object):
 		out = list(values)
 		out.extend(self.values())
 		
-		if type(values) == types.TupleType:
+		if type(values) == tuple:
 			return tuple(out)
 		
 		return out
@@ -412,14 +413,14 @@ class OSCMessage(object):
 	def _buildItemList(self, values, typehint=None):
 		if isinstance(values, OSCMessage):
 			items = values.items()
-		elif type(values) == types.ListType:
+		elif type(values) == list:
 			items = []
 			for val in values:
-				if type(val) == types.TupleType:
+				if type(val) == tuple:
 					items.append(val[:2])
 				else:
 					items.append((typehint, val))
-		elif type(values) == types.TupleType:
+		elif type(values) == tuple:
 			items = [values[:2]]
 		else:		
 			items = [(typehint, values)]
@@ -435,7 +436,7 @@ class OSCMessage(object):
 		
 		new_items = self._buildItemList(val)
 		
-		if type(i) != types.SliceType:
+		if type(i) != slice:
 			if len(new_items) != 1:
 				raise TypeError("single-item assignment expects a single value or a (typetag, value) tuple")
 			
@@ -634,7 +635,7 @@ class OSCBundle(OSCMessage):
 			binary = OSCBlob(argument.getBinary())
 		else:
 			msg = OSCMessage(self.address)
-			if type(argument) == types.DictType:
+			if type(argument) == dict:
 				if 'addr' in argument:
 					msg.setAddress(argument['addr'])
 				if 'args' in argument:
@@ -717,7 +718,7 @@ def OSCBlob(next):
 	The blob ends with 0 to 3 zero-bytes ('\x00') 
 	"""
 
-	if type(next) in types.StringTypes:
+	if type(next) in (str,):
 		OSCblobLength = math.ceil((len(next)) / 4.0) * 4
 		binary = struct.pack(">i%ds" % (OSCblobLength), OSCblobLength, next)
 	else:
@@ -808,7 +809,7 @@ def _readInt(data):
 	as a 32-bit integer. """
 	
 	if(len(data)<4):
-		print("Error: too few bytes for int", data, len(data))
+		print(("Error: too few bytes for int", data, len(data)))
 		rest = data
 		integer = 0
 	else:
@@ -845,7 +846,7 @@ def _readFloat(data):
 	"""
 	
 	if(len(data)<4):
-		print("Error: too few bytes for float", data, len(data))
+		print(("Error: too few bytes for float", data, len(data)))
 		rest = data
 		float = 0
 	else:
@@ -860,7 +861,7 @@ def _readDouble(data):
 	"""
 	
 	if(len(data)<8):
-		print("Error: too few bytes for double", data, len(data))
+		print(("Error: too few bytes for double", data, len(data)))
 		rest = data
 		float = 0
 	else:
@@ -939,7 +940,7 @@ def getUrlStr(*args):
 	if not len(args):
 		return ""
 		
-	if type(args[0]) == types.TupleType:
+	if type(args[0]) == tuple:
 		host = args[0][0]
 		port = args[0][1]
 		args = args[1:]
@@ -961,7 +962,7 @@ def getUrlStr(*args):
 	else:
 		host = 'localhost'
 	
-	if type(port) == types.IntType:
+	if type(port) == int:
 		return "%s:%d%s" % (host, port, prefix)
 	else:
 		return host + prefix
@@ -970,7 +971,7 @@ def parseUrlStr(url):
 	"""Convert provided string in 'host:port/prefix' format to it's components
 	Returns ((host, port), prefix)
 	"""
-	if not (type(url) in types.StringTypes and len(url)):
+	if not (type(url) in (str,) and len(url)):
 		return (None, '')
 
 	i = url.find("://")
@@ -1234,7 +1235,7 @@ def parseFilterStr(args):
 	"""
 	out = {}
 	
-	if type(args) in types.StringTypes:
+	if type(args) in (str,):
 		args = [args]
 		
 	prefix = None
@@ -1382,9 +1383,9 @@ class OSCMultiClient(OSCClient):
 			self.targets[address][0] = prefix
 		
 		if filters != None:
-			if type(filters) in types.StringTypes:
+			if type(filters) in (str,):
 				(_, filters) = parseFilterStr(filters)
-			elif type(filters) != types.DictType:
+			elif type(filters) != dict:
 				raise TypeError("'filters' argument must be a dict with {addr:bool} entries")
 		
 			self._updateFilters(self.targets[address][1], filters)
@@ -1396,10 +1397,10 @@ class OSCMultiClient(OSCClient):
 		  - prefix (string): The OSC-address prefix prepended to the address of each OSCMessage
 		  sent to this OSCTarget (optional)
 		"""
-		if type(address) in types.StringTypes:
+		if type(address) in (str,):
 			address = self._searchHostAddr(address)
 				
-		elif (type(address) == types.TupleType):
+		elif (type(address) == tuple):
 			(host, port) = address[:2]
 			try:
 				host = socket.gethostbyname(host)
@@ -1438,10 +1439,10 @@ class OSCMultiClient(OSCClient):
 		the 'address' argument can be a ((host, port) tuple), or a hostname.
 		If the 'prefix' argument is given, the Target is only deleted if the address and prefix match.
 		"""
-		if type(address) in types.StringTypes:
+		if type(address) in (str,):
 			address = self._searchHostAddr(address) 
 
-		if type(address) == types.TupleType:
+		if type(address) == tuple:
 			(host, port) = address[:2]
 			try:
 				host = socket.gethostbyname(host)
@@ -1456,10 +1457,10 @@ class OSCMultiClient(OSCClient):
 		the 'address' argument can be a ((host, port) tuple), or a hostname.
 		If the 'prefix' argument is given, the return-value is only True if the address and prefix match.
 		"""
-		if type(address) in types.StringTypes:
+		if type(address) in (str,):
 			address = self._searchHostAddr(address) 
 
-		if type(address) == types.TupleType:
+		if type(address) == tuple:
 			(host, port) = address[:2]
 			try:
 				host = socket.gethostbyname(host)
@@ -1494,10 +1495,10 @@ class OSCMultiClient(OSCClient):
 		'address' can be a (host, port) tuple, or a 'host' (string), in which case the first matching OSCTarget is returned
 		Returns (None, ['',{}]) if address not found.
 		"""
-		if type(address) in types.StringTypes:
+		if type(address) in (str,):
 			address = self._searchHostAddr(address) 
 
-		if (type(address) == types.TupleType): 
+		if (type(address) == tuple): 
 			(host, port) = address[:2]
 			try:
 				host = socket.gethostbyname(host)
@@ -2200,10 +2201,10 @@ class OSCServer(UDPServer, OSCAddressSpace):
 		url = ""
 		have_port = False
 		for item in data:
-			if (type(item) == types.IntType) and not have_port:
+			if (type(item) == int) and not have_port:
 				url += ":%d" % item
 				have_port = True
-			elif type(item) in types.StringTypes:
+			elif type(item) in (str,):
 				url += item
 
 		(addr, tail) = parseUrlStr(url)
@@ -2238,10 +2239,10 @@ class OSCServer(UDPServer, OSCAddressSpace):
 		url = ""
 		have_port = False
 		for item in data:
-			if (type(item) == types.IntType) and not have_port:
+			if (type(item) == int) and not have_port:
 				url += ":%d" % item
 				have_port = True
-			elif type(item) in types.StringTypes:
+			elif type(item) in (str,):
 				url += item
 
 		(addr, _) = parseUrlStr(url)

@@ -96,7 +96,7 @@ def GENERATE_PATTERN(keyword=None):
     pat = choose(patternNames.values())
 
     # Make sure we get right number of args
-    num_defs = len(pat.func_defaults) if pat.func_defaults is not None else 0
+    num_defs = len(pat.__defaults__) if pat.__defaults__ is not None else 0
     num_args = pat.__code__.co_argcount
 
     # Only change default args occasionally

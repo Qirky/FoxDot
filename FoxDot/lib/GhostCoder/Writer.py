@@ -1,7 +1,8 @@
+from __future__ import absolute_import
 from random import choice
 from copy import deepcopy
 import Queue
-import Grammar
+from . import Grammar
 
 class null:
     def __init__(self, root=True):

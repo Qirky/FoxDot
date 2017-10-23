@@ -1,4 +1,5 @@
 """ Import any Python library you have installed """
+from __future__ import print_function
 
 import cv2
 import numpy as np
