@@ -823,7 +823,7 @@ def _readInt(data):
 	as a 32-bit integer. """
 	
 	if(len(data)<4):
-		print(("Error: too few bytes for int", data, len(data)))
+		print("Error: too few bytes for int", data, len(data))
 		rest = data
 		integer = 0
 	else:
@@ -860,7 +860,7 @@ def _readFloat(data):
 	"""
 	
 	if(len(data)<4):
-		print(("Error: too few bytes for float", data, len(data)))
+		print("Error: too few bytes for float", data, len(data))
 		rest = data
 		float = 0
 	else:
@@ -875,7 +875,7 @@ def _readDouble(data):
 	"""
 	
 	if(len(data)<8):
-		print(("Error: too few bytes for double", data, len(data)))
+		print("Error: too few bytes for double", data, len(data))
 		rest = data
 		float = 0
 	else:
