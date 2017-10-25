@@ -17,6 +17,8 @@ snd/mkdir.py
 
 # PIP Registration file
 .pypirc
+# Directory created by pip install -e
+/*.egg-info
 
 # Compiled Python file
 *.pyc
