@@ -261,7 +261,7 @@ Returns one randomly selected item
 
 Returns true if the pattern contains a nest 
 
-##### `convert_data(self, dtype=<type 'float'>)`
+##### `convert_data(self, dtype=<type 'float'>, *args, **kwargs)`
 
 Makes a true copy and converts the data to a given data type 
 
@@ -279,6 +279,11 @@ Returns the number of occurrences of item in the Pattern
 Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
+
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
 
 ##### `flatten(self)`
 
@@ -523,7 +528,7 @@ Returns one randomly selected item
 
 Returns true if the pattern contains a nest 
 
-##### `convert_data(self, dtype=<type 'float'>)`
+##### `convert_data(self, dtype=<type 'float'>, *args, **kwargs)`
 
 Makes a true copy and converts the data to a given data type 
 
@@ -541,6 +546,11 @@ Returns the number of occurrences of item in the Pattern
 Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
+
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
 
 ##### `getitem(self, key)`
 
@@ -753,7 +763,7 @@ Returns one randomly selected item
 
 Returns true if the pattern contains a nest 
 
-##### `convert_data(self, dtype=<type 'float'>)`
+##### `convert_data(self, dtype=<type 'float'>, *args, **kwargs)`
 
 Makes a true copy and converts the data to a given data type 
 
@@ -771,6 +781,11 @@ Returns the number of occurrences of item in the Pattern
 Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
+
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
 
 ##### `group(self)`
 
@@ -990,7 +1005,7 @@ Returns one randomly selected item
 
 Returns true if the pattern contains a nest 
 
-##### `convert_data(self, dtype=<type 'float'>)`
+##### `convert_data(self, dtype=<type 'float'>, *args, **kwargs)`
 
 Makes a true copy and converts the data to a given data type 
 
@@ -1008,6 +1023,11 @@ Returns the number of occurrences of item in the Pattern
 Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
+
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
 
 ##### `getitem(self, key)`
 

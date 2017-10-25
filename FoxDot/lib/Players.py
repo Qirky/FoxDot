@@ -51,8 +51,10 @@
 
     Play multiple pitches together by putting them in round brackets:
 
+    ```python
     p1 >> pads([0,2,4,(0,2,4)])
-
+    ```
+    
     When you start FoxDot up, your clock is ticking at 120bpm and your player
     objects are all playing in the major scale. With 8 pitches in the major scale,
     the 0 refers to the first pitch and the 7 refers to the pitch one octave
@@ -148,7 +150,6 @@ from __future__ import absolute_import, division, print_function
 from os.path import dirname
 from random import shuffle, choice
 from copy import copy, deepcopy
-from time import sleep
 
 from .Settings import SamplePlayer, LoopPlayer
 from .Code import WarningMsg, debug_stdout
@@ -318,8 +319,26 @@ class Player(Repeatable):
             return self
         
         raise TypeError("{} is an innapropriate argument type for PlayerObject".format(other))
+
         return self
 
+    def test_for_circular_reference(self, attr, value, last_parent=None, last_key=None):
+        """ This is confusing me """
+        if isinstance(value, PlayerKey):
+            if value.parent is self and attr == value.key:
+                ident_self  = "{}.{}".format(self.id if self.id is not None else str(self), attr)
+                if last_parent is not None:
+                    ident_other = "{}.{}".format(last_parent.id if last_parent.id is not None else str(last_parent), last_key)
+                else:
+                    ident_other = ident_self
+                raise ValueError("Circular reference found: {} to itself via {}".format(ident_self, ident_other))
+            elif last_parent == value.parent and last_key == value.key:
+                return
+            else:
+                for item in value.parent.attr[value.key]:
+                    self.test_for_circular_reference(attr, item, value.parent, value.key)
+        return
+       
     def __setattr__(self, name, value):
         if self.__init:
 
@@ -332,6 +351,12 @@ class Player(Repeatable):
                     value, self._delay_offset = CalculateDelaysFromDur(value)
 
                 value = asStream(value)
+
+                # raise a ValueError if trying to reference itself -- doesn't handle indirect references to itself
+
+                for item in value:
+
+                    self.test_for_circular_reference(name, item)
 
                 # Update the attribute dict
                 
@@ -951,13 +976,25 @@ class Player(Repeatable):
 
                 self.update_player_key(item.key, self.now(item.key), 0)
 
-            elif item.parent in self.queue_block.objects():
+                item = item.now()
+
+            elif item.parent in self.queue_block:
 
                 # Call the parent of the number key to update
 
-                self.queue_block.call(item.parent, self)
+                # self.queue_block.call(item.parent, self)
 
-            item = item.now()
+                if not self.queue_block.already_called(item.parent):
+
+                    item = item.parent.now(item.key)
+
+                else:
+
+                    item = item.parent.now(item.key, - 1)
+
+            else:
+
+                item = item.now()
 
         if isinstance(item, GeneratorPattern):
 
@@ -988,7 +1025,13 @@ class Player(Repeatable):
 
         index = self.event_n + x
 
-        attr_value = self.attr[attr][index]
+        try:
+
+            attr_value = self.attr[attr][index]
+
+        except KeyError:
+
+            print(attr, self.attr[attr], index)
 
         if attr_value is not None:
 
@@ -1229,17 +1272,13 @@ class Player(Repeatable):
             Use kwargs to overide values in the current event """
 
         timestamp = kwargs.get("timestamp", self.queue_block.time)
-
         verbose   = kwargs.get("verbose", True)
-
-        self.current_event_length = self.get_event_length(**kwargs)
-
         banged = False
-
         freq = []
         bufnum = []
-
         last_msg = None
+
+        self.current_event_length = self.get_event_length(**kwargs)
 
         for i in range(self.current_event_length):
 
@@ -1474,17 +1513,17 @@ class Player(Repeatable):
 
     def _replace_degree(self, new_degree):
         # Update the GUI if possible
-        if self.widget:
-            if self.synthdef == SamplePlayer:
-                if self.playstring is not None:
-                    # Replace old_string with new string (only works with plain string patterns)
-                    new_string = new_degree.string()
-                    self.widget.addTask(target=self.widget.replace, args=(self.line_number, self.playstring, new_string))
-                    self.playstring = new_string
-            else:
-                # Replaces the degree pattern in the widget (experimental)
-                # self.widget.addTask(target=self.widget.replace_re, args=(self.line_number,), kwargs={'new':str(new_degree)})
-                self.playstring = str(new_degree)
+        #if self.widget:
+        #    if self.synthdef == SamplePlayer:
+        #        if self.playstring is not None:
+        #            # Replace old_string with new string (only works with plain string patterns)
+        #            new_string = new_degree.string()
+        #            self.widget.addTask(target=self.widget.replace, args=(self.line_number, self.playstring, new_string))
+        #            self.playstring = new_string
+        #    else:
+        #        # Replaces the degree pattern in the widget (experimental)
+        #        # self.widget.addTask(target=self.widget.replace_re, args=(self.line_number,), kwargs={'new':str(new_degree)})
+        #        self.playstring = str(new_degree)
         setattr(self, 'degree', new_degree)
         return
 
@@ -1495,13 +1534,10 @@ class Player(Repeatable):
     def degrade(self, amount=0.5):
         """ Sets the amp modifier to a random array of 0s and 1s
             amount=0.5 weights the array to equal numbers """
-        if not self.degrading:
-            self.amp = Pwrand([0,1],[1-amount, amount])
-            self.degrading = True
+        if float(amount) <= 0:
+            self.amplify = 1
         else:
-            ones = int(self.amp.count(1) * amount)
-            zero = self.amp.count(0)
-            self.amp = Pshuf(Pstutter([1,0],[ones,zero]))
+            self.amplify = PwRand([0, self.attr["amplify"]],[int(amount*10), max(10 - int(amount),0)])
         return self
 
     def changeSynth(self, list_of_synthdefs):
@@ -1509,7 +1545,6 @@ class Player(Repeatable):
         if isinstance(new_synth, SynthDef):
             new_synth = str(new_synth.name)
         self.synthdef = new_synth
-        # TODO, change the >> name
         return self
 
     """
@@ -1540,7 +1575,10 @@ class Player(Repeatable):
         return self
 
     def __repr__(self):
-        return "a '%s' Player Object" % self.synthdef
+        if self.id is not None:
+            return "<{} - {}>".format(self.id, self.synthdef)
+        else:
+            return "a '{}' Player Object".format(self.synthdef)
 
     def info(self):
         s = "Player Instance using '%s' \n\n" % self.synthdef
@@ -1679,3 +1717,6 @@ class rest(object):
         return int(self.dur)
     def __float__(self):
         return float(self.dur)
+
+class PlayerKeyException(Exception):
+    pass

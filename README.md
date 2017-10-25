@@ -8,7 +8,15 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - Fixed negative pitch bug
 - `PGroupMod` replaces `PGroupStar` when using square brackets in a "play" string. This "flattens" the values so that many nested `PGroups` don't create exponentially larger loops when sending events to SuperCollider.
 - Fixed `stutter` so that delays caused by `PGroups` are no longer lost.
- 
+- `PRand`, `PwRand`, and `PxRand` choose from a random index instead of a random element so that any "nested" `GeneratorPatterns` generate a new item instead of returning the same one i.e. at index 0.
+- Fixed `Player.degrade`
+- `slidedelay` default value changed from 0.75 to 0
+- Replaced "Ctrl" with "Cmd" for menu short-cuts on Mac OS 
+- Improved documentation layout
+- Player methods such `shuffle` no longer affect the text of a `play` Player as it would overload the undo heap. This may be added back in at a layer date.
+- Infinite recursion errors caused by circular referencing no longer seem to occur.
+- Improved printing of Players to include identifier e.g. `<p1 - pluck>`.
+
 ---
 
 ## Installation and startup
@@ -61,6 +69,8 @@ Python supports many different programming paradigms, including procedural and f
 ``` python
 p1 = Player()
 ```
+
+To stop a Player, use the `stop` method e.g. `p1.stop()`. If you want to stop all players, you can use the command `Clock.clear()` or the keyboard short-cut `Ctrl+.`, which executes this command.
 
 Assigning synths and instructions to a player object is done using the double-arrow operator `>>`. So if you wanted to assign a synth to `p1` called 'pads' (execute `print(SynthDefs)` to see all available synths) you would use the following code:
 

@@ -52,7 +52,9 @@ p1 >> pads([0,7,6,4])
 
 Play multiple pitches together by putting them in round brackets:
 
+```python
 p1 >> pads([0,2,4,(0,2,4)])
+```
 
 When you start FoxDot up, your clock is ticking at 120bpm and your player
 objects are all playing in the major scale. With 8 pitches in the major scale,
@@ -381,6 +383,10 @@ Adds a delay to a Synth Envelope
 
 Plays the current note n-1 times. You can specify keywords. 
 
+##### `test_for_circular_reference(self, attr, value, last_parent=None, last_key=None)`
+
+This is confusing me 
+
 ##### `unpack(self, item, debug=False)`
 
 Converts a pgroup to floating point values and updates and time var or playerkey relations 
@@ -400,6 +406,14 @@ Forces object's dict uses PlayerKey instances
 Takes another Player object and a function that takes
 two player arguments and returns one, default is the higher
 pitched
+
+---
+
+### `PlayerKeyException(self)`
+
+
+
+#### Methods
 
 ---
 

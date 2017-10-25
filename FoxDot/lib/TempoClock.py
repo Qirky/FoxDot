@@ -205,6 +205,20 @@ class TempoClock(object):
 
         for item in block:
 
+            # The item might get called by another item in the queue block
+
+            # Future fix?
+
+            # for item in block.functions:
+            #   item()
+            # for item in block.method_calls
+            #   item()
+            # for item in block.players
+            #   item.get_event()
+            # for item in block.players
+            #   item.resolve_player_key_relationships()
+            # block.send_osc_messages()
+
             if not block.called(item):
 
                 try:
@@ -499,9 +513,9 @@ class QueueBlock(object):
 
         q_obj = QueueObj(obj, args, kwargs)
 
-        for i, level in enumerate(self.priority_levels):
+        for i, in_level in enumerate(self.priority_levels):
 
-            if level(obj):
+            if in_level(obj):
 
                 self.events[i].append(q_obj)
 
@@ -514,7 +528,7 @@ class QueueBlock(object):
     def send_osc_messages(self):
         """ Sends all compiled osc messages to the SuperCollider server """
         for msg in self.osc_messages:
-            if msg.address == "/foxdot_midi":
+            if msg.address == "/foxdot_midi": # TODO -- dont hard code this
                 self.server.sclang.send(msg)
             else:
                 self.server.client.send(msg)        
@@ -526,40 +540,49 @@ class QueueBlock(object):
 
     def call(self, item, caller = None):
         """ Calls an item in queue slot """
-        # TODO -> Make more efficient -> and understand what is going on
 
         # This item (likely a Player) might be called by another Player
-        ####
-        
+
         if caller is not None:
 
-            correct = (caller in self.objects())
+            # Caller will call the actual object, get the queue_item
 
-            for event in self:
+            item = self.get_queue_item(item)
 
-                if item == event.obj:
+        # Stops circular references from crashing but they the two players' attributes wont be the same
 
-                    item = event
+        if item not in self.called_events:
 
-                    break
-
-        else:
-
-            correct = True
-
-        # item is a QueueObj OR the object itself
-
-        if correct and (item in self) and (item not in self.called_events):
-            
-            self[item].__call__()
             self.called_events.append(item)
 
+            item()
+
         return
+
+    def resolve_player_key_relatonships(self):
+        """ Un-implemented """
+        for item in self.called_events:
+            if isinstance(item.obj, Player):
+                item.obj.resolve_player_key_relatonships()
+        return
+
+    def already_called(self, obj):
+        """ Returns True if the obj (not QueueItem) has been called """
+        return self.get_queue_item(obj) in self.called_events
+
+    def get_queue_item(self, obj):
+        for item in self:
+            if item.obj == obj:
+                return item
+        else:
+            raise ValueError("{} not found".format(key))
 
     def __getitem__(self, key):
         for event in self:
             if event == key:
                 return event # Possible need to be key.obj?
+        else:
+            raise ValueError("{} not found".format(key))
 
     def players(self):
         return [item for level in self.events[1:3] for item in level]
@@ -569,6 +592,9 @@ class QueueBlock(object):
 
     def __len__(self):
         return sum([len(level) for level in self.events])
+
+    def __contains__(self, other):
+        return other in self.objects()
 
     def objects(self):
         return [item.obj for level in self.events for item in level]

@@ -141,9 +141,9 @@ class metaPattern(object):
 
     # TODO -- this is super hacky vv
 
-    def convert_data(self, dtype=float):
+    def convert_data(self, dtype=float, *args, **kwargs):
         """ Makes a true copy and converts the data to a given data type """
-        return self.true_copy([(item.convert_data(dtype) if isinstance(item, metaPattern) else dtype(item)) for item in self.data])
+        return self.true_copy([(item.convert_data(dtype, *args, **kwargs) if isinstance(item, metaPattern) else dtype(item, *args, **kwargs)) for item in self.data])
 
     def copy(self):
         """ Returns a copy of the Pattern such that alterations to the
@@ -586,6 +586,11 @@ class metaPattern(object):
 
         return self.zip(func(*args, **kwargs))
 
+    def every(self, n, method, *args, **kwargs):
+        """ Returns the pattern looped n-1 times then appended with
+            the version returned when method is called on it. """
+        return self.loop(n-1).pipe(getattr(self, method).__call__(*args, **kwargs))
+
     def map(self, func):
         return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])
 
@@ -838,12 +843,15 @@ class PGroup(metaPattern):
         return self.__class__.__name__
 
 import random
+import sys
 
 class GeneratorPattern(random.Random):
     """
         Used for when a Pattern does not generate a set length pattern,
         e.g. random patterns
     """
+    MAX_SIZE = sys.maxint
+    debugging = False
     def __new__(cls, *args, **kwargs):
         """ Override random.Random using first argument as a seed """
         return super(GeneratorPattern, cls).__new__ (cls)
@@ -900,11 +908,12 @@ class GeneratorPattern(random.Random):
     def func(self, index):
         return index
 
-    def __len__(self):
-        return 1
+    #def __len__(self):
+    #    return 1
 
     def __int__(self):  
         return int(self.getitem())
+
     def __float__(self):
         return  float(self.getitem())
     

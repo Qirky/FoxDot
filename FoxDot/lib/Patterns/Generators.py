@@ -26,10 +26,14 @@ class PRand(GeneratorPattern):
             except AssertionError:
                 raise AssertionError("{}: Range size must be greater than 1".format(self.name))
             self.data = "{}, {}".format(self.low, self.high)
+
+    def choose(self):
+        return self.data[self.choice(xrange(self.MAX_SIZE))]
             
     def func(self, index):
         if self.choosing:
-            value = self.choice(self.data)
+            # value = self.choice(self.data)
+            value = self.choose()
         else:
             value = self.randint(self.low, self.high)
         return value
@@ -56,10 +60,13 @@ class PwRand(GeneratorPattern):
             raise AssertionError(e)
         self.data    = Pattern(values)
         self.weights = Pattern(weights).stretch(len(self.data))
-        self.items   = self.data.stutter(self.weights)
+        self.values  = self.data.stutter(self.weights)
 
+    def choose(self):
+        return self.values[self.choice(xrange(self.MAX_SIZE))]
+        
     def func(self, index):
-        return self.choice(self.items)     
+        return self.choose()
 
 class PChain(GeneratorPattern):
     def __init__(self, mapping, **kwargs):

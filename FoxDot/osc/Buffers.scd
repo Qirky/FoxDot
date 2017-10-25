@@ -2,7 +2,7 @@ Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/exclamation/y
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/exclamation/yeah_1.wav", bufnum:224);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/hash/0_crash.wav", bufnum:225);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/hash/1_crash.wav", bufnum:226);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/hash/2_cymbal.wav", bufnum:227);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/hash/2_crash.wav", bufnum:227);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/percent/0.wav", bufnum:228);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/dollar/ikea_0.wav", bufnum:229);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/dollar/ikea_1.wav", bufnum:230);

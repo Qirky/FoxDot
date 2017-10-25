@@ -1,6 +1,6 @@
 # `Midi`
 
-Module for converting streams and frequencies 
+Module for converting handling MIDI in/out and functions relating to MIDI pitch calculation. 
 
 ## Classes
 

@@ -1,7 +1,5 @@
 # `Repeat`
 
-Repeat.py 
-
 ## Classes
 
 ### `MethodCall(self, parent, method, n, cycle=None, args=(), kwargs={})`

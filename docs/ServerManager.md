@@ -1,7 +1,5 @@
 # `ServerManager`
 
-ServerManager.py
-
 Handles OSC messages being sent to SuperCollider.
 
 ## Classes

@@ -83,6 +83,11 @@ Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
 
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
+
 ##### `flatten(self)`
 
 Returns a nested PGroup as un-nested e.g.
@@ -330,6 +335,11 @@ Returns the number of occurrences of item in the Pattern
 Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
+
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
 
 ##### `flatten(self)`
 
@@ -585,6 +595,11 @@ Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
 
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
+
 ##### `flatten(self)`
 
 Returns a nested PGroup as un-nested e.g.
@@ -837,6 +852,11 @@ Returns the number of occurrences of item in the Pattern
 Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
+
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
 
 ##### `flatten(self)`
 
@@ -1100,6 +1120,11 @@ Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
 
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
+
 ##### `flatten(self)`
 
 Returns a nested PGroup as un-nested e.g.
@@ -1361,6 +1386,11 @@ Returns the number of occurrences of item in the Pattern
 Returns a new Pattern with shuffled contents and shuffles
 any nested patterns. To shuffle the contents of nested patterns
 with the rest of the Pattern's contents, use `true_shuffle`.
+
+##### `every(self, n, method, *args, **kwargs)`
+
+Returns the pattern looped n-1 times then appended with
+the version returned when method is called on it. 
 
 ##### `flatten(self)`
 
