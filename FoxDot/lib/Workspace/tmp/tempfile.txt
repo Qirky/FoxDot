@@ -1,3 +1,0 @@
-p1 >> pluck([0,1,2,3], dur=p2.pan, pan=-1)
-
-p2 >> blip(p1.degree, dur=1/2, pan=p1.dur)

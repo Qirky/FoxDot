@@ -323,7 +323,7 @@ class Player(Repeatable):
         return self
 
     def test_for_circular_reference(self, attr, value, last_parent=None, last_key=None):
-        """ This is confusing me """
+        """ Raises an exception if a player's attribute refers to itself e.g. `p1 >> pads(dur=p1.dur)` """
         if isinstance(value, PlayerKey):
             if value.parent is self and attr == value.key:
                 ident_self  = "{}.{}".format(self.id if self.id is not None else str(self), attr)
@@ -980,17 +980,18 @@ class Player(Repeatable):
 
             elif item.parent in self.queue_block:
 
-                # Call the parent of the number key to update
-
-                # self.queue_block.call(item.parent, self)
+                # Update the parent with an up-to-date value
 
                 if not self.queue_block.already_called(item.parent):
 
-                    item = item.parent.now(item.key)
+                    item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
 
                 else:
 
-                    item = item.parent.now(item.key, - 1)
+                    item.parent.update_player_key(item.key, item.parent.now(item.key, -1), 0)
+
+                item = item.now()
+
 
             else:
 
@@ -1006,7 +1007,7 @@ class Player(Repeatable):
 
             # Make sure any values in the PGroup have their "now" methods called
 
-            item = item.convert_data(self.unpack)        
+            item = item.convert_data(self.unpack)    
 
         return item
 
@@ -1036,6 +1037,10 @@ class Player(Repeatable):
         if attr_value is not None:
 
             attr_value = self.unpack(attr_value)
+
+        if attr == "degree":
+
+            print(self, attr_value)
 
         return attr_value
 
