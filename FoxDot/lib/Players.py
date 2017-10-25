@@ -1038,10 +1038,6 @@ class Player(Repeatable):
 
             attr_value = self.unpack(attr_value)
 
-        if attr == "degree":
-
-            print(self, attr_value)
-
         return attr_value
 
     def get_prime_funcs(self, event):
