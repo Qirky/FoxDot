@@ -11,7 +11,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - `PRand`, `PwRand`, and `PxRand` choose from a random index instead of a random element so that any "nested" `GeneratorPatterns` generate a new item instead of returning the same one i.e. at index 0.
 - Fixed `Player.degrade`
 - `slidedelay` default value changed from 0.75 to 0
-- Replaced "Ctrl" with "Cmd" for menu short-cuts on Mac OS 
+- Replaced "Control" with "Command" for menu short-cuts on Mac OS (Thanks ianb) 
 - Improved documentation layout
 - Player methods such `shuffle` no longer affect the text of a `play` Player as it would overload the undo heap. This may be added back in at a layer date.
 - Infinite recursion errors caused by circular referencing no longer seem to occur.
