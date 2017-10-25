@@ -153,7 +153,8 @@ class workspace:
         # Key bindings (Use command key on Mac)
 
         ctrl = "Command" if SYSTEM == MAC_OS else "Control"
-        
+        alt = "Option" if SYSTEM == MAC_OS else "Alt"
+
         self.text.bind("<Return>",          self.newline)
         self.text.bind("<BackSpace>",       self.backspace)
         self.text.bind("<Delete>",          self.delete)
@@ -162,10 +163,10 @@ class workspace:
 
         self.text.bind("<{}-BackSpace>".format(ctrl),       self.delete_word)
         self.text.bind("<{}-Delete>".format(ctrl),          self.delete_next_word)
-            
+
         self.text.bind("<{}-Return>".format(ctrl),          self.exec_block)
-        self.text.bind("<Alt-Return>",                      self.exec_line)
-        
+        self.text.bind("<{}-Return>".format(alt),           self.exec_line)
+
         self.text.bind("<Alt_L>",                           lambda event: "break")
 
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)

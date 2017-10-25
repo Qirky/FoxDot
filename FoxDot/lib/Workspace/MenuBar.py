@@ -4,8 +4,8 @@ try:
     from Tkinter import Menu, BooleanVar
 except ImportError:
     from tkinter import Menu, BooleanVar
-    
-from ..Settings import SC3_PLUGINS
+
+from ..Settings import SC3_PLUGINS, SYSTEM, MAC_OS
 
 class MenuBar(Menu):
     def __init__(self, master, visible=True):
@@ -49,10 +49,14 @@ class MenuBar(Menu):
 
         # Code menu
 
+        ctrl = "Command" if SYSTEM == MAC_OS else "Ctrl"
+        # Note: Alt renders properly to look like Option, so we don't need a
+        # conditional for those shortcuts
+
         codemenu = Menu(self, tearoff=0)
-        codemenu.add_command(label="Evaluate Block",         command=self.root.exec_block,  accelerator="Ctrl+Return")
+        codemenu.add_command(label="Evaluate Block",         command=self.root.exec_block,  accelerator="{}+Return".format(ctrl))
         codemenu.add_command(label="Evaluate Line",          command=self.root.exec_line,   accelerator="Alt+Return")
-        codemenu.add_command(label="Clear Scheduling Clock", command=self.root.killall,     accelerator="Ctrl+.")
+        codemenu.add_command(label="Clear Scheduling Clock", command=self.root.killall,     accelerator="{}+.".format(ctrl))
         codemenu.add_separator()
         codemenu.add_command(label="Toggle Console",         command=self.root.toggle_console)
         codemenu.add_command(label="Export Console Log",     command=self.root.export_console)
