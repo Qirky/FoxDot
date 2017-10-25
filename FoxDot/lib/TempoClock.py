@@ -126,6 +126,7 @@ class TempoClock(object):
         return (self.get_bpm() / 60.0) * seconds
 
     def get_bpm(self):
+        """ Returns the current beats per minute as a floating point number """
         if isinstance(self.bpm, TimeVar):
             bpm_val = self.bpm.now(self.beat)
         elif self.midi_clock:
@@ -152,6 +153,7 @@ class TempoClock(object):
         return
 
     def debug(self, on=True):
+        """ Toggles debugging information printing to console """
         self.debugging = bool(on)
         return
 
@@ -399,7 +401,7 @@ class Queue(object):
 
         if beat < self.next():
 
-            self.data.append(QueueItem(item, beat, args, kwargs))
+            self.data.append(QueueBlock(item, beat, args, kwargs))
 
             block = self.data[-1]
 
@@ -432,7 +434,7 @@ class Queue(object):
 
                         i = 0
 
-                    self.data.insert(i, QueueItem(item, beat, args, kwargs))
+                    self.data.insert(i, QueueBlock(item, beat, args, kwargs))
 
                     block = self.data[i]
 
@@ -440,9 +442,13 @@ class Queue(object):
 
         # Tell any players about what queue item they are in
 
-        if hasattr(item, "queue_block"):
+        #if hasattr(item, "queue_block":
 
-            item.queue_block = block
+        #    item.queue_block = block
+
+        if isinstance(item, Player):
+
+            item.set_queue_block(block)
 
         return
 
@@ -463,7 +469,7 @@ class Queue(object):
         return sys.maxsize
             
 from types import FunctionType
-class QueueItem(object):
+class QueueBlock(object):
     priority_levels = [
                         lambda x: type(x) == FunctionType,   # Any functions are called first
                         lambda x: isinstance(x, MethodCall), # Then scheduled player methods
@@ -489,7 +495,7 @@ class QueueItem(object):
         return "{}: {}".format(self.beat, self.players())
     
     def add(self, obj, args=(), kwargs={}):
-        """ Adds a callable object to the QueueItem """
+        """ Adds a callable object to the QueueBlock """
 
         q_obj = QueueObj(obj, args, kwargs)
 
@@ -515,12 +521,15 @@ class QueueItem(object):
         return
 
     def called(self, item):
-        """ Returns True if the item is in this QueueItem and has already been called """
+        """ Returns True if the item is in this QueueBlock and has already been called """
         return item in self.called_events
 
     def call(self, item, caller = None):
-        """ Calls all items in queue slot """
+        """ Calls an item in queue slot """
         # TODO -> Make more efficient -> and understand what is going on
+
+        # This item (likely a Player) might be called by another Player
+        ####
         
         if caller is not None:
 
@@ -566,6 +575,7 @@ class QueueItem(object):
         
 
 class QueueObj(object):
+    """ Class representing each item in a `QueueBlock` instance """
     def __init__(self, obj, args=(), kwargs={}):
         self.obj = obj
         self.args = args
@@ -590,32 +600,32 @@ class History(object):
     def add(self, beat, osc_messages):
         self.data.append(osc_messages)
 
-##import Code
-##
-##class Wrapper(Code.LiveObject):
-##    
-##    def __init__(self, metro, obj, dur, args=()):
-##        self.args  = asStream(args)
-##        self.obj   = obj
-##        self.step  = dur
-##        self.metro = metro
-##        self.n     = 0
-##        self.s     = self.obj.__class__.__name__
-##
-##    def __str__(self):
-##        return "<Scheduled Call '%s'>" % self.s
-##
-##    def __repr__(self):
-##        return  str(self)
-##
-##    def __call__(self):
-##        """ Call the wrapped object and re-schedule """
-##        args = modi(self.args, self.n)
-##        try:
-##            self.obj.__call__(*args)
-##        except:
-##            self.obj.__call__(args)
-##        Code.LiveObject.__call__(self)
+from . import Code
+
+class Wrapper(Code.LiveObject):
+    
+    def __init__(self, metro, obj, dur, args=()):
+        self.args  = asStream(args)
+        self.obj   = obj
+        self.step  = dur
+        self.metro = metro
+        self.n     = 0
+        self.s     = self.obj.__class__.__name__
+
+    def __str__(self):
+        return "<Scheduled Call '%s'>" % self.s
+
+    def __repr__(self):
+        return  str(self)
+
+    def __call__(self):
+        """ Call the wrapped object and re-schedule """
+        args = modi(self.args, self.n)
+        try:
+            self.obj.__call__(*args)
+        except:
+            self.obj.__call__(args)
+        Code.LiveObject.__call__(self)
 
 class SoloPlayer:
     """ SoloPlayer objects """

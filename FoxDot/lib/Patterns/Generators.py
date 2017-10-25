@@ -1,6 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from .Main  import GeneratorPattern, Pattern, asStream
+import random
 
 class PRand(GeneratorPattern):
     ''' Returns a random integer between start and stop. If start is a container-type it returns

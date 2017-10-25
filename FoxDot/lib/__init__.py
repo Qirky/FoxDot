@@ -62,7 +62,7 @@ for item in (TimeVar, Player, Server, MidiIn):
 
 # Players and effects etc need reference to SC server
 
-for item in (Player, Effect, QueueItem, Clock):
+for item in (Player, Effect, QueueBlock, Clock):
 
     item.server = Server
 
@@ -83,7 +83,7 @@ for char1 in alphabet:
 
         group.append(arg)
 
-    FoxDotCode.namespace[char1 + "_"] = Group(*[FoxDotCode.namespace[char1+str(n)] for n in range(10)])
+    FoxDotCode.namespace[char1 + "_all"] = Group(*[FoxDotCode.namespace[char1+str(n)] for n in range(10)])
 
 # Create an empty item
 
@@ -95,3 +95,20 @@ when.set_namespace(FoxDotCode)
 
 def Master():
     return Group(*Clock.playing)
+
+# Custom handling of Pattern getitem when accessed with PlayerKey or TimeVar
+
+@PatternMethod
+def __getitem__(self, key):
+    if isinstance(key, PlayerKey):
+        # Create a player key whose calculation is get_item
+        print("Using a PlayerKey as index")
+        return self.getitem(key)
+    elif isinstance(key, TimeVar):
+        # Create a TimeVar of a PGroup that can then be indexed by the key
+        item = TimeVar(tuple(self.data))
+        item.dependency = key
+        item.evaluate = fetch(Get)
+        return item
+    else:
+        return self.getitem(key)

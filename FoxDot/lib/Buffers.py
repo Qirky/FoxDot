@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 """ This module manages the allocation of buffer numbers and samples """
+
 from __future__ import absolute_import, division, print_function
 
 from os.path import abspath, join, dirname

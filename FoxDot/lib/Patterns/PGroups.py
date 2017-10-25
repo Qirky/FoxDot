@@ -8,7 +8,7 @@ class PGroupPrime(PGroup):
         """ To be overridden by any PGroupPrime that changes state after access by a Player """
         return
     def convert_data(self, *args, **kwargs):
-        self.change_state() ## this is hacky AF
+        self.change_state()
         return PGroup.convert_data(self, *args, **kwargs)
     def has_behaviour(self):
         return True
@@ -53,36 +53,75 @@ class PGroupDiv(PGroupPrime):
         else:
             return 0
 
-class PGroupFloorDiv(PGroupPrime):
-    """ Unused """
-    bracket_style="//()"
-
-class PGroupMod(PGroupPrime):
-    """ Unused """
+class PGroupMod(PGroupPlus):
+    """ Useful for when you want many nested groups. This PGroup flattens the original
+        but the delay times are calculated in the same way as if the values were neseted
+     """
     bracket_style="%()"
 
-class PGroupSub(PGroupPrime):
-    """ Unused """
-    bracket_style="-()"
+    def __len__(self):
+        return len([item for item in self])
 
-class PGroupXor(PGroupPrime):
-    """ Unused """
-    bracket_style="^()"
+    def getitem(self, index):
+        return list(self)[index]
 
-class PGroupAnd(PGroupPrime):
-    """ Unused """
-    bracket_style="&()"
-    delay = 0
-    def __init__(self, args):
-        PGroupPrime.__init__(self, args[0])
-        if len(args) > 0:
-            self.delay = args[1]
-    def calculate_step(self, i, dur):
-        return i * self.delay
+    def calculate_step(self, dur):
+        return float(dur) / len(self.data)
 
-class PGroupOr(PGroupPrime):
-    """ Unused """
-    bracket_style="|()"
+    def calculate_time(self, dur):
+        """ Returns a PGroup of durations to use as the delay argument
+            when this is a sub-class of `PGroupPrime` """
+        values = []
+        step  = self.calculate_step(dur)
+        for i, item in enumerate(self.data):
+            delay = self.calculate_delay( i * step )
+            if hasattr(item, "calculate_time"):
+                delay += item.calculate_time( step )
+            if isinstance(delay, PGroup):
+                values.extend(list(delay))
+            else:
+                values.append( delay )
+        return PGroup(values)
+
+    def __iter__(self):
+        return self.get_iter(self.data)
+
+    @staticmethod
+    def get_iter(group):
+        """ Recursively unpacks nested PGroup into an un-nested group"""
+        for item in group:
+            if isinstance(item, PGroup):
+                for sub in PGroupMod.get_iter(item.data):
+                    yield sub
+            else:
+                yield item
+
+#class PGroupFloorDiv(PGroupPrime):
+#    """ Unused """
+#    bracket_style="//()"
+
+#class PGroupSub(PGroupPrime):
+#    """ Unused """
+#    bracket_style="-()"
+
+#class PGroupXor(PGroupPrime):
+#    """ Unused """
+#    bracket_style="^()"
+
+#class PGroupAnd(PGroupPrime):
+#    """ Unused """
+#    bracket_style="&()"
+#    delay = 0
+#    def __init__(self, args):
+#        PGroupPrime.__init__(self, args[0])
+#        if len(args) > 0:
+#            self.delay = args[1]
+#    def calculate_step(self, i, dur):
+#        return i * self.delay
+
+#class PGroupOr(PGroupPrime):
+#    """ Unused """
+#    bracket_style="|()"
 
 # Define any pattern methods that use PGroupPrimes
     

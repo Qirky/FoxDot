@@ -1,8 +1,4 @@
-"""
-    ServerManager.py
-
-    Handles OSC messages being sent to SuperCollider.
-
+""" Handles OSC messages being sent to SuperCollider.
 """
 
 from __future__ import absolute_import, division, print_function

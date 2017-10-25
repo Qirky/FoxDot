@@ -283,8 +283,10 @@ with the rest of the Pattern's contents, use `true_shuffle`.
 ##### `flatten(self)`
 
 Returns a nested PGroup as un-nested e.g.
-``` >>> P(0,(3,5)).flatten()
-``` P(0, 3, 5)
+``` 
+    >>> P(0,(3,5)).flatten()
+    P(0, 3, 5)
+``` 
 
 ##### `get_behaviour(self)`
 

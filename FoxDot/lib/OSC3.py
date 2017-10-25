@@ -542,7 +542,7 @@ class OSCMessage(object):
 				break
 			i += 1
 		else:
-			raise ValueError("'%s' not in OSCMessage" % str(m))
+			raise ValueError("'%s' not in OSCMessage" % str(v))
 		# but more efficient than first calling self.values().index(val),
 		# then calling self.items(), which would in turn call self.values() again...
 		

@@ -802,24 +802,12 @@ class PGroup(metaPattern):
             values.append( delay )
         return PGroup(values)
 
-##    def calculate_time(self, dur):
-##        """ Returns a PGroup of durations to use as the delay argument
-##            when this is a sub-class of `PGroupPrime` """
-##        values = []
-##        step  = self.calculate_step(dur)
-##        for i, item in enumerate(self):
-##            delay = self.calculate_delay( i * step )
-##            if isinstance(item, PGroup):
-##                delay += item.calculate_time( step )
-##                values.extend(list(delay))
-##            else:
-##                values.append( delay )
-##        return PGroup(values)
-
     def flatten(self):
         """ Returns a nested PGroup as un-nested e.g.
-            ``` >>> P(0,(3,5)).flatten()
-            ``` P(0, 3, 5)
+            ``` 
+                >>> P(0,(3,5)).flatten()
+                P(0, 3, 5)
+            ``` 
         """
         values = []
         for item in self:

@@ -243,6 +243,9 @@ class NumberKey(object):
         new.calculate = lambda a, b: abs(float(b))
         return new
 
+    def __index__(self):
+        return int(self)
+
     def map(self, mapping):
         """ Creates a new Player key that maps the values in the dictionary (mapping)
             to new values. Example use case:

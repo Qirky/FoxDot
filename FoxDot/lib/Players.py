@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 """
     Making music with FoxDot Players
     --------------------------------
@@ -12,7 +10,7 @@ from __future__ import absolute_import, division, print_function
     the console:
 
     ```python
-    print SynthDefs
+    print(SynthDefs)
     ```
 
     Each one of these represents a `SynthDef` *object*. These objects are then
@@ -23,6 +21,10 @@ from __future__ import absolute_import, division, print_function
     ```python
     p1 >> pads()
     ```
+
+    To stop a Player, use the `stop` method e.g. `p1.stop()`. If you want to
+    stop all players, you can use the command `Clock.clear()` or the keyboard
+    shortcut `Ctrl+.`, which executes this command.
 
     `p1` is the name of a predefined player object. At startup, FoxDot reserves
     all one- and two-character variable names, such as `x`, `p1`, or `bd` for
@@ -141,7 +143,7 @@ from __future__ import absolute_import, division, print_function
 
 """
 
-
+from __future__ import absolute_import, division, print_function
 
 from os.path import dirname
 from random import shuffle, choice
@@ -352,6 +354,7 @@ class Player(Repeatable):
                 else:
 
                     self.update_player_key(name, value, 0)
+
                 return
             
         self.__dict__[name] = value
@@ -408,7 +411,7 @@ class Player(Repeatable):
         # Set any non-zero values for FoxDot
 
         # Sustain & Legato
-        self.sus     = 1
+        self.sus     = 0.5 if self.synthdef == SamplePlayer else 1
         self.blur    = 1
 
         # Amplitude
@@ -744,10 +747,15 @@ class Player(Repeatable):
 
             for key, val in kwargs.items():
 
-                new_event[key] = [float(self.unpack(group_modi(val, i))) for i in range(n-1)]
+                new_event[key] = [self.unpack(group_modi(val, i)) for i in range(n-1)]
+
+            # Get PGroup delays
 
             new_event["timestamp"] = self.metro.osc_message_time()
-            new_event["delay"] = [dur * (i+1) for i in range(n-1)]
+            
+            new_event["delay"] = self.event.get("delay", 0) + asStream([dur * (i+1) for i in range(n-1)])
+
+            # new_event = self.get_prime_funcs(new_event)
 
             self.send(**new_event)
                 
@@ -988,38 +996,31 @@ class Player(Repeatable):
 
         return attr_value
 
-    def get_event(self):
-        """ Returns a dictionary of attr -> now values """
-
-        attributes = copy(self.attr)
+    def get_prime_funcs(self, event):
+        """ Finds and PGroupPrimes in event and returns the modulated event dictionary """
+        # Look for PGroupPrimes
 
         prime_funcs = {}
-        
-        for key in attributes:
 
-            if len(attributes[key]) > 0:
+        for key, value in event.items():
 
-                value = self.event[key] = self.now(key)
+            if isinstance(value, PGroup) and value.has_behaviour():
 
-                # Look for PGroupPrimes
+                name = value.get_name()
+                
+                getaction = True
 
-                if isinstance(value, PGroup):
+                # Only add the largest prime_func for the largest element in the event
 
-                    if value.has_behaviour():
+                if name in prime_funcs:
 
-                        name = value.get_name()
-                        
-                        getaction = True
+                    if len(value) <= len(prime_funcs[name][1]):
 
-                        if name in prime_funcs:
+                        getaction = False
 
-                            if len(value) <= len(prime_funcs[name][1]):
+                if getaction:
 
-                                getaction = False
-
-                        if getaction:
-
-                            prime_funcs[name] = [key, value, value.get_behaviour()]
+                    prime_funcs[name] = [key, value, value.get_behaviour()]
 
         # Add largest PGroupPrime function
 
@@ -1029,7 +1030,22 @@ class Player(Repeatable):
 
             if prime_call is not None:
 
-                self.event = prime_call(self.event, func[0])
+                event = prime_call(event, func[0])
+
+        return event
+
+    def get_event(self):
+        """ Returns a dictionary of attr -> now values """
+
+        attributes = copy(self.attr)
+        
+        for key in attributes:
+
+            if len(attributes[key]) > 0:
+
+                self.event[key] = self.now(key)
+
+        self.event = self.get_prime_funcs(self.event)
 
         return self
 
@@ -1306,7 +1322,16 @@ class Player(Repeatable):
         
         return
 
+    def set_queue_block(self, queue_block):
+        """ Gives this player object a reference to the other items that are 
+            scheduled at the same time """
+        self.queue_block = queue_block
+        return
+
     def get_synth_name(self, buf=0):
+        """ Returns the real SynthDef name of the player. Useful only for "play" 
+            as there is a play1 and play2 SynthDef for playing audio files with
+            one or two channels respectively. """
         if self.synthdef == SamplePlayer:
             numChannels = self.samples.getBuffer(buf).channels
             if numChannels == 1:
@@ -1318,6 +1343,8 @@ class Player(Repeatable):
         return synthdef
 
     def addfx(self, **kwargs):
+        """ Not implemented - add an effect to the SynthDef bus on SuperCollider
+            after it has been triggered. """
         return self
 
     #: Methods for stop/starting players

@@ -21,7 +21,7 @@ class cls:
         return str(self.name)
     def __repr__(self):
         return str(self.name)
-    def __call__(self):
+    def __call__(self, *args, **kwargs):
         return instance("{}({}{})".format(self.name, self.ref, format_args(args, kwargs)))
     def ar(self, *args, **kwargs):
         return instance("{}.ar({}{})".format(self.name, self.ref, format_args(args, kwargs)))
