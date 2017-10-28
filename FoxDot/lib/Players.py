@@ -1,7 +1,4 @@
-"""
-    Making music with FoxDot Players
-    --------------------------------
-    
+"""    
     Players are what make FoxDot make music. They are similar in design to
     SuperCollider's `PDef` and `PBind` combo but with slicker syntax. FoxDot
     uses SuperCollider to *actually* make the sound and does so by triggering
@@ -33,9 +30,9 @@
     instantiate a new `Player` object:
 
     ```python
-    new_player = Player()
+    foo = Player()
 
-    new_player >> pads()
+    foo >> pads()
     ```
 
     Changing parameters
@@ -88,7 +85,7 @@
     p1 >> pads([0,7,6,4], dur=[1,1/2,1/4,1/4], oct=6, sus=1)
 
     # See a list of possible keyword arguments
-    print Player.Attributes()
+    print(Player.get_attributes())
     ```
 
     Using the `play` SynthDef
@@ -98,7 +95,7 @@
     to play short audio files rather than specify pitches. In this case
     you use a string of characters as the first argument where each character
     refers to a different folder of audio files. You can see more information
-    by evaluating `print Samples`. The following line of code creates
+    by evaluating `print(Samples)`. The following line of code creates
     a basic drum beat:
 
     ```python
@@ -156,6 +153,7 @@ from .Code import WarningMsg, debug_stdout
 from .SCLang.SynthDef import SynthDefProxy, SynthDef
 from .Effects import FxList
 from .Utils import stdout
+from .Buffers import Samples
 
 from .Key import *
 from .Repeat import *
@@ -171,12 +169,43 @@ from .TimeVar import TimeVar
 
 class Player(Repeatable):
 
+    """
+    FoxDot generates music by creating instances of `Player` and giving them instructions
+    to follow. At startup FoxDot creates many instances of `Player` and assigns them to
+    any valid two character variable. This is so that when you start playing you don't 
+    have to worry about typing `myPlayer = Player()` and `myPlayer_2 = Player()` every
+    time you want to do something new. Of course there is nothing stopping you from 
+    doing that if yo so wish.
+
+    Instances of `Player` are given instructions to generate music using the `>>` syntax,
+    overriding the bitshift operator, and should be given an instance of `SynthDefProxy`.
+    A `SynthDefProxy` is created when calling an instance of `SynthDef` - these are the
+    "instruments" used by player objects and are written in SuperCollider code. You can
+    see more information about these in the `SCLang` module. Below describes how to assign
+    a `SynthDefProxy` of the `SynthDef` `pads` to a `Player` instance called `p1`:
+
+    ```python
+    # Calling pads as if it were a function returns a 
+    # pads SynthDefProxy object which is assigned to p1
+    p1 >> pads()
+
+    # You could store several instances and assign them at different times
+    proxy_1 = pads([0,1,2,3], dur=1/2)
+    proxy_2 = pads([4,5,6,7], dur=1)
+
+    p1 >> proxy_1 # Assign the first to p1
+    p1 >> proxy_2 # This replaces the instructions being followed by p1
+    ```
+    """
+
     # Set private values
 
     debug = 0
 
     __vars = []
     __init = False
+
+    # Really need to tidy this up
 
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'buf',
                   'blur', 'amplify', 'scale', 'bpm', 'sample')
@@ -192,9 +221,11 @@ class Player(Repeatable):
     fx_attributes = FxList.all_kwargs()
     fx_keys       = FxList.kwargs()
 
+    # Load default sample bank
+    samples = Samples
+
+    # Set in __init__.py
     metro   = None
-    server  = None
-    samples = None
 
     default_scale = Scale.default()
     default_root  = Root.default()
@@ -221,9 +252,6 @@ class Player(Repeatable):
         self.current_event_size   = 0
         self.current_event_length = 0
         self.current_event_depth  = 0
-
-        # not sure what this does
-        self.quantise = False
 
         # Stopping flag
         self.stopping = False
@@ -298,24 +326,48 @@ class Player(Repeatable):
     # Class methods
 
     @classmethod
-    def Attributes(cls):
+    def get_attributes(cls):
         """ Returns a list of possible keyword arguments for FoxDot players and effects """
         return cls.keywords + cls.base_attributes + cls.fx_attributes
+
+    @classmethod
+    def Attributes(cls):
+        """ To be replaced by `Player.get_attributes()` """
+        return cls.get_attributes()
+
+    @classmethod
+    def set_clock(cls, tempo_clock):
+        cls.metro = tempo_clock
+
+    # Should this also be instance method?
+    @classmethod
+    def set_sample_bank(cls, sample_bank):
+        cls.samples = sample_bank
 
     # Player Object Manipulation
     
     def __rshift__(self, other):
-        """ Handles the allocation of SynthDef objects using >> syntax """
+        """ Handles the allocation of SynthDef objects using >> syntax, other must be
+            an instance of `SynthDefProxy`, which is usually created when calling a
+            `SynthDef`
+        """
         
         if isinstance(other, SynthDefProxy):
             # Call the update method
             self.update(other.name, other.degree, **other.kwargs)
+            
             # Perform any methods
+            
             for method, arguments in other.methods:
+            
                 args, kwargs = arguments
+            
                 getattr(self, method).__call__(*args, **kwargs)
+            
             # Add the modifier
+            
             self + other.mod # need to account for minus
+            
             return self
         
         raise TypeError("{} is an innapropriate argument type for PlayerObject".format(other))
@@ -340,6 +392,9 @@ class Player(Repeatable):
         return
        
     def __setattr__(self, name, value):
+
+        # Possibly replace with slots?
+
         if self.__init:
 
             # Force the data into a Pattern if the attribute is used with SuperCollider
@@ -463,16 +518,21 @@ class Player(Repeatable):
     # --- Update methods
 
     def __call__(self, **kwargs):
-        """ Sends the next osc message to SuperCollider and schedules the
-            next event for this player """
+        """ Sends the next osc message event to SuperCollider and schedules this
+            Player in the clock based on the current clock time and this player's
+            current duration value. """
 
         # If stopping, kill the event
 
         if self.stopping and self.metro.now() >= self.stop_point:
+            
             self.kill()
+            
             return
 
         # If the duration has changed, work out where the internal markers should be
+
+        # This could be in its own private function
 
         force_count = kwargs.get("count", False)
         dur_updated = self.dur_updated()
@@ -493,7 +553,7 @@ class Player(Repeatable):
 
                 print("TypeError: Innappropriate argument type for 'dur'")
 
-        # Get the current state
+        # Get the current state -- tidy this up
 
         dur = 0
 
@@ -1341,7 +1401,7 @@ class Player(Repeatable):
 
                         delay = self.metro.beat_dur(delay)
 
-                        compiled_msg = self.server.get_bundle(synthdef, osc_msg, effects, timestamp = timestamp + delay)
+                        compiled_msg = self.metro.server.get_bundle(synthdef, osc_msg, effects, timestamp = timestamp + delay)
 
                         # We can set a condition to only send messages
 

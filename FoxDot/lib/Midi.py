@@ -102,6 +102,11 @@ class MidiIn:
         self.ppqn  = 24
         self.beat  = 0
 
+    @classmethod
+    def set_clock(cls, tempo_clock):
+        cls.metro = tempo_clock
+        return
+
     def update(self):
         data = self.device.get_message()
         if data is not None:

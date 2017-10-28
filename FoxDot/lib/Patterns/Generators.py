@@ -1,3 +1,32 @@
+"""
+
+    This module contains all the sub-classes of `GeneratorPattern` used in FoxDot. Unlike
+    a `Pattern`, a `GeneratorPattern` does not contain a list that is iterated over or
+    indexed but returns a value based on the index and an internal function. For example,
+    `PRand` returns a random value from a list of values. It will always return the same
+    value for the same index as it stores this in its internal cache. `Pattern` methods
+    such as `rotate` or `palindrome` are not available from the `GeneratorPattern` class
+    but slicing generators will return a `Pattern` object from which these methods can
+    be called e.g.
+
+        >>> gen = PRand([0,1,2])
+        >>> pat = gen[:5]
+        P[0, 1, 0, 2, 1]
+        >>> pat.rotate()
+        P[1, 0, 2, 1, 0]
+
+    Mathematical operations *do* work in the same way as they do in `Patterns`.
+
+        >>> gen1 = PRand([0,1,2])
+        >>> gen2 = gen1 + 10
+        >>> gen1[:5]
+        P[0, 2, 2, 1, 0]
+        >>> gen2[:5]
+        P[10, 12, 12, 11, 10]
+
+"""
+
+
 from __future__ import absolute_import, division, print_function
 
 from .Main  import GeneratorPattern, Pattern, asStream
@@ -8,7 +37,7 @@ class PRand(GeneratorPattern):
         a random item for that container. '''
     def __init__(self, start, stop=None, **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
-        # If we're given a list, choose from that list
+        # If we're given a list, choose from that list -- TODO always use a list and use xrange
         if hasattr(start, "__iter__"):
             self.data = Pattern(start)
             try:
@@ -147,3 +176,11 @@ class PSquare(GeneratorPattern):
     def func(self, index):
         return index * index
 
+
+class PFibMod(GeneratorPattern):
+    """ Returns the fibonacci sequence -- maybe a bad idea"""
+    def func(self, index):
+        if index < 2: return index
+        a = self.cache.get(index-1, self.getitem(index-1))
+        b = self.cache.get(index-2, self.getitem(index-2))
+        return a + b

@@ -266,6 +266,8 @@ class workspace:
 
             loading = tkMessageBox.askyesno("Load unsaved work?", "Your code wasn't saved last time you used FoxDot, do you want to load any unsaved work?")
 
+            self.root.update()
+
             if loading:
 
                 self.set_all(text)

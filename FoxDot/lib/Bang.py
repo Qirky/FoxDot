@@ -1,3 +1,10 @@
+"""
+
+This is an experimental module that contains the `Bang` class; events that are triggered
+in time with `Player` rhythms to give visual aid to which players are creating which sounds.
+
+"""
+
 from __future__ import absolute_import, division, print_function
 
 from .Code import execute

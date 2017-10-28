@@ -3,7 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 from . import Env
 from .SCLang import *
-from ..ServerManager import Server
+from ..ServerManager import DefaultServer
 from ..Settings import SYNTHDEF_DIR
 
 # Container for SynthDefs
@@ -29,7 +29,7 @@ SynthDefs = SynthDict()
 
 class SynthDefBaseClass(object):
     
-    server = Server
+    server = DefaultServer
     var = ['osc', 'env']
     defaults = {}
     container = SynthDefs

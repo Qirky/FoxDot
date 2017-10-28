@@ -63,10 +63,10 @@
 from __future__ import absolute_import, division, print_function
 
 from .Settings import EFFECTS_DIR, SC3_PLUGINS
-from .ServerManager import Server
+from .ServerManager import DefaultServer
 
 class Effect:
-    server=Server
+    server=DefaultServer
     def __init__(self, foxdot_name, synthdef, args={}, control=False):
 
         self.name      = foxdot_name
@@ -84,8 +84,22 @@ class Effect:
         self.input     = "osc = In.{}(bus, {});\n".format(self.suffix, self.channels)
         self.output    = "ReplaceOut.{}".format(self.suffix)
         
+    @classmethod
+    def set_server(cls, server):
+        cls.server = server
+    
     def __repr__(self):
-        return "<Fx '{}' -- args: {}>".format(self.synthdef, ",".join(self.args))
+        return "<Fx '{}' -- args: {}>".format(self.synthdef, ", ".join(self.args))
+
+    def __str__(self):
+        s  = "SynthDef.new(\{},\n".format(self.synthdef)
+        s += "{" + "|bus, {}|\n".format(", ".join(self.args))
+        s += "var {};\n".format(",".join(self.vars))
+        s += self.input
+        s += self.list_effects()
+        s += self.output
+        s += "(bus, osc)}).add;"
+        return s
 
     def add(self, string):
         self.effects.append(string)
@@ -105,16 +119,6 @@ class Effect:
         if name not in self.vars:
             self.vars.append(name)
         return
-        
-    def __str__(self):
-        s  = "SynthDef.new(\{},\n".format(self.synthdef)
-        s += "{" + "|bus, {}|\n".format(", ".join(self.args))
-        s += "var {};\n".format(",".join(self.vars))
-        s += self.input
-        s += self.list_effects()
-        s += self.output
-        s += "(bus, osc)}).add;"
-        return s
 
     def save(self):
         ''' writes to file and sends to server '''
@@ -156,6 +160,9 @@ class EffectManager(dict):
         self.all_kw=[]
         self.defaults={}
         self.order={N:[] for N in range(3)}
+
+    def __repr__(self):
+        return "\n".join([repr(value) for value in self.values()])
 
     def new(self, foxdot_arg_name, synthdef, args, order=2):
         self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args, order==0)
@@ -295,5 +302,4 @@ fx.add("osc = (osc * (shape * 50)).fold2(1).distort / 5")
 fx.save()
 
 In(); Out()
-
-    
+Effect.server.setFx(FxList)

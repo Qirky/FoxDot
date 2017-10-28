@@ -1,8 +1,5 @@
 # `Players`
 
-Making music with FoxDot Players
---------------------------------
-
 Players are what make FoxDot make music. They are similar in design to
 SuperCollider's `PDef` and `PBind` combo but with slicker syntax. FoxDot
 uses SuperCollider to *actually* make the sound and does so by triggering
@@ -34,9 +31,9 @@ a variable name for a player object with more than two characters, you just
 instantiate a new `Player` object:
 
 ```python
-new_player = Player()
+foo = Player()
 
-new_player >> pads()
+foo >> pads()
 ```
 
 Changing parameters
@@ -89,7 +86,7 @@ default.
 p1 >> pads([0,7,6,4], dur=[1,1/2,1/4,1/4], oct=6, sus=1)
 
 # See a list of possible keyword arguments
-print Player.Attributes()
+print(Player.get_attributes())
 ```
 
 Using the `play` SynthDef
@@ -99,7 +96,7 @@ There is a special case SynthDef object called `play` which allows you
 to play short audio files rather than specify pitches. In this case
 you use a string of characters as the first argument where each character
 refers to a different folder of audio files. You can see more information
-by evaluating `print Samples`. The following line of code creates
+by evaluating `print(Samples)`. The following line of code creates
 a basic drum beat:
 
 ```python
@@ -167,13 +164,38 @@ Returns a Pattern object containing the desired attribute for each player in the
 
 ### `Player(self)`
 
+FoxDot generates music by creating instances of `Player` and giving them instructions
+to follow. At startup FoxDot creates many instances of `Player` and assigns them to
+any valid two character variable. This is so that when you start playing you don't 
+have to worry about typing `myPlayer = Player()` and `myPlayer_2 = Player()` every
+time you want to do something new. Of course there is nothing stopping you from 
+doing that if yo so wish.
 
+Instances of `Player` are given instructions to generate music using the `>>` syntax,
+overriding the bitshift operator, and should be given an instance of `SynthDefProxy`.
+A `SynthDefProxy` is created when calling an instance of `SynthDef` - these are the
+"instruments" used by player objects and are written in SuperCollider code. You can
+see more information about these in the `SCLang` module. Below describes how to assign
+a `SynthDefProxy` of the `SynthDef` `pads` to a `Player` instance called `p1`:
+
+```python
+# Calling pads as if it were a function returns a 
+# pads SynthDefProxy object which is assigned to p1
+p1 >> pads()
+
+# You could store several instances and assign them at different times
+proxy_1 = pads([0,1,2,3], dur=1/2)
+proxy_2 = pads([4,5,6,7], dur=1)
+
+p1 >> proxy_1 # Assign the first to p1
+p1 >> proxy_2 # This replaces the instructions being followed by p1
+```
 
 #### Methods
 
 ##### `Attributes(cls)`
 
-Returns a list of possible keyword arguments for FoxDot players and effects 
+To be replaced by `Player.get_attributes()` 
 
 ##### `__add__(self, data)`
 
@@ -181,12 +203,15 @@ Change the degree modifier stream
 
 ##### `__call__(self, **kwargs)`
 
-Sends the next osc message to SuperCollider and schedules the
-next event for this player 
+Sends the next osc message event to SuperCollider and schedules this
+Player in the clock based on the current clock time and this player's
+current duration value. 
 
 ##### `__rshift__(self, other)`
 
-Handles the allocation of SynthDef objects using >> syntax 
+Handles the allocation of SynthDef objects using >> syntax, other must be
+an instance of `SynthDefProxy`, which is usually created when calling a
+`SynthDef`
 
 ##### `__sub__(self, data)`
 
@@ -251,6 +276,10 @@ p1.every(5, 'stutter', 4, cycle=8)
 ##### `follow(self, lead=False)`
 
 Takes a Player object and then follows the notes 
+
+##### `get_attributes(cls)`
+
+Returns a list of possible keyword arguments for FoxDot players and effects 
 
 ##### `get_event(self)`
 
@@ -385,7 +414,7 @@ Plays the current note n-1 times. You can specify keywords.
 
 ##### `test_for_circular_reference(self, attr, value, last_parent=None, last_key=None)`
 
-This is confusing me 
+Raises an exception if a player's attribute refers to itself e.g. `p1 >> pads(dur=p1.dur)` 
 
 ##### `unpack(self, item, debug=False)`
 

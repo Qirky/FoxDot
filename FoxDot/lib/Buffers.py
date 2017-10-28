@@ -1,13 +1,24 @@
-#!/usr/bin/python
+""" 
 
-""" This module manages the allocation of buffer numbers and samples """
+This module manages the allocation of buffer numbers and samples. To see
+a list of descriptions of what sounds are mapped to what characters,
+simply evaluate
+
+    print(Samples)
+
+Future:
+
+Aiming on being able to set individual sample banks for different players
+that can be proggrammed into performance.
+
+"""
 
 from __future__ import absolute_import, division, print_function
 
 from os.path import abspath, join, dirname
 from .Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
 from .Settings import FOXDOT_LOOP
-from .ServerManager import Server
+from .ServerManager import DefaultServer
 import wave
 import os
 
@@ -90,7 +101,7 @@ class Buffer(object):
         return self.bufnum
 
 class BufChar(object):
-    server = Server
+    server = DefaultServer
     def __init__(self, char):
         self.char    = char
         self.buffers = []
@@ -107,7 +118,7 @@ class BufChar(object):
     def __ne__(self, other):
         return str(self.char) != str(other)
     # Methods
-    def addbuffer(self, fn, num, num_channels=1):
+    def addbuffer(self, fn, num, num_channels=1): # TODO -- this shouldn't be sending the information to SC
         self.buffers.append( Buffer(fn, num, num_channels) )
         self.buffers[-1].char = self.char
         if fn is not None:

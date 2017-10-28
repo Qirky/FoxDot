@@ -1,3 +1,9 @@
+"""
+
+Contains classes `Pattern` and `PGroup` and the base class for `GeneratorPattern` (see Generators.py).
+
+"""
+
 from __future__ import absolute_import, division, print_function
 
 from random import choice, shuffle
@@ -16,13 +22,19 @@ def loop_pattern_func(f):
         multiple Patterns by using Patterns or TimeVars as arguments '''
     @functools.wraps(f)
     def new_function(*args):
+        
         # Return any functions that use TimeVars as PvarGenerators
         timevars = [arg for arg in args if isinstance(arg, Pattern.TimeVar)]
         if len(timevars) > 0:
             return Pattern.TimeVar.CreatePvarGenerator(f, *args)
+        
+        # Loop the pattern with different values
         pat = Pattern()
+        # Force pattern types if using lists/tuples
+        args = [PatternFormat(arg) for arg in args]
+        # Continually extend the pattern
         for i in range(LCM(*[len(arg) for arg in args if (hasattr(arg, '__len__') and not isinstance(arg, PGroup))])):
-            pat |= f(*[(modi(arg, i) if not isinstance(arg, PGroup) else arg) for arg in args])
+            pat |= f(*[(arg[i] if isinstance(arg, Pattern) else arg) for arg in args])
         return pat
     new_function.argspec = inspect.getargspec(f)
     return new_function
@@ -35,6 +47,8 @@ def loop_pattern_method(f):
     @functools.wraps(f)
     def new_function(self, *args):
         pat = Pattern()
+        # Force pattern types if using lists/tuples
+        args = [PatternFormat(arg) for arg in args]
         for i in range(LCM(*[len(arg) for arg in args if (hasattr(arg, '__len__') and not isinstance(arg, PGroup))])):
             pat |= f(self, *[(modi(arg, i) if not isinstance(arg, PGroup) else arg) for arg in args])
         return pat
@@ -873,7 +887,7 @@ class GeneratorPattern(random.Random):
         self.last_value = None
         self.data  = []
         self.index   = 0
-        self.history = {}
+        self.cache = {}
 
     def __repr__(self):
         """ String version is the name of the class and its arguments """
@@ -885,13 +899,13 @@ class GeneratorPattern(random.Random):
         if index is None:
             index, self.index = self.index, self.index + 1
         # If we have already accessed by this index, return the value
-        if index in self.history:
-            return self.history[index]
+        if index in self.cache:
+            return self.cache[index]
         else:
             # Calculate new value
             value = self.func(index)
             # Store if we refer to the same index
-            self.history[index] = value
+            self.cache[index] = value
             return value
 
     def new(self, other, func=Nil):
@@ -907,9 +921,6 @@ class GeneratorPattern(random.Random):
 
     def func(self, index):
         return index
-
-    #def __len__(self):
-    #    return 1
 
     def __int__(self):  
         return int(self.getitem())
@@ -942,6 +953,7 @@ class GeneratorPattern(random.Random):
     def __iter__(self):
         for i in range(self.MAX_SIZE):
             yield self[i]
+            
     def __getitem__(self, key):
         if type(key) is int:
             return self.getitem(key)
@@ -980,12 +992,16 @@ def asStream(data):
     """ Forces any data into a [pattern] form """
     return data if isinstance(data, Pattern) else Pattern(data)
 
-def Format(data):
+def PatternFormat(data):
+    """ If data is a list, returns Pattern(data). If data is a tuple, returns PGroup(data).
+        Returns data if neither. """
     if isinstance(data, list):
         return Pattern(data)
     if isinstance(data, tuple):
         return PGroup(data)
     return data
+
+Format = PatternFormat ## TODO - Remove this
 
 def patternclass(a, b):
     return PGroup if isinstance(a, PGroup) and isinstance(b, PGroup) else Pattern

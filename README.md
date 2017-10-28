@@ -23,7 +23,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 
 #### Prerequisites
 - [Python 2 or 3](https://www.python.org/) - make sure you say "yes" if you'd like to add Python to your path.
-- [SuperCollider 3.6 and above](http://supercollider.github.io/download)
+- [SuperCollider 3.8 and above](http://supercollider.github.io/download)
 
 #### Recommended
 - [sc3 plugins](http://sc3-plugins.sourceforge.net/)

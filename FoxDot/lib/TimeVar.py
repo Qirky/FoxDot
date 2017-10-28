@@ -66,6 +66,11 @@ class TimeVar(Repeatable):
 
             self.metro.start()
 
+    @classmethod
+    def set_clock(cls, tempo_clock):
+        cls.metro = tempo_clock
+        return
+
     @staticmethod
     def stream(values):
         return asStream(values)

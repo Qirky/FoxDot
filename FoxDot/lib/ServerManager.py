@@ -25,9 +25,28 @@ class SCLangClient(OSCClient):
         except Exception as e:
             print(e)
 
-class SCLangServerManager:
+# TODO -- Create an abstract base class that could be sub-classed for users who want to send their OSC messages elsewhere
 
-    metro = None
+class ServerManager(object):
+    def __init__(self, addr, port):
+        self.addr = addr
+        self.port = port
+        self.client = SCLangClient()
+        self.client.connect( (self.addr, self.port) )
+    @staticmethod
+    def create_osc_msg(dictionary):
+        """ Converts a Python dictionary into an OSC style list """
+        msg = []
+        for key, value in dictionary.items():
+            msg += [key, value]
+        return msg
+    def sendOSC(self, message):
+        return
+    def get_bundle(self):
+        return
+
+class SCLangServerManager(ServerManager):
+
     fxlist = None
 
     def __init__(self, addr, osc_port, sclang_port):
@@ -52,8 +71,11 @@ class SCLangServerManager:
         self.fx_setup_done = False
         self.fx_names = {}
 
-        # Toggle debug
-        # ------------
+        # Clear SuperCollider nodes if any left over from other session etc
+
+        self.freeAllNodes()
+
+        # Toggle debug in SuperCollider
 
         self.dumpOSC(0)
 
@@ -64,15 +86,18 @@ class SCLangServerManager:
         return str(self)
 
     def nextnodeID(self):
+        """ Gets the next node ID to use in SuperCollider """
         self.node += 1
         return self.node
 
     def query(self):
+        """ Prints debug status to SuperCollider console """
         self.client.send(OSCMessage("/status"))
         return
 
     def nextbusID(self):
-        if self.bus > 102:
+        """ Gets the next SuperCollider bus to use """
+        if self.bus > 100:
             self.bus = 1
         self.bus += 1
         return self.bus
@@ -82,10 +107,11 @@ class SCLangServerManager:
         message = OSCMessage("/s_new")
         node = packet[1] = self.nextnodeID()
         message.append(packet)
-        self.client.send( message )        
+        self.client.send( message )   
         return
 
     def freeAllNodes(self):
+        """ Triggers a free all message to kill all active nodes (sounds) in SuperCollider """
         msg = OSCMessage("/g_freeAll")
         msg.append([1])
         self.client.send(msg)
@@ -95,17 +121,6 @@ class SCLangServerManager:
         self.fxlist   = fx_list
         self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
-
-    def sendMidiMessage(self, event):
-        pass
-
-    @staticmethod
-    def create_osc_msg(dictionary):
-        """ Converts a Python dictionary into an OSC style list """
-        msg = []
-        for key, value in dictionary.items():
-            msg += [key, value]
-        return msg
 
     def get_bundle(self, synthdef, packet, effects, timestamp=0):
 
@@ -247,53 +262,42 @@ class SCLangServerManager:
         return
 
     def free_node(self, node):
+        """ Sends a message to SuperCollider to stop a specific node """
         message = OSCMessage("/n_free")
         message.append(node)
         self.client.send( message )
         return
 
-    # Buffer Communiation
-    # -------------------
-
     def bufferRead(self, path, bufnum):
+        """ Sends a message to SuperCollider to read an audio file into a buffer """
         message = OSCMessage("/b_allocRead")
         message.append([bufnum, path])
         self.client.send( message )
         return
 
-    # Midi Messages
-    # -------------
-
     def sendMidi(self, msg, cmd="/foxdot_midi"):
+        """ Sends a message to the FoxDot class in SuperCollider to forward a MIDI message """
         msg.setAddress(cmd)
         self.sclang.send(msg)
         return
 
-    # SynthDef Commmunication
-    # -----------------------
-
     def loadSynthDef(self, fn, cmd='/foxdot'):
+        """ Sends a message to the FoxDot class in SuperCollider to load a SynthDef from file """
         msg = OSCMessage()
         msg.setAddress(cmd)
         msg.append(fn)
         self.sclang.send(msg)
         return
 
-    # Debug - Dumps OSC messages SCLang side
-    # --------------------------------------
-
     def dumpOSC(self, value=1):
+        """ Debug - Dumps OSC messages SCLang side """
         msg = OSCMessage("/dumpOSC")
         msg.append(value)
         self.client.send(msg)
         return
 
-
-    # Boot and Quit
-    # -------------
-
     def start(self):
-        """ Boots SuperCollider """
+        """ Boots SuperCollider using `subprocess`"""
 
         if not self.booted:
             
@@ -350,6 +354,6 @@ if __name__ != "__main__":
 
     from .Settings import ADDRESS, PORT, PORT2
 
-    Server = SCLangServerManager(ADDRESS, PORT, PORT2)
+    DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
 
         

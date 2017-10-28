@@ -1,12 +1,48 @@
 """
+    Clock management for scheduling notes and functions. Anything 'callable', such as a function
+    or instance with a `__call__` method, can be scheduled. An instance of `TempoClock` is created
+    when FoxDot started up called `Clock`, which is used by `Player` instances to schedule musical
+    events. 
 
-    TempoClock.py
-    =============
-    
-    Clock management for scheduling notes and functions. Anything 'callable'
-    can be scheduled and can also be 'wrapped' using `Clock.call`, which
-    returns an object that schedules itself in the clock in the future once
-    the wrapped object is called.
+    The `TempoClock` is also responsible for sending the osc messages to SuperCollider. It contains
+    a queue of event blocks, instances of the `QueueBlock` class, which themselves contain queue
+    items, instances of the `QueueObj` class, which themseles contain the actual object or function
+    to be called. The `TempoClock` is continually running and checks if any queue block should 
+    be activated. A queue block has a "beat" value for which its contents should be activated. To make
+    sure that events happen on time, the `TempoClock` will begin processing the contents 0.25
+    seconds before it is *actually* meant to happen in case there is a large amount to process.  When 
+    a queue block is activated, a new thread is created to process all of the callable objects it
+    contains. If it calls a `Player` object, the queue block keeps track of the OSC messages generated 
+    until all `Player` objects in the block have been called. At this point the thread is told to
+    sleep until the remainder of the 0.25 seconds has passed. This value is stored in `Clock.latency`
+    and is adjustable. If you find that there is a noticeable jitter between events, i.e. irregular
+    beat lengths, you can increase the latency by simply evaluating the following in FoxDot:
+
+        Clock.latency = 0.5
+
+    To stop the clock from scheduling further events, use the `Clock.clear()` method, which is
+    bound to the shortcut key, `Ctrl+.`. You can schedule non-player objects in the clock by
+    using `Clock.schedule(func, beat, args, kwargs)`. By default `beat` is set to the next
+    bar in the clock, but you use `Clock.now() + n` or `Clock.next_bar() + n` to schedule a function
+    in the future at a specific time. 
+
+    To change the tempo of the clock, just set the bpm attribute using `Clock.bpm=val`. The change
+    in tempo will occur at the start of the next bar so be careful if you schedule this action within
+    a function like this:
+
+        def myFunc():
+            print("bpm change!")
+            Clock.bpm+=50
+
+    This will print the string `"bpm change"` at the next bar and change the bpm value at the
+    start of the *following* bar. The reason for this is to make it easier for calculating
+    currently clock times when using a `TimeVar` instance (See docs on TimeVar.py) as a tempo.
+
+    You can change the clock's time signature as you would change the tempo by setting the
+    `meter` attribute to a tuple with two values. So for 3/4 time you would use the follwing
+    code:
+
+        Clock.meter = (3,4)
 
 """
 
@@ -30,8 +66,6 @@ import threading
 import inspect
 
 class TempoClock(object):
-
-    server = None
 
     def __init__(self, bpm=120.0, meter=(4,4)):
 
@@ -68,7 +102,7 @@ class TempoClock(object):
         self.meter = meter
 
         # Create the queue
-        self.queue = Queue()
+        self.queue = Queue(self)
         self.current_block = None
         
         # Midi Clock In
@@ -85,6 +119,11 @@ class TempoClock(object):
 
         # If one object is going to played
         self.solo = SoloPlayer()
+
+    @classmethod
+    def set_server(cls, server):
+        cls.server = server
+        return
 
     def __str__(self):
         return str(self.queue)
@@ -206,18 +245,6 @@ class TempoClock(object):
         for item in block:
 
             # The item might get called by another item in the queue block
-
-            # Future fix?
-
-            # for item in block.functions:
-            #   item()
-            # for item in block.method_calls
-            #   item()
-            # for item in block.players
-            #   item.get_event()
-            # for item in block.players
-            #   item.resolve_player_key_relationships()
-            # block.send_osc_messages()
 
             if not block.called(item):
 
@@ -379,8 +406,9 @@ class TempoClock(object):
 #####
 
 class Queue(object):
-    def __init__(self):
+    def __init__(self, parent):
         self.data = []
+        self.parent = parent
 
     def __repr__(self):
         return "\n".join([str(item) for item in self.data]) if len(self.data) > 0 else "[]"
@@ -415,7 +443,7 @@ class Queue(object):
 
         if beat < self.next():
 
-            self.data.append(QueueBlock(item, beat, args, kwargs))
+            self.data.append(QueueBlock(self, item, beat, args, kwargs))
 
             block = self.data[-1]
 
@@ -448,17 +476,13 @@ class Queue(object):
 
                         i = 0
 
-                    self.data.insert(i, QueueBlock(item, beat, args, kwargs))
+                    self.data.insert(i, QueueBlock(self, item, beat, args, kwargs))
 
                     block = self.data[i]
 
                     break
 
         # Tell any players about what queue item they are in
-
-        #if hasattr(item, "queue_block":
-
-        #    item.queue_block = block
 
         if isinstance(item, Player):
 
@@ -481,6 +505,10 @@ class Queue(object):
             except IndexError:
                 pass
         return sys.maxsize
+
+    def get_server(self):
+        """ Returns the `ServerManager` instanced used by this block's parent clock """
+        return self.parent.server
             
 from types import FunctionType
 class QueueBlock(object):
@@ -490,10 +518,8 @@ class QueueBlock(object):
                         lambda x: isinstance(x, Player),     # Then players themselves
                         lambda x: True                       # And anything else
                       ]
-
-    server = None
                        
-    def __init__(self, obj, t, args=(), kwargs={}):
+    def __init__(self, parent, obj, t, args=(), kwargs={}):
 
         self.events         = [ [] for lvl in self.priority_levels ]
         self.called_events  = []
@@ -501,9 +527,15 @@ class QueueBlock(object):
 
         self.osc_messages   = []
 
+        self.server = parent.get_server()
+
         self.beat = t
         self.time = 0
         self.add(obj, args, kwargs)
+
+    @classmethod
+    def set_server(cls, server):
+        cls.server = server
         
     def __repr__(self):
         return "{}: {}".format(self.beat, self.players())
@@ -523,6 +555,7 @@ class QueueBlock(object):
         return
 
     def __call__(self):
+        """ Calls self.osc_messages() """
         self.send_osc_messages()
 
     def send_osc_messages(self):
@@ -533,10 +566,6 @@ class QueueBlock(object):
             else:
                 self.server.client.send(msg)        
         return
-
-    def called(self, item):
-        """ Returns True if the item is in this QueueBlock and has already been called """
-        return item in self.called_events
 
     def call(self, item, caller = None):
         """ Calls an item in queue slot """
@@ -559,16 +588,15 @@ class QueueBlock(object):
 
         return
 
-    def resolve_player_key_relatonships(self):
-        """ Un-implemented """
-        for item in self.called_events:
-            if isinstance(item.obj, Player):
-                item.obj.resolve_player_key_relatonships()
-        return
+    # Remove duplication
 
     def already_called(self, obj):
         """ Returns True if the obj (not QueueItem) has been called """
         return self.get_queue_item(obj) in self.called_events
+
+    def called(self, item):
+        """ Returns True if the item is in this QueueBlock and has already been called """
+        return item in self.called_events
 
     def get_queue_item(self, obj):
         for item in self:
@@ -577,15 +605,15 @@ class QueueBlock(object):
         else:
             raise ValueError("{} not found".format(key))
 
+    def players(self):
+        return [item for level in self.events[1:3] for item in level]
+
     def __getitem__(self, key):
         for event in self:
             if event == key:
                 return event # Possible need to be key.obj?
         else:
             raise ValueError("{} not found".format(key))
-
-    def players(self):
-        return [item for level in self.events[1:3] for item in level]
 
     def __iter__(self):
         return (item for level in self.events for item in level)

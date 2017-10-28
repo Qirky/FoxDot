@@ -1,7 +1,18 @@
 """
 
-    Copyright Ryan Kirkbride 2015
+FoxDot is a Python library and programming environment that provides a fast and 
+user-friendly abstraction to the powerful audio-engine, SuperCollider. It comes 
+with its own IDE, which means it can be used straight out of the box; all you need 
+is Python and SuperCollider and you're ready to go!
 
+For more information on installation, check out [the guide](http://foxdot.org/installation), 
+or if you're already set up, you can also find a useful starter guide that introduces the
+key components of FoxDot on [the website](http://foxdot.org/).
+
+Please see the documentation for more detailed information on the FoxDot classes 
+and how to implement them.
+
+Copyright Ryan Kirkbride 2015
 """
 
 from __future__ import absolute_import, division, print_function
@@ -20,8 +31,8 @@ from .Constants import *
 from .Midi import *
 from .Settings import *
 from .SCLang._SynthDefs import *
+from .ServerManager import *
 from .SCLang import SynthDefs, Env, SynthDef
-from .ServerManager import Server
 from .Root import Root
 from .Scale import Scale
 from .Workspace import get_keywords
@@ -30,76 +41,12 @@ from .Workspace import get_keywords
 
 from random import choice as choose
 
-# Create a clock and define functions
-
-Clock = TempoClock()
-
-# Give Players a reference to the Sample Library
-
-Player.samples = Samples
-
-# Give the server information about Effects
-
-Server.setFx(FxList)
-
 # Define any custom functions
-
-def nextBar(n=0):
-    ''' Schedule functions when you define them with @nextBar'''
-    if callable(n):
-        Clock.schedule(n, Clock.next_bar())
-        return n
-    def wrapper(f):
-        Clock.schedule(f, Clock.next_bar() + n)
-        return f
-    return wrapper
-
-# Assign the clock to time-keeping classes
-
-for item in (TimeVar, Player, Server, MidiIn):
-
-    item.metro = Clock
-
-# Players and effects etc need reference to SC server
-
-for item in (Player, Effect, QueueBlock, Clock):
-
-    item.server = Server
-
-# Create preset Players
-
-alphabet = list('abcdefghijklmnopqrstuvwxyz')
-numbers  = list('0123456789') + [""]
-
-for char1 in alphabet:
-
-    group = []
-
-    for char2 in alphabet + numbers:
-
-        arg = char1 + char2
-
-        FoxDotCode.namespace[arg] = Player()
-
-        group.append(arg)
-
-    FoxDotCode.namespace[char1 + "_all"] = Group(*[FoxDotCode.namespace[char1+str(n)] for n in range(10)])
-
-# Create an empty item
-
-FoxDotCode.namespace["_"] = EmptyItem()
-
-# Give the __when__ statement access to the  global namespace
-
-when.set_namespace(FoxDotCode)
-
-def Master():
-    return Group(*Clock.playing)
-
-# Custom handling of Pattern getitem when accessed with PlayerKey or TimeVar
 
 @PatternMethod
 def __getitem__(self, key):
+    """ Overrides the Pattern.__getitem__ to allow indexing
+        by TimeVar and PlayerKey instances. """
     if isinstance(key, PlayerKey):
         # Create a player key whose calculation is get_item
         print("Using a PlayerKey as index")
@@ -112,3 +59,68 @@ def __getitem__(self, key):
         return item
     else:
         return self.getitem(key)
+
+def nextBar(n=0):
+    ''' Schedule functions when you define them with @nextBar'''
+    if callable(n):
+        Clock.schedule(n, Clock.next_bar())
+        return n
+    def wrapper(f):
+        Clock.schedule(f, Clock.next_bar() + n)
+        return f
+    return wrapper
+
+def update_foxdot_clock(clock):
+    """ Tells the TimeVar, Player, and MidiIn classes to use 
+        a new instance of TempoClock. """
+
+    assert isinstance(clock, TempoClock)
+
+    for item in (TimeVar, Player, MidiIn):
+
+        item.set_clock(clock)
+
+def update_foxdot_server(serv):
+    """ Tells the `Effect` and`TempoClock`classes to send OSC messages to
+        a new ServerManager instance.
+    """
+
+    assert isinstance(serv, ServerManager)
+
+    TempoClock.set_server(serv)
+
+    return
+
+def instantiate_player_objects():
+    """ Instantiates all two-character variable Player Objects """
+    alphabet = list('abcdefghijklmnopqrstuvwxyz')
+    numbers  = list('0123456789')
+
+    for char1 in alphabet:
+
+        group = []
+
+        for char2 in numbers:
+
+            arg = char1 + char2
+
+            FoxDotCode.namespace[arg] = Player()
+
+            group.append(arg)
+
+        FoxDotCode.namespace[char1 + "_all"] = Group(*[FoxDotCode.namespace[char1+str(n)] for n in range(10)])
+
+    return
+
+def Master():
+    """ Returns a `Group` containing all the players currently active in the Clock """
+    return Group(*Clock.playing)
+
+# Create a clock and define functions
+
+when.set_namespace(FoxDotCode) # experimental
+
+Clock = TempoClock()
+update_foxdot_server(DefaultServer)
+update_foxdot_clock(Clock)
+instantiate_player_objects()

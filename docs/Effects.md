@@ -128,7 +128,8 @@ writes to file and sends to server
 
 ## Data
 
-#### `FxList = {'vib': <Fx 'vibrato' -- args: vib,vibdepth>, 'f...x 'slideFrom' -- args: slidedelay,sus,slidefrom>}`
+#### `FxList = <Fx 'vibrato' -- args: vib, vibdepth>
+<Fx 'forma... 'slideFrom' -- args: slidedelay, sus, slidefrom>`
 
 #### `fx = <Fx 'wavesShapeDistortion' -- args: shape>`
 

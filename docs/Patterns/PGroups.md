@@ -8,6 +8,11 @@ Stutter every other request
 
 #### Methods
 
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
+
 ##### `__invert__(self)`
 
 Using the ~ symbol as a prefix to a Pattern will reverse it.
@@ -267,6 +272,11 @@ but the delay times are calculated in the same way as if the values were neseted
 
 #### Methods
 
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
+
 ##### `__invert__(self)`
 
 Using the ~ symbol as a prefix to a Pattern will reverse it.
@@ -510,6 +520,11 @@ is the lowest common multiple of the lengths of the two joining patterns.
 Stutters the values over the length of and event's 'sus' 
 
 #### Methods
+
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
 
 ##### `__invert__(self)`
 
@@ -774,6 +789,11 @@ Stutters a shuffled version the values over the length of and event's 'dur'
 
 #### Methods
 
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
+
 ##### `__invert__(self)`
 
 Using the ~ symbol as a prefix to a Pattern will reverse it.
@@ -1035,6 +1055,11 @@ is the lowest common multiple of the lengths of the two joining patterns.
 
 
 #### Methods
+
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
 
 ##### `__invert__(self)`
 
@@ -1302,6 +1327,11 @@ is the lowest common multiple of the lengths of the two joining patterns.
 Stutters the values over the length of and event's 'dur' 
 
 #### Methods
+
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
 
 ##### `__invert__(self)`
 

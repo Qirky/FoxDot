@@ -1,5 +1,7 @@
 # `Main`
 
+Contains classes `Pattern` and `PGroup` and the base class for `GeneratorPattern` (see Generators.py).
+
 ## Classes
 
 ### `EmptyItem(self)`
@@ -195,6 +197,11 @@ Class to represent any groupings of notes as denoted by brackets.
 PGroups should only be found within a Pattern object.
 
 #### Methods
+
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
 
 ##### `__invert__(self)`
 
@@ -468,6 +475,11 @@ Base type pattern
 
 #### Methods
 
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
+
 ##### `__invert__(self)`
 
 Using the ~ symbol as a prefix to a Pattern will reverse it.
@@ -714,6 +726,11 @@ is the lowest common multiple of the lengths of the two joining patterns.
 
 #### Methods
 
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
+
 ##### `__invert__(self)`
 
 Using the ~ symbol as a prefix to a Pattern will reverse it.
@@ -944,6 +961,11 @@ is the lowest common multiple of the lengths of the two joining patterns.
 Abstract base class for Patterns 
 
 #### Methods
+
+##### `__getitem__(self, key)`
+
+Overrides the Pattern.__getitem__ to allow indexing
+by TimeVar and PlayerKey instances. 
 
 ##### `__invert__(self)`
 
@@ -1197,7 +1219,13 @@ Returns tuples/PGroups as PGroups, and anything else as Patterns
 
 ### `Format(data)`
 
-None
+If data is a list, returns Pattern(data). If data is a tuple, returns PGroup(data).
+Returns data if neither. 
+
+### `PatternFormat(data)`
+
+If data is a list, returns Pattern(data). If data is a tuple, returns PGroup(data).
+Returns data if neither. 
 
 ### `PatternMethod(f)`
 
