@@ -1,21 +1,11 @@
-FoxDot - Live Coding with Python v0.4.10
+FoxDot - Live Coding with Python v0.4.11
 ========================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.4.10 fixes and updates
+### v0.4.11 fixes and updates
 
-- Fixed negative pitch bug
-- `PGroupMod` replaces `PGroupStar` when using square brackets in a "play" string. This "flattens" the values so that many nested `PGroups` don't create exponentially larger loops when sending events to SuperCollider.
-- Fixed `stutter` so that delays caused by `PGroups` are no longer lost.
-- `PRand`, `PwRand`, and `PxRand` choose from a random index instead of a random element so that any "nested" `GeneratorPatterns` generate a new item instead of returning the same one i.e. at index 0.
-- Fixed `Player.degrade`
-- `slidedelay` default value changed from 0.75 to 0
-- Replaced "Control" with "Command" for menu short-cuts on Mac OS (Thanks ianb) 
-- Improved documentation layout
-- Player methods such `shuffle` no longer affect the text of a `play` Player as it would overload the undo heap. This may be added back in at a layer date.
-- Infinite recursion errors caused by circular referencing no longer seem to occur.
-- Improved printing of Players to include identifier e.g. `<p1 - pluck>`.
+- Removed `sys.maxint` to conform with Python 3
 
 ---
 

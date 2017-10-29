@@ -1,3 +1,18 @@
+### v0.4.10 fixes and updates
+
+- Fixed negative pitch bug
+- `PGroupMod` replaces `PGroupStar` when using square brackets in a "play" string. This "flattens" the values so that many nested `PGroups` don't create exponentially larger loops when sending events to SuperCollider.
+- Fixed `stutter` so that delays caused by `PGroups` are no longer lost.
+- `PRand`, `PwRand`, and `PxRand` choose from a random index instead of a random element so that any "nested" `GeneratorPatterns` generate a new item instead of returning the same one i.e. at index 0.
+- Fixed `Player.degrade`
+- `slidedelay` default value changed from 0.75 to 0
+- Replaced "Control" with "Command" for menu short-cuts on Mac OS (Thanks ianb) 
+- Improved documentation layout
+- Player methods such `shuffle` no longer affect the text of a `play` Player as it would overload the undo heap. This may be added back in at a layer date.
+- Infinite recursion errors caused by circular referencing no longer seem to occur.
+- Improved printing of Players to include identifier e.g. `<p1 - pluck>`.
+ 
+ 
 ### v0.4.9 fixes and updates
 
 - Fixed issues with indexing `GeneratorPattern` and using `var` in Player methods.
