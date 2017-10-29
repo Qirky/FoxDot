@@ -857,14 +857,13 @@ class PGroup(metaPattern):
         return self.__class__.__name__
 
 import random
-import sys
 
 class GeneratorPattern(random.Random):
     """
         Used for when a Pattern does not generate a set length pattern,
         e.g. random patterns
     """
-    MAX_SIZE = sys.maxint
+    MAX_SIZE = 65536
     debugging = False
     def __new__(cls, *args, **kwargs):
         """ Override random.Random using first argument as a seed """
