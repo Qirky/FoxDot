@@ -308,13 +308,6 @@ class workspace:
     def read(self):
         return self.text.get("1.0", END)
 
-    """
-
-        Key press commands
-        ------------------
-
-    """
-
     def keypress(self, event=None):
         """ Handles any keypress """
 

@@ -51,10 +51,9 @@ Quarks.install("FoxDot")
 3. If you have installed the SC3 Plugins, use the "Code" drop-down menu to select "Use SC3 Plugins". Restart FoxDot and you'll have access to classes found in the SC3 Plugins.
 4. Check out the [YouTube tutorials](https://www.youtube.com/channel/UCRyrNX07lFcfRSymZEWwl6w) for some in-depth tutorial videos on getting to grips with FoxDot
 
-#### Troubleshooting
+#### Frequently Asked Questions
 
-##### Buffer mismatch error
-If you are getting an error similar to "Buffer UGen channel mismatch: expected 2, yet buffer has 1 channels" in SuperCollider this just means that a mono audio file is being played back where SuperCollider was expecting stereo. Nothing to worry about!
+You can find answers to many frequently asked questions on the [FAQ post on the FoxDot discussion forum](http://foxdot.org/index.php/forum/?view=thread&id=1).
 
 ## Basics
 
