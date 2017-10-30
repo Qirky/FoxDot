@@ -1,4 +1,5 @@
 from __future__ import division
+from __future__ import print_function
 from FoxDot import *
 
 #-->> Created with FoxDot <<--#
@@ -12,7 +13,7 @@ from FoxDot import *
 # to play, which are called 'Synths'. You can see the list of pre-installed
 # 'Synths' by executing
 
-print Synths
+print(Synths)
 
 # A player object is created by instantiating the Player class, like
 # any other player class and takes no arguments. In FoxDot, all two-
@@ -38,7 +39,7 @@ p1.chop = 4
 
 # To see all the names of player attributes, just execute
 
-print Player.Attributes()
+print(Player.Attributes())
 
 # You can modulate the degree of the player in an algorithmic way by
 # using the '+' and '-' operators
@@ -69,7 +70,7 @@ Scale.default.set([0,2,3,5,7,10])
 
 # To see a list of all scales, use
 
-print Scale.names()
+print(Scale.names())
 
 # Similarly, you can change the root note players using the root keyword
 # and the Root.default object
