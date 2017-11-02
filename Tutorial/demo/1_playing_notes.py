@@ -35,11 +35,7 @@ p1.oct = 5
 
 # To see all the names of player attributes, just execute
 
-<<<<<<< HEAD
 print(Player.get_attributes())
-=======
-print(Player.Attributes())
->>>>>>> origin/master
 
 # You can modulate the degree of the player in an algorithmic way by
 # using the '+' and '-' operators
