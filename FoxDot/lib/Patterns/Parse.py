@@ -49,7 +49,7 @@ def feed(string):
 
                 e = "Empty '()' brackets in string"
 
-                raise(ParseError(e))
+                raise ParseError(e)
 
             items.append( chars )
 
@@ -69,7 +69,7 @@ def feed(string):
 
                 e = "Empty '{}' brackets in string"
 
-                raise(ParseError(e))
+                raise ParseError(e)
 
             items.append( braces_type(chars) )
                 
@@ -86,7 +86,7 @@ def feed(string):
 
                 e = "Empty '[]' brackets in string"
 
-                raise(ParseError(e))
+                raise ParseError(e)
 
             # Un-nest
             if contains_nest:

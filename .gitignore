@@ -7,6 +7,8 @@ FoxDot/lib/Settings/conf.py
 build/*
 dist/*
 FoxDot/snd/_loop_/*
+FoxDot/lib/Custom/*
+FoxDot/lib/GhostCoder/*
 
 # To-do list
 TODO.txt
