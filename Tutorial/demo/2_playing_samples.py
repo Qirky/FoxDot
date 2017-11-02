@@ -1,7 +1,4 @@
-from __future__ import division
-from FoxDot import *
-
-#-->> Created with FoxDot <<--#
+# Tutorial 1: Playing Samples
 
 # You can play audio samples in the FoxDot/snd/ sub-directories by using the
 # 'play' Synth and using a string of characters instead of list of notes.

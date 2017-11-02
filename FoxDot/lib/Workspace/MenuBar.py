@@ -5,7 +5,9 @@ try:
 except ImportError:
     from tkinter import Menu, BooleanVar
 
-from ..Settings import SC3_PLUGINS, SYSTEM, MAC_OS
+import os.path
+from functools import partial
+from ..Settings import *
 
 class MenuBar(Menu):
     def __init__(self, master, visible=True):
@@ -45,6 +47,7 @@ class MenuBar(Menu):
         editmenu.add_command(label="Decrease Font Size",      command=self.root.zoom_out, accelerator="Ctrl+-")
         editmenu.add_separator()
         editmenu.add_command(label="Toggle Menu", command=self.root.toggle_menu, accelerator="Ctrl+M")
+        editmenu.add_checkbutton(label="Toggle Window Transparency",  command=self.root.toggle_transparency, variable=self.root.transparent)
         self.add_cascade(label="Edit", menu=editmenu)
 
         # Code menu
@@ -75,6 +78,23 @@ class MenuBar(Menu):
         helpmenu.add_command(label="Open config file (advanced)",      command=self.root.open_config_file)
         ##        settingsmenu.add_command(label="Change Colours...",   command=self.root.toggleMenu)
         self.add_cascade(label="Help & Settings", menu=helpmenu)
+
+        # Tutorials
+
+        tutorialmenu = Menu(self, tearoff=0)
+
+        for tutorial in GET_TUTORIAL_FILES():
+
+            filename = os.path.basename(tutorial).replace(".py", "")
+
+            data = filename.split("_")
+
+            num  = data[0]
+            name = " ".join(data[1:]).title()
+
+            tutorialmenu.add_command(label="Load Tutorial {}: {}".format(num, name), command=partial(self.root.loadfile, tutorial))
+
+        self.add_cascade(label="Tutorials", menu=tutorialmenu)
 
         # Add to root
 

@@ -335,6 +335,11 @@ class PlayerKey(NumberKey):
             self.parent  = reference.parent
 
         self.last_updated = 0
+
+    def set(self, value, time):
+        self.value = value
+        self.last_updated = time
+        return
     
     def update(self, value, time):
         if value != self.value:

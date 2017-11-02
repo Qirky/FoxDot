@@ -1027,9 +1027,13 @@ def pattern_depth(pat):
                 total = depth + 1
     return total
 
+
 def group_modi(pgroup, index):
     """ Returns value from pgroup that modular indexes nested groups """
-    if isinstance(pgroup, (int, float, str, bool)):
+    std_type = (int, float, str, bool)
+    if isinstance(pgroup, Pattern.TimeVar) and isinstance(pgroup.now(), std_type):
+            return pgroup
+    elif isinstance(pgroup, std_type):
         return pgroup
     try:
         return group_modi(pgroup[index % len(pgroup)], index // len(pgroup))

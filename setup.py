@@ -3,7 +3,7 @@
 from distutils.core import setup   
 
 setup(name='FoxDot',
-      version='0.4.11',
+      version='0.4.12',
       description='Live Coding with SuperCollider',
       author='Ryan Kirkbride',
       author_email='ryan@foxdot.org',

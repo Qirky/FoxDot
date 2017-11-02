@@ -1,7 +1,4 @@
-from __future__ import division
-from FoxDot import *
-
-#-->> Created with FoxDot <<--#
+# Tutorial 1: Playing Notes
 
 # Live coding is an interactive process and you can interact wih your code
 # by executing it while it is being written. To execute a block of code (lines
@@ -9,15 +6,15 @@ from FoxDot import *
 # of code use Alt+Return
 
 # FoxDot creates music by giving player objects a 'digital instrument'
-# to play, which are called 'Synths'. You can see the list of pre-installed
+# to play, which are called 'SynthDefs'. You can see the list of pre-installed
 # 'Synths' by executing
 
-print Synths
+print(SynthDefs)
 
 # A player object is created by instantiating the Player class, like
 # any other player class and takes no arguments. In FoxDot, all two-
 # character variable names are reserved for player objects, such as 'p1'
-# or 'bd'. Use >> to give one of these to a player object like so:
+# Use >> to give one of these to a player object like so:
 
 p1 >> pads()
 
@@ -34,11 +31,11 @@ p1 >> pads([0,1,2], dur=[1,1/2,1/2], oct=6, pan=[1,-1])
 
 # You can also assign values to the attributes of player objects directly
 
-p1.chop = 4
+p1.oct = 5
 
 # To see all the names of player attributes, just execute
 
-print Player.Attributes()
+print(Player.get_attributes())
 
 # You can modulate the degree of the player in an algorithmic way by
 # using the '+' and '-' operators
@@ -69,12 +66,12 @@ Scale.default.set([0,2,3,5,7,10])
 
 # To see a list of all scales, use
 
-print Scale.names()
+print(Scale.names())
 
 # Similarly, you can change the root note players using the root keyword
 # and the Root.default object
 
-p >> pads([0,1,2], scale=Scale.minor, root=2)
+p1 >> pads([0,1,2], scale=Scale.minor, root=2)
 
 Root.default.set(2)
 

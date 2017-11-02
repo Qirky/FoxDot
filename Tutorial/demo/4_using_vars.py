@@ -1,3 +1,5 @@
+# Tutorial 4: Using Vars
+
 # A 'var' is a variable that changes over time. It takes two arguments
 # at instantiation; states and a list of durations (this can a single number
 # if all durations are equal).
@@ -6,7 +8,7 @@ a = var([0,4,5,3], 4)
 
 # Try executing this line every few seconds
 
-print a
+print(a)
 
 # Use 'var' with your Player objects to create chord progressions. 
 
@@ -20,13 +22,13 @@ b1 >> bass(a, dur=PDur(3,8)) + var([0,1],[3,1])
 
 b = a + var([0,10],8)
 
-print a, b
+print(a, b)
 
 # Updating the values of one 'var' will update it everywhere else
 
 a.update([1,4], 8)
 
-print a, b
+print(a, b)
 
 Clock.clear()
 
@@ -34,7 +36,7 @@ Clock.clear()
 
 c = linvar([0,1],16)
 
-print c
+print(c)
 
 p1 >> pads(a, amp=c)
 
@@ -44,7 +46,7 @@ Clock.clear()
 
 d = Pvar([PRange(12), PTri(5)], 8)
 
-print d
+print(d)
 
 p1 >> pads(a, amp=c, dur=1/4) + d
 

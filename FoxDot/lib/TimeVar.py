@@ -41,9 +41,12 @@ class TimeVar(Repeatable):
 
         self.name   = "un-named"
 
-        self.values   = values # may have to change self.values to self.values
+        self.values   = values
         self.dur    = dur
         self.bpm    = kwargs.get('bpm', None)
+
+        # This is possibly a bad idea
+        # self.data = self
 
         # Dynamic method for calculating values
         self.func     = Nil
@@ -545,6 +548,11 @@ class Pvar(TimeVar, Pattern):
         
         TimeVar.__init__(self, data, dur, **kwargs)
 
+    def new(self, other):
+        new = Pvar(asStream(other), dur=self.dur)
+        new.dependency = self
+        return new
+
     def __add__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(Add)
@@ -635,6 +643,13 @@ class Pvar(TimeVar, Pattern):
         # Used when piping patterns together
         new = self.new(PatternContainer(other))
         new.evaluate = fetch(Or)
+        return new
+
+    def transform(self, func):
+        """ Returns a Pvar based on a transformation function, as opposed to
+            a mathematical operation"""
+        new = self.new(0)
+        new.evaluate = fetch(func)
         return new
 
 
@@ -748,6 +763,7 @@ class _var_dict(object):
 
 var = _var_dict()
 
-# Give Main.Pattern a reference to TimeVar class
-Pattern.TimeVar = TimeVar
+# Give Main.Pattern a reference to TimeVar classes
+Pattern.TimeVar       = TimeVar
 Pattern.PvarGenerator = PvarGenerator
+Pattern.Pvar          = Pvar

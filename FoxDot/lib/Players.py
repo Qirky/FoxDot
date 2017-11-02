@@ -235,7 +235,7 @@ class Player(Repeatable):
     # Tkinter Window
     widget = None
 
-    def __init__( self ):
+    def __init__( self, name=None):
 
         # Inherit from repeatable i.e. x.every
 
@@ -247,7 +247,7 @@ class Player(Repeatable):
         # General setup
         
         self.synthdef = None
-        self.id = None
+        self.id = name
 
         self.current_event_size   = 0
         self.current_event_length = 0
@@ -283,11 +283,6 @@ class Player(Repeatable):
         self.whitespace  = None
         self.bang_kwargs = {}
 
-        # Modifiers -- could be removed?
-        
-        self.reversing = False
-        self.degrading = False
-        
         # Keeps track of which note to play etc
 
         self.event_index = 0
@@ -375,20 +370,49 @@ class Player(Repeatable):
         return self
 
     def test_for_circular_reference(self, attr, value, last_parent=None, last_key=None):
-        """ Raises an exception if a player's attribute refers to itself e.g. `p1 >> pads(dur=p1.dur)` """
-        if isinstance(value, PlayerKey):
+        """ Used to raise an exception if a player's attribute refers to itself e.g. `p1 >> pads(dur=p1.dur)` """
+
+        # If we are setting a group of values, check each one in turn
+
+        if isinstance(value, PGroup):
+            
+            for item in value:
+            
+                self.test_for_circular_reference(attr, item, last_parent,  last_key)
+
+        elif isinstance(value, PlayerKey):
+          
+            # If the original Player is *this* player and we are referencing the same attr, throw and exception
+         
             if value.parent is self and attr == value.key:
+
                 ident_self  = "{}.{}".format(self.id if self.id is not None else str(self), attr)
+                
                 if last_parent is not None:
+                    
                     ident_other = "{}.{}".format(last_parent.id if last_parent.id is not None else str(last_parent), last_key)
+                
                 else:
+                
                     ident_other = ident_self
-                raise ValueError("Circular reference found: {} to itself via {}".format(ident_self, ident_other))
+
+                err = "Circular reference found: {} to itself via {}".format(ident_self, ident_other)
+                
+                raise ValueError(err)
+            
+            # If we get the same parent and key, stop
+
             elif last_parent == value.parent and last_key == value.key:
+            
                 return
+            
             else:
+
+                # Check if other values in the parent might have a circular reference e.g. p1 >> pads([0,1,p2.degree])
+            
                 for item in value.parent.attr[value.key]:
-                    self.test_for_circular_reference(attr, item, value.parent, value.key)
+            
+                    self.test_for_circular_reference(attr, item, last_parent=value.parent, last_key=value.key)
         return
        
     def __setattr__(self, name, value):
@@ -428,12 +452,11 @@ class Player(Repeatable):
                 if name in self.__dict__:
 
                     if isinstance(self.__dict__[name], PlayerKey):
-    
-                        self.__dict__[name].update_pattern()
 
+                        self.__dict__[name].update_pattern()
                 else:
 
-                    self.update_player_key(name, value, 0)
+                    self.update_player_key(name, self.now(name), 0) # self.now might be an issue
 
                 return
             
@@ -464,7 +487,8 @@ class Player(Repeatable):
 
         for key in Player.Attributes():
 
-            if key != "scale":
+            if key not in ("scale", "dur", "sus", "blur", "amp",
+                            "amplify", "degree", "oct", "bpm"):
 
                 setattr(self, key, 0)
 
@@ -542,10 +566,6 @@ class Player(Repeatable):
             try:
 
                 self.event_n, self.event_index = self.count(self.event_index if not force_count else None)
-
-                if self.debug and dur_updated:
-
-                    print(self.event_index, self.metro.now())
 
             except TypeError as e:
 
@@ -840,8 +860,6 @@ class Player(Repeatable):
             
             new_event["delay"] = self.event.get("delay", 0) + asStream([dur * (i+1) for i in range(n-1)])
 
-            # new_event = self.get_prime_funcs(new_event)
-
             self.send(**new_event)
                 
         return self
@@ -999,7 +1017,15 @@ class Player(Repeatable):
 
         else:
 
-            self.__dict__[key].update(value, time)
+            # Force values if not playing
+
+            if self.isplaying is False:
+
+                self.__dict__[key].set(value, time)
+
+            else:
+
+                self.__dict__[key].update(value, time)
 
         return
 
@@ -1007,6 +1033,7 @@ class Player(Repeatable):
         delay = float(group_modi(self.event.get('delay', 0), index))
         if delay > 0:
             time  = self.event_index + delay
+            # TODO -- avoid scheduling lots of functions
             def delay_update(event, i, t):
                 for key in event:
                     if key not in ignore:
@@ -1093,6 +1120,11 @@ class Player(Repeatable):
         except KeyError:
 
             print(attr, self.attr[attr], index)
+
+        except ZeroDivisionError as e:
+
+            print(self, attr, self.attr[attr], index)
+            raise(e)
 
         if attr_value is not None:
 
@@ -1417,8 +1449,15 @@ class Player(Repeatable):
 
                             banged = True
 
-        self.freq = freq
-        self.buf = bufnum
+        # Store (and update PlayerKeys) the calculated values
+
+        if self.synthdef == SamplePlayer:
+
+            self.buf = bufnum
+
+        else:
+
+            self.freq = freq
         
         return
 
@@ -1522,7 +1561,7 @@ class Player(Repeatable):
         return self
 
     def solo(self, action=1):
-        """ Silences all players except this player. Undo the silence
+        """ Silences all players except this player. Undo the solo
             by using `Player.solo(0)` """
 
         action=int(action)
@@ -1532,7 +1571,7 @@ class Player(Repeatable):
             self.metro.solo.reset()
 
         elif action == 1:
-            
+
             self.metro.solo.set(self)
 
         elif action == 2:

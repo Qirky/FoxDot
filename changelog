@@ -1,3 +1,7 @@
+### v0.4.11 fixes and updates
+
+- Removed `sys.maxint` to conform with Python 3
+
 ### v0.4.10 fixes and updates
 
 - Fixed negative pitch bug

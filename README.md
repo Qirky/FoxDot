@@ -1,12 +1,24 @@
-FoxDot - Live Coding with Python v0.4.11
+FoxDot - Live Coding with Python v0.4.12
 ========================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.4.11 fixes and updates
+### v0.4.12 fixes and updates
 
-- Removed `sys.maxint` to conform with Python 3
+- `Player.stop_calling` is now `Player.never`. If a `Player` is calling its own method (implemented by the `every` method e.g. `p1 >> pads().every(4, "reverse")` you can now stop the repeated call by using `p1.never("reverse")`.
+- Fixed circular referencing bug when using PGroups e.g. `p1 >> pads(p1.degree + (0,4))`
+- Window transparency can now be toggled from the "Edit" menu
+- Added Tutorial files that can be loaded from the menu
+- Multiple uses of the `every` method with the same method name can be used together by specifying an `ident` keyword, which can be any hashable value i.e. a string or integer.
 
+```python
+# The second "stutter" no longer overrides the first
+d1 >> play("x-u-").every(8, "stutter", 8).every(3, "stutter", 4, dur=1, degree="y", ident=1)
+```
+
+- Fix `group_modi` function to test for `TimeVar` instances instead of trying and failing to index their contents so that `TimeVar`s with strings in their contents don't get into an infinite recursive call. 
+
+ 
 ---
 
 ## Installation and startup
@@ -40,6 +52,10 @@ Quarks.install("FoxDot")
 2. Start FoxDot by entering `python -m FoxDot` at the command line.
 3. If you have installed the SC3 Plugins, use the "Code" drop-down menu to select "Use SC3 Plugins". Restart FoxDot and you'll have access to classes found in the SC3 Plugins.
 4. Check out the [YouTube tutorials](https://www.youtube.com/channel/UCRyrNX07lFcfRSymZEWwl6w) for some in-depth tutorial videos on getting to grips with FoxDot
+
+#### Installing with SuperCollider 3.7 or earlier
+
+If you are having trouble installing the FoxDot Quark in SuperCollider, it’s usually because the version of SuperCollider you are installing doesn’t have the functionality for installing Quarks or it doesn’t work properly. If this is the case, you can download the contents of the following SuperCollider script: [foxdot.scd](http://foxdot.org/wp-content/uploads/foxdot.scd). Once downloaded, open the file in SuperCollider and press Ctrl+Return to run it. This will make SuperCollider start listening for messages from FoxDot.
 
 #### Frequently Asked Questions
 
@@ -129,7 +145,7 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 
 ## Documentation
 
-For more information on FoxDot, please see the `docs` folder (although largely unwritten).
+For more information on FoxDot, please see the `docs` folder (although largely unwritten). Please note that FoxDot is still in development and is changing all the time. I do my best to keep the website and README up to date but don't always have the time.
 
 ## Thanks
 

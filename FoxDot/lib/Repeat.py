@@ -97,10 +97,15 @@ class Repeatable(object):
         # Collect the cycle length
 
         cycle = kwargs.get("cycle", None)
+        ident = kwargs.get("ident", None)
 
-        kwargs = {key: value for key, value in kwargs.items() if key != "cycle"}
+        kwargs = {key: value for key, value in kwargs.items() if key not in ("cycle", "ident")}
 
         # If the method call already exists, just update it
+
+        if ident is not None:
+
+            cmd = "{}-{}".format(cmd, ident)
 
         if cmd in self.repeat_events:
 
@@ -122,11 +127,11 @@ class Repeatable(object):
 
     def stop_calling_all(self):
         for method in list(self.repeat_events.keys()):
-            self.stop_calling(method)
+            self.never(method)
         return self
             
 
-    def stop_calling(self, method):
+    def never(self, method):
         try:
             self.repeat_events[method].stop()
             del self.repeat_events[method]

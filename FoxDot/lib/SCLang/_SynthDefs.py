@@ -292,6 +292,7 @@ squish.freq = squish.freq / 4
 squish.osc = Ringz.ar(Pulse.ar(4 * squish.rate), squish.freq, squish.sus, squish.amp)
 squish.osc = squish.osc * XLine.ar(1/2, 0.000001, squish.sus, doneAction=2)
 squish.osc = squish.osc.cos
+squish.amp = squish.amp * 4
 squish.add()
 
 swell = SynthDef("swell")

@@ -14,6 +14,14 @@ if sys.platform.startswith('darwin'):
 
     SYSTEM = MAC_OS
 
+    # Attempted fix for some Mac OS users
+
+    try:
+        import matplotlib
+        matplotlib.use('TkAgg')
+    except ImportError:
+        pass
+
 elif sys.platform.startswith('win'):
 
     SYSTEM = WINDOWS
@@ -30,9 +38,10 @@ FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon" + (".ico
 FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 FOXDOT_LOOP  = os.path.realpath(FOXDOT_ROOT + "/snd/_loop_/")
 
-SCLANG_EXEC  = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
-SYNTHDEF_DIR = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
-EFFECTS_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/sceffects/")
+SCLANG_EXEC   = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
+SYNTHDEF_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
+EFFECTS_DIR   = os.path.realpath(FOXDOT_ROOT + "/osc/sceffects/")
+TUTORIAL_DIR  = os.path.realpath(FOXDOT_ROOT + "/../Tutorial/demo/")
 
 FOXDOT_OSC_FUNC     = os.path.realpath(FOXDOT_ROOT + "/osc/OSCFunc.scd")
 FOXDOT_STARTUP_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Startup.scd")
@@ -51,6 +60,9 @@ def GET_SYNTHDEF_FILES():
 
 def GET_FX_FILES():
     return [os.path.realpath(EFFECTS_DIR + "/" + path) for path in os.listdir(EFFECTS_DIR)]
+
+def GET_TUTORIAL_FILES():
+    return [os.path.realpath(TUTORIAL_DIR + "/" + path) for path in os.listdir(TUTORIAL_DIR)]
 
 # Set Environment Variables
 

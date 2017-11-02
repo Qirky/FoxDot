@@ -91,6 +91,10 @@ class console:
         """ str(s) -> string """
         return self.text.get(1.0, "end")
 
+    def config(self, *args, **kwargs):
+        self.canvas.config(*args, **kwargs)
+        return
+
     def flush(self):
         return
 

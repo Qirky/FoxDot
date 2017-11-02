@@ -100,11 +100,11 @@ def instantiate_player_objects():
 
         group = []
 
-        for char2 in numbers:
+        for char2 in alphabet + numbers:
 
             arg = char1 + char2
 
-            FoxDotCode.namespace[arg] = Player()
+            FoxDotCode.namespace[arg] = Player(arg)
 
             group.append(arg)
 

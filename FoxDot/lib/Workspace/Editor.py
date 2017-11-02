@@ -76,6 +76,11 @@ class workspace:
         self.root.grid_columnconfigure(1, weight=1) # Text boxes
         self.root.protocol("WM_DELETE_WINDOW", self.kill )
 
+        # Track whether user wants transparent background
+
+        self.transparent = BooleanVar()
+        self.transparent.set(False)
+
         # --- Set icon
         
         try:
@@ -546,6 +551,11 @@ class workspace:
             self.set_all(text)
         return "break"
 
+    def loadfile(self, path):
+        with open(path) as f:
+            self.set_all(f.read())
+        return
+
     def newfile(self, event=None):
         ''' Clears the document and asks if the user wants to save '''
         answer = tkMessageBox.askyesnocancel("", "Save your work before creating a new document?")
@@ -618,6 +628,28 @@ class workspace:
         # Pop-up to tell the user a restart is required
         tkMessageBox.showwarning(title="Just a heads up", message="Restart of FoxDot is required for the changes to take effect")
         return "break"
+
+    def toggle_transparency(self, event=None):
+        """ Sets the text and console background to black and then removes all black pixels from the GUI """
+        setting_transparent = self.transparent.get()
+        if setting_transparent:
+            alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
+            self.text.config(background=alpha)
+            self.linenumbers.config(background=alpha)
+            self.console.config(background=alpha)
+            if SYSTEM == WINDOWS:
+                self.root.wm_attributes('-transparentcolor', alpha)
+            else:
+                self.root.wm_attributes("-transparent", True)
+        else:
+            self.text.config(background=colour_map['background'])
+            self.linenumbers.config(background=colour_map['background'])
+            self.console.config(background="Black")
+            if SYSTEM == WINDOWS:
+                self.root.wm_attributes('-transparentcolor', "")
+            else:
+                self.root.wm_attributes("-transparent", False)
+        return
     
     def edit_paste(self, event=None):
         """ Pastes any text and updates the IDE """

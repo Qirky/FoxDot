@@ -55,7 +55,7 @@
     *Vibrato* - Title keyword: `vib`, Attribute keyword(s): 
     Vibrato (defaults to 0)
 
-    Undocumented: Spin, Shape, Formant, BandPassFilter
+    Undocumented: Spin, Shape, Formant, BandPassFilter, Echo
 
 
 """
@@ -277,7 +277,7 @@ fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")
 fx.save()
 
 fx = FxList.new('echo', 'combDelay', {'echo': 0, 'sus': 1, 'decay': 1}, order=2)
-fx.add('osc = osc + CombL.ar(osc, delaytime: echo * sus, maxdelaytime: 2, decaytime: decay)')
+fx.add('osc = osc + CombL.ar(osc, delaytime: echo * sus * 2, maxdelaytime: 2, decaytime: decay)')
 fx.save()
 
 fx = FxList.new('spin', 'spinPan', {'spin': 0,'sus': 1}, order=2)
