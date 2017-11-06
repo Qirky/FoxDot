@@ -1,7 +1,11 @@
-FoxDot - Live Coding with Python v0.4.12
+FoxDot - Live Coding with Python v0.4.13
 ========================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
+
+### v0.4.13 fixes and updates
+
+- Moved demo files into main package to fix install from pip.
 
 ### v0.4.12 fixes and updates
 
