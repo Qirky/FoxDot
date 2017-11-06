@@ -313,6 +313,24 @@ razz.osc  = RLPF.ar(razz.osc, 1300, 0.78)
 razz.env = Env.perc(atk=0.125)
 razz.add()
 
+sitar = SynthDef("sitar")
+sitar.amp = sitar.amp * 0.75
+sitar.sus = sitar.sus * 4
+sitar.osc = LFNoise0.ar([8400, 8500], sitar.amp)
+sitar.osc = sitar.osc * XLine.ar(1, 0.000001, sitar.sus * 0.1)
+sitar.freq = (265 / (sitar.freq * [0.666, 0.669])) * 0.005
+sitar.osc = CombL.ar(sitar.osc, delaytime=sitar.freq, maxdelaytime=2)
+sitar.env = Env.ramp()
+sitar.add()
+
+with SynthDef("star") as synth:
+    freq = instance('freq')
+    synth.amp  = (synth.amp * 2)+ 0.00001
+    synth.freq = [synth.freq / 2, synth.freq / 2 + LFNoise2.ar(50).range(-2,2)] 
+    synth.osc  = Saw.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,synth.sus))) * 0.3 + Saw.ar(freq+2, phase=VarSaw.ar(freq + 2, width=Line.ar(1,0.2,synth.sus))) * 0.3
+    synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, synth.sus/6)
+star = synth
+
 if SC3_PLUGINS:
 
     piano = SynthDef("piano")

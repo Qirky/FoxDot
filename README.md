@@ -153,6 +153,7 @@ For more information on FoxDot, please see the `docs` folder (although largely u
 - PyOSC, Artem Baguinski et al
 - Members of the Live Coding community who have contributed to the project in one way or another including, but not limited to, Alex McLean, Sean Cotterill, and Dan Hett.
 - Big thanks to those who have used, tested, and submitted bugs, which have all helped improve FoxDot
+- Thank you to those who have found solutions for SuperCollider related issues, such as DavidS48
 
 ### Samples
 

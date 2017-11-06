@@ -279,7 +279,7 @@ class TempoClock(object):
 
             beat = self.true_now() # get current time
 
-            next_event = next(self.queue)
+            next_event = self.queue.next()
 
             if beat >= next_event:
 
@@ -441,7 +441,7 @@ class Queue(object):
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
 
-        if beat < next(self):
+        if beat < self.next():
 
             self.data.append(QueueBlock(self, item, beat, args, kwargs))
 
