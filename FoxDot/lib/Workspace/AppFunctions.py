@@ -41,6 +41,9 @@ def at_function(index, string):
 def in_brackets(index, string):
     """ Returns true if index is between a pair of brackets (could be non closing) """
     
+    left_b = list("({[")
+    right_b = list(")}]")
+
     count = dict([(l,0) for l in left_b])
 
     index = index - 1 # Look to the character to the left to start
