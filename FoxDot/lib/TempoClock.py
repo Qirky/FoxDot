@@ -344,6 +344,7 @@ class TempoClock(object):
 
         return
 
+    def future(self, dur, obj, args=(), kwargs={}):
         """ Add a player / event to the queue `dur` beats in the future """
         self.schedule(obj, self.now() + dur, args, kwargs)
         return
