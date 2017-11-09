@@ -1,3 +1,21 @@
+### v0.4.14 fixes and updates
+
+- Pattern getitem method now allows Patterns to be indexed using a Player Key e.g. `P[0,1,2,3][p1.degree]` that will return the item in the Pattern based on the  integer values of the key (`p1.degree` in this example).
+- Added `future` method. Like `schedule` it adds a callable object to the queue but doesn't need the exact beat occurrence, just how many beats in the future from "now". First argument is time, followed by the object, arguments, and keyword arguments.
+- Player object `stop` method properly removes the player from `Clock.playing` list.
+- Using Player Key `__getitem__` returns a player key whose calculation function is `__getitem__`. This is useful if you want to use just one of the values of another player if they are in a group. e.g.
+
+```python
+p1 >> pads((0,2,4) + var([0,4,5,3]))
+b1 >> bass(p1.degree[0]) # Only plays the "root" note of the chord
+```
+
+- SuperCollider bus number resets to 4 instead of 1 to prevent feedback loops when using reverb.
+- Changed "verb" keyword to "mix" for reverb effect. Default is changed from 0.25 to 0.1.
+- `GeneratorPattern` `new` method converts the  `other` argument to a Pattern so you can use lists/tuples as opposed to just Patterns/PGroups when performing operations e.g. `PWalk() + (0,4)`.
+- Fixed `newline` method to only add an indent if the INSERT index was in brackets or following a colon instead of doing so if the line had open brackets / colon. Evaluated code no longer highlights any empty preceeding lines.
+- Python 3 uses xrange as range
+
 ### v0.4.13 fixes and updates
 
 - Moved demo files into main package to fix install from pip.
