@@ -37,7 +37,7 @@ class PRand(GeneratorPattern):
         a random item for that container. '''
     def __init__(self, start, stop=None, **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
-        # If we're given a list, choose from that list -- TODO always use a list and use xrange
+        # If we're given a list, choose from that list -- TODO always use a list and use range
         if hasattr(start, "__iter__"):
             self.data = Pattern(start)
             try:
@@ -57,7 +57,7 @@ class PRand(GeneratorPattern):
             self.data = "{}, {}".format(self.low, self.high)
 
     def choose(self):
-        return self.data[self.choice(xrange(self.MAX_SIZE))]
+        return self.data[self.choice(range(self.MAX_SIZE))]
             
     def func(self, index):
         if self.choosing:
@@ -92,7 +92,7 @@ class PwRand(GeneratorPattern):
         self.values  = self.data.stutter(self.weights)
 
     def choose(self):
-        return self.values[self.choice(xrange(self.MAX_SIZE))]
+        return self.values[self.choice(range(self.MAX_SIZE))]
         
     def func(self, index):
         return self.choose()
