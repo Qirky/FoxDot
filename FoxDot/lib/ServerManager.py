@@ -98,7 +98,7 @@ class SCLangServerManager(ServerManager):
     def nextbusID(self):
         """ Gets the next SuperCollider bus to use """
         if self.bus > 100:
-            self.bus = 1
+            self.bus = 4
         self.bus += 1
         return self.bus
 

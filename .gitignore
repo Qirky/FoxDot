@@ -9,6 +9,7 @@ dist/*
 FoxDot/snd/_loop_/*
 FoxDot/lib/Custom/*
 FoxDot/lib/GhostCoder/*
+changed_files.txt
 
 # To-do list
 TODO.txt

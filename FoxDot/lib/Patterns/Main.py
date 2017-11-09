@@ -914,8 +914,9 @@ class GeneratorPattern(random.Random):
         new = GeneratorPattern()
         new.parent = self
         new.name   = new.parent.name
+        other      = asStream(other)
         new.data   = "{} {}".format(func.__name__, other)
-        new.func   = lambda index: func(new.parent.getitem(index), other)
+        new.func   = lambda index: func(new.parent.getitem(index), other[index])
         return new
 
     def func(self, index):

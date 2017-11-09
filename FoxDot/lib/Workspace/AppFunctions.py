@@ -27,12 +27,52 @@ def isHex(char):
     return len(repr(char)) > 3
 
 def indented(s):
+    if len(s) == 0:
+        return 0
     for i, char in enumerate(s):
         if char != " ":
             break
     return i
 
+def at_function(index, string):
+    """ Returns true if the index is at a colon in the string """
+    return False if index == 0 else string[index-1] == ":"
+
+def in_brackets(index, string):
+    """ Returns true if index is between a pair of brackets (could be non closing) """
+    
+    count = dict([(l,0) for l in left_b])
+
+    index = index - 1 # Look to the character to the left to start
+
+    while index > 0:
+
+        char = string[index]
+
+        if char in left_b:
+
+            if count[char] == 0:
+
+                return True
+
+            else:
+
+                count[char] -= 1
+
+        elif char in right_b:
+
+            count[brackets[char]] += 1
+
+        index -= 1
+
+    return False
+
+def get_tabspace(s):
+    """ Returns the amount of whitespace at the start of a string """
+    return indented(s) * " "
+
 def open_bracket(text):
+    """ Returns the index of the last open bracket """
 
     count = dict([(l,0) for l in left_b])
 

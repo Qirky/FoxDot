@@ -344,6 +344,10 @@ class TempoClock(object):
 
         return
 
+        """ Add a player / event to the queue `dur` beats in the future """
+        self.schedule(obj, self.now() + dur, args, kwargs)
+        return
+
     def next_bar(self):
         """ Returns the beat value for the start of the next bar """
         beat = self.now()
@@ -387,9 +391,8 @@ class TempoClock(object):
         self.queue.clear()
         self.solo.reset()
 
-        for player in self.playing:
+        for player in list(self.playing):
 
-            player.reset()
             player.kill()
 
         for item in self.items:
@@ -577,8 +580,6 @@ class QueueBlock(object):
             # Caller will call the actual object, get the queue_item
 
             item = self.get_queue_item(item)
-
-        # Stops circular references from crashing but they the two players' attributes wont be the same
 
         if item not in self.called_events:
 

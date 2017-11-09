@@ -9,18 +9,18 @@
     a default value which is set when a Player is created.
 
     ```python
-    # Example. Reverb effect "title" is `room` and attribute is `verb`, which
+    # Example. Reverb effect "title" is `room` and attribute is `mix`, which
     # defaults to 0.25. The following adds a reverb effect
     
     p1 >> pads(room=0.5)
 
-    # This still adds the effect, but a verb of 0 doesn't actually do anything
+    # This still adds the effect, but a mix of 0 doesn't actually do anything
 
-    p1 >> pads(room=0.5, verb=0)
+    p1 >> pads(room=0.5, mix=0)
 
     # This effect is not added as the "title" keyword, room, is 0
 
-    p1 >> pads(room=0, verb=0.5)
+    p1 >> pads(room=0, mix=0.5)
     ```
 
     Other effects are outlined below:
@@ -34,8 +34,8 @@
     *Bitcrush* - Title keyword: `bits`, Attribute keyword(s): `crush`
     The bit depth, in number of `bits`, that the signal is reduced to; this is a value between 1 and 24 where other values are ignored. Use `crush` to set the amount of reduction to the bitrate (defaults to 8)
 
-    *Reverb* - Title keyword: `room`, Attribute keyword(s): `verb`
-    The `room` argument specifies the size of the room and `verb` is the dry/wet mix of reverb; this should be a value between 0 and 1 (defalts to 0.25)
+    *Reverb* - Title keyword: `room`, Attribute keyword(s): `mix`
+    The `room` argument specifies the size of the room and `mix` is the dry/wet mix of reverb; this should be a value between 0 and 1 (defalts to 0.25)
 
     *Chop* - Title keyword: `chop`, Attribute keyword(s): `sus`
     'Chops' the signal into chunks using a low frequency pulse wave over the sustain of a note.
@@ -292,8 +292,8 @@ fx = FxList.new("cut", "trimLength", {"cut": 0, "sus": 1}, order=2)
 fx.add("osc = osc * EnvGen.ar(Env(levels: [1,1,0.01], curve: 'step', times: [sus * cut, 0.01]))")
 fx.save()
 
-fx = FxList.new('room', 'reverb', {'room': 0, 'verb': 0.25}, order=2)
-fx.add("osc = FreeVerb.ar(osc, verb, room)")
+fx = FxList.new('room', 'reverb', {'room': 0, 'mix': 0.1}, order=2)
+fx.add("osc = FreeVerb.ar(osc, mix, room)")
 fx.save()
 
 fx = FxList.new("formant", "formantFilter", {"formant": 0}, order=2)

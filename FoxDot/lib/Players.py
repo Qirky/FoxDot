@@ -1490,9 +1490,17 @@ class Player(Repeatable):
 
     def kill(self):
         """ Removes this object from the Clock and resets itself"""
+        
         self.isplaying = False
+        
         self.stop_calling_all()
+        
         self.reset()
+
+        if self in self.metro.playing:
+        
+            self.metro.playing.remove(self)
+        
         return
         
     def stop(self, N=0):

@@ -49,8 +49,7 @@ def __getitem__(self, key):
         by TimeVar and PlayerKey instances. """
     if isinstance(key, PlayerKey):
         # Create a player key whose calculation is get_item
-        print("Using a PlayerKey as index")
-        return self.getitem(key)
+        return key.index(self)
     elif isinstance(key, TimeVar):
         # Create a TimeVar of a PGroup that can then be indexed by the key
         item = TimeVar(tuple(self.data))

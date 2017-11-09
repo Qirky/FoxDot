@@ -1,27 +1,9 @@
-FoxDot - Live Coding with Python v0.4.13
+FoxDot - Live Coding with Python v0.4.14
 ========================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.4.13 fixes and updates
-
-- Moved demo files into main package to fix install from pip.
-
-### v0.4.12 fixes and updates
-
-- `Player.stop_calling` is now `Player.never`. If a `Player` is calling its own method (implemented by the `every` method e.g. `p1 >> pads().every(4, "reverse")` you can now stop the repeated call by using `p1.never("reverse")`.
-- Fixed circular referencing bug when using PGroups e.g. `p1 >> pads(p1.degree + (0,4))`
-- Window transparency can now be toggled from the "Edit" menu
-- Added Tutorial files that can be loaded from the menu
-- Multiple uses of the `every` method with the same method name can be used together by specifying an `ident` keyword, which can be any hashable value i.e. a string or integer.
-
-```python
-# The second "stutter" no longer overrides the first
-d1 >> play("x-u-").every(8, "stutter", 8).every(3, "stutter", 4, dur=1, degree="y", ident=1)
-```
-
-- Fix `group_modi` function to test for `TimeVar` instances instead of trying and failing to index their contents so that `TimeVar`s with strings in their contents don't get into an infinite recursive call. 
-
+### v0.4.14 fixes and updates
  
 ---
 
@@ -63,7 +45,7 @@ If you are having trouble installing the FoxDot Quark in SuperCollider, it’s u
 
 #### Frequently Asked Questions
 
-You can find answers to many frequently asked questions on the [FAQ post on the FoxDot discussion forum](http://foxdot.org/index.php/forum/?view=thread&id=1).
+You can find answers to many frequently asked questions on the [FAQ post on the FoxDot discussion forum](http://foxdot.org/forum/?view=thread&id=1).
 
 ## Basics
 

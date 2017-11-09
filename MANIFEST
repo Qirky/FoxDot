@@ -2,6 +2,10 @@
 setup.py
 FoxDot\__init__.py
 FoxDot\__main__.py
+FoxDot\demo\1_playing_notes.py
+FoxDot\demo\2_playing_samples.py
+FoxDot\demo\3_using_patterns.py
+FoxDot\demo\4_using_vars.py
 FoxDot\lib\Bang.py
 FoxDot\lib\Buffers.py
 FoxDot\lib\Constants.py
@@ -72,6 +76,7 @@ FoxDot\osc\sceffects\formantFilter.scd
 FoxDot\osc\sceffects\highPassFilter.scd
 FoxDot\osc\sceffects\lowPassFilter.scd
 FoxDot\osc\sceffects\makeSound.scd
+FoxDot\osc\sceffects\pitchBend.scd
 FoxDot\osc\sceffects\pitchShift.scd
 FoxDot\osc\sceffects\reverb.scd
 FoxDot\osc\sceffects\slideFrom.scd
@@ -125,12 +130,14 @@ FoxDot\osc\scsyndef\scatter.scd
 FoxDot\osc\scsyndef\scrap.scd
 FoxDot\osc\scsyndef\scratch.scd
 FoxDot\osc\scsyndef\siren.scd
+FoxDot\osc\scsyndef\sitar.scd
 FoxDot\osc\scsyndef\snick.scd
 FoxDot\osc\scsyndef\soft.scd
 FoxDot\osc\scsyndef\soprano.scd
 FoxDot\osc\scsyndef\spark.scd
 FoxDot\osc\scsyndef\spick.scd
 FoxDot\osc\scsyndef\squish.scd
+FoxDot\osc\scsyndef\star.scd
 FoxDot\osc\scsyndef\swell.scd
 FoxDot\osc\scsyndef\test.scd
 FoxDot\osc\scsyndef\twang.scd

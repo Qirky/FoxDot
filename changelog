@@ -1,3 +1,22 @@
+### v0.4.13 fixes and updates
+
+- Moved demo files into main package to fix install from pip.
+
+### v0.4.12 fixes and updates
+
+- `Player.stop_calling` is now `Player.never`. If a `Player` is calling its own method (implemented by the `every` method e.g. `p1 >> pads().every(4, "reverse")` you can now stop the repeated call by using `p1.never("reverse")`.
+- Fixed circular referencing bug when using PGroups e.g. `p1 >> pads(p1.degree + (0,4))`
+- Window transparency can now be toggled from the "Edit" menu
+- Added Tutorial files that can be loaded from the menu
+- Multiple uses of the `every` method with the same method name can be used together by specifying an `ident` keyword, which can be any hashable value i.e. a string or integer.
+
+```python
+# The second "stutter" no longer overrides the first
+d1 >> play("x-u-").every(8, "stutter", 8).every(3, "stutter", 4, dur=1, degree="y", ident=1)
+```
+
+- Fix `group_modi` function to test for `TimeVar` instances instead of trying and failing to index their contents so that `TimeVar`s with strings in their contents don't get into an infinite recursive call. 
+
 ### v0.4.11 fixes and updates
 
 - Removed `sys.maxint` to conform with Python 3

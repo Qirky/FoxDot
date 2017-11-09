@@ -424,7 +424,9 @@ class workspace:
 
             # Highlight text only to last character, not whole line
 
-            self.highlight(start, end)
+            if len(self.text.get(start, end).strip()) > 0:
+
+                self.highlight(start, end)
 
         # Convert line numbers to Tkinter indices
 
@@ -690,41 +692,23 @@ class workspace:
 
         execute.update_line_numbers(self.text)
 
-        pos = 0 # amount of whitespace to add
+        whitespace = get_tabspace(line) # amount of whitespace to add
 
-        while True:
+        # If the line was empty, dont add whitespace
 
-            # Case 1. Unindented or indented but empty
+        if line.strip() == "":
 
-            if line.strip() == "": break
+            whitespace = ""
 
-            # Case 2. Open Bracket
+        # If the index was in brackets, add one tab size
 
-            # pos = open_bracket(line)
+        elif in_brackets(j, line) or at_function(j, line):
 
-            # if pos: break
-
-            # Case 2. Keyword with ending ':'
-
-            pos = function(line)
-
-            if pos: break
-
-            # Case 3. Indented line
-
-            pos = indented(line)
-
-            if pos: break
-
-            # Any other possibilities
-
-            pos = 0
-            
-            break
+            whitespace = whitespace + self.tabspace()
 
         # Add the necessary whitespace
 
-        self.text.insert(index(i+1,0), " " * pos )
+        self.text.insert(index(i+1,0), whitespace )
 
         # Update the IDE colours
 

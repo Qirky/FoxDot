@@ -243,8 +243,16 @@ class NumberKey(object):
         new.calculate = lambda a, b: abs(float(b))
         return new
 
-    def __index__(self):
-        return int(self)
+    def __getitem__(self, key):
+        new = self.child(key)
+        new.calculate = lambda a, b: b[a]
+        return new
+
+    def index(self, sequence):
+        """ Returns a Player Key that returns the element from sequence indexed using int(self) """
+        new = self.child(sequence)
+        new.calculate = lambda a, b: a[b]
+        return new
 
     def map(self, mapping):
         """ Creates a new Player key that maps the values in the dictionary (mapping)
@@ -275,10 +283,6 @@ class NumberKey(object):
         return repr(self.now())
     def __len__(self):
         return len(self.now())
-
-    # Container
-    def __getitem__(self, key):
-        return self.now()[key]
     
     def __iter__(self):
         try:
