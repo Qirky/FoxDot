@@ -170,7 +170,7 @@ with SynthDef("pluck") as pluck:
     pluck.amp  = pluck.amp + 0.00001
     pluck.freq = [pluck.freq, pluck.freq + LFNoise2.ar(50).range(-2,2)]
     pluck.osc  = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
-    pluck.osc  = pluck.osc * XLine.ar(pluck.amp, pluck.amp/10000, pluck.sus * 4, doneAction=2) * 0.3
+    pluck.osc  = pluck.osc * XLine.kr(pluck.amp, pluck.amp/10000, pluck.sus * 4, doneAction=2) * 0.3
 
 with SynthDef("spark") as synth:
     freq = instance('freq')

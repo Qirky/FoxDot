@@ -9,6 +9,8 @@ dist/*
 FoxDot/snd/_loop_/*
 FoxDot/lib/Custom/*
 FoxDot/lib/GhostCoder/*
+FoxDot/lib/Settings/conf.txt
+FoxDot/lib/Workspace/tmp/tempfile.txt
 changed_files.txt
 
 # To-do list

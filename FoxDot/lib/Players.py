@@ -214,9 +214,14 @@ class Player(Repeatable):
     
     internal_keywords = tuple(value for value in keywords if value != "degree")
 
+    # Aliases
+
+    alias = { "pitch" : "degree",
+              "char" : "degree" }
+
     # Base attributes
     
-    base_attributes = ('sus', 'fmod', 'vib', 'pan', 'rate', 'amp', 'midinote', 'channel')
+    base_attributes = ('sus', 'fmod', 'vib', 'pan', 'rate', 'amp', 'midinote', 'channel') 
 
     fx_attributes = FxList.all_kwargs()
     fx_keys       = FxList.kwargs()
@@ -425,6 +430,10 @@ class Player(Repeatable):
             
             if name not in self.__vars:
 
+                # Get any alias
+
+                name = self.alias.get(name, name)
+
                 if name == "dur":
 
                     value, self._delay_offset = CalculateDelaysFromDur(value)
@@ -462,6 +471,9 @@ class Player(Repeatable):
             
         self.__dict__[name] = value
         return
+
+    def __getattr__(self, name):
+        return self.__dict__[self.alias.get(name, name)]
 
     def __getitem__(self, name):
         if self.__init:
@@ -535,7 +547,7 @@ class Player(Repeatable):
         self.oct     = 5
         
         # Tempo
-        self.bpm     = None 
+        self.bpm     = None
         
         return self
 

@@ -5,7 +5,7 @@
 
 bd >> play("x")
 
-# A character refers to a sound file and whitespace is used for silence, so
+# A character refers to a sound and whitespace is used for silence, so
 # you can spread sounds out in time:
 
 bd >> play("x  x  x ")
@@ -22,16 +22,32 @@ d1 >> play("(x )( x)o ")
 
 d1 >> play("x-o[-o]")
 
-# The following patterns are identical
+d1 >> play("x-o[---]")
+
+# You can combine the brackets however you like: the following patterns are identical
 
 d1 >> play("x-o(-[-o])")
 
 d1 >> play("x-o[-(o )]")
 
-# Curly brackets squeeze any sound files into the duration of one
+# Curly braces select a sample sound at random if you want more variety
 
-d1 >> play("x-o{---}")
+d1 >> play("x-o{-=[--][-o]}")
 
 Clock.clear()
+
+# Each character is mapped to a folder of sound files and you can select different
+# samples by using the "sample" keyword argument
+
+d1 >> play("(x[--])xu[--]")
+
+d1 >> play("(x[--])xu[--]", sample=1)
+
+d1 >> play("(x[--])xu[--]", sample=2)
+
+d1 >> play("(x[--])xu[--]", sample=[1,2,3])
+
+Clock.clear()
+
 
 
