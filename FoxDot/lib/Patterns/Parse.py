@@ -12,30 +12,66 @@ import re
 from .PlayString import *
 from .Generators import PRand
 from .PGroups    import PGroupMod
-from .Main       import metaPattern, PatternMethod
+from .Main       import Pattern, metaPattern, PatternMethod
 
 from ..Utils import modi, LCM
 
 re_nests  = r"\((.*?)\)"
 re_square = r"\[.*?\]"
 re_curly  = r"\{.*?\}"
+re_arrow  = r"<.*?>"
 square_type=PGroupMod
 braces_type=PRand
+
+class layerPat(Pattern):
+    # Class for testing whether or not a pattern should be layered via <> brackets
+    pass
 
 def ParsePlayString(string):
     output, _ = feed(string)
     return output
 
 def feed(string):
+    
     string = PlayString(string)
-    items = []
+    items  = Pattern() # The actual pattern
+
     contains_nest = False
+    
     i = 0
+    
     while i < len(string):
+
         char = string[i]
 
+        # look for a '<>'
+        if char == "<":
+
+            # Parse the contents of the brackets if found
+            j = string.index(">", start=i+1)
+            s = string[i+1:j]
+            i = j
+
+            chars, _ = feed(s)
+
+            if len(chars) == 0:
+
+                e = "Empty '<>' brackets in string"
+
+                raise ParseError(e)
+
+            if len(items.data) > 0 and isinstance(items.data[-1], layerPat):
+
+                items.data[-1] = layerPat(items.data[-1] & chars)
+
+            else:
+
+                items.append(layerPat(chars))
+
+            contains_nest = True
+
         # Look for a '()'
-        if char == "(":
+        elif char == "(":
 
             # Parse the contents of the brackets if found
             j = string.index(")", start=i+1)
@@ -93,13 +129,15 @@ def feed(string):
 
                 # May contain sub-nests, so re-parse with calculated duration
 
-                chars, _ = feed(s)
+                # chars, _ = feed(s) # why do this again?
 
                 new_chars = []
 
-                for num in range(max([len(ch) for ch in chars])):
+                largest_item = max([len(ch) for ch in chars.data])
 
-                    new_chars.append(square_type([modi(ch, num) for ch in chars]))
+                for num in range(largest_item):
+
+                    new_chars.append(square_type([modi(ch, num) for ch in chars.data]))
 
                 items.append( new_chars )
 
@@ -115,7 +153,7 @@ def feed(string):
 
         # Add single character to list
 
-        elif char not in ")]":
+        elif char not in ")]}>":
 
             items.append( char )
 
@@ -123,6 +161,7 @@ def feed(string):
         i += 1
 
     return items, contains_nest
+
 
 @PatternMethod
 def fromString(self, string):

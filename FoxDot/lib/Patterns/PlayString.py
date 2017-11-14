@@ -31,20 +31,9 @@ class PlayString:
         return self.string[key]
     def __setitem__(self, key, value):
         self.string[key] = value
-    def get_dur(self):
-        """ Returns a list of durations """
-        return [char.get_dur() for char in self.string]
-    def multiply(self, value):
-        for char in self.string:
-            char.multiply(value)
-        return
-    def append(self, item):
-        self.string.append(item)
-    def extend(self, items):
-        self.string.extend(items)
     def index(self, sub, start=0):
         """ Returns the index of the closing bracket """
-        br = "([{"[")]}".index(sub)]
+        br = "([{<"[")]}>".index(sub)]
         count = 0
         for i in range(start, len(self.string)):
             char = self.string[i]
@@ -56,47 +45,3 @@ class PlayString:
                 else:
                     return i
         raise ParseError("Closing bracket '%s' missing in string '%s'" % (sub, self.original))
-
-    # Return strings
-    
-    def shuffle(self):
-        """ Proper method of shuffling playstrings as opposed to shuffle() """
-
-        # 1. Get all the characters out in order
-
-        chars = re.findall(re_chars, self.original)
-
-        string = re.sub(re_chars, "%s", self.original)
-
-        # 2. Shuffle
-
-        shuffle(chars)
-
-        # 3. replace
-
-        return string % tuple(chars)
-
-    def mirror(self):
-        l = list(self.original)
-        l.reverse()
-        for i, char in enumerate(l):
-            if char in br_pairs.keys():
-                l[i] = br_pairs[char]
-        return "".join(l)
-
-    def rotate(self, n=1):
-        # 1. Get all the characters out in order
-
-        chars = re.findall(re_chars, self.original)
-
-        string = re.sub(re_chars, "%s", self.original)
-
-        # 2. Rotate
-    
-        n = int(n)
-
-        chars = chars[n:] + chars[:n]
-
-        return string % tuple(chars)
-
-
