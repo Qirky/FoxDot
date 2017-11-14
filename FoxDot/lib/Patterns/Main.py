@@ -85,6 +85,7 @@ class metaPattern(object):
         # might be created during runtime
 
         if self.__class__.__name__ not in PATTERN_WEIGHTS:
+            
             PATTERN_WEIGHTS.insert(-1, self.__class__.__name__)
         
         if type(data) is str:
@@ -865,6 +866,7 @@ class GeneratorPattern(random.Random):
     """
     MAX_SIZE = 65536
     debugging = False
+
     def __new__(cls, *args, **kwargs):
         """ Override random.Random using first argument as a seed """
         return super(GeneratorPattern, cls).__new__ (cls)

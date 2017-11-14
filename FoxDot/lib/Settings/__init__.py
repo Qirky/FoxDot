@@ -9,9 +9,9 @@ PY_VERSION = sys.version_info[0]
 
 # Any Py2to3
 
-if PY_VERSION == 3:
+if PY_VERSION == 2:
 
-    xrange = range    
+    range = xrange
 
 # Check for OS -> mac, linux, win
 

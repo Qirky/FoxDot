@@ -580,7 +580,7 @@ class Pvar(TimeVar, Pattern):
     
     def __rmul__(self, other):
         new = self.new(asStream(other))
-        new.evaluate = fetch(rMul)
+        new.evaluate = fetch(Mul)
         return new
     
     def __div__(self, other):

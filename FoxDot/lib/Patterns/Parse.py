@@ -23,10 +23,6 @@ re_arrow  = r"<.*?>"
 square_type=PGroupMod
 braces_type=PRand
 
-class layerPat(Pattern):
-    # Class for testing whether or not a pattern should be layered via <> brackets
-    pass
-
 def ParsePlayString(string):
     output, _ = feed(string)
     return output
@@ -36,6 +32,7 @@ def feed(string):
     string = PlayString(string)
     items  = Pattern() # The actual pattern
 
+    layer_pattern = False
     contains_nest = False
     
     i = 0
@@ -60,13 +57,15 @@ def feed(string):
 
                 raise ParseError(e)
 
-            if len(items.data) > 0 and isinstance(items.data[-1], layerPat):
+            if layer_pattern:
 
-                items.data[-1] = layerPat(items.data[-1] & chars)
+                items.data[-1] = (items.data[-1] & chars)
 
             else:
 
-                items.append(layerPat(chars))
+                items.data.append(chars)
+
+                layer_pattern = True
 
             contains_nest = True
 
@@ -87,7 +86,9 @@ def feed(string):
 
                 raise ParseError(e)
 
-            items.append( chars )
+            items.data.append( chars )
+
+            layer_pattern = False
 
             contains_nest = True
 
@@ -107,7 +108,9 @@ def feed(string):
 
                 raise ParseError(e)
 
-            items.append( braces_type(chars) )
+            items.data.append( braces_type(chars) )
+
+            layer_pattern = False
                 
         # Look for a '[]'
         elif char == "[":
@@ -139,7 +142,9 @@ def feed(string):
 
                     new_chars.append(square_type([modi(ch, num) for ch in chars.data]))
 
-                items.append( new_chars )
+                items.data.append( new_chars )
+
+                layer_pattern = False
 
             else:
 
@@ -149,13 +154,17 @@ def feed(string):
 
                     new_chars.append(char)
 
-                items.append( square_type(new_chars) )
+                items.data.append( square_type(new_chars) )
+
+                layer_pattern = False
 
         # Add single character to list
 
         elif char not in ")]}>":
 
-            items.append( char )
+            items.data.append( char )
+
+            layer_pattern = False
 
         # Increase iterator
         i += 1
@@ -165,6 +174,5 @@ def feed(string):
 
 @PatternMethod
 def fromString(self, string):
-    self.data = ParsePlayString(string)
-    self.make()
+    self.data = ParsePlayString(string).data
     return self
