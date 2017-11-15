@@ -12,7 +12,7 @@ import re
 from .PlayString import *
 from .Generators import PRand
 from .PGroups    import PGroupMod
-from .Main       import Pattern, metaPattern, PatternMethod
+from .Main       import Pattern, metaPattern, PatternMethod, PGroup
 
 from ..Utils import modi, LCM
 
@@ -24,13 +24,47 @@ square_type=PGroupMod
 braces_type=PRand
 
 def ParsePlayString(string):
+    """ Returns the parsed play string used by sample player """
     output, _ = feed(string)
     return output
 
+def arrow_zip(pat1, pat2):
+    """ Zips two patterns together. If one item is a tuple, it extends the tuple / PGroup
+        i.e. arrow_zip([(0,1),3], [2]) -> [(0,1,2),(3,2)]
+    """
+    output = Pattern()
+
+    for i in range(LCM(len(pat1), len(pat2))):
+
+        item1 = pat1.getitem(i, get_generator=True)
+        item2 = pat2.getitem(i, get_generator=True)
+
+        if all([x.__class__== PGroup for x in (item1, item2)]):
+
+            new_item = PGroup(item1.data + item2.data)
+
+        elif item1.__class__ == PGroup:
+
+            new_item = PGroup(item1.data + [item2])
+
+        elif item2.__class__ == PGroup:
+
+            new_item = PGroup([item1] + item2.data)
+
+        else:
+
+            new_item = (item1, item2)
+
+        output.append(new_item)
+
+    return output
+
 def feed(string):
+    """ Used to recursively parse nested strings, returns a list object (not Pattern),
+        and a boolean denoting if the list contains a nested list """
     
     string = PlayString(string)
-    items  = Pattern() # The actual pattern
+    items  = [] # The actual pattern
 
     layer_pattern = False
     contains_nest = False
@@ -59,11 +93,11 @@ def feed(string):
 
             if layer_pattern:
 
-                items.data[-1] = (items.data[-1] & chars)
+                items[-1] = arrow_zip(items[-1],  Pattern(chars) )
 
             else:
 
-                items.data.append(chars)
+                items.append(Pattern(chars))
 
                 layer_pattern = True
 
@@ -86,7 +120,7 @@ def feed(string):
 
                 raise ParseError(e)
 
-            items.data.append( chars )
+            items.append( chars ) # add the nested list
 
             layer_pattern = False
 
@@ -108,7 +142,7 @@ def feed(string):
 
                 raise ParseError(e)
 
-            items.data.append( braces_type(chars) )
+            items.append( braces_type(chars) )
 
             layer_pattern = False
                 
@@ -136,13 +170,13 @@ def feed(string):
 
                 new_chars = []
 
-                largest_item = max([len(ch) for ch in chars.data])
+                largest_item = max([len(ch) for ch in chars])
 
                 for num in range(largest_item):
 
-                    new_chars.append(square_type([modi(ch, num) for ch in chars.data]))
+                    new_chars.append(square_type([modi(ch, num) for ch in chars]))
 
-                items.data.append( new_chars )
+                items.append( new_chars )
 
                 layer_pattern = False
 
@@ -154,7 +188,7 @@ def feed(string):
 
                     new_chars.append(char)
 
-                items.data.append( square_type(new_chars) )
+                items.append( square_type(new_chars) )
 
                 layer_pattern = False
 
@@ -162,7 +196,7 @@ def feed(string):
 
         elif char not in ")]}>":
 
-            items.data.append( char )
+            items.append( char )
 
             layer_pattern = False
 
@@ -174,5 +208,6 @@ def feed(string):
 
 @PatternMethod
 def fromString(self, string):
-    self.data = ParsePlayString(string).data
+    self.data = ParsePlayString(string)
+    self.make()
     return self

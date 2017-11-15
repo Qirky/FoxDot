@@ -183,7 +183,7 @@ class metaPattern(object):
             for indexing with TimeVars """
         return self.getitem(key)
 
-    def getitem(self, key):
+    def getitem(self, key, get_generator=False):
         """ Is called by __getitem__ """
         # We can get multiple values by indexing with a pattern or tuple
         if isinstance(key, (metaPattern, tuple)):
@@ -195,9 +195,11 @@ class metaPattern(object):
             # Get the "nested" single value
             i = key % len(self.data)
             val = self.data[i]
-            if isinstance(val, (Pattern, GeneratorPattern)):
+            if isinstance(val, Pattern) or ( isinstance(val, GeneratorPattern) and not get_generator ):
                 j   = key // len(self.data)
-                val = val.getitem(j)
+                val = val.getitem(j, get_generator)
+            elif isinstance(val, GeneratorPattern) and get_generator:
+                return val
         return val
     
     def __setitem__(self, key, value):
@@ -300,6 +302,7 @@ class metaPattern(object):
 
     def __and__(self, other):
         return self.zip(other)
+
     def __rand__(self, other):
         return asStream(other).zip(self)
     
@@ -609,16 +612,28 @@ class metaPattern(object):
     def map(self, func):
         return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])
 
-    # Changing the pattern in place
+       
     
     def extend(self, item):
         self[len(self):] = [item]
         return self
 
+    def new_extend(self, item):
+        new = self.__class__()
+        new.data = list(self.data)
+        new.extend(item)
+        return new
+
     def append(self, item):
         self.data.append(item)
         self.make()
         return self
+
+    def new_append(self, item):
+        new = self.__class__()
+        new.data = list(self.data)
+        new.append(item)
+        return new
     
     def i_rotate(self, n=1):
         self.data = self.data[n:] + self.data[0:n]
@@ -677,6 +692,48 @@ class metaPattern(object):
             new.append((item1, item2))
         return self.__class__(new)
 
+    def zipx(self, other):
+        """ Like zip but if one of the patters is already 'zipped' then the PGroups
+            are joined instead of placed in one another. """
+        new = []
+
+        other = asStream(other)
+
+        for i in range(LCM(len(self.data), len(other.data))):
+        
+            item1 = self.data[i % len(self.data)]
+        
+            item2 = other.data[i % len(other.data)]
+
+            if isinstance(item1, Pattern):
+
+                new_item = item1.zipx(item2)
+
+            elif isinstance(item2, Pattern):
+
+                new_item = asStream(item1).zipx(item2) # guesswork
+
+            elif item1.__class__ == PGroup:
+
+                if item2.__class__ !=  PGroup: # sub-classes are counted like int/float
+
+                    new_item = item1.new_append(item2)
+
+                else:
+
+                    new_item = item1.new_extend(item2)
+
+            elif item2.__class__ == PGroup:
+
+                new_item = PGroup(item1).new_extend(item2)
+
+            else:
+
+                new_item = PGroup(item1, item2)
+        
+            new.append(new_item)
+        
+        return self.__class__(new)
     
     def deepzip(self, other):
         new = []
@@ -796,6 +853,10 @@ class PGroup(metaPattern):
 
             self.data = new_data
 
+    def extend(self, item):
+        self.data.extend(item)
+        return self
+
     def merge(self, value):
         """ Merge values into one PGroup """
         if hasattr(value, "__len__"):
@@ -894,7 +955,7 @@ class GeneratorPattern(random.Random):
         """ String version is the name of the class and its arguments """
         return "{}({})".format(self.name, self.data)
         
-    def getitem(self, index=None):
+    def getitem(self, index=None, *args):
         """ Calls self.func(index) to get an item if index is not in
             self.history, otherwise returns self.history[index] """
         if index is None:
@@ -966,7 +1027,7 @@ class GeneratorPattern(random.Random):
             return Pattern([self[i] for i in range(a, b, c)])
 
 class PatternContainer(metaPattern):
-    def getitem(self, key):
+    def getitem(self, key, *args):
         key = key % len(self)
         return self.data[key]
     def __len__(self):

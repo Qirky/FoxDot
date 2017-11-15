@@ -698,7 +698,7 @@ class workspace:
 
         if line.strip() == "":
 
-            whitespace = ""
+            whitespace = whitespace[:-tabsize]
 
         # If the index was in brackets, add one tab size
 
