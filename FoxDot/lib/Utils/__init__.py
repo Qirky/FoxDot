@@ -17,7 +17,7 @@ def stdout(*args):
 
 def sliceToRange(s):
     start = s.start if s.start is not None else 0
-    stop  = s.stop 
+    stop  = s.stop
     step  = s.step if s.step is not None else 1
     try:
         return list(range(start, stop, step))
@@ -28,31 +28,31 @@ def LCM(*args):
     """ Lowest Common Multiple """
 
     args = [n for n in args if n != 0]
-    
+
     # Base case
     if len(args) == 0:
         return 1
-    
+
     elif len(args) == 1:
         return args[0]
 
     X = list(args)
-    
+
     while any([X[0]!=K for K in X]):
 
         i = X.index(min(X))
-        X[i] += args[i]        
+        X[i] += args[i]
 
     return X[0]
 
-def EuclidsAlgorithm(n, k):
-    
+def EuclidsAlgorithm(n, k, lo=0, hi=1):
+
     if n == 0: return [n for i in range(k)]
-    
-    data = [[1 if i < n else 0] for i in range(k)]
-    
+
+    data = [[hi if i < n else lo] for i in range(k)]
+
     while True:
-        
+
         k = k - n
 
         if k <= 1:
@@ -64,7 +64,7 @@ def EuclidsAlgorithm(n, k):
         for i in range(n):
             data[i] += data[-1]
             del data[-1]
-    
+
     return [x for y in data for x in y]
 
 
@@ -72,7 +72,7 @@ def modi(array, i, debug=0):
     """ Returns the modulo index i.e. modi([0,1,2],4) will return 1 """
     try:
         return array[i % len(array)]
-    except(TypeError, AttributeError, ZeroDivisionError): 
+    except(TypeError, AttributeError, ZeroDivisionError):
         return array
 
 def get_expanded_len(data):
@@ -92,11 +92,11 @@ def get_expanded_len(data):
 
 def max_length(*patterns):
     """ Returns the largest length pattern """
-    return max([len(p) for p in patterns])  
+    return max([len(p) for p in patterns])
 
 # Classes
 
-class dots:        
+class dots:
     """ Class for representing long Patterns in strings """
     def __repr__(self):
         return '...'
