@@ -24,7 +24,7 @@ MAX_SIZE = 2048
 #==============================#
 #         1. P[] & P()         #
 #==============================#
- 
+
 class __pattern__(object):
     ''' Used to define lists as patterns:
 
@@ -50,7 +50,7 @@ class __pattern__(object):
         else:
             data = args
         return Pattern(data)
-    
+
     def __call__(self, *args):
         return PGroup(args if len(args) > 1 else args[0])
 
@@ -85,9 +85,9 @@ class __pattern__(object):
 class __reverse_pattern__(__pattern__):
     def __getattr__(self, name):
         return ~object.__getattr__(self, name)
-    
 
-# This is a pattern creator  
+
+# This is a pattern creator
 P = __pattern__()
 
 #================================#
@@ -118,7 +118,7 @@ def PStretch(seq, size):
 def PPairs(seq, func=lambda n: 8-n):
     """ Laces a sequence with a second sequence obtained
         by performing a function on the original. By default this is
-        `lambda n: 8 - n`. """        
+        `lambda n: 8 - n`. """
     i = 0
     data = []
     for item in seq:
@@ -199,7 +199,7 @@ def PSum(n, total, **kwargs):
         else:
             data[i % n] += step
             i += 1
-            
+
     return Pattern(data)
 
 @loop_pattern_func
@@ -225,6 +225,16 @@ def PEuclid(n, k):
     ''' Returns the Euclidean rhythm which spreads 'n' pulses over 'k' steps as evenly as possible.
         e.g. `PEuclid(3, 8)` will return `P[1, 0, 0, 1, 0, 0, 1, 0]` '''
     return Pattern( EuclidsAlgorithm(n, k) )
+
+@loop_pattern_func
+def PEuclid2(n, k, lo, hi):
+    ''' Same as PEuclid except it returns an array filled with 'lo' value instead of 0
+        and 'hi' value instead of 1. Can be used to generate characters patterns used to
+        play sample like play(PEuclid2(3,8,'-','X')) will be equivalent to
+        play(P['X', '-', '-', 'X', '-', '-', 'X', '-'])
+        that's like saying play("X--X--X-")
+        '''
+    return Pattern( EuclidsAlgorithm(n, k, lo, hi) )
 
 @loop_pattern_func
 def PDur(n, k, start=0, dur=0.25):
