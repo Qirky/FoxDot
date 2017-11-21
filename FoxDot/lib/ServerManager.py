@@ -477,11 +477,216 @@ class SCLangServerManager(ServerManager):
             self.daemon.terminate()
         return
 
+try:
+    import socketserver
+
+except ImportError:
+
+    import SocketServer as socketserver
+
+import socket
+import json
+from threading import Thread
+from time import sleep
+
+class Message:
+    """ Wrapper for JSON messages sent to the server """
+    def __init__(self, data):
+        self.data = data
+    def __str__(self):
+        """ Prepares the json message to be sent with first 4 digits
+            denoting the length of the message """
+        packet = str(json.dumps(self.data, separators=(',',':')))
+        length = "{:04d}".format( len(packet) )
+        return length + packet
+    def __len__(self):
+        return len(str(self))
+    def asString(self):
+        return str(self)
+
+def read_from_socket(sock):
+    """ Reads data from the socket """
+    # Get number single int that tells us how many digits to read
+    try:
+        bits = int(sock.recv(4).decode())
+    except(ConnectionAbortedError, ConnectionResetError):
+        return None
+    if bits > 0:
+        # Read the remaining data (JSON)
+        data = sock.recv(bits).decode()
+        # Convert back to Python data structure
+        return json.loads(data)
+
+def send_to_socket(sock, data):
+    """ Converts Python data structure to JSON message and
+        sends to a connected socket """
+    msg = Message(data)
+    # Get length and store as string
+    msg_len, msg_str = len(msg), str(msg).encode()
+    # Continually send until we know all of the data has been sent
+    sent = 0
+    while sent < msg_len:
+        bits = sock.send(msg_str[sent:])
+        sent += bits
+    return
+
+class ThreadedServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    """ Base class """
+    pass
+
+class TempoServer(ThreadedServer):
+    """ Used in TempoClock.py to connect to instances of FoxDot over a network. Sends
+        bpm changes over the network. On initial request this sends the start_time value
+        of the clock """
+
+    def __init__(self, clock, port=57999):
+        # tempo clock
+        RequestHandler.metro = self.metro = clock
+
+        # Address information
+        self.hostname = str(socket.gethostname())
+
+        # Listen on any IP
+        self.ip_addr  = "0.0.0.0"
+        self.port     = int(port)
+
+        # Public ip for server is the first IPv4 address we find, else just show the hostname
+        self.ip_pub = self.hostname
+        
+        try:
+            for info in socket.getaddrinfo(socket.gethostname(), None):
+                if info[0] == 2:
+                    self.ip_pub = info[4][0]
+                    break
+        except socket.gaierror:
+            pass
+
+        # Instantiate server process
+
+        ThreadedServer.__init__(self, (self.ip_addr, self.port), RequestHandler)
+        self.server_thread = Thread(target=self.serve_forever)
+        self.server_thread.daemon = False
+        self.running = False
+
+    def __str__(self):
+        return "{} on port {}\n".format(self.ip_pub, self.port)
+
+    def start(self):
+        """ Starts listening on the socket """
+
+        self.running = True
+        self.server_thread.start()
+
+        return
+
+    def kill(self):
+        """ Properly terminates the server instance """
+        self.running = False
+        self.server_thread.join(0)
+        self.shutdown()
+        self.server_close()
+        return
+
+class RequestHandler(socketserver.BaseRequestHandler):
+    """ Created whenever a new connection to the server is made:
+        self.request = socket
+        self.server  = Server instance
+        self.client_address = (address, port)
+    """
+
+    def handle(self):
+        """ Overload """
+        while True:
+
+            data = read_from_socket(self.request)           
+
+            if data is None:
+
+                print("Client disconnected from {}".format(self.client_address))
+
+                break
+
+            else:
+
+                # Get the requested data and send to client
+
+                new_data = {}
+                
+                for item in data["request"]:
+
+                    new_data[item] = self.metro.get_attr(item)
+
+                send_to_socket(self.request, new_data)
+            
+        return
+
+class TempoClient:
+    def __init__(self, clock):
+        self.metro = clock
+
+        self.server_hostname = None
+        self.server_port     = None
+        self.server_address  = None
+        
+        self.socket   = None
+
+    def connect(self, hostname, port=57890):
+        """ Connects to the server instance """
+
+        # Get details of remote
+        self.server_hostname = hostname
+        self.server_port     = int(port)
+        self.server_address  = (self.server_hostname, self.server_port)
+
+        # Connect to remote
+
+        try:
+
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            self.socket.connect(self.server_address)
+
+        except Exception as e:
+
+            raise(e)
+
+            raise(ConnectionError("Could not connect to host '{}'".format( self.server_hostname ) ) )
+
+        # connect to the server and listen for new updates for the tempo-clock
+
+        self.listening = True
+        self.daemon = Thread(target=self.listen)
+        self.daemon.start()
+
+        self.send({"request" : ["bpm", "start_time"]})
+        
+        return self
+
+    def send(self, data):
+        """ Sends data to server """
+        return send_to_socket(self.socket, data)
+
+    def listen(self):
+        """ Listens out for data coming from the server and passes it on
+            to the handler.
+        """
+        while self.listening:
+            data = read_from_socket(self.socket)
+            if data is None:
+                break
+            for key, value in data.items():
+                self.metro.set_attr(key, value)
+        return      
+
+    def kill(self):
+        """ Properly terminates the connection to the server """
+        self.listening = False
+        self.socket.close()
+        return
+
 
 if __name__ != "__main__":
 
     from .Settings import ADDRESS, PORT, PORT2
 
     DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
-
-        

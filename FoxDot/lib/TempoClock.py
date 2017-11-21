@@ -56,6 +56,7 @@ from .Patterns import asStream
 from .TimeVar import TimeVar
 from .Midi import MidiIn, MIDIDeviceNotFound
 from .Utils import modi
+from .ServerManager import TempoClient
 
 from time import sleep, time, clock
 from fractions import Fraction
@@ -66,6 +67,9 @@ import threading
 import inspect
 
 class TempoClock(object):
+
+    tempo_server = None
+    tempo_client = None
 
     def __init__(self, bpm=120.0, meter=(4,4)):
 
@@ -123,6 +127,29 @@ class TempoClock(object):
     @classmethod
     def set_server(cls, server):
         cls.server = server
+        return
+
+    def start_tempo_server(self, serv):
+        self.tempo_server = serv(self)
+        self.tempo_server.start()
+        return
+
+    def kill_tempo_server(self):
+        if self.tempo_server is not None:
+            self.tempo_server.kill()
+        return
+
+    def connect(self, ip_address, port=57999):
+        try:
+            self.tempo_client = TempoClient(self)
+            self.tempo_client.connect(ip_address, port)
+        except ConnectionRefusedError as e:
+            print(e)
+        pass
+
+    def kill_tempo_client(self):
+        if self.tempo_client is not None:
+            self.tempo_client.kill()
         return
 
     def __str__(self):
@@ -204,6 +231,31 @@ class TempoClock(object):
         self.time = time() - self.start_time
         for player in self.playing:
             player(count=True)
+        return
+
+    def get_attr(self, key):
+        """ Returns a serialisable value for Fraction values etc"""
+        if key == "start_time":
+
+            value = (self.start_time.numerator, self.start_time.denominator)
+
+        elif key == "bpm":
+
+            value = float(self.bpm)
+
+        return value
+
+    def set_attr(self, key, value):
+        """ Sets the value of self.key when key is a string """
+
+        if key == "start_time":
+
+            setattr(self, key, Fraction(value[0], value[1]))
+
+        elif key == "bpm":
+
+            self.bpm = value
+
         return
 
     def true_now(self):
@@ -377,6 +429,8 @@ class TempoClock(object):
 
     def stop(self):
         self.ticking = False
+        self.kill_tempo_server()
+        self.kill_tempo_client()
         self.clear()
         return
 
@@ -539,7 +593,11 @@ class QueueBlock(object):
 
     @classmethod
     def set_server(cls, server):
-        cls.server = server
+        cls.server = server # osc server
+
+    def start_server(self, serv):
+        self.tempo_server = serv(self)
+        return
         
     def __repr__(self):
         return "{}: {}".format(self.beat, self.players())

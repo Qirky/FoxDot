@@ -8,6 +8,8 @@ except ImportError:
 import os.path
 from functools import partial
 from ..Settings import *
+from ..ServerManager import TempoServer
+from ..Code import FoxDotCode
 
 class MenuBar(Menu):
     def __init__(self, master, visible=True):
@@ -18,6 +20,9 @@ class MenuBar(Menu):
 
         self.sc3_plugins = BooleanVar()
         self.sc3_plugins.set(SC3_PLUGINS)
+
+        self.listening = BooleanVar()
+        self.listening.set(False)
 
         # Set font
         
@@ -65,7 +70,9 @@ class MenuBar(Menu):
         codemenu.add_command(label="Export Console Log",     command=self.root.export_console)
         codemenu.add_separator()
         codemenu.add_checkbutton(label="Use SC3 Plugins",    command=self.root.toggle_sc3_plugins, variable=self.sc3_plugins)
-        self.add_cascade(label="Code", menu=codemenu)
+        codemenu.add_separator()
+        codemenu.add_checkbutton(label="Listen for connections", command=self.allow_connections, variable=self.listening)
+        self.add_cascade(label="Language", menu=codemenu)
 
 
         # Help
@@ -107,4 +114,16 @@ class MenuBar(Menu):
     def toggle(self):
         self.root.root.config(menu=self if not self.visible else 0)
         self.visible = not self.visible
+        return
+
+    def allow_connections(self):
+        """ Starts a new instance of ServerManager.TempoServer and connects it with the clock """
+        if self.listening.get() == True:
+            Clock = FoxDotCode.namespace["Clock"]
+            Clock.start_tempo_server(TempoServer)
+            print("Listening for connections on {}".format(Clock.tempo_server))
+        else:
+            Clock = FoxDotCode.namespace["Clock"]
+            Clock.kill_tempo_server()
+            print("Closed connections")
         return
