@@ -657,8 +657,6 @@ class TempoClient:
         self.listening = True
         self.daemon = Thread(target=self.listen)
         self.daemon.start()
-
-        self.send({"request" : ["bpm", "start_time"]})
         
         return self
 
@@ -674,8 +672,12 @@ class TempoClient:
             data = read_from_socket(self.socket)
             if data is None:
                 break
-            for key, value in data.items():
-                self.metro.set_attr(key, value)
+            if "start_time" in data:
+                self.metro.set_attr("start_time", data["start_time"])
+            if "bpm" in data:
+                self.metro.set_attr("bpm", data["bpm"])
+            if "beat" in data:
+                self.metro.set_attr("beat", data["beat"])
         return      
 
     def kill(self):

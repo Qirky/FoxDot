@@ -143,6 +143,7 @@ class TempoClock(object):
         try:
             self.tempo_client = TempoClient(self)
             self.tempo_client.connect(ip_address, port)
+            self.tempo_client.send({"request" : ["bpm", "start_time", "beat"]})
         except ConnectionRefusedError as e:
             print(e)
         pass
@@ -245,12 +246,18 @@ class TempoClock(object):
 
         elif key == "beat":
 
-            value = float(self.beat)
+            value = (self.beat.numerator, self.beat.denominator)
+
+        elif key == "time":
+
+            value = (self.time.numerator, self.time.denominator)
 
         return value
 
     def set_attr(self, key, value):
         """ Sets the value of self.key when key is a string """
+
+        print(key, value)
 
         if   key == "start_time":
 
@@ -262,14 +269,21 @@ class TempoClock(object):
 
         elif key == "beat":
 
-            self.beat = beat
+            setattr(self, key, Fraction(value[0], value[1]))
+
+        elif key == "time":
+
+            setattr(self, key, Fraction(value[0], value[1]))
 
         return
+
+    def true_now_sec(self):
+        return self.dtype(((time() - self.start_time) - self.latency) - self.nudge)
 
     def true_now(self):
         """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
         # Get number of seconds elapsed
-        now = self.dtype(((time() - self.start_time) - self.latency) - self.nudge)
+        now = self.true_now_sec()
         # Increment the beat counter
         self.beat += (now - self.time) * (self.dtype(self.get_bpm()) / 60)
         # Store time
