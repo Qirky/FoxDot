@@ -49,7 +49,7 @@ class LineNumbers(Tk.Canvas):
                              justify=Tk.RIGHT,
                              text=linenum,
                              font="CodeFont",
-                             fill="gray")
+                             fill="#c9c9c9")
 
             i = self.textwidget.index("{}+1line".format(i))
 
