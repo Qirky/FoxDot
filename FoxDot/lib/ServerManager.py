@@ -47,7 +47,8 @@ class ServerManager(object):
 
 class SCLangServerManager(ServerManager):
 
-    fxlist = None
+    fxlist    = None
+    synthdefs = None
 
     def __init__(self, addr, osc_port, sclang_port):
 
@@ -122,60 +123,52 @@ class SCLangServerManager(ServerManager):
         self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
 
-    def get_bundle(self, synthdef, packet, effects, timestamp=0):
+    def get_midi_message(self, synthdef, packet):
 
-        # Create a bundle
-        
-        bundle = OSCBundle(time=timestamp)
+        bundle.setAddress("/foxdot_midi")
 
-        # Create a specific message for midi
+        msg = OSCMessage()
+        msg.setAddress("/foxdot_midi")
 
-        if synthdef == "MidiOut":
+        note    = packet.get("midinote", 60)
+        vel     = min(127, (packet.get("amp", 1) * 128) - 1)
+        sus     = packet.get("sus", 0.5)
+        channel = packet.get("channel", 0)
 
-            bundle.setAddress("/foxdot_midi")
+        msg.append( [synthdef.name, note, vel, sus, channel] )
 
-            msg = OSCMessage()
-            msg.setAddress("/foxdot_midi")
-
-            note    = packet.get("midinote", 60)
-            vel     = min(127, (packet.get("amp", 1) * 128) - 1)
-            sus     = packet.get("sus", 0.5)
-            channel = packet.get("channel", 0)
-
-            msg.append( [synthdef, note, vel, sus, channel] )
-
-            bundle.append(msg)
-
-            return bundle
-
-        # Create a group for the note
-        group_id = self.nextnodeID()
-        msg = OSCMessage("/g_new")
-        msg.append( [group_id, 1, 1] )
         bundle.append(msg)
 
-        # Get the bus and SynthDef nodes
-        this_bus  = self.nextbusID()
-        this_node = self.nextnodeID()
+        return bundle
+
+
+    def get_init_node(self, node, bus, group_id, synthdef, packet):
+    
+        msg = OSCMessage("/s_new")
 
         # Make sure messages release themselves after 8 * the duration at max (temp)
-        max_sus = float(packet["sus"] * 8)
-
-        # Effects of order 0 go first - then the synth, then order 1, then envelope (todo) then order 2
-
-        # IN
         
-        msg = OSCMessage("/s_new")
-        key = "rate" if synthdef in (SamplePlayer, LoopPlayer) else "freq"
+        max_sus = float(packet["sus"] * 8) # might be able to get rid of this
+        
+        key = "rate" if synthdef.name in (SamplePlayer, LoopPlayer) else "freq"
+        
         if key in packet:
+        
             value = ["rate", packet[key]]
+        
         else:
+        
             value = []
-        osc_packet = ["startSound", this_node, 0, group_id, 'bus', this_bus, "sus", max_sus] + value
+        
+        osc_packet = ["startSound", node, 0, group_id, 'bus', bus, "sus", max_sus] + value
+        
         msg.append( osc_packet )
-        bundle.append(msg)
+        
+        return msg, node
 
-        # ORDER 0
+    def get_control_effect_nodes(self, node, bus, group_id, effects):
+
+        pkg = []
 
         for fx in self.fxlist.order[0]:
 
@@ -184,34 +177,49 @@ class SCLangServerManager(ServerManager):
                 this_effect = effects[fx]
 
                 # Get next node ID
-                this_node, last_node = self.nextnodeID(), this_node
-                msg = OSCMessage("/s_new")
-                osc_packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
-                msg.append(osc_packet)
-                bundle.append(msg)
-
-        # SYNTH
+                node, last_node = self.nextnodeID(), node
             
+                msg = OSCMessage("/s_new")
+            
+                osc_packet = [self.fx_names[fx], node, 1, group_id, 'bus', bus] + this_effect
+            
+                msg.append(osc_packet)
+            
+                pkg.append(msg)
+
+        return pkg, node
+
+    def get_synth_node(self, node, bus, group_id, synthdef, packet):
+        
         msg = OSCMessage("/s_new")
+
+        new_message = {}
 
         for key in packet:
 
-            try:
+            if key != "env":
 
-                packet[key] = float(packet[key])
+                try:
 
-            except TypeError as e:
+                    new_message[key] = float(packet[key]) # is this not already the case?
 
-                WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( key, packet[key] ))
-                packet[key] = 0.0
+                except TypeError as e:
+
+                    WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( key, packet[key] ))
+                    new_message[key] = 0.0
 
         # Get next node ID
-        this_node, last_node = self.nextnodeID(), this_node                
-        osc_packet = [synthdef, this_node, 1, group_id, 'bus', this_bus] + self.create_osc_msg(packet)        
+        node, last_node = self.nextnodeID(), node                
+        
+        osc_packet = [synthdef.name, node, 1, group_id, 'bus', bus] + self.create_osc_msg(new_message)        
+        
         msg.append( osc_packet )
-        bundle.append(msg)
 
-        # ORDER 1
+        return msg, node
+
+    def get_pre_env_effect_nodes(self, node, bus, group_id,effects):
+
+        pkg = []
 
         for fx in self.fxlist.order[1]:
 
@@ -220,15 +228,58 @@ class SCLangServerManager(ServerManager):
                 this_effect = effects[fx]
 
                 # Get next node ID
-                this_node, last_node = self.nextnodeID(), this_node
+                node, last_node = self.nextnodeID(), node
                 msg = OSCMessage("/s_new")
-                osc_packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
+                osc_packet = [self.fx_names[fx], node, 1, group_id, 'bus', bus] + this_effect
                 msg.append( osc_packet )
-                bundle.append(msg)
+                pkg.append(msg)
+    
+        return pkg, node
 
-        # ENVELOPE (TODO)
+    def get_synth_envelope(self, node, bus, group_id, synthdef, packet):
 
-        # ORDER 2
+        env_packet = {  "sus" : packet["sus"],
+                        "amp" : packet["amp"] }
+
+        for key in ("atk", "decay", "rel", "legato", "curve", "gain"):
+
+            # Try and get from the player
+
+            value = packet.get(key, None)
+
+            # If it is absent or set to None, get default from Synth
+
+            if value is None:
+
+                value = synthdef.get_default_env(key)
+
+            # Store
+
+            env_packet[key] = value
+
+        env = synthdef.get_default_env("env") if packet.get("env", None) is None else packet.get("env", None)
+
+        try:
+
+            dest = env.get_env_name()
+
+        except AttributeError as e:
+
+            # Set the curve value
+
+            env_packet["curve"] = env
+            dest = "BasicEnvelope"
+
+        node, last_node = self.nextnodeID(), node
+        msg = OSCMessage("/s_new")
+        osc_packet = [dest, node, 1, group_id, 'bus', bus] + self.create_osc_msg(env_packet)
+        msg.append( osc_packet )
+
+        return msg, node
+
+    def get_post_env_effect_nodes(self, node, bus, group_id, effects ):
+
+        pkg = []
 
         for fx in self.fxlist.order[2]:
 
@@ -237,18 +288,95 @@ class SCLangServerManager(ServerManager):
                 this_effect = effects[fx]
 
                 # Get next node ID
-                this_node, last_node = self.nextnodeID(), this_node
+                node, last_node = self.nextnodeID(), node
                 msg = OSCMessage("/s_new")
-                osc_packet = [self.fx_names[fx], this_node, 1, group_id, 'bus', this_bus] + this_effect
+                osc_packet = [self.fx_names[fx], node, 1, group_id, 'bus', bus] + this_effect
                 msg.append( osc_packet )
-                bundle.append(msg)
+                pkg.append(msg)
 
-        # OUT
+        return pkg, node
+
+    def get_exit_node(self, node, bus, group_id, packet):
         
         msg = OSCMessage("/s_new")
-        this_node, last_node = self.nextnodeID(), this_node
-        osc_packet = ['makeSound', this_node, 1, group_id, 'bus', this_bus, 'sus', max_sus]
+        node, last_node = self.nextnodeID(), node
+        osc_packet = ['makeSound', node, 1, group_id, 'bus', bus, 'sus', float(packet["sus"] * 8)]
         msg.append( osc_packet )
+
+        return msg, node
+
+    def get_bundle(self, synthdef, packet, effects, timestamp=0):    
+
+        # Get the actual synthdef object
+
+        synthdef = self.synthdefs[synthdef]
+
+        # Create a bundle
+        
+        bundle = OSCBundle(time=timestamp)
+
+        # Create a specific message for midi
+
+        if synthdef.name == "MidiOut": # this should be in a dict of synthdef to functions maybe? we need a "nudge to sync"
+
+            return self.get_midi_message(synthdef, packet)
+
+        # Create a group for the note
+        group_id = self.nextnodeID()
+        msg = OSCMessage("/g_new")
+        msg.append( [group_id, 1, 1] )
+        
+        bundle.append(msg)
+
+        # Get the bus and SynthDef nodes
+        this_bus  = self.nextbusID()
+        this_node = self.nextnodeID()
+
+        # First node of the group (control rate)
+
+        msg, this_node = self.get_init_node(this_node, this_bus, group_id, synthdef, packet)
+
+        # Add effects to control rate e.g. vibrato        
+
+        bundle.append( msg )
+
+        pkg, this_node = self.get_control_effect_nodes(this_node, this_bus, group_id, effects)
+
+        for msg in pkg:
+
+            bundle.append(msg)
+
+        # trigger synth
+
+        msg, this_node = self.get_synth_node(this_node, this_bus, group_id, synthdef, packet)
+
+        bundle.append(msg)
+
+        # ORDER 1
+
+        pkg, this_node = self.get_pre_env_effect_nodes(this_node, this_bus, group_id, effects)
+
+        for msg in pkg:
+
+            bundle.append(msg)
+
+        # ENVELOPE
+
+        # msg, this_node = self.get_synth_envelope(this_node, this_bus, group_id, synthdef, packet)
+
+        # bundle.append( msg )
+
+        # ORDER 2 (AUDIO EFFECTS)
+
+        pkg, this_node = self.get_post_env_effect_nodes(this_node, this_bus, group_id, effects)
+    
+        for msg in pkg:
+    
+            bundle.append(msg)
+
+        # OUT
+
+        msg, _ = self.get_exit_node(this_node, this_bus, group_id, packet)
 
         bundle.append(msg)
         

@@ -680,7 +680,7 @@ class metaPattern(object):
         """ Concatonates this patterns stream with another """
         return Pattern(self.data + asStream(pattern).data)
 
-    def zip(self, other):
+    def zipx(self, other):
         """ Returns a `Pattern` of `PGroups`, where each `PGroup` contains the i-th
             element from each of the argument sequences. The length of the pattern
             is the lowest common multiple of the lengths of the two joining patterns. """
@@ -692,48 +692,36 @@ class metaPattern(object):
             new.append((item1, item2))
         return self.__class__(new)
 
-    def zipx(self, other):
-        """ Like zip but if one of the patters is already 'zipped' then the PGroups
-            are joined instead of placed in one another. """
-        new = []
+    def zip(self, other):
+        """ Zips two patterns together. If one item is a tuple, it extends the tuple / PGroup
+            i.e. arrow_zip([(0,1),3], [2]) -> [(0,1,2),(3,2)]
+        """
+        output = Pattern()
 
-        other = asStream(other)
+        for i in range(LCM(len(self), len(other))):
 
-        for i in range(LCM(len(self.data), len(other.data))):
-        
-            item1 = self.data[i % len(self.data)]
-        
-            item2 = other.data[i % len(other.data)]
+            item1 = self.getitem(i, get_generator=True)
+            item2 = other.getitem(i, get_generator=True)
 
-            if isinstance(item1, Pattern):
+            if all([x.__class__== PGroup for x in (item1, item2)]):
 
-                new_item = item1.zipx(item2)
-
-            elif isinstance(item2, Pattern):
-
-                new_item = asStream(item1).zipx(item2) # guesswork
+                new_item = PGroup(item1.data + item2.data)
 
             elif item1.__class__ == PGroup:
 
-                if item2.__class__ !=  PGroup: # sub-classes are counted like int/float
-
-                    new_item = item1.new_append(item2)
-
-                else:
-
-                    new_item = item1.new_extend(item2)
+                new_item = PGroup(item1.data + [item2])
 
             elif item2.__class__ == PGroup:
 
-                new_item = PGroup(item1).new_extend(item2)
+                new_item = PGroup([item1] + item2.data)
 
             else:
 
-                new_item = PGroup(item1, item2)
-        
-            new.append(new_item)
-        
-        return self.__class__(new)
+                new_item = (item1, item2)
+
+            output.append(new_item)
+
+        return output
     
     def deepzip(self, other):
         new = []

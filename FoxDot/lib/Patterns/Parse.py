@@ -93,7 +93,7 @@ def feed(string):
 
             if layer_pattern:
 
-                items[-1] = arrow_zip(items[-1],  Pattern(chars) )
+                items[-1] = items[-1].zip( Pattern(chars) )
 
             else:
 

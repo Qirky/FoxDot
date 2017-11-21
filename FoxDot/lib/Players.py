@@ -150,7 +150,7 @@ from copy import copy, deepcopy
 
 from .Settings import SamplePlayer, LoopPlayer
 from .Code import WarningMsg, debug_stdout
-from .SCLang.SynthDef import SynthDefProxy, SynthDef
+from .SCLang.SynthDef import SynthDefProxy, SynthDef, SynthDefs
 from .Effects import FxList
 from .Utils import stdout
 from .Buffers import Samples
@@ -208,7 +208,9 @@ class Player(Repeatable):
     # Really need to tidy this up
 
     keywords   = ('degree', 'oct', 'freq', 'dur', 'delay', 'buf',
-                  'blur', 'amplify', 'scale', 'bpm', 'sample')
+                  'blur', 'amplify', 'scale', 'bpm', 'sample', "env")
+
+    envelope_keywords = ("atk", "decay", "rel", "legato", "curve", "gain")
 
     required_keys = ("amp", "sus")
     
@@ -1199,7 +1201,10 @@ class Player(Repeatable):
 
     def new_message(self, index=0, **kwargs):
         """ Returns the header of an osc message to be added to by osc_message() """
-        message = {}      
+
+        # Start with the envelope
+        
+        message = {"env": group_modi(kwargs.get("env", self.event['env']), index)}
 
         if self.synthdef == SamplePlayer:
 
@@ -1272,7 +1277,7 @@ class Player(Repeatable):
 
             freq   = miditofreq(midinote)
             
-            message = {'freq':  freq, 'midinote': midinote}
+            message.update({'freq':  freq, 'midinote': midinote})
             
         return message
 
@@ -1315,7 +1320,7 @@ class Player(Repeatable):
 
                     # Only send non-zero values
 
-                    if val != 0 or key in self.required_keys: 
+                    if val != 0 or key in self.required_keys or key in self.envelope_keywords: 
 
                         message[key] = val
 

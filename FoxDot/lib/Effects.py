@@ -209,7 +209,8 @@ class EffectManager(dict):
 # Have ordered effects e.g.
 # 0. Process frequency / playback rate
 # 1. Before envelope
-# 2. After envelope
+# 2. Adding the envelope
+# 3. After envelope
 
 FxList = EffectManager()
 
@@ -274,7 +275,10 @@ if SC3_PLUGINS:
     fx = FxList.new('dist', 'distortion', {'dist': 0}, order=1)
     fx.add("osc = CrossoverDistortion.ar(osc, smooth:1-dist)")
     fx.save()
-    
+
+# Envelope
+
+# Post envelope effects    
 
 fx = FxList.new('chop', 'chop', {'chop': 0, 'sus': 1}, order=2)
 fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")

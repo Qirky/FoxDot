@@ -1243,7 +1243,7 @@ class workspace:
         return
 
     def releaseNodes(self, event=None):
-        execute("Server.freeAllNodes()")
+        execute("DefaultServer.freeAllNodes()")
         return
 
     def replace(self, line, old, new):

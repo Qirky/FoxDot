@@ -10,6 +10,7 @@ from ..Settings import SYNTHDEF_DIR
 
 class SynthDict(dict):
     module = None
+    server = None
     def __init__(self, **kwargs):
         dict.__init__(self, kwargs)
     def __str__(self):
@@ -20,6 +21,10 @@ class SynthDict(dict):
         return self[name]
     def reload(self):
         reload(self.module)
+    def set_server(self, serv):
+        self.server = serv
+        self.server.synthdefs = self
+        return
 
 # Create container for SynthDefs
 

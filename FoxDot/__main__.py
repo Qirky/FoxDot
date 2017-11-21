@@ -10,12 +10,18 @@
 
 from __future__ import absolute_import, division, print_function
 
+import sys
+
+if sys.version_info[0] == 2:
+
+    ModuleNotFoundError = Exception
+
 try:
 
     from .lib import FoxDotCode
     from .lib.Workspace import workspace
 
-except ValueError:
+except(ValueError, ModuleNotFoundError):
 
     from lib import FoxDotCode
     from lib.Workspace import workspace
