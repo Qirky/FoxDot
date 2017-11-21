@@ -509,7 +509,7 @@ def read_from_socket(sock):
     # Get number single int that tells us how many digits to read
     try:
         bits = int(sock.recv(4).decode())
-    except(ConnectionAbortedError, ConnectionResetError):
+    except:
         return None
     if bits > 0:
         # Read the remaining data (JSON)

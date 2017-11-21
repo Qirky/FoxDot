@@ -243,18 +243,26 @@ class TempoClock(object):
 
             value = float(self.bpm)
 
+        elif key == "beat":
+
+            value = float(self.beat)
+
         return value
 
     def set_attr(self, key, value):
         """ Sets the value of self.key when key is a string """
 
-        if key == "start_time":
+        if   key == "start_time":
 
             setattr(self, key, Fraction(value[0], value[1]))
 
         elif key == "bpm":
 
             self.bpm = value
+
+        elif key == "beat":
+
+            self.beat = beat
 
         return
 
@@ -272,11 +280,11 @@ class TempoClock(object):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
         if not self.ticking:
             self.beat = self.true_now()
-        return self.beat + self.beat_dur(self.latency)
+        return self.beat + self.beat_dur(self.latency + self.nudge)
 
     def osc_message_time(self):
         """ Returns the true time that an osc message should be run i.e. now + latency + nudge? """
-        return time() + self.latency + self.nudge
+        return time() + self.latency
         
     def start(self):
         """ Starts the clock thread """
