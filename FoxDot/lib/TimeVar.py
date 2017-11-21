@@ -24,7 +24,7 @@ def fetch(func):
         return func(a, b)
     return eval_now
 
- 
+
 class TimeVar(Repeatable):
     """ Var(values [,durs=[4]]) """
 
@@ -50,9 +50,9 @@ class TimeVar(Repeatable):
 
         # Dynamic method for calculating values
         self.func     = Nil
-        self.evaluate = fetch(Nil) 
+        self.evaluate = fetch(Nil)
         self.dependency = 1
-        
+
         self.update(values, dur)
 
         self.current_value = None
@@ -82,7 +82,7 @@ class TimeVar(Repeatable):
     def CreatePvarGenerator(func, *args):
         return PvarGenerator(func, *args)
 
-    # Standard dunder methods 
+    # Standard dunder methods
     def __str__(self):
         return str(self.now())
     def __repr__(self):
@@ -136,7 +136,7 @@ class TimeVar(Repeatable):
             seconds = seconds - offset
 
             if seconds > 0:
-                
+
                 beats = (self.values[i] * min(seconds, r)) / 60.0
                 r    -= seconds
                 start = 0
@@ -187,9 +187,9 @@ class TimeVar(Repeatable):
                 self.dur = asStream(dur)
 
         self.values = self.stream(values)
-        
+
         a, b = 0, 0
-        
+
         for dur in self.dur:
             a = b
             b = a + dur
@@ -198,7 +198,7 @@ class TimeVar(Repeatable):
         return self
 
     # Evaluation methods
- 
+
     def calculate(self, val): # maybe rename to resolve
         """ Returns val as modified by its dependencies """
         return self.evaluate(val, self.dependency)
@@ -225,7 +225,7 @@ class TimeVar(Repeatable):
         loops = time // total_dur
 
         # And therefore how much time we are into one cycle
-        
+
         time  = time - (loops * total_dur)
 
         # And how many events have passed
@@ -254,7 +254,7 @@ class TimeVar(Repeatable):
         # Store the % way through this value's time
 
         self.proportion = (float(time % total_dur) - count) / (acc - count)
-            
+
         return i
 
     def now(self, time=None):
@@ -266,7 +266,7 @@ class TimeVar(Repeatable):
     def copy(self):
         new = var(self.values, self.dur, bpm=self.bpm)
         return new
-                   
+
     def get_durs(self):
         return self.dur
 
@@ -279,7 +279,7 @@ class TimeVar(Repeatable):
         for i, item in enumerate(self.values):
             self.values[i] = (((item / lrg) * -1) + 1) * lrg
         return
-        
+
 
     # Method that return an augmented NEW version of the 'var'
 
@@ -292,7 +292,7 @@ class TimeVar(Repeatable):
 
     def lshift(self, duration):
         time = [self.dur[0]-duration] + list(self.dur[1:]) + [duration]
-        return self.__class__(self.values, time)        
+        return self.__class__(self.values, time)
 
     def rshift(self, duration):
         time = [duration] + list(self.dur[:-1]) + [self.dur[-1]-duration]
@@ -308,7 +308,7 @@ class TimeVar(Repeatable):
         pass
 
     # Mathmetical operators
-    
+
     def __add__(self, other):
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
@@ -318,7 +318,7 @@ class TimeVar(Repeatable):
         new = self.new(other)
         new.evaluate = fetch(Add)
         return new
-    
+
     def __radd__(self, other):
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
@@ -358,7 +358,7 @@ class TimeVar(Repeatable):
         new = self.new(other)
         new.evaluate = fetch(Mul)
         return new
-    
+
     def __rmul__(self, other):
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
@@ -385,7 +385,7 @@ class TimeVar(Repeatable):
                 return other.__class__((x ** self for x in other))
             else:
                 return other.__pow__(self)
-        
+
         new = self.new(other)
         new.evaluate = fetch(Pow)
         return new
@@ -400,7 +400,7 @@ class TimeVar(Repeatable):
         new = self.new(other)
         new.evaluate = fetch(rFloorDiv)
         return new
-    
+
     def __rfloordiv__(self, other):
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
@@ -421,7 +421,7 @@ class TimeVar(Repeatable):
         new = self.new(other)
         new.evaluate = fetch(rDiv)
         return new
-    
+
     def __rtruediv__(self, other):
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) in (tuple, list):
@@ -495,7 +495,7 @@ class TimeVar(Repeatable):
         """ A TimeVar can store functions and will call the current item with this method """
         return self.now().__call__(*args, **kwargs)
 
-    # Emulating container types 
+    # Emulating container types
 
     def __getitem__(self, other):
         new = self.new(other)
@@ -520,7 +520,7 @@ class linvar(TimeVar):
         return (self.current_value * (1-self.proportion)) + (self.next_value * self.proportion)
 
 class expvar(linvar):
-    def get_timevar_value(self, prop):
+    def get_timevar_value(self):
         self.proportion *= self.proportion
         return (self.current_value * (1-self.proportion)) + (self.next_value * self.proportion)
 
@@ -545,7 +545,7 @@ class Pvar(TimeVar, Pattern):
         except:
 
             data = [values]
-        
+
         TimeVar.__init__(self, data, dur, **kwargs)
 
     def new(self, other):
@@ -562,12 +562,12 @@ class Pvar(TimeVar, Pattern):
         new = self.new(asStream(other))
         new.evaluate = fetch(rAdd)
         return new
-    
+
     def __sub__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(Sub)
         return new
-    
+
     def __rsub__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(rSub)
@@ -577,37 +577,37 @@ class Pvar(TimeVar, Pattern):
         new = self.new(asStream(other))
         new.evaluate = fetch(Mul)
         return new
-    
+
     def __rmul__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(Mul)
         return new
-    
+
     def __div__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(Div)
         return new
-    
+
     def __rdiv__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(rDiv)
         return new
-    
+
     def __truediv__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(Div)
         return new
-    
+
     def __rtruediv__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(rDiv)
         return new
-    
+
     def __floordiv__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(FloorDiv)
         return new
-    
+
     def __rfloordiv__(self, other):
         new = self.new(asStream(other))
         new.evaluate = fetch(rFloorDiv)
@@ -663,9 +663,9 @@ class PvarGenerator(Pvar):
         self.args = [(arg if isinstance(arg, TimeVar) else TimeVar(arg)) for arg in args]
         self.last_args = []
         self.last_data = []
-        self.evaluate = fetch(Nil) 
+        self.evaluate = fetch(Nil)
         self.dependency = 1
-        
+
     def now(self):
         new_args = [arg.now() for arg in self.args]
         if new_args != self.last_args:
@@ -694,9 +694,9 @@ class PvarGeneratorEx(PvarGenerator):
         self.args = list(args)
         self.last_args = []
         self.last_data = []
-        self.evaluate = fetch(Nil) 
+        self.evaluate = fetch(Nil)
         self.dependency = 1
-    
+
 
 class _inf(int):
     """ Un-implemented """
@@ -738,7 +738,7 @@ class _var_dict(object):
         just use `var.name = var([k, l])` and the contents of the var will be
         updated everywhere else in the program.
     """
-    
+
     def __init__(self):
         self.__vars = {}
     @staticmethod
