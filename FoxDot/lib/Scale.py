@@ -7,7 +7,7 @@ from random import choice
 def choose():
     """ Scale.choose() -> Returns a random scale object """
     return choice(Scale.names.values())
-    
+
 
 class ScalePattern(Pattern):
 
@@ -43,7 +43,7 @@ class ScalePattern(Pattern):
         return self.name != other.name if isinstance(other, ScalePattern) else True
 
     def semitones(self, pitches, steps=12):
-        """ Returns the semitone values for a series of pitches in this scale """        
+        """ Returns the semitone values for a series of pitches in this scale """
         tones = []
         for pitch in pitches:
             i = pitch % len(self.data) # should be wary of number of pitches per scale -- todo
@@ -72,7 +72,7 @@ class ScalePattern(Pattern):
             print("Warning: {} is not a valid scale".format(new))
 
         return self
-        
+
 
 class PentatonicScalePattern(ScalePattern):
 
@@ -116,7 +116,7 @@ class _freq:
 ##fib = [0,1]
 ##for n in range(2,11):
 ##    fib.append(fib[n-1]+fib[n-2])
-##    
+##
 ##fibonacci = []
 ##for n in range(3, len(fib)-1):
 ##    fibonacci.append((n-3) * (fib[n] / float(fib[n-1])))
@@ -145,15 +145,15 @@ class __scale__:
     harmonicMinor   = ScalePattern("harmonicMinor", [0,2,3,5,7,8,11])
     harmonicMajor   = ScalePattern("harmonicMajor", [0,2,4,5,7,8,11])
 
-    #justMajor       = ScalePattern("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
-    #justMinor       = ScalePattern("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
+    justMajor       = ScalePattern("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
+    justMinor       = ScalePattern("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
 
     dorian          = ScalePattern("dorian",  [0,2,3,5,7,9,10])
     dorian2         = ScalePattern("dorian2", [0,1,3,5,6,8,9,11])
 
     egyptian        = ScalePattern("egyptian", [0,2,5,7,10])
     zhi             = ScalePattern("zhi", [0,2,5,7,9])
-    phyrgian        = ScalePattern("phrygian", [0,1,3,5,7,8,10])
+    phrygian        = ScalePattern("phrygian", [0,1,3,5,7,8,10])
     prometheus      = ScalePattern("prometheus", [0,2,4,6,11])
     indian          = ScalePattern("indian", [0,4,5,7,10])
 
@@ -163,14 +163,14 @@ class __scale__:
     lydian          = ScalePattern("lydian", [0,2,4,6,7,9,11])
     lydianMinor     = ScalePattern("lydianMinor", [0,2,4,6,7,8,10])
 
-    #ryan            = ScalePattern("ryan", [0,2,3,5,6,9,10])
+    ryan            = ScalePattern("ryan", [0,2,3,5,6,9,10])
 
     freq            = ScalePattern("freq", _freq())
 
     def __init__(self):
 
         self.default = ScalePattern("major")
-        
+
     def __setattr__(self, key, value):
         if key == "default" and key in vars(self):
             self.default.set(value)
