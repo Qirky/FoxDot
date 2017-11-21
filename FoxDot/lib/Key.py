@@ -245,13 +245,23 @@ class NumberKey(object):
 
     def __getitem__(self, key):
         new = self.child(key)
-        new.calculate = lambda a, b: b[a]
+        def getitem(a, b):
+            try:
+                return b[a]
+            except TypeError:
+                return b
+        new.calculate = getitem
         return new
 
     def index(self, sequence):
         """ Returns a Player Key that returns the element from sequence indexed using int(self) """
         new = self.child(sequence)
-        new.calculate = lambda a, b: a[b]
+        def getitem(b, a):
+            try:
+                return b[a]
+            except TypeError:
+                return b
+        new.calculate = getitem
         return new
 
     def map(self, mapping):

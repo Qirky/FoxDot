@@ -81,9 +81,9 @@ class TempoClock(object):
 
         # Store time as a rational number
         
-        self.time = self.dtype(0)
-        self.beat = self.dtype(0)
-        self.start_time = self.dtype(time())
+        self.time       = self.dtype(0)
+        self.beat       = self.dtype(0)
+        self.start_time = self.dtype(time()) # could set to 0?
 
         # Don't start yet...
         self.ticking = False
@@ -109,9 +109,9 @@ class TempoClock(object):
         self.midi_clock = None
 
         # Can be configured
-        self.latency    = 0.25
-        self.nudge      = 0.0
-        self.sleep_time = 0.0001
+        self.latency    = 0.25 # Time between starting processing osc messages and sending to server
+        self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
+        self.sleep_time = 0.0001 # The duration to sleep while continually looping
 
         # Debug
         self.debugging = False
@@ -209,7 +209,7 @@ class TempoClock(object):
     def true_now(self):
         """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
         # Get number of seconds elapsed
-        now = self.dtype(((time() - self.start_time) - self.latency) + self.nudge)
+        now = self.dtype(((time() - self.start_time) - self.latency) - self.nudge)
         # Increment the beat counter
         self.beat += (now - self.time) * (self.dtype(self.get_bpm()) / 60)
         # Store time
@@ -223,8 +223,8 @@ class TempoClock(object):
         return self.beat + self.beat_dur(self.latency)
 
     def osc_message_time(self):
-        """ Returns the true time that an osc message should be run i.e. now + latency """
-        return time() + self.latency - self.nudge
+        """ Returns the true time that an osc message should be run i.e. now + latency + nudge? """
+        return time() + self.latency + self.nudge
         
     def start(self):
         """ Starts the clock thread """

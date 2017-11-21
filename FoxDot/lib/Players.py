@@ -212,6 +212,10 @@ class Player(Repeatable):
 
     envelope_keywords = ("atk", "decay", "rel", "legato", "curve", "gain")
 
+    # Base attributes
+    
+    base_attributes = ('sus', 'fmod', 'pan', 'rate', 'amp', 'midinote', 'channel') 
+
     required_keys = ("amp", "sus")
     
     internal_keywords = tuple(value for value in keywords if value != "degree")
@@ -219,11 +223,7 @@ class Player(Repeatable):
     # Aliases
 
     alias = { "pitch" : "degree",
-              "char" : "degree" }
-
-    # Base attributes
-    
-    base_attributes = ('sus', 'fmod', 'vib', 'pan', 'rate', 'amp', 'midinote', 'channel') 
+              "char"  : "degree" }
 
     fx_attributes = FxList.all_kwargs()
     fx_keys       = FxList.kwargs()
@@ -242,7 +242,7 @@ class Player(Repeatable):
     # Tkinter Window
     widget = None
 
-    def __init__( self, name=None):
+    def __init__(self, name=None):
 
         # Inherit from repeatable i.e. x.every
 
