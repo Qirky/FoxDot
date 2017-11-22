@@ -678,6 +678,8 @@ class TempoClient:
                 self.metro.set_attr("bpm", data["bpm"])
             if "beat" in data:
                 self.metro.set_attr("beat", data["beat"])
+            if "time" in data:
+                self.metro.set_attr("time", data["time"])
         return      
 
     def kill(self):

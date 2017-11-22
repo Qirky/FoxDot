@@ -85,8 +85,8 @@ class TempoClock(object):
 
         # Store time as a rational number
         
-        self.time       = self.dtype(0)
-        self.beat       = self.dtype(0)
+        self.time       = self.dtype(0) # Seconds elsapsed
+        self.beat       = self.dtype(0) # Beats elapsed
         self.start_time = self.dtype(time()) # could set to 0?
 
         # Don't start yet...
@@ -143,7 +143,7 @@ class TempoClock(object):
         try:
             self.tempo_client = TempoClient(self)
             self.tempo_client.connect(ip_address, port)
-            self.tempo_client.send({"request" : ["bpm", "start_time", "beat"]})
+            self.tempo_client.send({"request" : ["bpm", "start_time", "beat", "time"]})
         except ConnectionRefusedError as e:
             print(e)
         pass
@@ -257,8 +257,6 @@ class TempoClock(object):
     def set_attr(self, key, value):
         """ Sets the value of self.key when key is a string """
 
-        print(key, value)
-
         if   key == "start_time":
 
             setattr(self, key, Fraction(value[0], value[1]))
@@ -277,13 +275,14 @@ class TempoClock(object):
 
         return
 
-    def true_now_sec(self):
-        return self.dtype(((time() - self.start_time) - self.latency) - self.nudge)
+    def get_elapsed_sec(self):
+        # return self.dtype(((time() - (self.start_time + self.nudge)) - self.latency))
+        return self.dtype( time() - (self.start_time + self.nudge) - self.latency )
 
     def true_now(self):
         """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
         # Get number of seconds elapsed
-        now = self.true_now_sec()
+        now = self.get_elapsed_sec()
         # Increment the beat counter
         self.beat += (now - self.time) * (self.dtype(self.get_bpm()) / 60)
         # Store time
@@ -292,12 +291,12 @@ class TempoClock(object):
 
     def now(self):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
-        if not self.ticking:
+        if self.ticking is False: # Get the time w/o latency if not ticking
             self.beat = self.true_now()
-        return self.beat + self.beat_dur(self.latency + self.nudge)
+        return self.beat + self.beat_dur(self.latency)
 
     def osc_message_time(self):
-        """ Returns the true time that an osc message should be run i.e. now + latency + nudge? """
+        """ Returns the true time that an osc message should be run i.e. now + latency """
         return time() + self.latency
         
     def start(self):
