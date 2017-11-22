@@ -115,6 +115,7 @@ class TempoClock(object):
         # Can be configured
         self.latency    = 0.25 # Time between starting processing osc messages and sending to server
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
+        self.hard_nudge = 0.0
         self.sleep_time = 0.0001 # The duration to sleep while continually looping
 
         # Debug
@@ -171,7 +172,10 @@ class TempoClock(object):
             # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
             self.schedule(lambda *args, **kwargs: object.__setattr__(self, attr, value))
             # Notify listening clients -- future
-            pass
+            if self.tempo_client is not None:
+                self.tempo_client.update_tempo(value)
+            if self.tempo_server is not None:
+                self.tempo_server.update_tempo(value)
         else:
             self.__dict__[attr] = value
         return
@@ -237,18 +241,19 @@ class TempoClock(object):
     def calculate_nudge(self, time1, time2, latency):
         """ Approximates the nudge value of this TempoClock based on the machine time.time()
             value from another machine and the latency between them """
-        self.nudge = (time1 + latency) - time2
-        print("Setting nudge to {}".format(self.nudge))
+        self.hard_nudge = time2 - (time1 + latency)
         return
 
-    def get_sync_info(self, key):
+    def get_sync_info(self):
         """ Returns a serialisable value for Fraction values etc"""
 
         data = {
-            "start_time" : (self.start_time.numerator, self.start_time.denominator),
-            "bpm"        : float(self.bpm), # TODO: serialise timevar etc
-            "beat"       : (self.beat.numerator, self.beat.denominator),
-            "time"       : (self.time.numerator, self.time.denominator)
+            "sync" : {
+                "start_time" : (self.start_time.numerator, self.start_time.denominator),
+                "bpm"        : float(self.bpm), # TODO: serialise timevar etc
+                "beat"       : (self.beat.numerator, self.beat.denominator),
+                "time"       : (self.time.numerator, self.time.denominator)
+            }
         }
 
         return data
@@ -269,7 +274,7 @@ class TempoClock(object):
 
     def get_elapsed_sec(self):
         # return self.dtype(((time() - (self.start_time + self.nudge)) - self.latency))
-        return self.dtype( time() - (self.start_time + self.nudge) - self.latency )
+        return self.dtype( time() - (self.start_time + (self.nudge + self.hard_nudge)) - self.latency )
 
     def true_now(self):
         """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """

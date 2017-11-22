@@ -486,8 +486,9 @@ except ImportError:
 
 import socket
 import json
+import time
 from threading import Thread
-from time import sleep, time
+
 
 class Message:
     """ Wrapper for JSON messages sent to the server """
@@ -541,7 +542,8 @@ class TempoServer(ThreadedServer):
 
     def __init__(self, clock, port=57999):
         # tempo clock
-        RequestHandler.metro = self.metro = clock
+        RequestHandler.metro  = self.metro = clock
+        RequestHandler.master = self
 
         # Address information
         self.hostname = str(socket.gethostname())
@@ -563,6 +565,8 @@ class TempoServer(ThreadedServer):
 
         # Instantiate server process
 
+        self.peers = []
+
         ThreadedServer.__init__(self, (self.ip_addr, self.port), RequestHandler)
         self.server_thread = Thread(target=self.serve_forever)
         self.server_thread.daemon = False
@@ -579,6 +583,11 @@ class TempoServer(ThreadedServer):
 
         return
 
+    def update_tempo(self, bpm):
+        for peer in self.peers:
+            peer.update_tempo(bpm)
+        return
+
     def kill(self):
         """ Properly terminates the server instance """
         self.running = False
@@ -593,6 +602,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
         self.server  = Server instance
         self.client_address = (address, port)
     """
+    master = None
 
     def handle(self):
         """ Overload """
@@ -602,6 +612,8 @@ class RequestHandler(socketserver.BaseRequestHandler):
         read_from_socket(self.request)
 
         send_to_socket(self.request, {"clock_time": time.time()})
+
+        self.master.peers.append(self)
 
         while True:
 
@@ -617,9 +629,23 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                 # Get the requested data and send to client
 
-                send_to_socket(self.request, self.metro.get_sync_info())
+                if "request" in data:
+
+                    send_to_socket(self.request, self.metro.get_sync_info())
+
+                elif "new_bpm" in data:
+
+                    self.metro.set_attr("bpm", data["new_bpm"])
             
         return
+
+
+    def update_tempo(self, bpm):
+
+        send_to_socket(self.request, {"new_bpm": bpm })
+
+        return
+
 
 class TempoClient:
     def __init__(self, clock):
@@ -675,7 +701,7 @@ class TempoClient:
 
     def stop_timing(self):
         self.stop_time = time.time()
-        self.latency = self.stop_time - self.end_time
+        self.latency = (self.stop_time - self.start_time) * 0.5
 
     def send(self, data):
         """ Sends data to server """
@@ -691,7 +717,7 @@ class TempoClient:
 
         self.stop_timing()
 
-        self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency) # maybe divide latency by 2
+        self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
         
         # Enter loop
 
@@ -699,10 +725,16 @@ class TempoClient:
             data = read_from_socket(self.socket)
             if data is None:
                 break
-            for key in ("start_time", "bpm", "beat", "time"):
-                if key in data:
-                    self.metro.set_attr(key, data[key])
-        return      
+            if "sync" in data:
+                for key in ("start_time", "bpm", "beat", "time"):
+                    if key in data:
+                        self.metro.set_attr(key, data["sync"][key])
+            elif "new_bpm" in data:
+                self.metro.set_attr("bpm", data["new_bpm"])
+        return
+
+    def update_tempo(self, bpm):
+        send_to_socket(self.socket, {"new_bpm": bpm})
 
     def kill(self):
         """ Properly terminates the connection to the server """
