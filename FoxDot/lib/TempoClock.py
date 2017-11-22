@@ -234,42 +234,34 @@ class TempoClock(object):
             player(count=True)
         return
 
-    def get_attr(self, key):
+    def calculate_nudge(self, time1, time2, latency):
+        """ Approximates the nudge value of this TempoClock based on the machine time.time()
+            value from another machine and the latency between them """
+        self.nudge = (time1 + latency) - time2
+        print("Setting nudge to {}".format(self.nudge))
+        return
+
+    def get_sync_info(self, key):
         """ Returns a serialisable value for Fraction values etc"""
-        if key == "start_time":
 
-            value = (self.start_time.numerator, self.start_time.denominator)
+        data = {
+            "start_time" : (self.start_time.numerator, self.start_time.denominator),
+            "bpm"        : float(self.bpm), # TODO: serialise timevar etc
+            "beat"       : (self.beat.numerator, self.beat.denominator),
+            "time"       : (self.time.numerator, self.time.denominator)
+        }
 
-        elif key == "bpm":
+        return data
 
-            value = float(self.bpm)
-
-        elif key == "beat":
-
-            value = (self.beat.numerator, self.beat.denominator)
-
-        elif key == "time":
-
-            value = (self.time.numerator, self.time.denominator)
-
-        return value
 
     def set_attr(self, key, value):
         """ Sets the value of self.key when key is a string """
 
-        if   key == "start_time":
-
-            setattr(self, key, Fraction(value[0], value[1]))
-
-        elif key == "bpm":
+        if key == "bpm":
 
             self.bpm = value
 
-        elif key == "beat":
-
-            setattr(self, key, Fraction(value[0], value[1]))
-
-        elif key == "time":
+        else:
 
             setattr(self, key, Fraction(value[0], value[1]))
 

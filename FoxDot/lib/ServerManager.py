@@ -487,7 +487,7 @@ except ImportError:
 import socket
 import json
 from threading import Thread
-from time import sleep
+from time import sleep, time
 
 class Message:
     """ Wrapper for JSON messages sent to the server """
@@ -596,9 +596,16 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
         """ Overload """
+
+        # First we get latency
+
+        read_from_socket(self.request)
+
+        send_to_socket(self.request, {"clock_time": time.time()})
+
         while True:
 
-            data = read_from_socket(self.request)           
+            data = read_from_socket(self.request)
 
             if data is None:
 
@@ -610,13 +617,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                 # Get the requested data and send to client
 
-                new_data = {}
-                
-                for item in data["request"]:
-
-                    new_data[item] = self.metro.get_attr(item)
-
-                send_to_socket(self.request, new_data)
+                send_to_socket(self.request, self.metro.get_sync_info())
             
         return
 
@@ -657,8 +658,24 @@ class TempoClient:
         self.listening = True
         self.daemon = Thread(target=self.listen)
         self.daemon.start()
+
+        # Send init message
+        self.start_time = None
+        self.stop_time  = None
+        self.latency    = None
+
+        send_to_socket(self.socket, ["init"])
         
+        self.start_timing()
+
         return self
+
+    def start_timing(self):
+        self.start_time = time.time()
+
+    def stop_timing(self):
+        self.stop_time = time.time()
+        self.latency = self.stop_time - self.end_time
 
     def send(self, data):
         """ Sends data to server """
@@ -668,18 +685,23 @@ class TempoClient:
         """ Listens out for data coming from the server and passes it on
             to the handler.
         """
+        # First message is machine clock time
+
+        time_data = read_from_socket(self.socket)
+
+        self.stop_timing()
+
+        self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency) # maybe divide latency by 2
+        
+        # Enter loop
+
         while self.listening:
             data = read_from_socket(self.socket)
             if data is None:
                 break
-            if "start_time" in data:
-                self.metro.set_attr("start_time", data["start_time"])
-            if "bpm" in data:
-                self.metro.set_attr("bpm", data["bpm"])
-            if "beat" in data:
-                self.metro.set_attr("beat", data["beat"])
-            if "time" in data:
-                self.metro.set_attr("time", data["time"])
+            for key in ("start_time", "bpm", "beat", "time"):
+                if key in data:
+                    self.metro.set_attr(key, data[key])
         return      
 
     def kill(self):
