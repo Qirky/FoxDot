@@ -167,15 +167,22 @@ class TempoClock(object):
     def __contains__(self, item):
         return item in self.items
 
+    def update_tempo(self, bpm):
+        """ Schedules the bpm change at the next bar """
+        self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", bpm))
+
     def __setattr__(self, attr, value):
         if attr == "bpm" and self.__setup:
             # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
-            self.schedule(lambda *args, **kwargs: object.__setattr__(self, attr, value))
+            self.update_tempo(value)
+
             # Notify listening clients -- future
             if self.tempo_client is not None:
                 self.tempo_client.update_tempo(value)
+            
             if self.tempo_server is not None:
                 self.tempo_server.update_tempo(value)
+                
         else:
             self.__dict__[attr] = value
         return

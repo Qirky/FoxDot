@@ -635,7 +635,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                 elif "new_bpm" in data:
 
-                    self.metro.set_attr("bpm", data["new_bpm"])
+                    self.metro.update_tempo(data["new_bpm"])
             
         return
 
@@ -722,15 +722,20 @@ class TempoClient:
         # Enter loop
 
         while self.listening:
+            
             data = read_from_socket(self.socket)
+            
             if data is None:
                 break
+            
             if "sync" in data:
                 for key in ("start_time", "bpm", "beat", "time"):
-                    if key in data:
+                    if key in data["sync"]:
                         self.metro.set_attr(key, data["sync"][key])
+            
             elif "new_bpm" in data:
-                self.metro.set_attr("bpm", data["new_bpm"])
+
+                self.metro.update_tempo(data["new_bpm"])
         return
 
     def update_tempo(self, bpm):
