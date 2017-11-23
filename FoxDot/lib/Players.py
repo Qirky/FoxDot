@@ -1531,7 +1531,7 @@ class Player(Repeatable):
 
         if N > 0:
 
-            self.stop_point += self.metro.next_bar() + ((N-1) * self.metro.bar_length())
+            self.stop_point = self.metro.next_bar() + ((N-1) * self.metro.bar_length())
 
         else:
 
