@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from ..Settings import *
 from .SCLang import *
-from .SynthDef import SynthDef, SampleSynthDef
+from .SynthDef import SynthDef, SampleSynthDef, FileSynthDef
 
 from . import Env
 
@@ -48,7 +48,7 @@ with SynthDef("lazer") as synth:
     synth.amp = synth.amp * 0.1
     synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005],  width=(synth.rate-1)/4) + LFSaw.ar(LFNoise0.ar(synth.rate * 20, add=synth.freq * Pulse.ar((synth.rate-2) + 0.1, add=1), mul=0.5))
     synth.env = Env.perc(0.1)
-lazer = synth 
+lazer = synth
 
 with SynthDef("growl") as growl:
     growl.sus = growl.sus * 1.5
@@ -98,11 +98,11 @@ with SynthDef("gong") as gong:
     gong.amp = gong.amp * 4
     gong.freq = gong.freq * 2
     gong.osc=Klank.ar( [[0.501, 1, 0.8, 2.002, 3, 9.6, 2.49, 11, 2.571, 3.05, 6.242, 12.49, 13, 16, 24],
-                        [0.002, 0.02, 0.001, 0.008, 0.02, 0.004, 0.02, 0.04, 0.02, 0.005, 0.05, 0.05, 0.02, 0.03, 0.04], 
-            [1.2, 1.2, 1.2, 0.9, 0.9, 0.9, 0.25, 0.25, 0.25, 0.14, 0.14, 0.14, 0.07, 0.07, 0.07]*gong.sus], 
+                        [0.002, 0.02, 0.001, 0.008, 0.02, 0.004, 0.02, 0.04, 0.02, 0.005, 0.05, 0.05, 0.02, 0.03, 0.04],
+            [1.2, 1.2, 1.2, 0.9, 0.9, 0.9, 0.25, 0.25, 0.25, 0.14, 0.14, 0.14, 0.07, 0.07, 0.07]*gong.sus],
             SinOscFB.ar(20, 0, 10), gong.freq, 0, 4)
     gong.env = Env.ramp(amp=[1,0], curve="'lin'", sus=gong.sus*8)
-    
+
 
 
 with SynthDef("soprano") as soprano:
@@ -155,11 +155,11 @@ with SynthDef("soft") as soft:
     soft.freq= soft.freq/2
     soft.amp = soft.amp / (40 * (1 + soft.rate))
     soft.osc = Klank.ar([[7, 5, 3, 1],[8,4,2,1],[2,4,8,16]], LFNoise0.ar(soft.rate/soft.sus), soft.freq)
-    soft.env = Env.env(soft.sus) 
+    soft.env = Env.env(soft.sus)
 
-    
+
 with SynthDef("quin") as synth:
-    synth.amp = synth.amp 
+    synth.amp = synth.amp
     synth.osc = Klank.ar([[1,2,4,2],[100,50,0,10],[1,5,0,1]], Impulse.ar(synth.freq).dup, [synth.freq * 1.01, synth.freq]) / 5000
     synth.osc = synth.osc * LFSaw.ar(synth.freq * (1 + synth.rate))
     synth.env = Env.perc(atk=0.01, sus=synth.sus, curve=1)
@@ -326,7 +326,7 @@ sitar.add()
 with SynthDef("star") as synth:
     freq = instance('freq')
     synth.amp  = (synth.amp * 2)+ 0.00001
-    synth.freq = [synth.freq / 2, synth.freq / 2 + LFNoise2.ar(50).range(-2,2)] 
+    synth.freq = [synth.freq / 2, synth.freq / 2 + LFNoise2.ar(50).range(-2,2)]
     synth.osc  = Saw.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,synth.sus))) * 0.3 + Saw.ar(freq+2, phase=VarSaw.ar(freq + 2, width=Line.ar(1,0.2,synth.sus))) * 0.3
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, synth.sus/6)
 star = synth
@@ -338,6 +338,13 @@ if SC3_PLUGINS:
     piano.osc = MdaPiano.ar(piano.freq, vel=40 + (piano.amp * 60), decay=piano.sus / 4)
     piano.env = Env.ramp()
     piano.add()
+
+# SynthDefs read from file
+sawbass = FileSynthDef('sawbass')
+sawbass.add()
+
+prophet = FileSynthDef('prophet')
+prophet.add()
 
 # Get rid of the variable synth
 

@@ -120,12 +120,14 @@ FoxDot\osc\scsyndef\piano.scd
 FoxDot\osc\scsyndef\play1.scd
 FoxDot\osc\scsyndef\play2.scd
 FoxDot\osc\scsyndef\pluck.scd
+FoxDot\osc\scsyndef\prophet.scd
 FoxDot\osc\scsyndef\pulse.scd
 FoxDot\osc\scsyndef\quin.scd
 FoxDot\osc\scsyndef\rave.scd
 FoxDot\osc\scsyndef\razz.scd
 FoxDot\osc\scsyndef\ripple.scd
 FoxDot\osc\scsyndef\saw.scd
+FoxDot\osc\scsyndef\sawbass.scd
 FoxDot\osc\scsyndef\scatter.scd
 FoxDot\osc\scsyndef\scrap.scd
 FoxDot\osc\scsyndef\scratch.scd
