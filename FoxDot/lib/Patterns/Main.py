@@ -231,9 +231,8 @@ class metaPattern(object):
             yield i, value
 
     def __getslice__(self, start, stop, step=1):
-
         start = start if start is not None else 0
-        stop  = min(stop, len(self)) if stop is not None else len(self)
+        stop  = stop if stop is not None else len(self)
         step  = step if step is not None else 1
 
         if stop < start:
