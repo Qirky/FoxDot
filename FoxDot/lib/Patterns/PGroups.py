@@ -124,6 +124,10 @@ class PGroupMod(PGroupPlus):
 #    bracket_style="|()"
 
 # Define any pattern methods that use PGroupPrimes
+
+@PatternMethod
+def offadd(self, other):
+    return self + PGroupPlus(0, other)
     
 @PatternMethod
 def amen(self, size=2):

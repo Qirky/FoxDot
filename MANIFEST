@@ -6,6 +6,7 @@ FoxDot\demo\1_playing_notes.py
 FoxDot\demo\2_playing_samples.py
 FoxDot\demo\3_using_patterns.py
 FoxDot\demo\4_using_vars.py
+FoxDot\demo\5_adding_effects.py
 FoxDot\lib\Bang.py
 FoxDot\lib\Buffers.py
 FoxDot\lib\Constants.py
@@ -110,6 +111,7 @@ FoxDot\osc\scsyndef\growl.scd
 FoxDot\osc\scsyndef\karp.scd
 FoxDot\osc\scsyndef\klank.scd
 FoxDot\osc\scsyndef\lazer.scd
+FoxDot\osc\scsyndef\longsaw.scd
 FoxDot\osc\scsyndef\loop.scd
 FoxDot\osc\scsyndef\marimba.scd
 FoxDot\osc\scsyndef\noise.scd

@@ -94,6 +94,17 @@ def max_length(*patterns):
     """ Returns the largest length pattern """
     return max([len(p) for p in patterns])
 
+def get_inverse_op(method):
+    """ Returns the opposite __dunder__ method e.g.
+        get_inverse_op("__add__") -> "__radd__"
+        get_inverse_op("__ror__") -> "__or__"
+    """
+    if method.startswith("__r"):
+        return method.replace("__r", "__")
+    elif method.startswith("__"):
+        return method.replace("__", "__r", 1)
+    return method
+
 # Classes
 
 class dots:

@@ -309,125 +309,86 @@ class TimeVar(Repeatable):
 
     # Mathmetical operators
 
-    def __add__(self, other):
+    def math_op(self, other, op):
+        """ Performs the mathematical operation between self and other. "op" should 
+            be the  string name of a dunder method  e.g. __mul__ """
         if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self + x for x in other))
+            if type(other) is tuple:
+                return PGroup([getattr(self, op).__call__(x) for x in other])
+            elif type(other) is list:
+                return Pattern([getattr(self, op).__call__(x) for x in other])
             else:
-                return other.__radd__(self)
+                return getattr(other, get_inverse_op(op)).__call__(self)
+        return other
+
+    def __add__(self, other):
+        new = self.math_op(other, "__add__")
         new = self.new(other)
         new.evaluate = fetch(Add)
         return new
 
     def __radd__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x + self for x in other))
-            else:
-                return other.__add__( self)
+        new = self.math_op(other, "__radd__")
         new = self.new(other)
         new.evaluate = fetch(rAdd)
         return new
 
     def __sub__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self - x for x in other))
-            else:
-                return other.__rsub__(self)
+        new = self.math_op(other, "__sub__")
         new = self.new(other)
         new.evaluate = fetch(rSub)
         return new
+
     def __rsub__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x - self for x in other))
-            else:
-                return other.__sub__(self)
+        new = self.math_op(other, "__rsub__")
         new = self.new(other)
         new.evaluate = fetch(Sub)
         return new
 
-    # *
     def __mul__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self * x for x in other))
-            else:
-                return other.__rmul__(self)
+        new = self.math_op(other, "__mul__")
         new = self.new(other)
         new.evaluate = fetch(Mul)
         return new
 
     def __rmul__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x * self for x in other))
-            else:
-                return other.__mul__(self)
+        new = self.math_op(other, "__rmul__")
         new = self.new(other)
         new.evaluate = fetch(Mul)
         return new
 
     def __pow__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self ** x for x in other))
-            else:
-                return other.__rpow__(self)
+        new = self.math_op(other, "__pow__")
         new = self.new(other)
         new.evaluate = fetch(rPow)
         return new
 
     def __rpow__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x ** self for x in other))
-            else:
-                return other.__pow__(self)
-
+        new = self.math_op(other, "__rpow__")
         new = self.new(other)
         new.evaluate = fetch(Pow)
         return new
 
-    # //
     def __floordiv__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self // x for x in other))
-            else:
-                return other.__rfloordiv__(self)
+        new = self.math_op(other, "__floordiv__")
         new = self.new(other)
         new.evaluate = fetch(rFloorDiv)
         return new
 
     def __rfloordiv__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x // self for x in other))
-            else:
-                return other.__floordiv__(self)
+        new = self.math_op(other, "__rfloordiv__")
         new = self.new(other)
         new.evaluate = fetch(FloorDiv)
         return new
 
-    # /
     def __truediv__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((self / x for x in other))
-            else:
-                return other.__rtruediv__(self)
+        new = self.math_op(other, "__truediv__")
         new = self.new(other)
         new.evaluate = fetch(rDiv)
         return new
 
     def __rtruediv__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x / self for x in other))
-            else:
-                return other.__truediv__(self)
+        new = self.math_op(other, "__rtruediv__")
         new = self.new(other)
         new.evaluate = fetch(Div)
         return new
@@ -446,7 +407,7 @@ class TimeVar(Repeatable):
         self.values = self.values / other
         return self
 
-    # Comparisons
+    # Comparisons -- todo: return TimeVars
 
     def __gt__(self, other):
         return float(self.now()) > float(other)
@@ -462,26 +423,18 @@ class TimeVar(Repeatable):
 
     # %
     def __mod__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x.__rmod__(self) for x in other))
-            else:
-                return other.__rmod__(self)
+        new = self.math_op(other, "__mod__")
         new = self.new(other)
         new.evaluate = fetch(rMod)
         return new
 
     def __rmod__(self, other):
-        if not isinstance(other, (TimeVar, int, float)):
-            if type(other) in (tuple, list):
-                return other.__class__((x.__mod__(self) for x in other))
-            else:
-                return other.__mod__(self)
+        new = self.math_op(other, "__rmod__")
         new = self.new(other)
         new.evaluate = fetch(Mod)
         return new
 
-    #  Comparisons
+    #  Comparisons -- todo: return TimeVar
 
     def __eq__(self, other):
         return other == self.now()

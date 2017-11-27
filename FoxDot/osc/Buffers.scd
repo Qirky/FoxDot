@@ -291,12 +291,11 @@ Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/3/three1.wav"
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/3/three2.wav", bufnum:291);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/4/four1.wav", bufnum:292);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_/4/four2.wav", bufnum:293);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/bill96.wav", bufnum:294);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/billions.wav", bufnum:295);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/break170.wav", bufnum:296);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/afro105.wav", bufnum:294);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/break170.wav", bufnum:295);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/cowbells110.wav", bufnum:296);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/dirty120.wav", bufnum:297);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/drums130.wav", bufnum:298);
 Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/foxdot.wav", bufnum:299);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/glass.wav", bufnum:300);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/mojo.wav", bufnum:301);
-Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/sparkfest.wav", bufnum:302);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/robot110.wav", bufnum:300);
+Buffer.read(s, "C:/Users/Ryan/Documents/GitHub/FoxDot/FoxDot/snd/_loop_/techno130.wav", bufnum:301);
