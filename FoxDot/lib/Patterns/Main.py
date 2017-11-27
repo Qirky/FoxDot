@@ -408,6 +408,16 @@ class metaPattern(object):
                 new.append(modi(self.data,i))
         return self.__class__(new)
 
+    def arp(self, arp_pattern):
+        """ Return a new Pattern with each item repeated len(arp_pattern) times
+            and incremented by arp_pattern. Useful for arpeggiating. e.g.
+            ```
+            >>> P[0, 1, 2, 3].arp([0, 2])
+            P[0, 2, 1, 3, 2, 4, 3, 5]
+            ```
+        """
+        return self.stutter(len(arp_pattern)) + arp_pattern
+
     def splice(self, seq, *seqs):
         """ Takes at least list / Pattern and creates a new Pattern by
             adding a value from each pattern in turn to the new pattern.
