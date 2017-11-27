@@ -705,11 +705,13 @@ class metaPattern(object):
             new.append((item1, item2))
         return self.__class__(new)
 
-    def zip(self, other):
+    def zip(self, other, dtype=None):
         """ Zips two patterns together. If one item is a tuple, it extends the tuple / PGroup
             i.e. arrow_zip([(0,1),3], [2]) -> [(0,1,2),(3,2)]
         """
         output = Pattern()
+
+        dtype = PGroup if dtype is None else dtype
 
         for i in range(LCM(len(self), len(other))):
 

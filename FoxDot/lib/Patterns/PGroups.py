@@ -104,9 +104,24 @@ class PGroupMod(PGroupPlus):
 #    """ Unused """
 #    bracket_style="-()"
 
-#class PGroupXor(PGroupPrime):
-#    """ Unused """
-#    bracket_style="^()"
+class PGroupXor(PGroupPrime):
+    """ The delay of this PGroup is s """
+    bracket_style="^()"
+    def __init__(self, *args):
+        self.delay = 0
+        PGroupPrime.__init__(self, *args)
+
+    def set_delay(self, value):
+        self.delay = value
+        return self
+    
+    def calculate_step(self, dur):
+        return self.delay
+
+    def calculate_delay(self, delay):
+        return delay
+
+
 
 #class PGroupAnd(PGroupPrime):
 #    """ Unused """
@@ -126,8 +141,25 @@ class PGroupMod(PGroupPlus):
 # Define any pattern methods that use PGroupPrimes
 
 @PatternMethod
-def offadd(self, other):
-    return self + PGroupPlus(0, other)
+def offadd(self, value, delay=0.5):
+    return self + PGroupXor(0, value).set_delay(delay)
+
+@PatternMethod
+def offlayer(self, method, *args, **kwargs):
+    """ Zips a pattern with a modified version of itself. Method argument
+        can be a function that takes this pattern as its first argument,
+        or the name of a Pattern method as a string. """
+    
+    if callable(method):
+        func = method
+        args = [self.data] + list(args)
+    else:
+        func = getattr(self, method)
+        assert callable(func)
+
+    delay = kwargs.get("dur", 0.5)
+
+    return self.zip(func(*args, **kwargs), dtype=PGroupXor(0, value).set_delay(delay))
     
 @PatternMethod
 def amen(self, size=2):

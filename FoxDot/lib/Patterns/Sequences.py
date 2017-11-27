@@ -67,6 +67,9 @@ class __pattern__(object):
         """ Returns scrambled version """
         return PGroupPow(other)
 
+    def __xor__(self, other):
+        return PGroupXor(other[:-1]).set_delay(other[-1])
+
     def __add__(self, other):
         return PGroupPlus(other)
 
