@@ -33,7 +33,7 @@ SynthDefs = SynthDict()
 # SynthDef Base Class
 
 class SynthDefBaseClass(object):
-    
+
     server = DefaultServer
     var = ['osc', 'env']
     defaults = {}
@@ -61,7 +61,7 @@ class SynthDefBaseClass(object):
         self.amp         = instance("amp")
         self.pan         = instance("pan")
         self.rate        = instance("rate")
-        
+
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
                             "pan"       : 0,
@@ -122,13 +122,13 @@ class SynthDefBaseClass(object):
     def __getattribute__(self, key):
         if key.startswith("_"):
             return object.__getattribute__(self, key)
-        
+
         defaults    = object.__getattribute__(self, 'defaults')
         var         = object.__getattribute__(self, 'var')
         synth_added = object.__getattribute__(self, 'synth_added')
-        
+
         attr = list(defaults.keys()) + var
-        
+
         if synth_added:
             return object.__getattribute__(self, key)
         elif key in attr:
@@ -176,7 +176,7 @@ class SynthDefBaseClass(object):
                 if str(arg) != str(self.__dict__[arg]):
                     string += (str(arg) + '=' + str(self.__dict__[arg]) + ';\n')
         return string
-                
+
 
     # Adding the SynthDef to the Server
     # ---------------------------------
@@ -192,16 +192,16 @@ class SynthDefBaseClass(object):
             return True
         except:
             return False
-    
+
     def add(self):
         """ This is required to add the SynthDef to the SuperCollider Server """
 
         if self.has_envelope():
 
             self.osc = self.osc * self.env
-    
+
         try:
-            
+
             # Write file
             self.write()
 
@@ -212,9 +212,9 @@ class SynthDefBaseClass(object):
 
             # Add to list
             self.container[self.name] = self
-            
+
         except Exception as e:
-            
+
             WarningMsg("Error: SynthDef '{}' could not be added to the server:\n{}".format(self.name, e))
 
         return None
@@ -247,7 +247,7 @@ class SynthDef(SynthDefBaseClass):
         self.base.append("freq = In.kr(bus, 1);")
         self.base.append("freq = freq + fmod;")
         return
-        
+
 class SampleSynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
         SynthDefBaseClass.__init__(self, *args, **kwargs)
@@ -259,14 +259,20 @@ class SampleSynthDef(SynthDefBaseClass):
         self.defaults['rate']  = 1.0
         self.base.append("rate = In.kr(bus, 1);")
 
-        
 
+# SynthDef from sc file
+class FileSynthDef(SynthDefBaseClass):
+    def write(self):
+        pass
+
+    def __str__(self):
+        return open(self.filename, 'rb').read()
 
 '''
     SynthDefProxy Class
     -------------------
 
-    
+
 '''
 
 class SynthDefProxy:
