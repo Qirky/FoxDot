@@ -59,15 +59,38 @@ def __getitem__(self, key):
     else:
         return self.getitem(key)
 
-def nextBar(n=0):
-    ''' Schedule functions when you define them with @nextBar'''
+def _futureBarDecorator(n, multiplier=1):
     if callable(n):
         Clock.schedule(n, Clock.next_bar())
         return n
     def wrapper(f):
-        Clock.schedule(f, Clock.next_bar() + n * Clock.bar_length())
+        Clock.schedule(f, Clock.next_bar() + (n * multiplier))
         return f
     return wrapper
+
+def nextBar(n=0):
+    ''' Schedule functions when you define them with @nextBar
+    Functions will run n beats into the next bar.
+
+    >>> nextBar(v1.solo)
+    or
+    >>> @nextBar
+    ... def dostuff():
+    ...     v1.solo()
+    '''
+    return _futureBarDecorator(n)
+
+def futureBar(n=0):
+    ''' Schedule functions when you define them with @futureBar
+    Functions will run n bars in the future (0 is the next bar)
+
+    >>> futureBar(v1.solo)
+    or
+    >>> @futureBar(4)
+    ... def dostuff():
+    ...     v1.solo()
+    '''
+    return _futureBarDecorator(n, Clock.bar_length())
 
 def update_foxdot_clock(clock):
     """ Tells the TimeVar, Player, and MidiIn classes to use 
