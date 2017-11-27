@@ -35,6 +35,7 @@ SynthDefs = SynthDict()
 class SynthDefBaseClass(object):
 
     server = DefaultServer
+    bus_name = 'bus'
     var = ['osc', 'env']
     defaults = {}
     container = SynthDefs
@@ -236,6 +237,9 @@ class SynthDefBaseClass(object):
             message += [key, value]
         self.server.sendNote(self.name, message)
         return
+
+    def preprocess_osc(self, osc_message):
+        pass
 
 class SynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):

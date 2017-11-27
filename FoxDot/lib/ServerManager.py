@@ -217,10 +217,12 @@ class SCLangServerManager(ServerManager):
                     new_message[key] = 0.0
 
         # Get next node ID
-        node, last_node = self.nextnodeID(), node                
-        
-        osc_packet = [synthdef.name, node, 1, group_id, 'bus', bus] + self.create_osc_msg(new_message)        
-        
+
+        node, last_node = self.nextnodeID(), node
+
+        osc_packet = [synthdef.name, node, 1, group_id, synthdef.bus_name, bus] \
+            + self.create_osc_msg(new_message)
+
         msg.append( osc_packet )
 
         return msg, node
@@ -339,6 +341,8 @@ class SCLangServerManager(ServerManager):
         # Get the bus and SynthDef nodes
         this_bus  = self.nextbusID()
         this_node = self.nextnodeID()
+
+        synthdef.preprocess_osc(packet)
 
         # First node of the group (control rate)
 
