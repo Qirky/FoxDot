@@ -65,7 +65,7 @@ def nextBar(n=0):
         Clock.schedule(n, Clock.next_bar())
         return n
     def wrapper(f):
-        Clock.schedule(f, Clock.next_bar() + n)
+        Clock.schedule(f, Clock.next_bar() + n * Clock.bar_length())
         return f
     return wrapper
 
