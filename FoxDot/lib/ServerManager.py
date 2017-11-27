@@ -428,6 +428,13 @@ class SCLangServerManager(ServerManager):
         self.sclang.send(msg)
         return
 
+    def loadCompiled(self, fn):
+        """ Sends a message to SuperCollider to load a compiled SynthDef file """
+        msg = OSCMessage()
+        msg.setAddress('/d_load')
+        msg.append(fn)
+        self.client.send(msg)
+
     def dumpOSC(self, value=1):
         """ Debug - Dumps OSC messages SCLang side """
         msg = OSCMessage("/dumpOSC")

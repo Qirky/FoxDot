@@ -193,6 +193,10 @@ class SynthDefBaseClass(object):
         except:
             return False
 
+    def _load_synth(self):
+        self.write()
+        SynthDef.server.loadSynthDef(self.filename)
+
     def add(self):
         """ This is required to add the SynthDef to the SuperCollider Server """
 
@@ -202,13 +206,10 @@ class SynthDefBaseClass(object):
 
         try:
 
-            # Write file
-            self.write()
-
             self.synth_added = True
 
             # Load to server
-            SynthDef.server.loadSynthDef(self.filename)
+            self._load_synth()
 
             # Add to list
             self.container[self.name] = self
@@ -298,3 +299,14 @@ class SynthDefProxy:
             return func
         else:
             return getattr(self, name)
+
+class CompiledSynthDef(SynthDefBaseClass):
+    def __init__(self, name, filename):
+        super(CompiledSynthDef, self).__init__(name)
+        self.filename = filename
+
+    def _load_synth(self):
+        SynthDef.server.loadCompiled(self.filename)
+
+    def __str__(self):
+        return repr(self)
