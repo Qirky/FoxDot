@@ -25,6 +25,9 @@ class SCLangClient(OSCClient):
         except Exception as e:
             print(e)
 
+class OSCConnect(SCLangClient):
+    pass
+
 # TODO -- Create an abstract base class that could be sub-classed for users who want to send their OSC messages elsewhere
 
 class ServerManager(object):
@@ -60,11 +63,16 @@ class SCLangServerManager(ServerManager):
         self.wait_time = 5
         self.count = 0
 
+        # General SuperCollider OSC connection
         self.client = SCLangClient()
         self.client.connect( (self.addr, self.port) )
 
+        # OSC Connection for custom OSCFunc in SuperCollider
         self.sclang = SCLangClient()
-        self.sclang.connect( (self.addr, self.SCLang_port) )        
+        self.sclang.connect( (self.addr, self.SCLang_port) )
+
+        # Assign a valid OSC Client
+        self.forward = None
 
         self.node = 1000
         self.bus  = 4
@@ -387,6 +395,9 @@ class SCLangServerManager(ServerManager):
         msg = OSCMessage(address)
         msg.append(message)
         self.client.send(msg)
+        # If we are sending other messages as well
+        if self.forward is not None:
+            self.forward.send(message)
         return
 
     def free_node(self, node):

@@ -273,9 +273,9 @@ class MethodCall:
 
         self.i, self.next = self.count()
 
-##        if cycle is not None and cycle != self.cycle:
-##
-##            self.next = self.parent.metro.next_bar() + self.when[self.i]
+        if cycle is not None and cycle != self.cycle:
+
+            self.next = self.parent.metro.next_bar() + self.when[self.i]
 
         self.cycle = cycle
         

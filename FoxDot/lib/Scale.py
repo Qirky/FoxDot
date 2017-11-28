@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from .Patterns import Pattern
+from .Patterns import Pattern, PGroup, asStream
 
 from random import choice
 
@@ -28,6 +28,8 @@ class ScalePattern(Pattern):
 
         self.pentatonic = PentatonicScalePattern(self)
 
+        self.steps = 12
+
     def __call__(self, *args):
 
         if len(args) > 0:
@@ -42,14 +44,25 @@ class ScalePattern(Pattern):
     def __ne__(self, other):
         return self.name != other.name if isinstance(other, ScalePattern) else True
 
-    def semitones(self, pitches, steps=12):
+    def semitones(self, pitches):
         """ Returns the semitone values for a series of pitches in this scale """
         tones = []
-        for pitch in pitches:
-            i = pitch % len(self.data) # should be wary of number of pitches per scale -- todo
-            n = (pitch // len(self.data)) * steps
-            tones.append( self.data[i] + n)
+        for pitch in asStream(pitches):
+            tones.append( self.note_to_semitone(pitch) )
         return Pattern(tones)
+
+    def note_to_semitone(self, pitch):
+        """ Takes a pitch value and returns the semitone value e.g. midinote value not accounting for octaves """
+        if isinstance(pitch, PGroup):
+            return pitch.__class__([self.note_to_semitone(p) for p in pitch])
+        else:
+            i = pitch % len(self.data)
+            n = (pitch // len(self.data)) * self.steps 
+        return asStream(self.data)[i] + n
+
+    #def semitone_to_note(self, semitone):
+    #    """ Takes a semitone value (midinote) and returns the pitch in this scale """
+    #    return semitone
 
     def set(self, new):
 
