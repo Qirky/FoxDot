@@ -80,14 +80,14 @@ class NumberKey(object):
         new.calculate = Mul
         return new
     
-    def __div__(self, other):
+    def __truediv__(self, other):
         if isinstance(other, metaPattern):
             return other.__rdiv__(self)
         new = self.child(other)
         new.calculate = rDiv
         return new
 
-    def __rdiv__(self, other):
+    def __rtruediv__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=asStream(other)
@@ -95,6 +95,23 @@ class NumberKey(object):
             return other.__div__(self)
         new = self.child(other)
         new.calculate = Div
+        return new
+
+    def __floordiv__(self, other):
+        if isinstance(other, metaPattern):
+            return other.__rdiv__(self)
+        new = self.child(other)
+        new.calculate = rFloorDiv
+        return new
+
+    def __rfloordiv__(self, other):
+        """ If operating with a pattern, return a pattern of values """
+        if isinstance(other, (list, tuple)):
+            other=asStream(other)
+        if isinstance(other, metaPattern):
+            return other.__div__(self)
+        new = self.child(other)
+        new.calculate = FloorDiv
         return new
     
     def __mod__(self, other):
@@ -262,6 +279,12 @@ class NumberKey(object):
             except TypeError:
                 return b
         new.calculate = getitem
+        return new
+
+    def semitones(self):
+        """ Converts the current value into the semitone value using the parent's scale """
+        new = self.child(0)
+        new.calculate = lambda a, b: self.parent.scale.semitones(b)
         return new
 
     def map(self, mapping):

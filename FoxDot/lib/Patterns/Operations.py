@@ -101,6 +101,9 @@ PMul = POperand(Mul)
 PDiv = POperand(Div)
 PDiv2 = POperand(rDiv)
 
+PFloor = POperand(FloorDiv)
+PFloor2 = POperand(rFloorDiv)
+
 PMod = POperand(Mod)
 PMod2 = POperand(rMod)
 
