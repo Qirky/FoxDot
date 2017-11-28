@@ -141,8 +141,8 @@ class PGroupXor(PGroupPrime):
 # Define any pattern methods that use PGroupPrimes
 
 @PatternMethod
-def offadd(self, value, delay=0.5):
-    return self + PGroupXor(0, value).set_delay(delay)
+def offadd(self, value, dur=0.5):
+    return self + PGroupXor(0, value).set_delay(dur)
 
 @PatternMethod
 def offlayer(self, method, *args, **kwargs):
@@ -166,23 +166,29 @@ def amen(self, size=2):
     """ Merges and laces the first and last two items such that a
         drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
     new = []
-
-    for n in range(len(self.data)):
-
+    for n in range(len(self)):
         if  n % 4 == 0:
-
-            new.append([self.data[n], PGroupPlus(self.data[n], modi(self.data, n + size))])
-
-        elif n % 4 == 2:
-
-            new.append( [self.data[n]]*3+[self.data[n-1]] )
-
-        elif n % 4 == 3:
-
-            new.append( [PGroupPlus(self.data[n], self.data[n-1]), [self.data[n], self.data[n-1]] ] )
-
+            new.append([self[n], PGroupPlus(self[n], modi(self, n + size))])
+        elif n % 4 == size:
+            new.append( [self[n]]*3+[self[n-1]] )
+        elif n % 4 == size + 1:
+            new.append( [PGroupPlus(self[n], self[n-1]), [self[n], self[n-1]] ] )
         else:
+            new.append(self[n])
+    return self.__class__(new)
 
+@PatternMethod
+def bubble(self, size=2):
+    """ Merges and laces the first and last two items such that a
+        drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
+    new = []
+    for n in range(len(self.data)):
+        if  n % 4 == 0:
+            new.append([self.data[n], PGroupPlus(self.data[n], modi(self.data, n + size))])
+        elif n % 4 == 2:
+            new.append( [self.data[n]]*3+[self.data[n-1]] )
+        elif n % 4 == 3:
+            new.append( [PGroupPlus(self.data[n], self.data[n-1]), [self.data[n], self.data[n-1]] ] )
+        else:
             new.append(self.data[n])
-    
     return self.__class__(new)
