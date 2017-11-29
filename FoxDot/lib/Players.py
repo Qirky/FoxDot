@@ -1580,7 +1580,7 @@ class Player(Repeatable):
 
     def only(self):
         """ Stops all players except this one """
-        for player in self.metro.playing:
+        for player in list(self.metro.playing):
             if player is not self:
                 player.stop()
         return self
