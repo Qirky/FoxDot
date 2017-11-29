@@ -58,6 +58,7 @@ FOXDOT_OSC_FUNC     = os.path.realpath(FOXDOT_ROOT + "/osc/OSCFunc.scd")
 FOXDOT_STARTUP_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Startup.scd")
 FOXDOT_BUFFERS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Buffers.scd")
 FOXDOT_EFFECTS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Effects.scd")
+FOXDOT_INFO_FILE    = os.path.realpath(FOXDOT_ROOT + "/osc/Info.scd")
 FOXDOT_TEMP_FILE    = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/tmp/tempfile.txt")
 
 # If the tempfile doesn't exist, create it
