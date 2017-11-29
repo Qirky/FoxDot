@@ -50,6 +50,9 @@ class SonicPiSynthDef(CompiledSynthDef):
         # want the startSound synth to be adding anything to that bus.
         osc_msg['freq'] = 0
 
+        # These synths are all really loud for some reason
+        osc_msg['amp'] *= .2
+
         # sonic-pi has a full ADSR, but if those values are not explicitly
         # passed, translate the 'sus' into the sustain or release
         # (depending on what the synthdef uses by default)
