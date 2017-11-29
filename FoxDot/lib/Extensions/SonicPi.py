@@ -35,12 +35,16 @@ class SonicPiSynthDef(CompiledSynthDef):
 
     def __init__(self, name, filename, synthdata):
         super(SonicPiSynthDef, self).__init__(name, filename)
+        # These synths are all really loud for some reason
+        self.balance = 0.2
         self._arg_defaults = synthdata['arg_defaults']
         for key in self._arg_defaults:
             if not hasattr(self, key):
                 setattr(self, key, self.new_attr_instance(key))
 
     def preprocess_osc(self, osc_msg):
+        super(SonicPiSynthDef, self).preprocess_osc(osc_msg)
+
         # sonic-pi uses 'note' instead of 'freq', so we have to translate
         osc_msg['note'] = freqtomidi(osc_msg['freq'])
 
@@ -49,9 +53,6 @@ class SonicPiSynthDef(CompiledSynthDef):
         # because sonic-pi's synths use Out instead of ReplaceOut, so we don't
         # want the startSound synth to be adding anything to that bus.
         osc_msg['freq'] = 0
-
-        # These synths are all really loud for some reason
-        osc_msg['amp'] *= .2
 
         # sonic-pi has a full ADSR, but if those values are not explicitly
         # passed, translate the 'sus' into the sustain or release

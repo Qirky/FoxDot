@@ -71,6 +71,8 @@ class SynthDefBaseClass(object):
                             "fmod"      : 0, # could be put in an Effect?
                             "rate"      : 0,
                             "bus"       : 0 }
+        # The amp is multiplied by this before being sent to SC
+        self.balance = 1
 
         self.add_base_class_behaviour()
 
@@ -239,7 +241,7 @@ class SynthDefBaseClass(object):
         return
 
     def preprocess_osc(self, osc_message):
-        pass
+        osc_message['amp'] *= self.balance
 
 class SynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
