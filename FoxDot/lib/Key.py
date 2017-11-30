@@ -460,3 +460,8 @@ class AccompanyKey(NumberKey):
             self.acmp_value = self.find_new_value(value)
             self.last_value = value
         return self.acmp_value
+
+
+# Give pattern objects a reference to the PlayerKey type
+
+Pattern.PlayerKey = PlayerKey

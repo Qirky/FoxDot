@@ -105,6 +105,10 @@ class metaPattern(object):
             
             self.data = data
             self.make()
+
+    @classmethod
+    def get_methods(cls):
+        return [attr for attr in dir(cls) if callable(getattr(cls, attr))]
             
     def __len__(self):
         """ Returns the *expanded" length of the pattern. e.g. the following

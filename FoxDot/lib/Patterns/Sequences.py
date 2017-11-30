@@ -38,7 +38,9 @@ class __pattern__(object):
         the Pattern `P[0, 2, 1, 2, 3, 4, 5, 6, 7, 8, 9]`
     '''
     def __getitem__(self, args):
-        if hasattr(args, '__iter__') and not isinstance(args, (str, bytes, GeneratorPattern)):
+        if isinstance(args, (Pattern.TimeVar, Pattern.PlayerKey)):
+            data = [args]
+        elif hasattr(args, '__iter__') and not isinstance(args, (str, bytes, GeneratorPattern)):
             data = []
             for item in args:
                 if type(item) is slice:

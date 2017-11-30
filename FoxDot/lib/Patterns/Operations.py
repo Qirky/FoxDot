@@ -113,5 +113,5 @@ PPow2 = POperand(rPow)
 PGet = POperand(Get)
 
 # Pattern comparisons -> need to maybe have a equals func?
-PEq = lambda a, b: (all([a[i]==b[i] for i in range(len(a))]) if len(a) == len(b) else False) if a.__class__ == b.__class__ else False
-PNe = lambda a, b: (any([a[i]!=b[i] for i in range(len(a))]) if len(a) == len(b) else True) if a.__class__ == b.__class__ else True
+PEq = lambda a, b: (all([int(a[i]==b[i]) for i in range(len(a))]) if len(a) == len(b) else False) if a.__class__ == b.__class__ else False
+PNe = lambda a, b: (any([int(a[i]!=b[i]) for i in range(len(a))]) if len(a) == len(b) else True) if a.__class__ == b.__class__ else True

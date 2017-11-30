@@ -51,7 +51,7 @@ class TimeVar(Repeatable):
         # Dynamic method for calculating values
         self.func     = Nil
         self.evaluate = fetch(Nil)
-        self.dependency = 1
+        self.dependency = None
 
         self.update(values, dur)
 
@@ -323,72 +323,96 @@ class TimeVar(Repeatable):
 
     def __add__(self, other):
         new = self.math_op(other, "__add__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(Add)
         return new
 
     def __radd__(self, other):
         new = self.math_op(other, "__radd__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(rAdd)
         return new
 
     def __sub__(self, other):
         new = self.math_op(other, "__sub__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(rSub)
         return new
 
     def __rsub__(self, other):
         new = self.math_op(other, "__rsub__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(Sub)
         return new
 
     def __mul__(self, other):
         new = self.math_op(other, "__mul__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(Mul)
         return new
 
     def __rmul__(self, other):
         new = self.math_op(other, "__rmul__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(Mul)
         return new
 
     def __pow__(self, other):
         new = self.math_op(other, "__pow__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(rPow)
         return new
 
     def __rpow__(self, other):
         new = self.math_op(other, "__rpow__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(Pow)
         return new
 
     def __floordiv__(self, other):
         new = self.math_op(other, "__floordiv__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(rFloorDiv)
         return new
 
     def __rfloordiv__(self, other):
         new = self.math_op(other, "__rfloordiv__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(FloorDiv)
         return new
 
     def __truediv__(self, other):
         new = self.math_op(other, "__truediv__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(rDiv)
         return new
 
     def __rtruediv__(self, other):
         new = self.math_op(other, "__rtruediv__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(Div)
         return new
@@ -424,12 +448,16 @@ class TimeVar(Repeatable):
     # %
     def __mod__(self, other):
         new = self.math_op(other, "__mod__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(rMod)
         return new
 
     def __rmod__(self, other):
         new = self.math_op(other, "__rmod__")
+        if not isinstance(other, (TimeVar, int, float)):
+            return new
         new = self.new(other)
         new.evaluate = fetch(Mod)
         return new
@@ -501,108 +529,146 @@ class Pvar(TimeVar, Pattern):
 
         TimeVar.__init__(self, data, dur, **kwargs)
 
+    def __getattribute__(self, attr):
+        # If it's a method, only return the method if its new, transform, or a dunder
+        if attr in Pattern.get_methods():   
+            
+            if attr not in ("new", "now", "transform") and not attr.startswith("__"):
+
+                # return a function that transforms the patterns of the  root Pvar
+
+                def get_new_pvar(*args, **kwargs):
+
+                    # If this is the root Pvar, change the values
+
+                    if self.dependency is  None:
+
+                        new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
+
+                        return Pvar(new_values, dur=self.dur)
+
+                    else:
+
+                    # Get the "parent" Pvar and re-apply the connecting function
+
+                        new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
+
+                        new_item = self.func(new_pvar, self.original_value)
+
+                        return new_item
+
+                return get_new_pvar
+                
+        return object.__getattribute__(self, attr)
+
     def new(self, other):
-        new = Pvar(asStream(other), dur=self.dur)
+        new = Pvar([other], dur=self.dur)
+        new.original_value = other
         new.dependency = self
         return new
 
+    def set_eval(self, func):
+        self.evaluate = fetch(func)
+        self.func     = func
+        return
+
     def __add__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Add)
+        new = self.new(other)
+        new.set_eval(Add)
         return new
 
     def __radd__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(rAdd)
+        new = self.new((other))
+        new.set_eval(rAdd)
         return new
 
     def __sub__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Sub)
+        new = self.new((other))
+        new.set_eval(Sub)
         return new
 
     def __rsub__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(rSub)
+        new = self.new((other))
+        new.set_eval(rSub)
         return new
 
     def __mul__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Mul)
+        new = self.new((other))
+        new.set_eval(Mul)
         return new
 
     def __rmul__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Mul)
+        new = self.new((other))
+        new.set_eval(Mul)
         return new
 
     def __div__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Div)
+        new = self.new((other))
+        new.set_eval(Div)
         return new
 
     def __rdiv__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(rDiv)
+        new = self.new((other))
+        new.set_eval(rDiv)
         return new
 
     def __truediv__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Div)
+        new = self.new((other))
+        new.set_eval(Div)
         return new
 
     def __rtruediv__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(rDiv)
+        new = self.new((other))
+        new.set_eval(rDiv)
         return new
 
     def __floordiv__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(FloorDiv)
+        new = self.new((other))
+        new.set_eval(FloorDiv)
         return new
 
     def __rfloordiv__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(rFloorDiv)
+        new = self.new((other))
+        new.set_eval(rFloorDiv)
         return new
 
     def __pow__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Pow)
+        new = self.new((other))
+        new.set_eval(Pow)
         return new
 
     def __rpow__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(rPow)
+        new = self.new((other))
+        new.set_eval(rPow)
         return new
 
     def __mod__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(Mod)
+        new = self.new((other))
+        new.set_eval(Mod)
         return new
 
     def __rmod__(self, other):
-        new = self.new(asStream(other))
-        new.evaluate = fetch(rMod)
+        new = self.new((other))
+        new.set_eval(rMod)
         return new
 
     def __or__(self, other):
         # Used when piping patterns together
         new = self.new(PatternContainer(other))
-        new.evaluate = fetch(rOr)
+        new.set_eval(rOr)
         return new
 
     def __ror__(self, other):
         # Used when piping patterns together
         new = self.new(PatternContainer(other))
-        new.evaluate = fetch(Or)
+        new.set_eval(Or)
         return new
 
     def transform(self, func):
         """ Returns a Pvar based on a transformation function, as opposed to
             a mathematical operation"""
-        new = self.new(0)
-        new.evaluate = fetch(func)
+        new = self.new(self)
+        new.set_eval(func)
         return new
 
 
@@ -612,33 +678,69 @@ class PvarGenerator(Pvar):
         and the function is called whenever the arguments are changed
     """
     def __init__(self, func, *args):
-        self.func = func
+        self.p_func = func # p_func is the Pattern function e.g. PDur but self.func is created when operating on this PvarGenerator
         self.args = [(arg if isinstance(arg, TimeVar) else TimeVar(arg)) for arg in args]
         self.last_args = []
         self.last_data = []
         self.evaluate = fetch(Nil)
-        self.dependency = 1
+        self.dependency = None
+
+    def info(self):
+        return "<{} {}>".format(self.__class__.__name__, self.func.__name__ + str(tuple(self.args)))
 
     def now(self):
         new_args = [arg.now() for arg in self.args]
         if new_args != self.last_args:
             self.last_args = new_args
-            self.last_data = self.func(*self.last_args)
+            self.last_data = self.p_func(*self.last_args)
         pat = self.calculate(self.last_data)
         return pat
 
     def new(self, other):
         # new = Pvar([other]) # TODO -- test this
         new = self.__class__(lambda x: x, other)
+        new.original_value = other
         new.dependency = self
         return new
 
-    def transform(self, func):
-        """ Returns a PvarGenerator based on a transformation on another, not just
-            a mathematical operation"""
-        new = self.new(0)
-        new.evaluate = func
-        return new
+    def set_eval(self, func):
+        self.evaluate = fetch(func)
+        self.func     = func
+        return
+
+    def __getattribute__(self, attr):
+        # If it's a method, only return the method if its new, transform, or a dunder
+        if attr in Pattern.get_methods():   
+            
+            if attr not in ("new", "now", "transform") and not attr.startswith("__"):
+
+                # return a function that transforms the patterns of the  root Pvar
+
+                def get_new_pvar_gen(*args, **kwargs):
+
+                    # If this is the root Pvar, change the values
+
+                    if self.dependency is None:
+
+                        # Create a new function that combines the original *plus* the method
+
+                        def new_func(*old_args, **old_kwargs):
+
+                            return getattr(self.p_func(*old_args, **old_kwargs), attr)(*args, **kwargs)
+
+                        return PvarGenerator(new_func, *self.args)
+
+                    else:
+
+                        # Get the "parent" Pvar and re-apply the connecting function
+
+                        new_pvar_gen = getattr(self.dependency, attr)(*args, **kwargs)
+
+                        return self.func(new_pvar_gen, self.original_value)
+
+                return get_new_pvar_gen
+                
+        return object.__getattribute__(self, attr)
 
 class PvarGeneratorEx(PvarGenerator):
     """ Un-Documented """

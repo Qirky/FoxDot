@@ -29,14 +29,14 @@ def CalculateDelaysFromDur(durations):
         It replicates two events.
     """
     # If it's a PvarGenerator, this needs more work
-    if isinstance(durations, Pattern.PvarGenerator):
-        durs = durations.transform(lambda a, b: CalculateDelaysFromDur(b.now())[0])
-        dels = durations.transform(lambda a, b: CalculateDelaysFromDur(b.now())[1]) # could be more efficient?
-        return durs, dels
+    #if isinstance(durations, Pattern.PvarGenerator):
+    #    durs = durations.transform(lambda a, b: CalculateDelaysFromDur(b.now())[0])
+    #    dels = durations.transform(lambda a, b: CalculateDelaysFromDur(b.now())[1]) # could be more efficient?
+    #    return durs, dels
     # If its a Pvar, create a new Pvar that uses this function as its transformation function
     if isinstance(durations, Pattern.Pvar):
-        durs = durations.transform(lambda a, b: CalculateDelaysFromDur(b)[0])
-        dels = durations.transform(lambda a, b: CalculateDelaysFromDur(b)[1])
+        durs = durations.transform(lambda a, b: CalculateDelaysFromDur(a)[0])
+        dels = durations.transform(lambda a, b: CalculateDelaysFromDur(a)[1])
         return durs, dels
     # Continue if not a pvargenerator
     durs, dels = Pattern(), Pattern()
