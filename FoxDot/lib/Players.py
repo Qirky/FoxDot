@@ -738,12 +738,12 @@ class Player(Repeatable):
             return True
         return False
 
-
     def rhythm(self):
         """ Returns the "now" value of the duration """
         rhythm = []
         for value in self.attr['dur']:
             if isinstance(value, TimeVar):
+            #if hasattr(value, "now"):
                 rhythm.append(value.now())
             else:
                 rhythm.append(value)
@@ -896,6 +896,22 @@ class Player(Repeatable):
         else:
             self.pan=0
             self.pshift=0
+        return self
+
+    def slider(self, start=0, on=1):
+        """ Creates a glissando effect between notes """
+        if on:
+            if start:
+                self.slide=[1,0]
+                self.slidefrom=[0,1]
+            else:
+                self.slide=[0,1]
+                self.slidefrom=[1,0]
+            self.slidedelay=0.75
+        else:
+            self.slide=0
+            self.slidefrom=0
+            self.slidedelay=0
         return self
 
     def reverse(self):
