@@ -35,6 +35,7 @@ SynthDefs = SynthDict()
 class SynthDefBaseClass(object):
 
     server = DefaultServer
+    bus_name = 'bus'
     var = ['osc', 'env']
     defaults = {}
     container = SynthDefs
@@ -70,6 +71,8 @@ class SynthDefBaseClass(object):
                             "fmod"      : 0, # could be put in an Effect?
                             "rate"      : 0,
                             "bus"       : 0 }
+        # The amp is multiplied by this before being sent to SC
+        self.balance = 1
 
         self.add_base_class_behaviour()
 
@@ -193,6 +196,10 @@ class SynthDefBaseClass(object):
         except:
             return False
 
+    def _load_synth(self):
+        self.write()
+        SynthDef.server.loadSynthDef(self.filename)
+
     def add(self):
         """ This is required to add the SynthDef to the SuperCollider Server """
 
@@ -202,13 +209,10 @@ class SynthDefBaseClass(object):
 
         try:
 
-            # Write file
-            self.write()
-
             self.synth_added = True
 
             # Load to server
-            SynthDef.server.loadSynthDef(self.filename)
+            self._load_synth()
 
             # Add to list
             self.container[self.name] = self
@@ -235,6 +239,9 @@ class SynthDefBaseClass(object):
             message += [key, value]
         self.server.sendNote(self.name, message)
         return
+
+    def preprocess_osc(self, osc_message):
+        osc_message['amp'] *= self.balance
 
 class SynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
@@ -298,3 +305,14 @@ class SynthDefProxy:
             return func
         else:
             return getattr(self, name)
+
+class CompiledSynthDef(SynthDefBaseClass):
+    def __init__(self, name, filename):
+        super(CompiledSynthDef, self).__init__(name)
+        self.filename = filename
+
+    def _load_synth(self):
+        SynthDef.server.loadCompiled(self.filename)
+
+    def __str__(self):
+        return repr(self)

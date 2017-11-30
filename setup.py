@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from distutils.core import setup   
+from distutils.core import setup
 
 setup(name='FoxDot',
       version='0.5.1',
@@ -12,6 +12,7 @@ setup(name='FoxDot',
                 'FoxDot.lib',
                 'FoxDot.lib.Code',
                 'FoxDot.lib.Custom',
+                'FoxDot.lib.Extensions',
                 'FoxDot.lib.Workspace',
                 'FoxDot.lib.Patterns',
                 'FoxDot.lib.SCLang',
@@ -29,6 +30,8 @@ setup(name='FoxDot',
                                  'osc/*.scd',
                                  'osc/sceffects/*.scd',
                                  'osc/scsyndef/*.scd',
-                                 'demo/*.py',],
+                                 'demo/*.py',
+                                 'lib/Extensions/*.json',
+                                 ],
                       'FoxDot.lib.Workspace': ['img/*', 'tmp/*'],
                       'FoxDot.lib.Settings' : ['conf.txt']})

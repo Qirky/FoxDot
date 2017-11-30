@@ -217,10 +217,12 @@ class SCLangServerManager(ServerManager):
                     new_message[key] = 0.0
 
         # Get next node ID
-        node, last_node = self.nextnodeID(), node                
-        
-        osc_packet = [synthdef.name, node, 1, group_id, 'bus', bus] + self.create_osc_msg(new_message)        
-        
+
+        node, last_node = self.nextnodeID(), node
+
+        osc_packet = [synthdef.name, node, 1, group_id, synthdef.bus_name, bus] \
+            + self.create_osc_msg(new_message)
+
         msg.append( osc_packet )
 
         return msg, node
@@ -340,6 +342,8 @@ class SCLangServerManager(ServerManager):
         this_bus  = self.nextbusID()
         this_node = self.nextnodeID()
 
+        synthdef.preprocess_osc(packet)
+
         # First node of the group (control rate)
 
         msg, this_node = self.get_init_node(this_node, this_bus, group_id, synthdef, packet)
@@ -427,6 +431,13 @@ class SCLangServerManager(ServerManager):
         msg.append(fn)
         self.sclang.send(msg)
         return
+
+    def loadCompiled(self, fn):
+        """ Sends a message to SuperCollider to load a compiled SynthDef file """
+        msg = OSCMessage()
+        msg.setAddress('/d_load')
+        msg.append(fn)
+        self.client.send(msg)
 
     def dumpOSC(self, value=1):
         """ Debug - Dumps OSC messages SCLang side """

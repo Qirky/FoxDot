@@ -23,6 +23,12 @@ def miditofreq(midinote):
 
 midi2cps = miditofreq # alias
 
+def _log2(num):
+    return math.log(num) / math.log(2)
+
+def freqtomidi(freq):
+    return 12 * _log2((freq / 440)) + 69
+
 def midi(scale, octave, degree, root=0, stepsPerOctave=12):
     """ Calculates a midinote from a scale, octave, degree, and root """
 

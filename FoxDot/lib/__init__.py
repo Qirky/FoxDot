@@ -32,7 +32,7 @@ from .Midi import *
 from .Settings import *
 from .SCLang._SynthDefs import *
 from .ServerManager import *
-from .SCLang import SynthDefs, Env, SynthDef
+from .SCLang import SynthDefs, Env, SynthDef, CompiledSynthDef
 from .Root import Root
 from .Scale import Scale
 from .Workspace import get_keywords
