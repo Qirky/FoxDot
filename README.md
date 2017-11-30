@@ -3,35 +3,15 @@ FoxDot - Live Coding with Python v0.5.0
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.5.0 fixes and updates
+### v0.5.1 fixes and updates
 
-- Pattern "zipping" behaviour changed. A `PGroup` within a sequence is extended when zipped with another instead of nesting it. e.g.
+- Improved behaviour of `TimeVar`, `Pvar`, and `PvarGenerator` classes when created via mathematical operators. 
+- SynthDefs can be read loaded into FoxDot from SuperCollider using the `FileSynthDef` and `CompiledSynthDef` classes (see `SynthDef.py`).
+- `DefaultServer` instance has a `forward` attribute that, when not `None`, sends any outgoing OSC message to.  Example:
 ```python
-# Old style
->>> P[(0,1),(2,3)].zip([(4,5)])
-P[P(0, 1, P(4, 5)), P(2, 3, P(4, 5))]
-# New style
->>> P[(0,1),(2,3)].zip([(4,5)])
-P[P(0, 1, 4, 5), P(2, 3, 4, 5)]
+# Sends any OSC message going to SuperCollider to the address
+DefaultServer.forward = OSCClient(("localhost", 57890))
 ```
-- Consequently, sample player strings can use the `<>` arrows to play multiple sequences together using one string.
-```python
-# This plays three patterns together
-d1 >> play("<x ><  o[ o]>< -(-=)>", sample=(0,1,2))
-```
-- To use a different sample value for each pattern use a group of values as in the example above. Each value in relates to each pattern e.g. the "x" used sample 0, the "o" pattern uses sample 1 and the "-" pattern uses sample 2. If you want to use multiple values just use a group within a group:
-```
-# Plays the snare drum in both channels at different rates
-d1 >> play("<x x><  o >", pan=(0, (-1,1)), rate=(1, (1,.9))
-```
-- Network synchronisation introduced! This is still quite a beta feature and feedback would be appreciated if you come across any issues. Here's how to do it:
- 
-To connect to another instance of FoxDot over the network you need one user to be the  master clock. The master clock user needs to go from the menu to "Language" then "Listen  for connections". This will start listening for connections from other FoxDot instances. It will print the IP address and port number to the console; give this information to your live coding partner. They need to run the following code using the IP address on the master clock machine:
-```python
-Clock.connect("<ip address>")
-```
-This will copy some data, e.g. tempo, from the master clock and also adjust for the differences in local machine time (if your clocks are out of sync). The latter will depend on the latency of the connection between your machines. If you are out of time slightly, set the `Clock.nudge` value to a small value (+-0.01) until the clocks are in sync. Now whenever you change the `Clock.bpm` value, the change will propagate to everyone on the next bar.  
-
  
 ---
 
