@@ -8,7 +8,6 @@
 DefaultServer.forward = OSCClient(("localhost", 57890))
 ```
 
-
 ### v0.5.0 fixes and updates
 
 - Pattern "zipping" behaviour changed. A `PGroup` within a sequence is extended when zipped with another instead of nesting it. e.g.
