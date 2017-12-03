@@ -32,6 +32,10 @@ FoxDot\lib\Code\main_lib.py
 FoxDot\lib\Custom\Fractal.py
 FoxDot\lib\Custom\__init__.py
 FoxDot\lib\Custom\webcam.py
+FoxDot\lib\Extensions\SonicPi.py
+FoxDot\lib\Extensions\__init__.py
+FoxDot\lib\Extensions\generate_sonic_pi.py
+FoxDot\lib\Extensions\sonicpi.json
 FoxDot\lib\Patterns\Generators.py
 FoxDot\lib\Patterns\Main.py
 FoxDot\lib\Patterns\Operations.py

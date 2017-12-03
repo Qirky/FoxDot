@@ -140,13 +140,14 @@ class In(Effect):
 
 class Out(Effect):
     def __init__(self):
+        self.max_duration = 8
         Effect.__init__(self, 'makeSound', 'makeSound')
         self.save()
     def __str__(self):
         s  = "SynthDef.new(\makeSound,\n"
         s += "{ arg bus, sus; var osc;\n"
         s += "	osc = In.ar(bus, 2);\n"
-        s += "  osc = EnvGen.ar(Env([1,1,0],[sus, 0.1])) * osc;\n"
+        s += "  osc = EnvGen.ar(Env([1,1,0],[sus * {}, 0.1]), doneAction: 14) * osc;\n".format(self.max_duration)
         s += "	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);\n"
         s += "	Out.ar(0, osc);\n"
         s += " }).add;\n"

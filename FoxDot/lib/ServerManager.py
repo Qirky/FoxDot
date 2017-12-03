@@ -310,7 +310,7 @@ class SCLangServerManager(ServerManager):
         
         msg = OSCMessage("/s_new")
         node, last_node = self.nextnodeID(), node
-        osc_packet = ['makeSound', node, 1, group_id, 'bus', bus, 'sus', float(packet["sus"] * 8)]
+        osc_packet = ['makeSound', node, 1, group_id, 'bus', bus, 'sus', float(packet["sus"])]
         msg.append( osc_packet )
 
         return msg, node
