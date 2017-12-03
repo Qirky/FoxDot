@@ -327,7 +327,7 @@ with SynthDef("star") as synth:
     freq = instance('freq')
     synth.amp  = (synth.amp * 2)+ 0.00001
     synth.freq = [synth.freq / 2, synth.freq / 2 + LFNoise2.ar(50).range(-2,2)]
-    synth.osc  = Saw.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,synth.sus))) * 0.3 + Saw.ar(freq+2, phase=VarSaw.ar(freq + 2, width=Line.ar(1,0.2,synth.sus))) * 0.3
+    synth.osc  = LFSaw.ar(freq * 1.002, iphase=VarSaw.ar(freq, width=Line.ar(1,0.2,synth.sus))) * 0.3 + LFSaw.ar(freq+2, iphase=VarSaw.ar(freq + 2, width=Line.ar(1,0.2,synth.sus))) * 0.3
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, synth.sus/6)
 star = synth
 

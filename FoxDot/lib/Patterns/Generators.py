@@ -38,6 +38,8 @@ class PRand(GeneratorPattern):
     def __init__(self, start, stop=None, **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
         # If we're given a list, choose from that list -- TODO always use a list and use range
+        self.args = (start, stop)
+        self.kwargs = kwargs
         if hasattr(start, "__iter__"):
             self.data = Pattern(start)
             try:
@@ -82,6 +84,7 @@ class PxRand(PRand):
 class PwRand(GeneratorPattern):
     def __init__(self, values, weights, **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
+        self.args = (values, weights)
         try:
             assert(all(type(x) == int for x in weights))
         except AssertionError:
@@ -100,6 +103,9 @@ class PwRand(GeneratorPattern):
 class PChain(GeneratorPattern):
     def __init__(self, mapping, **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
+        
+        self.args = (mapping,)
+
         self.last_value = 0
         self.mapping = {}
         i = 0
@@ -122,6 +128,9 @@ class PTree(GeneratorPattern):
     """
     def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x), **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
+        
+        self.args=(n, f, choose)
+
         self.f  = f
         self.choose = choose
         self.values = [n]
@@ -134,6 +143,8 @@ class PWalk(GeneratorPattern):
     def __init__(self, max=7, step=1, start=0, **kwargs):
 
         GeneratorPattern.__init__(self, **kwargs)
+
+        self.args = (max, step, start)
         
         self.max   = abs(max)
         self.min   = self.max * -1
@@ -164,6 +175,7 @@ class PWhite(GeneratorPattern):
     ''' Returns random floating point values between 'lo' and 'hi' '''
     def __init__(self, lo=0, hi=1, **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
+        self.args = (lo, hi)
         self.low = float(lo)
         self.high = float(hi)
         self.mid = (lo + hi) / 2.0

@@ -1223,6 +1223,7 @@ class workspace:
     def move_word_right(self, event=None):
         
         row, col   = index(self.text.index(INSERT))
+        searching = True
 
         if col == 0:
 
@@ -1234,12 +1235,9 @@ class workspace:
                 
                 searching = False
 
-        else:
-
-            col += 1
-            last_index = self.text.index(END)
-            chars      = "()[]{} \"'.,"
-            searching = True
+        col += 1
+        last_index = self.text.index(END)
+        chars      = "()[]{} \"'.,"
 
         while searching:
 

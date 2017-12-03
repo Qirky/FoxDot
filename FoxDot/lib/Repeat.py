@@ -88,7 +88,7 @@ class Repeatable(object):
 
             assert callable(method)
 
-        except:
+        except AttributeError:
 
             WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
 

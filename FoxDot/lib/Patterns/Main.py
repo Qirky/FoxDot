@@ -949,6 +949,9 @@ class GeneratorPattern(random.Random):
         if kwargs.get("seed", None) is not None:
             
             self.seed(kwargs["seed"])
+
+        self.args = tuple()
+        self.kwargs = kwargs
             
         self.mod = Pattern()
         self.mod_functions = []
@@ -1033,6 +1036,11 @@ class GeneratorPattern(random.Random):
             b = key.stop
             c = key.step if key.step else 1
             return Pattern([self[i] for i in range(a, b, c)])
+
+    def dup(self, n=2):
+        """ Returns a PGroup with n lots of the Generator """
+        return PGroup([self.__class__(*self.args, **self.kwargs) for i in range(n)])
+
 
 class PatternContainer(metaPattern):
     def getitem(self, key, *args):

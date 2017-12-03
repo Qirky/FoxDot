@@ -1,0 +1,4 @@
+d1 >> play("<V ><[nn]>", rate=(1, PRand(1,5).dup()), sample=(1,PRand(5).dup()))
+d2 >> play("<  u ><  f ><  H >", sample=(1,2), delay=(0), pan=(-1,1))
+
+p1 >> pads(dur=2, fmod=1, amp=3/4, oct=6) + (0,2,4,6)
