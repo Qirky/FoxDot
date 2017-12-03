@@ -26,7 +26,9 @@ class SCLangClient(OSCClient):
             print(e)
 
 class OSCConnect(SCLangClient):
-    pass
+    def __init__(self, address):
+        SCLangClient.__init__(self)
+        self.connect(address)
 
 # TODO -- Create an abstract base class that could be sub-classed for users who want to send their OSC messages elsewhere
 
