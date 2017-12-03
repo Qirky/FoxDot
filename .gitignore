@@ -13,6 +13,8 @@ FoxDot/lib/Settings/conf.txt
 FoxDot/lib/Workspace/tmp/tempfile.txt
 changed_files.txt
 
+*.txt
+
 # To-do list
 TODO.txt
 
@@ -71,4 +73,3 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-FoxDot/lib/Workspace/tmp/tempfile.txt
