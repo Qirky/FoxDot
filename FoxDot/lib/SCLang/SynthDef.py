@@ -252,7 +252,7 @@ class SynthDef(SynthDefBaseClass):
         """ Defines the initial setup for every SynthDef """
         SynthDefBaseClass.add_base_class_behaviour(self)
         self.base.append("freq = In.kr(bus, 1);")
-        self.base.append("freq = freq + fmod;")
+        self.base.append("freq = [freq, freq+fmod];")
         return
 
 class SampleSynthDef(SynthDefBaseClass):

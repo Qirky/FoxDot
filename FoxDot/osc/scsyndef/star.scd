@@ -2,7 +2,7 @@ SynthDef.new(\star,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
-freq = freq + fmod;
+freq = [freq, freq+fmod];
 amp=((amp * 2) + 1e-05);
 freq=[(freq / 2), ((freq / 2) + LFNoise2.ar(50).range(-2, 2))];
 osc=((Saw.ar((freq * 1.002), phase: VarSaw.ar(freq, width: Line.ar(1, 0.2, sus))) * 0.3) + (Saw.ar((freq + 2), phase: VarSaw.ar((freq + 2), width: Line.ar(1, 0.2, sus))) * 0.3));

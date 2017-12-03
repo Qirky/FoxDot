@@ -2,7 +2,7 @@ SynthDef.new(\klank,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
-freq = freq + fmod;
+freq = [freq, freq+fmod];
 sus=(sus * 1.5);
 osc=Klank.ar(`[[1, 2, 3, 4], [1, 1, 1, 1], [2, 2, 2, 2]], ClipNoise.ar(0.0005).dup, freq);
 osc=Decimator.ar(osc, bits: (rate - 1));

@@ -2,7 +2,7 @@ SynthDef.new(\donk,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
-freq = freq + fmod;
+freq = [freq, freq+fmod];
 freq=(freq / 2);
 amp=(amp / 1.25);
 osc=Ringz.ar((Impulse.ar(0, phase: rate) / (rate + 1)), [freq, (freq + 2)], sus, amp);

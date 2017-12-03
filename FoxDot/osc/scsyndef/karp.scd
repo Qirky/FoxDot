@@ -2,7 +2,7 @@ SynthDef.new(\karp,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
-freq = freq + fmod;
+freq = [freq, freq+fmod];
 amp=(amp * 0.75);
 osc=LFNoise0.ar((400 + (400 * rate)), amp);
 osc=(osc * XLine.ar(1, 1e-06, (sus * 0.1)));

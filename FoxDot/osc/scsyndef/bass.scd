@@ -2,7 +2,7 @@ SynthDef.new(\bass,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=8.5, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
-freq = freq + fmod;
+freq = [freq, freq+fmod];
 freq=(freq / 4);
 osc=((LFTri.ar(freq, mul: amp) + VarSaw.ar(freq, width: (rate / 10), mul: amp)) + SinOscFB.ar(freq, mul: (amp / 2)));
 env=EnvGen.ar(Env.perc(attackTime: 0.02,releaseTime: sus,level: amp,curve: 'lin'), doneAction: 0);

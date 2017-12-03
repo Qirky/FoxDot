@@ -2,7 +2,7 @@ SynthDef.new(\glass,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
-freq = freq + fmod;
+freq = [freq, freq+fmod];
 sus=(sus * 1.5);
 amp=(amp * 1.5);
 freq=[freq, (freq * (1 + (0.005 * rate)))];
