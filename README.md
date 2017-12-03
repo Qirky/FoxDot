@@ -10,7 +10,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - `DefaultServer` instance has a `forward` attribute that, when not `None`, sends any outgoing OSC message to.  Example:
 ```python
 # Sends any OSC message going to SuperCollider to the address
-DefaultServer.forward = OSCClient(("localhost", 57890))
+DefaultServer.forward = OSCConnect(("localhost", 57890))
 ```
  
 ---
