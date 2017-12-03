@@ -172,6 +172,11 @@ class workspace:
         self.text.bind("<{}-Return>".format(ctrl),          self.exec_block)
         self.text.bind("<{}-Return>".format(alt),           self.exec_line)
 
+        # Directional movement
+
+        self.text.bind("<{}-Left>".format(ctrl),            self.move_word_left)
+        self.text.bind("<{}-Right>".format(ctrl),           self.move_word_right)
+
         self.text.bind("<Alt_L>",                           lambda event: "break")
 
         self.text.bind("<{}-a>".format(ctrl),               self.selectall)
@@ -1214,6 +1219,111 @@ class workspace:
                 break
 
         self.last_word = string
+
+    def move_word_right(self, event=None):
+        
+        row, col   = index(self.text.index(INSERT))
+
+        if col == 0:
+
+            _,  line_length = index(self.text.index("{}.end".format(row)))
+            
+            if line_length == 0:
+
+                new_row, new_col = row + 1, 0
+                
+                searching = False
+
+        else:
+
+            col += 1
+            last_index = self.text.index(END)
+            chars      = "()[]{} \"'.,"
+            searching = True
+
+        while searching:
+
+            _, line_length = index(self.text.index("{}.end".format(row)))
+
+            if line_length > 0:
+            
+                for i in range(col, line_length - 1):
+                
+                    if self.text.get(index(row, i)) in chars:
+                        
+                        searching = False
+                
+                    elif index(row, i) == last_index:
+                        
+                        searching = False
+                
+                    if searching is False:
+                        
+                        new_row, new_col = row, i
+                        
+                        self.text.mark_set(INSERT, index(new_row, new_col))
+                        
+                        return "break"
+
+                row += 1
+                col = 0
+
+            else:
+
+                searching = False
+                new_row, new_col = row, 0    
+
+        self.text.mark_set(INSERT, index(new_row, new_col))
+        
+        return "break"
+
+    def move_word_left(self, event=None):
+        row, col   = index(self.text.index(INSERT))
+        col -= 1
+
+        last_index = self.text.index(END)
+        chars      = "()[]{} \"'.,"
+        searching = True
+
+        _, line_length = index(self.text.index("{}.end".format(row)))
+
+        if line_length == 0:
+
+            searching = False
+            new_row, new_col = index(self.text.index("{}.end".format(row - 1)))
+
+        while searching:
+
+            if line_length > 0:
+            
+                for i in range(col, 0, -1):
+                
+                    if self.text.get(index(row, i)) in chars:
+                        
+                        searching = False
+                
+                    elif index(row, i) == last_index:
+                        
+                        searching = False
+                
+                    if searching is False:
+                        
+                        new_row, new_col = row, i
+                        
+                        self.text.mark_set(INSERT, index(new_row, new_col))
+                        
+                        return "break"
+
+                _, line_length = row ,col = index(self.text.index("{}.end".format(row - 1)))
+
+            else:
+
+                searching = False
+                new_row, new_col = row, 0    
+
+        self.text.mark_set(INSERT, index(new_row, new_col))
+        
+        return "break"
 
     """
         Generic functions
