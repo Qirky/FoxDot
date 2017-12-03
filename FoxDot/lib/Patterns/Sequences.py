@@ -66,14 +66,18 @@ class __pattern__(object):
             return PGroupStar(other)
 
     def __pow__(self, other):
-        """ Returns scrambled version """
+        """ P**(x1, x2,...,xn) - Returns scrambled version """
         return PGroupPow(other)
 
     def __xor__(self, other):
+        """ P^(x1, x2,..., dur) -  Returns a PGroup that delays each value by dur * n """
         return PGroupXor(other[:-1]).set_delay(other[-1])
 
     def __add__(self, other):
         return PGroupPlus(other)
+
+    def __radd__(self, other):
+        return self + other
 
     def __truediv__(self, other):
         return PGroupDiv(other)
