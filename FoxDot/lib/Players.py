@@ -452,6 +452,12 @@ class Player(Repeatable):
                 
                 self.attr[name] = value
 
+                # Remove from the stored pattern dict
+
+                if name in self.previous_patterns:
+
+                    del self.previous_patterns[name]
+
                 # keep track of what values we change with +-
 
                 if (self.synthdef == SamplePlayer and name == "sample") or (self.synthdef != SamplePlayer and name == "degree"):
@@ -475,7 +481,10 @@ class Player(Repeatable):
         return
 
     def __getattr__(self, name):
-        return self.__dict__[self.alias.get(name, name)]
+        try:       
+            return self.__dict__[self.alias.get(name, name)]
+        except KeyError:
+            raise AttributeError
 
     def __getitem__(self, name):
         if self.__init:

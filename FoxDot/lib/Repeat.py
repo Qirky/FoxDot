@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from .Code import WarningMsg
-from .Patterns import asStream
+from .Patterns import Pattern, asStream
 from .Utils import modi
 
 class Repeatable(object):
@@ -9,6 +9,7 @@ class Repeatable(object):
     method_synonyms      = {}
     def __init__(self):
         self.repeat_events        = {}
+        self.previous_patterns    = {}
 
     def after(self, n, cmd, *args, **kwargs):
         """ Schedule self.cmd(args, kwargs) in 'n' beats time
@@ -53,6 +54,10 @@ class Repeatable(object):
             # Call the stutter method on the 5th beat of every 8 beat cycle
 
             p1.every(5, 'stutter', 4, cycle=8)
+
+            # If the method is not valid but *is* a valid Pattern method, that is called and reverted
+
+            p1.every(4, 'palindrome')
             
             ```
 
@@ -76,7 +81,45 @@ class Repeatable(object):
 
                 method_name = attr[0]
 
-                method = getattr(self, method_name)
+                if hasattr(self, method_name):
+
+                    method = getattr(self, method_name)
+
+                elif hasattr(Pattern, method_name):
+
+                    call_pattern_method = getattr(Pattern, method_name)
+
+                    def method(*args, **kwargs):
+
+                        # If there are no "old" patterns held in memory, use the pattern method and store
+
+                        if len(self.previous_patterns) == 0:
+
+                            for attr in self.attr:
+
+                                self.previous_patterns[attr] = self.attr[attr]
+
+                                self.attr[attr] = call_pattern_method(self.attr[attr], *args, **kwargs)
+
+                        # If there *are* old patterns, re-use them
+
+                        else:
+
+                            for attr in self.previous_patterns:
+
+                                self.attr[attr] = self.previous_patterns[attr]
+
+                            # Clear the cache
+
+                            self.previous_patterns = {}
+
+                        return
+
+                else:
+
+                    WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
+
+                    return self
 
             elif len(attr) == 2:
 
