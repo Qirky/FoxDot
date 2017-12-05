@@ -1,22 +1,34 @@
 """ Handles OSC messages being sent to SuperCollider.
 """
-
 from __future__ import absolute_import, division, print_function
 
-import os
-import subprocess
+import Queue
+import json
+import socket
 import sys
+import threading
+import time
+from collections import namedtuple
+from threading import Thread
 
-from time import sleep
-
-from .Settings import *
 from .Code import WarningMsg
+from .Settings import *
+
 
 if sys.version_info[0] > 2:
     from .OSC3 import *
 else:
     from .OSC import *
     
+
+# Keep in sync with Info.scd
+ServerInfo = namedtuple(
+    'ServerInfo',
+    ('sample_rate', 'actual_sample_rate', 'num_synths', 'num_groups',
+     'num_audio_bus_channels', 'num_control_bus_channels',
+     'num_input_bus_channels', 'num_output_bus_channels', 'num_buffers',
+     'max_nodes', 'max_synth_defs'))
+
 
 class SCLangClient(OSCClient):
     def send(*args, **kwargs):
@@ -25,10 +37,81 @@ class SCLangClient(OSCClient):
         except Exception as e:
             print(e)
 
+
 class OSCConnect(SCLangClient):
     def __init__(self, address):
         SCLangClient.__init__(self)
         self.connect(address)
+
+
+class RequestTimeout(Exception):
+    """ Raised if expecting a response from the server but received none """
+
+
+class SCLangBidirectionalClient(OSCServer):
+    """
+    This is a combination client/server
+
+    The UDP server is necessary for receiving responses from the SCLang server
+    when we query it with requests.
+
+    Note that this is not thread-safe, as the receive() method can discard messages
+    """
+    def __init__(self, server_address=('localhost', 0), client=None, return_port=0):
+        OSCServer.__init__(self, server_address, client, return_port)
+        self._server_thread = None
+        self.addDefaultHandlers()
+        self.addMsgHandler('default', self._handle_message)
+        self._response_queue = Queue.Queue()
+
+    def connect(self, addr):
+        """ Connect to an address and start the server thread """
+        self.client.connect(addr)
+        self.start()
+
+    def start(self):
+        """ Start the server thread. """
+        if self._server_thread is not None:
+            return
+        self._server_thread = threading.Thread(target=self.serve_forever)
+        self._server_thread.setDaemon(True)
+        self._server_thread.start()
+
+    def stop(self):
+        """ Stop the server thread and close the socket. """
+        if self._server_thread is None:
+            return
+        self.running = False
+        self._server_thread.join()
+        self.server_close()
+
+    def _handle_message(self, addr, tags, data, client_address):
+        self._response_queue.put((addr, data))
+
+    def send(self, *args, **kwargs):
+        try:
+            self.client.send(*args, **kwargs)
+        except Exception as e:
+            print(e)
+
+    def receive(self, pattern, timeout=2):
+        """
+        Retrieve the first message matching the pattern
+
+        All messages received that do not match will be discarded
+        """
+        expr = getRegEx(pattern)
+        now = start = time.time()
+        while now - start < timeout:
+            try:
+                addr, data = self._response_queue.get(True, start + timeout - now)
+            except Queue.Empty:
+                raise RequestTimeout()
+            match = expr.match(addr)
+            if match and (match.end() == len(addr)):
+                return data
+            now = time.time()
+
 
 # TODO -- Create an abstract base class that could be sub-classed for users who want to send their OSC messages elsewhere
 
@@ -69,18 +152,32 @@ class SCLangServerManager(ServerManager):
         self.client = SCLangClient()
         self.client.connect( (self.addr, self.port) )
 
-        # OSC Connection for custom OSCFunc in SuperCollider
-        self.sclang = SCLangClient()
-        self.sclang.connect( (self.addr, self.SCLang_port) )
-
         # Assign a valid OSC Client
         self.forward = None
 
         self.node = 1000
-        self.bus  = 4
+        self.num_input_busses = 2
+        self.num_output_busses = 2
+        self.bus = self.num_input_busses + self.num_output_busses
+        self.max_busses = 100
 
         self.fx_setup_done = False
         self.fx_names = {}
+
+        # OSC Connection for custom OSCFunc in SuperCollider
+        self.sclang = SCLangBidirectionalClient()
+        self.sclang.connect( (self.addr, self.SCLang_port) )
+        self.loadSynthDef(FOXDOT_INFO_FILE)
+        try:
+            info = self.getInfo()
+        except RequestTimeout:
+            # It's not terrible if we couldn't fetch the info, but we should log it.
+            WarningMsg("Could not fetch info from SCLang server. Using defaults...")
+        else:
+            self.num_input_busses = info.num_input_bus_channels
+            self.num_output_busses = info.num_output_bus_channels
+            self.max_busses = info.num_audio_bus_channels
+            self.bus = self.num_input_busses + self.num_output_busses
 
         # Clear SuperCollider nodes if any left over from other session etc
 
@@ -108,9 +205,10 @@ class SCLangServerManager(ServerManager):
 
     def nextbusID(self):
         """ Gets the next SuperCollider bus to use """
-        if self.bus > 100:
-            self.bus = 4
-        self.bus += 1
+        self.bus += 2
+        # Make sure we still have 2 audio channels available
+        if self.bus + 1 >= self.max_busses:
+            self.bus = self.num_input_busses + self.num_output_busses
         return self.bus
 
     def sendOSC(self, packet):
@@ -448,6 +546,20 @@ class SCLangServerManager(ServerManager):
         self.client.send(msg)
         return
 
+    def dumpTree(self, group_id=0, flag=0):
+        """ Server will print the node tree """
+        msg = OSCMessage("/g_dumpTree")
+        msg.append([group_id, flag])
+        self.client.send(msg)
+
+    def getInfo(self):
+        """ Fetch info about the SCLang server """
+        msg = OSCMessage()
+        msg.setAddress('/foxdot/info')
+        self.sclang.send(msg)
+        info = ServerInfo(*self.sclang.receive('/foxdot/info'))
+        return info
+
     def start(self):
         """ Boots SuperCollider using `subprocess`"""
 
@@ -508,10 +620,6 @@ except ImportError:
 
     import SocketServer as socketserver
 
-import socket
-import json
-import time
-from threading import Thread
 
 
 class Message:
