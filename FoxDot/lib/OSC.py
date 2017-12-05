@@ -902,7 +902,7 @@ def decodeOSC(data):
 				decoded.append(value)
 		else:
 			raise OSCError("OSCMessage's typetag-string lacks the magic ','")
-
+	
 	return decoded
 
 ######

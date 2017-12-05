@@ -807,7 +807,8 @@ def _readString(data):
 	"""Reads the next (null-terminated) block of data
 	"""
 	#length   = string.find(data,"\0")
-	length = str(data).find("\0")
+	#length = str(data).find("\x00")
+	length = data.index(b"\x00")
 	nextData = int(math.ceil((length+1) / 4.0) * 4)
 	return (data[0:length], data[nextData:])
 
@@ -891,11 +892,11 @@ def decodeOSC(data):
 	table = {"i":_readInt, "f":_readFloat, "s":_readString, "b":_readBlob, "d":_readDouble, "t":_readTimeTag}
 	decoded = []
 	address,  rest = _readString(data)
-	if address.startswith(","):
+	if address.startswith(b","): # .encode("utf-8")):
 		typetags = address
-		address = ""
+		address = b""
 	else:
-		typetags = ""
+		typetags = b""
 
 	if address == "#bundle":
 		time, rest = _readTimeTag(rest)
@@ -911,13 +912,12 @@ def decodeOSC(data):
 			typetags, rest = _readString(rest)
 		decoded.append(address)
 		decoded.append(typetags)
-		if typetags.startswith(","):
-			for tag in typetags[1:]:
+		if typetags.startswith(b","): #.encode("utf-8")):
+			for tag in typetags.decode()[1:]:
 				value, rest = table[tag](rest)
 				decoded.append(value)
 		else:
 			raise OSCError("OSCMessage's typetag-string lacks the magic ','")
-
 	return decoded
 
 ######
@@ -1323,6 +1323,8 @@ def getRegEx(pattern):
 	"""Compiles and returns a 'regular expression' object for the given address-pattern.
 	"""
 	# Translate OSC-address syntax to python 're' syntax
+	if type(pattern) is bytes:
+		pattern = pattern.decode()
 	pattern = pattern.replace(".", r"\.")		# first, escape all '.'s in the pattern.
 	pattern = pattern.replace("(", r"\(")		# escape all '('s.
 	pattern = pattern.replace(")", r"\)")		# escape all ')'s.
@@ -1790,6 +1792,7 @@ class OSCRequestHandler(DatagramRequestHandler):
 
 	def _unbundle(self, decoded):
 		"""Recursive bundle-unpacking function"""
+		
 		if decoded[0] != "#bundle":
 			self.replies += self.server.dispatchMessage(decoded[0], decoded[1][1:], decoded[2:], self.client_address)
 			return

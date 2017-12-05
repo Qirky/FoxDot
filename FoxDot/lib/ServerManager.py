@@ -1,8 +1,12 @@
 """ Handles OSC messages being sent to SuperCollider.
 """
 from __future__ import absolute_import, division, print_function
+import sys
 
-import Queue
+if sys.version_info[0] > 2:
+    import queue
+else:
+    import Queue as queue
 import json
 import socket
 import sys
@@ -62,7 +66,7 @@ class SCLangBidirectionalClient(OSCServer):
         self._server_thread = None
         self.addDefaultHandlers()
         self.addMsgHandler('default', self._handle_message)
-        self._response_queue = Queue.Queue()
+        self._response_queue = queue.Queue()
 
     def connect(self, addr):
         """ Connect to an address and start the server thread """
@@ -105,13 +109,14 @@ class SCLangBidirectionalClient(OSCServer):
         while now - start < timeout:
             try:
                 addr, data = self._response_queue.get(True, start + timeout - now)
-            except Queue.Empty:
+            except queue.Empty:
                 raise RequestTimeout()
+            if type(addr) is bytes:
+                addr = addr.decode()
             match = expr.match(addr)
             if match and (match.end() == len(addr)):
                 return data
             now = time.time()
-
 
 # TODO -- Create an abstract base class that could be sub-classed for users who want to send their OSC messages elsewhere
 
