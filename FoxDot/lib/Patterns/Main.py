@@ -1022,7 +1022,11 @@ class GeneratorPattern(random.Random):
     def __rdiv__(self, other):
         return self.new(other, rDiv)
     def __rtruediv__(self, other):
-        return self.new(other, rDiv)        
+        return self.new(other, rDiv)
+    def __mod__(self, other):
+        return self.new(other,  Mod)
+    def __rmod__(self, other):
+        return self.new(other, rMod)
     # Container methods
     def __iter__(self):
         for i in range(self.MAX_SIZE):

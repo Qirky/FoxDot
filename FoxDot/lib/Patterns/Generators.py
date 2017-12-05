@@ -188,6 +188,11 @@ class PSquare(GeneratorPattern):
     def func(self, index):
         return index * index
 
+class PIndex(GeneratorPattern):
+    ''' Returns the index being accessed '''
+    def func(self, index):
+        return index
+
 
 class PFibMod(GeneratorPattern):
     """ Returns the fibonacci sequence -- maybe a bad idea"""
