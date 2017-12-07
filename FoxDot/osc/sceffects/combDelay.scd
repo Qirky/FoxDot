@@ -1,5 +1,5 @@
 SynthDef.new(\combDelay,
-{|bus, decay, sus, echo|
+{|bus, echo, sus, decay|
 var osc;
 osc = In.ar(bus, 2);
 osc = osc + CombL.ar(osc, delaytime: echo * sus * 2, maxdelaytime: 2, decaytime: decay);
