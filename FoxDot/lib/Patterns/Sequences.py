@@ -245,31 +245,28 @@ def PEuclid2(n, k, lo, hi):
         '''
     return Pattern( EuclidsAlgorithm(n, k, lo, hi) )
 
+
+def PBeat(string, start=0, dur=0.5):
+    """ Returns a Pattern of durations based on an input string where
+        non-whitespace denote a pulse e.g.
+        ```
+        >>> PTab("x xxx x")
+        P[1, 0.5, 0.5, 1, 0.5]
+    """
+    data = [int(char != " ") for char in list(string)]
+    pattern = Pattern(PulsesToDurations( data ))
+    if start != 0:
+        pattern = pattern.rotate(int(start))
+    return pattern * dur
+
 @loop_pattern_func
 def PDur(n, k, start=0, dur=0.25):
     """ Returns the *actual* durations based on Euclidean rhythms (see PEuclid) where dur
         is the length of each step.
         e.g. `PDur(3, 8)` will return `P[0.75, 0.75, 0.5]` """
-
-    data = EuclidsAlgorithm(n, k)
-
-    count, seq = 1, []
-
-    for item in data[1:]:
-        if item == 1:
-            seq.append(count)
-            count = 1
-        else:
-            count += 1
-
-    seq.append(count)
-
-    pattern = Pattern(seq)
-
+    pattern = Pattern(PulsesToDurations( EuclidsAlgorithm(n, k) ))
     if start != 0:
-
         pattern = pattern.rotate(int(start))
-
     return pattern * dur
 
 @loop_pattern_func # forces it into a stream instead of Group
