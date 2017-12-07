@@ -326,9 +326,9 @@ sitar.add()
 with SynthDef("star") as synth:
     freq = instance('freq')
     synth.amp  = (synth.amp * 2)+ 0.00001
-    synth.freq = [synth.freq / 2, synth.freq / 2 + LFNoise2.ar(50).range(-2,2)]
-    synth.osc  = LFSaw.ar(freq * 1.002, iphase=VarSaw.ar(freq, width=Line.ar(1,0.2,synth.sus))) * 0.3 + LFSaw.ar(freq+2, iphase=VarSaw.ar(freq + 2, width=Line.ar(1,0.2,synth.sus))) * 0.3
-    synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, 0.5/6)
+    synth.freq = synth.freq / 2
+    synth.osc  = LFSaw.ar(freq * 1.002, iphase=VarSaw.kr(freq, width=Line.kr(1,0.2,synth.sus))) * 0.3 + LFSaw.ar(freq  + LFNoise2.ar(50).range(-2,2) + 2, iphase=VarSaw.kr(freq + 2, width=Line.kr(1,0.2,synth.sus))) * 0.3
+    synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, 0.07)
 star = synth
 
 if SC3_PLUGINS:
