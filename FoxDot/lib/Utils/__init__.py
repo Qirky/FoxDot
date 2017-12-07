@@ -68,6 +68,28 @@ def EuclidsAlgorithm(n, k, lo=0, hi=1):
     return [x for y in data for x in y]
 
 
+def PulsesToDurations(data):
+    """ Returns a list of durations based on pulses (1s) and blanks (0s).
+        Data should be a list of [1,0] where 1 is a pulse. """
+    
+    count, seq = 1, []
+
+    for item in data[1:]:
+
+        if item == 1:
+
+            seq.append(count)
+            count = 1
+
+        else:
+
+            count += 1
+
+    seq.append(count)
+
+    return seq
+
+
 def modi(array, i, debug=0):
     """ Returns the modulo index i.e. modi([0,1,2],4) will return 1 """
     try:
