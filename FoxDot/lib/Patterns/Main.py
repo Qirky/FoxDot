@@ -320,15 +320,58 @@ class metaPattern(object):
         return self.__class__([int(value == modi(asStream(other), i)) for i, value in enumerate(self)])
     def ne(self, other):
         return self.__class__([int(value != modi(asStream(other), i)) for i, value in enumerate(self)])
+    # def gt(self, other):
+    #     return self.__class__([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
+    # def lt(self, other):
+    #     return self.__class__([int(value < modi(asStream(other), i)) for i, value in enumerate(self)])
+    # def ge(self, other):
+    #     return self.__class__([int(value >= modi(asStream(other), i)) for i, value in enumerate(self)])
+    # def le(self, other):
+    #     return self.__class__([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
     def __gt__(self, other):
-        return self.__class__([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
-    def __ge__(self, other):
-        return self.__class__([int(value >= modi(asStream(other), i)) for i, value in enumerate(self)])
-    def __lt__(self, other):
-        return self.__class__([int(value < modi(asStream(other), i)) for i, value in enumerate(self)])
-    def __le__(self, other):
-        return self.__class__([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
+        #return self.__class__([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
+        values = []
+        other = asStream(other)
+        for i, value in enumerate(self): # possibly LCM in future
+            value = value > other[i]
+            if not isinstance(value, PGroup):
+                value = int(value)
+            values.append(value)
+        return self.__class__(values)
 
+    def __ge__(self, other):
+        #return self.__class__([int(value >= modi(asStream(other), i)) for i, value in enumerate(self)])
+        values = []
+        other = asStream(other)
+        for i, value in enumerate(self): # possibly LCM in future
+            value = value >= other[i]
+            if not isinstance(value, PGroup):
+                value = int(value)
+            values.append(value)
+        return self.__class__(values)
+
+    def __lt__(self, other):
+        #return self.__class__([int(value < modi(asStream(other), i)) for i, value in enumerate(self)])
+        values = []
+        other = asStream(other)
+        for i, value in enumerate(self): # possibly LCM in future
+            value = value < other[i]
+            if not isinstance(value, PGroup):
+                value = int(value)
+            values.append(value)
+        return self.__class__(values)
+
+    def __le__(self, other):
+        #return self.__class__([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
+        values = []
+        other = asStream(other)
+        for i, value in enumerate(self): # possibly LCM in future
+            value = value <= other[i]
+            if not isinstance(value, PGroup):
+                value = int(value)
+            values.append(value)
+        return self.__class__(values)
+        
     # Methods that return augmented versions of original
 
     def shuffle(self, n=1):
@@ -926,6 +969,87 @@ class PGroup(metaPattern):
     def get_name(self):
         return self.__class__.__name__
 
+    def ne(self, other):
+        """ Not equals operator """
+        values = []
+        other  = PatternFormat(other)
+        if isinstance(other, Pattern):
+            return other.ne(self)
+        for i, item in enumerate(self): # possibly LCM
+            item = item != modi(other,i)
+            if not isinstance(item, metaPattern):
+                item = int(item)
+            values.append(item)
+        return self.__class__(values)
+
+    def __ne__(self,  other):
+        return self.ne(other)
+
+    def eq(self, other):
+        """ equals operator """
+        values = []
+        other  = PatternFormat(other) # bad function  name
+        if isinstance(other, Pattern):
+            return other.eq(self)
+        for i, item in enumerate(self): # possibly LCM
+            item = item == modi(other,i)
+            if not isinstance(item, metaPattern):
+                item = int(item)
+            values.append(item)
+        return self.__class__(values)
+
+    def __eq__(self, other):
+        return self.eq(other)
+
+    def __gt__(self, other):
+        values = []
+        other  = PatternFormat(other)
+        if isinstance(other, Pattern):
+            return other < self
+        for i, item in enumerate(self): # possibly LCM
+            item = item > modi(other,i)
+            if not isinstance(item, metaPattern):
+                item = int(item)
+            values.append(item)
+        return self.__class__(values)
+
+    def __lt__(self, other):
+        values = []
+        other  = PatternFormat(other)
+        if isinstance(other, Pattern):
+            return other > self
+        for i, item in enumerate(self): # possibly LCM
+            item = item < modi(other,i)
+            if not isinstance(item, metaPattern):
+                item = int(item)
+            values.append(item)
+        return self.__class__(values)
+
+    def __ge__(self, other):
+        values = []
+        other  = PatternFormat(other)
+        if isinstance(other, Pattern):
+            return other <= self
+        for i, item in enumerate(self): # possibly LCM
+            item = item >= modi(other,i)
+            if not isinstance(item, metaPattern):
+                item = int(item)
+            values.append(item)
+        return self.__class__(values)
+
+    def __le__(self, other):
+        values = []
+        other  = PatternFormat(other)
+        if isinstance(other, Pattern):
+            return other >= self
+        for i, item in enumerate(self): # possibly LCM
+            item = item <= modi(other,i)
+            if not isinstance(item, metaPattern):
+                item = int(item)
+            values.append(item)
+        return self.__class__(values)
+
+
 import random
 
 class GeneratorPattern(random.Random):
@@ -1100,6 +1224,15 @@ def Convert(*args):
         else:
             PatternTypes.append(Pattern(val))
     return PatternTypes if len(PatternTypes) > 0 else PatternTypes[0]
+
+def asPattern(item):
+    if isinstance(item,  metaPattern):
+        return item
+    if isinstance(item, list):
+        return Pattern(item)
+    if isinstance(item, tuple):
+        return PGroup(item)
+    return Pattern(item)
 
 def pattern_depth(pat):
     """ Returns the level of nested arrays """	
