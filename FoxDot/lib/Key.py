@@ -19,11 +19,21 @@ class NumberKey(object):
     @staticmethod
     def calculate(x, y):
         return x
+
+    @staticmethod
+    def convert_to_pattern(value):
+        if isinstance(value,  list):
+            value = Pattern(value)
+        elif isinstance(value, tuple):
+            value = PGroup(value)
+        elif not isinstance(value, metaPattern):
+            value = Pattern(value)
+        return value
     
     def __add__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__radd__(self)
         new = self.child(other)
@@ -33,7 +43,7 @@ class NumberKey(object):
     def __radd__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__add__(self)
         new = self.child(other)
@@ -43,7 +53,7 @@ class NumberKey(object):
     def __sub__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rsub__(self)
         new = self.child(other)
@@ -53,7 +63,7 @@ class NumberKey(object):
     def __rsub__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__sub__(self)
         new = self.child(other)
@@ -63,7 +73,7 @@ class NumberKey(object):
     def __mul__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rmul__(self)
         new = self.child(other)
@@ -73,7 +83,7 @@ class NumberKey(object):
     def __rmul__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__mul__(self)
         new = self.child(other)
@@ -81,6 +91,8 @@ class NumberKey(object):
         return new
     
     def __truediv__(self, other):
+        if isinstance(other, (list, tuple)):
+            other = self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rdiv__(self)
         new = self.child(other)
@@ -90,7 +102,7 @@ class NumberKey(object):
     def __rtruediv__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__div__(self)
         new = self.child(other)
@@ -98,6 +110,8 @@ class NumberKey(object):
         return new
 
     def __floordiv__(self, other):
+        if isinstance(other, (list, tuple)):
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rdiv__(self)
         new = self.child(other)
@@ -107,7 +121,7 @@ class NumberKey(object):
     def __rfloordiv__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__div__(self)
         new = self.child(other)
@@ -117,7 +131,7 @@ class NumberKey(object):
     def __mod__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rmod__(self)
         new = self.child(other)
@@ -127,7 +141,7 @@ class NumberKey(object):
     def __rmod__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__mod__(self)
         new = self.child(other)
@@ -137,7 +151,7 @@ class NumberKey(object):
     def __pow__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rpow__(self)
         new = self.child(other)
@@ -147,7 +161,7 @@ class NumberKey(object):
     def __rpow__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__pow__(self)
         new = self.child(other)
@@ -157,7 +171,7 @@ class NumberKey(object):
     def __xor__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rxor__(self)
         new = self.child(other)
@@ -167,7 +181,7 @@ class NumberKey(object):
     def __rxor__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__xor__(self)
         new = self.child(other)
@@ -177,7 +191,7 @@ class NumberKey(object):
     def __truediv__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__rtruediv__(self)
         new = self.child(other)
@@ -187,7 +201,7 @@ class NumberKey(object):
     def __rtruediv__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__truediv__(self)
         new = self.child(other)
@@ -198,7 +212,7 @@ class NumberKey(object):
     def __eq__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.eq(self)
         new = self.child(other)
@@ -208,7 +222,7 @@ class NumberKey(object):
     def __ne__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.ne(self)
         new = self.child(other)
@@ -218,27 +232,33 @@ class NumberKey(object):
     def __gt__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__lt__(self)
         new = self.child(other)
-        new.calculate = lambda a, b: int(a < b)
+        new.calculate = lambda a, b: (b > a) if isinstance(b, metaPattern) else int(b > a)
         return new
     
     def __lt__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__gt__(self)
         new = self.child(other)
-        new.calculate = lambda a, b: int(a > b)
+        def compare(a, b):
+            value = b < a
+            if isinstance(value, PGroup):
+                return value
+            else:
+                return int(value)
+        new.calculate = compare
         return new
     
     def __ge__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__le__(self)
         new = self.child(other)
@@ -248,11 +268,19 @@ class NumberKey(object):
     def __le__(self, other):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
-            other=asStream(other)
+            other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__ge__(self)
         new = self.child(other)
-        new.calculate = lambda a, b: int(a >= b)
+        # a is other
+        #new.calculate = lambda a, b: int(a >= b)
+        def compare(a, b):
+            value = b <= a
+            if isinstance(value, PGroup):
+                return value
+            else:
+                return int(value)
+        new.calculate = compare
         return new
 
     def __abs__(self):
@@ -305,7 +333,9 @@ class NumberKey(object):
     # Values
     
     def __nonzero__(self):
-        return int(bool(self.now()))
+        return self.__bool__()
+    def __bool__(self):
+        return bool(self.now())
     def __int__(self):
         return int(self.now())
     def __float__(self):
