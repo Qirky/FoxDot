@@ -1319,7 +1319,7 @@ class Player(Repeatable):
 
                 pos = 0 
  
-            buf  = int(self.samples[str(degree)].bufnum(sample))
+            buf  = self.samples.getBufferFromSymbol(str(degree), sample).bufnum
             
             message = {'buf': buf, 'pos': pos}
 

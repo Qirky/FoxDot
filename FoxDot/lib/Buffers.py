@@ -1,4 +1,4 @@
-""" 
+"""
 
 This module manages the allocation of buffer numbers and samples. To see
 a list of descriptions of what sounds are mapped to what characters,
@@ -12,18 +12,20 @@ Aiming on being able to set individual sample banks for different players
 that can be proggrammed into performance.
 
 """
-
 from __future__ import absolute_import, division, print_function
 
-from os.path import abspath, join, dirname
-from .Settings import FOXDOT_SND, FOXDOT_BUFFERS_FILE
-from .Settings import FOXDOT_LOOP
-from .ServerManager import DefaultServer
-import wave
+import fnmatch
 import os
+import wave
+from contextlib import closing
+from itertools import chain
+from os.path import abspath, join, isabs, isfile, isdir, splitext
 
-def path(fn):
-    return abspath(join(dirname(__file__), fn))
+from .Code import WarningMsg
+from .SCLang import SampleSynthDef
+from .ServerManager import DefaultServer
+from .Settings import FOXDOT_SND, FOXDOT_LOOP
+
 
 alpha    = "abcdefghijklmnopqrstuvwxyz"
 
@@ -71,7 +73,7 @@ DESCRIPTIONS = { 'a' : "Gameboy hihat", 'A' : "Sword",
                  'r' : "Metal",         'R' : "Metallic",
                  's' : "Shaker",        'S' : "Tamborine",
                  't' : "Cowbell",       'T' : "Cowbell",
-                 'u' : "Frying pan",    'U' : "Misc. Fx",   
+                 'u' : "Frying pan",    'U' : "Misc. Fx",
                  'v' : "Kick drum 3",   'V' : "Soft kick",
                  'w' : "Dub hits",      'W' : "Distorted",
                  'x' : "Bass drum 1",   'X' : "Heavy kick",
@@ -90,195 +92,312 @@ DESCRIPTIONS = { 'a' : "Gameboy hihat", 'A' : "Sword",
                  '3' : 'Vocals (Three)',
                  '4' : 'Vocals (Four)'}
 
+
+def symbolToDir(symbol):
+    """ Return the sample search directory for a symbol """
+    if symbol.isalpha():
+        return join(
+            FOXDOT_SND,
+            symbol.lower(),
+            'upper' if symbol.isupper() else 'lower'
+        )
+    elif symbol in nonalpha:
+        longname = nonalpha[symbol]
+        return join(FOXDOT_SND, '_', longname)
+    else:
+        return None
+
+
 class Buffer(object):
     def __init__(self, fn, number, channels=1):
         self.fn = fn
         self.bufnum   = int(number)
         self.channels = channels
+
     def __repr__(self):
         return "<Buffer num {}>".format(self.bufnum)
+
     def __int__(self):
         return self.bufnum
 
-class BufChar(object):
-    server = DefaultServer
-    def __init__(self, char):
-        self.char    = char
-        self.buffers = []
+    @classmethod
+    def fromFile(cls, filename, number):
+        try:
+            with closing(wave.open(filename)) as snd:
+                numChannels = snd.getnchannels()
+        except wave.Error:
+            numChannels = 1
+        return cls(filename, number, numChannels)
+
+
+nil = Buffer('', 0)
+
+
+class BufferManager(object):
+    def __init__(self, server=DefaultServer, paths=()):
+        self._server = server
+        self._max_buffers = server.max_buffers
+        # Keep buffer 0 unallocated because we use it as the "nil" buffer
+        self._nextbuf = 1
+        self._buffers = [None for _ in range(self._max_buffers)]
+        self._fn_to_buf = {}
+        self._paths = [FOXDOT_LOOP] + list(paths)
+        self._ext = ['wav', 'wave', 'aif', 'aiff', 'flac']
+
     def __str__(self):
-        return "BufChar '{}': '{}'".format(self.char, DESCRIPTIONS.get(self.char, "----"))
-    def __getitem__(self, key):
-        return self.buffers[key]
-    def __iter__(self):
-        for buf in self.buffers:
-            yield buf.fn, buf.bufnum
-    # Comparisons
-    def __eq__(self, other):
-        return str(self.char) == str(other)
-    def __ne__(self, other):
-        return str(self.char) != str(other)
-    # Methods
-    def addbuffer(self, fn, num, num_channels=1): # TODO -- this shouldn't be sending the information to SC
-        self.buffers.append( Buffer(fn, num, num_channels) )
-        self.buffers[-1].char = self.char
-        if fn is not None:
-            self.server.bufferRead(fn, num)
-        return
-    def bufnum(self, n):        
-        return self.buffers[int(n % len(self.buffers))] if self.buffers else Buffer(None, 0)
+        return "\n".join(["%r: %s" % (k, v) for k, v in sorted(DESCRIPTIONS.items())])
 
-class LoopFile(BufChar):
-    def __str__(self):
-        return "LoopFile '{}' loaded in buffer {}".format(self.char, self.buffers[0])
+    def __repr__(self):
+        return '<BufferManager>'
 
-class BufferManager:
-    def __init__(self):
+    def _incr_nextbuf(self):
+        self._nextbuf += 1
+        if self._nextbuf >= self._max_buffers:
+            self._nextbuf = 1
 
-        # Dictionary of characters to respective buffer number
-        self.symbols = {}
+    def _getNextBufnum(self):
+        """ Get the next free buffer number """
+        start = self._nextbuf
+        while self._buffers[self._nextbuf] is not None:
+            self._incr_nextbuf()
+            if self._nextbuf == start:
+                raise RuntimeError("Buffers full! Cannot allocate additional buffers.")
+        freebuf = self._nextbuf
+        self._incr_nextbuf()
+        return freebuf
 
-        # Dictionary of buffer numbers to character
-        self.buffers = {}
-        self.loop_files = {}
+    def addPath(self, path):
+        """ Add a path to the search paths for samples """
+        self._paths.append(abspath(path))
 
-        # Load buffers
-        bufnum = 1
-        root   = FOXDOT_SND
+    def free(self, filenameOrBuf):
+        """ Free a buffer. Accepts a filename or buffer number """
+        if isinstance(filenameOrBuf, int):
+            buf = self._buffers[filenameOrBuf]
+        else:
+            buf = self._fn_to_buf[filenameOrBuf]
+        del self._fn_to_buf[buf.fn]
+        self._buffers[buf.bufnum] = None
+        self._server.bufferFree(buf.bufnum)
 
-        # Go through the alphabet
+    def freeAll(self):
+        """ Free all buffers """
+        buffers = list(self._fn_to_buf.values())
+        for buf in buffers:
+            self.free(buf.bufnum)
 
-        for folder in ('lower', 'upper'):
+    def setMaxBuffers(self, max_buffers):
+        """ Set the max buffers on the SC server """
+        if max_buffers < self._max_buffers:
+            if any(self._buffers[max_buffers:]):
+                raise RuntimeError(
+                    "Cannot shrink buffer size. Buffers already allocated."
+                )
+            self._buffers = self._buffers[:max_buffers]
+        elif max_buffers > self._max_buffers:
+            while len(self._buffers) < max_buffers:
+                self._buffers.append(None)
+        self._max_buffers = max_buffers
+        self._nextbuf = self._nextbuf % max_buffers
 
-            for char in alpha:
-
-                if folder == "upper":
-
-                    char = char.upper()
-                
-                path = join(root, char.lower(), folder)
-
-                self.symbols[char] = BufChar(char)
-
-                if os.path.isdir(path):
-                
-                    for f in sorted(os.listdir(path)):
-
-                        try:
-
-                            snd = wave.open(join(path, f))
-                            numChannels = snd.getnchannels()
-                            snd.close()
-
-                        except wave.Error as e:
-
-                            numChannels = 1
-
-                        self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
-                        self.buffers[bufnum] = self.symbols[char][-1]
-
-                        bufnum += 1
-
-        # Go through symbols
-
-        for char in nonalpha:
-
-            self.symbols[char] = BufChar(char)
-
-            path = join(root, "_", nonalpha[char])
-
-            if (os.path.isdir(path)):
-        
-                for f in sorted(os.listdir(path)):
-
-                    try:
-
-                        snd = wave.open(join(path, f))
-                        numChannels = snd.getnchannels()
-                        snd.close()
-
-                    except wave.Error:
-
-                        numChannels = 1
-
-                    self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
-                    self.buffers[bufnum] = self.symbols[char][-1]
-
-                    bufnum += 1
-
-        # Define empty buffer
-        self.nil = BufChar(None)
-        self.nil.addbuffer(None, 0)
-
-        # Sort out loop buffers
-
-        for filename in os.listdir(FOXDOT_LOOP):
-
-            path = join(root, FOXDOT_LOOP)
-
-            name = "".join(filename.split(".")[:-1])
-
-            self.loop_files[name] = LoopFile(name)
-            self.loop_files[name].addbuffer(join(path, filename), bufnum, 2)
-
-            bufnum += 1
-
-        self.loops = list(self.loop_files.keys())
-
-        # Write to file
-        self.write_to_file()
-
-    def __getitem__(self, key):
-        if hasattr(key, 'char'):
-            key = key.char
-        return self.symbols.get(key, self.nil)
+    def getBufferFromSymbol(self, symbol, index=0):
+        """ Get buffer information from a symbol """
+        if symbol.isspace():
+            return nil
+        dirname = symbolToDir(symbol)
+        if dirname is None:
+            return nil
+        samplepath = self._findSample(dirname, index)
+        if samplepath is None:
+            return nil
+        return self._allocateAndLoad(samplepath)
 
     def getBuffer(self, bufnum):
-        return self.buffers[int(bufnum)]
+        """ Get buffer information from the buffer number """
+        return self._buffers[bufnum]
 
-    def __str__(self):
-        # return "\n".join(["{}: {}".format(symbol, b) for symbol, b in self.symbols.items()])
-        return "\n".join([str(value) for value in self.symbols.values()])
+    def _allocateAndLoad(self, filename):
+        """ Allocates and loads a buffer from a filename, with caching """
+        if filename not in self._fn_to_buf:
+            bufnum = self._getNextBufnum()
+            buf = Buffer.fromFile(filename, bufnum)
+            self._server.bufferRead(filename, bufnum)
+            self._fn_to_buf[filename] = buf
+            self._buffers[bufnum] = buf
+        return self._fn_to_buf[filename]
 
-    def write_to_file(self):
-        f = open(FOXDOT_BUFFERS_FILE, 'w')
-        for data_list in [self.symbols, self.loop_files]:
-            for char in data_list:
-                for fn, buf in data_list[char]:
-                    f.write('Buffer.read(s, "{}", bufnum:{});\n'.format(path(fn).replace("\\","/"), buf))
-        return
+    def _getSoundFile(self, filename):
+        """ Look for a file with all possible extensions """
+        base, cur_ext = splitext(filename)
+        if cur_ext:
+            # If the filename already has an extensions, keep it
+            if isfile(filename):
+                return filename
+        else:
+            # Otherwise, look for all possible extensions
+            for ext in self._ext:
+                # Look for .wav and .WAV
+                for tryext in [ext, ext.upper()]:
+                    extpath = filename + '.' + tryext
+                    if isfile(extpath):
+                        return extpath
+        return None
 
-    def load(self):
-        for data_list in [self.symbols, self.loop_files]:
-            for char in data_list:
-                for fn, buf in data_list[char]:
-                    self.server.bufferRead(buf, path(fn))
-        return
+    def _getSoundFileOrDir(self, filename):
+        """ Get a matching sound file or directory """
+        if isdir(filename):
+            return abspath(filename)
+        foundfile = self._getSoundFile(filename)
+        if foundfile:
+            return abspath(foundfile)
+        return None
 
-    def bufnum(self, char):
-        return self.symbols.get(char, 0)
+    def _searchPaths(self, filename):
+        """ Search our search paths for an audio file or directory """
+        if isabs(filename):
+            return self._getSoundFileOrDir(filename)
+        else:
+            for root in self._paths:
+                fullpath = join(root, filename)
+                foundfile = self._getSoundFileOrDir(fullpath)
+                if foundfile:
+                    return foundfile
+        return None
+
+    def _getFileInDir(self, dirname, index):
+        """ Return nth sample in a directory """
+        candidates = []
+        for filename in sorted(os.listdir(dirname)):
+            name, ext = splitext(filename)
+            if ext.lower()[1:] in self._ext:
+                fullpath = join(dirname, filename)
+                if len(candidates) == index:
+                    return fullpath
+                candidates.append(fullpath)
+        if candidates:
+            return candidates[index % len(candidates)]
+        return None
+
+    def _patternSearch(self, filename, index):
+        """
+        Return nth sample that matches a path pattern
+
+        Path pattern is a relative path that can contain wildcards such as *
+        and ? (see fnmatch for more details). Some example paths:
+
+            samp*
+            **/voices/*
+            perc*/bass*
+
+        """
+
+        def _findNextSubpaths(path, pattern):
+            """ For a path pattern, find all subpaths that match """
+            # ** is a special case meaning "all recursive directories"
+            if pattern == '**':
+                for dirpath, _, _ in os.walk(path):
+                    yield dirpath
+            else:
+                children = os.listdir(path)
+                for c in fnmatch.filter(children, pattern):
+                    yield join(path, c)
+
+        candidates = []
+        queue = self._paths[:]
+        subpaths = filename.split(os.sep)
+        filepat = subpaths.pop()
+        while subpaths:
+            subpath = subpaths.pop(0)
+            queue = list(chain.from_iterable(
+                (_findNextSubpaths(p, subpath) for p in queue)
+            ))
+
+        # If the filepat (ex. 'foo*.wav') has an extension, we want to match
+        # the full filename. If not, we just match against the basename.
+        match_base = not hasext(filepat)
+
+        for path in queue:
+            for subpath, _, filenames in os.walk(path):
+                for filename in sorted(filenames):
+                    basename, ext = splitext(filename)
+                    if ext[1:].lower() not in self._ext:
+                        continue
+                    if match_base:
+                        ismatch = fnmatch.fnmatch(basename, filepat)
+                    else:
+                        ismatch = fnmatch.fnmatch(filename, filepat)
+                    if ismatch:
+                        fullpath = join(subpath, filename)
+                        if len(candidates) == index:
+                            return fullpath
+                        candidates.append(fullpath)
+        if candidates:
+            return candidates[index % len(candidates)]
+        return None
+
+    def _findSample(self, filename, index=0):
+        """
+        Find a sample from a filename or pattern
+
+        Will first attempt to find an exact match (by abspath or relative to
+        the search paths). Then will attempt to pattern match in search paths.
+
+        """
+        path = self._searchPaths(filename)
+        if path:
+            # If it's a file, use that sample
+            if isfile(path):
+                return path
+            # If it's a dir, use one of the samples in that dir
+            elif isdir(path):
+                foundfile = self._getFileInDir(path, index)
+                if foundfile:
+                    return foundfile
+                else:
+                    WarningMsg("No sound files in %r" % path)
+                    return None
+            else:
+                WarningMsg("File %r is neither a file nor a directory" % path)
+                return None
+        else:
+            # If we couldn't find a dir or file with this name, then we use it
+            # as a pattern and recursively walk our paths
+            foundfile = self._patternSearch(filename, index)
+            if foundfile:
+                return foundfile
+            WarningMsg("Could not find any sample matching %r" % filename)
+            return None
+
+    def loadBuffer(self, filename, index=0):
+        """ Load a sample and return the number of a buffer """
+        samplepath = self._findSample(filename, index)
+        if samplepath is None:
+            return 0
+        else:
+            buf = self._allocateAndLoad(samplepath)
+            return buf.bufnum
+
+
+def hasext(filename):
+    return bool(splitext(filename)[1])
+
 
 Samples = BufferManager()
 
-def FindBuffer(name):
-    if name in Samples.loop_files:
-        return int(Samples.loop_files[name].bufnum(0))
-    else:
-        print("File '{}' not found".format(name))
-        return 0
-
-from .SCLang import SampleSynthDef
 
 class LoopSynthDef(SampleSynthDef):
     def __init__(self):
         SampleSynthDef.__init__(self, "loop")
         self.pos = self.new_attr_instance("pos")
+        self.sample = self.new_attr_instance("sample")
         self.defaults['pos']   = 0
+        self.defaults['sample']   = 0
         self.base.append("osc = PlayBuf.ar(2, buf, BufRateScale.kr(buf) * rate, startPos: BufSampleRate.kr(buf) * pos);")
         self.base.append("osc = osc * EnvGen.ar(Env([0,1,1,0],[0.05, sus-0.05, 0.05]));")
         self.osc = self.osc * self.amp
         self.add()
-    def __call__(self, filename, pos=0, **kwargs):
-        kwargs["buf"] = FindBuffer(filename)
+    def __call__(self, filename, pos=0, sample=0, **kwargs):
+        kwargs["buf"] = Samples.loadBuffer(filename, sample)
         return SampleSynthDef.__call__(self, pos, **kwargs)
 
 loop = LoopSynthDef()
