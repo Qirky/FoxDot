@@ -95,7 +95,8 @@ class Repeatable(object):
 
                         if len(self.previous_patterns) == 0:
 
-                            for attr in self.attr:
+                            # for attr in self.attr:
+                            for attr in ["degree"]:
 
                                 self.previous_patterns[attr] = self.attr[attr]
 
