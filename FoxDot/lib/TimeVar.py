@@ -25,7 +25,7 @@ def fetch(func):
     return eval_now
 
 
-class TimeVar(Repeatable):
+class TimeVar:
     """ Var(values [,durs=[4]]) """
 
     metro = None
