@@ -314,3 +314,10 @@ def PRhythm(durations):
             output.append(value)
             delays.append(delay)
         return output + delays.rotate(1)
+
+
+def PJoin(patterns):
+    data = []
+    for pattern in patterns:
+        data.extend(pattern)
+    return Pattern(data)
