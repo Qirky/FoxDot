@@ -2,6 +2,8 @@ from __future__ import absolute_import, division, print_function
 
 from .Patterns import *
 from .TimeVar import TimeVar
+from functools import partial
+
 
 class NumberKey(object):
     def __init__(self, value, reference):
@@ -235,8 +237,14 @@ class NumberKey(object):
             other=self.convert_to_pattern(other)
         if isinstance(other, metaPattern):
             return other.__lt__(self)
+        def compare(a, b):
+            value = b > a
+            if isinstance(value, PGroup):
+                return value
+            else:
+                return int(value)
         new = self.child(other)
-        new.calculate = lambda a, b: (b > a) if isinstance(b, metaPattern) else int(b > a)
+        new.calculate = compare
         return new
     
     def __lt__(self, other):
@@ -262,7 +270,13 @@ class NumberKey(object):
         if isinstance(other, metaPattern):
             return other.__le__(self)
         new = self.child(other)
-        new.calculate = lambda a, b: int(a <= b)
+        def compare(a, b):
+            value = b >= a
+            if isinstance(value, PGroup):
+                return value
+            else:
+                return int(value)
+        new.calculate = compare
         return new
     
     def __le__(self, other):
@@ -315,20 +329,96 @@ class NumberKey(object):
         new.calculate = lambda a, b: self.parent.scale.semitones(b)
         return new
 
-    def map(self, mapping):
+    def simple_map(self, mapping):
         """ Creates a new Player key that maps the values in the dictionary (mapping)
             to new values. Example use case:
 
             ```
-            d1 >> play("x-o-", sample=d1.degree.map( { "-" : -1, "o" : var([0,2]) }))
+            d1 >> play("x-o-", sample=d1.degree.simple_map( { "-" : -1, "o" : var([0,2]) }))
             ```
 
         """
-        data = [(self == key) * value for key, value in mapping.items()]
+        data = [ ((self == key) * value) for key, value in mapping.items() ]
         new_key = data[0]
         for i in data[1:]:
             new_key = new_key + i
         return new_key
+
+    def map(self, mapping):
+        """ Allows for functional mapping. `mapping` is a dictionary of keys, which can
+            be functions, and values, which can also be functions. If neither is callable,
+            then the the mapping function returns the value when this Player Key  is equal
+            to the key. The key can be callable and will return the value provided if the
+            the callable key function returns True (it must take one argument, this Player Key).
+            Trivially, the following mappings are equivalent in behaviour:
+
+            ```
+            p1 >> piano(p2.degree.map({4: 7}))
+
+            p1 >> piano(p2.degree.map({lambda x: x == 4: 7}))
+            ```
+
+            If the value is callable, then it is called on this player key when the key
+            is satisfied:
+            
+            ```
+            p1 >> piano(p2.degree.map({lambda x: x >= 4: lambda x: x + (0,2)}))
+            ```
+        """
+        funcs = {}
+        for key, value in mapping.items():
+            # We can map using a function
+            if callable(key) and callable(value):
+                funcs[partial(key, self)]  = partial(value, self)
+
+            elif callable(key) and not callable(value):
+                funcs[partial(key, self)]  = partial(lambda e: e, value)
+
+            elif callable(value):
+                funcs[partial(lambda e: self == key, key)] = partial(value, self)
+
+            else:
+                # one-to-one mapping
+                funcs[partial(lambda e: self == key, key)] = partial(lambda e: e, value)
+
+        def mapping_function(a, b):
+            for func, result in funcs.items():
+                if bool(func()) is True:
+                    value = result()
+                    break
+            else:
+                value = 0
+            return value
+
+        new = self.child(0)        
+        new.calculate = mapping_function
+        return new        
+
+    def get_min(self):
+        new = self.child(0)
+        def f(a, b):
+            try:
+                return min(b)
+            except TypeError:
+                return b
+        new.calculate = f
+        return new
+
+    def get_max(self):
+        new = self.child(0)
+        def f(a, b):
+            try:
+                return max(b)
+            except TypeError:
+                return b
+        new.calculate = f
+        return new
+
+    def transpose(self, func):
+        """ Returns a child Player Key based on the func """
+        new = self.child(0)
+        new.calculate = lambda a, b: func(b)
+        return new
     
     # Values
     
@@ -388,7 +478,7 @@ class PlayerKey(NumberKey):
         NumberKey.__init__(self, value, reference)
         
         # Reference to the Player object that is using this
-        self.parent  = parent
+        self.parent  = parent # is the player
         self.key     = attr
         self.pattern = asStream(self.parent.attr[self.key]) if self.parent is not None else asStream([])
 
@@ -398,7 +488,7 @@ class PlayerKey(NumberKey):
 
         else:
 
-            self.other   = reference
+            self.other   = reference # is the parent Player Key -- todo: make this mroe clear
             self.parent  = reference.parent
 
         self.last_updated = 0
@@ -409,7 +499,10 @@ class PlayerKey(NumberKey):
         return
     
     def update(self, value, time):
-        if value != self.value:
+        """ Updates the contents of the PlayerKey *if* the time value is different to self.last_updated.
+            If they are the same, the the contents become a PGroup of the two values """
+        if not equal_values(value, self.value):
+        #if value != self.value:
             if time == self.last_updated:
                 try:
                     self.value.append(value)

@@ -282,6 +282,12 @@ class metaPattern(object):
 
     def __abs__(self):
         return self.__class__([abs(item) for item in self])
+
+    def __bool__(self):
+        return all([bool(item > 0) for item in self])
+
+    def __nonzero__(self):
+        return self.__bool__()
     
     def abs(self):
         return abs(self)
@@ -1244,6 +1250,13 @@ def pattern_depth(pat):
                 total = depth + 1
     return total
 
+def equal_values(this, that):
+    """ Returns True if this == that """
+    comp = this == that
+    if isinstance(comp, metaPattern):
+        return all(list(comp))
+    else:
+        return comp
 
 def group_modi(pgroup, index):
     """ Returns value from pgroup that modular indexes nested groups """
