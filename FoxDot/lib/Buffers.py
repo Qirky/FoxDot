@@ -22,6 +22,7 @@ from itertools import chain
 from os.path import abspath, join, isabs, isfile, isdir, splitext
 
 from .Code import WarningMsg
+from .Logging import Timing
 from .SCLang import SampleSynthDef
 from .ServerManager import DefaultServer
 from .Settings import FOXDOT_SND, FOXDOT_LOOP
@@ -335,6 +336,7 @@ class BufferManager(object):
             return candidates[index % len(candidates)]
         return None
 
+    @Timing('bufferSearch', logargs=True)
     def _findSample(self, filename, index=0):
         """
         Find a sample from a filename or pattern
