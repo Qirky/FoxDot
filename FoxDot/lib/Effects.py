@@ -62,6 +62,7 @@
 
 from __future__ import absolute_import, division, print_function
 
+import os.path
 from .Settings import EFFECTS_DIR, SC3_PLUGINS
 from .ServerManager import DefaultServer
 
@@ -122,10 +123,41 @@ class Effect:
 
     def save(self):
         ''' writes to file and sends to server '''
-        with open(self.filename, 'w') as f:
-            f.write(self.__str__())
+        
+        # 1. See if the file exists
+
+        if os.path.isfile(self.filename):
+
+            with open(self.filename) as f:
+
+                contents = f.read()
+
+        else:
+
+            contents = ""
+
+        # 2. If it does, check contents
+
+        this_string = self.__str__()
+
+        if contents != this_string:
+
+            try:
+
+                with open(self.filename, 'w') as f:
+                
+                    f.write(this_string)
+
+            except IOError:
+
+                print("IOError: Unable to update '{}' effect.".format(self.synthdef))
+
+        # 3. Send to server
+        
         if self.server is not None:
+
             self.server.loadSynthDef(self.filename)
+
         return
 
 class In(Effect):
