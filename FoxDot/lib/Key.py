@@ -375,11 +375,11 @@ class NumberKey(object):
                 funcs[partial(key, self)]  = partial(lambda e: e, value)
 
             elif callable(value):
-                funcs[partial(lambda e: self == key, key)] = partial(value, self)
+                funcs[partial(lambda e: self == e, key)] = partial(value, self)
 
             else:
                 # one-to-one mapping
-                funcs[partial(lambda e: self == key, key)] = partial(lambda e: e, value)
+                funcs[partial(lambda e: self == e, key)] = partial(lambda e: e, value)
 
         def mapping_function(a, b):
             for func, result in funcs.items():
@@ -419,6 +419,11 @@ class NumberKey(object):
         new = self.child(0)
         new.calculate = lambda a, b: func(b)
         return new
+
+
+    def accompany(self, freq=0, rel=[0,2,4]):
+        """ Returns a PlayerKey whose function returns an accompanying note"""
+        return self.transpose(Accompany(freq=freq, rel=rel))
     
     # Values
     
@@ -519,70 +524,123 @@ class PlayerKey(NumberKey):
 
     def child(self, other):
         return PlayerKey(other, self, self.parent, self.key)
-    
-class AccompanyKey(NumberKey):
+
+
+
+class Accompany:
     """ Like PlayerKey except it returns """
-    def __init__(self, other, rel=[0,2,4], debug=False):
+    def __init__(self, freq=0, rel=[0,2,4]):
 
-        NumberKey.__init__(self, other, None)
+        self.players_last_value = None
+        self.this_last_value    = 0
 
-        assert(isinstance(other, PlayerKey))
-
-        self.parent = other.parent
-
-        self.last_value = self.value.now()
-        self.acmp_value = self.last_value
-
+        self.frequency  = freq
         self.scale_size = 7
+        self.relations  = list(rel)
 
-        self.data       = list(rel) + [min(rel) + self.scale_size, max(rel) - self.scale_size]
 
-        self.debug = debug
+    def __call__(self, playerkey):
+        """ Acts as a function in Player Key """
+        # Only change value if the player key has changed - maybe set a frequency?
+        if self.players_last_value == playerkey:
+            return self.this_last_value
+        else:
+            return self.find_new_value(playerkey)
 
-    def child(self, other):
-        return NumberKey(other, self)
+    def find_new_value(self, playerkey):
 
-    def find_new_value(self, new):
-        """ Finds the item in self.data that is closest to self.acmp_value """
-        if len(self.data) == 1:
-            return self.data[0]
+        # Which value is the closest to this_last_value
+
+        values = [(playerkey + x) % 7 for x in self.relations] + [(playerkey % 7) + (x - self.scale_size) for x in self.relations]
+
+        nearby = [abs(self.this_last_value - value) for value in values]
+        
+        indices = [nearby.index(val) for val in sorted(nearby)]
+
+        r = random.random()
+
+        if r <= 0.65:
+
+            i = 0
+
+        elif r <= 0.9:
+
+            i = 1
+
         else:
 
-            old = self.acmp_value
+            i = 2
+
+        index = indices[i]
+
+        self.this_last_value = values[index]
+        self.players_last_value = playerkey
+    
+        return self.this_last_value
+    
+# class AccompanyKey(NumberKey):
+#     """ Like PlayerKey except it returns """
+#     def __init__(self, other, rel=[0,2,4], debug=False):
+
+#         NumberKey.__init__(self, other, None)
+
+#         assert(isinstance(other, PlayerKey))
+
+#         self.parent = other.parent
+
+#         self.last_value = self.value.now()
+#         self.acmp_value = self.last_value
+
+#         self.scale_size = 7
+
+#         self.data       = list(rel) + [min(rel) + self.scale_size, max(rel) - self.scale_size]
+
+#         self.debug = debug
+
+#     def child(self, other):
+#         return NumberKey(other, self)
+
+#     def find_new_value(self, new):
+#         """ Finds the item in self.data that is closest to self.acmp_value """
+#         if len(self.data) == 1:
+#             return self.data[0]
+#         else:
+
+#             old = self.acmp_value
             
-            A = new % self.scale_size
-            B = old % self.scale_size
+#             A = new % self.scale_size
+#             B = old % self.scale_size
             
-            # Order in "closeness" to our current value
-            shifts = sorted(self.data, key=lambda N: abs(B - (A + N)))
+#             # Order in "closeness" to our current value
+#             shifts = sorted(self.data, key=lambda N: abs(B - (A + N)))
 
-            # Pick a new value to go to
-            r = random.random()
+#             # Pick a new value to go to
+#             r = random.random()
 
-            if r <= 0.65:
+#             if r <= 0.65:
 
-                i = 0
+#                 i = 0
 
-            elif r <= 0.9:
+#             elif r <= 0.9:
 
-                i = 1
+#                 i = 1
 
-            else:
+#             else:
 
-                i = 2
+#                 i = 2
 
-            val = shifts[i]
+#             val = shifts[i]
 
-            return old + (val + A - B)
+#             return old + (val + A - B)
 
-    def now(self):
-        value = self.calculate(self.value.now(), self.other)
-        if isinstance(value, NumberKey):
-            value = value.now()
-        if value != self.last_value:
-            self.acmp_value = self.find_new_value(value)
-            self.last_value = value
-        return self.acmp_value
+#     def now(self):
+#         value = self.calculate(self.value.now(), self.other)
+#         if isinstance(value, NumberKey):
+#             value = value.now()
+#         if value != self.last_value:
+#             self.acmp_value = self.find_new_value(value)
+#             self.last_value = value
+#         return self.acmp_value
 
 
 # Give pattern objects a reference to the PlayerKey type
