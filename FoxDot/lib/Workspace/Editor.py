@@ -268,23 +268,29 @@ class workspace:
 
         # Check temporary file
 
-        with open(FOXDOT_TEMP_FILE) as f:
+        def recover_work():
 
-            text = f.read()
+            with open(FOXDOT_TEMP_FILE) as f:
 
-        if len(text):
+                text = f.read()
 
-            loading = tkMessageBox.askyesno("Load unsaved work?", "Your code wasn't saved last time you used FoxDot, do you want to load any unsaved work?")
+            if len(text):
 
-            self.root.update()
+                loading = tkMessageBox.askyesno("Load unsaved work?", "Your code wasn't saved last time you used FoxDot, do you want to load any unsaved work?")
 
-            if loading:
+                self.root.update()
 
-                self.set_all(text)
+                if loading:
 
-            else:
+                    self.set_all(text)
 
-                self.clear_temp_file()
+                else:
+
+                    self.clear_temp_file()
+
+        # Ask in 1/2 sec
+
+        self.root.after(100, recover_work)
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
