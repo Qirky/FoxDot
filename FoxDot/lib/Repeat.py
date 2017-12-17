@@ -4,12 +4,65 @@ from .Code import WarningMsg
 from .Patterns import Pattern, asStream
 from .Utils import modi
 
+class MethodList:
+    def __init__(self, root):
+        self.root=root
+        self.list_of_methods = []
+    def __repr__(self):
+        return repr(self.list_of_methods)
+
+    def remove(self, method):
+        for i, info in enumerate(self.list_of_methods):
+            name, args, kwargs = info
+            if name == method:
+                self.list_of_methods.pop(i)
+                return
+        raise ValueError
+
+    def contains(self, method):
+        for name, args, kwargs in self.list_of_methods:
+            if name == method:
+                return True
+        return False
+
 class Repeatable(object):
     after_update_methods = []
     method_synonyms      = {}
     def __init__(self):
         self.repeat_events        = {}
         self.previous_patterns    = {}
+
+    def update_pattern_root(self, attr):
+
+        if attr not in self.previous_patterns:
+
+            self.previous_patterns[attr] = MethodList(self.attr[attr])
+
+        else:
+
+            self.previous_patterns[attr].root = self.attr[attr]
+
+        self.update_pattern_methods(attr)     
+
+        return
+
+    def update_pattern_methods(self, attr):
+
+        if attr not in self.previous_patterns:
+
+            self.previous_patterns[attr] = MethodList(self.attr[attr])
+
+        data = self.previous_patterns[attr].root
+
+        for method, args, kwargs in self.previous_patterns[attr].list_of_methods:
+
+            call_pattern_method = getattr(Pattern, method)
+
+            data = call_pattern_method(data, *args, **kwargs)
+
+        self.attr[attr] = data
+
+        return
 
     def after(self, n, cmd, *args, **kwargs):
         """ Schedule self.cmd(args, kwargs) in 'n' beats time
@@ -39,6 +92,79 @@ class Repeatable(object):
             pass
         
         return self
+
+    def get_method_by_name(self, cmd):
+         # Make sure cmd is a method
+
+        if cmd in self.method_synonyms:
+
+            attr = [ self.method_synonyms[cmd] ]
+
+        else:
+
+            attr = cmd.split(".")
+
+        # We can also schedule attribute methods
+
+        if len(attr) == 1:
+
+            method_name = attr[0]
+
+            if hasattr(self, method_name):
+
+                method = getattr(self, method_name)
+
+            elif hasattr(Pattern, method_name):
+
+                # THIS ONLY CALLS ON DEGREE ATM                
+
+                def method(*args, **kwargs):
+
+                    # If there are no "old" patterns held in memory, use the pattern method and store
+
+                    attr = "degree"
+
+                    if attr not in self.previous_patterns:
+
+                        self.previous_patterns[attr] = MethodList(self.attr[attr])
+
+                    # If this has already been called, "undo it"
+
+                    if self.previous_patterns[attr].contains(method_name):
+
+                        self.previous_patterns[attr].remove(method_name)
+
+                        # self.attr[attr] = call_pattern_method(self.attr[attr], *args, **kwargs)
+
+                    # If not, add it to the list
+
+                    else:
+
+                        self.previous_patterns[attr].list_of_methods.append((method_name, args, kwargs))
+
+                    # Update the attribute
+
+                    self.update_pattern_methods(attr)
+
+                    return
+
+            else:
+
+                WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
+
+                return self
+
+        elif len(attr) == 2:
+
+            # TODO -- add this functionality to PlayerKey class
+
+            sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
+
+            method = lambda *args, **kwargs: self.attr.update({attr[0]: sub_method(*args, **kwargs)})
+
+        assert callable(method)
+        
+        return method
         
     def every(self, n, cmd, *args, **kwargs):
         """ Every n beats, call a method (defined as a string) on the
@@ -65,72 +191,7 @@ class Repeatable(object):
 
         try:
 
-            # Make sure cmd is a method
-
-            if cmd in self.method_synonyms:
-
-                attr = [ self.method_synonyms[cmd] ]
-
-            else:
-
-                attr = cmd.split(".")
-
-            # We can also schedule attribute methods
-
-            if len(attr) == 1:
-
-                method_name = attr[0]
-
-                if hasattr(self, method_name):
-
-                    method = getattr(self, method_name)
-
-                elif hasattr(Pattern, method_name):
-
-                    call_pattern_method = getattr(Pattern, method_name)
-
-                    def method(*args, **kwargs):
-
-                        # If there are no "old" patterns held in memory, use the pattern method and store
-
-                        if len(self.previous_patterns) == 0:
-
-                            # for attr in self.attr:
-                            for attr in ["degree"]:
-
-                                self.previous_patterns[attr] = self.attr[attr]
-
-                                self.attr[attr] = call_pattern_method(self.attr[attr], *args, **kwargs)
-
-                        # If there *are* old patterns, re-use them
-
-                        else:
-
-                            for attr in self.previous_patterns:
-
-                                self.attr[attr] = self.previous_patterns[attr]
-
-                            # Clear the cache
-
-                            self.previous_patterns = {}
-
-                        return
-
-                else:
-
-                    WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
-
-                    return self
-
-            elif len(attr) == 2:
-
-                # TODO -- add this functionality to PlayerKey class
-
-                sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
-
-                method = lambda *args, **kwargs: self.attr.update({attr[0]: sub_method(*args, **kwargs)})
-
-            assert callable(method)
+            method = self.get_method_by_name(cmd)
 
         except AttributeError:
 
@@ -177,6 +238,10 @@ class Repeatable(object):
 
     def never(self, method):
         try:
+            # If it a pattern method, undo it - so far this only applies to degree
+            if self.previous_patterns["degree"].contains(method):
+                self.previous_patterns["degree"].remove(method)
+                self.update_pattern_methods("degree")
             self.repeat_events[method].stop()
             del self.repeat_events[method]
         except KeyError:
@@ -270,6 +335,12 @@ class MethodCall:
         """ Proxy for parent object __call__, calls the enclosed method
             and schedules it in the future. """
 
+        # Return without scheduling if stopping
+        
+        if self.stopping:
+
+            return
+
         self.i += 1
 
         self.last_when, self.this_when = self.this_when, float(self.when[self.i])
@@ -292,9 +363,7 @@ class MethodCall:
 
         # Re-schedule the method call
 
-        if not self.stopping:
-
-            self.schedule()
+        self.schedule()
 
         return
 

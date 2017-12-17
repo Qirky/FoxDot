@@ -438,13 +438,13 @@ class Player(Repeatable):
 
                 if name == "dur":
 
-                    value, self._delay_offset = CalculateDelaysFromDur(value)
+                    value, self._delay_offset = CalculateDelaysFromDur(value) # can we avoid using this?
 
                 value = asStream(value)
 
                 # raise a ValueError if trying to reference itself -- doesn't handle indirect references to itself
 
-                for item in value:
+                for item in value: # maybe use a deepiter method
 
                     self.test_for_circular_reference(name, item)
 
@@ -452,11 +452,9 @@ class Player(Repeatable):
                 
                 self.attr[name] = value
 
-                # Remove from the stored pattern dict
+                # Remove from the stored pattern dict / call those
 
-                if name in self.previous_patterns:
-
-                    del self.previous_patterns[name]
+                self.update_pattern_root(name)
 
                 # keep track of what values we change with +-
 
@@ -485,7 +483,8 @@ class Player(Repeatable):
         try:       
             return self.__dict__[self.alias.get(name, name)]
         except KeyError:
-            raise AttributeError
+            err = "Player Object has no attribute '{}'".format(name)
+            raise AttributeError(err)
 
     def __getitem__(self, name):
         if self.__init:
@@ -963,23 +962,28 @@ class Player(Repeatable):
     def shuffle(self):
         """ Shuffles the degree of a player. """
         # If using a play string for the degree
-        if self.synthdef == SamplePlayer and self.playstring is not None:
-            # Shuffle the contents of playgroups among the whole string
-            new_play_string = PlayString(self.playstring).shuffle()
-            new_degree = Pattern(new_play_string).shuffle()
-        else:            
-            new_degree = self.attr['degree'].shuffle()
+        #if self.synthdef == SamplePlayer and self.playstring is not None:
+        #    # Shuffle the contents of playgroups among the whole string
+        #    new_play_string = PlayString(self.playstring).shuffle()
+        #    new_degree = Pattern(new_play_string).shuffle()
+        #else:            
+        #new_degree = self.attr['degree'].shuffle()
+        new_degree = self.previous_patterns["degree"].root.shuffle()
         self._replace_degree(new_degree)
         return self
 
     def mirror(self):
         """ The degree pattern is reversed """
-        self._replace_degree(self.attr['degree'].mirror())
+        new_degree = self.previous_patterns["degree"].root.mirror()
+        self._replace_degree(new_degree)
+        #self._replace_degree(self.attr['degree'].mirror())
         return self
 
     def rotate(self, n=1):
         """ Rotates the values in the degree by 'n' """
-        self._replace_degree(self.attr['degree'].rotate(n))
+        #self._replace_degree(self.attr['degree'].rotate(n))
+        new_degree = self.previous_patterns["degree"].root.rotate(n)
+        self._replace_degree(new_degree)
         return self
 
     def map(self, key1, key2, mapping):
@@ -1659,16 +1663,16 @@ class Player(Repeatable):
 
         if isinstance(other, self.__class__):
 
-            self.degree = AccompanyKey(other.degree, values, debug)
+            self.degree = other.degree.accompany()
         
         return self
 
-    def follow(self, lead=False):
+    def follow(self, other=False):
         """ Takes a Player object and then follows the notes """
 
-        if isinstance(lead, self.__class__):
+        if isinstance(other, self.__class__):
 
-            self.degree = lead.degree
+            self.degree = other.degree
 
         return self
 
