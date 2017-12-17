@@ -474,7 +474,10 @@ class TimeVar:
 
     def __call__(self, *args, **kwargs):
         """ A TimeVar can store functions and will call the current item with this method """
-        return self.now().__call__(*args, **kwargs)
+        if callable(self.now()):
+            return self.now().__call__(*args, **kwargs)
+        else:
+            return self.now()
 
     # Emulating container types
 
