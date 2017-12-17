@@ -481,7 +481,7 @@ class metaPattern(object):
             P[0,4,8,1,5,9,2,6,8,3,7,9]
             ```
         """
-        sequences = (self, seq) + seqs
+        sequences = (self, asStream(seq)) + tuple(asStream(s) for s in seqs)
         size = LCM(*[len(s) for s in sequences])
         new = []
         for i in range(size):
@@ -765,6 +765,8 @@ class metaPattern(object):
         """
         output = Pattern()
 
+        other  = asStream(other)
+
         dtype = PGroup if dtype is None else dtype
 
         for i in range(LCM(len(self), len(other))):
@@ -774,18 +776,19 @@ class metaPattern(object):
 
             if all([x.__class__== PGroup for x in (item1, item2)]):
 
-                new_item = PGroup(item1.data + item2.data)
+                new_item = dtype(item1.data + item2.data)
 
             elif item1.__class__ == PGroup:
 
-                new_item = PGroup(item1.data + [item2])
+                new_item = dtype(item1.data + [item2])
 
             elif item2.__class__ == PGroup:
 
-                new_item = PGroup([item1] + item2.data)
+                new_item = dtype([item1] + item2.data)
 
             else:
 
+                #new_item = dtype((item1, item2)) ### this
                 new_item = (item1, item2)
 
             output.append(new_item)
