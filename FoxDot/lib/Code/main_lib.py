@@ -84,8 +84,12 @@ class FoxDotCode:
         ''' Returns the bytecode for  '''
         return compile(str(CodeString(string)), "FoxDot", "exec")
                  
-    def __call__(self, code, verbose=True):
+    def __call__(self, code, verbose=True, verbose_error=None):
         """ Takes a string of FoxDot code and executes as Python """
+
+        if verbose_error is None:
+
+            verbose_error = verbose
 
         if not code:
 
@@ -109,7 +113,7 @@ class FoxDotCode:
 
             response = error_stack()
 
-            if verbose is True:
+            if verbose_error is True:
 
                 print(response)
 

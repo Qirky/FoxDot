@@ -19,11 +19,36 @@ if sys.version_info[0] == 2:
 try:
 
     from .lib import FoxDotCode
-    from .lib.Workspace import workspace
+    from .lib import execute
 
 except(ValueError, ModuleNotFoundError):
 
     from lib import FoxDotCode
-    from lib.Workspace import workspace
+    from lib import execute
 
-FoxDot = workspace(FoxDotCode).run()
+# If we are getting command line input
+
+if sys.argv[-1] == "--pipe":
+
+    # Set up pipe
+
+    while True:
+
+        # Read in
+
+        text = input("")
+        execute(text, verbose=False, verbose_error=True)
+
+else:
+
+    # Start the gui
+
+    try:
+
+        from .lib.Workspace import workspace
+
+    except(ValueError, ModuleNotFoundError):
+        
+        from lib.Workspace import workspace
+
+    FoxDot = workspace(FoxDotCode).run()
