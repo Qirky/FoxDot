@@ -36,8 +36,14 @@ if sys.argv[-1] == "--pipe":
 
         # Read in
 
-        text = input("")
-        execute(text, verbose=False, verbose_error=True)
+        try:
+
+            text = input("")
+            execute(text, verbose=False, verbose_error=True)
+
+        except EOFError:
+
+            sys.exit("Quitting")
 
 else:
 

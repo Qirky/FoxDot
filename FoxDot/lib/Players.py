@@ -582,7 +582,7 @@ class Player(Repeatable):
         # This could be in its own private function
 
         force_count = kwargs.get("count", False)
-        dur_updated = self.dur_updated()
+        dur_updated = self.dur_updated() 
 
         if dur_updated or force_count is True:
 
@@ -751,11 +751,11 @@ class Player(Repeatable):
         """ Returns the "now" value of the duration """
         rhythm = []
         for value in self.attr['dur']:
+            #rhythm.append(self.unpack(value))
             if isinstance(value, TimeVar):
-            #if hasattr(value, "now"):
-                rhythm.append(value.now())
+                 rhythm.append(value.now())
             else:
-                rhythm.append(value)
+                 rhythm.append(value)
         self.current_dur = asStream(rhythm)
         return self.current_dur
 
@@ -1174,7 +1174,7 @@ class Player(Repeatable):
 
                 item = item.now()
 
-            elif item.parent in self.queue_block:
+            elif self.queue_block is not None and item.parent in self.queue_block:
 
                 # Update the parent with an up-to-date value
 
@@ -1198,6 +1198,10 @@ class Player(Repeatable):
             # Unpack any generator patterns nested in a PGroup
 
             item = item.getitem() ## TODO -- get the correct index
+
+        if isinstance(item, Pattern): # We might have had a pattern stored! TODO- is this the best time to check this
+
+            item = item[self.event_n]
 
         if isinstance(item, PGroup):
 

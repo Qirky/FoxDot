@@ -159,7 +159,7 @@ def offlayer(self, method, *args, **kwargs):
 
     delay = kwargs.get("dur", 0.5)
 
-    return self.zip(func(*args, **kwargs), dtype=PGroupXor(0, value).set_delay(delay))
+    return self.zip(func(*args, **kwargs), dtype=lambda a, b: PGroupXor(a, b).set_delay(delay))
     
 @PatternMethod
 def amen(self, size=2):

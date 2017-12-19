@@ -64,7 +64,10 @@ FOXDOT_TEMP_FILE    = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/tmp/tempfil
 # If the tempfile doesn't exist, create it
 
 if not os.path.isfile(FOXDOT_TEMP_FILE):
-    with open(FOXDOT_TEMP_FILE, "w") as f:
+    try:
+        with open(FOXDOT_TEMP_FILE, "w") as f:
+            pass
+    except FileNotFoundError:
         pass
 
 def GET_SYNTHDEF_FILES():
