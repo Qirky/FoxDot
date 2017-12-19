@@ -36,7 +36,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__radd__(self)
         new = self.child(other)
         new.calculate = Add
@@ -56,7 +56,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__rsub__(self)
         new = self.child(other)
         new.calculate = rSub
@@ -66,7 +66,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__sub__(self)
         new = self.child(other)
         new.calculate = Sub
@@ -76,7 +76,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__rmul__(self)
         new = self.child(other)
         new.calculate = Mul
@@ -86,7 +86,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__mul__(self)
         new = self.child(other)
         new.calculate = Mul
@@ -95,7 +95,7 @@ class NumberKey(object):
     def __truediv__(self, other):
         if isinstance(other, (list, tuple)):
             other = self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__rdiv__(self)
         new = self.child(other)
         new.calculate = rDiv
@@ -114,7 +114,7 @@ class NumberKey(object):
     def __floordiv__(self, other):
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__rdiv__(self)
         new = self.child(other)
         new.calculate = rFloorDiv
@@ -124,7 +124,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__div__(self)
         new = self.child(other)
         new.calculate = FloorDiv
@@ -134,7 +134,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__rmod__(self)
         new = self.child(other)
         new.calculate = rMod
@@ -144,7 +144,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__mod__(self)
         new = self.child(other)
         new.calculate = Mod
@@ -154,7 +154,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__rpow__(self)
         new = self.child(other)
         new.calculate = rPow
@@ -164,7 +164,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__pow__(self)
         new = self.child(other)
         new.calculate = Pow
@@ -184,7 +184,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__xor__(self)
         new = self.child(other)
         new.calculate = Pow
@@ -194,7 +194,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__rtruediv__(self)
         new = self.child(other)
         new.calculate = rDiv
@@ -204,7 +204,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__truediv__(self)
         new = self.child(other)
         new.calculate = Div
@@ -235,7 +235,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__lt__(self)
         def compare(a, b):
             value = b > a
@@ -251,7 +251,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__gt__(self)
         new = self.child(other)
         def compare(a, b):
@@ -267,7 +267,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__le__(self)
         new = self.child(other)
         def compare(a, b):
@@ -283,7 +283,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, metaPattern):
+        if isinstance(other, (metaPattern, GeneratorPattern)):
             return other.__ge__(self)
         new = self.child(other)
         # a is other
@@ -365,21 +365,25 @@ class NumberKey(object):
             p1 >> piano(p2.degree.map({lambda x: x >= 4: lambda x: x + (0,2)}))
             ```
         """
+        # todo - Doesn't properly handle tuples/lists as patterns
         funcs = {}
         for key, value in mapping.items():
+            
             # We can map using a function
+            
             if callable(key) and callable(value):
-                funcs[partial(key, self)]  = partial(value, self)
+                funcs[partial(lambda: key(self.now()))]  = partial(lambda: value(self.now()))
 
             elif callable(key) and not callable(value):
-                funcs[partial(key, self)]  = partial(lambda e: e, value)
+                funcs[partial(lambda: key(self.now()))]  = partial(lambda: value)
 
             elif callable(value):
-                funcs[partial(lambda e: self == e, key)] = partial(value, self)
+                funcs[partial(lambda e: self.now() == e, key)] = partial(lambda: value(self.now()))
 
             else:
+            
                 # one-to-one mapping
-                funcs[partial(lambda e: self == e, key)] = partial(lambda e: e, value)
+                funcs[partial(lambda e: self.now() == e, key)] = partial(lambda: value)
 
         def mapping_function(a, b):
             for func, result in funcs.items():
@@ -392,7 +396,7 @@ class NumberKey(object):
 
         new = self.child(0)        
         new.calculate = mapping_function
-        return new        
+        return new
 
     def get_min(self):
         new = self.child(0)
