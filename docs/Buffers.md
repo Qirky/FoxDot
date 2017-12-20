@@ -51,22 +51,6 @@ that can be proggrammed into performance.
 
 #### Methods
 
-##### `add(self)`
-
-This is required to add the SynthDef to the SuperCollider Server 
-
-##### `add_base_class_behaviour(self)`
-
-Defines the initial setup for every SynthDef 
-
-##### `play(self, freq, **kwargs)`
-
-Plays a single sound 
-
-##### `write(self)`
-
-Writes the SynthDef to file 
-
 ---
 
 ## Functions
@@ -81,7 +65,7 @@ None
 
 ## Data
 
-#### `Samples = <FoxDot.lib.Buffers.BufferManager instance>`
+#### `Samples = <FoxDot.lib.Buffers.BufferManager object>`
 
 #### `loop = loop`
 
