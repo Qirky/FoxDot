@@ -18,13 +18,11 @@ if sys.version_info[0] == 2:
 
 try:
 
-    from .lib import FoxDotCode
-    from .lib import execute
+    from .lib import FoxDotCode, handle_stdin
 
 except(ValueError, ModuleNotFoundError):
 
-    from lib import FoxDotCode
-    from lib import execute
+    from lib import FoxDotCode, handle_stdin
 
 # If we are getting command line input
 
@@ -32,18 +30,7 @@ if sys.argv[-1] == "--pipe":
 
     # Set up pipe
 
-    while True:
-
-        # Read in
-
-        try:
-
-            text = input("")
-            execute(text, verbose=False, verbose_error=True)
-
-        except EOFError:
-
-            sys.exit("Quitting")
+    handle_stdin()
 
 else:
 

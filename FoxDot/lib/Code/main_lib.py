@@ -164,6 +164,32 @@ def get_now(obj):
     """ Returns the value of objects if they are time-varying """
     return getattr(obj, 'now', lambda: obj).__call__()
 
+def get_input():
+    """ Similar to `input` but can handle multi-line input. Terminates on a final "\n" """
+    line = " "; text = ""
+    
+    while len(line) > 0:
+        
+        line = input("")
+        text = text + "\n" + line
+
+    return text
+
+def handle_stdin():
+    while True:
+
+        try:
+
+            text = get_input()
+
+            execute(text, verbose=False, verbose_error=True)
+
+        except(EOFError, KeyboardInterrupt):
+
+            sys.exit("Quitting")
+
+    return
+
 def stdout(code):
     """ Shell-based output """
     console_text = code.strip().split("\n")

@@ -3,15 +3,29 @@ FoxDot - Live Coding with Python v0.5
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.5.2 fixes and updates
+### v0.5.4 fixes and updates
 
-- Improved behaviour of `TimeVar`, `Pvar`, and `PvarGenerator` classes when created via mathematical operators. 
-- SynthDefs can be read loaded into FoxDot from SuperCollider using the `FileSynthDef` and `CompiledSynthDef` classes (see `SynthDef.py`).
-- `DefaultServer` instance has a `forward` attribute that, when not `None`, sends any outgoing OSC message to.  Example:
+- Better communication from external processes. Running FoxDot with a `--pipe` flag (e.g. `python -m FoxDot --pipe`) allows commands to be written via the stdin. Each command should end with a blank line.
+
+### v0.5.3 fixes and updates
+
+- Player attribute aliases added. Using `pitch` and `char` will return a player's `degree` attribute.
+- Player Key behaviour improved. Using multiple conditions e.g. `4 < p1.pitch < 7` will hold the value 1 while `p1.pitch` is between 4 and 7, and a 0 otherwise. These conditions can be "mapped" to values other than 1 by using the `map` method to map values, or results of functions, to other values/functions (which are applied to the values):
 ```python
-# Sends any OSC message going to SuperCollider to the address
-DefaultServer.forward = OSCConnect(("localhost", 57890))
+b1 >> bass(var([0,4,5,3]))
+# Takes a dictionary of values / functions
+p1 >> pads(b1.pitch.map(
+		{ 0: 2,
+		  4: lambda x: x + P(0,2),
+		  lambda x: x in (5,3): lambda y: y + PRand([0,2,4,7])
+	}))
 ```
+- Known issue: mapping to a pattern of values for a Player's duration does not work as expected so be careful.
+- The `Player.every` method can now take `Pattern` methods, which affect the degree of the `Player` (specifying attributes will be added later). Instead of applying the function every time it is called, it has a switch that applies the function then "un-applies" the function.
+```python
+p1 >> play("x-i-").every(6, "amen").every(8, "palindrome")
+```
+
  
 ---
 
@@ -66,7 +80,7 @@ A 'block' of code in FoxDot is made up of consecutive lines of code with no empt
 Python supports many different programming paradigms, including procedural and functional, but FoxDot implements a traditional object orientated approach with a little bit of cheating to make it easier to live code. A player object is what FoxDot uses to make music by assigning it a synth (the 'instrument' it will play) and some instructions, such as note pitches. All one and two character variable names are reserved for player objects at startup so, by default, the variables `a`, `bd`, and `p1` are 'empty' player objects. If you use one of these variables to store something else but want to use it as a player object again, or you  want to use a variable with more than two characters, you just have to reserve it by creating a `Player` and assigning it like so:
 
 ``` python
-p1 = Player()
+p1 = Player("p1") # The string name is optional
 ```
 
 To stop a Player, use the `stop` method e.g. `p1.stop()`. If you want to stop all players, you can use the command `Clock.clear()` or the keyboard short-cut `Ctrl+.`, which executes this command.
@@ -101,17 +115,20 @@ hh >> play("---[--]")
 sn >> play("  o ")
 ```
 
-Alternatively you can use `PZip`, the `zip` method, or the `&` sign to create one pattern that does this:
+Alternatively, you can do this in one line using `<>` arrows to separate patterns you want to play together like so:
+
+```python
+d1 >> play("<x( x)  ><---[--]><  o >")
+```
+
+Or you can use `PZip`, the `zip` method, or the `&` sign to create one pattern that does this. This can be useful if you want to perform some function on individual layers later on:
 
 ``` python
-# The following are equivalent
-d1 >> play( PZip("x( x)  ", "--[--]", "  o "))
+d1 >> play(P["x( x)  "].palindrome().zip("---[--]").zip(P["  o "].amen()))  
 
-d1 >> play(P["x( x)  "].zip("---[--]").zip("  o "))  
+# The first item must be a P[] pattern, not a string. 
 
-# Note that first string is wrapped in a Pattern P[] 
-
-d1 >> play(P["x( x)  "] & "---[--]" & "  o ")
+d1 >> play(P["x( x)  "].palindrome() & "---[--]" & P["  o "].amen())
 ```
 
 Grouping characters in round brackets laces the pattern so that on each play through of the sequence of samples, the next character in the group's sample is played. The sequence `(xo)---` would be played back as if it were entered `x---o---`. Using square brackets will force the enclosed samples to played in the same time span as a single character e.g. `--[--]` will play two hi-hat hits at a half beat then two at a quarter beat. You can play a random sample from a selection by using curly braces in your Play String like so:
