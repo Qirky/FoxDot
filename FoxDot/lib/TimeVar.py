@@ -755,6 +755,26 @@ class PvarGeneratorEx(PvarGenerator):
         self.evaluate = fetch(Nil)
         self.dependency = 1
 
+class mapvar(Pvar):
+    """ Like a `Pvar`, the `mapvar` returns a whole `Pattern` as opposed to a single
+        value, but instead of using the global clock to find the current value it
+        uses the value in an instance of the `PlayerKey` class. """
+    def __init__(self, key, mapping, default=0):
+        TimeVar.__init__(self, [])
+        self.key     = key
+        self.values  = {key: asStream(value) for key, value in mapping.items()}
+        self.default = default
+
+    def get_current_index(self, time=None):
+        self.current_index = self.key.now()
+        return self.current_index
+
+    def now(self, time=None):
+        """ Returns the value currently represented by this TimeVar """
+        i = self.get_current_index(time)
+        self.current_value = self.calculate(self.values.get(i, self.default))
+        return self.current_value
+
 
 class _inf(int):
     """ Un-implemented """
