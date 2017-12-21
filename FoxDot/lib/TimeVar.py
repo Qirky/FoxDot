@@ -577,27 +577,27 @@ class Pvar(TimeVar, Pattern):
 
     def __add__(self, other):
         new = self.new(other)
-        new.set_eval(Add)
+        new.set_eval(rAdd)
         return new
 
     def __radd__(self, other):
         new = self.new((other))
-        new.set_eval(rAdd)
+        new.set_eval(Add)
         return new
 
     def __sub__(self, other):
         new = self.new((other))
-        new.set_eval(Sub)
+        new.set_eval(rSub)
         return new
 
     def __rsub__(self, other):
         new = self.new((other))
-        new.set_eval(rSub)
+        new.set_eval(Sub)
         return new
 
     def __mul__(self, other):
         new = self.new((other))
-        new.set_eval(Mul)
+        new.set_eval(rMul)
         return new
 
     def __rmul__(self, other):
@@ -607,52 +607,52 @@ class Pvar(TimeVar, Pattern):
 
     def __div__(self, other):
         new = self.new((other))
-        new.set_eval(Div)
+        new.set_eval(rDiv)
         return new
 
     def __rdiv__(self, other):
         new = self.new((other))
-        new.set_eval(rDiv)
+        new.set_eval(Div)
         return new
 
     def __truediv__(self, other):
         new = self.new((other))
-        new.set_eval(Div)
+        new.set_eval(rDiv)
         return new
 
     def __rtruediv__(self, other):
         new = self.new((other))
-        new.set_eval(rDiv)
+        new.set_eval(Div)
         return new
 
     def __floordiv__(self, other):
         new = self.new((other))
-        new.set_eval(FloorDiv)
+        new.set_eval(rFloorDiv)
         return new
 
     def __rfloordiv__(self, other):
         new = self.new((other))
-        new.set_eval(rFloorDiv)
+        new.set_eval(FloorDiv)
         return new
 
     def __pow__(self, other):
         new = self.new((other))
-        new.set_eval(Pow)
+        new.set_eval(rPow)
         return new
 
     def __rpow__(self, other):
         new = self.new((other))
-        new.set_eval(rPow)
+        new.set_eval(Pow)
         return new
 
     def __mod__(self, other):
         new = self.new((other))
-        new.set_eval(Mod)
+        new.set_eval(rMod)
         return new
 
     def __rmod__(self, other):
         new = self.new((other))
-        new.set_eval(rMod)
+        new.set_eval(Mod)
         return new
 
     def __or__(self, other):
