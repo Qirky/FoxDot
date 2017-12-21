@@ -1178,6 +1178,9 @@ class GeneratorPattern(random.Random):
         """ Returns a PGroup with n lots of the Generator """
         return PGroup([self.__class__(*self.args, **self.kwargs) for i in range(n)])
 
+    def transform(self, func):
+        return self.new(None, lambda a, b: func(a))
+
 
 class PatternContainer(metaPattern):
     def getitem(self, key, *args):
