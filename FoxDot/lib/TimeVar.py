@@ -6,7 +6,6 @@
 from __future__ import absolute_import, division, print_function
 
 from .Patterns import *
-from .Repeat import *
 from .Utils  import *
 from .Patterns.Operations import *
 
@@ -32,8 +31,6 @@ class TimeVar:
     depth = 128
 
     def __init__(self, values, dur=None, **kwargs):
-
-        Repeatable.__init__(self)
 
         if dur is None:
 
