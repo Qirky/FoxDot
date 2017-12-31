@@ -1176,9 +1176,9 @@ class workspace:
     def colour_line(self, line):
         """ Checks a line for any tags that match regex and updates IDE colours """
 
-        start, end = index(line,0), index(line,"end")
+        start_of_line, end_of_line = index(line,0), index(line,"end")
 
-        thisline = self.text.get(start, end)
+        thisline = self.text.get(start_of_line, end_of_line)
 
         try:
 
@@ -1186,7 +1186,7 @@ class workspace:
 
             for tag_name in self.text.tag_names():
 
-                self.text.tag_remove(tag_name, start, end)
+                self.text.tag_remove(tag_name, start_of_line, end_of_line)
 
             # Re-apply tags
 
@@ -1196,9 +1196,75 @@ class workspace:
 
         except Exception as e:
 
-            print(e)
+            print(e)       
 
-        return                    
+        # Find comments (not done with regex)
+
+        i = find_comment(thisline)
+
+        if i is not None:
+
+            self.text.tag_add("comments", index(line, i), end_of_line)
+
+        return
+
+    def find_multiline(self):
+        """ Goes through the whole text and adds multiline formatting where necessary. Not-implemented """
+
+        start = 1
+        end   = int(self.text.index(END).split(".")[0])
+
+        pos = []
+        tracking = False
+        tracking_char = ""
+
+        # Iterate over each line
+        for line in range(start, end):
+
+            # If it contains a """ or ''' start tracking
+
+            text = self.text.get("{}.0".format(line), "{}.end".format(line))
+
+            for char in ("'''", '"""'):
+
+                print(char, text, char in text)
+
+                if char in text:
+
+                    index = text.index(char)
+
+                    if tracking and tracking_char == char:
+
+                        break
+            else:
+
+                index = None
+
+            # Find the closing set of quotes
+
+            if index is not None:
+
+                if tracking:
+
+                    tracking_char = ""
+                    tracking = False
+                    m_end    = index
+
+                    pos.append((m_start, m_end))
+
+                else:
+
+                    tracking = True
+                    m_start = index
+                    tracking_char = char
+
+        # Add formatting
+
+        if len(pos) > 0:
+
+            print(pos)
+
+        return
 
     def get_last_word(self):
 

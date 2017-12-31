@@ -31,7 +31,7 @@ class BracketHandler:
 
         for char in list(self.left_brackets.keys()) + list(self.right_brackets.keys()):
 
-            self.text.bind(char, self.handle)
+            self.text.bind(char, self.handle) # this binds bracket presses to the handle method
 
     def handle(self, event=None, insert=INSERT):
 
@@ -62,7 +62,7 @@ class BracketHandler:
                 ret = "break"
                 
             except:
-                
+
                 pass
 
             # B. If next character is a whitespace or a right bracket add a closing bracket as well. 
@@ -182,7 +182,12 @@ class BracketHandler:
                 self.text.tag_add("tag_open_brackets", "{}.{}".format(row,col), "{}.{}".format(row,col+1))
                 self.text.tag_add("tag_open_brackets", "{}.{}".format(line,column), "{}.{}".format(line,column+1))
 
-        return ret
+        if ret is None:
+            
+            self.text.insert(INSERT, event.char)
+            self.root.colour_line(line)
+
+        return "break"
 
     def delete(self, insert=INSERT):
         line, column = index(self.text.index(insert))

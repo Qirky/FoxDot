@@ -19,6 +19,7 @@ numbers   = r"(?<![a-zA-Z])\d+"
 strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
+multiline = r"\"\"\".*\"\"\"|'''.*'''"
 
 
 
@@ -107,7 +108,61 @@ def userdefined(line):
     if match:
 
         return match.group()
-    
+
+def find_comment(line):
+    """ Finds the index of a comment # and returns None if not found """
+    instring, instring_char = False, ""
+    for i, char in enumerate(line):
+        if char in ('"', "'"):
+            if instring:
+                if char == instring_char:
+                    instring = False
+                    instring_char = ""
+            else:
+                instring = True
+                instring_char = char
+        elif char == "#":
+          if not instring:
+              return i
+    return None
+
+def find_multiline(text):
+    pos = []
+
+    tag = multiline
+
+    match_start = match_end = 0
+
+    for match in re.finditer(tag, text, re.DOTALL):
+
+        looking = True
+
+        i = 0
+
+        while looking:
+
+            try:
+
+                start  = match.start(i)
+                end    = match.end(i)
+
+                if start == end == -1:
+
+                    raise IndexError # this is hacky af
+
+                match_start = start
+                match_end   = end
+
+            except IndexError:
+
+                looking = False
+
+            i += 1
+
+        pos.append((match_start, match_end))
+
+    return pos
+
 
 # Use our regex to read patterns.py and add all the functions to key_types
     
@@ -172,7 +227,6 @@ re_patterns = {  'functions' : functions,
                  'key_types' : key_types,
                  'user_defn' : user_defn,
                  'other_kws' : other_kws,
-                 'comments'  : comments,
                  'numbers'   : numbers,
                  'strings'   : strings,
                  'dollar'    : dollar,
