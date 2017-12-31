@@ -674,7 +674,7 @@ class Player(Repeatable):
     def count(self, time=None, event_after=False):
         """ Counts the number of events that will have taken place between 0 and `time`. If
             `time` is not specified the function uses self.metro.now(). Setting `event_after`
-            to `True` will find the next event *after* `time`"""
+            to `True` will find the next event *after* `time`"""  
 
         n = 0
         acc = 0
@@ -857,12 +857,16 @@ class Player(Repeatable):
 
         return self
 
-    def stutter(self, n=2, **kwargs):
+    def stutter(self, amount=None, **kwargs):
         """ Plays the current note n-1 times. You can specify keywords. """
 
         # Get the current values (this might be called between events)
 
-        n = int(n)
+        n = int(kwargs.get("n", amount if amount is not None else 2))
+
+        if "n" in kwargs:
+
+            del kwargs["n"]
 
         if self.metro.solo == self and n > 1:
 
@@ -986,7 +990,7 @@ class Player(Repeatable):
         self._replace_degree(new_degree)
         return self
 
-    def map(self, key1, key2, mapping):
+    def attrmap(self, key1, key2, mapping):
         """ Sets the attribute for self.key2 to self.key1
             altered with a mapping dictionary.
         """
@@ -996,8 +1000,18 @@ class Player(Repeatable):
     def smap(self, kwargs):
         """ Like map but maps the degree to the sample attribute
         """
-        self.map("degree", "sample", kwargs)
+        self.attrmap("degree", "sample", kwargs)
         return self
+
+    def map(self, other, mapping, otherattr="degree"):
+        """ p1 >> pads().map(b1, {0: {oct=[4,5], dur=PDur(3,8), 2: oct})     """
+        # Convert dict to {"oct": {4}}
+        # key is the value of player key, attr is 
+        for key, minimap in mapping.items():
+            for attr, value in minimap.items():
+                setattr(self, attr, mapvar(getattr(other, attr), values))
+        return self
+
     
     # --- Misc. Standard Object methods
 
@@ -1707,7 +1721,7 @@ class Player(Repeatable):
 
         return self
 
-    def versus(self, other, key = lambda x: x.freq, f=max):
+    def versus_old(self, other, key = lambda x: x.freq, f=max):
         """ Takes another Player object and a function that takes
             two player arguments and returns one, default is the higher
             pitched
@@ -1724,6 +1738,12 @@ class Player(Repeatable):
             self._versus = None
         return self
 
+    def versus(self, other, func = lambda a, b: a > b):
+
+        self.amp  = self.pitch > other.pitch
+        other.amp = other.pitch > self.pitch
+
+        return self
     
 
     # Utils
