@@ -418,7 +418,7 @@ class NumberKey(object):
         new.calculate = f
         return new
 
-    def transpose(self, func):
+    def transform(self, func):
         """ Returns a child Player Key based on the func """
         new = self.child(0)
         new.calculate = lambda a, b: func(b)
@@ -427,7 +427,7 @@ class NumberKey(object):
 
     def accompany(self, freq=0, rel=[0,2,4]):
         """ Returns a PlayerKey whose function returns an accompanying note"""
-        return self.transpose(Accompany(freq=freq, rel=rel))
+        return self.transform(Accompany(freq=freq, rel=rel))
     
     # Values
     
