@@ -176,6 +176,9 @@ def get_input():
     return text
 
 def handle_stdin():
+    """ When FoxDot is run with the --pipe added, this function
+        is called and continuosly   """
+
     while True:
 
         try:

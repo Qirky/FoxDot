@@ -156,7 +156,7 @@ class Repeatable(object):
 
         elif len(attr) == 2:
 
-            # TODO -- add this functionality to PlayerKey class
+            # TODO -- add this functionality to PlayerKey class?
 
             sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
 
@@ -166,7 +166,7 @@ class Repeatable(object):
         
         return method
         
-    def every(self, n, cmd, *args, **kwargs):
+    def every(self, occurence, cmd, *args, **kwargs):
         """ Every n beats, call a method (defined as a string) on the
             object and use the args and kwargs. To call the method
             every n-th beat of a timeframe, use the `cycle` keyword argument
@@ -214,7 +214,7 @@ class Repeatable(object):
 
         if cmd in self.repeat_events:
 
-            self.repeat_events[cmd].update(n, cycle, args, kwargs)
+            self.repeat_events[cmd].update(occurence, cycle, args, kwargs)
 
             if not self.repeat_events[cmd].isScheduled():
 
@@ -222,7 +222,7 @@ class Repeatable(object):
 
         else:
 
-            call = MethodCall(self, method, n, cycle, args, kwargs)
+            call = MethodCall(self, method, occurence, cycle, args, kwargs)
 
             self.repeat_events[cmd] = call
 
