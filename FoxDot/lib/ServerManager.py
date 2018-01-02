@@ -41,7 +41,6 @@ class SCLangClient(OSCClient):
         except Exception as e:
             print(e)
 
-
 class OSCConnect(SCLangClient):
     def __init__(self, address):
         SCLangClient.__init__(self)
@@ -173,12 +172,19 @@ class SCLangServerManager(ServerManager):
         self.sclang = SCLangBidirectionalClient()
         self.sclang.connect( (self.addr, self.SCLang_port) )
         self.loadSynthDef(FOXDOT_INFO_FILE)
+        
         try:
+
             info = self.getInfo()
+
         except RequestTimeout:
+
             # It's not terrible if we couldn't fetch the info, but we should log it.
+
             WarningMsg("Could not fetch info from SCLang server. Using defaults...")
+
         else:
+
             self.num_input_busses = info.num_input_bus_channels
             self.num_output_busses = info.num_output_bus_channels
             self.max_busses = info.num_audio_bus_channels

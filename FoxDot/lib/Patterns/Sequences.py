@@ -40,7 +40,7 @@ class __pattern__(object):
     def __getitem__(self, args):
         if isinstance(args, (Pattern.TimeVar, Pattern.PlayerKey)):
             data = [args]
-        elif hasattr(args, '__iter__') and not isinstance(args, (str, bytes, GeneratorPattern)):
+        elif hasattr(args, '__iter__') and not isinstance(args, (str, bytes, GeneratorPattern, PGroup)):
             data = []
             for item in args:
                 if type(item) is slice:
