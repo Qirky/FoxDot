@@ -12,6 +12,7 @@ FoxDot\lib\Buffers.py
 FoxDot\lib\Constants.py
 FoxDot\lib\Effects.py
 FoxDot\lib\Key.py
+FoxDot\lib\Logging.py
 FoxDot\lib\Midi.py
 FoxDot\lib\OSC.py
 FoxDot\lib\OSC3.py
@@ -71,6 +72,7 @@ FoxDot\lib\Workspace\img\icon.ico
 FoxDot\lib\Workspace\tmp\tempfile.txt
 FoxDot\osc\Buffers.scd
 FoxDot\osc\Info.scd
+FoxDot\osc\OscFunc.scd
 FoxDot\osc\sceffects\FilterSwell.scd
 FoxDot\osc\sceffects\bandPassFilter.scd
 FoxDot\osc\sceffects\bitcrush.scd
