@@ -335,7 +335,7 @@ fx.save()
 
 fx = FxList.new("formant", "formantFilter", {"formant": 0}, order=2)
 fx.add("formant = (formant % 8) + 1")
-fx.add("osc = Formlet.ar(osc, formant * 200, ((formant % 5 + 1)) / 1000, (formant * 1.5) / 600).tanh;")
+fx.add("osc = Formlet.ar(osc, formant * 200, ((formant % 5 + 1)) / 1000, (formant * 1.5) / 600).tanh")
 fx.save()
 
 fx = FxList.new("shape", "wavesShapeDistortion", {"shape":0}, order=2)
