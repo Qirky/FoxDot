@@ -3,29 +3,11 @@ FoxDot - Live Coding with Python v0.5
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.5.4 fixes and updates
+### v0.5.5 fixes and updates
 
-- Better communication from external processes. Running FoxDot with a `--pipe` flag (e.g. `python -m FoxDot --pipe`) allows commands to be written via the stdin. Each command should end with a blank line.
-
-### v0.5.3 fixes and updates
-
-- Player attribute aliases added. Using `pitch` and `char` will return a player's `degree` attribute.
-- Player Key behaviour improved. Using multiple conditions e.g. `4 < p1.pitch < 7` will hold the value 1 while `p1.pitch` is between 4 and 7, and a 0 otherwise. These conditions can be "mapped" to values other than 1 by using the `map` method to map values, or results of functions, to other values/functions (which are applied to the values):
-```python
-b1 >> bass(var([0,4,5,3]))
-# Takes a dictionary of values / functions
-p1 >> pads(b1.pitch.map(
-		{ 0: 2,
-		  4: lambda x: x + P(0,2),
-		  lambda x: x in (5,3): lambda y: y + PRand([0,2,4,7])
-	}))
-```
-- Known issue: mapping to a pattern of values for a Player's duration does not work as expected so be careful.
-- The `Player.every` method can now take `Pattern` methods, which affect the degree of the `Player` (specifying attributes will be added later). Instead of applying the function every time it is called, it has a switch that applies the function then "un-applies" the function.
-```python
-p1 >> play("x-i-").every(6, "amen").every(8, "palindrome")
-```
-
+- Fix `TimeVar` class so it no longer inherits from `Repeatable` i.e. no longer has access to the "every" method.
+- Fix pattern bug  when creating a pattern using the `P` generator; `P[P(0,2)]` no longer returns `P[0, 2]`. However, `P[(0,2)]` is interpreted exactly as `P[0, 2]` and will return that instead.
+- Added more variation to the "formantFilter" effect 
  
 ---
 
@@ -157,6 +139,10 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 ## Documentation
 
 For more information on FoxDot, please see the `docs` folder (although largely unwritten). Please note that FoxDot is still in development and is changing all the time. I do my best to keep the website and README up to date but don't always have the time.
+
+## Using alternative editors
+
+FoxDot comes pre-packaged with its own basic editor so that you don't have to tinker with config files or download any other tools but if you want to use an existing editor you can. [Koltes](https://github.com/KoltesDigital) has written a plugin for the popular Atom editor. You can install it by going to Settings -> Install -> Searching "foxdot" and pressing install on the plug in. Press Ctrl+Alt+f or go to menu -> Packages -> FoxDot  -> Toggle to start FoxDot running.
 
 ## Thanks
 
