@@ -145,6 +145,8 @@ class BufferManager(object):
         self._paths = [FOXDOT_LOOP] + list(paths)
         self._ext = ['wav', 'wave', 'aif', 'aiff', 'flac']
 
+        self.loops = [fn.rsplit(".",1)[0] for fn in os.listdir(FOXDOT_LOOP)]
+
     def __str__(self):
         return "\n".join(["%r: %s" % (k, v) for k, v in sorted(DESCRIPTIONS.items())])
 
