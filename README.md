@@ -7,7 +7,17 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 
 - Fix `TimeVar` class so it no longer inherits from `Repeatable` i.e. no longer has access to the "every" method.
 - Fix pattern bug  when creating a pattern using the `P` generator; `P[P(0,2)]` no longer returns `P[0, 2]`. However, `P[(0,2)]` is interpreted exactly as `P[0, 2]` and will return that instead.
-- Added more variation to the "formantFilter" effect 
+- Added more variation to the "formantFilter" effect
+- "loop" samples are added "on-the-fly" as opposed to loaded at start up. These can be loaded by filepath (with or without extension)
+```python
+a1 >> loop("/path/to/sample.wav")
+a2 >> loop("/path/to/sample")
+
+a1 >> loop("yeah")             # Searches recursively for yeah.(wav|wave|aif|aiff|flac)
+a1 >> loop("perc/kick")        # Supports directories in the path
+a1 >> loop("*kick*", sample=2) # Supports * ? [chars] and [!chars]
+a1 >> loop("**/*_Em")          # Supports ** as 'recursively all subdirectories'
+``` 
  
 ---
 

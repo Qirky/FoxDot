@@ -1,0 +1,5 @@
+d1 >> play("x-u-", dur=2).every(4, "stutter")
+
+d2 >> loop("robot110", P[:8], tempo=110)
+
+Clock.bpm=var([120,60],[28,4])

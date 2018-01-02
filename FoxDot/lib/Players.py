@@ -1376,7 +1376,7 @@ class Player(Repeatable):
 
             # Adjust the rate to a given tempo
 
-            rate = tempo * rate
+            rate = float(tempo * rate)
 
             if rate < 0:
 
@@ -1890,6 +1890,19 @@ class Group:
 
         return self
         
+    def only(self):
+
+        if self.metro is None:
+
+            self.__class__.metro = Player.metro
+        
+        for player in list(self.metro.playing):
+            
+            if player not in self.players:
+                
+                player.stop()
+
+        return self
 
     def iterate(self, dur=4):
         if dur == 0 or dur is None:

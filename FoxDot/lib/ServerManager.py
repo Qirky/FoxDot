@@ -276,7 +276,7 @@ class SCLangServerManager(ServerManager):
             value = []
         
         osc_packet = ["startSound", node, 0, group_id, 'bus', bus, "sus", max_sus] + value
-        
+
         msg.append( osc_packet )
         
         return msg, node
