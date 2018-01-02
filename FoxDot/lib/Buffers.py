@@ -142,7 +142,7 @@ class BufferManager:
         self.loop_files = {}
 
         # Load buffers
-        bufnum = 1
+        self.next_bufnum = 1
         root   = FOXDOT_SND
 
         # Go through the alphabet
@@ -173,10 +173,10 @@ class BufferManager:
 
                             numChannels = 1
 
-                        self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
-                        self.buffers[bufnum] = self.symbols[char][-1]
+                        self.symbols[char].addbuffer(join(path, f), self.next_bufnum, numChannels)
+                        self.buffers[self.next_bufnum] = self.symbols[char][-1]
 
-                        bufnum += 1
+                        self.next_bufnum += 1
 
         # Go through symbols
 
@@ -200,10 +200,10 @@ class BufferManager:
 
                         numChannels = 1
 
-                    self.symbols[char].addbuffer(join(path, f), bufnum, numChannels)
-                    self.buffers[bufnum] = self.symbols[char][-1]
+                    self.symbols[char].addbuffer(join(path, f), self.next_bufnum, numChannels)
+                    self.buffers[self.next_bufnum] = self.symbols[char][-1]
 
-                    bufnum += 1
+                    self.next_bufnum += 1
 
         # Define empty buffer
         self.nil = BufChar(None)
@@ -218,14 +218,41 @@ class BufferManager:
             name = "".join(filename.split(".")[:-1])
 
             self.loop_files[name] = LoopFile(name)
-            self.loop_files[name].addbuffer(join(path, filename), bufnum, 2)
+            self.loop_files[name].addbuffer(join(path, filename), self.next_bufnum, 2)
 
-            bufnum += 1
+            self.next_bufnum += 1
 
         self.loops = list(self.loop_files.keys())
 
         # Write to file
         self.write_to_file()
+
+    def add_sample(self, fn):
+        """add a sample to loop during runtime
+        give fn as filename w/out ext"""
+
+        # synth already loaded
+        if fn in self.loop_files:
+            raise FileExistsError('{} synth already loaded'.format(fn))
+
+        # filename doesn't exist
+        folder_contents = {"".join(f.split('.')[:-1]): f for f in os.listdir(FOXDOT_LOOP)}
+        if fn not in folder_contents:
+            raise FileNotFoundError("{} isn't in the sample directory".format(fn))
+
+        path = join(FOXDOT_SND, FOXDOT_LOOP)
+
+        self.loop_files[fn] = LoopFile(fn)
+        self.loop_files[fn].addbuffer(join(path, folder_contents[fn]), 
+                                      self.next_bufnum, 2)
+
+        self.next_bufnum += 1
+
+        # idk what this is for
+        self.loops = list(self.loop_files.keys())
+
+        # is this needed?
+        # self.write_to_file()
 
     def __getitem__(self, key):
         if hasattr(key, 'char'):
