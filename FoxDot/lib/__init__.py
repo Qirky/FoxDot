@@ -17,6 +17,8 @@ Copyright Ryan Kirkbride 2015
 
 from __future__ import absolute_import, division, print_function
 
+import logging
+
 from .Code import *
 
 FoxDotCode.namespace = globals()
@@ -141,6 +143,7 @@ def Master():
 
 # Create a clock and define functions
 
+logging.basicConfig(level=logging.ERROR)
 when.set_namespace(FoxDotCode) # experimental
 
 Clock = TempoClock()

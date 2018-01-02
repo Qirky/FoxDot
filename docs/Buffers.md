@@ -13,13 +13,6 @@ that can be proggrammed into performance.
 
 ## Classes
 
-### `BufChar(self, char)`
-
-
-
-#### Methods
-
----
 
 ### `Buffer(self, fn, number, channels=1)`
 
@@ -37,13 +30,6 @@ that can be proggrammed into performance.
 
 ---
 
-### `LoopFile(self, char)`
-
-
-
-#### Methods
-
----
 
 ### `LoopSynthDef(self)`
 
@@ -55,9 +41,6 @@ that can be proggrammed into performance.
 
 ## Functions
 
-### `FindBuffer(name)`
-
-None
 
 ### `path(fn)`
 

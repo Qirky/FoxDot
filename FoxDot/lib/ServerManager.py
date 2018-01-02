@@ -165,6 +165,7 @@ class SCLangServerManager(ServerManager):
         self.num_output_busses = 2
         self.bus = self.num_input_busses + self.num_output_busses
         self.max_busses = 100
+        self.max_buffers = 1024
 
         self.fx_setup_done = False
         self.fx_names = {}
@@ -179,6 +180,7 @@ class SCLangServerManager(ServerManager):
             # It's not terrible if we couldn't fetch the info, but we should log it.
             WarningMsg("Could not fetch info from SCLang server. Using defaults...")
         else:
+            self.max_buffers = info.num_buffers
             self.num_input_busses = info.num_input_bus_channels
             self.num_output_busses = info.num_output_bus_channels
             self.max_busses = info.num_audio_bus_channels
@@ -522,6 +524,12 @@ class SCLangServerManager(ServerManager):
         message.append([bufnum, path])
         self.client.send( message )
         return
+
+    def bufferFree(self, bufnum):
+        """ Sends a message to SuperCollider to free a buffer """
+        message = OSCMessage("/b_free")
+        message.append([bufnum])
+        self.client.send(message)
 
     def sendMidi(self, msg, cmd="/foxdot_midi"):
         """ Sends a message to the FoxDot class in SuperCollider to forward a MIDI message """
