@@ -18,7 +18,6 @@ from threading import Thread
 from .Code import WarningMsg
 from .Settings import *
 
-
 if sys.version_info[0] > 2:
     from .OSC3 import *
 else:
@@ -171,20 +170,24 @@ class SCLangServerManager(ServerManager):
         self.fx_names = {}
 
         # OSC Connection for custom OSCFunc in SuperCollider
-        self.sclang = SCLangBidirectionalClient()
-        self.sclang.connect( (self.addr, self.SCLang_port) )
-        self.loadSynthDef(FOXDOT_INFO_FILE)
-        try:
-            info = self.getInfo()
-        except RequestTimeout:
-            # It's not terrible if we couldn't fetch the info, but we should log it.
-            WarningMsg("Could not fetch info from SCLang server. Using defaults...")
+        if GET_SC_INFO:
+            self.sclang = SCLangBidirectionalClient()
+            self.sclang.connect( (self.addr, self.SCLang_port) )
+            self.loadSynthDef(FOXDOT_INFO_FILE)
+            try:
+                info = self.getInfo()
+            except RequestTimeout:
+                # It's not terrible if we couldn't fetch the info, but we should log it.
+                WarningMsg("Could not fetch info from SCLang server. Using defaults...")
+            else:
+                self.max_buffers = info.num_buffers
+                self.num_input_busses = info.num_input_bus_channels
+                self.num_output_busses = info.num_output_bus_channels
+                self.max_busses = info.num_audio_bus_channels
+                self.bus = self.num_input_busses + self.num_output_busses
         else:
-            self.max_buffers = info.num_buffers
-            self.num_input_busses = info.num_input_bus_channels
-            self.num_output_busses = info.num_output_bus_channels
-            self.max_busses = info.num_audio_bus_channels
-            self.bus = self.num_input_busses + self.num_output_busses
+            self.sclang = SCLangClient()
+            self.sclang.connect( (self.addr, self.SCLang_port))
 
         # Clear SuperCollider nodes if any left over from other session etc
 

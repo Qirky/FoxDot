@@ -92,6 +92,7 @@ PORT2         = conf.PORT2
 FONT          = conf.FONT
 SC3_PLUGINS   = conf.SC3_PLUGINS
 MAX_CHANNELS  = conf.MAX_CHANNELS
+GET_SC_INFO   = conf.GET_SC_INFO
 
 if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
 

@@ -9,6 +9,7 @@ BOOT_ON_STARTUP=False
 SC3_PLUGINS=True
 MAX_CHANNELS=2
 SAMPLES_DIR=""
+GET_SC_INFO=True
 
 # Text colours
 # ------------------
@@ -25,6 +26,8 @@ strings='#eae02a'
 dollar='#ec4e20'
 arrow='#eae02a'
 players='#ec4e20'
+
+
 
 
 

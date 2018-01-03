@@ -31,6 +31,7 @@ except FileNotFoundError:
     SC3_PLUGINS=False
     MAX_CHANNELS=2
     SAMPLES_DIR=""
+    GET_SC_INFO=True
 
     # Text colours
     # ------------------
