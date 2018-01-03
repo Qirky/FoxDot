@@ -167,6 +167,14 @@ from .Bang import Bang
 
 from .TimeVar import TimeVar
 
+# class EmptyPlayer(object):
+#     def __init__(self, name):
+#         self.name = name
+#     def __rshift__(self, *args, **kwargs):
+#         self = Player(self.name).__rshift__(*args, **kwargs)
+#         return self
+
+
 class Player(Repeatable):
 
     """
