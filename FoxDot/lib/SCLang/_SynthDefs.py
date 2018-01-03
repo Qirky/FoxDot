@@ -25,7 +25,7 @@ with SynthDef("audioin") as audioin:
 with SynthDef("pads") as pads:
     pads.amp = pads.amp * 1.5
     pads.freq = pads.freq + [0,1]
-    pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) + Pulse.ar(pads.freq, width=LFTri.kr(pads.sus/16), mul=pads.amp/20) 
+    pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) + Pulse.ar(pads.freq, width=LFTri.kr(pads.sus/16), iphase=0.5, mul=pads.amp/20) 
     pads.osc = HPF.ar(pads.osc, 1000);
     pads.env = Env.perc()
 
