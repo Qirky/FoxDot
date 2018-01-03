@@ -3,7 +3,8 @@ SynthDef.new(\quin,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-osc=(Klank.ar(`[[1, 2, 4, 2], [100, 50, 0, 10], [1, 5, 0, 1]], Impulse.ar(freq).dup, [(freq * 1.01), freq]) / 5000);
+freq=(freq * [1, 1.01]);
+osc=(Klank.ar(`[[1, 2, 4, 2], [100, 50, 0, 10], [1, 5, 0, 1]], Impulse.ar(freq).dup, freq) / 5000);
 osc=(osc * LFSaw.ar((freq * (1 + rate))));
 env=EnvGen.ar(Env.perc(attackTime: 0.01,releaseTime: sus,level: amp,curve: 1), doneAction: 0);
 osc=(osc * env);

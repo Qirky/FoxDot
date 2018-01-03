@@ -3,8 +3,10 @@ SynthDef.new(\pads,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-amp=(amp / 2);
-osc=SinOsc.ar([freq, (freq + 2)], mul: amp);
+amp=(amp * 1.5);
+freq=(freq + [0, 1]);
+osc=(SinOsc.ar(freq, mul: amp) + Pulse.ar(freq, width: LFTri.kr((sus / 16)), mul: (amp / 20)));
+osc=HPF.ar(osc, 1000);
 env=EnvGen.ar(Env.perc(attackTime: 0.01,releaseTime: sus,level: amp,curve: 0), doneAction: 0);
 osc=(osc * env);
 osc = Mix(osc) * 0.5;

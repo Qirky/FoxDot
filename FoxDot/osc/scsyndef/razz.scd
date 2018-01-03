@@ -3,7 +3,8 @@ SynthDef.new(\razz,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-rate=Lag.ar(K2A.ar((freq + [0, 1])), rate);
+freq=(freq + [0, 1]);
+rate=Lag.ar(K2A.ar(freq), rate);
 osc=(Saw.ar((rate * [1, 0.5]), [1, 0.3333333333333333]) + Saw.ar((rate + LFNoise2.ar(4).range(0.5, 2.5)), 1));
 osc=BPF.ar(osc, (freq * 2.5), 0.3);
 osc=RLPF.ar(osc, 1300, 0.78);

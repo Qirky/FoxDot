@@ -3,7 +3,9 @@ SynthDef.new(\charm,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-osc=(SinOsc.ar([freq, (freq + 4)], mul: (amp / 4)) + VarSaw.ar((freq * 8), 10, mul: (amp / 8)));
+freq=(freq + [0, 2]);
+freq=(freq * [1, 2]);
+osc=(SinOsc.ar(freq, mul: (amp / 4)) + VarSaw.ar((freq * 8), 10, mul: (amp / 8)));
 osc=LPF.ar(osc, SinOsc.ar(Line.ar(1, (rate * 4), (sus / 8)), 0, (freq * 2), ((freq * 2) + 10)));
 env=EnvGen.ar(Env.perc(attackTime: 0.01,releaseTime: sus,level: amp,curve: 0), doneAction: 0);
 osc=(osc * env);

@@ -3,5 +3,6 @@ SynthDef.new(\makeSound,
 	osc = In.ar(bus, 2);
   osc = EnvGen.ar(Env([1,1,0],[sus * 8, 0.1]), doneAction: 14) * osc;
 	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);
-	Out.ar(0, osc);
+Out.ar(0, osc[0]);
+Out.ar(1, osc[1]);
  }).add;

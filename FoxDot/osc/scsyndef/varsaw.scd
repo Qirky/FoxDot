@@ -3,7 +3,8 @@ SynthDef.new(\varsaw,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-osc=VarSaw.ar([freq, (freq * 1.005)], mul: (amp / 4), width: rate);
+freq=(freq * [1, 1.005]);
+osc=VarSaw.ar(freq, mul: (amp / 4), width: rate);
 env=EnvGen.ar(Env(times: [(sus / 2), (sus / 2)],levels: [0, amp, 0],curve: 'lin'), doneAction: 0);
 osc=(osc * env);
 osc = Mix(osc) * 0.5;

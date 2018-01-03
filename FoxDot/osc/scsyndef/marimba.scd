@@ -3,7 +3,7 @@ SynthDef.new(\marimba,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-osc=Klank.ar(`[[0.5, 1, 4, 9], [0.5, 1, 1, 1], [1, 1, 1, 1]], PinkNoise.ar([0.007, 0.007]), [freq, freq], [0, 2]);
+osc=Klank.ar(`[[0.5, 1, 4, 9], [0.5, 1, 1, 1], [1, 1, 1, 1]], PinkNoise.ar([0.007, 0.007]), freq, [0, 2]);
 sus=1;
 env=EnvGen.ar(Env.perc(attackTime: 0.001,releaseTime: sus,level: amp,curve: -6), doneAction: 0);
 osc=(osc * env);
