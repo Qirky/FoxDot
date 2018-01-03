@@ -181,7 +181,9 @@ class Out(Effect):
         s += "	osc = In.ar(bus, 2);\n"
         s += "  osc = EnvGen.ar(Env([1,1,0],[sus * {}, 0.1]), doneAction: 14) * osc;\n".format(self.max_duration)
         s += "	DetectSilence.ar(osc, amp:0.0001, time: 0.1, doneAction: 14);\n"
-        s += "	Out.ar(0, osc);\n"
+        #s += "	Out.ar(0, osc);\n"
+        s += "Out.ar(0, osc[0]);\n"
+        s += "Out.ar(1, osc[1]);\n"
         s += " }).add;\n"
         return s
 

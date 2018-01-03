@@ -23,8 +23,10 @@ with SynthDef("audioin") as audioin:
     audioin.env = Env.mask()
 
 with SynthDef("pads") as pads:
-    pads.amp = pads.amp / 2
-    pads.osc = SinOsc.ar([pads.freq, pads.freq + 2], mul=pads.amp)
+    pads.amp = pads.amp * 1.5
+    pads.freq = pads.freq + [0,1]
+    pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) + Pulse.ar(pads.freq, width=LFTri.kr(pads.sus/16), mul=pads.amp/20) 
+    pads.osc = HPF.ar(pads.osc, 1000);
     pads.env = Env.perc()
 
 with SynthDef("noise") as noise:
@@ -40,13 +42,15 @@ with SynthDef("dab") as synth:
 dab = synth
 
 with SynthDef("varsaw") as synth:
-     synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005], mul=synth.amp / 4, width=synth.rate)
+     synth.freq = synth.freq * [1, 1.005]
+     synth.osc = VarSaw.ar(synth.freq, mul=synth.amp / 4, width=synth.rate)
      synth.env = Env.env()
 varsaw = synth
 
 with SynthDef("lazer") as synth:
+    synth.freq = synth.freq * [1, 1.005]
     synth.amp = synth.amp * 0.1
-    synth.osc = VarSaw.ar([synth.freq, synth.freq * 1.005],  width=(synth.rate-1)/4) + LFSaw.ar(LFNoise0.ar(synth.rate * 20, add=synth.freq * Pulse.ar((synth.rate-2) + 0.1, add=1), mul=0.5))
+    synth.osc = VarSaw.ar(synth.freq,  width=(synth.rate-1)/4) + LFSaw.ar(LFNoise0.ar(synth.rate * 20, add=synth.freq * Pulse.ar((synth.rate-2) + 0.1, add=1), mul=0.5))
     synth.env = Env.perc(0.1)
 lazer = synth
 
@@ -81,7 +85,9 @@ with SynthDef("scatter") as scatter:
     scatter.env = Env.linen(0.01, scatter.sus/2, scatter.sus/2)
 
 with SynthDef("charm") as charm:
-    charm.osc = SinOsc.ar([charm.freq, charm.freq + 2 * 2], mul=charm.amp / 4) + VarSaw.ar(charm.freq * 8, 10, mul=charm.amp/8)
+    charm.freq = charm.freq + [0,2]
+    charm.freq = charm.freq * [1,2]
+    charm.osc = SinOsc.ar(charm.freq, mul=charm.amp / 4) + VarSaw.ar(charm.freq * 8, 10, mul=charm.amp/8)
     charm.osc = LPF.ar(charm.osc, SinOsc.ar(Line.ar(1,charm.rate*4, charm.sus/8),0,charm.freq*2,charm.freq*2 + 10 ))
     charm.env = Env.perc()
 
@@ -160,7 +166,8 @@ with SynthDef("soft") as soft:
 
 with SynthDef("quin") as synth:
     synth.amp = synth.amp
-    synth.osc = Klank.ar([[1,2,4,2],[100,50,0,10],[1,5,0,1]], Impulse.ar(synth.freq).dup, [synth.freq * 1.01, synth.freq]) / 5000
+    synth.freq = synth.freq * [1, 1.01]
+    synth.osc = Klank.ar([[1,2,4,2],[100,50,0,10],[1,5,0,1]], Impulse.ar(synth.freq).dup, synth.freq) / 5000
     synth.osc = synth.osc * LFSaw.ar(synth.freq * (1 + synth.rate))
     synth.env = Env.perc(atk=0.01, sus=synth.sus, curve=1)
 quin = synth
@@ -183,7 +190,7 @@ spark = synth
 with SynthDef("blip") as synth:
     freq = instance('freq')
     synth.amp  = synth.amp + 0.00001
-    synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
+    synth.freq = freq + [0, LFNoise2.ar(50).range(-2,2)]
     synth.freq = synth.freq * 2
     synth.osc  = (LFCub.ar(freq * 1.002, iphase=1.5) + LFTri.ar(freq, iphase=Line.ar(2,0,0,2)) * 0.3) * Blip.ar(freq / 2, synth.rate)
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 2) * 0.3
@@ -191,7 +198,7 @@ blip = synth
 
 with SynthDef("ripple") as ripple:
     ripple.amp = ripple.amp / 6
-    ripple.osc = Pulse.ar([ripple.freq/4, ripple.freq/4+1 ],0.2,0.25) + Pulse.ar([ripple.freq+2,ripple.freq],0.5,0.5)
+    ripple.osc = Pulse.ar(ripple.freq/4,0.2,0.25) + Pulse.ar(ripple.freq+1,0.5,0.5)
     ripple.osc = ripple.osc * SinOsc.ar(ripple.rate/ripple.sus,0,0.5,1)
     ripple.env = Env.env(sus=[0.55 * ripple.sus, 0.55*ripple.sus])
 
@@ -216,7 +223,7 @@ zap.env = Env.perc(atk=0.025, curve=-10)
 zap.add()
 
 marimba = SynthDef("marimba")
-marimba.osc = Klank.ar([[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,1]], PinkNoise.ar([0.007, 0.007]), [marimba.freq, marimba.freq], [0,2])
+marimba.osc = Klank.ar([[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,1]], PinkNoise.ar([0.007, 0.007]), marimba.freq, [0,2])
 marimba.sus = 1
 marimba.env = Env.perc(atk=0.001, curve=-6)
 marimba.add()
@@ -231,7 +238,8 @@ fuzz.add()
 bug = SynthDef("bug")
 bug.defaults.update(rate=1)
 bug.amp = bug.amp / 5
-bug.osc = Pulse.ar([bug.freq, bug.freq * 1.0001], width=[0.09,0.16,0.25]) * SinOsc.ar(bug.rate * 4)
+bug.freq = bug.freq * [1, 1.0001]
+bug.osc = Pulse.ar(bug.freq, width=[0.09,0.16,0.25]) * SinOsc.ar(bug.rate * 4)
 bug.env = Env.perc(bug.sus * 1.5)
 bug.add()
 
@@ -256,7 +264,8 @@ snick.add()
 
 twang = SynthDef("twang")
 twang.freq = twang.freq / 8
-twang.osc = LPF.ar(Impulse.ar([twang.freq, twang.freq + 2], 0.1), 4000)
+twang.freq = twang.freq + [0, 2]
+twang.osc = LPF.ar(Impulse.ar(twang.freq, 0.1), 4000)
 twang.osc = Env.perc() * CombL.ar(twang.osc, delaytime=twang.rate/(twang.freq * 8), maxdelaytime=0.25);
 twang.add()
 
@@ -272,7 +281,8 @@ karp.add()
 arpy = SynthDef("arpy")
 arpy.freq = arpy.freq / 2
 arpy.amp  = arpy.amp * 2
-arpy.osc  = LPF.ar(Impulse.ar([arpy.freq, arpy.freq + 0.5]), 3000)
+arpy.freq = arpy.freq + [0,0.5]
+arpy.osc  = LPF.ar(Impulse.ar(arpy.freq), 3000)
 arpy.env  = Env.perc(sus=arpy.sus * 0.25)
 arpy.add()
 
@@ -298,7 +308,9 @@ squish.add()
 swell = SynthDef("swell")
 swell.defaults.update(rate=1)
 swell.amp = swell.amp / 4
-swell.osc = VarSaw.ar([swell.freq, (swell.freq + 1) / 0.5], width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
+swell.freq = swell.freq + [0,1]
+swell.freq = swell.freq * [1, 0.5]
+swell.osc = VarSaw.ar(swell.freq, width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
 swell.env = Env.perc()
 swell.add()
 
@@ -306,7 +318,8 @@ swell.add()
 
 razz = SynthDef("razz")
 razz.defaults.update(rate=0.3)
-razz.rate = Lag.ar(K2A.ar(razz.freq + [0,1]), razz.rate)
+razz.freq = razz.freq + [0,1]
+razz.rate = Lag.ar(K2A.ar(razz.freq), razz.rate)
 razz.osc  = Saw.ar(razz.rate * [1,1/2], [1,1/3]) + Saw.ar(razz.rate+LFNoise2.ar(4).range(0.5, 2.5), 1)
 razz.osc  = BPF.ar(razz.osc, razz.freq * 2.5, 0.3)
 razz.osc  = RLPF.ar(razz.osc, 1300, 0.78)
