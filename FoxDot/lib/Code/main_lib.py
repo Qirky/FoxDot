@@ -14,6 +14,7 @@ except ImportError:
     TypeType = type
     
 from ..Utils import modi
+from ..Settings import *
 
 # Player RegEx
 re_player = re.compile(r"(\s*?)(\w+)\s*?>>\s*?\w+")
