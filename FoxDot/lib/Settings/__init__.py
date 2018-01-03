@@ -12,6 +12,7 @@ PY_VERSION = sys.version_info[0]
 if PY_VERSION == 2:
 
     range = xrange
+    input = raw_input
 
 # Check for OS -> mac, linux, win
 
