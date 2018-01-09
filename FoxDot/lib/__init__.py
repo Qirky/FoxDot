@@ -129,7 +129,7 @@ def instantiate_player_objects():
 
             arg = char1 + char2
 
-            FoxDotCode.namespace[arg] = Player(arg)
+            FoxDotCode.namespace[arg] = EmptyPlayer(arg)
 
             group.append(arg)
 
