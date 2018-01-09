@@ -167,12 +167,27 @@ from .Bang import Bang
 
 from .TimeVar import TimeVar
 
-# class EmptyPlayer(object):
-#     def __init__(self, name):
-#         self.name = name
-#     def __rshift__(self, *args, **kwargs):
-#         self = Player(self.name).__rshift__(*args, **kwargs)
-#         return self
+class EmptyPlayer(object):
+    """ Place holder for Player objects created at run-time to reduce load time.
+    """
+    def __init__(self, name):
+        self.name = name
+    def __repr__(self):
+        return "<{} - Unassigned>".format(self.name)
+    def __rshift__(self, *args, **kwargs):
+        self.__class__ = Player
+        self.__init__(self.name)
+        self.__rshift__(*args, **kwargs)
+        return self
+
+    def __getattr__(self, name):
+        """ Tries to return the correct attr; if not init the Player and try again """
+        try:
+            return self.__dict__[name]
+        except KeyError:
+            self.__class__ = Player
+            self.__init__(self.name)
+            return self.__getattr__(name)
 
 
 class Player(Repeatable):
