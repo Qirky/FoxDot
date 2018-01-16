@@ -271,6 +271,10 @@ fx = FxList.new("coarse", "coarse", {"coarse": 0, "sus": 1}, order=0)
 fx.add("osc = osc * LFPulse.ar(coarse / sus)")
 fx.save()
 
+fx = FxList.new("striate", "striate", {"striate": 0, "sus": 1, "buf": 0, "rate": 1}, order=0)
+fx.add("osc = osc * LFPulse.ar(striate / sus, width:  (BufDur.kr(buf) / rate) / sus)")
+fx.save()
+
 fx = FxList.new("pshift", "pitchShift", {"pshift":0}, order=0)
 fx.add("osc = osc * (1.059463**pshift)")
 fx.save()
@@ -291,7 +295,6 @@ fx.add_var("env")
 fx.add("env = EnvGen.kr(Env([0,1,0], times:[(sus*0.125), (sus*0.25)], curve:4))")
 fx.add('osc = RHPF.ar(osc, env * swell, hpr)')
 fx.save()
-
 
 fx = FxList.new("bpf", "bandPassFilter", {"bpf": 0, "bpr": 1, "bpnoise": 0, "sus": 1}, order=2)
 fx.add("bpnoise = bpnoise / sus")
