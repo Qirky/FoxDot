@@ -8,7 +8,6 @@ except ImportError:
 import os.path
 from functools import partial
 from ..Settings import *
-from ..ServerManager import TempoServer
 from ..Code import FoxDotCode
 
 class MenuBar(Menu):
@@ -20,9 +19,6 @@ class MenuBar(Menu):
 
         self.sc3_plugins = BooleanVar()
         self.sc3_plugins.set(SC3_PLUGINS)
-
-        self.listening = BooleanVar()
-        self.listening.set(False)
 
         # Set font
         
@@ -71,7 +67,7 @@ class MenuBar(Menu):
         codemenu.add_separator()
         codemenu.add_checkbutton(label="Use SC3 Plugins",    command=self.root.toggle_sc3_plugins, variable=self.sc3_plugins)
         codemenu.add_separator()
-        codemenu.add_checkbutton(label="Listen for connections", command=self.allow_connections, variable=self.listening)
+        codemenu.add_checkbutton(label="Listen for connections", command=self.root.allow_connections, variable=self.root.listening_for_connections)
         self.add_cascade(label="Language", menu=codemenu)
 
 
@@ -116,14 +112,21 @@ class MenuBar(Menu):
         self.visible = not self.visible
         return
 
-    def allow_connections(self):
+    def allow_connections(self, **kwargs):
         """ Starts a new instance of ServerManager.TempoServer and connects it with the clock """
-        if self.listening.get() == True:
-            Clock = FoxDotCode.namespace["Clock"]
-            Clock.start_tempo_server(TempoServer)
+        if self.listening_for_connections.get() == True:
+            Clock = self.namespace["Clock"]
+            Clock.start_tempo_server(TempoServer, **kwargs)
             print("Listening for connections on {}".format(Clock.tempo_server))
         else:
-            Clock = FoxDotCode.namespace["Clock"]
+            Clock = self.namespace["Clock"]
             Clock.kill_tempo_server()
             print("Closed connections")
+        return
+
+    def start_listening(self, **kwargs):
+        """ Manual starting of FoxDot tempo server """
+        # TODO - take this out of the menu
+        self.listening_for_connections.set(not self.listening_for_connections.get())
+        self.allow_connections(**kwargs)
         return

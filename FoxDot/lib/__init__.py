@@ -44,7 +44,7 @@ from .Workspace import get_keywords
 from random import choice as choose
 
 # Define any custom functions
-
+    
 @PatternMethod
 def __getitem__(self, key):
     """ Overrides the Pattern.__getitem__ to allow indexing
@@ -140,6 +140,18 @@ def instantiate_player_objects():
 def Master():
     """ Returns a `Group` containing all the players currently active in the Clock """
     return Group(*Clock.playing)
+
+# def allow_connections():
+#     """ Starts a new instance of ServerManager.TempoServer and connects it with the clock """
+#     if self.listening_for_connections.get() == True:
+#         Clock = self.namespace["Clock"]
+#         Clock.start_tempo_server(TempoServer, **kwargs)
+#         print("Listening for connections on {}".format(Clock.tempo_server))
+#     else:
+#         Clock = self.namespace["Clock"]
+#         Clock.kill_tempo_server()
+#         print("Closed connections")
+#     return
 
 # Create a clock and define functions
 

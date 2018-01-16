@@ -130,8 +130,8 @@ class TempoClock(object):
         cls.server = server
         return
 
-    def start_tempo_server(self, serv):
-        self.tempo_server = serv(self)
+    def start_tempo_server(self, serv, **kwargs):
+        self.tempo_server = serv(self, **kwargs)
         self.tempo_server.start()
         return
 

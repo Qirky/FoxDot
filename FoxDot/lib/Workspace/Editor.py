@@ -45,6 +45,7 @@ import re
 # Code execution
 from ..Code import execute
 from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE
+from ..ServerManager import TempoServer
 
 # App object
 
@@ -80,6 +81,12 @@ class workspace:
 
         self.transparent = BooleanVar()
         self.transparent.set(False)
+
+        # Boolean for connection
+
+        self.listening_for_connections = BooleanVar()
+        self.listening_for_connections.set(False)
+
 
         # --- Set icon
         
@@ -1512,4 +1519,23 @@ class workspace:
         return
 
     def clear_temp_file(self):
+        return
+
+    def start_listening(self, **kwargs):
+        """ Manual starting of FoxDot tempo server """
+        # TODO - take this out of the menu
+        self.listening_for_connections.set(not self.listening_for_connections.get())
+        self.allow_connections(**kwargs)
+        return
+
+    def allow_connections(self, **kwargs):
+        """ Starts a new instance of ServerManager.TempoServer and connects it with the clock """
+        if self.listening_for_connections.get() == True:
+            Clock = self.namespace["Clock"]
+            Clock.start_tempo_server(TempoServer, **kwargs)
+            print("Listening for connections on {}".format(Clock.tempo_server))
+        else:
+            Clock = self.namespace["Clock"]
+            Clock.kill_tempo_server()
+            print("Closed connections")
         return
