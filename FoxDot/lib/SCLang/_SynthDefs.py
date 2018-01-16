@@ -59,8 +59,14 @@ with SynthDef("growl") as growl:
     growl.osc = SinOsc.ar(growl.freq + SinOsc.kr(0.5, add=1, mul=2), mul=growl.amp) * Saw.ar((growl.sus / 1.5) * 32)
     growl.env = Env.env()
 
+# with SynthDef("bass") as bass:
+#     bass.defaults.update(rate=8.5)
+#     bass.freq = bass.freq / 4
+#     bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=bass.rate / 10, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
+#    bass.env  = Env.perc(atk=0.02, curve="'lin'", )
+
 with SynthDef("bass") as bass:
-    bass.defaults.update(rate=8.5)
+    bass.defaults.update(rate=8)
     bass.freq = bass.freq / 4
     bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=bass.rate / 10, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
     bass.env  = Env.perc(atk=0.02, curve="'lin'", )
@@ -92,23 +98,20 @@ with SynthDef("charm") as charm:
     charm.env = Env.perc()
 
 with SynthDef("bell") as bell:
-    bell.defaults.update(verb = 0.5, room = 0.5)
+    bell.defaults.update(verb = 0.5, room = 0.5, rate=1)
     bell.amp = bell.amp * 4
-    bell.sus = 2.5
     bell.osc = Klank.ar([ [0.501, 1, 0.7,   2.002, 3, 9.6,   2.49, 11, 2.571,  3.05, 6.242, 12.49, 13, 16, 24],
-                       [0.002,0.02,0.001, 0.008,0.02,0.004, 0.02,0.04,0.02, 0.005,0.05,0.05, 0.02, 0.03, 0.04],
-                       stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.25), bell.freq, 0, 3)
-    bell.env = Env.ramp()
+                       [0.002,0.1,0.001, 0.008,0.02,0.004, 0.02,0.04,0.02, 0.005,0.05,0.05, 0.02, 0.03, 0.04],
+                       stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.01), bell.freq, 0, 4 * bell.rate)
 
 with SynthDef("gong") as gong:
-    gong.amp = gong.amp * 4
+    gong.amp = gong.amp * 2.5
     gong.freq = gong.freq * 2
     gong.osc=Klank.ar( [[0.501, 1, 0.8, 2.002, 3, 9.6, 2.49, 11, 2.571, 3.05, 6.242, 12.49, 13, 16, 24],
                         [0.002, 0.02, 0.001, 0.008, 0.02, 0.004, 0.02, 0.04, 0.02, 0.005, 0.05, 0.05, 0.02, 0.03, 0.04],
-            [1.2, 1.2, 1.2, 0.9, 0.9, 0.9, 0.25, 0.25, 0.25, 0.14, 0.14, 0.14, 0.07, 0.07, 0.07]*gong.sus],
-            SinOscFB.ar(20, 0, 10), gong.freq, 0, 4)
-    gong.env = Env.ramp(amp=[1,0], curve="'lin'", sus=gong.sus*8)
-
+            [1.2, 1.2, 1.2, 0.9, 0.9, 0.9, 0.25, 0.25, 0.25, 0.14, 0.14, 0.14, 0.07, 0.07, 0.07]],
+            SinOscFB.ar(20, 0, 10), gong.freq, gong.freq * gong.rate, 4) * gong.amp
+    gong.osc = HPF.ar(gong.osc, 440)
 
 
 with SynthDef("soprano") as soprano:
@@ -147,7 +150,7 @@ with SynthDef("ambi") as ambi:
     ambi.sus = ambi.sus * 1.5
     ambi.amp = ambi.amp / 3
     ambi.freq = [ambi.freq, ambi.freq * 1.005]
-    ambi.osc = Klank.ar([[1,2,3,3 + (ambi.rate/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(ambi.freq, add=1), ambi.freq)
+    ambi.osc = Klank.ar([[1,2,3,3 + ((ambi.rate-1)/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(ambi.freq, add=1), ambi.freq)
     ambi.env = Env.env(ambi.sus*2)
 
 with SynthDef("glass") as glass:
