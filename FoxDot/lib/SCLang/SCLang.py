@@ -53,6 +53,8 @@ class instance:
         return instance("(%s)" % (str(self) + " ** " + str(other)))
     def __truediv__(self, other):
         return self.__div__(other)
+    def __getitem__(self, other):
+        return instance("(%s)" % (str(self) + "[" + str(other) +  "]"))
     def __radd__(self, other):
         return instance("(%s)" % (str(other) + " + " + str(self)))
     def __rsub__(self, other):
