@@ -899,7 +899,7 @@ class Player(Repeatable):
             
             for key in attributes:
 
-                if len(attributes[key]) > 0 and key not in kwargs:
+                if len(attributes[key]) > 0 and key not in kwargs and key != "buf": # buf will have already been changed
 
                     new_event[key] = self.now(key)
 
@@ -951,11 +951,13 @@ class Player(Repeatable):
         self.event_n += n
         return self
 
-    def spread(self, on=1):
+    # Preset methods
+
+    def spread(self, on=0.125):
         """ Sets pan to (-1, 1) and pshift to (0, 0.125)"""
-        if on:
+        if on != 0:
             self.pan=(-1,1)
-            self.pshift=(0,0.125)
+            self.pshift=(0,on)
         else:
             self.pan=0
             self.pshift=0
