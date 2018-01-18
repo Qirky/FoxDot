@@ -268,7 +268,12 @@ class workspace:
 
         # Say Hello to the user
 
-        hello = "Welcome to FoxDot! Press Ctrl+{} for help.".format(self.help_key)
+        if SYSTEM == MAC_OS:
+            ctrl = "Cmd"
+        else:
+            ctrl = "Ctrl"
+
+        hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
 
         print(hello)
         print("-" * len(hello))
