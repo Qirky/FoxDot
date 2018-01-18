@@ -3,9 +3,9 @@ SynthDef.new(\donk,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-freq=(freq / 2);
+freq=((freq / 2) + [0, 2]);
 amp=(amp / 1.25);
-osc=Ringz.ar((Impulse.ar(0, phase: rate) / (rate + 1)), [freq, (freq + 2)], sus, amp);
+osc=Ringz.ar((Impulse.ar(0, phase: rate) / (rate + 1)), freq, sus, amp);
 osc = Mix(osc) * 0.5;
 osc = Pan2.ar(osc, pan);
 	ReplaceOut.ar(bus, osc)}).add;

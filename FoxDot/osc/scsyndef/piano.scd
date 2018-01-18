@@ -3,8 +3,8 @@ SynthDef.new(\piano,
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
-amp=(amp / 2);
-osc=MdaPiano.ar(freq, vel: (40 + (amp * 60)), decay: (sus / 4));
+amp=(amp * 0.7);
+osc=MdaPiano.ar((freq[0]), vel: (40 + (amp * 60)), decay: (sus / 4));
 env=EnvGen.ar(Env(times: [sus],levels: [(amp * 1), (amp * 1)],curve: 'step'), doneAction: 0);
 osc=(osc * env);
 osc = Mix(osc) * 0.5;

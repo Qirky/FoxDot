@@ -87,7 +87,7 @@ with SynthDef("rave") as rave:
     rave.env = Env.perc()
 
 with SynthDef("scatter") as scatter:
-    scatter.osc = (Saw.ar( scatter.freq , mul=scatter.amp / 8) + VarSaw.ar([scatter.freq + 2,scatter.freq +1],  mul=scatter.amp/8)) * LFNoise0.ar(scatter.rate)
+    scatter.osc = (Saw.ar( scatter.freq , mul=scatter.amp / 8) + VarSaw.ar(scatter.freq + [2,1],  mul=scatter.amp/8)) * LFNoise0.ar(scatter.rate)
     scatter.env = Env.linen(0.01, scatter.sus/2, scatter.sus/2)
 
 with SynthDef("charm") as charm:
@@ -115,9 +115,10 @@ with SynthDef("gong") as gong:
 
 
 with SynthDef("soprano") as soprano:
-    soprano.defaults.update(vib=5, verb=0.5)
+    soprano.defaults.update(rate=5, verb=0.5)
     soprano.sus = soprano.sus * 1.75
     soprano.amp = soprano.amp / 2
+    soprano.freq = Vibrato.ar(soprano.rate)
     soprano.osc = SinOsc.ar(soprano.freq * 3, mul=soprano.amp) + SinOscFB.ar(soprano.freq * 3, mul=soprano.amp / 2)
     soprano.env = Env.env()
 
@@ -149,14 +150,14 @@ with SynthDef("klank") as klank:
 with SynthDef("ambi") as ambi:
     ambi.sus = ambi.sus * 1.5
     ambi.amp = ambi.amp / 3
-    ambi.freq = [ambi.freq, ambi.freq * 1.005]
+    ambi.freq = ambi.freq * [1,1.005]
     ambi.osc = Klank.ar([[1,2,3,3 + ((ambi.rate-1)/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(ambi.freq, add=1), ambi.freq)
     ambi.env = Env.env(ambi.sus*2)
 
 with SynthDef("glass") as glass:
     glass.sus = glass.sus * 1.5
     glass.amp = glass.amp * 1.5
-    glass.freq = [glass.freq, glass.freq * (1 + (0.005 * glass.rate))]
+    glass.freq = glass.freq * [1, (1 + (0.005 * glass.rate))]
     glass.osc = Klank.ar([[2,4,9,16],[1,1,1,1],[2,2,2,2]], PinkNoise.ar(0.0005).dup * SinOsc.ar(glass.freq / 4, add=1, mul=0.5), glass.freq)
     glass.env = Env.env(glass.sus*2)
 
@@ -178,14 +179,14 @@ quin = synth
 with SynthDef("pluck") as pluck:
     freq = instance('freq')
     pluck.amp  = pluck.amp + 0.00001
-    pluck.freq = [pluck.freq, pluck.freq + LFNoise2.ar(50).range(-2,2)]
+    pluck.freq = pluck.freq + [0, LFNoise2.ar(50).range(-2,2)]
     pluck.osc  = SinOsc.ar(freq * 1.002, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3 + SinOsc.ar(freq, phase=VarSaw.ar(freq, width=Line.ar(1,0.2,2))) * 0.3
     pluck.osc  = pluck.osc * XLine.kr(pluck.amp, pluck.amp/10000, pluck.sus * 4, doneAction=2) * 0.3
 
 with SynthDef("spark") as synth:
     freq = instance('freq')
     synth.amp  = synth.amp + 0.00001
-    synth.freq = [synth.freq, synth.freq + LFNoise2.ar(50).range(-2,2)]
+    synth.freq = synth.freq + [0, LFNoise2.ar(50).range(-2,2)]
     synth.osc  = LFSaw.ar(freq * 1.002, iphase=Saw.ar(0.1)) * 0.3 + LFSaw.ar(freq, iphase=Saw.ar(0.1)) * 0.3
     synth.osc  = (synth.osc * Line.ar(synth.amp, synth.amp/10000, synth.sus * 1.5) * 0.3) * Line.ar(0.01, 1, synth.sus * 0.033)
 spark = synth
@@ -295,9 +296,9 @@ nylon.env = Env.perc(curve=-4, atk=0.000125, sus=Env.sus * 3)
 nylon.add()
 
 donk = SynthDef("donk")
-donk.freq = donk.freq / 2
+donk.freq = (donk.freq / 2) + [0,2]
 donk.amp  = donk.amp / 1.25
-donk.osc = Ringz.ar(Impulse.ar(0, phase=donk.rate) / (donk.rate+1), [donk.freq, donk.freq + 2], donk.sus, donk.amp)
+donk.osc = Ringz.ar(Impulse.ar(0, phase=donk.rate) / (donk.rate+1), donk.freq, donk.sus, donk.amp)
 donk.add()
 
 squish = SynthDef("squish")
@@ -350,8 +351,8 @@ star = synth
 if SC3_PLUGINS:
 
     piano = SynthDef("piano")
-    piano.amp = piano.amp / 2
-    piano.osc = MdaPiano.ar(piano.freq, vel=40 + (piano.amp * 60), decay=piano.sus / 4)
+    piano.amp = piano.amp * 0.7
+    piano.osc = MdaPiano.ar(piano.freq[0], vel=40 + (piano.amp * 60), decay=piano.sus / 4)
     piano.env = Env.ramp()
     piano.add()
 
