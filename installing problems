@@ -1,0 +1,19 @@
+init_OSC
+compiling class library...
+initPassOne started
+	NumPrimitives = 692
+initPassOne done
+	compiling dir: 'C:\Program Files\SuperCollider-3.8.0\SCClassLibrary'
+	compiling dir: 'C:\Users\Adrian\AppData\Local\SuperCollider\downloaded-quarks\BatLib'
+Open ended symbol ... started on line 69 in file 'C:\Users\Adrian\AppData\Local\SuperCollider\downloaded-quarks\BatLib\LessKeys.sc'
+	compiling dir: 'C:\Users\Adrian\AppData\Local\SuperCollider\downloaded-quarks\FoxDot'
+	compiling dir: 'C:\Users\Adrian\AppData\Local\SuperCollider\downloaded-quarks\FoxDotQuark'
+ERROR: duplicate Class found: 'FoxDot' 
+C:\Users\Adrian\AppData\Local\SuperCollider\downloaded-quarks\FoxDot\FoxDot.sc
+C:\Users\Adrian\AppData\Local\SuperCollider\downloaded-quarks\FoxDotQuark\FoxDot.sc
+
+	pass 1 done
+ERROR: There is a discrepancy.
+numClassDeps 1108   gNumClasses 2214
+Library has not been compiled successfully.
+Library has not been compiled successfully.
