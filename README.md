@@ -3,28 +3,16 @@ FoxDot - Live Coding with Python v0.5
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.5.6 fixes and updates
+### v0.5.8 fixes and updates
 
-- Running FoxDot with a `--pipe` flag is compatible with Python 2
-- Updated the "pads" SynthDef
-- Old unidirectional server manager class can be used by editing config file.
-
-### v0.5.5 fixes and updates
-
-- Fix `TimeVar` class so it no longer inherits from `Repeatable` i.e. no longer has access to the "every" method.
-- Fix pattern bug  when creating a pattern using the `P` generator; `P[P(0,2)]` no longer returns `P[0, 2]`. However, `P[(0,2)]` is interpreted exactly as `P[0, 2]` and will return that instead.
-- Added more variation to the "formantFilter" effect
-- "loop" samples are added "on-the-fly" as opposed to loaded at start up. These can be loaded by filepath (with or without extension)
+- Fixed panning issues on many SynthDefs so `fmod` spreads a signal across 2 channels effectively.
+- Added the ability to use `Pattern` methods on player attributes when using the `every` method:
 ```python
-a1 >> loop("/path/to/sample.wav")
-a2 >> loop("/path/to/sample")
-
-a1 >> loop("yeah")             # Searches recursively for yeah.(wav|wave|aif|aiff|flac)
-a1 >> loop("perc/kick")        # Supports directories in the path
-a1 >> loop("*kick*", sample=2) # Supports * ? [chars] and [!chars]
-a1 >> loop("**/*_Em")          # Supports ** as 'recursively all subdirectories'
-``` 
- 
+d1 >> play("x-o-o", dur=PDur(5,8)).every(4, "rate.offadd", 2)  
+```
+- Improved `every` to switch pattern methods on/off at the correct time when using a list of durations.
+- FoxDot UI no longer crashes when saving / closing after using a lambda character.
+  
 ---
 
 ## Installation and startup
@@ -177,3 +165,5 @@ FoxDot's audio files have been obtained from a number of sources but I've lost r
 - A number of sounds courtesy of Mike Hodnick's live coded album, [Expedition](https://github.com/kindohm/expedition)
 - Many samples have been obtained from http://freesound.org and have been placed in the public domain via the Creative Commons 0 License: http://creativecommons.org/publicdomain/zero/1.0/ - thank you to the original creators
 - Other samples have come from the [Dirt Sample Engine](https://github.com/tidalcycles/Dirt-Samples/tree/c2db9a0dc4ffb911febc613cdb9726cae5175223) which is part of the TidalCycles live coding language created by Yaxu - another huge amount of thanks.
+
+If you feel I've used a sample where I shouldn't have, please get it touch!
