@@ -33,6 +33,7 @@ class Repeatable(object):
         self.previous_patterns    = {}
 
     def update_pattern_root(self, attr):
+        """ Update the base attribute pattern that methods are applied to """
 
         if attr not in self.previous_patterns:
 
@@ -47,6 +48,7 @@ class Repeatable(object):
         return
 
     def update_pattern_methods(self, attr):
+        """ Update the 'current' version of a pattern based on its root and methods stored """
 
         if attr not in self.previous_patterns:
 
@@ -117,6 +119,24 @@ class Repeatable(object):
 
         return attr_name, method_name
 
+    def is_pattern_method(self, method_name, attr="degree"):
+
+        if attr == "degree" and hasattr(self, method_name):
+
+            return False
+
+        elif hasattr(Pattern, method_name):
+
+            return True
+
+        else:
+
+            return False
+
+    def is_player_method(self, method_name, attr="degree"):
+
+        return hasattr(self, method_name) and attr == "degree"
+
     def get_method_by_name(self, cmd):
         # Make sure cmd is a method
 
@@ -124,11 +144,11 @@ class Repeatable(object):
 
         if True: # TODO move this back
 
-            if hasattr(self, method_name):
+            if self.is_player_method(method_name, attr_name):
 
                 method = getattr(self, method_name)
 
-            elif hasattr(Pattern, method_name):
+            elif self.is_pattern_method(method_name, attr_name):
 
                 # THIS ONLY CALLS ON DEGREE ATM                
 
@@ -141,7 +161,7 @@ class Repeatable(object):
 
                     if attr not in self.previous_patterns:
 
-                        self.previous_patterns[attr] = MethodList(self.attr[attr])
+                        self.previous_patterns[attr] = MethodList(self.attr[attr]) # store the root
 
                     # If this has already been called, "undo it"
 
@@ -167,7 +187,7 @@ class Repeatable(object):
 
                 WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
 
-                return self
+                return None, None
 
         # elif len(attr) == 2:
 
@@ -229,11 +249,41 @@ class Repeatable(object):
 
         if cmd in self.repeat_events:
 
-            self.repeat_events[cmd].update(occurence, cycle, args, kwargs)
+            # Work out whether the method needs calling or not
 
-            if not self.repeat_events[cmd].isScheduled():
+            call = self.repeat_events[cmd]
 
-                self.repeat_events[cmd].schedule()
+            # Update the time details
+
+            call.update(occurence, cycle, args, kwargs)
+
+            attr, method_name = self.get_attr_and_method_name(cmd)
+
+            if self.is_pattern_method(method_name, attr):
+
+                # If the index is odd, "turn off the  method"
+
+                n, acc = call.count()
+
+                if n % 2 == 1:
+
+                    if self.previous_patterns[attr].contains(method_name):
+
+                        self.previous_patterns[attr].remove(method_name)
+
+                else:
+
+                    if not self.previous_patterns[attr].contains(method_name):
+
+                        self.previous_patterns[attr].list_of_methods.append((method_name, args, kwargs))
+
+                # Update the attribute
+
+                self.update_pattern_methods(attr)
+
+            if not call.isScheduled():
+
+                call.schedule()
 
         else:
 
@@ -253,9 +303,8 @@ class Repeatable(object):
 
     def never(self, cmd):
         attr, method = self.get_attr_and_method_name(cmd)
-        #attr = "degree"
         try:
-            # If it a pattern method, undo it - so far this only applies to degree
+            # If it a pattern method, undo it
             if self.previous_patterns[attr].contains(method):
                 self.previous_patterns[attr].remove(method)
                 self.update_pattern_methods(attr)
@@ -330,27 +379,6 @@ class MethodCall:
 
                     break
 
-                # if acc + dur == now:
-
-                #     acc += dur
-
-                #     n += 1
-
-                #     break
-
-                # elif acc + dur > now:
-
-                #     # acc += dur
-
-                #     # n += 1
-
-                #     break
-
-                # else:
-                    
-                #     acc += dur
-                #     n += 1
-
         return n, acc
 
     def __repr__(self):
@@ -410,13 +438,13 @@ class MethodCall:
         """ Updates the values of the MethodCall. Re-adjusts
             the index if cycle has been changed """
 
-        test = self.parent.metro.now()
-
         self.when = asStream(n)
         self.args = args
         self.kwargs = kwargs
 
         self.i, self.next = self.count()
+
+        # Amend the cycle (TODO!)
 
         if cycle is not None and cycle != self.cycle:
 
