@@ -145,6 +145,10 @@ def offadd(self, value, dur=0.5):
     return self + PGroupXor(0, value).set_delay(dur)
 
 @PatternMethod
+def offmul(self, value, dur=0.5):
+    return self * PGroupXor(1, value).set_delay(dur)
+
+@PatternMethod
 def offlayer(self, method, *args, **kwargs):
     """ Zips a pattern with a modified version of itself. Method argument
         can be a function that takes this pattern as its first argument,
