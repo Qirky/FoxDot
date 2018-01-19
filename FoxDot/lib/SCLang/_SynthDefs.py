@@ -115,10 +115,9 @@ with SynthDef("gong") as gong:
 
 
 with SynthDef("soprano") as soprano:
-    soprano.defaults.update(rate=5, verb=0.5)
     soprano.sus = soprano.sus * 1.75
     soprano.amp = soprano.amp / 2
-    soprano.freq = Vibrato.ar(soprano.rate)
+    soprano.freq = Vibrato.kr(soprano.freq, soprano.rate+4)
     soprano.osc = SinOsc.ar(soprano.freq * 3, mul=soprano.amp) + SinOscFB.ar(soprano.freq * 3, mul=soprano.amp / 2)
     soprano.env = Env.env()
 
