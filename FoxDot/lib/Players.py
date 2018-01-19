@@ -1571,7 +1571,7 @@ class Player(Repeatable):
 
                     bufnum.append( buf )
 
-                amp = group_modi(kwargs.get('amp', osc_msg['amp']), i)
+                amp = group_modi(kwargs.get('amp', osc_msg.get('amp',1)), i)
 
                 # Any messages with zero amps or 0 buf are not sent <- maybe change that for "now" classes
 
