@@ -37,6 +37,7 @@ from .BracketHandler import BracketHandler
 from .TextBox import ThreadedText
 from .LineNumbers import LineNumbers
 from .MenuBar import MenuBar
+from ..Code import write_to_file
 
 import webbrowser
 import os
@@ -535,18 +536,19 @@ class workspace:
     def save(self, event=None):
         """ Saves the contents of the text editor """
         text = self.text.get("0.0",END)
+        
         if not self.saved:
-            self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py"),("FoxDot files", ".fox")],
+            self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py")],
                                                            defaultextension=".py")
         if self.filename:
-            with open(self.filename, 'w') as f:
-                f.write(text)
-                f.close()
-                self.saved = True
-                print("Saved '{}'".format(self.filename))
-
+            
+            write_to_file(self.filename, text)                
+            
+            self.saved = True
+            
+            print("Saved '{}'".format(self.filename))
+            
             # Remove tmp file
-
             self.clear_temp_file()
                 
         return bool(self.filename)
@@ -555,14 +557,20 @@ class workspace:
 
     def saveAs(self,event=None):
         text = self.text.get("0.0",END)
-        self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py"),("FoxDot files", ".fox")],
+        self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py")],
                                                        defaultextension=".py")
         if self.filename is not None:
-            with open(self.filename, 'w') as f:
-                f.write(text)
-                f.close()
-                self.saved = True
-                print("Save successful!")
+            
+            write_to_file(self.filename, text)    
+            
+            self.saved = True
+            
+            print("Save successful!")
+
+            # Remove tmp file
+
+            self.clear_temp_file()
+
         return bool(self.filename)
 
     # Open a file: Ctrl+o
@@ -1519,8 +1527,7 @@ class workspace:
         return
     
     def set_temp_file(self, text):
-        with open(FOXDOT_TEMP_FILE, "w") as f:
-            f.write(text)
+        write_to_file(FOXDOT_TEMP_FILE, text)
         return
 
     def clear_temp_file(self):
