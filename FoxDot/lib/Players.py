@@ -1001,12 +1001,6 @@ class Player(Repeatable):
         self._replace_degree(new_degree)
         return self
 
-    def mirror(self):
-        """ The degree pattern is reversed """
-        new_degree = self.previous_patterns["degree"].root.mirror()
-        self._replace_degree(new_degree)
-        #self._replace_degree(self.attr['degree'].mirror())
-        return self
 
     def rotate(self, n=1):
         """ Rotates the values in the degree by 'n' """
