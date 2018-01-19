@@ -93,8 +93,7 @@ class Repeatable(object):
         
         return self
 
-    def get_method_by_name(self, cmd):
-         # Make sure cmd is a method
+    def get_attr_and_method_name(self, cmd):
 
         if cmd in self.method_synonyms:
 
@@ -108,7 +107,22 @@ class Repeatable(object):
 
         if len(attr) == 1:
 
+            attr_name   = "degree"
             method_name = attr[0]
+
+        elif len(attr) == 2:
+
+            attr_name = attr[0]
+            method_name = attr[1]
+
+        return attr_name, method_name
+
+    def get_method_by_name(self, cmd):
+        # Make sure cmd is a method
+
+        attr_name, method_name = self.get_attr_and_method_name(cmd)
+
+        if True: # TODO move this back
 
             if hasattr(self, method_name):
 
@@ -122,7 +136,8 @@ class Repeatable(object):
 
                     # If there are no "old" patterns held in memory, use the pattern method and store
 
-                    attr = "degree"
+                    # attr = "degree"
+                    attr = attr_name
 
                     if attr not in self.previous_patterns:
 
@@ -154,17 +169,17 @@ class Repeatable(object):
 
                 return self
 
-        elif len(attr) == 2:
+        # elif len(attr) == 2:
 
-            # TODO -- add this functionality to PlayerKey class?
+        #     # TODO -- add this functionality to PlayerKey class?
 
-            sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
+        #     sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
 
-            method = lambda *args, **kwargs: self.attr.update({attr[0]: sub_method(*args, **kwargs)})
+        #     method = lambda *args, **kwargs: self.attr.update({attr[0]: sub_method(*args, **kwargs)})
 
         assert callable(method)
         
-        return method
+        return attr_name, method
         
     def every(self, occurence, cmd, *args, **kwargs):
         """ Every n beats, call a method (defined as a string) on the
@@ -191,7 +206,7 @@ class Repeatable(object):
 
         try:
 
-            method = self.get_method_by_name(cmd)
+            attr, method = self.get_method_by_name(cmd)
 
         except AttributeError:
 
@@ -236,16 +251,18 @@ class Repeatable(object):
         return self
             
 
-    def never(self, method):
+    def never(self, cmd):
+        attr, method = self.get_attr_and_method_name(cmd)
+        #attr = "degree"
         try:
             # If it a pattern method, undo it - so far this only applies to degree
-            if self.previous_patterns["degree"].contains(method):
-                self.previous_patterns["degree"].remove(method)
-                self.update_pattern_methods("degree")
-            self.repeat_events[method].stop()
-            del self.repeat_events[method]
+            if self.previous_patterns[attr].contains(method):
+                self.previous_patterns[attr].remove(method)
+                self.update_pattern_methods(attr)
+            self.repeat_events[cmd].stop()
+            del self.repeat_events[cmd]
         except KeyError:
-            err = "Player method '{}' not active".format(method)
+            err = "Player method '{}' not active".format(cmd)
             raise KeyError(err)
         return self
 
@@ -259,11 +276,11 @@ class MethodCall:
 
         self.cycle = cycle
         self.when  = asStream(n)
-
-        self.this_when = float(self.when[0])
-        self.last_when = 0
         
         self.i, self.next = self.count()
+
+        self.this_when = float(self.when[self.i])
+        self.last_when = 0
 
         self.args = args
         self.kwargs = kwargs
@@ -306,25 +323,33 @@ class MethodCall:
 
                 dur = float(durations[n])
 
-                if acc + dur == now:
+                acc += dur
+                n   += 1
 
-                    acc += dur
-
-                    n += 1
-
-                    break
-
-                elif acc + dur > now:
-
-                    acc += dur
-                    n += 1
+                if acc >= now:
 
                     break
 
-                else:
+                # if acc + dur == now:
+
+                #     acc += dur
+
+                #     n += 1
+
+                #     break
+
+                # elif acc + dur > now:
+
+                #     # acc += dur
+
+                #     # n += 1
+
+                #     break
+
+                # else:
                     
-                    acc += dur
-                    n += 1
+                #     acc += dur
+                #     n += 1
 
         return n, acc
 
@@ -341,11 +366,11 @@ class MethodCall:
 
             return
 
-        self.i += 1
+        # Update the current duration
 
         self.last_when, self.this_when = self.this_when, float(self.when[self.i])
 
-        if self.cycle:
+        if self.cycle is not None:
             
             self.next += (float(modi(self.cycle, self.i)) + (self.this_when - self.last_when))
 
@@ -365,6 +390,10 @@ class MethodCall:
 
         self.schedule()
 
+        # Increase the index to get the next duration
+        
+        self.i += 1
+
         return
 
     def schedule(self):
@@ -380,6 +409,9 @@ class MethodCall:
     def update(self, n, cycle, args=(), kwargs={}):
         """ Updates the values of the MethodCall. Re-adjusts
             the index if cycle has been changed """
+
+        test = self.parent.metro.now()
+
         self.when = asStream(n)
         self.args = args
         self.kwargs = kwargs
