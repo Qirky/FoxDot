@@ -68,6 +68,7 @@ with SynthDef("growl") as growl:
 with SynthDef("bass") as bass:
     bass.defaults.update(rate=8)
     bass.freq = bass.freq / 4
+    bass.amp  = bass.amp * 0.8
     bass.osc  = LFTri.ar(bass.freq, mul=bass.amp) + VarSaw.ar(bass.freq, width=bass.rate / 10, mul=bass.amp) + SinOscFB.ar(bass.freq, mul=bass.amp / 2)
     bass.env  = Env.perc(atk=0.02, curve="'lin'", )
 

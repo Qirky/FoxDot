@@ -4,6 +4,7 @@ var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
 freq=(freq / 4);
+amp=(amp * 0.8);
 osc=((LFTri.ar(freq, mul: amp) + VarSaw.ar(freq, width: (rate / 10), mul: amp)) + SinOscFB.ar(freq, mul: (amp / 2)));
 env=EnvGen.ar(Env.perc(attackTime: 0.02,releaseTime: sus,level: amp,curve: 'lin'), doneAction: 0);
 osc=(osc * env);
