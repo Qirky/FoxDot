@@ -763,6 +763,7 @@ class metaPattern(object):
         """ Zips two patterns together. If one item is a tuple, it extends the tuple / PGroup
             i.e. arrow_zip([(0,1),3], [2]) -> [(0,1,2),(3,2)]
         """
+
         output = Pattern()
 
         other  = asStream(other)
@@ -788,8 +789,7 @@ class metaPattern(object):
 
             else:
 
-                #new_item = dtype((item1, item2)) ### this
-                new_item = (item1, item2)
+                new_item = dtype(item1, item2)
 
             output.append(new_item)
 
