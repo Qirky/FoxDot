@@ -1,7 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
 from .Main import PGroup, PatternMethod
-from ..Utils import modi
+from ..Utils import modi, LCM
 
 class PGroupPrime(PGroup):
     def change_state(self):
@@ -29,7 +29,7 @@ class PGroupPlus(PGroupPrime):
     bracket_style="+()"
     def get_behaviour(self):
         def action(event, key):
-            event['delay'] += self.calculate_time(float(event['sus']))
+            event['delay'] += self.calculate_time(event['sus'])
             return event
         return action
 
@@ -149,7 +149,7 @@ def offmul(self, value, dur=0.5):
     return self * PGroupXor(1, value).set_delay(dur)
 
 @PatternMethod
-def offlayer(self, method, *args, **kwargs):
+def offlayer(self, dur, method, *args, **kwargs):
     """ Zips a pattern with a modified version of itself. Method argument
         can be a function that takes this pattern as its first argument,
         or the name of a Pattern method as a string. """
@@ -161,16 +161,14 @@ def offlayer(self, method, *args, **kwargs):
         func = getattr(self, method)
         assert callable(func)
 
-    delay = kwargs.get("dur", 0.5)
-
-    return self.zip(func(*args, **kwargs), dtype=lambda a, b: PGroupXor(a, b).set_delay(delay))
+    return self.zip(func(*args, **kwargs), dtype=lambda a, b: PGroupXor(a, b).set_delay(dur))
     
 @PatternMethod
 def amen(self, size=2):
     """ Merges and laces the first and last two items such that a
         drum pattern "x-o-" would become "(x[xo])-o([-o]-)" """
     new = []
-    for n in range(len(self)):
+    for n in range( LCM(len(self), 4) ):
         if  n % 4 == 0:
             new.append([self[n], PGroupPlus(self[n], modi(self, n + size))])
         elif n % 4 == size:
