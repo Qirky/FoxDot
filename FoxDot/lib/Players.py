@@ -459,9 +459,9 @@ class Player(Repeatable):
 
                 name = self.alias.get(name, name)
 
-                if name == "dur":
+                #if name == "dur":
 
-                    value, self._delay_offset = CalculateDelaysFromDur(value) # can we avoid using this?
+                #    value, self._delay_offset = CalculateDelaysFromDur(value) # can we avoid using this?
 
                 value = asStream(value)
 
@@ -602,7 +602,7 @@ class Player(Repeatable):
 
         # If the duration has changed, work out where the internal markers should be
 
-        # This could be in its own private function
+        # -- This could be in its own private function
 
         force_count = kwargs.get("count", False)
         dur_updated = self.dur_updated() 
@@ -621,49 +621,62 @@ class Player(Repeatable):
 
         # Get the current state -- tidy this up
 
-        dur = 0
+        # dur = 0
 
-        while True:
+        # while True:
 
             # This could be in a separate method
 
-            self.get_event()
+        self.get_event() # PUT THE FOLLOWING IN GET EVENT
             
-            # Set a 'None' to 0
+            # # Set a 'None' to 0
 
-            if self.event['dur'] is None:
+            # if self.event['dur'] is None:
 
-                dur = 0
+            #     dur = 0
 
-            # If there are more than one dur (happens sometimes because of threading), only use first
+            # # If there are more than one dur add to the delay
 
-            try:
+            # try:
 
-                if len(self.event['dur']) > 0:
+            #     if len(self.event['dur']) > 0:
 
-                    self.event['dur'] = self.event['dur'][0]                    
+            #         #self.event['dur'] = self.event['dur'][0]
+            #         min_dur = min(self.event['dur'])
 
-            except TypeError:
+            #         offset = PGroup([(dur if dur != min_dur else 0) for dur in self.event["dur"]])
 
-                pass
+            #         self.event["delay"] = self.event["delay"] + offset
 
-            finally:
+            #         self.event["dur"] = min_dur
 
-                dur = float(self.event['dur'])
+            # except TypeError:
 
-            # Skip events with durations of 0
+            #     pass
 
-            if dur == 0:
+            # finally:
 
-                self.event_n += 1
+            # if self.event['dur'] is None:
 
-            else:
+            #     dur = 0
 
-                break
+            # # Skip events with durations of 0
+
+            # if dur == 0:
+
+            #     self.event_n += 1
+
+            # else:
+
+            #     dur = float(self.event['dur'])
+
+            #     break
 
         # Play the note
 
         self.sent_messages = []
+
+        dur = self.event["dur"]
         
         self.send(verbose=(self.metro.solo == self and kwargs.get('verbose', True) and type(self.event['dur']) != rest))
         
@@ -771,14 +784,27 @@ class Player(Repeatable):
         return False
 
     def rhythm(self):
-        """ Returns the "now" value of the duration """
+        """ Returns the players array of durations at this point in time """
         rhythm = []
+
         for value in self.attr['dur']:
-            #rhythm.append(self.unpack(value))
+            
             if isinstance(value, TimeVar):
-                 rhythm.append(value.now())
-            else:
-                 rhythm.append(value)
+                 
+                value = value.now()
+
+            # If there are multiple durations, use the minimum
+
+            try:
+
+                value = min(value)
+
+            except TypeError:
+
+                pass
+            
+            rhythm.append(value)
+
         self.current_dur = asStream(rhythm)
         return self.current_dur
 
@@ -794,7 +820,7 @@ class Player(Repeatable):
 
         if self.isplaying is False:
 
-            self.reset() # <-- need to reset effects
+            self.reset() 
 
         # If there is a designated solo player when updating, add this at next bar
         
@@ -883,6 +909,8 @@ class Player(Repeatable):
     def stutter(self, amount=None, **kwargs):
         """ Plays the current note n-1 times. You can specify keywords. """
 
+        timestamp = self.metro.osc_message_time() # when the first item should be sent
+
         # Get the current values (this might be called between events)
 
         n = int(kwargs.get("n", amount if amount is not None else 2))
@@ -903,7 +931,17 @@ class Player(Repeatable):
 
                     new_event[key] = self.now(key)
 
-            dur = float(kwargs.get("dur", self.dur)) / n
+            new_event = self.unduplicate_durs(new_event)
+
+            if "dur" in kwargs:
+
+                dur = kwargs["dur"]
+
+            else:
+
+                dur = new_event["dur"]
+
+            dur = float(dur) / n
 
             delay = 0
 
@@ -931,13 +969,13 @@ class Player(Repeatable):
 
             # Get PGroup delays
 
-            new_event["delay"] = new_event.get("delay", 0) + PGroup([dur * (i+1) for i in range(n-1)])
+            # new_event["delay"] = new_event.get("delay", 0) + PGroup([dur * (i+1) for i in range(n-1)])
+
+            new_event["delay"] = PGroup([dur * (i+1) for i in range(n-1)])
 
             new_event = self.get_prime_funcs(new_event)
 
-            self.update_all_player_keys(event=new_event)
-
-            self.send(timestamp=self.metro.osc_message_time(), **new_event)
+            self.send(timestamp=timestamp, **new_event)
                 
         return self
 
@@ -1147,17 +1185,19 @@ class Player(Repeatable):
 
         delays = list(delays) if isinstance(delays, PGroup) else [delays]
 
-        if any(delays):
+        if any([d != 0  for d in delays]):
 
             event_size = self.get_event_length(event, **kwargs)
 
             for index in range(event_size):
 
-                delay = group_modi(delays, index)
+                delay = float(group_modi(delays, index))
             
                 if delay > 0:
                 
                     time  = self.event_index + delay
+
+                    # TODO -- only update keys that have been accessed
                 
                     def delay_update(event, i, t):
                 
@@ -1165,7 +1205,7 @@ class Player(Repeatable):
                 
                             if key not in ignore:
                 
-                                self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), i), t)
+                                self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), i), float(t))
                 
                     self.metro.schedule(delay_update, time, args=(event, index, time))
                 
@@ -1316,6 +1356,50 @@ class Player(Repeatable):
 
         return event
 
+    def unduplicate_durs(self, event):
+
+        # If there are more than one dur then add to the delay
+
+        if "dur" in event:
+
+            try:
+
+                if len(event['dur']) > 0:
+
+                    min_dur = min(event['dur'])
+
+                    offset = PGroup([(dur if dur != min_dur else 0) for dur in event["dur"]])
+
+                    event["delay"] = event["delay"] + offset
+
+                    event["dur"] = float(min_dur)
+
+            except TypeError:
+
+                pass
+
+        if "sus" in event:
+
+            try:
+
+                # Also update blur / sus
+
+                if len(event['sus']) > 0:
+
+                    min_sus = min(event['sus'])
+
+                    offset = PGroup([(sus / min_sus) for sus in event["sus"]])
+
+                    event["blur"] = event["blur"] * offset
+
+                    event["sus"] = float(min_sus)
+
+            except TypeError:
+
+                pass
+
+        return event
+
     def get_event(self):
         """ Returns a dictionary of attr -> now values """
 
@@ -1326,6 +1410,8 @@ class Player(Repeatable):
             if len(attributes[key]) > 0:
 
                 self.event[key] = self.now(key)
+
+        self.event = self.unduplicate_durs(self.event)
 
         self.event = self.get_prime_funcs(self.event)
 
