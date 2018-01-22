@@ -4,6 +4,8 @@ from .Code import WarningMsg
 from .Patterns import Pattern, asStream
 from .Utils import modi
 
+import threading
+
 class MethodList:
     def __init__(self, root):
         self.root=root
@@ -183,6 +185,8 @@ class Repeatable(object):
 
                     return
 
+                method.__name__ = cmd # for debugging purposes
+
             else:
 
                 WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
@@ -301,18 +305,34 @@ class Repeatable(object):
         return self
             
 
-    def never(self, cmd):
+    def never(self, cmd, ident=None):
+        """ Stops calling cmd on repeat """
+
         attr, method = self.get_attr_and_method_name(cmd)
+
+        if ident is not None:
+        
+            cmd = "{}-{}".format(cmd, ident)
+
         try:
             # If it a pattern method, undo it
+            
             if self.previous_patterns[attr].contains(method):
+            
                 self.previous_patterns[attr].remove(method)
+            
                 self.update_pattern_methods(attr)
+            
             self.repeat_events[cmd].stop()
+            
             del self.repeat_events[cmd]
+        
         except KeyError:
+        
             err = "Player method '{}' not active".format(cmd)
+        
             raise KeyError(err)
+        
         return self
 
 class MethodCall:
@@ -413,6 +433,8 @@ class MethodCall:
         except Exception as e:
 
             print("{} in '{}': {}".format(e.__class__.__name__, self.method.__name__, e))
+
+        #threading.Thread(target=this_method).start() # risky
 
         # Re-schedule the method call
 
