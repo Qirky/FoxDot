@@ -439,7 +439,7 @@ class TempoClock(object):
         """ Returns a 'schedulable' wrapper for any callable object """
         return Wrapper(self, obj, dur, args)
 
-    def players(self, exclude=[]):
+    def players(self, ex=[]):
         return [p for p in self.playing if p not in exclude]
 
     # Every n beats, do...
@@ -592,6 +592,9 @@ class Queue(object):
     def get_server(self):
         """ Returns the `ServerManager` instanced used by this block's parent clock """
         return self.parent.server
+
+    def get_clock(self):
+        return self.parent
             
 from types import FunctionType
 class QueueBlock(object):
@@ -610,7 +613,9 @@ class QueueBlock(object):
 
         self.osc_messages   = []
 
-        self.server = parent.get_server()
+        self.parent = parent
+        self.server = self.parent.get_server()
+        self.metro  = self.parent.get_clock()
 
         self.beat = t
         self.time = 0
@@ -692,6 +697,9 @@ class QueueBlock(object):
 
     def players(self):
         return [item for level in self.events[1:3] for item in level]
+
+    def all_items(self):
+        return [item for level in self.events for item in level]
 
     def __getitem__(self, key):
         for event in self:
@@ -782,6 +790,7 @@ class SoloPlayer:
     def add(self, player):
         if player not in self.data:
             self.data.append(player)
+
     def set(self, player):
         self.data = [player]
     def reset(self):
@@ -789,9 +798,11 @@ class SoloPlayer:
     def active(self):
         """ Returns true if self.data is not empty """
         return len(self.data) > 0
+
     def __eq__(self, other):
         """ Returns true if other is in self.data or if self.data is empty """
         return (other in self.data) if self.data else True
+
     def __ne__(self, other):
         return (other not in self.data) if self.data else True
 
