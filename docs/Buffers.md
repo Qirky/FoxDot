@@ -13,7 +13,6 @@ that can be proggrammed into performance.
 
 ## Classes
 
-
 ### `Buffer(self, fn, number, channels=1)`
 
 
@@ -22,14 +21,13 @@ that can be proggrammed into performance.
 
 ---
 
-### `BufferManager(self)`
+### `BufferManager(self, server=FoxDot ServerManager Instance -> localhost:57110, paths=())`
 
 
 
 #### Methods
 
 ---
-
 
 ### `LoopSynthDef(self)`
 
@@ -41,14 +39,19 @@ that can be proggrammed into performance.
 
 ## Functions
 
-
-### `path(fn)`
+### `hasext(filename)`
 
 None
 
+### `symbolToDir(symbol)`
+
+Return the sample search directory for a symbol 
+
 ## Data
 
-#### `Samples = <FoxDot.lib.Buffers.BufferManager object>`
+#### `Samples = <BufferManager>`
 
 #### `loop = loop`
+
+#### `nil = <Buffer num 0>`
 

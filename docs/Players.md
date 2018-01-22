@@ -142,6 +142,15 @@ sample - Special keyword for Sample Players; selects another audio file from the
 
 ## Classes
 
+### `EmptyPlayer(self, name)`
+
+Place holder for Player objects created at run-time to reduce load time.
+    
+
+#### Methods
+
+---
+
 ### `Group(self, *args)`
 
 

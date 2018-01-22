@@ -9,6 +9,7 @@ Package Contents
 - [Constants](Constants.md)
 - [Effects](Effects.md)
 - [Key](Key.md)
+- [Logging](Logging.md)
 - [Midi](Midi.md)
 - [OSC3](OSC3.md)
 - [Players](Players.md)
