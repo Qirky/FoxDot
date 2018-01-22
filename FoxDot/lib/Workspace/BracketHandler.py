@@ -103,7 +103,6 @@ class BracketHandler:
 
                     ret = "break"
 
-
             # Update line colours
         
             self.root.colour_line(line)
@@ -186,6 +185,10 @@ class BracketHandler:
             
             self.text.insert(INSERT, event.char)
             self.root.colour_line(line)
+
+        # Store the text
+
+        self.root.text_as_string = self.get_all()
 
         return "break"
 

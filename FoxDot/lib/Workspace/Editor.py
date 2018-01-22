@@ -301,6 +301,8 @@ class workspace:
 
                     self.clear_temp_file()
 
+                self.text_as_string = self.get_all()
+
         # Ask in 1/2 sec
 
         self.root.after(100, recover_work)
@@ -521,6 +523,7 @@ class workspace:
         print("{}+.       : Stop all sound".format(ctrl))
         print("{}+=       : Increase font size".format(ctrl))
         print("{}+-       : Decrease font size".format(ctrl))
+        print("{}+L       : Insert lambda symbol".format(ctrl))
         print("{}+S       : Save your work".format(ctrl))
         print("{}+O       : Open a file".format(ctrl))
         print("{}+M       : Toggle the menu".format(ctrl))
