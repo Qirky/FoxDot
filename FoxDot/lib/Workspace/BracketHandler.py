@@ -188,7 +188,7 @@ class BracketHandler:
 
         # Store the text
 
-        self.root.text_as_string = self.get_all()
+        self.root.text_as_string = self.root.get_all()
 
         return "break"
 
