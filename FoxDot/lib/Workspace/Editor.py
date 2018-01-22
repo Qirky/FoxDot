@@ -1519,7 +1519,7 @@ class workspace:
         return
 
     def get_all(self):
-        return self.text.get("1.0", END)
+        return self.text.get("1.0", END).strip()
 
     def openhomepage(self):
         webbrowser.open("www.foxdot.org")
