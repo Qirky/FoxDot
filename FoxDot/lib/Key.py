@@ -372,18 +372,21 @@ class NumberKey(object):
             # We can map using a function
             
             if callable(key) and callable(value):
+
                 funcs[partial(lambda: key(self.now()))]  = partial(lambda: value(self.now()))
 
             elif callable(key) and not callable(value):
-                funcs[partial(lambda: key(self.now()))]  = partial(lambda: value)
+
+                funcs[partial(lambda: key(self.now()))]  = partial(lambda e: e, value)
 
             elif callable(value):
+
                 funcs[partial(lambda e: self.now() == e, key)] = partial(lambda: value(self.now()))
 
             else:
-            
+                print(key, value)
                 # one-to-one mapping
-                funcs[partial(lambda e: self.now() == e, key)] = partial(lambda: value)
+                funcs[partial(lambda e: self.now() == e, key)] = partial(lambda e: e, value)
 
         def mapping_function(a, b):
             for func, result in funcs.items():
