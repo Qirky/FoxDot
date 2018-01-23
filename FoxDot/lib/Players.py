@@ -382,6 +382,10 @@ class Player(Repeatable):
             self.update(other.name, other.degree, **other.kwargs)
             
             # Perform any methods
+
+            self + other.mod
+
+            self.update_pattern_root('sample' if self.synthdef == SamplePlayer else 'degree')
             
             for method, arguments in other.methods:
             
@@ -391,7 +395,7 @@ class Player(Repeatable):
             
             # Add the modifier
             
-            self + other.mod # need to account for minus
+            # self + other.mod # need to account for minus
             
             return self
         
@@ -619,58 +623,9 @@ class Player(Repeatable):
 
                 print("TypeError: Innappropriate argument type for 'dur'")
 
-        # Get the current state -- tidy this up
+        # Get the current state 
 
-        # dur = 0
-
-        # while True:
-
-            # This could be in a separate method
-
-        self.get_event() # PUT THE FOLLOWING IN GET EVENT
-            
-            # # Set a 'None' to 0
-
-            # if self.event['dur'] is None:
-
-            #     dur = 0
-
-            # # If there are more than one dur add to the delay
-
-            # try:
-
-            #     if len(self.event['dur']) > 0:
-
-            #         #self.event['dur'] = self.event['dur'][0]
-            #         min_dur = min(self.event['dur'])
-
-            #         offset = PGroup([(dur if dur != min_dur else 0) for dur in self.event["dur"]])
-
-            #         self.event["delay"] = self.event["delay"] + offset
-
-            #         self.event["dur"] = min_dur
-
-            # except TypeError:
-
-            #     pass
-
-            # finally:
-
-            # if self.event['dur'] is None:
-
-            #     dur = 0
-
-            # # Skip events with durations of 0
-
-            # if dur == 0:
-
-            #     self.event_n += 1
-
-            # else:
-
-            #     dur = float(self.event['dur'])
-
-            #     break
+        self.get_event() 
 
         # Play the note
 

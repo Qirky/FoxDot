@@ -10,8 +10,17 @@ class MethodList:
     def __init__(self, root):
         self.root=root
         self.list_of_methods = []
+    
     def __repr__(self):
         return repr(self.list_of_methods)
+
+    def update(self, method, args, kwargs):
+        for i, info in enumerate(self.list_of_methods):
+            name, _, _  = info
+            if name == method:
+                self.list_of_methods[i] = (method, args, kwargs)
+                return
+        return ValueError
 
     def remove(self, method):
         for i, info in enumerate(self.list_of_methods):
@@ -152,13 +161,10 @@ class Repeatable(object):
 
             elif self.is_pattern_method(method_name, attr_name):
 
-                # THIS ONLY CALLS ON DEGREE ATM                
-
                 def method(*args, **kwargs):
 
                     # If there are no "old" patterns held in memory, use the pattern method and store
 
-                    # attr = "degree"
                     attr = attr_name
 
                     if attr not in self.previous_patterns:
@@ -170,8 +176,6 @@ class Repeatable(object):
                     if self.previous_patterns[attr].contains(method_name):
 
                         self.previous_patterns[attr].remove(method_name)
-
-                        # self.attr[attr] = call_pattern_method(self.attr[attr], *args, **kwargs)
 
                     # If not, add it to the list
 
@@ -192,14 +196,6 @@ class Repeatable(object):
                 WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
 
                 return None, None
-
-        # elif len(attr) == 2:
-
-        #     # TODO -- add this functionality to PlayerKey class?
-
-        #     sub_method = lambda *args, **kwargs: getattr(self.attr[attr[0]], attr[1]).__call__(*args, **kwargs)
-
-        #     method = lambda *args, **kwargs: self.attr.update({attr[0]: sub_method(*args, **kwargs)})
 
         assert callable(method)
         
@@ -265,7 +261,7 @@ class Repeatable(object):
 
             if self.is_pattern_method(method_name, attr):
 
-                # If the index is odd, "turn off the  method"
+                # if n is even, it means the method is active # TODO -- put this in a class mate
 
                 n, acc = call.count()
 
@@ -277,9 +273,9 @@ class Repeatable(object):
 
                 else:
 
-                    if not self.previous_patterns[attr].contains(method_name):
+                    if self.previous_patterns[attr].contains(method_name):
 
-                        self.previous_patterns[attr].list_of_methods.append((method_name, args, kwargs))
+                        self.previous_patterns[attr].update(method_name, args, kwargs)
 
                 # Update the attribute
 
