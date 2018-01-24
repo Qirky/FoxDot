@@ -2032,6 +2032,18 @@ class rest(object):
         return rest(self.dur % other)
     def __rmod__(self, other):
         return rest(other % self.dur)
+    def __eq__(self, other):
+        return (self.dur == other)
+    def __ne__(self, other):
+        return (self.dur != other)
+    def __lt__(self, other):
+        return (self.dur < other)
+    def __le__(self, other):
+        return (self.dur <= other)
+    def __gt__(self, other):
+        return (self.dur > other)
+    def __ge__(self, other):
+        return (self.dur >= other)
     def __int__(self):
         return int(self.dur)
     def __float__(self):
