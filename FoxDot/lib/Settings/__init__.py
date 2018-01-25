@@ -78,7 +78,7 @@ def GET_FX_FILES():
     return [os.path.realpath(EFFECTS_DIR + "/" + path) for path in os.listdir(EFFECTS_DIR)]
 
 def GET_TUTORIAL_FILES():
-    return [os.path.realpath(TUTORIAL_DIR + "/" + path) for path in os.listdir(TUTORIAL_DIR)]
+    return [os.path.realpath(TUTORIAL_DIR + "/" + path) for path in sorted(os.listdir(TUTORIAL_DIR))]
 
 # Set Environment Variables
 
