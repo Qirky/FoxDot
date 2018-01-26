@@ -494,7 +494,7 @@ class workspace:
         try:
             self.text.edit_undo()
             self.update_all()
-        except:
+        except TclError:
             pass
              
         return "break"
@@ -503,7 +503,7 @@ class workspace:
         try:
             self.text.edit_redo()
             self.update_all()
-        except:
+        except TclError:
             pass
         return "break"
 

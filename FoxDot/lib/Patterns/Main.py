@@ -1007,6 +1007,13 @@ class PGroup(metaPattern):
             values.append(item)
         return self.__class__(values)
 
+    def __hash__(self):
+        return hash( self.__key() )
+
+    def __key(self):
+        """ Returns a tuple of information to identify this Pattern """
+        return (self.__class__, tuple(self.data))
+
     def __eq__(self, other):
         return self.eq(other)
 
@@ -1121,9 +1128,9 @@ class GeneratorPattern(random.Random):
         new = GeneratorPattern()
         new.parent = self
         new.name   = new.parent.name
-        other      = asStream(other)
+        new.other  = asStream(other) # We want to store the pattern I think?
         new.data   = "{} {}".format(func.__name__, other)
-        new.func   = lambda index: func(new.parent.getitem(index), other[index])
+        new.func   = lambda index: func(new.parent.getitem(index), new.other[index])
         return new
 
     def func(self, index):
