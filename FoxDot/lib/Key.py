@@ -344,7 +344,7 @@ class NumberKey(object):
             new_key = new_key + i
         return new_key
 
-    def map(self, mapping):
+    def map(self, mapping, default=0):
         """ Allows for functional mapping. `mapping` is a dictionary of keys, which can
             be functions, and values, which can also be functions. If neither is callable,
             then the the mapping function returns the value when this Player Key  is equal
@@ -384,7 +384,6 @@ class NumberKey(object):
                 funcs[partial(lambda e: self.now() == e, key)] = partial(lambda: value(self.now()))
 
             else:
-                print(key, value)
                 # one-to-one mapping
                 funcs[partial(lambda e: self.now() == e, key)] = partial(lambda e: e, value)
 
@@ -394,7 +393,7 @@ class NumberKey(object):
                     value = result()
                     break
             else:
-                value = 0
+                value = default
             return value
 
         new = self.child(0)        
@@ -429,7 +428,7 @@ class NumberKey(object):
 
 
     def accompany(self, freq=0, rel=[0,2,4]):
-        """ Returns a PlayerKey whose function returns an accompanying note"""
+        """ Returns a PlayerKey whose function returns an accompanying note """
         return self.transform(Accompany(freq=freq, rel=rel))
     
     # Values
