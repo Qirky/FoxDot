@@ -61,6 +61,20 @@ def __getitem__(self, key):
     else:
         return self.getitem(key)
 
+def player_method(f):
+    """ Decorator for assigning functions as Player methods. 
+
+    >>> @player_method
+    ... def test(self):
+    ...    print(self.degree)
+
+    >>> p1.test()
+    """
+    setattr(Player, f.__name__, f)
+    return getattr(Player, f.__name__)
+
+PlayerMethod = player_method # Temporary alias
+
 def _futureBarDecorator(n, multiplier=1):
     if callable(n):
         Clock.schedule(n, Clock.next_bar())
@@ -70,7 +84,7 @@ def _futureBarDecorator(n, multiplier=1):
         return f
     return wrapper
 
-def nextBar(n=0):
+def next_bar(n=0):
     ''' Schedule functions when you define them with @nextBar
     Functions will run n beats into the next bar.
 
@@ -81,6 +95,8 @@ def nextBar(n=0):
     ...     v1.solo()
     '''
     return _futureBarDecorator(n)
+
+nextBar = next_bar # temporary alias
 
 def futureBar(n=0):
     ''' Schedule functions when you define them with @futureBar
@@ -141,17 +157,15 @@ def Master():
     """ Returns a `Group` containing all the players currently active in the Clock """
     return Group(*Clock.playing)
 
-# def allow_connections():
-#     """ Starts a new instance of ServerManager.TempoServer and connects it with the clock """
-#     if self.listening_for_connections.get() == True:
-#         Clock = self.namespace["Clock"]
-#         Clock.start_tempo_server(TempoServer, **kwargs)
-#         print("Listening for connections on {}".format(Clock.tempo_server))
-#     else:
-#         Clock = self.namespace["Clock"]
-#         Clock.kill_tempo_server()
-#         print("Closed connections")
-#     return
+def allow_connections(valid = True, *args, **kwargs):
+    """ Starts a new instance of ServerManager.TempoServer and connects it with the clock. Default port is 57999 """
+    if valid:
+        Clock.start_tempo_server(TempoServer, **kwargs)
+        print("Listening for connections on {}".format(Clock.tempo_server))
+    else:
+        Clock.kill_tempo_server()
+        print("Closed connections")
+    return
 
 # Create a clock and define functions
 
