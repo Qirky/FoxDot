@@ -378,14 +378,12 @@ class Player(Repeatable):
         """
         
         if isinstance(other, SynthDefProxy):
-            # Call the update method
-            self.update(other.name, other.degree, **other.kwargs)
             
-            # Perform any methods
-
-            self + other.mod
-
-            self.update_pattern_root('sample' if self.synthdef == SamplePlayer else 'degree')
+            # Call the update method
+            
+            self.update(other.name, other.degree, **other.kwargs)
+        
+            # self.update_pattern_root('sample' if self.synthdef == SamplePlayer else 'degree')
             
             for method, arguments in other.methods:
             
@@ -394,8 +392,8 @@ class Player(Repeatable):
                 getattr(self, method).__call__(*args, **kwargs)
             
             # Add the modifier
-            
-            # self + other.mod # need to account for minus
+
+            self + other.mod
             
             return self
         
@@ -1037,9 +1035,11 @@ class Player(Repeatable):
         """ Change the degree modifier stream """
         self.mod_data = data
         if self.synthdef == SamplePlayer:
-            self.attr['sample'] = self.modifier + self.mod_data
+            # self.attr['sample'] = self.modifier + self.mod_data
+            self.sample = self.modifier + self.mod_data
         else:
-            self.attr['degree'] = self.modifier + self.mod_data
+            #self.attr['degree'] = self.modifier + self.mod_data
+            self.degree = self.modifier + self.mod_data
         return self
 
     def __sub__(self, data):
