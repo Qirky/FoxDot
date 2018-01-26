@@ -40,6 +40,8 @@ with SynthDef("dab") as synth:
      synth.osc = a + b
      synth.env = Env.env(sus=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
 dab = synth
+del a
+del b
 
 with SynthDef("varsaw") as synth:
      synth.freq = synth.freq * [1, 1.005]
@@ -199,6 +201,7 @@ with SynthDef("blip") as synth:
     synth.osc  = (LFCub.ar(freq * 1.002, iphase=1.5) + LFTri.ar(freq, iphase=Line.ar(2,0,0,2)) * 0.3) * Blip.ar(freq / 2, synth.rate)
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 2) * 0.3
 blip = synth
+del freq
 
 with SynthDef("ripple") as ripple:
     ripple.amp = ripple.amp / 6
