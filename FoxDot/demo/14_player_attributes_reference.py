@@ -30,16 +30,15 @@ d1 >> dirt([0,4,2,1], dur=1/2, hpf=4000, hpr=0.3)
 d1 >> dirt([0,4,2,1], dur=1/2, hpf=linvar([0,4000],8), hpr=P[1,1,0.3].stretch(8))
 
 
-############
+
+
+####################
 Reference
+####################
 
 
-#    dur - Durations (defaults to 1 and 1/2 for the Sample Player)
-#    sus - Sustain (defaults to `dur`)
-#    rate - Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
-#    sample - Special keyword for Sample Players; selects another audio file from the bank of samples for a sample character.
 
-
+####################
 # amp - Amplitude (defaults to 1)
 # Sets the volume of the note/pattern
 
@@ -52,6 +51,8 @@ d1 >> play("*", dur=1/2, amp=.5)
 d1 >> play("*", dur=1/2, amp=[1,0,1,1,0])
 
 
+
+####################
 # amplify - Chagnes amp, by multiplying agasint the existing value (instead of overwritting)
 
 # Creating a pattern with amp
@@ -62,14 +63,87 @@ d1 >> play("*", dur=1/2, amplify=[.5,1,0])
 p1 >> blip([0,1,2,3], amplify=var([1,0],[28,4]))
 
 
+
+####################
+# bend
+
+
+
+####################
+# benddelay - See bend
+
+
+
+####################
 # bits
+# The bit depth, in number of bits, that the signal is reduced to;
+# this is a value between 1 and 24 where other values are ignored.
+# Use crush to set the amount of reduction to the bitrate (defaults to 8)
 
+
+
+####################
+# bitcrush - See bits
+
+
+
+####################
+# blur
+
+
+
+####################
+# bpf - Band Pass Filter
+
+
+
+####################
+# bpnoise - See bpf
+
+
+
+####################
+# bpr - See bpf
+
+
+
+####################
+# bpm
+
+
+
+####################
+# buf
+
+
+
+####################
+# channel
+
+
+
+####################
 # chop
+# 'Chops' the signal into chunks using a low frequency pulse wave over the sustain of a note.
 
+
+
+####################
 # coarse
 
+
+
+####################
+# comb delay - See echo
+
+
+
+####################
 # crush
 
+
+
+####################
 # cut
 # Cuts a duration
 p1 >> pluck(P[:8], dur=1/2, cut=1/8)
@@ -77,9 +151,18 @@ p1 >> pluck(P[:8], dur=1/2, cut=1/4)
 p1 >> pluck(P[:8], dur=1/2, cut=1/2)
 
 
+
+####################
 # cutoff
 
 
+
+####################
+# decay - See echo
+
+
+
+####################
 # degree - The degree of the note, or pitch, can be specified by keyword (also the first positional)
 p1 >> blip(degree=[0,1,2,3])
 
@@ -91,6 +174,7 @@ b1 >> bass(p1.degree[0])
 
 
 
+####################
 # delay - A duration of time to wait before sending the information to SuperCollider (defaults to 0)
 
 # Delays every 3 note by .1
@@ -108,7 +192,18 @@ p1 >> blip([0,1,2,3], delay=(0,.1,.2,.3))
 
 
 
-# Echo
+####################
+# dist
+
+
+
+####################
+# dur - Durations (defaults to 1 and 1/2 for the Sample Player)
+
+
+
+####################
+# echo
 # Title keyword: echo, Attribute keyword(s): decay
 # Sets the decay time for any echo effect in beats, works best on Sample Player (defaults to 0)
 # Multiplied against the sustain value
@@ -120,11 +215,32 @@ p1 >> pluck(P[:8], echo=.25)
 
 p1 >> pluck(P[:8], echo=.5)
 
+p1 >> pluck(P[:8], echo=.5, decay=.5)
 
 
+
+####################
+# env
+
+
+
+####################
+# fmod
+
+
+
+####################
 # formant
 
-# HPF - High Pass Filter
+
+
+####################
+# freq
+
+
+
+####################
+# hpf - High Pass Filter
 # Filters out all the frequencies below given value, removing lower freqencies
 
 # 4000 hertz
@@ -146,7 +262,14 @@ p1 >> pluck(P[:8], dur=1/2, hpf=linvar([0,4000],[8,0]), hpr=.5)
 p1 >> pluck(P[:8], dur=1/2, hpf=linvar([0,4000],[8,0]), hpr=linvar([0.1,1],12))
 
 
-# LPF - Low Pass Filter
+
+####################
+# hpr - See hpf
+
+
+
+####################
+# lpf - Low Pass Filter
 # Filters out all the frequencies above given value, removing higher freqencies
 
 # 4000 hertz
@@ -156,17 +279,48 @@ p1 >> pluck(P[:8], dur=1/2, lpf=400)
 p1 >> pluck(P[:8], dur=1/2, lpf=linvar([500,4000],[8,0]), lpr=linvar([0.1,1],12))
 
 
+
+####################
+# lpr - See lpf
+
+
+
+####################
+# midinote
+
+
+
+####################
 # pan
+# Panning, where -1 is far left, 1 is far right (defaults to 0)
 
 
+
+####################
 # pitch - See degree
 
+
+
+####################
 # pshift
 
-# room
 
-# Reveb
-# Reverb - Title keyword: room, Attribute keyword(s): mix
+
+####################
+# oct
+
+
+
+####################
+# rate
+# Variable keyword used for misc. changes to a signal. E.g. Playback rate of the Sample Player (defaults to 1)
+
+
+
+####################
+# room
+# Title keyword: room, Attribute keyword(s): mix
+
 # The room argument specifies the size of the room
 d1 >> play("x-o-", room=0.5)
 
@@ -174,11 +328,31 @@ d1 >> play("x-o-", room=0.5)
 d1 >> play("x-o-", room=0.5, mix=.5)
 
 
+
+####################
+# Reveb
+# See Room
+
+
+
+####################
+# sample
+# Special keyword for Sample Players; selects another audio file from the bank of samples for a sample character.
+
+
+
+####################
+# scale
+
+
+
+####################
 # shape
 
 
-# Slide
-# Slide To - Title keyword: slide,
+
+####################
+# slide - Slide To
 # Slides' the frequency value of a signal to freq * (slide+1) over the duration of a note (defaults to 0)
 
 p1 >> pluck(P[:8], dur=1/2, slide=1)
@@ -188,21 +362,53 @@ p1 >> pluck(P[:8], dur=1/2, slide=12)
 p1 >> pluck(P[:8], dur=1/2, slide=var([0,-1],[12,4]))
 
 
+
+####################
+# slidedelay
+
+
+
+####################
 # slidefrom
 
 
+
+####################
 # slider
 
 
+
+####################
 # spread
 
 
+
+####################
+# spin
+
+
+
+####################
+# striate
+
+
+
+####################
 # stutter
 
 
-# sus
+
+####################
+# sus - Sustain (defaults to `dur`)
 
 
+
+####################
+# swell
+
+
+
+####################
 # vib - Vibrato
 # Vibrato - Title keyword: vib, Attribute keyword(s): Vibrato (defaults to 0)
 
@@ -213,5 +419,5 @@ p1 >> pluck(P[:8], dur=1/2, vib=12, vibdepth=0.5)
 
 
 
-
-
+####################
+# vibdepth - See vib
