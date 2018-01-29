@@ -13,6 +13,9 @@ FoxDot/lib/Settings/conf.txt
 FoxDot/lib/Workspace/tmp/tempfile.txt
 changed_files.txt
 
+# Sphinx build dir
+docs/_build/
+
 *.txt
 
 # To-do list
@@ -73,3 +76,6 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# swp files
+*.swp

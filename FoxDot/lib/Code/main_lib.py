@@ -16,16 +16,15 @@ except ImportError:
 from ..Utils import modi
 from ..Settings import *
 
+"""
+Live Object
+===========
+
+Base for any self-scheduling objects
+"""
+
 # Player RegEx
 re_player = re.compile(r"(\s*?)(\w+)\s*?>>\s*?\w+")
-
-"""
-    Live Object
-    ===========
-
-    Base for any self-scheduling objects
-
-"""
 
 class LiveObject(object):
 

@@ -207,21 +207,18 @@ class Repeatable(object):
             every n-th beat of a timeframe, use the `cycle` keyword argument
             to specify that timeframe.
 
-            ```
-            # Call the shuffle method every 4 beats
+            ::
+                # Call the shuffle method every 4 beats
 
-            p1.every(4, 'shuffle')
+                p1.every(4, 'shuffle')
 
-            # Call the stutter method on the 5th beat of every 8 beat cycle
+                # Call the stutter method on the 5th beat of every 8 beat cycle
 
-            p1.every(5, 'stutter', 4, cycle=8)
+                p1.every(5, 'stutter', 4, cycle=8)
 
-            # If the method is not valid but *is* a valid Pattern method, that is called and reverted
+                # If the method is not valid but *is* a valid Pattern method, that is called and reverted
 
-            p1.every(4, 'palindrome')
-            
-            ```
-
+                p1.every(4, 'palindrome')
         """
 
         try:

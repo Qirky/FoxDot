@@ -1,13 +1,12 @@
 """
-    Sequences.py
-    ------------
-    All patterns inherit from Base.Pattern. There are two types of pattern:
+Sequences.py
+------------
+All patterns inherit from Base.Pattern. There are two types of pattern:
 
-    1. Container types
-        - Similar to lists but with different mathematical operators
-    2. Generator types
-        - Similar to generators but can be indexed (returns values based on functions)
-
+1. Container types
+    * Similar to lists but with different mathematical operators
+2. Generator types
+    * Similar to generators but can be indexed (returns values based on functions)
 """
 
 from __future__ import absolute_import, division, print_function
@@ -185,13 +184,10 @@ def PStep(n, value, default=0):
 @loop_pattern_func
 def PSum(n, total, **kwargs):
     """
-        Returns a Pattern of length 'n' that sums to equal 'total'
+    Returns a Pattern of length 'n' that sums to equal 'total'
 
-        ```
-        e.g. PSum(3,8) -> P[3, 3, 2]
-             PSum(5,4) -> P[1, 0.75, 0.75, 0.75, 0.75]
-        ```
-
+    e.g. PSum(3,8) -> P[3, 3, 2]
+         PSum(5,4) -> P[1, 0.75, 0.75, 0.75, 0.75]
     """
     lim = kwargs.get("lim", 0.125)
 
@@ -214,12 +210,13 @@ def PSum(n, total, **kwargs):
 
 @loop_pattern_func
 def PRange(start, stop=None, step=None):
-    ''' Returns a Pattern equivalent to `Pattern(range(start, stop, step)) '''
+    """ Returns a Pattern equivalent to ``Pattern(range(start, stop, step))`` """
     return Pattern(list(range(*[val for val in (start, stop, step) if val is not None])))
 
 @loop_pattern_func
 def PTri(start, stop=None, step=None):
-    ''' Returns a Pattern equivalent to `Pattern(range(start, stop, step)) with its reversed form appended.'''
+    """ Returns a Pattern equivalent to ``Pattern(range(start, stop, step))`` with its reversed form
+    appended."""
     rev_step = step if step is not None else 1
     data = list(PRange(start, stop, step))
     return Pattern(data + [item + rev_step for item in reversed(data)])
@@ -250,9 +247,10 @@ def PEuclid2(n, k, lo, hi):
 def PBeat(string, start=0, dur=0.5):
     """ Returns a Pattern of durations based on an input string where
         non-whitespace denote a pulse e.g.
-        ```
-        >>> PTab("x xxx x")
-        P[1, 0.5, 0.5, 1, 0.5]
+        ::
+
+            >>> PTab("x xxx x")
+            P[1, 0.5, 0.5, 1, 0.5]
     """
     data = [int(char != " ") for char in list(string)]
     pattern = Pattern(PulsesToDurations( data ))

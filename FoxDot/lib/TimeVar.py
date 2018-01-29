@@ -1,6 +1,5 @@
 """
-    Time-Dependent Variables (TimeVar)
-
+Time-Dependent Variables (TimeVar)
 """
 
 from __future__ import absolute_import, division, print_function
@@ -509,12 +508,13 @@ class expvar(linvar):
 
 class Pvar(TimeVar, Pattern):
     """ A TimeVar that represents Patterns that change over time e.g.
-        ```
-        >>> a = Pvar([ [0,1,2,3], [4,5] ], 4)
-        >>> print a # time is 0
-        P[0, 1, 2, 3]
-        >>> print a # time is 4
-        P[4, 5]
+        ::
+
+            >>> a = Pvar([ [0,1,2,3], [4,5] ], 4)
+            >>> print a # time is 0
+            P[0, 1, 2, 3]
+            >>> print a # time is 4
+            P[4, 5]
     """
     stream = PatternContainer
     def __init__(self, values, dur=None, **kwargs):

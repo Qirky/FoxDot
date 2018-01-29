@@ -8,20 +8,19 @@
     also have other attribute keywords which can be any value and may have
     a default value which is set when a Player is created.
 
-    ```python
-    # Example. Reverb effect "title" is `room` and attribute is `mix`, which
-    # defaults to 0.25. The following adds a reverb effect
-    
-    p1 >> pads(room=0.5)
+    ::
+        # Example. Reverb effect "title" is `room` and attribute is `mix`, which
+        # defaults to 0.25. The following adds a reverb effect
+        
+        p1 >> pads(room=0.5)
 
-    # This still adds the effect, but a mix of 0 doesn't actually do anything
+        # This still adds the effect, but a mix of 0 doesn't actually do anything
 
-    p1 >> pads(room=0.5, mix=0)
+        p1 >> pads(room=0.5, mix=0)
 
-    # This effect is not added as the "title" keyword, room, is 0
+        # This effect is not added as the "title" keyword, room, is 0
 
-    p1 >> pads(room=0, mix=0.5)
-    ```
+        p1 >> pads(room=0, mix=0.5)
 
     Other effects are outlined below:
     
@@ -231,7 +230,7 @@ class EffectManager(dict):
         return tuple(self.kw)
 
     def all_kwargs(self):
-        """ Returns *all" keywords for all effects """
+        """ Returns *all* keywords for all effects """
         return tuple(self.all_kw)
 
     def __iter__(self):

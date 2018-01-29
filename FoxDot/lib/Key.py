@@ -352,18 +352,16 @@ class NumberKey(object):
             the callable key function returns True (it must take one argument, this Player Key).
             Trivially, the following mappings are equivalent in behaviour:
 
-            ```
-            p1 >> piano(p2.degree.map({4: 7}))
+            ::
+                p1 >> piano(p2.degree.map({4: 7}))
 
-            p1 >> piano(p2.degree.map({lambda x: x == 4: 7}))
-            ```
+                p1 >> piano(p2.degree.map({lambda x: x == 4: 7}))
 
             If the value is callable, then it is called on this player key when the key
             is satisfied:
             
-            ```
-            p1 >> piano(p2.degree.map({lambda x: x >= 4: lambda x: x + (0,2)}))
-            ```
+            ::
+                p1 >> piano(p2.degree.map({lambda x: x >= 4: lambda x: x + (0,2)}))
         """
         # todo - Doesn't properly handle tuples/lists as patterns
         funcs = {}
