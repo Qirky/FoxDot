@@ -274,7 +274,13 @@ def PDur(n, k, start=0, dur=0.25):
 def PDelay(*args):
     return PDur(*args).accum().group()
 
+@loop_pattern_func
+def PStrum(n=4):
+    """ Returns a pattern of durations similar to how you might strum a guitar """
+    return (Pattern([1,1/2]).stutter([1,n + 1])|Pattern([1.5,1/2]).stutter([1,n])|1)
+
 def PQuicken(dur=1/2, stepsize=3, steps=6):
+    """ Returns a PGroup of delay amounts that gradually decrease """
     delay = []
     count = 0
     for i in range(steps):
@@ -286,7 +292,9 @@ def PQuicken(dur=1/2, stepsize=3, steps=6):
 
 
 def PRhythm(durations):
-    """ [1,(3,8)] -> [(1,2.75,3.5),2]
+    """ Converts all tuples/PGroups into delays calculated using the PDur algorithm.
+    e.g.
+        PRhythm([1,(3,8)]) -> P[(1,2.75,3.5),2]
     *work in progress*
     """
     if len(durations) == 1:
