@@ -1,50 +1,3 @@
-"""
-    How to use `when` statements
-    ----------------------------
-
-    A `when` statement is similar to your traditional `if` statement but
-    instead of evaluating the expression at the time the code is run, it
-    is constantly testing it to see if it is true.
-
-    ```
-    Example 1
-    ---------
-
-    when 5 < 10:
-        print True
-    else:
-        print False
-    ```
-
-    Currently there is no `elif` statement implemented yet and lines of code
-    cannot be spread over multiple lines.
-
-    To "stop" an individual `when` statement from monitoring its test. You
-    need to call the `__when__` object with a `lambda` expression equalling
-    that of the test and call the `remove` method.
-
-    ```
-    Example 2
-    ---------
-
-    a, b = 5, 10
-
-    when a > b:
-        print "a is bigger"
-    else:
-        print "b is bigger"
-
-    # This is how to 'stop' the statement above
-
-    __when__(lambda: a > b).remove()
-
-    # This removes *all* currently running when statements
-
-    __when__.reset()
-    ```
-
-"""
-
 from __future__ import absolute_import, division, print_function
 
 from .foxdot_func_cmp import *
@@ -88,10 +41,6 @@ class _whenStatement:
             run the appropriate response code '''
         if self.expr():
             if not self.do_switch:
-                
-                # Execute the values
-##                for action in self.action:
-##                    exec(compile(action, "FoxDot", "exec"), self.namespace)
 
                 self.action()
                     
@@ -102,10 +51,6 @@ class _whenStatement:
             if not self.elsedo_switch:
 
                 self.notaction()
-                
-                # Execute the values
-##                for action in self.notaction:
-##                    exec(compile(action, "FoxDot", "exec"), self.namespace)
 
                 self.toggle_live_functions(False)
                 self.do_switch = False
@@ -194,7 +139,7 @@ class _whenLibrary:
         """ Calling when() with no arguments will evaluate all expressions
             stored in self.library. Calling with func as a valid function
             will see if the function is in self.library and add it if not,
-            or update the 
+            or update do  / elsedo
 
         """   
             
@@ -218,13 +163,15 @@ class _whenLibrary:
 
             return self.library[name]
 
+    # what do these do?
+
     def a(self, expr):
         if self.editing is not None:
             self.editing.when(expr)            
         return None
     def b(self, expr):
         if self.editing is not None:
-            self.editing.then(expr)
+            self.editing.do(expr)
         return None
     def c(self, expr):
         if self.editing is not None:
