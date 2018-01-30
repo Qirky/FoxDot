@@ -630,12 +630,12 @@ class SCLangServerManager(ServerManager):
         return
 
 try:
+    
     import socketserver
 
 except ImportError:
 
     import SocketServer as socketserver
-
 
 
 class Message:
