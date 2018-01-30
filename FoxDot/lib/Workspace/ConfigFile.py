@@ -5,7 +5,7 @@ try:
 except ImportError:
     from tkinter import *
 
-from ..Settings import FOXDOT_ICON
+from ..Settings import FOXDOT_ICON, FOXDOT_ICON_GIF
 
 try:
     import tkMessageBox
@@ -17,7 +17,7 @@ import os.path
 
 class Config:
     def __init__(self, path):
-        self.root = Tk(className='FoxDot')
+        self.root = Toplevel()
         self.root.title("conf.txt")
 
         try:
@@ -25,10 +25,10 @@ class Config:
             # Use .ico file by default
             self.root.iconbitmap(FOXDOT_ICON)
             
-        except:
+        except TclError:
 
             # Use .gif if necessary
-            self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON))
+            self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON_GIF))
 
         self.filepath = os.path.realpath(path)
 

@@ -96,10 +96,10 @@ class workspace:
             # Use .ico file by default
             self.root.iconbitmap(FOXDOT_ICON)
             
-        except:
+        except TclError:
 
             # Use .gif if necessary
-            self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON))
+            self.root.tk.call('wm', 'iconphoto', self.root._w, PhotoImage(file=FOXDOT_ICON_GIF))
 
         # --- Setup font
 
@@ -668,23 +668,26 @@ class workspace:
     def toggle_transparency(self, event=None):
         """ Sets the text and console background to black and then removes all black pixels from the GUI """
         setting_transparent = self.transparent.get()
-        if setting_transparent:
-            alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
-            self.text.config(background=alpha)
-            self.linenumbers.config(background=alpha)
-            self.console.config(background=alpha)
-            if SYSTEM == WINDOWS:
-                self.root.wm_attributes('-transparentcolor', alpha)
+        try:
+            if setting_transparent:
+                alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
+                self.text.config(background=alpha)
+                self.linenumbers.config(background=alpha)
+                self.console.config(background=alpha)
+                if SYSTEM == WINDOWS:
+                    self.root.wm_attributes('-transparentcolor', alpha)
+                else:
+                    self.root.wm_attributes("-transparent", True)
             else:
-                self.root.wm_attributes("-transparent", True)
-        else:
-            self.text.config(background=colour_map['background'])
-            self.linenumbers.config(background=colour_map['background'])
-            self.console.config(background="Black")
-            if SYSTEM == WINDOWS:
-                self.root.wm_attributes('-transparentcolor', "")
-            else:
-                self.root.wm_attributes("-transparent", False)
+                self.text.config(background=colour_map['background'])
+                self.linenumbers.config(background=colour_map['background'])
+                self.console.config(background="Black")
+                if SYSTEM == WINDOWS:
+                    self.root.wm_attributes('-transparentcolor', "")
+                else:
+                    self.root.wm_attributes("-transparent", False)
+        except TclError as e:
+            print(e)
         return
     
     def edit_paste(self, event=None):
