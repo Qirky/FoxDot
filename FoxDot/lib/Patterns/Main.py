@@ -1,7 +1,5 @@
 """
-
 Contains classes `Pattern` and `PGroup` and the base class for `GeneratorPattern` (see Generators.py).
-
 """
 
 from __future__ import absolute_import, division, print_function
@@ -1007,10 +1005,10 @@ class PGroup(metaPattern):
 
     def flatten(self):
         """ Returns a nested PGroup as un-nested e.g.
-            ``` 
-                >>> P(0,(3,5)).flatten()
-                P(0, 3, 5)
-            ``` 
+        ::
+
+            >>> P(0,(3,5)).flatten()
+            P(0, 3, 5)
         """
         values = []
         for item in self:
