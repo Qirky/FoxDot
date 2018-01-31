@@ -261,24 +261,85 @@ class metaPattern(object):
         --------------------------------------
 
     """
-    def __add__(self, other):  return PAdd(self, other)
-    def __radd__(self, other): return PAdd(self, other)
-    def __sub__(self, other):  return PSub(self, other)
-    def __rsub__(self, other): return PSub2(self, other)
-    def __mul__(self, other):  return PMul(self, other)
-    def __rmul__(self, other): return PMul(self, other)
-    def __truediv__(self, other):   return PDiv(self, other)
-    def __rtruediv__(self, other):  return PDiv2(self, other)
-    def __floordiv__(self, other):  return PFloor(self, other)
-    def __rfloordiv__(self, other): return PFloor2(self, other)
-    def __mod__(self, other):  return PMod(self, other)
-    def __rmod__(self, other): return PMod2(self, other)
-    def __pow__(self, other):  return PPow(self, other)
-    def __rpow__(self, other): return PPow2(self, other)
-    def __xor__(self, other):  return PPow(self, other)
-    def __rxor__(self, other): return PPow2(self, other)
-    def __truediv__(self, other):  return PDiv(self, other)
-    def __rtruediv__(self, other): return PDiv2(self, other)
+    def __add__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__radd__(self)
+        return PAdd(self, other)
+
+    def __radd__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__add__(self)
+        return PAdd(self, other)
+
+    def __sub__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__rsub__(self)
+        return PSub(self, other)
+    
+    def __rsub__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__sub__(self)
+        return PSub2(self, other)
+
+    def __mul__(self, other):    
+        if isinstance(other, GeneratorPattern):
+            return other.__rmul__(self)
+        return PMul(self, other)
+
+    def __rmul__(self, other):   
+        if isinstance(other, GeneratorPattern):
+            return other.__mul__(self)
+        return PMul(self, other)
+
+    def __truediv__(self, other):    
+        if isinstance(other, GeneratorPattern):
+            return other.__rtruediv__(self)
+        return PDiv(self, other)
+
+    def __rtruediv__(self, other):    
+        if isinstance(other, GeneratorPattern):
+            return other.__truediv__(self)
+        return PDiv2(self, other)
+
+    def __floordiv__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__rfloordiv__(self)
+        return PFloor(self, other)
+
+    def __rfloordiv__(self, other):   
+        if isinstance(other, GeneratorPattern):
+            return other.__floordiv__(self)
+        return PFloor2(self, other)
+
+    def __mod__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__rmod__(self)
+        return PMod(self, other)
+
+    def __rmod__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__mod__(self)
+        return PMod2(self, other)
+
+    def __pow__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__rpow__(self)
+        return PPow(self, other)
+
+    def __rpow__(self, other):  
+        if isinstance(other, GeneratorPattern):
+            return other.__pow__(self)
+        return PPow2(self, other)
+
+    def __xor__(self, other):   
+        if isinstance(other, GeneratorPattern):
+            return other.__rxor__(self)
+        return PPow(self, other)
+
+    def __rxor__(self, other):   
+        if isinstance(other, GeneratorPattern):
+            return other.__xor__(self)
+        return PPow2(self, other)
 
     def __abs__(self):
         return self.__class__([abs(item) for item in self])
@@ -305,6 +366,7 @@ class metaPattern(object):
     def __or__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return self.pipe(other)
+
     def __ror__(self, other):
         """ Use the '|' symbol to 'pipe' Patterns into on another """
         return asStream(other).pipe(self)
