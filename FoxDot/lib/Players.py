@@ -1312,6 +1312,7 @@ class Player(Repeatable):
         return event
 
     def unduplicate_durs(self, event):
+        """ Converts values stored in event["dur"] in a tuple/PGroup into delays """
 
         # If there are more than one dur then add to the delay
 

@@ -392,7 +392,7 @@ class workspace:
         try:
 
             execute( self.text.get(a, b) )
-            execute.update_line_numbers(self.text, a, b)
+            # execute.update_line_numbers(self.text, a, b)
 
         except:
 

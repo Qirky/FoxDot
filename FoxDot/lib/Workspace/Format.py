@@ -22,7 +22,6 @@ arrow     = r"\s>>\s?"
 multiline = r"\"\"\".*\"\"\"|'''.*'''"
 
 
-
 # RegEx Group 2
 def re_list(string, br="[]"):
     new = ""
