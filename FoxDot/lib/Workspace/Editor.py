@@ -82,6 +82,7 @@ class workspace:
 
         self.transparent = BooleanVar()
         self.transparent.set(False)
+        self.using_alpha = False
 
         # Boolean for connection
 
@@ -670,21 +671,21 @@ class workspace:
         setting_transparent = self.transparent.get()
         try:
             if setting_transparent:
-                if SYSTEM == WINDOWS:
+                try:
                     alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
                     self.text.config(background=alpha)
                     self.linenumbers.config(background=alpha)
                     self.console.config(background=alpha)
                     self.root.wm_attributes('-transparentcolor', alpha)
-                else:
+                except TclError:
                     self.root.wm_attributes("-alpha", 0.8)
-            else:
-                self.text.config(background=colour_map['background'])
-                self.linenumbers.config(background=colour_map['background'])
-                self.console.config(background="Black")
-                if SYSTEM == WINDOWS:
+                    self.using_alpha = True
+            elif not self.using_alpha:
+                    self.text.config(background=colour_map['background'])
+                    self.linenumbers.config(background=colour_map['background'])
+                    self.console.config(background="Black")
                     self.root.wm_attributes('-transparentcolor', "")
-                else:
+            else:
                     self.root.wm_attributes("-alpha", 1)
         except TclError as e:
             print(e)
