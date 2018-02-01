@@ -3,20 +3,11 @@ FoxDot - Live Coding with Python v0.5
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.5.9 fixes and updates
+### v0.5.10 fixes and updates
 
-- Player `stutter` method no longer updates the internal "key" so improves efficiency when using it.
-- Better handling of delays in `offadd` and `offlayer` pattern methods
-
-### v0.5.8 fixes and updates
-
-- Fixed panning issues on many SynthDefs so `fmod` spreads a signal across 2 channels effectively.
-- Added the ability to use `Pattern` methods on player attributes when using the `every` method:
-```python
-d1 >> play("x-o-o", dur=PDur(5,8)).every(4, "rate.offadd", 2)  
-```
-- Improved `every` to switch pattern methods on/off at the correct time when using a list of durations.
-- FoxDot UI no longer crashes when saving / closing after using a lambda character.
+- Fix `GeneratorPattern` index behaviour.
+- Improve `Player` efficiency; only update player keys that are being accessed.
+- Use "alpha" transparency when single value transparency doesn't work.   
   
 ---
 

@@ -307,7 +307,7 @@ class TimeVar:
 
     def math_op(self, other, op):
         """ Performs the mathematical operation between self and other. "op" should 
-            be the  string name of a dunder method  e.g. __mul__ """
+            be the string name of a dunder method  e.g. __mul__ """
         if not isinstance(other, (TimeVar, int, float)):
             if type(other) is tuple:
                 return PGroup([getattr(self, op).__call__(x) for x in other])
