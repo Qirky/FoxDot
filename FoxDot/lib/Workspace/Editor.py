@@ -670,14 +670,14 @@ class workspace:
         setting_transparent = self.transparent.get()
         try:
             if setting_transparent:
-                alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
-                self.text.config(background=alpha)
-                self.linenumbers.config(background=alpha)
-                self.console.config(background=alpha)
                 if SYSTEM == WINDOWS:
+                    alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
+                    self.text.config(background=alpha)
+                    self.linenumbers.config(background=alpha)
+                    self.console.config(background=alpha)
                     self.root.wm_attributes('-transparentcolor', alpha)
                 else:
-                    self.root.wm_attributes("-transparent", True)
+                    self.root.wm_attributes("-alpha", 0.8)
             else:
                 self.text.config(background=colour_map['background'])
                 self.linenumbers.config(background=colour_map['background'])
@@ -685,7 +685,7 @@ class workspace:
                 if SYSTEM == WINDOWS:
                     self.root.wm_attributes('-transparentcolor', "")
                 else:
-                    self.root.wm_attributes("-transparent", False)
+                    self.root.wm_attributes("-alpha", 1)
         except TclError as e:
             print(e)
         return
