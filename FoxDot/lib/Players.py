@@ -160,14 +160,14 @@ class EmptyPlayer(object):
         self.__rshift__(*args, **kwargs)
         return self
 
-    def __getattr__(self, name):
+    def __getattribute__(self, name):
         """ Tries to return the correct attr; if not init the Player and try again """
         try:
-            return self.__dict__[name]
-        except KeyError:
+            return object.__getattribute__(self, name)
+        except AttributeError:
             self.__class__ = Player
             self.__init__(self.name)
-            return self.__getattr__(name)
+            return self.__getattribute__(name)
 
 
 class Player(Repeatable):
@@ -279,9 +279,8 @@ class Player(Repeatable):
         self.sent_messages = []
 
         self.case_modulation = {
-            "sus"   : lambda val, i, *args, **kwargs: val * float(self.metro.beat_dur()) * float(self.get_key("blur", i, **kwargs)),
-            "amp"   : lambda val, i, *args, **kwargs: val * float(self.get_key("amplify", i, **kwargs)),
-            "delay" : lambda val, i, *args, **kwargs: val + float(self.get_key("_delay_offset", i, **kwargs))
+            "sus"   : lambda val, i, *args, **kwargs: val * float(self.metro.beat_dur()) * float(self.get_key("blur", i, **kwargs)), # this should be done in the SynthDef?
+            "amp"   : lambda val, i, *args, **kwargs: val * float(self.get_key("amplify", i, **kwargs))
             }
 
         # Visual feedback information
@@ -297,6 +296,7 @@ class Player(Repeatable):
         self.event_n = 0
         self.notes_played = 0
         self.event = {}
+        self.accessed_keys = []
 
         # Used for checking clock updates
 
@@ -439,10 +439,6 @@ class Player(Repeatable):
 
                 name = self.alias.get(name, name)
 
-                #if name == "dur":
-
-                #    value, self._delay_offset = CalculateDelaysFromDur(value) # can we avoid using this?
-
                 value = asStream(value)
 
                 # raise a ValueError if trying to reference itself -- doesn't handle indirect references to itself
@@ -483,11 +479,24 @@ class Player(Repeatable):
         return
 
     def __getattr__(self, name):
-        try:       
-            return self.__dict__[self.alias.get(name, name)]
+        try:
+            # This checks for aliases, not the actual keys
+            name = self.alias.get(name, name)
+            item = self.__dict__[name]
+            # If returning a player key, keep track of which are being accessed
+            if isinstance(item, PlayerKey) and name not in self.accessed_keys:                
+                self.accessed_keys.append(name)
+            return item
         except KeyError:
             err = "Player Object has no attribute '{}'".format(name)
             raise AttributeError(err)
+
+    def __getattribute__(self, name):
+        item = object.__getattribute__(self, name)
+        if isinstance(item, PlayerKey):
+            if name not in self.accessed_keys:
+                self.accessed_keys.append(name)
+        return item
 
     def __getitem__(self, name):
         if self.__init:
@@ -550,9 +559,6 @@ class Player(Repeatable):
 
         # Duration of notes
         self.dur     = 0.5 if self.synthdef == SamplePlayer else 1
-
-        # Modifier for affecting delay
-        self._delay_offset = 0
 
         # Degree of scale / Characters of samples
         self.degree  = " " if self.synthdef is SamplePlayer else 0
@@ -1083,7 +1089,6 @@ class Player(Repeatable):
     def update_player_key(self, key, value, time):
         """  Forces object's dict uses PlayerKey instances
         """
-        
         if key not in self.__dict__:
 
             self.__dict__[key] = PlayerKey(value, parent=self, attr=key)
@@ -1107,8 +1112,14 @@ class Player(Repeatable):
         return
 
     def update_all_player_keys(self, ignore=[], event=None, **kwargs):
-        
-        # delay = float(group_modi(self.event.get('delay', 0), index))
+        """ Updates the internal values of player keys that have been accessed e.g. p1.pitch. If there is a delay,
+            then schedule a function to update the values in the future. """
+
+        # Don't bother if no keys are being accessed
+
+        if len(self.accessed_keys) == 0:
+
+            return
 
         if event is None:
 
@@ -1129,14 +1140,12 @@ class Player(Repeatable):
                 if delay > 0:
                 
                     time  = self.event_index + delay
-
-                    # TODO -- only update keys that have been accessed
                 
                     def delay_update(event, i, t):
                 
                         for key in event:
                 
-                            if key not in ignore:
+                            if key in self.accessed_keys and key not in ignore:
                 
                                 self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), i), float(t))
                 
@@ -1146,7 +1155,7 @@ class Player(Repeatable):
                 
                     for key in event.keys():
                 
-                        if key not in ignore:
+                        if key in self.accessed_keys and key not in ignore:
                 
                             self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), index), self.event_index)
 
@@ -1154,7 +1163,7 @@ class Player(Repeatable):
 
             for key in event.keys():
 
-                if key not in ignore:
+                if key in self.accessed_keys and key not in ignore:
 
                     self.update_player_key(key, kwargs.get(key, event.get(key, 0)), self.event_index)
 
@@ -1223,9 +1232,7 @@ class Player(Repeatable):
     # Private method
 
     def __get_current_delay(self, i, kwargs):
-        delay = float(group_modi(kwargs.get('delay', self.event.get('delay', 0)), i))
-        func = self.case_modulation["delay"]
-        return func(delay, i)
+        return float(group_modi(kwargs.get('delay', self.event.get('delay', 0)), i))
 
     def now(self, attr="degree", x=0, **kwargs):
         """ Calculates the values for each attr to send to the server at the current clock time """
