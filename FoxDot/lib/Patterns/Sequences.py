@@ -292,7 +292,7 @@ def PQuicken(dur=1/2, stepsize=3, steps=6):
 def PRhythm(durations):
     """ Converts all tuples/PGroups into delays calculated using the PDur algorithm.
     e.g.
-        PRhythm([1,(3,8)]) -> P[(1,2.75,3.5),2]
+        PRhythm([1,(3,8)]) -> P[1,(2,0.75,1.5)]
     *work in progress*
     """
     if len(durations) == 1:
@@ -304,25 +304,21 @@ def PRhythm(durations):
     else:
         durations = asStream(durations).data
         output = Pattern()
-        delays = Pattern()
         for i in range(len( asStream(durations).data ) ):
             item = durations[i]
             if isinstance(item, (list, Pattern)):
                 value = PRhythm(item)
-                delay = 0
             elif isinstance(item, (tuple, PGroup)):
                 dur   = PDur(*item)
-                delay = dur.accum().group()
-                value = sum(dur)
+                value = PGroup(sum(dur)|dur.accum()[1:])
             else:
                 value = item
-                delay = 0
             output.append(value)
-            delays.append(delay)
-        return output + delays.rotate(1)
+        return output
 
 
 def PJoin(patterns):
+    """ Joins a list of patterns together """
     data = []
     for pattern in patterns:
         data.extend(pattern)
