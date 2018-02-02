@@ -154,11 +154,16 @@ class EmptyPlayer(object):
         self.name = name
     def __repr__(self):
         return "<{} - Unassigned>".format(self.name)
+    
     def __rshift__(self, *args, **kwargs):
+        """ Converts an EmptyPlayer to a Player. """
         self.__class__ = Player
         self.__init__(self.name)
         self.__rshift__(*args, **kwargs)
         return self
+
+    def __invert__(self):
+        return self.reset()
 
     def __getattribute__(self, name):
         """ Tries to return the correct attr; if not init the Player and try again """
@@ -514,7 +519,8 @@ class Player(Repeatable):
     # --- Startup methods
 
     def reset(self):
-        """ Sets all Player attributes to 0 unless their default is specified by an effect """
+        """ Sets all Player attributes to 0 unless their default is specified by an effect. Also
+            can be called by using a tilde before the player variable. E.g. ~p1 """
 
         # Add all keywords to the dict, then set non-zero defaults
 
@@ -570,6 +576,10 @@ class Player(Repeatable):
         self.bpm     = None
         
         return self
+
+    def __invert__(self):
+        """ Using the ~ syntax resets the player """
+        return self.reset()
 
     # --- Update methods
 
@@ -730,11 +740,11 @@ class Player(Repeatable):
                  
                 value = value.now()
 
-            # If there are multiple durations, use the minimum
+            # If there are multiple durations, use the first
 
             try:
 
-                value = min(value)
+                value = value[0]
 
             except TypeError:
 
@@ -1307,13 +1317,13 @@ class Player(Repeatable):
 
                 if len(event['dur']) > 0:
 
-                    min_dur = min(event['dur'])
+                    init_dur = event["dur"][0]
 
-                    offset = PGroup([(dur if dur != min_dur else 0) for dur in event["dur"]])
+                    offset = PGroup(0|event['dur'][1:])
 
                     event["delay"] = event["delay"] + offset
 
-                    event["dur"] = float(min_dur)
+                    event["dur"]   = float(init_dur)
 
             except TypeError:
 
@@ -1365,11 +1375,11 @@ class Player(Repeatable):
     def new_message(self, index=0, **kwargs):
         """ Returns the header of an osc message to be added to by osc_message() """
 
-        # Start with the envelope
-        
-        # message = {"env": group_modi(kwargs.get("env", self.event['env']), index)}
+        # todo - start with the envelope
 
-        message = {}
+        # Let SC know the duration of 1 beat so effects can use it
+
+        message = {"beat_dur": self.metro.beat_dur()}
 
         if self.synthdef == SamplePlayer:
 
