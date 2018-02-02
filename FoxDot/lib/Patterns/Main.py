@@ -1246,7 +1246,56 @@ class GeneratorPattern(random.Random):
         return PGroup([self.__class__(*self.args, **self.kwargs) for i in range(n)])
 
     def transform(self, func):
+        """ Use func, which should take 1 argument, to transform the values in a generator pattern. Trivial example:
+            myGenerator.transform(lambda x: 0 if x in (0,1,2) else 3)
+        """
         return self.new(None, lambda a, b: func(a))
+
+    def map(self, mapping, default=0):
+        """ Using .transform() to map values via a dictionary
+
+            ::
+                a = PRand([0,1])
+                b = a.map({0: 16, 1: 25})
+
+        """
+        return self.transform( lambda value: mapping.get(value, default) )
+
+        # TODO - handle callables
+        # funcs = {}
+        
+        # for key, value in mapping.items():
+            
+        #     # We can map using a function
+            
+        #     if callable(key) and callable(value):
+
+        #         funcs[partial(lambda: key(self.now()))]  = partial(lambda: value(self.now()))
+
+        #     elif callable(key) and not callable(value):
+
+        #         funcs[partial(lambda: key(self.now()))]  = partial(lambda e: e, value)
+
+        #     elif callable(value):
+
+        #         funcs[partial(lambda e: self.now() == e, key)] = partial(lambda: value(self.now()))
+
+        #     else:
+        #         # one-to-one mapping
+        #         funcs[partial(lambda e: self.now() == e, key)] = partial(lambda e: e, value)
+
+        # def mapping_function(a, b):
+        #     for func, result in funcs.items():
+        #         if bool(func()) is True:
+        #             value = result()
+        #             break
+        #     else:
+        #         value = default
+        #     return value
+
+        # new = self.child(0)        
+        # new.calculate = mapping_function
+        return new
 
 
 class PatternContainer(metaPattern):
