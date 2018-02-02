@@ -760,7 +760,7 @@ class mapvar(Pvar):
         TimeVar.__init__(self, [])
         self.key     = key
         self.values  = {key: asStream(value) for key, value in mapping.items()}
-        self.default = default
+        self.default = asStream(default)
 
     def get_current_index(self, time=None):
         self.current_index = self.key.now()
