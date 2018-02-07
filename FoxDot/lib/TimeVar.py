@@ -38,8 +38,8 @@ class TimeVar:
         self.name   = "un-named"
 
         self.values   = values
-        self.dur    = dur
-        self.bpm    = kwargs.get('bpm', None)
+        self.dur      = dur
+        self.bpm      = kwargs.get('bpm', None)
 
         # This is possibly a bad idea
         # self.data = self
@@ -69,6 +69,10 @@ class TimeVar:
     def set_clock(cls, tempo_clock):
         cls.metro = tempo_clock
         return
+
+    @classmethod
+    def help(cls):
+        return print(cls.__doc__)
 
     @staticmethod
     def stream(values):
