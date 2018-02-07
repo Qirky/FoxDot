@@ -270,15 +270,21 @@ class workspace:
 
         # Say Hello to the user
 
-        if SYSTEM == MAC_OS:
-            ctrl = "Cmd"
-        else:
-            ctrl = "Ctrl"
+        def hello():
 
-        hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
+            if SYSTEM == MAC_OS:
+                ctrl = "Cmd"
+            else:
+                ctrl = "Ctrl"
 
-        print(hello)
-        print("-" * len(hello))
+            hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
+
+            print(hello)
+            print("-" * len(hello))
+
+        # Ask after widget loaded
+
+        self.root.after(50, hello)
 
         # Check temporary file
 
@@ -304,7 +310,7 @@ class workspace:
 
                 self.text_as_string = self.get_all()
 
-        # Ask in 1/2 sec
+        # Ask after widget loaded
 
         self.root.after(100, recover_work)
 
