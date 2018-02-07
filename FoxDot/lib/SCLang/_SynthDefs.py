@@ -22,12 +22,12 @@ with SynthDef("audioin") as audioin:
     audioin.osc = AudioIn.ar(1)
     audioin.env = Env.mask()
 
-with SynthDef("pads") as pads:
-    pads.amp = pads.amp * 1.5
-    pads.freq = pads.freq + [0,1]
-    pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) + Pulse.ar(pads.freq, width=LFTri.kr(pads.sus/16), iphase=0.5, mul=pads.amp/20) 
-    pads.osc = HPF.ar(pads.osc, 1000);
-    pads.env = Env.perc()
+# with SynthDef("pads") as pads:
+#     pads.amp = pads.amp * 1.5
+#     pads.freq = pads.freq + [0,1]
+#     pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) + Pulse.ar(pads.freq, width=LFTri.kr(pads.sus/16), iphase=0.5, mul=pads.amp/20) 
+#     pads.osc = HPF.ar(pads.osc, 1000);
+#     pads.env = Env.perc()
 
 with SynthDef("noise") as noise:
     noise.freq  = noise.freq * 2
@@ -365,6 +365,9 @@ sawbass.add()
 
 prophet = FileSynthDef('prophet')
 prophet.add()
+
+pads = FileSynthDef('pads')
+pads.add()
 
 # Get rid of the variable synth
 
