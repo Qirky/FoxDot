@@ -395,11 +395,13 @@ class MethodCall:
         return n, acc
 
     def __repr__(self):
-        return "<Future {}() call of '{}' player>".format(self.method.__name__, self.parent.synthdef)
+        return "<Future {}() call of '{}'>".format(self.method.__name__, self.parent)
 
     def __call__(self, *args, **kwargs):
         """ Proxy for parent object __call__, calls the enclosed method
             and schedules it in the future. """
+
+        assert self.method is not None
 
         # Return without scheduling if stopping
         
@@ -426,8 +428,6 @@ class MethodCall:
         except Exception as e:
 
             print("{} in '{}': {}".format(e.__class__.__name__, self.method.__name__, e))
-
-        #threading.Thread(target=this_method).start() # risky
 
         # Re-schedule the method call
 

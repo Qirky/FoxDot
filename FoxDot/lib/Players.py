@@ -334,6 +334,10 @@ class Player(Repeatable):
     # Class methods
 
     @classmethod
+    def help(cls):
+        return print(cls.__doc__)
+
+    @classmethod
     def get_attributes(cls):
         """ Returns a list of possible keyword arguments for FoxDot players and effects """
         return cls.keywords + cls.base_attributes + cls.fx_attributes
@@ -574,6 +578,10 @@ class Player(Repeatable):
         
         # Tempo
         self.bpm     = None
+
+        # Stop calling any repeating methods
+
+        self.stop_calling_all()
         
         return self
 
@@ -1681,8 +1689,6 @@ class Player(Repeatable):
         """ Removes this object from the Clock and resets itself"""
         
         self.isplaying = False
-        
-        self.stop_calling_all()
         
         self.reset()
 
