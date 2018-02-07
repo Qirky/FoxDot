@@ -107,6 +107,10 @@ class metaPattern(object):
     @classmethod
     def get_methods(cls):
         return [attr for attr in dir(cls) if callable(getattr(cls, attr))]
+
+    @classmethod
+    def help(cls):
+        return print(cls.__doc__)
             
     def __len__(self):
         """ Returns the *expanded" length of the pattern. e.g. the following
@@ -1165,6 +1169,10 @@ class GeneratorPattern(random.Random):
     def __repr__(self):
         """ String version is the name of the class and its arguments """
         return "{}({})".format(self.name, self.data)
+
+    @classmethod
+    def help(cls):
+        return print(cls.__doc__)
         
     def getitem(self, index=None, *args):
         """ Calls self.func(index) to get an item if index is not in

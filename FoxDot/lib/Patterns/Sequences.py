@@ -249,7 +249,7 @@ def PBeat(string, start=0, dur=0.5):
         non-whitespace denote a pulse e.g.
         ::
 
-            >>> PTab("x xxx x")
+            >>> PBeat("x xxx x")
             P[1, 0.5, 0.5, 1, 0.5]
     """
     data = [int(char != " ") for char in list(string)]
@@ -262,7 +262,18 @@ def PBeat(string, start=0, dur=0.5):
 def PDur(n, k, start=0, dur=0.25):
     """ Returns the *actual* durations based on Euclidean rhythms (see PEuclid) where dur
         is the length of each step.
-        e.g. `PDur(3, 8)` will return `P[0.75, 0.75, 0.5]` """
+        ::
+            >>> PDur(3, 8)
+            P[0.75, 0.75, 0.5]
+            >>> PDur(5, 16)
+            P[0.75, 0.75, 0.75, 0.75, 1]
+    """
+    # If we have more pulses then steps, double the steps and decrease the duration
+
+    while n > k:
+        k   = k * 2
+        dur = dur / 2
+
     pattern = Pattern(PulsesToDurations( EuclidsAlgorithm(n, k) ))
     if start != 0:
         pattern = pattern.rotate(int(start))
