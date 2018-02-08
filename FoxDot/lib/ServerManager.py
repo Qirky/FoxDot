@@ -33,17 +33,19 @@ ServerInfo = namedtuple(
      'max_nodes', 'max_synth_defs'))
 
 
-class SCLangClient(OSCClient):
+class OSCClientWrapper(OSCClient):
     def send(*args, **kwargs):
+        """ Sends the message given but prints errors instead of raising them """
         try:
             OSCClient.send(*args, **kwargs)
         except Exception as e:
             print(e)
 
 
-class OSCConnect(SCLangClient):
+class OSCConnect(OSCClientWrapper):
+    """ An OSCClientWrapper that connects on initialisation """
     def __init__(self, address):
-        SCLangClient.__init__(self)
+        OSCClientWrapper.__init__(self)
         self.connect(address)
 
 
@@ -117,14 +119,16 @@ class SCLangBidirectionalClient(OSCServer):
                 return data
             now = time.time()
 
-# TODO -- Create an abstract base class that could be sub-classed for users who want to send their OSC messages elsewhere
+#  Create an abstract base class that could be sub-classed for users who want to send their OSC messages elsewhere
 
 class ServerManager(object):
-    def __init__(self, addr, port):
+    def __init__(self, addr, port, osc_address="/s_new"):
         self.addr = addr
         self.port = port
-        self.client = SCLangClient()
+        self.client = OSCClientWrapper()
         self.client.connect( (self.addr, self.port) )
+        self.osc_address = osc_address
+
     @staticmethod
     def create_osc_msg(dictionary):
         """ Converts a Python dictionary into an OSC style list """
@@ -132,10 +136,19 @@ class ServerManager(object):
         for key, value in dictionary.items():
             msg += [key, value]
         return msg
-    def sendOSC(self, message):
+
+    def sendOSC(self, osc_message):
+        self.client.send( osc_message )   
         return
-    def get_bundle(self):
-        return
+
+    def get_bundle(self, *args, **kwargs):
+        bundle  = OSCBundle(time=kwargs.get("timestamp", 0))
+        message = OSCMessage(self.osc_address)
+        for item in args:
+            if type(item) == dict:
+                message.append(self.create_osc_msg(item))
+        bundle.append(message)
+        return bundle
 
 class SCLangServerManager(ServerManager):
 
@@ -153,7 +166,7 @@ class SCLangServerManager(ServerManager):
         self.count = 0
 
         # General SuperCollider OSC connection
-        self.client = SCLangClient()
+        self.client = OSCClientWrapper()
         self.client.connect( (self.addr, self.port) )
 
         # Assign a valid OSC Client
@@ -186,7 +199,7 @@ class SCLangServerManager(ServerManager):
                 self.max_busses = info.num_audio_bus_channels
                 self.bus = self.num_input_busses + self.num_output_busses
         else:
-            self.sclang = SCLangClient()
+            self.sclang = OSCClientWrapper()
             self.sclang.connect( (self.addr, self.SCLang_port))
 
         # Clear SuperCollider nodes if any left over from other session etc
@@ -221,12 +234,12 @@ class SCLangServerManager(ServerManager):
             self.bus = self.num_input_busses + self.num_output_busses
         return self.bus
 
-    def sendOSC(self, packet):
-        """ Compiles and sends an 's_new' OSC message for SuperCollider """
-        message = OSCMessage("/s_new")
-        node = packet[1] = self.nextnodeID()
-        message.append(packet)
-        self.client.send( message )   
+    def sendOSC(self, osc_message):
+        """ Sends an OSC message to the server. Checks for midi messages """
+        if osc_message.address == OSC_MIDI_ADDRESS:
+            self.sclang.send( osc_message )
+        else:
+            self.client.send( osc_message )   
         return
 
     def freeAllNodes(self):
@@ -242,18 +255,19 @@ class SCLangServerManager(ServerManager):
         return
 
     def get_midi_message(self, synthdef, packet):
+        """ Prepares an OSC message to trigger midi sent from SuperCollider """
 
-        bundle.setAddress("/foxdot_midi")
+        bundle = OSCBundle()
+        bundle.setAddress(OSC_MIDI_ADDRESS) # these need to be variable names at least
 
-        msg = OSCMessage()
-        msg.setAddress("/foxdot_midi")
+        msg     = OSCMessage(OSC_MIDI_ADDRESS)
 
         note    = packet.get("midinote", 60)
         vel     = min(127, (packet.get("amp", 1) * 128) - 1)
         sus     = packet.get("sus", 0.5)
         channel = packet.get("channel", 0)
 
-        msg.append( [synthdef.name, note, vel, sus, channel] )
+        msg.append( [synthdef, note, vel, sus, channel] )
 
         bundle.append(msg)
 
@@ -337,7 +351,7 @@ class SCLangServerManager(ServerManager):
 
         return msg, node
 
-    def get_pre_env_effect_nodes(self, node, bus, group_id,effects):
+    def get_pre_env_effect_nodes(self, node, bus, group_id, effects):
 
         pkg = []
 
@@ -425,21 +439,22 @@ class SCLangServerManager(ServerManager):
 
         return msg, node
 
-    def get_bundle(self, synthdef, packet, effects, timestamp=0):    
+    def get_bundle(self, synthdef, packet, effects, timestamp=0):
+        """ Returns the OSC Bundle for a notew based on a Player's SynthDef, and event and effects dictionaries """ 
 
-        # Get the actual synthdef object
+        # Create a specific message for midi
 
-        synthdef = self.synthdefs[synthdef]
+        if synthdef == "MidiOut": # this should be in a dict of synthdef to functions maybe? we need a "nudge to sync"
+
+            return self.get_midi_message(synthdef, packet)
 
         # Create a bundle
         
         bundle = OSCBundle(time=timestamp)
 
-        # Create a specific message for midi
+        # Get the actual synthdef object
 
-        if synthdef.name == "MidiOut": # this should be in a dict of synthdef to functions maybe? we need a "nudge to sync"
-
-            return self.get_midi_message(synthdef, packet)
+        synthdef = self.synthdefs[synthdef]
 
         # Create a group for the note
         group_id = self.nextnodeID()
@@ -534,7 +549,7 @@ class SCLangServerManager(ServerManager):
         message.append([bufnum])
         self.client.send(message)
 
-    def sendMidi(self, msg, cmd="/foxdot_midi"):
+    def sendMidi(self, msg, cmd=OSC_MIDI_ADDRESS):
         """ Sends a message to the FoxDot class in SuperCollider to forward a MIDI message """
         msg.setAddress(cmd)
         self.sclang.send(msg)
