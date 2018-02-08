@@ -3,6 +3,17 @@ FoxDot - Live Coding with Python v0.5
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
+### v0.5.11 fixes and updates
+
+- The Player reset method can be called using a preceding ~ character such that the two lines below are equivalent:
+```python
+p1.reset() >> pads([0,2,4], dur=1/2)
+~p1 >> pads([0,2,4], dur=1/2)
+```
+- The `reset` also stops calling repeat methods now.
+- Fixed welcome message display size bug for Mac and Linux.
+- Updated synths and samples.
+
 ### v0.5.10 fixes and updates
 
 - Fix `GeneratorPattern` index behaviour.
