@@ -809,6 +809,11 @@ class Player(Repeatable):
 
             setattr(self, "degree", degree)
 
+        else:
+
+            setattr(self, "degree", 0)            
+
+
         # Set special case attributes
 
         self.scale = kwargs.get("scale", self.__class__.default_scale )
