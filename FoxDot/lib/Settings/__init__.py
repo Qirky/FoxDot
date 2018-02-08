@@ -115,8 +115,21 @@ class _LoopPlayer:
     def __ne__(self, other):
         return other != self.name
 
+class _MidiPlayer:
+    name = "MidiOut"
+    def __eq__(self, other):
+        return other == self.name
+    def __ne__(self, other):
+        return other != self.name
+
 SamplePlayer = _SamplePlayer()
 LoopPlayer   = _LoopPlayer()
+MidiPlayer   = _MidiPlayer()
+
+
+# OSC Information
+
+OSC_MIDI_ADDRESS = "/foxdot_midi"
 
 # Colours
 
