@@ -653,10 +653,7 @@ class QueueBlock(object):
     def send_osc_messages(self):
         """ Sends all compiled osc messages to the SuperCollider server """
         for msg in self.osc_messages:
-            if msg.address == "/foxdot_midi": # TODO -- dont hard code this
-                self.server.sclang.send(msg)
-            else:
-                self.server.client.send(msg)        
+            self.server.sendOSC(msg)
         return
 
     def call(self, item, caller = None):
