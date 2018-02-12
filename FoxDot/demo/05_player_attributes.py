@@ -3,8 +3,10 @@
 # You can set variables outside a player
 pitches = P[0,1,2,3,4]
 harmony = pitches + 2
+
 print(pitches)
 print(harmony)
+
 p1 >> pluck(pitches)
 p2 >> star(harmony)
 

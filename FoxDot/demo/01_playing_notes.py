@@ -1,12 +1,5 @@
 # Tutorial 3: Playing Notes
 
-
-# A player object is created by instantiating the Player class, like
-# any other player class and takes no arguments.
-
-foo = Player()
-
-# But you usually don't have to do that manually...
 # In FoxDot, all two-character variable names are reserved for player objects, such as 'p1'
 # Creating a Player Object with no arguments will play a single note on middle C, by default, repeatedly until stopped.
 # Use >> to give one of these to a player object like so:

@@ -241,7 +241,6 @@ FoxDot\snd\_\percent\noise_4.wav
 FoxDot\snd\_\plus\beep (1).wav
 FoxDot\snd\_\plus\beep (2).wav
 FoxDot\snd\_\plus\beep (3).wav
-FoxDot\snd\_\plus\beep (4).wav
 FoxDot\snd\_\plus\beep (5).wav
 FoxDot\snd\_\plus\beep (6).wav
 FoxDot\snd\_\question\0.wav
@@ -351,16 +350,16 @@ FoxDot\snd\j\upper\11.wav
 FoxDot\snd\j\upper\145.wav
 FoxDot\snd\j\upper\76.wav
 FoxDot\snd\j\upper\81.wav
-FoxDot\snd\k\lower\misc (0).wav
-FoxDot\snd\k\lower\misc (1).wav
-FoxDot\snd\k\lower\misc (2).wav
-FoxDot\snd\k\lower\misc (3).wav
-FoxDot\snd\k\lower\misc (5).wav
-FoxDot\snd\k\lower\misc (6).wav
-FoxDot\snd\k\upper\keys_0.wav
-FoxDot\snd\k\upper\keys_1.wav
-FoxDot\snd\k\upper\keys_2.wav
-FoxDot\snd\k\upper\keys_3.wav
+FoxDot\snd\k\lower\keys_0.wav
+FoxDot\snd\k\lower\keys_1.wav
+FoxDot\snd\k\lower\keys_2.wav
+FoxDot\snd\k\lower\keys_3.wav
+FoxDot\snd\k\upper\misc (0).wav
+FoxDot\snd\k\upper\misc (1).wav
+FoxDot\snd\k\upper\misc (2).wav
+FoxDot\snd\k\upper\misc (3).wav
+FoxDot\snd\k\upper\misc (5).wav
+FoxDot\snd\k\upper\misc (6).wav
 FoxDot\snd\l\lower\perc_0.wav
 FoxDot\snd\l\lower\perc_1.wav
 FoxDot\snd\l\lower\perc_2.wav

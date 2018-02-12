@@ -12,9 +12,6 @@
 
 print("Hello World")
 
-
-
-
 ##############
 # Help
 

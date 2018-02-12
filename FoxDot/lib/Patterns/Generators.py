@@ -101,8 +101,13 @@ class PwRand(GeneratorPattern):
         return self.choose()
 
 class PChain(GeneratorPattern):
+    """ An example of a Markov Chain generator pattern. The mapping argument 
+        should be a dictionary of keys whose values are a list/pattern of possible
+        destinations.  """
     def __init__(self, mapping, **kwargs):
         GeneratorPattern.__init__(self, **kwargs)
+
+        assert isinstance(mapping, dict)
         
         self.args = (mapping,)
 
@@ -119,6 +124,31 @@ class PChain(GeneratorPattern):
     def func(self, index):
         self.last_value = self.choice(self.mapping[self.last_value])
         return self.last_value
+
+class PZ12(GeneratorPattern):
+    """ Implementation of the PZ12 algorithm for predetermined random numbers. Using
+        an irrational value for p, however, results in a non-determined order of values. 
+    """
+    def __init__(self, p, tokens=[0,1]):
+        GeneratorPattern.__init__(self)
+        self.probs   = [1-p, p]
+        self.data    = tokens
+        self._prev   = []
+        self.dearth  = [0 for n in self.data]
+
+    def _count_values(self, token):    
+        return sum([self._prev[i] == token for i in range(len(self._prev))])
+
+    def func(self, index):
+        index = len(self._prev)
+        for i, token in enumerate(self.data):
+            d0 = self.probs[i] * (index + 1)
+            d1 = self._count_values(token)
+            self.dearth[i] = d0-d1
+        i = self.dearth.index(max(self.dearth))
+        value = self.data[i]
+        self._prev.append(value)
+        return value
 
 class PTree(GeneratorPattern):
     """ Takes a starting value and two functions as arguments. The first function, f, must

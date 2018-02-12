@@ -801,7 +801,7 @@ class Player(Repeatable):
 
             if degree is not None:
 
-                setattr(self, "degree", degree if len(degree) > 0 else " ")
+                setattr(self, "degree", degree if degree != "" else " ")
 
         elif degree is not None:
 

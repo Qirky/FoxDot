@@ -74,6 +74,9 @@ class SynthDefBaseClass(object):
         # The amp is multiplied by this before being sent to SC
         self.balance = 1
 
+        # Add to list
+        self.container[self.name] = self
+
         self.add_base_class_behaviour()
 
     # Context Manager
@@ -240,9 +243,6 @@ class SynthDefBaseClass(object):
 
             # Load to server
             self._load_synth()
-
-            # Add to list
-            self.container[self.name] = self
 
         except Exception as e:
 

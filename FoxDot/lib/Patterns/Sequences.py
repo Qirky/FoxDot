@@ -243,6 +243,12 @@ def PEuclid2(n, k, lo, hi):
         '''
     return Pattern( EuclidsAlgorithm(n, k, lo, hi) )
 
+@loop_pattern_func
+def PBern(size=16, ratio=0.5):
+    """ Returns a pattern of 1s and 0s based on the ratio value (between 0 and 1).
+        This is called a Bernoulli sequence. """
+    return Pattern([int(random.random() < ratio) for n in range(size)])
+
 
 def PBeat(string, start=0, dur=0.5):
     """ Returns a Pattern of durations based on an input string where

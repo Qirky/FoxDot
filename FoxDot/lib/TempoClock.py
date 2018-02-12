@@ -56,7 +56,7 @@ from .Patterns import asStream
 from .TimeVar import TimeVar
 from .Midi import MidiIn, MIDIDeviceNotFound
 from .Utils import modi
-from .ServerManager import TempoClient
+from .ServerManager import TempoClient, ServerManager
 
 from time import sleep, time, clock
 from fractions import Fraction
@@ -127,15 +127,22 @@ class TempoClock(object):
 
     @classmethod
     def set_server(cls, server):
+        """ Sets the destination for OSC messages being compiled (the server is also the class
+            that compiles them) via objects in the clock. Should be an instance of ServerManager -
+            see ServerManager.py for more. """
+        assert isinstance(server, ServerManager)
         cls.server = server
         return
 
     def start_tempo_server(self, serv, **kwargs):
+        """ Starts listening for FoxDot clients connecting over a network. This uses
+            a TempoClient instance from ServerManager.py """
         self.tempo_server = serv(self, **kwargs)
         self.tempo_server.start()
         return
 
     def kill_tempo_server(self):
+        """ Kills the tempo server """
         if self.tempo_server is not None:
             self.tempo_server.kill()
         return

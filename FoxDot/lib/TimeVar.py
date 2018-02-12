@@ -759,7 +759,7 @@ class PvarGeneratorEx(PvarGenerator):
 class mapvar(Pvar):
     """ Like a `Pvar`, the `mapvar` returns a whole `Pattern` as opposed to a single
         value, but instead of using the global clock to find the current value it
-        uses the value in an instance of the `PlayerKey` class. """
+        uses the value in an instance of the `PlayerKey` class or another `TimeVar`. """
     def __init__(self, key, mapping, default=0):
         TimeVar.__init__(self, [])
         self.key     = key
