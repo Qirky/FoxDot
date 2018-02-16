@@ -525,19 +525,21 @@ class workspace:
             ctrl = "Ctrl"
             
         print("FoxDot Help:")
-        print("--------------------------------------------")
-        print("{}+Return  : Execute code".format(ctrl))
-        print("{}+.       : Stop all sound".format(ctrl))
-        print("{}+=       : Increase font size".format(ctrl))
-        print("{}+-       : Decrease font size".format(ctrl))
-        print("{}+L       : Insert lambda symbol".format(ctrl))
-        print("{}+S       : Save your work".format(ctrl))
-        print("{}+O       : Open a file".format(ctrl))
-        print("{}+M       : Toggle the menu".format(ctrl))
-        print("{}+{}       : Toggle console window".format(ctrl, self.toggle_key))
-        print("--------------------------------------------")
+        print("-----------------------------------------")
+        print("{}+Return      : Execute code".format(ctrl))
+        print("{}+.           : Stop all sound".format(ctrl))
+        print("{}+=           : Increase font size".format(ctrl))
+        print("{}+-           : Decrease font size".format(ctrl))
+        print("{}+L           : Insert lambda symbol".format(ctrl))
+        print("{}+S           : Save your work".format(ctrl))
+        print("{}+O           : Open a file".format(ctrl))
+        print("{}+M           : Toggle the menu".format(ctrl))
+        print("{}+{}           : Toggle console window".format(ctrl, self.toggle_key))
+        print("print(SynthDefs) : View available SynthDefs")
+        print("print(Samples)   : View character-to-sample mapping")
+        print("---------------------------------------------------")
         print("Please visit foxdot.org for more information")
-        print("--------------------------------------------")
+        print("---------------------------------------------------")
         return "break"
 
     # Save the current text: Ctrl+s
