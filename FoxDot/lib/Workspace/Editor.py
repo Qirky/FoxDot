@@ -1555,6 +1555,10 @@ class workspace:
     def clear_temp_file(self):
         return
 
+    def clear_console(self):
+        self.console.clear()
+        return
+
     def start_listening(self, **kwargs):
         """ Manual starting of FoxDot tempo server """
         # TODO - take this out of the menu

@@ -47,6 +47,7 @@ class MenuBar(Menu):
         editmenu.add_command(label="Increase Font Size",      command=self.root.zoom_in, accelerator="Ctrl+=")
         editmenu.add_command(label="Decrease Font Size",      command=self.root.zoom_out, accelerator="Ctrl+-")
         editmenu.add_separator()
+        editmenu.add_command(label="Clear Console", command=self.root.clear_console)
         editmenu.add_command(label="Toggle Menu", command=self.root.toggle_menu, accelerator="Ctrl+M")
         editmenu.add_checkbutton(label="Toggle Window Transparency",  command=self.root.toggle_transparency, variable=self.root.transparent)
         self.add_cascade(label="Edit", menu=editmenu)

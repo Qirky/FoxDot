@@ -91,6 +91,11 @@ class console:
         """ str(s) -> string """
         return self.text.get(1.0, "end")
 
+    def clear(self):
+        """ Clears the console """
+        self.canvas.dchars(self.text, 0, "end")
+        return
+
     def config(self, *args, **kwargs):
         self.canvas.config(*args, **kwargs)
         return
