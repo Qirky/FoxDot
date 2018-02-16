@@ -32,6 +32,8 @@ except FileNotFoundError:
     MAX_CHANNELS=2
     SAMPLES_DIR=""
     GET_SC_INFO=True
+    USE_ALPHA=False
+    ALPHA_VALUE=0.8
 
     # Text colours
     # ------------------

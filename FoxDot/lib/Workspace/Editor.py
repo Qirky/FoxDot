@@ -45,7 +45,7 @@ import re
 
 # Code execution
 from ..Code import execute
-from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE
+from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA
 from ..ServerManager import TempoServer
 
 # App object
@@ -82,7 +82,7 @@ class workspace:
 
         self.transparent = BooleanVar()
         self.transparent.set(False)
-        self.using_alpha = False
+        self.using_alpha = USE_ALPHA
 
         # Boolean for connection
 
@@ -677,20 +677,29 @@ class workspace:
         setting_transparent = self.transparent.get()
         try:
             if setting_transparent:
-                try:
-                    alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
-                    self.text.config(background=alpha)
-                    self.linenumbers.config(background=alpha)
-                    self.console.config(background=alpha)
-                    self.root.wm_attributes('-transparentcolor', alpha)
-                except TclError:
-                    self.root.wm_attributes("-alpha", 0.8)
-                    self.using_alpha = True
+                if not self.using_alpha:
+                    try:
+                        alpha = "#000001" if SYSTEM == WINDOWS else "systemTransparent"
+                        self.text.config(background=alpha)
+                        self.linenumbers.config(background=alpha)
+                        self.console.config(background=alpha)
+                        if SYSTEM == WINDOWS:
+                            self.root.wm_attributes('-transparentcolor', alpha)
+                        else:
+                            self.root.wm_attributes("-transparent", True)
+                    except TclError:
+                        self.using_alpha = True
+                if self.using_alpha:
+                    self.root.wm_attributes("-alpha", ALPHA_VALUE)
+            # Re-set the colours
             elif not self.using_alpha:
-                    self.text.config(background=colour_map['background'])
-                    self.linenumbers.config(background=colour_map['background'])
-                    self.console.config(background="Black")
+                self.text.config(background=colour_map['background'])
+                self.linenumbers.config(background=colour_map['background'])
+                self.console.config(background="Black")
+                if SYSTEM == WINDOWS:
                     self.root.wm_attributes('-transparentcolor', "")
+                else:
+                    self.root.wm_attributes("-transparent", False)
             else:
                     self.root.wm_attributes("-alpha", 1)
         except TclError as e:

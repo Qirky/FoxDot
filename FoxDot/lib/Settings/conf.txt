@@ -10,6 +10,8 @@ SC3_PLUGINS=False
 MAX_CHANNELS=2
 SAMPLES_DIR=""
 GET_SC_INFO=True
+USE_ALPHA=False
+ALPHA_VALUE=0.8
 
 # Text colours
 # ------------------
@@ -26,6 +28,8 @@ strings='#eae02a'
 dollar='#ec4e20'
 arrow='#eae02a'
 players='#ec4e20'
+
+
 
 
 
