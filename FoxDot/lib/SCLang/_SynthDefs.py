@@ -369,6 +369,9 @@ prophet.add()
 pads = FileSynthDef('pads')
 pads.add()
 
+pasha = FileSynthDef('pasha')
+pasha.add()
+
 # Get rid of the variable synth
 
 del synth
