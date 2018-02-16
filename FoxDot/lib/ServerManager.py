@@ -129,6 +129,13 @@ class ServerManager(object):
         self.client.connect( (self.addr, self.port) )
         self.osc_address = osc_address
 
+        self.node = 1000
+        self.num_input_busses = 2
+        self.num_output_busses = 2
+        self.bus = self.num_input_busses + self.num_output_busses
+        self.max_busses = 100
+        self.max_buffers = 1024
+
     @staticmethod
     def create_osc_msg(dictionary):
         """ Converts a Python dictionary into an OSC style list """
@@ -147,8 +154,15 @@ class ServerManager(object):
         for item in args:
             if type(item) == dict:
                 message.append(self.create_osc_msg(item))
+            else:
+                message.append(item)
         bundle.append(message)
         return bundle
+
+    def loadSynthDef(self, *args, **kwargs):
+        return
+    def setFx(self, *args, **kwargs):
+        return
 
 class SCLangServerManager(ServerManager):
 
@@ -331,7 +345,7 @@ class SCLangServerManager(ServerManager):
 
             if key != "env":
 
-                try:
+                try:    
 
                     new_message[key] = float(packet[key]) # is this not already the case?
 
@@ -874,6 +888,7 @@ class TempoClient:
         """ Listens out for data coming from the server and passes it on
             to the handler.
         """
+        
         # First message is machine clock time
 
         time_data = read_from_socket(self.socket)
