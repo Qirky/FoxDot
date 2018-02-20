@@ -176,7 +176,7 @@ class TempoClock(object):
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar """
-        self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", bpm))
+        return self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", bpm))
 
     def __setattr__(self, attr, value):
         if attr == "bpm" and self.__setup:
