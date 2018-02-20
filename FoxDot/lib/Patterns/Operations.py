@@ -75,14 +75,23 @@ def Mul(a, b):  return a * b
 def Div(a, b):  return a / b
 def Mod(a, b):  return a % b
 def Pow(a, b):  return a ** b
-def Get(a, b):  return a[b]
+def Get(a, b):  
+    try: 
+        return a[b]
+    except TypeError: 
+        return a
 def FloorDiv(a, b): return a // b
 def Xor(a, b): return a ^ b
 def Or(a, b):  return a | b
 
 def rAdd(a, b): return b + a
-def rGet(a, b): return b[a]
+def rGet(a, b):  
+    try: 
+        return b[a]
+    except TypeError: 
+        return b
 def rSub(a, b): return b - a
+def rMul(a, b): return b * a
 def rDiv(a, b): return b / a
 def rMod(a, b): return b % a
 def rPow(a, b): return b ** a
