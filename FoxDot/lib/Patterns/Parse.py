@@ -91,6 +91,8 @@ def feed(string):
 
                 raise ParseError(e)
 
+            # If we know we are layering, zip the last item
+
             if layer_pattern:
 
                 items[-1] = items[-1].zip( Pattern(chars) )
@@ -165,8 +167,6 @@ def feed(string):
             if contains_nest:
 
                 # May contain sub-nests, so re-parse with calculated duration
-
-                # chars, _ = feed(s) # why do this again?
 
                 new_chars = []
 
