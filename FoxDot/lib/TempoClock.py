@@ -180,14 +180,18 @@ class TempoClock(object):
 
     def __setattr__(self, attr, value):
         if attr == "bpm" and self.__setup:
+
             # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
+
             self.update_tempo(value)
 
-            # Notify listening clients -- future
+            # Notify listening clients
             if self.tempo_client is not None:
+            
                 self.tempo_client.update_tempo(value)
             
             if self.tempo_server is not None:
+            
                 self.tempo_server.update_tempo(value)
                 
         else:
@@ -205,6 +209,9 @@ class TempoClock(object):
     def beat_dur(self, n=1):
         """ Returns the length of n beats in seconds """
         return 0 if n == 0 else (60.0 / self.get_bpm()) * n
+
+    def beats_to_seconds(self, beats):
+        return self.beat_dur(beats)
 
     def seconds_to_beats(self, seconds):
         """ Returns the number of beats that occur in a time period  """
