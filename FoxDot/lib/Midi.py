@@ -34,11 +34,9 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
 
     # Make sure we force timevars into real values
 
-    if isinstance(scale, ScalePattern):
+    if isinstance(scale, ScalePattern) and isinstance(scale.data, TimeVar):
 
-        if isinstance(scale.data, TimeVar):
-
-            scale = asStream(scale.data.now())
+        scale = asStream(scale.data.now())
 
     # Force float
     octave = float(octave)
