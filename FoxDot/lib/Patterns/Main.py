@@ -926,6 +926,12 @@ class metaPattern(object):
                 self.data[i] = Pattern(data)
             elif type(data) is str and len(data) > 1:
                 self.data[i] = Pattern(data)
+            
+        # If this only contains a pattern, its redundant to use this as a container
+            
+        if len(self.data) == 1 and isinstance(self.data[0], Pattern):
+
+            self.data = self.data[0].data
 
         self.data = list(self.data)
                 
