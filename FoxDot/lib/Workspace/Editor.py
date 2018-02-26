@@ -63,6 +63,8 @@ class workspace:
         CodeClass.namespace['Player'].widget = self
         #CodeClass.namespace['Ghost'].widget = self
 
+        version = CodeClass.namespace['__version__']
+
         # Used for docstring prompt
         
         self.namespace = CodeClass.namespace
@@ -70,7 +72,7 @@ class workspace:
         # Set up master widget  
 
         self.root = Tk(className='FoxDot')
-        self.root.title("FoxDot - Live Coding with Python and SuperCollider")
+        self.root.title("FoxDot v{} - Live Coding with Python and SuperCollider".format(version))
         self.root.rowconfigure(0, weight=1) # Text box
         self.root.rowconfigure(1, weight=0) # Separator
         self.root.rowconfigure(2, weight=0) # Console
@@ -399,7 +401,7 @@ class workspace:
         try:
 
             execute( self.text.get(a, b) )
-            # execute.update_line_numbers(self.text, a, b)
+            execute.update_line_numbers(self.text, a, b)
 
         except:
 
