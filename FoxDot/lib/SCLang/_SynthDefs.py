@@ -165,7 +165,7 @@ with SynthDef("glass") as glass:
 
 with SynthDef("soft") as soft:
     soft.freq= soft.freq/2
-    soft.amp = soft.amp / (40 * (1 + soft.rate))
+    soft.amp = soft.amp / (200 * (1 + soft.rate))
     soft.osc = Klank.ar([[7, 5, 3, 1],[8,4,2,1],[2,4,8,16]], LFNoise0.ar(soft.rate/soft.sus), soft.freq)
     soft.env = Env.env(soft.sus)
 
