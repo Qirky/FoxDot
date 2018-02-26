@@ -7,6 +7,9 @@ in time with `Player` rhythms to give visual aid to which players are creating w
 
 from __future__ import absolute_import, division, print_function
 
+from time import time, sleep
+from threading import Thread
+
 from .Code import execute
 
 class Bang:
@@ -52,14 +55,19 @@ class Bang:
 
             # Only update visuals if the line is visible
 
+            if player.line_number is None:
+
+                return
+
             if a <= player.line_number <= b:
                 
                 row = player.line_number
                 col = player.whitespace
                 env   = player.envelope
-                event = player.event
-                
-                duration = event['sus']
+                clock = player.metro
+
+                duration     = clock.beat_dur( player.dur / 2 )
+                message_time = player.queue_block.time
 
                 self.id = "{}_bang".format(player.id)
 
@@ -67,17 +75,19 @@ class Bang:
                 end   = "%d.end" % row
 
                 def bang():
+
+                    # wait until the time osc messages are sent
+
+                    while time() < message_time:
+
+                        sleep(0.001)
+
                     self.widget.addTask(target=self.widget.text.tag_add, args=(self.id, start, end))
                     self.widget.addTask(target=self.widget.text.tag_config, args=(self.id,), kwargs=kwargs)
+                    self.widget.root.after(int(1000 * duration), self.remove)
                     return
 
-                clock = player.metro
-
-                t = clock.seconds_to_beats(clock.latency)
-
-                clock.schedule(bang, player.metro.now() + t )
-
-                clock.schedule(self.remove, player.metro.now() + self.duration + t)
+                Thread(target=bang).start()
 
             return
 
