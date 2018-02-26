@@ -1,3 +1,10 @@
+### v0.5.12 fixes and updates
+
+- Improved `TimeVar` efficiency and can correctly handle the use of `GeneratorPattern` as an argument for duration.  
+- Slight re-ordering of samples with better descriptions when using `print(Samples)` (which is now a command in the help message).
+- Added "pasha" SynthDef
+- Experimental: you can use a `linvar` for tempo e.g. `Clock.bpm=linvar([40,120],16)`
+
 ### v0.5.11 fixes and updates
 
 - The Player reset method can be called using a preceding ~ character such that the two lines below are equivalent:

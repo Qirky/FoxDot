@@ -4,6 +4,7 @@ var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
 freq=(freq / 2);
+amp=(amp / (200 * (1 + rate)));
 osc=Klank.ar(`[[7, 5, 3, 1], [8, 4, 2, 1], [2, 4, 8, 16]], LFNoise0.ar((rate / sus)), freq);
 env=EnvGen.ar(Env(times: sus,levels: [0, amp, 0],curve: 'lin'), doneAction: 0);
 osc=(osc * env);
