@@ -15,7 +15,8 @@ user_defn = r"(?<=def )(\w+)"
 players   = r"(?<=>>)(\s*\w+)"
 comments  = r"^\s*#.*|[^\"']*(#[^\"']*$)"
 decorator = r"\A\s*@.+"
-numbers   = r"(?<![a-zA-Z])\d+"
+#numbers   = r"(?<![a-zA-Z])\d+"
+numbers   = r"\W+(\d+)"
 strings   = r"\".*?\"|\".*" + "|\'.*?\'|\'.*"
 dollar    = r"\s\$\s?"
 arrow     = r"\s>>\s?"
@@ -169,7 +170,7 @@ from ..Patterns import Main, Sequences, Generators
 from ..SCLang import SCLang
 
 foxdot_kw = ["Clock","Group","Scale","DefaultServer","Root","Samples","var","Pvar",
-             "linvar","expvar","mapvar","inf","when", "lambda", u"λ", decorator]
+             "linvar","expvar","mapvar","sinvar","inf","when", "lambda", u"λ", decorator]
 
 foxdot_funcs = classes(Main) + classes(Generators) + functions(Sequences) + ["P"]
 
@@ -207,6 +208,7 @@ tabsize = 4
 
 functions = r"(?<![a-zA-Z._])(" + "|".join(py_functions) + ")(?![_a-zA-Z])"
 key_types = r"(?<![a-zA-Z._])(" + "|".join(py_key_types) + ")(?![_a-zA-Z])"
+#key_types = r"\.?(\w+)\(|\W+P\W+" # TODO - change py_key_types to just and value followed by ()?
 other_kws = r"(?<![a-zA-Z._])(" + "|".join(py_other_kws) + ")(?![_a-zA-Z])"
 
 colour_map = {'plaintext'  : COLOURS.plaintext,
