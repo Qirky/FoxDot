@@ -1,8 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
 from .Patterns import Pattern, PGroup, asStream
+from .TimeVar import TimeVar
 
 from random import choice
+import math
 
 def choose():
     """ Scale.choose() -> Returns a random scale object """
@@ -26,9 +28,9 @@ class ScalePattern(Pattern):
 
             self.data = ScalePattern.names[name]
 
-        self.pentatonic = PentatonicScalePattern(self)
-
         self.steps = 12
+
+        self.pentatonic = PentatonicScalePattern(self)
 
     def __call__(self, *args):
 
@@ -50,6 +52,46 @@ class ScalePattern(Pattern):
         for pitch in asStream(pitches):
             tones.append( self.note_to_semitone(pitch) )
         return Pattern(tones)
+
+    def get_midi_note(self, degree, octave=5, root=0):
+        """ Calculates a midinote from a scale, octave, degree, and root """
+
+        # Make sure we force timevars into real values
+
+        if isinstance(self.data, TimeVar):
+
+            scale = asStream(self.data.now())
+
+        # Force float
+        octave = float(octave)
+        degree = float(degree)
+        root   = float(root)
+        
+        # Floor val
+        lo = int(math.floor(degree))
+        hi = lo + 1
+
+        octave = octave + (lo // len(self))
+        index  = lo % len(self)
+
+        # Work out any microtones
+
+        micro = (degree - lo)
+
+        if micro > 0:
+
+            ex_scale = list(self) + [self.steps]
+
+            diff  = ex_scale[index + 1] - self[index]
+
+            micro = micro * diff
+
+        midival = self.steps * octave     # Root note of scale
+        midival = midival + root          # Adjust for key
+        midival = midival + self[index]   # Add the note
+        midival = midival + micro         # And any microtonal
+        
+        return midival
 
     def note_to_semitone(self, pitch):
         """ Takes a pitch value and returns the semitone value e.g. midinote value not accounting for octaves """
@@ -92,6 +134,7 @@ class PentatonicScalePattern(ScalePattern):
     def __init__(self, scale):
 
         self.data = scale
+        self.steps = scale.steps
 
     def __len__(self):
         return 5
@@ -148,6 +191,7 @@ class __scale__:
     majorPentatonic = ScalePattern("majorPentatonic", [0,2,4,7,9])
 
     minor           = ScalePattern("minor", [0,2,3,5,7,8,10])
+    aeolian         = ScalePattern("aeolian",  [ 0, 2, 3, 5, 7, 8, 10 ])
     minorPentatonic = ScalePattern("minorPentatonic", [0,3,5,7,10])
 
     mixolydian      = ScalePattern("mixolydian", [0,2,4,5,7,9,10])
@@ -162,9 +206,11 @@ class __scale__:
     justMinor       = ScalePattern("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
 
     dorian          = ScalePattern("dorian",  [0,2,3,5,7,9,10])
-    dorian2         = ScalePattern("dorian2", [0,1,3,5,6,8,9,11])
+    dorian2         = ScalePattern("dorian2", [0,1,3,5,6,8,9,11]) 
+    diminished      = ScalePattern("diminished", [ 0, 1, 3, 4, 6, 7, 9, 10 ])
 
     egyptian        = ScalePattern("egyptian", [0,2,5,7,10])
+    yu              = ScalePattern("yu", [0,3,5,7,10])
     zhi             = ScalePattern("zhi", [0,2,5,7,9])
     phrygian        = ScalePattern("phrygian", [0,1,3,5,7,8,10])
     prometheus      = ScalePattern("prometheus", [0,2,4,6,11])
@@ -177,6 +223,9 @@ class __scale__:
     lydianMinor     = ScalePattern("lydianMinor", [0,2,4,6,7,8,10])
 
     ryan            = ScalePattern("ryan", [0,2,3,5,6,9,10])
+
+    romanianMinor   = ScalePattern("romanianMinor", [ 0, 2, 3, 6, 7, 9, 10 ])
+    chinese         = ScalePattern("chinese", [ 0, 4, 6, 7, 11 ])
 
     freq            = ScalePattern("freq", _freq())
 

@@ -141,7 +141,7 @@ from .Patterns import *
 from .Midi import *
 
 from .Root import Root
-from .Scale import Scale
+from .Scale import Scale, ScalePattern
 
 from .Bang import Bang
 
@@ -1454,7 +1454,17 @@ class Player(Repeatable):
             octave = group_modi(kwargs.get("oct", self.event["oct"]), index)
             root   = group_modi(kwargs.get("root", self.event["root"]), index)
 
-            midinote = midi( kwargs.get("scale", self.scale), octave, degree, root )
+            scale  = kwargs.get("scale", self.scale)
+
+            # TODO -- make sure it's always a scale
+
+            if isinstance(scale, ScalePattern):
+
+                midinote = scale.get_midi_note(degree, octave, root)
+
+            else:
+
+                midinote = midi( scale, octave, degree, root )
 
             freq   = miditofreq(midinote)
             
