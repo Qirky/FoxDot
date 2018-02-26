@@ -43,8 +43,7 @@ class TimeVar:
         self.dur      = dur
         self.bpm      = kwargs.get('bpm', None)
 
-        # This is possibly a bad idea
-        # self.data = self
+        self.get_seconds = bool(kwargs.get('seconds', False))
 
         # Dynamic method for calculating values
         self.func     = Nil
@@ -61,8 +60,6 @@ class TimeVar:
         self.next_index    = 0
 
         self.proportion    = 0
-
-        self.current_time_block  = None
 
         # If the clock is not ticking, start it
 
@@ -109,50 +106,50 @@ class TimeVar:
         """ Displays the values and the dependency value - useful for debugging """
         return self.value + [self.dependency]
 
-    def _bpm_cycle_dur(self):
-        """ Returns the time, in seconds, for a var to loop to its original
-            value and duration if this var is a bpm value. """
-        return sum([(self.dur[i] / self.values[i]) for i in range(LCM(len(self.dur), len(self.values)) )]) * 60
+    # def _bpm_cycle_dur(self):
+    #     """ Returns the time, in seconds, for a var to loop to its original
+    #         value and duration if this var is a bpm value. """
+    #     return sum([(self.dur[i] / self.values[i]) for i in range(LCM(len(self.dur), len(self.values)) )]) * 60
 
-    def _bpm_to_beats(self, duration, start=0):
-        """ If self.values are series of bpm, how many beats occur in
-            the time frame 'duration'. Used in TempoClock """
+    # def _bpm_to_beats(self, duration, start=0):
+    #     """ If self.values are series of bpm, how many beats occur in
+    #         the time frame 'duration'. Used in TempoClock """
 
-        cycle_dur = self._bpm_cycle_dur()
+    #     cycle_dur = self._bpm_cycle_dur()
 
-        start = start % self.length() # What offset to the start to apply
+    #     start = start % self.length() # What offset to the start to apply
 
-        n = duration // cycle_dur # How many cycles occurred in duration
+    #     n = duration // cycle_dur # How many cycles occurred in duration
 
-        r = duration % cycle_dur  # How many seconds of the last cycle occurred
+    #     r = duration % cycle_dur  # How many seconds of the last cycle occurred
 
-        total = n * self.length()
+    #     total = n * self.length()
 
-        i = 0
+    #     i = 0
 
-        while r > 0:
+    #     while r > 0:
 
-            # Work out their durations and sub from 'r' until 0
+    #         # Work out their durations and sub from 'r' until 0
 
-            seconds = (self.dur[i]/ self.values[i]) * 60.0
+    #         seconds = (self.dur[i]/ self.values[i]) * 60.0
 
-            offset  = (start / self.values[i]) * 60.0
+    #         offset  = (start / self.values[i]) * 60.0
 
-            seconds = seconds - offset
+    #         seconds = seconds - offset
 
-            if seconds > 0:
+    #         if seconds > 0:
 
-                beats = (self.values[i] * min(seconds, r)) / 60.0
-                r    -= seconds
-                start = 0
-                total += beats
+    #             beats = (self.values[i] * min(seconds, r)) / 60.0
+    #             r    -= seconds
+    #             start = 0
+    #             total += beats
 
-            else:
+    #         else:
 
-                start -= self.dur[i]
+    #             start -= self.dur[i]
 
-            i += 1
-        return total
+    #         i += 1
+    #     return total
 
     # Update methods
 
@@ -163,20 +160,15 @@ class TimeVar:
         new.dependency = self
         return new
 
-    def length(self):
-        """ Returns the duration of one full cycle in beats """
-        return self.time[-1][1]
+    # def length(self):
+    #     """ Returns the duration of one full cycle in beats """
+    #     return self.time[-1][1]
 
     def update(self, values, dur=None, **kwargs):
         """ Updates the TimeVar with new values.
         """
 
         self.bpm = kwargs.get('bpm', self.bpm)
-
-        # if isinstance(values, str): values = [values]
-
-        self.values = []
-        self.time   = []
 
         #: Update the durations of each state
 
@@ -185,7 +177,6 @@ class TimeVar:
             self.dur = asStream(dur)
 
         self.values = self.stream(values)
-        self.time   = self.dur
 
         return self
 
@@ -200,15 +191,13 @@ class TimeVar:
 
             while True:
 
-                self.next_time += self.dur[self.next_index]
+                self.next_time, self.prev_time = self.next_time + self.dur[self.next_index], self.next_time
 
                 self.next_index += 1
 
                 if self.next_time >= time:
 
                     break
-
-                self.prev_time = self.next_time
 
         # Store the % way through this value's time
 
@@ -228,6 +217,10 @@ class TimeVar:
 
     def get_current_time(self, beat=None):
         """ Returns the current beat value """
+        # Return elapsed time in seconds if get_seconds flag is True
+        if self.get_seconds is True:
+            return float(self.metro.time)
+        # Else return the beat
         if beat is None:
             beat = self.metro.now()
         if self.bpm is not None:
@@ -497,7 +490,14 @@ class expvar(linvar):
         self.proportion *= self.proportion
         return (self.current_value * (1-self.proportion)) + (self.next_value * self.proportion)
 
-# TODO sinvar?
+import math
+
+class sinvar(linvar):
+    def get_timevar_value(self):
+        d = self.current_value  > self.next_value
+        x = (self.proportion * 90) + (d * 270)
+        self.proportion = math.sin(math.radians(x)) + int(d)
+        return (self.current_value * (1-self.proportion)) + (self.next_value * self.proportion)
 
 PATTERN_METHODS = Pattern.get_methods()
 
