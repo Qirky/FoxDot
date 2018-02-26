@@ -278,7 +278,19 @@ fx = FxList.new("pshift", "pitchShift", {"pshift":0}, order=0)
 fx.add("osc = osc * (1.059463**pshift)")
 fx.save()
 
-# Sound effects
+fx = FxList.new("fm_sin", "FrequencyModulationSine", {"fm_sin":0, "fm_sin_i":1}, order=0)
+fx.add("osc = osc + (fm_sin_i * SinOsc.kr(osc * fm_sin))")
+fx.save()
+
+fx = FxList.new("fm_saw", "FrequencyModulationSaw", {"fm_saw":0, "fm_saw_i":1}, order=0)
+fx.add("osc = osc + (fm_saw_i * Saw.kr(osc * fm_saw))")
+fx.save()
+
+fx = FxList.new("fm_pulse", "FrequencyModulationPulse", {"fm_pulse":0, "fm_pulse_i":1}, order=0)
+fx.add("osc = osc + (fm_pulse_i * Pulse.kr(osc * fm_pulse))")
+fx.save()
+
+# Signal effects
 
 fx = FxList.new('hpf','highPassFilter', {'hpf': 0, 'hpr': 1}, order=2)
 fx.doc("Highpass filter")
