@@ -149,12 +149,12 @@ with SynthDef("klank") as klank:
     klank.osc = Decimator.ar(klank.osc, bits=klank.rate - 1)
     klank.env = Env.env(klank.sus*2)
 
-with SynthDef("ambi") as ambi:
-    ambi.sus = ambi.sus * 1.5
-    ambi.amp = ambi.amp / 3
-    ambi.freq = ambi.freq * [1,1.005]
-    ambi.osc = Klank.ar([[1,2,3,3 + ((ambi.rate-1)/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(ambi.freq, add=1), ambi.freq)
-    ambi.env = Env.env(ambi.sus*2)
+with SynthDef("feel") as feel:
+    feel.sus  = feel.sus * 1.5
+    feel.amp  = feel.amp / 3
+    feel.freq = feel.freq * [1,1.005]
+    feel.osc = Klank.ar([[1,2,3,3 + ((feel.rate-1)/10)],[1,1,1,1],[2,2,2,2]], Impulse.ar(0.0005) * Saw.ar(feel.freq, add=1), feel.freq)
+    feel.env = Env.env(feel.sus*2)
 
 with SynthDef("glass") as glass:
     glass.sus = glass.sus * 1.5
@@ -371,6 +371,9 @@ pads.add()
 
 pasha = FileSynthDef('pasha')
 pasha.add()
+
+ambi = FileSynthDef("ambi")
+ambi.add()
 
 # Get rid of the variable synth
 
