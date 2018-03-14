@@ -330,7 +330,11 @@ if SC3_PLUGINS:
 # Post envelope effects    
 
 fx = FxList.new('chop', 'chop', {'chop': 0, 'sus': 1}, order=2)
-fx.add("osc = osc * LFPulse.ar(chop / sus, add: 0.1)")
+fx.add("osc = osc * LFPulse.kr(chop / sus, add: 0.01)")
+fx.save()
+
+fx = FxList.new('tremolo', 'tremolo', {'tremolo': 0, 'beat_dur': 1}, order=2)
+fx.add("osc = osc * SinOsc.ar( tremolo / beat_dur, mul:0.5, add:0.5)")
 fx.save()
 
 fx = FxList.new('echo', 'combDelay', {'echo': 0, 'sus': 1, 'decay': 1}, order=2)
