@@ -7,22 +7,33 @@ from .Utils import modi
 import threading
 
 class MethodList:
+    """ Class for holding information about the order of which methods have been
+        called on Player attributes. `root` is the original Pattern.
+     """
     def __init__(self, root):
         self.root=root
         self.list_of_methods = []
-    
-    def __repr__(self):
-        return repr(self.list_of_methods)
+
+    def get_root_pattern(self):
+        return self.root
+
+    def set_root_pattern(self, new):
+        self.root = new
+
+    def add_method(self, method_name, args, kwargs):
+        self.list_of_methods.append((method_name, args, kwargs))
 
     def update(self, method, args, kwargs):
+        """ Updates the args and kwargs for a repeated method """
         for i, info in enumerate(self.list_of_methods):
             name, _, _  = info
             if name == method:
                 self.list_of_methods[i] = (method, args, kwargs)
                 return
-        return ValueError
+        raise ValueError
 
     def remove(self, method):
+        """ Removes a method (should be a string) from the list of methods """
         for i, info in enumerate(self.list_of_methods):
             name, args, kwargs = info
             if name == method:
@@ -30,18 +41,26 @@ class MethodList:
                 return
         raise ValueError
 
-    def contains(self, method):
+    def __repr__(self):
+        return repr(self.list_of_methods)
+
+    def __contains__(self, method):
+        """ Returns true if the method is in the list of methods """
         for name, args, kwargs in self.list_of_methods:
             if name == method:
                 return True
         return False
+
+    def __iter__(self):
+        for value in self.list_of_methods:
+            yield value
 
 class Repeatable(object):
     after_update_methods = []
     method_synonyms      = {}
     def __init__(self):
         self.repeat_events        = {}
-        self.previous_patterns    = {}
+        self.previous_patterns    = {} # not a good name - TODO change
 
     def update_pattern_root(self, attr):
         """ Update the base attribute pattern that methods are applied to """
@@ -52,7 +71,7 @@ class Repeatable(object):
 
         else:
 
-            self.previous_patterns[attr].root = self.attr[attr]
+            self.previous_patterns[attr].set_root_pattern( self.attr[attr] )
 
         self.update_pattern_methods(attr)     
 
@@ -65,17 +84,121 @@ class Repeatable(object):
 
             self.previous_patterns[attr] = MethodList(self.attr[attr])
 
-        data = self.previous_patterns[attr].root
+        result = self.previous_patterns[attr].get_root_pattern()
 
-        for method, args, kwargs in self.previous_patterns[attr].list_of_methods:
+        # For each method in the list, call on the pattern
+
+        for method, args, kwargs in self.previous_patterns[attr]:
 
             call_pattern_method = getattr(Pattern, method)
 
-            data = call_pattern_method(data, *args, **kwargs)
+            result = call_pattern_method(result, *args, **kwargs)
 
-        self.attr[attr] = data
+        self.attr[attr] = result
 
         return
+
+    def get_attr_and_method_name(self, cmd):
+        """ Returns the attribute and method name from a string in the form
+            `"attr.method"` would return `"attr"` and `"method"`. If attr is not
+            present, it returns `"degree"` in place. 
+        """
+
+        if cmd in self.method_synonyms:
+
+            attr = [ self.method_synonyms[cmd] ]
+
+        else:
+
+            attr = cmd.split(".")
+
+        # We can also schedule attribute methods
+
+        if len(attr) == 1:
+
+            attr_name   = "degree"
+            method_name = attr[0]
+
+        elif len(attr) == 2:
+
+            attr_name = attr[0]
+            method_name = attr[1]
+
+        return attr_name, method_name
+
+    def is_pattern_method(self, method_name, attr="degree"):
+        """ Returns True if the method is a valid method of `Pattern` """
+
+        if attr == "degree" and hasattr(self, method_name):
+
+            return False
+
+        elif hasattr(Pattern, method_name):
+
+            return True
+
+        else:
+
+            return False
+
+    def is_player_method(self, method_name, attr="degree"):
+        """ Returns True if the method is a valid method  of `Player` """ 
+        return hasattr(self, method_name) and attr == "degree"
+
+    def get_method_by_name(self, cmd):
+        """ Returns the attribute name and method based on `cmd` which is a string.
+            Should be in form `"attr.method"`.
+        """
+
+        attr_name, method_name = self.get_attr_and_method_name(cmd)
+
+        # Just get the player method if a valid player method
+
+        if self.is_player_method(method_name, attr_name):
+
+            method = getattr(self, method_name)
+
+        # If its a Pattern method, create a "new" function  that acts as a method
+
+        elif self.is_pattern_method(method_name, attr_name):
+
+            def method(*args, **kwargs):
+
+                # If there are no "old" patterns held in memory, use the pattern method and store
+
+                if attr_name not in self.previous_patterns:
+
+                    self.previous_patterns[attr_name] = MethodList(self.attr[attr_name]) # store the root
+
+                # If this has already been called, "undo it"
+
+                if method_name in self.previous_patterns[attr_name]:
+
+                    self.previous_patterns[attr_name].remove(method_name)
+
+                # If not, add it to the list
+
+                else:
+
+                    self.previous_patterns[attr_name].add_method(method_name, args, kwargs)
+
+                # Update the attribute
+
+                self.update_pattern_methods(attr_name)
+
+                return
+
+            method.__name__ = cmd # for debugging purposes
+
+        else:
+
+            WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
+
+            return None, None
+
+        assert callable(method)
+        
+        return attr_name, method
 
     def after(self, n, cmd, *args, **kwargs):
         """ Schedule self.cmd(args, kwargs) in 'n' beats time
@@ -105,101 +228,6 @@ class Repeatable(object):
             pass
         
         return self
-
-    def get_attr_and_method_name(self, cmd):
-
-        if cmd in self.method_synonyms:
-
-            attr = [ self.method_synonyms[cmd] ]
-
-        else:
-
-            attr = cmd.split(".")
-
-        # We can also schedule attribute methods
-
-        if len(attr) == 1:
-
-            attr_name   = "degree"
-            method_name = attr[0]
-
-        elif len(attr) == 2:
-
-            attr_name = attr[0]
-            method_name = attr[1]
-
-        return attr_name, method_name
-
-    def is_pattern_method(self, method_name, attr="degree"):
-
-        if attr == "degree" and hasattr(self, method_name):
-
-            return False
-
-        elif hasattr(Pattern, method_name):
-
-            return True
-
-        else:
-
-            return False
-
-    def is_player_method(self, method_name, attr="degree"):
-
-        return hasattr(self, method_name) and attr == "degree"
-
-    def get_method_by_name(self, cmd):
-        # Make sure cmd is a method
-
-        attr_name, method_name = self.get_attr_and_method_name(cmd)
-
-        if True: # TODO move this back
-
-            if self.is_player_method(method_name, attr_name):
-
-                method = getattr(self, method_name)
-
-            elif self.is_pattern_method(method_name, attr_name):
-
-                def method(*args, **kwargs):
-
-                    # If there are no "old" patterns held in memory, use the pattern method and store
-
-                    attr = attr_name
-
-                    if attr not in self.previous_patterns:
-
-                        self.previous_patterns[attr] = MethodList(self.attr[attr]) # store the root
-
-                    # If this has already been called, "undo it"
-
-                    if self.previous_patterns[attr].contains(method_name):
-
-                        self.previous_patterns[attr].remove(method_name)
-
-                    # If not, add it to the list
-
-                    else:
-
-                        self.previous_patterns[attr].list_of_methods.append((method_name, args, kwargs))
-
-                    # Update the attribute
-
-                    self.update_pattern_methods(attr)
-
-                    return
-
-                method.__name__ = cmd # for debugging purposes
-
-            else:
-
-                WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
-
-                return None, None
-
-        assert callable(method)
-        
-        return attr_name, method
         
     def every(self, occurence, cmd, *args, **kwargs):
         """ Every n beats, call a method (defined as a string) on the
@@ -264,13 +292,13 @@ class Repeatable(object):
 
                 if n % 2 == 1:
 
-                    if self.previous_patterns[attr].contains(method_name):
+                    if method_name in self.previous_patterns[attr]:
 
                         self.previous_patterns[attr].remove(method_name)
 
                 else:
 
-                    if self.previous_patterns[attr].contains(method_name):
+                    if method_name in self.previous_patterns[attr]:
 
                         self.previous_patterns[attr].update(method_name, args, kwargs)
 
@@ -284,17 +312,18 @@ class Repeatable(object):
 
         else:
 
-            call = MethodCall(self, method, occurence, cycle, args, kwargs)
+            self.repeat_events[cmd] = MethodCall(self, method, occurence, cycle, args, kwargs)
 
-            self.repeat_events[cmd] = call
-
-            call.schedule()
+            self.repeat_events[cmd].schedule()
 
         return self
 
     def stop_calling_all(self):
+        """ Stops all repeated methods. """
         for method in list(self.repeat_events.keys()):
+
             self.never(method)
+
         return self
             
 
@@ -310,7 +339,7 @@ class Repeatable(object):
         try:
             # If it a pattern method, undo it
             
-            if self.previous_patterns[attr].contains(method):
+            if method in self.previous_patterns[attr]:
             
                 self.previous_patterns[attr].remove(method)
             
@@ -336,32 +365,42 @@ class MethodCall:
         self.parent = parent  
         self.method = method
 
-        self.cycle = cycle
-        self.when  = asStream(n)
-        
-        self.i, self.next = self.count()
+        self.update(n, cycle, args, kwargs)
 
-        self.this_when = float(self.when[self.i])
-        self.last_when = 0
+        self.after_update = False
+        self.stopping = False
+
+    def update(self, n, cycle=None, args=(), kwargs={}):
+        """ Updates the values of the MethodCall. Re-adjusts the index if cycle has been changed """
+
+        if cycle is not None:
+
+            self.when   = asStream(cycle)
+            self.cycle  = asStream(n)
+
+        else:
+
+            self.when   = asStream(n)
+            self.cycle  = None
 
         self.args = args
         self.kwargs = kwargs
 
-        self.after_update = False
+        self.i, self.next = self.count()
 
-        self.stopping = False
+        self.offset = float(modi(self.cycle, self.i)) - 1 if self.cycle is not None else 0
+        
+        return self
 
     def count(self):
         """ Counts the number of times this method would have been called between clock start and now """
 
-        n = 0
-        acc = 0
-        dur = 0
+        n = 0; acc = 0; dur = 0
         now = float(self.parent.metro.now())
 
         # Get durations
 
-        durations = self.when if self.cycle is None else asStream(self.cycle)
+        durations = self.when # if self.cycle is None else asStream(self.cycle)
         total_dur = float(sum(durations))
 
         # How much time left to fit remainder in
@@ -398,8 +437,7 @@ class MethodCall:
         return "<Future {}() call of '{}'>".format(self.method.__name__, self.parent)
 
     def __call__(self, *args, **kwargs):
-        """ Proxy for parent object __call__, calls the enclosed method
-            and schedules it in the future. """
+        """ Proxy for parent object __call__, calls the enclosed method and schedules it in the future. """
 
         assert self.method is not None
 
@@ -409,25 +447,17 @@ class MethodCall:
 
             return
 
-        # Update the current duration
+        # Call the method
 
-        self.last_when, self.this_when = self.this_when, float(self.when[self.i])
+        self.call_method()
+
+         # Update the next time to schedule
+
+        self.next += float(self.when[self.i])
 
         if self.cycle is not None:
             
-            self.next += (float(modi(self.cycle, self.i)) + (self.this_when - self.last_when))
-
-        else:
-
-            self.next += self.this_when
-
-        try:
-
-            self.method.__call__(*self.args, **self.kwargs)
-
-        except Exception as e:
-
-            print("{} in '{}': {}".format(e.__class__.__name__, self.method.__name__, e))
+            self.offset = float(modi(self.cycle, self.i)) - 1
 
         # Re-schedule the method call
 
@@ -439,8 +469,21 @@ class MethodCall:
 
         return
 
+    def call_method(self):
+        """ Calls the method. Prints to the console with error info. """
+        try:
+
+            self.method.__call__(*self.args, **self.kwargs)
+
+        except Exception as e:
+
+            print("{} in '{}': {}".format(e.__class__.__name__, self.method.__name__, e))
+
+        return
+
     def schedule(self):
-        self.parent.metro.schedule(self, self.next)
+        """ Schedules the method to be called in the clock """
+        self.parent.metro.schedule(self, self.next + self.offset)
 
     def isScheduled(self):
         """ Returns True if this is in the Tempo Clock """
@@ -448,23 +491,3 @@ class MethodCall:
 
     def stop(self):
         self.stopping = True
-
-    def update(self, n, cycle, args=(), kwargs={}):
-        """ Updates the values of the MethodCall. Re-adjusts
-            the index if cycle has been changed """
-
-        self.when = asStream(n)
-        self.args = args
-        self.kwargs = kwargs
-
-        self.i, self.next = self.count()
-
-        # Amend the cycle (TODO!)
-
-        if cycle is not None and cycle != self.cycle:
-
-            self.next = self.parent.metro.next_bar() + self.when[self.i]
-
-        self.cycle = cycle
-        
-        return self
