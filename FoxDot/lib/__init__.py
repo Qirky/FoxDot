@@ -17,7 +17,7 @@ Copyright Ryan Kirkbride 2015
 
 from __future__ import absolute_import, division, print_function
 
-__version__ = "0.5.13"
+__version__ = "0.5.14"
 
 import logging
 
