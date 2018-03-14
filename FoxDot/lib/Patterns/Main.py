@@ -106,15 +106,18 @@ class metaPattern(object):
 
     @classmethod
     def get_methods(cls):
+        """ Returns the methods associated with the `Pattern` class as a list """
         return [attr for attr in dir(cls) if callable(getattr(cls, attr))]
 
     @classmethod
     def help(cls):
+        """ Prints the Pattern class docstring to the console """
         return print(cls.__doc__)
             
     def __len__(self):
-        """ Returns the *expanded" length of the pattern. e.g. the following
-            are identical.
+        """ Returns the *expanded* length of the pattern such that if the pattern is laced, the
+            value is the length of the list multiplied by the lowest-common-multiple of the lengths
+            of nested patterns. e.g. the following are identical:
             ```
             >>> print( len(P[0,1,2,[3,4]]) )
             8
@@ -190,7 +193,7 @@ class metaPattern(object):
         return self.getitem(key)
 
     def getitem(self, key, get_generator=False):
-        """ Is called by __getitem__ """
+        """ Called by __getitem__() """
         # We can get multiple values by indexing with a pattern or tuple
         if isinstance(key, (metaPattern, tuple)):
             val = self.__class__([self.getitem(n) for n in key])
@@ -257,12 +260,6 @@ class metaPattern(object):
         """ Returns the number of occurrences of item in the Pattern"""
         return self.data.count(item)
 
-    """
-
-        Pattern operators (i.e. magic methods)
-        --------------------------------------
-
-    """
     def __add__(self, other):  
         if isinstance(other, GeneratorPattern):
             return other.__radd__(self)
@@ -661,12 +658,12 @@ class metaPattern(object):
         
         return self | self.mirror()[a:b]
 
-    def normalise(self):
+    def norm(self):
         """ Returns the pattern with all values between 0 and 1 """
         pos = self - min(self)
         return pos / max(pos)
 
-    def unduplicate(self):
+    def undup(self):
         """ Removes any consecutive duplicate numbers from a Pattern """
         new = []
         last_val = None
@@ -741,9 +738,8 @@ class metaPattern(object):
         return self.loop(n-1).pipe(getattr(self, method).__call__(*args, **kwargs))
 
     def map(self, func):
-        return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])
-
-       
+        """ Returns a Pattern that calls `func` on each item """
+        return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])       
     
     def extend(self, item):
         self[len(self):] = [item]
@@ -788,11 +784,8 @@ class metaPattern(object):
 
     # Boolean tests
 
-    def contains_nest(self):
-        """ Returns true if the pattern contains a nest """
-        pass
-
     def startswith(self, prefix):
+        """ Returns True if the first item in the Pattern is equal to prefix """
         return self.data[0] == prefix
     
     def all(self, func=(lambda x: bool(x))):
@@ -1309,7 +1302,7 @@ class GeneratorPattern(random.Random):
 
         # new = self.child(0)        
         # new.calculate = mapping_function
-        return new
+        # return new
 
 
 class PatternContainer(metaPattern):
@@ -1368,7 +1361,7 @@ def Convert(*args):
     return PatternTypes if len(PatternTypes) > 0 else PatternTypes[0]
 
 def asPattern(item):
-    if isinstance(item,  metaPattern):
+    if isinstance(item, metaPattern):
         return item
     if isinstance(item, list):
         return Pattern(item)
