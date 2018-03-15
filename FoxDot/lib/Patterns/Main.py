@@ -614,6 +614,23 @@ class metaPattern(object):
         return self.__class__(new)
 
     @loop_pattern_method
+    def duplicate(self, n):
+        """ Repeats this pattern n times but keep nested pattern values """
+        new = []
+        for i in range(n):
+            new += self.data
+        return self.__class__(new)
+
+    @loop_pattern_method
+    def iter(self, n):
+        """ Repeats this pattern n times but doesn't take nested pattern into account for length"""
+        return self[:len(self.data)*n]
+        #new = []
+        #for i in range(len(self.data) * n):
+        #    new += self[i]
+        #return self.__class__(new)
+
+    @loop_pattern_method
     def swap(self, n=2):
         new = []
         for pair in [list(val) for val in [reversed(self[i:i+n]) for i in range(0, len(self), n)]]:
