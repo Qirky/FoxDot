@@ -35,7 +35,8 @@ def getdetails(function, name=None):
 
     # Pattern decorators have this attribute
 
-    argspec = function.argspec if hasattr(function, 'argspec') else inspect.getargspec(function)
+    #argspec = function.argspec if hasattr(function, 'argspec') else inspect.getfullargspec(function)
+    argspec = inspect.getfullargspec(function)
 
     args     = argspec.args
     defaults = argspec.defaults if argspec.defaults is not None else ()
@@ -56,8 +57,8 @@ def getdetails(function, name=None):
     if argspec.varargs is not None:
         output.append('*' + argspec.varargs)
 
-    if argspec.keywords is not None:
-        output.append('**' + argspec.keywords)
+    if argspec.varkw is not None:
+        output.append('**' + argspec.varkw)
         
     return (function.__name__ if name is None else name) + '(' + ', '.join(output) + ')'
 
@@ -210,7 +211,7 @@ class ModuleDoc:
 
                         docstring = inspect.getdoc(item)
 
-                        methods = {getdetails(method): inspect.getdoc(method) for _, method in inspect.getmembers(item) if inspect.ismethod(method) }
+                        methods = {getdetails(method): inspect.getdoc(method) for _, method in inspect.getmembers(item) if (inspect.ismethod(method) or inspect.isfunction(method)) }
 
                         try:
 

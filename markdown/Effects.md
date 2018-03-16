@@ -65,6 +65,26 @@ Undocumented: Spin, Shape, Formant, BandPassFilter, Echo
 
 #### Methods
 
+##### `__init__(self, foxdot_name, synthdef, args={}, control=False)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `__str__(self)`
+
+Return str(self).
+
+##### `doc(self, string)`
+
+Set a docstring for the effects
+
+##### `save(self)`
+
+writes to file and sends to server 
+
 ---
 
 ### `EffectManager(self)`
@@ -81,6 +101,26 @@ dict(**kwargs) -> new dictionary initialized with the name=value pairs
 
 #### Methods
 
+##### `__init__(self)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__iter__(self)`
+
+Implement iter(self).
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `all_kwargs(self)`
+
+Returns *all* keywords for all effects 
+
+##### `kwargs(self)`
+
+Returns the title keywords for each effect 
+
 ---
 
 ### `In(self)`
@@ -89,6 +129,26 @@ dict(**kwargs) -> new dictionary initialized with the name=value pairs
 
 #### Methods
 
+##### `__init__(self)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `__str__(self)`
+
+Return str(self).
+
+##### `doc(self, string)`
+
+Set a docstring for the effects
+
+##### `save(self)`
+
+writes to file and sends to server 
+
 ---
 
 ### `Out(self)`
@@ -96,6 +156,26 @@ dict(**kwargs) -> new dictionary initialized with the name=value pairs
 
 
 #### Methods
+
+##### `__init__(self)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `__str__(self)`
+
+Return str(self).
+
+##### `doc(self, string)`
+
+Set a docstring for the effects
+
+##### `save(self)`
+
+writes to file and sends to server 
 
 ---
 

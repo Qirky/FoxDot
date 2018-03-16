@@ -8,6 +8,15 @@
 
 #### Methods
 
+##### `__call__(self, A, B)`
+
+A is always a Pattern or PGroup.
+        
+
+##### `__init__(self, func)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
 ---
 
 ## Functions

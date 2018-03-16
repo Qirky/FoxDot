@@ -51,6 +51,30 @@ Used to store 'when statements'. Is accessed through the `__when__` object.
 
 #### Methods
 
+##### `__call__(self, name, **kwargs)`
+
+Calling when() with no arguments will evaluate all expressions
+stored in self.library. Calling with func as a valid function
+will see if the function is in self.library and add it if not,
+or update do  / elsedo
+
+##### `__init__(self)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `reset(self)`
+
+Clears the library and stop scheduling 
+
+##### `run(self)`
+
+Continual loop evaluating when_statements
+        
+
 ---
 
 ### `_whenStatement(self, func=<lambda>)`
@@ -59,9 +83,40 @@ Used to store 'when statements'. Is accessed through the `__when__` object.
 
 #### Methods
 
+##### `__init__(self, func=<lambda>)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `elsedo(self, func)`
+
+Set the instructions for when the test expression is False. Should
+be a list of strings. 
+
+##### `evaluate(self)`
+
+Calls the test expression, and if it has changed then
+run the appropriate response code 
+
+##### `reset(self)`
+
+Sets the `when` and `else` actions to nothing 
+
 ##### `set_namespace(cls, ns)`
 
 Define the namespace to execute the actions. Should be a `dict` 
+
+##### `then(self, func)`
+
+Set the instructions for when the test expression is True. Should
+be a list of strings. 
+
+##### `toggle_live_functions(self, switch)`
+
+If the action functions are @livefunctions, turn them on/off 
 
 ---
 

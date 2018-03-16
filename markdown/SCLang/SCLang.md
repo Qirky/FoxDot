@@ -10,6 +10,22 @@ SCLang.py
 
 #### Methods
 
+##### `__call__(self, *args, **kwargs)`
+
+Call self as a function.
+
+##### `__init__(self, name, **kwargs)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `__str__(self)`
+
+Return str(self).
+
 ---
 
 ### `instance(self, string)`
@@ -17,6 +33,22 @@ SCLang.py
 
 
 #### Methods
+
+##### `__call__(self, *args, **kwargs)`
+
+Call self as a function.
+
+##### `__init__(self, string)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `__str__(self)`
+
+Return str(self).
 
 ---
 

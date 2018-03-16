@@ -8,6 +8,14 @@
 
 #### Methods
 
+##### `__init__(self, raw)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__str__(self)`
+
+Return str(self).
+
 ---
 
 ### `FoxDotCode(self, *args, **kwargs)`
@@ -16,6 +24,14 @@
 
 #### Methods
 
+##### `__call__(self, code, verbose=True, verbose_error=None)`
+
+Takes a string of FoxDot code and executes as Python 
+
+##### `_compile(string)`
+
+Returns the bytecode for  
+
 ---
 
 ### `LiveObject(self, *args, **kwargs)`
@@ -23,6 +39,10 @@
 
 
 #### Methods
+
+##### `__call__(self)`
+
+Call self as a function.
 
 ---
 

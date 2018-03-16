@@ -13,7 +13,7 @@ All patterns inherit from Base.Pattern. There are two types of pattern:
 
 ## Functions
 
-### `P10(n)`
+### `P10(*args)`
 
 Returns an n-length Pattern of a randomly generated series of 1's and 0's 
 
@@ -30,7 +30,7 @@ non-whitespace denote a pulse e.g.
     >>> PBeat("x xxx x")
     P[1, 0.5, 0.5, 1, 0.5]
 
-### `PBern(size=16, ratio=0.5)`
+### `PBern(*args)`
 
 Returns a pattern of 1s and 0s based on the ratio value (between 0 and 1).
 This is called a Bernoulli sequence. 
@@ -39,7 +39,7 @@ This is called a Bernoulli sequence.
 
 None
 
-### `PDur(n, k, start=0, dur=0.25)`
+### `PDur(*args)`
 
 Returns the *actual* durations based on Euclidean rhythms (see PEuclid) where dur
 is the length of each step.
@@ -49,12 +49,12 @@ is the length of each step.
     >>> PDur(5, 16)
     P[0.75, 0.75, 0.75, 0.75, 1]
 
-### `PEuclid(n, k)`
+### `PEuclid(*args)`
 
 Returns the Euclidean rhythm which spreads 'n' pulses over 'k' steps as evenly as possible.
 e.g. `PEuclid(3, 8)` will return `P[1, 0, 0, 1, 0, 0, 1, 0]` 
 
-### `PEuclid2(n, k, lo, hi)`
+### `PEuclid2(*args)`
 
 Same as PEuclid except it returns an array filled with 'lo' value instead of 0
 and 'hi' value instead of 1. Can be used to generate characters patterns used to
@@ -76,7 +76,7 @@ by performing a function on the original. By default this is
 
 Returns a PGroup of delay amounts that gradually decrease 
 
-### `PRange(start, stop=None, step=None)`
+### `PRange(*args)`
 
 Returns a Pattern equivalent to ``Pattern(range(start, stop, step))`` 
 
@@ -91,15 +91,15 @@ e.g.
 
 PShuf(seq) -> Returns a shuffled version of seq
 
-### `PSine(n=16)`
+### `PSine(*args)`
 
 Returns values of one cycle of sine wave split into 'n' parts 
 
-### `PSq(a=1, b=2, c=3)`
+### `PSq(*args)`
 
 Returns a Pattern 
 
-### `PStep(n, value, default=0)`
+### `PStep(*args)`
 
 Returns a Pattern that every n-term is 'value' otherwise 'default' 
 
@@ -108,22 +108,22 @@ Returns a Pattern that every n-term is 'value' otherwise 'default'
 Returns 'seq' as a Pattern and looped until its length is 'size'
 e.g. `PStretch([0,1,2], 5)` returns `P[0, 1, 2, 0, 1]` 
 
-### `PStrum(n=4)`
+### `PStrum(*args)`
 
 Returns a pattern of durations similar to how you might strum a guitar 
 
-### `PStutter(x, n=2)`
+### `PStutter(*args)`
 
 PStutter(seq, n) -> Creates a pattern such that each item in the array is repeated n times (n can be a pattern) 
 
-### `PSum(n, total, **kwargs)`
+### `PSum(*args)`
 
 Returns a Pattern of length 'n' that sums to equal 'total'
 
 e.g. PSum(3,8) -> P[3, 3, 2]
      PSum(5,4) -> P[1, 0.75, 0.75, 0.75, 0.75]
 
-### `PTri(start, stop=None, step=None)`
+### `PTri(*args)`
 
 Returns a Pattern equivalent to ``Pattern(range(start, stop, step))`` with its reversed form
 appended.

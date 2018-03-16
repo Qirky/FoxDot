@@ -10,6 +10,14 @@ Allows you continually update a function
 
 #### Methods
 
+##### `__call__(self, *args, **kwargs)`
+
+Call self as a function.
+
+##### `__init__(self, func, dependency=None)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
 ---
 
 ## Functions

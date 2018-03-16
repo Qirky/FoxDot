@@ -42,6 +42,18 @@ logger to use the DEBUG level. For example::
 
 #### Methods
 
+##### `__call__(self, fxn)`
+
+Call self as a function.
+
+##### `__init__(self, event, logger=FoxDot.perf, logargs=False)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__str__(self)`
+
+Return str(self).
+
 ---
 
 ## Functions
