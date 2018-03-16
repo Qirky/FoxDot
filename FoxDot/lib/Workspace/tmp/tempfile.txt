@@ -1,0 +1,17 @@
+d1  >> play("<X ><m^smtnmf><  ( (KwQ))>", sample=(0,[0,1,P*(2,3)]), room=0.8, mix=PWhite(0,0.3), rate=PwRand([1,2,-1],[5,1,1]), pan=PStep(11,P*(-1,1)) , bits=PStep(7,8), crush=16, chop=PStep(7,4), coarse=PStep(6,2), dur=PStep(7,1,1/2), shape=PStep(6,0,PWhite(0.1,0.5)), amp=var([1,0],[PRand(1,3)*2,PRand([1,2])]), slide=PStep(7,[-1,1])).every(5, "stutter", 4, pan=[-1,1])
+
+d2 >> play("V", dur=PStep(5,1,2), formant=[0,P*(0,5,2,4)], chop=32, room=0.5, amp=1/2*PZ12(math.pi/3), echo=var([0,0.5,0.25],[10,4,2]), bits=PStep(5,8), crush=32).every(PRand(8), "stutter", 4, dur=var([1,2,3]), pan=[-1,1], rate=2)
+    
+import math
+
+d3 >> play(":", sample=P[:4], dur=1/4, formant=Pvar([0,P[:8]],[14,2]))
+
+k1 >> klank(linvar([0,12],[32,0]), chop=4, rate=P[4:24].stutter(2), scale=Scale.chromatic, room=)
+
+p1 >> pads(var([0,2],32), dur=1/4, amp=d1.amp==0, oct=4, bits=4) + (0,[4,[5,6]])
+
+p2 >> nylon([0,0,0,0,2], amp=2, dur=PDur(3,8)*2, chop=4, sus=4, room=1, mix=0.33, oct=5, fmod=4, hpf=3000, hpr=0.2, pan=[-1,1]) + [0,4]
+
+b1 >> sawbass(dur=PDur(3,8,[0,2]), sus=1/2, cutoff=PStep(5,4000,1000), formant=var([0,2,6],[24,4,4]), room=0.5, mix=0.5, amp=1) + [0,0,[0,-1,]]
+
+Root.default=var(((PIndex()*7)%12)-6,[64])

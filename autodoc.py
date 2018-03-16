@@ -167,7 +167,7 @@ class GenerateDocs:
 
     def issubpackage(self, module):
         if inspect.ismodule(module) and hasattr(module, '__file__'):
-            return self.validfile(module.__file__) and os.path.basename(module.__file__) == '__init__.pyc'
+            return self.validfile(module.__file__) and os.path.basename(module.__file__) == '__init__.py'
         else:
             return False
                 
@@ -278,5 +278,5 @@ if __name__ == "__main__":
 
     import FoxDot
 
-    docs = GenerateDocs(FoxDot.lib, 'docs', title="FoxDot Documentation")
+    docs = GenerateDocs(FoxDot.lib, 'markdown', title="FoxDot Documentation")
     docs.write()
