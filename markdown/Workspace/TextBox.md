@@ -8,6 +8,18 @@ Text widget which can display text in various forms.
 
 #### Methods
 
+##### `__winfo_getint(self, x)`
+
+Internal function.
+
+##### `__winfo_parseitem(self, t)`
+
+Internal function.
+
+##### `cget(self, key)`
+
+Return the resource value for a KEY given as string.
+
 ##### `__init__(self, master, **options)`
 
 Construct a text widget with the parent MASTER.
@@ -38,14 +50,6 @@ Return repr(self).
 ##### `__str__(self)`
 
 Return the window path name of this widget.
-
-##### `__winfo_getint(self, x)`
-
-Internal function.
-
-##### `__winfo_parseitem(self, t)`
-
-Internal function.
 
 ##### `_bind(self, what, sequence, func, add, needcleanup=1)`
 
@@ -78,6 +82,11 @@ Internal function.
 ##### `_grid_configure(self, command, index, cnf, kw)`
 
 Internal function.
+
+##### `nametowidget(self, name)`
+
+Return the Tkinter instance of a widget identified by
+its Tcl name NAME.
 
 ##### `_options(self, cnf, kw=None)`
 
@@ -129,6 +138,13 @@ process.
 
 Return an identifier to cancel the scheduling with
 after_cancel.
+
+##### `grid_anchor(self, anchor=None)`
+
+The anchor value controls how to place the grid within the
+master when no row/column has any weight.
+
+The default anchor is nw.
 
 ##### `bbox(self, index)`
 
@@ -204,10 +220,6 @@ this widget. With a list of strings as argument the bindtags are
 set to this list. The bindtags determine in which order events are
 processed (see bind).
 
-##### `cget(self, key)`
-
-Return the resource value for a KEY given as string.
-
 ##### `clipboard_append(self, string, **kw)`
 
 Append STRING to the Tk clipboard.
@@ -238,6 +250,14 @@ is to try UTF8_STRING and fall back to STRING.
 This command is equivalent to:
 
 selection_get(CLIPBOARD)
+
+##### `grid_columnconfigure(self, index, cnf={}, **kw)`
+
+Configure column INDEX of a grid.
+
+Valid resources are minsize (minimum size of the column),
+weight (how much does additional space propagate to this column)
+and pad (how much space to let additionally).
 
 ##### `compare(self, index1, op, index2)`
 
@@ -379,6 +399,14 @@ keyword arguments specify parameter of the event
 Return a list of all virtual events or the information
 about the SEQUENCE bound to the virtual event VIRTUAL.
 
+##### `focus_set(self)`
+
+Direct input focus to this widget.
+
+If the application currently does not have the focus
+this widget will get the focus if the application gets
+the focus through the window manager.
+
 ##### `focus_displayof(self)`
 
 Return the widget which has currently the focus on the
@@ -406,13 +434,9 @@ the focus.
 Return the widget which would have the focus if top level
 for this widget gets the focus from the window manager.
 
-##### `focus_set(self)`
+##### `pack_forget(self)`
 
-Direct input focus to this widget.
-
-If the application currently does not have the focus
-this widget will get the focus if the application gets
-the focus through the window manager.
+Unmap this widget and do not use it for the packing order.
 
 ##### `get(self, index1, index2=None)`
 
@@ -455,34 +479,6 @@ other applications do not get events anymore.
 Return None, "local" or "global" if this widget has
 no, a local or a global grab.
 
-##### `grid_anchor(self, anchor=None)`
-
-The anchor value controls how to place the grid within the
-master when no row/column has any weight.
-
-The default anchor is nw.
-
-##### `grid_bbox(self, column=None, row=None, col2=None, row2=None)`
-
-Return a tuple of integer coordinates for the bounding
-box of this widget controlled by the geometry manager grid.
-
-If COLUMN, ROW is given the bounding box applies from
-the cell with row and column 0 to the specified
-cell. If COL2 and ROW2 are given the bounding box
-starts at that cell.
-
-The returned integers specify the offset of the upper left
-corner in the master widget and the width and height.
-
-##### `grid_columnconfigure(self, index, cnf={}, **kw)`
-
-Configure column INDEX of a grid.
-
-Valid resources are minsize (minimum size of the column),
-weight (how much does additional space propagate to this column)
-and pad (how much space to let additionally).
-
 ##### `grid_configure(self, cnf={}, **kw)`
 
 Position a widget in the parent widget in a grid. Use as options:
@@ -498,6 +494,19 @@ row=number - use cell identified with given row (starting with 0)
 rowspan=number - this widget will span several rows
 sticky=NSEW - if cell is larger on which sides will this
               widget stick to the cell boundary
+
+##### `grid_bbox(self, column=None, row=None, col2=None, row2=None)`
+
+Return a tuple of integer coordinates for the bounding
+box of this widget controlled by the geometry manager grid.
+
+If COLUMN, ROW is given the bounding box applies from
+the cell with row and column 0 to the specified
+cell. If COL2 and ROW2 are given the bounding box
+starts at that cell.
+
+The returned integers specify the offset of the upper left
+corner in the master widget and the width and height.
 
 ##### `grid_forget(self)`
 
@@ -567,6 +576,11 @@ Return a list of all available image types (e.g. photo bitmap).
 
 Return the index in the form line.char for INDEX.
 
+##### `pack_info(self)`
+
+Return information about the packing options
+for this widget.
+
 ##### `insert(self, index, chars, *args)`
 
 Insert CHARS before the characters at INDEX. An additional
@@ -575,6 +589,10 @@ tag can be given in ARGS. Additional CHARS and tags can follow in ARGS.
 ##### `keys(self)`
 
 Return a list of all resource names of this widget.
+
+##### `tkraise(self, aboveThis=None)`
+
+Raise this widget in the stacking order.
 
 ##### `lower(self, belowThis=None)`
 
@@ -608,11 +626,6 @@ Set mark MARKNAME before the character at INDEX.
 ##### `mark_unset(self, *markNames)`
 
 Delete all marks in MARKNAMES.
-
-##### `nametowidget(self, name)`
-
-Return the Tkinter instance of a widget identified by
-its Tcl name NAME.
 
 ##### `option_add(self, pattern, value, priority=None)`
 
@@ -658,15 +671,6 @@ ipady=amount - add internal padding in y direction
 padx=amount - add padding in x direction
 pady=amount - add padding in y direction
 side=TOP or BOTTOM or LEFT or RIGHT -  where to add this widget.
-
-##### `pack_forget(self)`
-
-Unmap this widget and do not use it for the packing order.
-
-##### `pack_info(self)`
-
-Return information about the packing options
-for this widget.
 
 ##### `pack_propagate(self, flag=['_noarg_'])`
 
@@ -924,10 +928,6 @@ should adhere to Motif.
 A parameter of 1 means adhere to Motif (e.g. no color
 change if mouse passes over slider).
 Returns the set value.
-
-##### `tkraise(self, aboveThis=None)`
-
-Raise this widget in the stacking order.
 
 ##### `unbind(self, sequence, funcid=None)`
 

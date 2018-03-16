@@ -4,18 +4,6 @@ Module for converting handling MIDI in/out and functions relating to MIDI pitch 
 
 ## Classes
 
-### `MIDIDeviceNotFound(self, *args, **kwargs)`
-
-Common base class for all non-exit exceptions.
-
-#### Methods
-
-##### `__str__(self)`
-
-Return str(self).
-
----
-
 ### `MidiIn(self, port_id=0)`
 
 
@@ -53,6 +41,18 @@ Return str(self).
 
 ---
 
+### `MIDIDeviceNotFound(self, *args, **kwargs)`
+
+Common base class for all non-exit exceptions.
+
+#### Methods
+
+##### `__str__(self)`
+
+Return str(self).
+
+---
+
 ### `rtMidiNotFound(self, *args, **kwargs)`
 
 Common base class for all non-exit exceptions.
@@ -67,6 +67,14 @@ Return str(self).
 
 ## Functions
 
+### `miditofreq(midinote)`
+
+Converts a midi number to frequency 
+
+### `midi2cps(midinote)`
+
+Converts a midi number to frequency 
+
 ### `_log2(num)`
 
 None
@@ -78,14 +86,6 @@ None
 ### `midi(scale, octave, degree, root=0, stepsPerOctave=12)`
 
 Calculates a midinote from a scale, octave, degree, and root 
-
-### `midi2cps(midinote)`
-
-Converts a midi number to frequency 
-
-### `miditofreq(midinote)`
-
-Converts a midi number to frequency 
 
 ## Data
 

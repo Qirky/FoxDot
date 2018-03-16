@@ -147,43 +147,6 @@ Converts an EmptyPlayer to a Player.
 
 ---
 
-### `Group(self, *args)`
-
-
-
-#### Methods
-
-##### `__getattr__(self, name)`
-
-Returns a Pattern object containing the desired attribute for each player in the group  
-
-##### `__init__(self, *args)`
-
-Initialize self.  See help(type(self)) for accurate signature.
-
-##### `__setattr__(self, name, value)`
-
-Implement setattr(self, name, value).
-
-##### `__str__(self)`
-
-Return str(self).
-
----
-
-### `GroupAttr(self, *args, **kwargs)`
-
-list() -> new empty list
-list(iterable) -> new list initialized from iterable's items
-
-#### Methods
-
-##### `__call__(self, *args, **kwargs)`
-
-Call self as a function.
-
----
-
 ### `Player(self, name=None)`
 
 FoxDot generates music by creating instances of `Player` and giving them instructions
@@ -537,11 +500,40 @@ pitched
 
 ---
 
-### `PlayerKeyException(self, *args, **kwargs)`
+### `Group(self, *args)`
 
-Common base class for all non-exit exceptions.
+
 
 #### Methods
+
+##### `__getattr__(self, name)`
+
+Returns a Pattern object containing the desired attribute for each player in the group  
+
+##### `__init__(self, *args)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__setattr__(self, name, value)`
+
+Implement setattr(self, name, value).
+
+##### `__str__(self)`
+
+Return str(self).
+
+---
+
+### `GroupAttr(self, *args, **kwargs)`
+
+list() -> new empty list
+list(iterable) -> new list initialized from iterable's items
+
+#### Methods
+
+##### `__call__(self, *args, **kwargs)`
+
+Call self as a function.
 
 ---
 
@@ -583,6 +575,14 @@ Return self!=value.
 ##### `__repr__(self)`
 
 Return repr(self).
+
+---
+
+### `PlayerKeyException(self, *args, **kwargs)`
+
+Common base class for all non-exit exceptions.
+
+#### Methods
 
 ---
 

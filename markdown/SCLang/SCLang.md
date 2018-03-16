@@ -54,10 +54,6 @@ Return str(self).
 
 ## Functions
 
-### `dup(x)`
-
-None
-
 ### `format_args(args=[], kwargs={}, delim=: )`
 
 None
@@ -66,55 +62,33 @@ None
 
 None
 
+### `dup(x)`
+
+None
+
 ## Data
 
-#### `AudioIn = AudioIn`
+#### `SinOsc = SinOsc`
 
-#### `BPF = BPF`
+#### `SinOscFB = SinOscFB`
 
-#### `Blip = Blip`
+#### `Saw = Saw`
 
-#### `BufChannels = BufChannels`
+#### `LFSaw = LFSaw`
 
-#### `BufDur = BufDur`
+#### `VarSaw = VarSaw`
 
-#### `BufFrames = BufFrames`
+#### `LFTri = LFTri`
 
-#### `BufGrain = BufGrain`
+#### `LFPar = LFPar`
 
-#### `BufRateScale = BufRateScale`
+#### `PlayBuf = PlayBuf`
 
-#### `BufSampleRate = BufSampleRate`
+#### `LFNoise0 = LFNoise0`
 
-#### `ClipNoise = ClipNoise`
+#### `LFNoise1 = LFNoise1`
 
-#### `CombC = CombC`
-
-#### `CombL = CombL`
-
-#### `CombN = CombN`
-
-#### `Crackle = Crackle`
-
-#### `CrossoverDistortion = CrossoverDistortion`
-
-#### `Decimator = Decimator`
-
-#### `DelayC = DelayC`
-
-#### `DelayL = DelayL`
-
-#### `DelayN = DelayN`
-
-#### `Disintegrator = Disintegrator`
-
-#### `Dust = Dust`
-
-#### `Formant = Formant`
-
-#### `FreeVerb = FreeVerb`
-
-#### `GVerb = GVerb`
+#### `LFNoise2 = LFNoise2`
 
 #### `Gendy1 = Gendy1`
 
@@ -126,71 +100,97 @@ None
 
 #### `Gendy5 = Gendy5`
 
-#### `HPF = HPF`
-
-#### `Impulse = Impulse`
-
-#### `K2A = K2A`
-
-#### `Klank = Klank`
-
-#### `LFCub = LFCub`
-
-#### `LFNoise0 = LFNoise0`
-
-#### `LFNoise1 = LFNoise1`
-
-#### `LFNoise2 = LFNoise2`
-
-#### `LFPar = LFPar`
-
-#### `LFPulse = LFPulse`
-
-#### `LFSaw = LFSaw`
-
-#### `LFTri = LFTri`
-
-#### `LPF = LPF`
-
-#### `Lag = Lag`
-
-#### `Limiter = Limiter`
-
-#### `Line = Line`
-
-#### `MdaPiano = MdaPiano`
-
-#### `Out = Out`
-
-#### `PMOsc = PMOsc`
-
-#### `Pan2 = Pan2`
-
-#### `PinkNoise = PinkNoise`
-
-#### `PlayBuf = PlayBuf`
+#### `Formant = Formant`
 
 #### `Pulse = Pulse`
 
-#### `RHPF = RHPF`
+#### `LFPulse = LFPulse`
 
-#### `RLPF = RLPF`
+#### `PMOsc = PMOsc`
+
+#### `Crackle = Crackle`
+
+#### `LFCub = LFCub`
+
+#### `PinkNoise = PinkNoise`
+
+#### `Impulse = Impulse`
+
+#### `Blip = Blip`
+
+#### `Klank = Klank`
 
 #### `Resonz = Resonz`
 
-#### `Ringz = Ringz`
+#### `K2A = K2A`
 
-#### `Saw = Saw`
+#### `Out = Out`
 
-#### `SinOsc = SinOsc`
+#### `AudioIn = AudioIn`
 
-#### `SinOscFB = SinOscFB`
-
-#### `SmoothDecimator = SmoothDecimator`
-
-#### `VarSaw = VarSaw`
+#### `Lag = Lag`
 
 #### `Vibrato = Vibrato`
 
+#### `Line = Line`
+
 #### `XLine = XLine`
+
+#### `FreeVerb = FreeVerb`
+
+#### `GVerb = GVerb`
+
+#### `Pan2 = Pan2`
+
+#### `LPF = LPF`
+
+#### `RLPF = RLPF`
+
+#### `BPF = BPF`
+
+#### `HPF = HPF`
+
+#### `RHPF = RHPF`
+
+#### `DelayC = DelayC`
+
+#### `DelayN = DelayN`
+
+#### `DelayL = DelayL`
+
+#### `CombN = CombN`
+
+#### `CombL = CombL`
+
+#### `CombC = CombC`
+
+#### `Limiter = Limiter`
+
+#### `Ringz = Ringz`
+
+#### `Dust = Dust`
+
+#### `ClipNoise = ClipNoise`
+
+#### `BufRateScale = BufRateScale`
+
+#### `BufSampleRate = BufSampleRate`
+
+#### `BufFrames = BufFrames`
+
+#### `BufChannels = BufChannels`
+
+#### `BufDur = BufDur`
+
+#### `BufGrain = BufGrain`
+
+#### `Decimator = Decimator`
+
+#### `SmoothDecimator = SmoothDecimator`
+
+#### `CrossoverDistortion = CrossoverDistortion`
+
+#### `Disintegrator = Disintegrator`
+
+#### `MdaPiano = MdaPiano`
 

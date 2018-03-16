@@ -2,47 +2,6 @@
 
 ## Classes
 
-### `MethodCall(self, parent, method, n, cycle=None, args=(), kwargs={})`
-
-Class to represent an object's method call that,
-when called, schedules itself in the future 
-
-#### Methods
-
-##### `__call__(self, *args, **kwargs)`
-
-Proxy for parent object __call__, calls the enclosed method and schedules it in the future. 
-
-##### `__init__(self, parent, method, n, cycle=None, args=(), kwargs={})`
-
-Initialize self.  See help(type(self)) for accurate signature.
-
-##### `__repr__(self)`
-
-Return repr(self).
-
-##### `call_method(self)`
-
-Calls the method. Prints to the console with error info. 
-
-##### `count(self)`
-
-Counts the number of times this method would have been called between clock start and now 
-
-##### `isScheduled(self)`
-
-Returns True if this is in the Tempo Clock 
-
-##### `schedule(self)`
-
-Schedules the method to be called in the clock 
-
-##### `update(self, n, cycle=None, args=(), kwargs={})`
-
-Updates the values of the MethodCall. Re-adjusts the index if cycle has been changed 
-
----
-
 ### `MethodList(self, root)`
 
 Class for holding information about the order of which methods have been
@@ -144,6 +103,47 @@ Update the 'current' version of a pattern based on its root and methods stored
 ##### `update_pattern_root(self, attr)`
 
 Update the base attribute pattern that methods are applied to 
+
+---
+
+### `MethodCall(self, parent, method, n, cycle=None, args=(), kwargs={})`
+
+Class to represent an object's method call that,
+when called, schedules itself in the future 
+
+#### Methods
+
+##### `__call__(self, *args, **kwargs)`
+
+Proxy for parent object __call__, calls the enclosed method and schedules it in the future. 
+
+##### `__init__(self, parent, method, n, cycle=None, args=(), kwargs={})`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `call_method(self)`
+
+Calls the method. Prints to the console with error info. 
+
+##### `count(self)`
+
+Counts the number of times this method would have been called between clock start and now 
+
+##### `isScheduled(self)`
+
+Returns True if this is in the Tempo Clock 
+
+##### `schedule(self)`
+
+Schedules the method to be called in the clock 
+
+##### `update(self, n, cycle=None, args=(), kwargs={})`
+
+Updates the values of the MethodCall. Re-adjusts the index if cycle has been changed 
 
 ---
 

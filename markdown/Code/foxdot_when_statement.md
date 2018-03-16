@@ -44,39 +44,6 @@ Example 2
 
 ## Classes
 
-### `_whenLibrary(self)`
-
-Used to store 'when statements'. Is accessed through the `__when__` object.
-    
-
-#### Methods
-
-##### `__call__(self, name, **kwargs)`
-
-Calling when() with no arguments will evaluate all expressions
-stored in self.library. Calling with func as a valid function
-will see if the function is in self.library and add it if not,
-or update do  / elsedo
-
-##### `__init__(self)`
-
-Initialize self.  See help(type(self)) for accurate signature.
-
-##### `__repr__(self)`
-
-Return repr(self).
-
-##### `reset(self)`
-
-Clears the library and stop scheduling 
-
-##### `run(self)`
-
-Continual loop evaluating when_statements
-        
-
----
-
 ### `_whenStatement(self, func=<lambda>)`
 
 
@@ -117,6 +84,39 @@ be a list of strings.
 ##### `toggle_live_functions(self, switch)`
 
 If the action functions are @livefunctions, turn them on/off 
+
+---
+
+### `_whenLibrary(self)`
+
+Used to store 'when statements'. Is accessed through the `__when__` object.
+    
+
+#### Methods
+
+##### `__call__(self, name, **kwargs)`
+
+Calling when() with no arguments will evaluate all expressions
+stored in self.library. Calling with func as a valid function
+will see if the function is in self.library and add it if not,
+or update do  / elsedo
+
+##### `__init__(self)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `reset(self)`
+
+Clears the library and stop scheduling 
+
+##### `run(self)`
+
+Continual loop evaluating when_statements
+        
 
 ---
 

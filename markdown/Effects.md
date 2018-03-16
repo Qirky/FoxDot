@@ -87,42 +87,6 @@ writes to file and sends to server
 
 ---
 
-### `EffectManager(self)`
-
-dict() -> new empty dictionary
-dict(mapping) -> new dictionary initialized from a mapping object's
-    (key, value) pairs
-dict(iterable) -> new dictionary initialized as if via:
-    d = {}
-    for k, v in iterable:
-        d[k] = v
-dict(**kwargs) -> new dictionary initialized with the name=value pairs
-    in the keyword argument list.  For example:  dict(one=1, two=2)
-
-#### Methods
-
-##### `__init__(self)`
-
-Initialize self.  See help(type(self)) for accurate signature.
-
-##### `__iter__(self)`
-
-Implement iter(self).
-
-##### `__repr__(self)`
-
-Return repr(self).
-
-##### `all_kwargs(self)`
-
-Returns *all* keywords for all effects 
-
-##### `kwargs(self)`
-
-Returns the title keywords for each effect 
-
----
-
 ### `In(self)`
 
 
@@ -176,6 +140,42 @@ Set a docstring for the effects
 ##### `save(self)`
 
 writes to file and sends to server 
+
+---
+
+### `EffectManager(self)`
+
+dict() -> new empty dictionary
+dict(mapping) -> new dictionary initialized from a mapping object's
+    (key, value) pairs
+dict(iterable) -> new dictionary initialized as if via:
+    d = {}
+    for k, v in iterable:
+        d[k] = v
+dict(**kwargs) -> new dictionary initialized with the name=value pairs
+    in the keyword argument list.  For example:  dict(one=1, two=2)
+
+#### Methods
+
+##### `__init__(self)`
+
+Initialize self.  See help(type(self)) for accurate signature.
+
+##### `__iter__(self)`
+
+Implement iter(self).
+
+##### `__repr__(self)`
+
+Return repr(self).
+
+##### `all_kwargs(self)`
+
+Returns *all* keywords for all effects 
+
+##### `kwargs(self)`
+
+Returns the title keywords for each effect 
 
 ---
 

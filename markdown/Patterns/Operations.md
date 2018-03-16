@@ -21,28 +21,20 @@ Initialize self.  See help(type(self)) for accurate signature.
 
 ## Functions
 
-### `Add(a, b)`
-
-None
-
-### `Div(a, b)`
-
-None
-
 ### `DominantPattern(*patterns)`
 
 Returns the class (and the relative pattern) for the
 type of Pattern to use in a mathematical operation 
 
-### `FloorDiv(a, b)`
+### `Nil(a, b)`
 
 None
 
-### `Get(a, b)`
+### `Add(a, b)`
 
 None
 
-### `Mod(a, b)`
+### `Sub(a, b)`
 
 None
 
@@ -50,11 +42,71 @@ None
 
 None
 
-### `Nil(a, b)`
+### `Div(a, b)`
+
+None
+
+### `Mod(a, b)`
+
+None
+
+### `Pow(a, b)`
+
+None
+
+### `Get(a, b)`
+
+None
+
+### `FloorDiv(a, b)`
+
+None
+
+### `Xor(a, b)`
 
 None
 
 ### `Or(a, b)`
+
+None
+
+### `rAdd(a, b)`
+
+None
+
+### `rGet(a, b)`
+
+None
+
+### `rSub(a, b)`
+
+None
+
+### `rMul(a, b)`
+
+None
+
+### `rDiv(a, b)`
+
+None
+
+### `rMod(a, b)`
+
+None
+
+### `rPow(a, b)`
+
+None
+
+### `rFloorDiv(a, b)`
+
+None
+
+### `rXor(a, b)`
+
+None
+
+### `rOr(a, b)`
 
 None
 
@@ -66,61 +118,15 @@ None
 
 None
 
-### `Pow(a, b)`
-
-None
-
-### `Sub(a, b)`
-
-None
-
-### `Xor(a, b)`
-
-None
-
-### `rAdd(a, b)`
-
-None
-
-### `rDiv(a, b)`
-
-None
-
-### `rFloorDiv(a, b)`
-
-None
-
-### `rGet(a, b)`
-
-None
-
-### `rMod(a, b)`
-
-None
-
-### `rMul(a, b)`
-
-None
-
-### `rOr(a, b)`
-
-None
-
-### `rPow(a, b)`
-
-None
-
-### `rSub(a, b)`
-
-None
-
-### `rXor(a, b)`
-
-None
-
 ## Data
 
 #### `PAdd = <FoxDot.lib.Patterns.Operations.POperand object>`
+
+#### `PSub = <FoxDot.lib.Patterns.Operations.POperand object>`
+
+#### `PSub2 = <FoxDot.lib.Patterns.Operations.POperand object>`
+
+#### `PMul = <FoxDot.lib.Patterns.Operations.POperand object>`
 
 #### `PDiv = <FoxDot.lib.Patterns.Operations.POperand object>`
 
@@ -130,19 +136,13 @@ None
 
 #### `PFloor2 = <FoxDot.lib.Patterns.Operations.POperand object>`
 
-#### `PGet = <FoxDot.lib.Patterns.Operations.POperand object>`
-
 #### `PMod = <FoxDot.lib.Patterns.Operations.POperand object>`
 
 #### `PMod2 = <FoxDot.lib.Patterns.Operations.POperand object>`
-
-#### `PMul = <FoxDot.lib.Patterns.Operations.POperand object>`
 
 #### `PPow = <FoxDot.lib.Patterns.Operations.POperand object>`
 
 #### `PPow2 = <FoxDot.lib.Patterns.Operations.POperand object>`
 
-#### `PSub = <FoxDot.lib.Patterns.Operations.POperand object>`
-
-#### `PSub2 = <FoxDot.lib.Patterns.Operations.POperand object>`
+#### `PGet = <FoxDot.lib.Patterns.Operations.POperand object>`
 

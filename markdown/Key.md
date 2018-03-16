@@ -2,22 +2,6 @@
 
 ## Classes
 
-### `Accompany(self, freq=0, rel=[0, 2, 4])`
-
-Like PlayerKey except it returns 
-
-#### Methods
-
-##### `__call__(self, playerkey)`
-
-Acts as a function in Player Key 
-
-##### `__init__(self, freq=0, rel=[0, 2, 4])`
-
-Initialize self.  See help(type(self)) for accurate signature.
-
----
-
 ### `NumberKey(self, value, reference)`
 
 
@@ -326,6 +310,22 @@ Returns a child Player Key based on the func
 
 Updates the contents of the PlayerKey *if* the time value is different to self.last_updated.
 If they are the same, the the contents become a PGroup of the two values 
+
+---
+
+### `Accompany(self, freq=0, rel=[0, 2, 4])`
+
+Like PlayerKey except it returns 
+
+#### Methods
+
+##### `__call__(self, playerkey)`
+
+Acts as a function in Player Key 
+
+##### `__init__(self, freq=0, rel=[0, 2, 4])`
+
+Initialize self.  See help(type(self)) for accurate signature.
 
 ---
 

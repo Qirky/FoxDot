@@ -169,19 +169,19 @@ Writes the SynthDef to file
 
 ## Functions
 
-### `hasext(filename)`
-
-None
-
 ### `symbolToDir(symbol)`
 
 Return the sample search directory for a symbol 
 
+### `hasext(filename)`
+
+None
+
 ## Data
+
+#### `nil = <Buffer num 0>`
 
 #### `Samples = <BufferManager>`
 
 #### `loop = loop`
-
-#### `nil = <Buffer num 0>`
 

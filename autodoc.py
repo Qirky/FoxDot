@@ -249,7 +249,7 @@ class ModuleDoc:
 
     def _write_section(self, header, level=3):
         self.file.write('## {}\n\n'.format(header.title()))
-        for name, doc in sorted(self.__dict__[header].items()):
+        for name, doc in self.__dict__[header].items():
             self.file.write('#' * level + ' `{}`\n\n'.format(name))
             self.file.write(str(doc))
 
@@ -271,7 +271,7 @@ class ClassDoc:
         self.doc     = docstring if docstring is not None else ''
         self.methods = methods
     def generatemethods(self):
-        return ['##### `{}`\n\n{}'.format(method, doc) for method, doc in sorted(self.methods.items()) if doc is not None]
+        return ['##### `{}`\n\n{}'.format(method, doc) for method, doc in self.methods.items() if doc is not None]
     def __str__(self):
         return self.doc + '\n\n' + '#### Methods\n\n' + ''.join([str(doc) + '\n\n' for doc in self.generatemethods()]) + '---\n\n'
 
