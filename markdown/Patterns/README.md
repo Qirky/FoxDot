@@ -1,21 +1,6 @@
 Patterns
 ========
 
-Package Contents
-----------------
-
-### Modules
-- [Generators](Generators.md)
-- [Main](Main.md)
-- [Operations](Operations.md)
-- [PGroups](PGroups.md)
-- [Parse](Parse.md)
-- [Sequences](Sequences.md)
-- [Utils](Utils.md)
-
-
----
-
 A `Pattern` object is a container-like object, similar to Python lists, but with slightly different behaviour.
 The two most notable differences are how they behave when used with arithmetic operators and
 how they behave when indexed. A `Pattern` can be created by instantiating the class like so:
@@ -79,4 +64,17 @@ together:
 `Patterns` also have many useful methods for manipulating the order of values, such as `palindrome`
 or `rotate`, and can be "chained" together as these don't affect the order in place and return
 the augmented version of the `Pattern`.
+
+Package Contents
+----------------
+
+### Modules
+- [Generators](Generators.md)
+- [Main](Main.md)
+- [Operations](Operations.md)
+- [PGroups](PGroups.md)
+- [Parse](Parse.md)
+- [Sequences](Sequences.md)
+- [Utils](Utils.md)
+
 

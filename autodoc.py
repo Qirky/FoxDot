@@ -115,6 +115,10 @@ class GenerateDocs:
             f.write("{}\n".format(self.title))
             f.write("{}\n\n".format("="*len(self.title)))
 
+            # Get the description from __init__.py
+            if self.docstring is not None:
+                f.write("{}\n\n".format(self.docstring))                
+
             f.write("Package Contents\n")
             f.write("----------------\n\n")
             
@@ -131,11 +135,7 @@ class GenerateDocs:
                 for sub in self.subpackages:
                     f.write("- [{}]({})\n".format(sub.title, sub.title))
             f.write("\n")
-
-            # Get the description from __init__.py
-            if self.docstring is not None:
-                f.write("---\n\n")
-                f.write("{}\n\n".format(self.docstring))
+            
         return
                         
     def write(self):
