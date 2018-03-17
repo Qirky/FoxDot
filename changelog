@@ -1,3 +1,8 @@
+### v0.5.13 fixes and updates
+
+- Improved `TimeVar` algorithm and added `sinvar` class, which is a subclass of `linvar` but calculates it's values using a sinewave as opposed a linear scale.
+- General refactoring and improvement on efficiency.
+
 ### v0.5.12 fixes and updates
 
 - Improved `TimeVar` efficiency and can correctly handle the use of `GeneratorPattern` as an argument for duration.  

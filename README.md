@@ -3,10 +3,13 @@ FoxDot - Live Coding with Python v0.5
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.5.13 fixes and updates
+### v0.5.14 fixes and updates
 
-- Improved `TimeVar` algorithm and added `sinvar` class, which is a subclass of `linvar` but calculates it's values using a sinewave as opposed a linear scale.
-- General refactoring and improvement on efficiency. 
+- Improved the behaviour of repeatedly calling methods when using the `cycle` keyword:
+```python
+# Calls "stutter" on the 6th beat of an 8 beat cycle
+p1 >> pads().every(6, "stutter", cycle=8)
+```
    
 ---
 
