@@ -1,5 +1,9 @@
 # Tutorial 13: Advanced Clock
 
+# Note: You don't need to run this line, its used for installing FoxDot for Linux users using Python 2.
+
+from __future__ import print_function 
+
 # To see what is scheduled to be played.
 print(Clock)
 
