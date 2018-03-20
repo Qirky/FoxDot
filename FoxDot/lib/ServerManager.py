@@ -250,10 +250,20 @@ class SCLangServerManager(ServerManager):
 
     def sendOSC(self, osc_message):
         """ Sends an OSC message to the server. Checks for midi messages """
+        
         if osc_message.address == OSC_MIDI_ADDRESS:
+        
             self.sclang.send( osc_message )
+        
         else:
-            self.client.send( osc_message )   
+        
+            self.client.send( osc_message )
+        
+        # If we are sending other messages as well
+        if self.forward is not None:
+            
+            self.forward.send(message)
+        
         return
 
     def freeAllNodes(self):
@@ -536,11 +546,17 @@ class SCLangServerManager(ServerManager):
     def send(self, address, message):
         """ Sends message (a list) to SuperCollider """
         msg = OSCMessage(address)
+        
         msg.append(message)
+        
         self.client.send(msg)
+        
         # If we are sending other messages as well
+        
         if self.forward is not None:
+        
             self.forward.send(message)
+        
         return
 
     def free_node(self, node):
