@@ -138,10 +138,11 @@ from .Buffers import Samples
 from .Key import *
 from .Repeat import *
 from .Patterns import *
-from .Midi import *
+# from .Midi import *
 
 from .Root import Root
-from .Scale import Scale, ScalePattern
+from .Scale import Scale, ScaleType, ScalePattern
+from .Scale import midi, miditofreq
 
 from .Bang import Bang
 
@@ -240,8 +241,9 @@ class Player(Repeatable):
     # Set in __init__.py
     metro   = None
 
-    default_scale = Scale.default()
-    default_root  = Root.default()
+    default_scale = Scale.default
+
+    default_root  = Root.default() # TODO//remove callable
 
     after_update_methods = ["stutter"]
 
@@ -1458,15 +1460,14 @@ class Player(Repeatable):
 
             # TODO -- make sure it's always a scale
 
-            if isinstance(scale, ScalePattern):
+            if isinstance(scale, ScaleType):
 
-                midinote = scale.get_midi_note(degree, octave, root)
+                freq, midinote = scale.get_freq(degree, octave, root, get_midi=True)
 
             else:
 
                 midinote = midi( scale, octave, degree, root )
-
-            freq   = miditofreq(midinote)
+                freq     = miditofreq(midinote)
             
             message.update({'freq':  freq, 'midinote': midinote})
             

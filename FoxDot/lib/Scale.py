@@ -6,39 +6,95 @@ from .TimeVar import TimeVar
 from random import choice
 import math
 
-def choose():
-    """ Scale.choose() -> Returns a random scale object """
-    return choice(Scale.names.values())
+def miditofreq(midinote):
+    """ Converts a midi number to frequency """
+    return 440 * (2 ** ((midinote - 69.0)/12.0))
 
+def _log2(num):
+    return math.log(num) / math.log(2)
 
-class ScalePattern(Pattern):
+def freqtomidi(freq):
+    return 12 * _log2((freq / 440)) + 69
 
-    names = {}
-    name  = 'unnamed'
+def midi(scale, octave, degree, root=0, stepsPerOctave=12):
+    """ Calculates a midinote from a scale, octave, degree, and root """
 
-    def __init__(self, name, *args):
+    # Make sure we force timevars into real values
+
+    if isinstance(scale, ScalePattern) and isinstance(scale.data, TimeVar):
+
+        scale = asStream(scale.data.now())
+
+    # Force float
+    octave = float(octave)
+    degree = float(degree)
+    root   = float(root)
+    
+    # Floor val
+    lo = int(math.floor(degree))
+    hi = lo + 1
+
+    octave = octave + (lo // len(scale))
+    index  = lo % len(scale)
+
+    # Work out any microtones
+
+    micro = (degree - lo)
+
+    if micro > 0:
+
+        ex_scale = list(scale) + [stepsPerOctave]
+
+        diff  = ex_scale[index + 1] - scale[index]
+
+        micro = micro * diff
+
+    midival = stepsPerOctave * octave # Root note of scale
+    midival = midival + root          # Adjust for key
+    midival = midival + scale[index]  # Add the note
+    midival = midival + micro         # And any microtonal
+
+    return midival
+
+class ScaleType:
+    pass
+
+class TuningType(list):
+    def __init__(self, data):
+        data = list(data)
+        list.__init__(self, data[:-1])
+        self.steps = data[-1]
+
+class Tuning:
+    ET12          = TuningType([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    just          = TuningType([0.0, 1.1173128526978, 2.0391000173077, 3.1564128700055, 3.8631371386483, 4.9804499913461, 5.9022371559561, 7.0195500086539, 8.1368628613517, 8.8435871299945, 10.175962878659, 10.882687147302, 12 ])
+    bohlen_pierce = TuningType([i*12/13*math.log2(3) for i in range(14)])
+
+class ScalePattern(ScaleType, Pattern):
+
+    name = None
+
+    def __init__(self, semitones, name=None, tuning=Tuning.ET12):
 
         self.name = name
 
-        if args:
+        self.semitones = list(semitones)
 
-            ScalePattern.names[name] = self.data = args[0]
+        if not isinstance(tuning, TuningType):
+
+            self.tuning = TuningType(tuning)
 
         else:
 
-            self.data = ScalePattern.names[name]
+            self.tuning = tuning
 
-        self.steps = 12
+        self.data = self.semitones
 
-        self.pentatonic = PentatonicScalePattern(self)
+        self.steps = self.tuning.steps
 
-    def __call__(self, *args):
+        if self.steps:
 
-        if len(args) > 0:
-
-            self.set(args[0])
-
-        return self
+            self.pentatonic = PentatonicScalePattern(self)
 
     def __eq__(self, other):
         return self.name == other.name if isinstance(other, ScalePattern) else False
@@ -52,6 +108,9 @@ class ScalePattern(Pattern):
         for pitch in asStream(pitches):
             tones.append( self.note_to_semitone(pitch) )
         return Pattern(tones)
+
+    def get_tuned_note(self, degree):
+        return self.tuning[self[degree]]
 
     def get_midi_note(self, degree, octave=5, root=0):
         """ Calculates a midinote from a scale, octave, degree, and root """
@@ -74,6 +133,8 @@ class ScalePattern(Pattern):
         octave = octave + (lo // len(self))
         index  = lo % len(self)
 
+        pitch = self.get_tuned_note(index)
+
         # Work out any microtones
 
         micro = (degree - lo)
@@ -86,12 +147,18 @@ class ScalePattern(Pattern):
 
             micro = micro * diff
 
-        midival = self.steps * octave     # Root note of scale
-        midival = midival + root          # Adjust for key
-        midival = midival + self[index]   # Add the note
-        midival = midival + micro         # And any microtonal
+        midival = self.steps * octave    # Root note of scale
+        midival = midival + root         # Adjust for key
+        midival = midival + pitch        # Add the note
+        midival = midival + micro        # And any microtones
         
         return midival
+
+    def get_freq(self, degree, octave=5, root=0, get_midi=False):
+        """ Returns the frequency of a midinote calculated by self.get_midi_note. Returns a tuple containing
+            the freqency and midinote if `get_midi` is set to `True`. """
+        midinote = self.get_midi_note(degree, octave, root)
+        return (miditofreq(midinote), midinote) if get_midi else miditofreq(midinote)
 
     def note_to_semitone(self, pitch):
         """ Takes a pitch value and returns the semitone value e.g. midinote value not accounting for octaves """
@@ -105,28 +172,6 @@ class ScalePattern(Pattern):
     #def semitone_to_note(self, semitone):
     #    """ Takes a semitone value (midinote) and returns the pitch in this scale """
     #    return semitone
-
-    def set(self, new):
-
-        if new is self:
-
-            return self
-
-        if type(new) == str:
-
-            self.data = self.__class__.names[new]
-            self.name = new
-
-        elif isinstance(new, (list, Pattern)):
-
-            self.data = new
-            self.name = self.__class__.name
-
-        else:
-
-            print("Warning: {} is not a valid scale".format(new))
-
-        return self
 
 
 class PentatonicScalePattern(ScalePattern):
@@ -162,10 +207,63 @@ class PentatonicScalePattern(ScalePattern):
 
         return self.values(self.data)[key]
 
-class _freq:
+class FreqScalePattern(ScalePattern):
+    def __init__(self):
+        ScalePattern.__init__(self, [], name="freq")
+    def get_midi_note(self, freq, *args, **kwargs):
+        return freqtomidi(freq)
+    def get_freq(self, freq, *args, **kwargs):
+        return (freq, freqtomidi(freq)) if kwargs.get("get_midi", False) else freq
     def __repr__(self):
         return "[inf]"
 
+class _DefaultTuning(TuningType):
+    """ Wrapper for Tuning.default """
+    def __init__(self, tuning):
+        self.tuning = tuning
+
+    def __len__(self):
+        return len(self.tuning)
+
+class _DefaultScale(ScaleType):
+    """ Wrapper for Scale.default """
+    def __init__(self, scale):
+        self.scale = scale
+
+    def __len__(self):
+        return len(self.scale)
+
+    def __repr__(self):
+        return repr(self.scale)
+
+    def set(self, new, *args, **kwargs):
+        """ Change the contents of the default scale """
+
+        if type(new) == str:
+
+            self.scale = Scale.get_scale(new)
+
+        elif isinstance(new, (list, Pattern)):
+
+            self.scale = ScalePattern(new, *args, **kwargs)
+
+            # Store if the user has used a name
+
+            if self.scale.name is not None and self.scale.name not in Scale.names():
+
+                Scale[self.scale.name] = self.scale
+
+        else:
+
+            print("Warning: {} is not a valid scale".format(new))
+
+        return self
+
+    def __getattribute__(self, attr):
+        if attr not in ("scale", "set"):
+            return self.scale.__getattribute__(attr)
+        else:
+            return object.__getattribute__(self, attr)
 
 # Custom made fibonacci tuing
 
@@ -181,57 +279,57 @@ class _freq:
 ##
 ##del n
 
-# Default scale is major
-
 class __scale__:
 
-    chromatic       = ScalePattern("chromatic", [0,1,2,3,4,5,6,7,8,9,10,11,12])
+    chromatic       = ScalePattern([0,1,2,3,4,5,6,7,8,9,10,11,12], name="chromatic")
 
-    major           = ScalePattern("major", [0,2,4,5,7,9,11])
-    majorPentatonic = ScalePattern("majorPentatonic", [0,2,4,7,9])
+    major           = ScalePattern([0,2,4,5,7,9,11], name="major")
+    majorPentatonic = ScalePattern([0,2,4,7,9], name="majorPentatonic" )
 
-    minor           = ScalePattern("minor", [0,2,3,5,7,8,10])
-    aeolian         = ScalePattern("aeolian",  [ 0, 2, 3, 5, 7, 8, 10 ])
-    minorPentatonic = ScalePattern("minorPentatonic", [0,3,5,7,10])
+    minor           = ScalePattern([0,2,3,5,7,8,10], name="minor")
+    aeolian         = ScalePattern([0,2,3,5,7,8,10], name="aeolian")
+    minorPentatonic = ScalePattern([0,3,5,7,10], name="minorPentatonic")
 
-    mixolydian      = ScalePattern("mixolydian", [0,2,4,5,7,9,10])
+    mixolydian      = ScalePattern([0,2,4,5,7,9,10], name="mixolydian")
 
-    melodicMinor    = ScalePattern("melodicMinor", [0,2,3,5,7,9,11])
-    melodicMajor    = ScalePattern("melodicMinor", [0,2,4,5,7,8,11])
+    melodicMinor    = ScalePattern([0,2,3,5,7,9,11], name="melodicMinor")
+    melodicMajor    = ScalePattern([0,2,4,5,7,8,11], name="melodicMajor")
 
-    harmonicMinor   = ScalePattern("harmonicMinor", [0,2,3,5,7,8,11])
-    harmonicMajor   = ScalePattern("harmonicMajor", [0,2,4,5,7,8,11])
+    harmonicMinor   = ScalePattern([0,2,3,5,7,8,11], name="harmonicMinor")
+    harmonicMajor   = ScalePattern([0,2,4,5,7,8,11], name="harmonicMajor")
 
-    justMajor       = ScalePattern("justMajor", [ 0, 2.0391000173077, 3.8631371386483, 4.9804499913461, 7.0195500086539, 8.8435871299945, 10.882687147302 ])
-    justMinor       = ScalePattern("justMinor", [ 0, 2.0391000173077, 3.1564128700055, 4.9804499913461, 7.0195500086539, 8.1368628613517, 10.175962878659 ])
+    # Goal: Do normal scales but adjust tuning
 
-    dorian          = ScalePattern("dorian",  [0,2,3,5,7,9,10])
-    dorian2         = ScalePattern("dorian2", [0,1,3,5,6,8,9,11]) 
-    diminished      = ScalePattern("diminished", [ 0, 1, 3, 4, 6, 7, 9, 10 ])
+    justMajor       = ScalePattern([0,2,4,5,7,9,11], name="justMajor", tuning=Tuning.just)
+    justMinor       = ScalePattern([0,2,3,5,7,8,10], name="justMinor", tuning=Tuning.just)
 
-    egyptian        = ScalePattern("egyptian", [0,2,5,7,10])
-    yu              = ScalePattern("yu", [0,3,5,7,10])
-    zhi             = ScalePattern("zhi", [0,2,5,7,9])
-    phrygian        = ScalePattern("phrygian", [0,1,3,5,7,8,10])
-    prometheus      = ScalePattern("prometheus", [0,2,4,6,11])
-    indian          = ScalePattern("indian", [0,4,5,7,10])
+    dorian          = ScalePattern([0,2,3,5,7,9,10], name="dorian")
+    dorian2         = ScalePattern([0,1,3,5,6,8,9,11], name="dorian2") 
+    diminished      = ScalePattern([0,1,3,4,6,7,9,10], name="diminished")
 
-    locrian         = ScalePattern("locrian", [0,1,3,5,6,8,10])
-    locrianMajor    = ScalePattern("locrianMajor", [0,2,4,5,6,8,10])
+    egyptian        = ScalePattern([0,2,5,7,10], name="egyptian")
+    yu              = ScalePattern([0,3,5,7,10], name="yu")
+    zhi             = ScalePattern([0,2,5,7,9], name="zhi")
+    phrygian        = ScalePattern([0,1,3,5,7,8,10], name="phrygian")
+    prometheus      = ScalePattern([0,2,4,6,11], name="prometheus")
+    indian          = ScalePattern([0,4,5,7,10], name="indian")
 
-    lydian          = ScalePattern("lydian", [0,2,4,6,7,9,11])
-    lydianMinor     = ScalePattern("lydianMinor", [0,2,4,6,7,8,10])
+    locrian         = ScalePattern([0,1,3,5,6,8,10], name="locrian")
+    locrianMajor    = ScalePattern([0,2,4,5,6,8,10], name="locrianMajor")
 
-    ryan            = ScalePattern("ryan", [0,2,3,5,6,9,10])
+    lydian          = ScalePattern([0,2,4,6,7,9,11], name="lydian")
+    lydianMinor     = ScalePattern([0,2,4,6,7,8,10], name="lydianMinor")
 
-    romanianMinor   = ScalePattern("romanianMinor", [ 0, 2, 3, 6, 7, 9, 10 ])
-    chinese         = ScalePattern("chinese", [ 0, 4, 6, 7, 11 ])
+    custom          = ScalePattern([0,2,3,5,6,9,10], name="custom")
 
-    freq            = ScalePattern("freq", _freq())
+    romanianMinor   = ScalePattern([ 0, 2, 3, 6, 7, 9, 10 ], name="romanianMinor")
+    chinese         = ScalePattern([ 0, 4, 6, 7, 11 ], name="chinese")
+
+    freq            = FreqScalePattern()
 
     def __init__(self):
 
-        self.default = ScalePattern("major")
+        self.default = _DefaultScale(self.major)
 
     def __setattr__(self, key, value):
         if key == "default" and key in vars(self):
@@ -243,10 +341,28 @@ class __scale__:
     def __getitem__(self, key):
         return getattr(self, key)
 
-    @staticmethod
+    def get_scale(self, name):
+        """ Returns a ScalePattern using a name """
+        return self.library()[name]
+
+    def library(self):
+        """ Returns a dictionary with scale names to scale instances """
+        lib = []
+        for items in (self.__class__.__dict__.items(), self.__dict__.items()):
+            lib.extend([(key, value) for key, value in items if isinstance(value, ScalePattern)])
+        return dict(lib)
+
     def names():
-        """ Returns a list of all the scales by name """
-        return sorted(ScalePattern.names.keys())
+        """ Returns a list of all the scale names """
+        return sorted(self.library().keys())
+
+    def scales():
+        """ Returns a list of all the scales object """
+        return sorted(self.library().values(), key=lambda scale: scale.name)
+
+    def choose():
+        """ Scale.choose() -> Returns a random scale object """
+        return choice(self.scales())
 
 
 Scale = __scale__()

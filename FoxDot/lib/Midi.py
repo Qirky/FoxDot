@@ -17,61 +17,63 @@ from .TimeVar  import TimeVar
 
 import math
 
-def miditofreq(midinote):
-    """ Converts a midi number to frequency """
-    return 440 * (2 ** ((midinote - 69.0)/12.0))
+# TODO -- move this to Scale
 
-midi2cps = miditofreq # alias
+# def miditofreq(midinote):
+#     """ Converts a midi number to frequency """
+#     return 440 * (2 ** ((midinote - 69.0)/12.0))
 
-def _log2(num):
-    return math.log(num) / math.log(2)
+# midi2cps = miditofreq # alias
 
-def freqtomidi(freq):
-    return 12 * _log2((freq / 440)) + 69
+# def _log2(num):
+#     return math.log(num) / math.log(2)
 
-def midi(scale, octave, degree, root=0, stepsPerOctave=12):
-    """ Calculates a midinote from a scale, octave, degree, and root """
+# def freqtomidi(freq):
+#     return 12 * _log2((freq / 440)) + 69
 
-    # Make sure we force timevars into real values
+# def midi(scale, octave, degree, root=0, stepsPerOctave=12):
+#     """ Calculates a midinote from a scale, octave, degree, and root """
 
-    if isinstance(scale, ScalePattern) and isinstance(scale.data, TimeVar):
+#     # Make sure we force timevars into real values
 
-        scale = asStream(scale.data.now())
+#     if isinstance(scale, ScalePattern) and isinstance(scale.data, TimeVar):
 
-    # Force float
-    octave = float(octave)
-    degree = float(degree)
-    root   = float(root)
+#         scale = asStream(scale.data.now())
+
+#     # Force float
+#     octave = float(octave)
+#     degree = float(degree)
+#     root   = float(root)
     
-    # Floor val
-    lo = int(math.floor(degree))
-    hi = lo + 1
+#     # Floor val
+#     lo = int(math.floor(degree))
+#     hi = lo + 1
 
-    octave = octave + (lo // len(scale))
-    index  = lo % len(scale)
+#     octave = octave + (lo // len(scale))
+#     index  = lo % len(scale)
 
-    # Work out any microtones
+#     # Work out any microtones
 
-    micro = (degree - lo)
+#     micro = (degree - lo)
 
-    if micro > 0:
+#     if micro > 0:
 
-        ex_scale = list(scale) + [stepsPerOctave]
+#         ex_scale = list(scale) + [stepsPerOctave]
 
-        diff  = ex_scale[index + 1] - scale[index]
+#         diff  = ex_scale[index + 1] - scale[index]
 
-        micro = micro * diff
+#         micro = micro * diff
 
-    midival = stepsPerOctave * octave # Root note of scale
-    midival = midival + root          # Adjust for key
-    midival = midival + scale[index]  # Add the note
-    midival = midival + micro         # And any microtonal
+#     midival = stepsPerOctave * octave # Root note of scale
+#     midival = midival + root          # Adjust for key
+#     midival = midival + scale[index]  # Add the note
+#     midival = midival + micro         # And any microtonal
 
-    #chroma = range(int(stepsPerOctave))
-    #scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
-    #midival = scale_val + (octave * len(chroma)) + float(root)
+#     #chroma = range(int(stepsPerOctave))
+#     #scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
+#     #midival = scale_val + (octave * len(chroma)) + float(root)
 
-    return midival
+#    return midival
 
 
 class MidiIn:
