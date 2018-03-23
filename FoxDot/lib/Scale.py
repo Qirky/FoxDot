@@ -178,8 +178,10 @@ class PentatonicScalePattern(ScalePattern):
 
     def __init__(self, scale):
 
-        self.data = scale
-        self.steps = scale.steps
+        self.data      = scale
+        self.steps     = scale.steps
+        self.semitones = scale.semitones
+        self.tuning    = scale.tuning
 
     def __len__(self):
         return 5

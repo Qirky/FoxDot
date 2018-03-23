@@ -375,6 +375,12 @@ pasha.add()
 ambi = FileSynthDef("ambi")
 ambi.add()
 
+angel = FileSynthDef("angel")
+angel.add()
+
+keys = FileSynthDef("keys")
+keys.add()
+
 # Get rid of the variable synth
 
 del synth

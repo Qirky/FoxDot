@@ -14,67 +14,7 @@ except ImportError as _err:
 from .Patterns import asStream
 from .Scale    import ScalePattern
 from .TimeVar  import TimeVar
-
-import math
-
-# TODO -- move this to Scale
-
-# def miditofreq(midinote):
-#     """ Converts a midi number to frequency """
-#     return 440 * (2 ** ((midinote - 69.0)/12.0))
-
-# midi2cps = miditofreq # alias
-
-# def _log2(num):
-#     return math.log(num) / math.log(2)
-
-# def freqtomidi(freq):
-#     return 12 * _log2((freq / 440)) + 69
-
-# def midi(scale, octave, degree, root=0, stepsPerOctave=12):
-#     """ Calculates a midinote from a scale, octave, degree, and root """
-
-#     # Make sure we force timevars into real values
-
-#     if isinstance(scale, ScalePattern) and isinstance(scale.data, TimeVar):
-
-#         scale = asStream(scale.data.now())
-
-#     # Force float
-#     octave = float(octave)
-#     degree = float(degree)
-#     root   = float(root)
-    
-#     # Floor val
-#     lo = int(math.floor(degree))
-#     hi = lo + 1
-
-#     octave = octave + (lo // len(scale))
-#     index  = lo % len(scale)
-
-#     # Work out any microtones
-
-#     micro = (degree - lo)
-
-#     if micro > 0:
-
-#         ex_scale = list(scale) + [stepsPerOctave]
-
-#         diff  = ex_scale[index + 1] - scale[index]
-
-#         micro = micro * diff
-
-#     midival = stepsPerOctave * octave # Root note of scale
-#     midival = midival + root          # Adjust for key
-#     midival = midival + scale[index]  # Add the note
-#     midival = midival + micro         # And any microtonal
-
-#     #chroma = range(int(stepsPerOctave))
-#     #scale_val = (scale[hi % len(scale)] - scale[lo % len(scale)]) * ((degree-lo)) + scale[lo % len(scale)]
-#     #midival = scale_val + (octave * len(chroma)) + float(root)
-
-#    return midival
-
+from .SCLang import SynthDefProxy
 
 class MidiIn:
     metro = None
@@ -137,12 +77,14 @@ class MidiIn:
         """ Closes the active port """
         self.device.close_port()
         return
-                
-from .SCLang import SynthDefProxy
+            
 
 class MidiOut(SynthDefProxy):
+    """ SynthDef proxy for sending midi message via supercollider """
     def __init__(self, degree=0, **kwargs):
         SynthDefProxy.__init__(self, self.__class__.__name__, degree, kwargs)
+
+# Midi information exceptions
 
 class MIDIDeviceNotFound(Exception):
     def __str__(self):
