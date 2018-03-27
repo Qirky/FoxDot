@@ -105,7 +105,7 @@ with SynthDef("bell") as bell:
     bell.amp = bell.amp * 4
     bell.osc = Klank.ar([ [0.501, 1, 0.7,   2.002, 3, 9.6,   2.49, 11, 2.571,  3.05, 6.242, 12.49, 13, 16, 24],
                        [0.002,0.1,0.001, 0.008,0.02,0.004, 0.02,0.04,0.02, 0.005,0.05,0.05, 0.02, 0.03, 0.04],
-                       stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.01), bell.freq, 0, 4 * bell.rate)
+                       stutter([1.2, 0.9, 0.25, 0.14, 0.07], 3) ], Impulse.ar(0.01), bell.freq, 0, 4 * bell.rate) * bell.amp
 
 with SynthDef("gong") as gong:
     gong.amp = gong.amp * 2.5
@@ -375,8 +375,8 @@ pasha.add()
 ambi = FileSynthDef("ambi")
 ambi.add()
 
-angel = FileSynthDef("angel")
-angel.add()
+space = FileSynthDef("space")
+space.add()
 
 keys = FileSynthDef("keys")
 keys.add()
