@@ -128,11 +128,12 @@ class PChain(GeneratorPattern):
 class PZ12(GeneratorPattern):
     """ Implementation of the PZ12 algorithm for predetermined random numbers. Using
         an irrational value for p, however, results in a non-determined order of values. 
+        Experimental, only works with 2 values.
     """
-    def __init__(self, p, tokens=[0,1]):
+    def __init__(self, tokens=[1,0], p=[1, 0.5]):
         GeneratorPattern.__init__(self)
-        self.probs   = [1-p, p]
         self.data    = tokens
+        self.probs = [value / max(p) for value in p]
         self._prev   = []
         self.dearth  = [0 for n in self.data]
 
