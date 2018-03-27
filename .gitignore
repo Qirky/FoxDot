@@ -23,6 +23,7 @@ TODO.txt
 
 # Tracks
 Tracks/*
+Tracks/*.*
 
 # Make directory and autodoc scripts
 autodoc.py
