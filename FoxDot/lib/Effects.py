@@ -316,16 +316,20 @@ fx.save()
        
 if SC3_PLUGINS:
 
-    fx = FxList.new('bits', 'bitcrush', {'bits': 0, 'sus': 1, 'amp': 1, 'crush': 1}, order=1)
+    fx = FxList.new('crush', 'bitcrush', {'bits': 8, 'sus': 1, 'amp': 1, 'crush': 0}, order=1)
     fx.add("osc = Decimator.ar(osc, rate: 44100/crush, bits: bits)")
     fx.add("osc = osc * Line.ar(amp * 0.85, 0.0001, sus * 2)") 
     fx.save()
 
-    fx = FxList.new('dist', 'distortion', {'dist': 0}, order=1)
-    fx.add("osc = CrossoverDistortion.ar(osc, smooth:1-dist)")
+    fx = FxList.new('dist', 'distortion', {'dist': 0, 'tmp': 0}, order=1)
+    fx.add("tmp = osc")
+    fx.add("osc = CrossoverDistortion.ar(osc, amp:0.2, smooth:0.01)")
+    fx.add("osc = osc + (0.1 * dist * DynKlank.ar(`[[60,61,240,3000 + SinOsc.ar(62,mul:100)],nil,[0.1, 0.1, 0.05, 0.01]], osc))")
+    fx.add("osc = (osc.cubed * 8).softclip * 0.5")
+    fx.add("osc = SelectX.ar(dist, [tmp, osc])")
     fx.save()
 
-# Envelope
+# Envelope -- just include in the SynthDef and use asdr?
 
 # Post envelope effects    
 
