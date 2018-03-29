@@ -387,9 +387,7 @@ class TempoClock(object):
 
             if self.sleep_time > 0:
 
-                sleep(self.sleep_time * 5)
-
-                self.osc_message_accum += self.sleep_time
+                sleep(self.sleep_time)
 
         return
 

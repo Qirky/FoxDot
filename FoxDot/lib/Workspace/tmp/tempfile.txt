@@ -1,1 +1,7 @@
+d1 >> play(var(P["[vvvvvv]v".replace("v","l")],[12,4]), dur=expvar([1/16,1/32],16), rate=(.9,1), pan=(-1,1), hpf=P[150:1000:10][:128]*0, hpr=P[5:37]/50, crush=P[:24][:64].stutter(2), sample=0, amp=1/2, lpf=000, room=0.1,)
 
+d2 >> play("(x )( x)u ", crush=PStep([11,4],[32,32,P*(40,32)]), slide=0).every(6, "sample.offadd", 2, 0.75).every(6, "stutter", 4, dur=var([1,3],6), pan=[-1,1]).every(5, "rate.offmul", 2, 0.25)
+d3 >> play("[--]")
+
+
+d1 >> play("x", dur=P[a])
