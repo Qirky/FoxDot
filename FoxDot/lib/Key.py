@@ -6,6 +6,14 @@ from functools import partial
 
 
 class NumberKey(object):
+    """ An object that acts like a number but may have dependencies when returing its
+        value. These are used when returing Player object attribute values accessed via
+        `getattr` e.g. `p1.dur` or `getattr(p1, "dur")`. The parent attribute is the Player
+        that contains the key or the referenced key in the case that the value has been
+        maniupulated. e.g. if `p1` is using `p2.degree` then `p1.degree.parent == p1` and 
+        `p1.degree.value.parent == p2`.
+    """
+
     def __init__(self, value, reference):
         # the number to store/update
         self.value = value
@@ -13,8 +21,6 @@ class NumberKey(object):
         self.other = reference
         # This is the Player object whose attribute this is fetching / chained to
         self.parent = self.other.parent if isinstance(self.other, NumberKey) else None
-
-        # If p1 is using p2.degree then p1.degree.parent == p1 and p1.degree.value.parent == p2
 
     # Storing mathematical operations
 
@@ -36,7 +42,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, (metaPattern, GeneratorPattern)):
+        if isinstance(other, (Pattern, GeneratorPattern)):
             return other.__radd__(self)
         new = self.child(other)
         new.calculate = Add
@@ -76,7 +82,7 @@ class NumberKey(object):
         """ If operating with a pattern, return a pattern of values """
         if isinstance(other, (list, tuple)):
             other=self.convert_to_pattern(other)
-        if isinstance(other, (metaPattern, GeneratorPattern)):
+        if isinstance(other, (Pattern, GeneratorPattern)): # was metaPattern before
             return other.__rmul__(self)
         new = self.child(other)
         new.calculate = Mul
@@ -338,6 +344,7 @@ class NumberKey(object):
             ```
 
         """
+        assert isinstance(mapping, dict)
         data = [ ((self == key) * value) for key, value in mapping.items() ]
         new_key = data[0]
         for i in data[1:]:
@@ -363,39 +370,149 @@ class NumberKey(object):
             ::
                 p1 >> piano(p2.degree.map({lambda x: x >= 4: lambda x: x + (0,2)}))
         """
-        # todo - Doesn't properly handle tuples/lists as patterns
+
+        assert isinstance(mapping, dict)
+
+        # Begin mapping
+        
         funcs = {}
+
         for key, value in mapping.items():
             
             # We can map using a function
-            
-            if callable(key) and callable(value):
 
-                funcs[partial(lambda: key(self.now()))]  = partial(lambda: value(self.now()))
+            if callable(key):
 
-            elif callable(key) and not callable(value):
-
-                funcs[partial(lambda: key(self.now()))]  = partial(lambda e: e, value)
-
-            elif callable(value):
-
-                funcs[partial(lambda e: self.now() == e, key)] = partial(lambda: value(self.now()))
+                key_func = lambda f: f(self.now())
 
             else:
-                # one-to-one mapping
-                funcs[partial(lambda e: self.now() == e, key)] = partial(lambda e: e, value)
 
-        def mapping_function(a, b):
+                key_func = lambda v: self.now() == v
+
+            map_key = partial(key_func, key)
+
+            # The return value can be a function called on self.now()
+
+            if callable(value):
+
+                def val_func(value, func):
+                    # Call on current  value (force pattern)
+                    new_value = _wrapper(value).__call__(self.now()) * func()
+                    
+                    # Get the values from default that we want
+                    def_value = (default.now() if hasattr(default, "now") else default) * _invert(func())
+                    
+                    return new_value + def_value
+
+            else:
+
+                # If we are mapping just to a single value, get the test (e.g P(1,0)) and multiply by the value
+
+                def val_func(value, func):
+                    # Call on current  value (force pattern)
+                    new_value = asStream(value) * func()
+                    
+                    # Get the values from default that we want
+                    def_value = (default.now() if hasattr(default, "now") else default) * _invert(func())
+                    
+                    return new_value + def_value
+
+            map_val = partial(val_func, value, map_key)
+
+            # Store
+
+            funcs[map_key] = map_val
+
+        # Is called and returns the last function that satisfies a func
+
+        def mapping_function(*args):
+            value = None
             for func, result in funcs.items():
-                if bool(func()) is True:
+                #if bool(func()) is True:
+                if any(asPattern(func())):
                     value = result()
-                    break
-            else:
+            if value is None:
                 value = default
             return value
 
         new = self.child(0)        
         new.calculate = mapping_function
+        
+        return new
+
+    def deepmap(self, mapping, default=0):
+        """ Like map, but nested values are directly mapped """
+
+        assert isinstance(mapping, dict)
+
+        # Begin mapping
+        
+        funcs = {}
+
+        for key, value in mapping.items():
+            
+            # We can map using a function
+
+            if callable(key):
+
+                key_func = lambda f: f(self.now())
+
+            else:
+
+                key_func = lambda v: self.now() == v
+
+            map_key = partial(key_func, key)
+
+            # The return value can be a function called on self.now()
+
+            if callable(value):
+
+                def val_func(value, func):
+
+                    matrix = asPattern(func())
+                    
+                    new_value = matrix.replace(1, _wrapper(value).__call__(self.now()))
+
+                    def_value = (default.now() if hasattr(default, "now") else default) * _invert(matrix)
+                    
+                    return new_value + def_value
+
+            else:
+
+                # If we are mapping just to a single value, get the test (e.g P(1,0)) and multiply by the value
+
+                def val_func(value, func):
+
+                    matrix = asPattern(func())
+
+                    new_value = matrix.replace(1, value)
+                    
+                    def_value = (default.now() if hasattr(default, "now") else default) * _invert(func())
+                    
+                    return new_value + def_value
+
+
+            map_val = partial(val_func, value, map_key)
+
+            # Store
+
+            funcs[map_key] = map_val
+
+        # Is called and returns the last function that satisfies a func
+
+        def mapping_function(*args):
+            value = None
+            for func, result in funcs.items():
+                #if bool(func()) is True:     
+                if any(asPattern(func())):               
+                    value = result()
+            if value is None:
+                value = default
+            return value
+
+        new = self.child(0)        
+        new.calculate = mapping_function
+        
         return new
 
     def get_min(self):
@@ -424,10 +541,13 @@ class NumberKey(object):
         new.calculate = lambda a, b: func(b)
         return new
 
-
     def accompany(self, freq=0, rel=[0,2,4]):
         """ Returns a PlayerKey whose function returns an accompanying note """
         return self.transform(Accompany(freq=freq, rel=rel))
+
+    def versus(self):
+        """ e.g. `p1.pitch.versus(*rules)` """
+        return
     
     # Values
     
@@ -650,3 +770,13 @@ class Accompany:
 # Give pattern objects a reference to the PlayerKey type
 
 Pattern.PlayerKey = PlayerKey
+
+def _wrapper(f):
+    """ Decorator function for forcing functions with a single value to return a Pattern object """
+    def new_func(value):
+        #return f(asStream(value))
+        pattern = f(asStream(value))
+    return new_func
+
+def _invert(value):
+    return (value * -1) + 1
