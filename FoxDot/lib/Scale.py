@@ -68,7 +68,7 @@ class TuningType(list):
 class Tuning:
     ET12          = TuningType([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
     just          = TuningType([0.0, 1.1173128526978, 2.0391000173077, 3.1564128700055, 3.8631371386483, 4.9804499913461, 5.9022371559561, 7.0195500086539, 8.1368628613517, 8.8435871299945, 10.175962878659, 10.882687147302, 12 ])
-    bohlen_pierce = TuningType([i*12/13*math.log2(3) for i in range(14)])
+    bohlen_pierce = TuningType([i*12/13*math.log(3, 2) for i in range(14)])
 
 class ScalePattern(ScaleType, Pattern):
 
