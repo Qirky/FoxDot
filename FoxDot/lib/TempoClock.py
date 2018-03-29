@@ -294,7 +294,6 @@ class TempoClock(object):
         return
 
     def get_elapsed_sec(self):
-        # return self.dtype(((time() - (self.start_time + self.nudge)) - self.latency))
         return self.dtype( time() - (self.start_time + (self.nudge + self.hard_nudge)) - self.latency )
 
     def true_now(self):
@@ -324,14 +323,14 @@ class TempoClock(object):
         main.start()
         return
 
-    def __run_block(self, block):
+    def __run_block(self, block, time):
         """ Private method for calling all the items in the queue block.
             This means the clock can still 'tick' while a large number of
             events are activated  """
 
-        # Set the time to "activate" messages on SC
+        # Set the time to "activate" messages on - adjust in case the block is activated late
 
-        block.time = self.osc_message_time()
+        block.time = self.osc_message_time() - self.beat_dur(float(time) - block.beat)
 
         for item in block:
 
@@ -378,7 +377,7 @@ class TempoClock(object):
 
                 if len(self.current_block):
 
-                    threading.Thread(target=self.__run_block, args=(self.current_block,)).start()
+                    threading.Thread(target=self.__run_block, args=(self.current_block, beat)).start()
 
             # If using a midi-clock, update the values
 
@@ -388,7 +387,9 @@ class TempoClock(object):
 
             if self.sleep_time > 0:
 
-                sleep(self.sleep_time)
+                sleep(self.sleep_time * 5)
+
+                self.osc_message_accum += self.sleep_time
 
         return
 
@@ -432,6 +433,8 @@ class TempoClock(object):
         # Add to the queue
 
         self.queue.add(obj, beat, args, kwargs)
+
+        # block.time = self.osc_message_accum
 
         return
 
