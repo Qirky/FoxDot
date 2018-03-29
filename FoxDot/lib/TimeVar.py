@@ -1,5 +1,8 @@
 """
 Time-Dependent Variables (TimeVar)
+
+TODO: using __call__ -> go through getattribute and check instead of already having a __call__
+
 """
 
 from __future__ import absolute_import, division, print_function
@@ -446,12 +449,12 @@ class TimeVar:
 
     # Storing functions etc
 
-    def __call__(self, *args, **kwargs):
-        """ A TimeVar can store functions and will call the current item with this method """
-        if callable(self.now()):
-            return self.now().__call__(*args, **kwargs)
-        else:
-            return self.now()
+    # def __call__(self, *args, **kwargs):
+    #     """ A TimeVar can store functions and will call the current item with this method """
+    #     if callable(self.now()):
+    #         return self.now().__call__(*args, **kwargs)
+    #     else:
+    #         return self.now()
 
     # Emulating container types
 
