@@ -7,6 +7,7 @@ FoxDot/lib/Settings/conf.py
 build/*
 dist/*
 FoxDot/snd/_loop_/*
+FoxDot/osc/scsyndef/test.scd
 FoxDot/lib/Custom/*
 FoxDot/lib/GhostCoder/*
 FoxDot/lib/Settings/conf.txt
@@ -22,8 +23,7 @@ docs/_build/
 TODO.txt
 
 # Tracks
-Tracks/*
-Tracks/*.*
+FoxDot/Tracks/*
 
 # Make directory and autodoc scripts
 autodoc.py
