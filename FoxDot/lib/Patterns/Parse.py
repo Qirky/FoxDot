@@ -11,8 +11,8 @@ import re
 
 from .PlayString import *
 from .Generators import PRand
-from .PGroups    import PGroupMod
-from .Main       import Pattern, metaPattern, PatternMethod, PGroup
+from .PGroups    import PGroupMod, PGroupOr, PGroupStar
+from .Main       import Pattern, metaPattern, PatternMethod, PGroup, GeneratorPattern
 
 from ..Utils import modi, LCM
 
@@ -20,13 +20,26 @@ re_nests  = r"\((.*?)\)"
 re_square = r"\[.*?\]"
 re_curly  = r"\{.*?\}"
 re_arrow  = r"<.*?>"
-square_type=PGroupMod
-braces_type=PRand
+square_type = PGroupMod
+braces_type = PRand
+bar_type    = PGroupOr
 
 def ParsePlayString(string):
     """ Returns the parsed play string used by sample player """
     output, _ = feed(string)
     return output
+
+def convert_to_int(data):
+    """ Recursively calls until all nested data contains only integers """
+    if isinstance(data, (int, float, str)):
+        return int(data)
+    elif isinstance(data, (list, tuple)):
+        return data.__class__([convert_to_int(item) for item in data])
+    elif isinstance(data, GeneratorPattern):
+        return data.transform(convert_to_int)
+    elif isinstance(data, metaPattern):
+        return data.convert_data(convert_to_int)
+    return int(data)
 
 def arrow_zip(pat1, pat2):
     """ Zips two patterns together. If one item is a tuple, it extends the tuple / PGroup
@@ -104,6 +117,45 @@ def feed(string):
                 layer_pattern = True
 
             contains_nest = True
+
+        # Look for || for specifying sample numbers
+
+        elif char == "|":
+
+            # Parse the contents of the brackets if found
+            j = string.next_char_index("|", start=i+1)
+            s = string[i+1:j]
+            i = j
+
+            chars, _ = feed(s)
+
+            if len(chars) == 0:
+
+                e = "Empty '||' delimeters in string"
+
+                raise ParseError(e)
+
+            try:
+
+                assert(len(chars) == 2)
+
+            except AssertionError:
+
+                e = "'||' delimeters must contain exactly 2 elements"
+
+                raise ParseError(e)
+
+            # First is our list of sample chars
+            
+            samp_chr = chars[0]
+
+            # Next is a list of integers for sample kw
+
+            samp_num = convert_to_int(chars[1])
+
+            # print(samp_chr, samp_num)
+
+            items.append(bar_type((samp_chr, samp_num)))
 
         # Look for a '()'
         elif char == "(":
@@ -194,7 +246,7 @@ def feed(string):
 
         # Add single character to list
 
-        elif char not in ")]}>":
+        elif char not in ")]}>|":
 
             items.append( char )
 

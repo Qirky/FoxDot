@@ -503,6 +503,8 @@ class Player(Repeatable):
             raise AttributeError(err)
 
     def __getattribute__(self, name):
+        # This checks for aliases, not the actual keys
+        name = Player.alias.get(name, name)
         item = object.__getattribute__(self, name)
         if isinstance(item, PlayerKey):
             if name not in self.accessed_keys:
@@ -1282,35 +1284,29 @@ class Player(Repeatable):
 
         prime_funcs = {}
 
-        for key, value in event.items():
+        # Start with degree
+
+        active = []
+
+        event_keys = ["degree"] + [key for key in event.keys() if key != "degree"] # hacky?
+
+        for key in event_keys:
+
+            value = event[key]
 
             if isinstance(value, PGroup) and value.has_behaviour():
 
-                name = value.get_name()
-                
-                getaction = True
+                #size = len(value)
 
-                # Only add the largest prime_func for the largest element in the event
+                # if size not in active:
 
-                if name in prime_funcs:
+                    # active.append(size)
 
-                    if len(value) <= len(prime_funcs[name][1]):
+                func = value.get_behaviour()
 
-                        getaction = False
-
-                if getaction:
-
-                    prime_funcs[name] = [key, value, value.get_behaviour()]
-
-        # Add largest PGroupPrime function
-
-        for name, func in prime_funcs.items():
-
-            prime_call = func[-1]
-
-            if prime_call is not None:
-
-                event = prime_call(event, func[0])
+                event = func(event, key)
+        
+        # print("=================")
 
         return event
 

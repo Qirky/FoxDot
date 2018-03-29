@@ -344,6 +344,8 @@ class metaPattern(object):
         return self.__class__([abs(item) for item in self])
 
     def __bool__(self):
+        """ Returns True if *any* value in the Pattern are greater than zero """
+        # NOTE: this used to be ALL 
         return all([bool(item > 0) for item in self])
 
     def __nonzero__(self):
@@ -959,6 +961,8 @@ class PGroup(metaPattern):
     """
     
     bracket_style = "()"
+    # set this value to negative how many trailing values you don't want treated as "normal"
+    ignore = 0
 
     def __init__(self, seq=[], *args):
 
@@ -993,6 +997,10 @@ class PGroup(metaPattern):
 
             self.data = new_data
 
+    def shape(self):
+        """ Returns the lengths of all nested PGroups - not really useful"""
+        return tuple([item.shape() if isinstance(item, PGroup) else 1 for item in self])
+
     def extend(self, item):
         self.data.extend(item)
         return self
@@ -1004,24 +1012,6 @@ class PGroup(metaPattern):
         else:
             new_data = [value]
         return self.__class__(list(self.data) + new_data)
-
-    def calculate_step(self, dur):
-        return dur
-
-    def calculate_delay(self, delay):
-        return 0
-
-    def calculate_time(self, dur):
-        """ Returns a PGroup of durations to use as the delay argument
-            when this is a sub-class of `PGroupPrime` """
-        values = []
-        step  = self.calculate_step(dur)
-        for i, item in enumerate(self):
-            delay = self.calculate_delay( i * step )
-            if hasattr(item, "calculate_time"):
-                delay += item.calculate_time( step )
-            values.append( delay )
-        return PGroup(values)
 
     def flatten(self):
         """ Returns a nested PGroup as un-nested e.g.
@@ -1038,20 +1028,94 @@ class PGroup(metaPattern):
                 values.append(item)
         return PGroup(values)
 
+    def _get_step(self, dur):
+        return dur
+
+    def _get_delay(self, delay):
+        return 0
+
+    def _get_sample(self):
+        return 0
+
+    def calculate_time(self, dur):
+        """ Returns a PGroup of durations to use as the delay argument
+            when this is a sub-class of `PGroupPrime` """
+        values = []
+        step  = self._get_step(dur)
+        for i, item in enumerate(self):
+            delay = self._get_delay( i * step )
+            if isinstance(item, PGroup):
+                delay += item.calculate_time( step )
+            values.append( delay )
+        return PGroup(values)
+
+    def calculate_sample(self):
+        values = []
+        for item in self.data:
+            if isinstance(item, PGroup):
+                sample = item.calculate_sample()
+            else:
+                sample = None
+            values.append(sample)
+        if all([v is None for v in values]):
+            return None
+        else:
+            return self.__class__(values) # could cause adding issues
+
     def get_behaviour(self):
-        """ Returns a function that modulates a player event dictionary """
+        """ Returns a function that changes a player event dictionary """
         def action(event, key):
-            event['delay'] += self.calculate_time(float(event['dur']))
-            return event
+            this_delay = self.calculate_time(float(event['dur']))
+            return self._update_event(event, key, this_delay)
         return action
+
+    def _update_event(self, event, key, delay):
+        sample = self.calculate_sample()
+        event = self._update_sample(event, sample)
+        # print("Key:", key, event[key])
+        event = self._update_delay(event, delay)
+        return event
+
+    def _update_delay(self, event, delay):
+        """ Updates the delay value in the event dictionary """
+
+        event["delay"] = get_avg_if(delay, event["delay"], lambda x: x != 0)
+
+        # print("Event delay is now {!r}".format(event["delay"]))
+        
+        return event
+
+    def avg_if(self, other, func):
+        """ Averages the values if cmp is satisfied """
+        if not isinstance(other, PGroup):
+            # Return the Group if we have this single value in it
+            return self if other in self else avg_if_func(self, other, func)
+        else:
+            # Go through each element and repeat process
+            data = []
+            size = LCM(len(self), len(other))
+            for i in range(size):
+                # data.append( avg_if_func(self[i], other[i], func) )
+                data.append( get_avg_if(self[i], other[i], func) )
+            return self.__class__(data)
+        return
+
+    def _update_sample(self, event, sample):
+        """ Updates the sample value in the event dictionary """
+        if isinstance(sample, PGroup):
+            new_sample = sample.replace(None, 0)
+            old_sample = event["sample"] * (sample == None)
+            event["sample"] = new_sample + old_sample
+        elif sample is not None:
+            event["sample"] = sample
+        return event
 
     def has_behaviour(self):
         """ Returns True if this is a PGroupPrime or any elements are
             instances of PGroupPrime or its sub-classes"""
         for value in self:
-            if isinstance(value, PGroup):
-                if value.has_behaviour():
-                    return True
+            if isinstance(value, PGroup) and value.has_behaviour():
+                return True
         else:
             return False
 
@@ -1069,7 +1133,8 @@ class PGroup(metaPattern):
             if not isinstance(item, metaPattern):
                 item = int(item)
             values.append(item)
-        return self.__class__(values)
+        #return self.__class__(values)
+        return PGroup(values)
 
     def __ne__(self,  other):
         return self.ne(other)
@@ -1077,7 +1142,7 @@ class PGroup(metaPattern):
     def eq(self, other):
         """ equals operator """
         values = []
-        other  = PatternFormat(other) # bad function  name
+        other  = PatternFormat(other) # bad function name
         if isinstance(other, Pattern):
             return other.eq(self)
         for i, item in enumerate(self): # possibly LCM
@@ -1085,7 +1150,8 @@ class PGroup(metaPattern):
             if not isinstance(item, metaPattern):
                 item = int(item)
             values.append(item)
-        return self.__class__(values)
+        # return self.__class__(values)
+        return PGroup(values)
 
     def __hash__(self):
         return hash( self.__key() )
@@ -1144,7 +1210,6 @@ class PGroup(metaPattern):
                 item = int(item)
             values.append(item)
         return self.__class__(values)
-
 
 import random
 
@@ -1400,7 +1465,12 @@ def equal_values(this, that):
     """ Returns True if this == that """
     comp = this == that
     if isinstance(comp, metaPattern):
-        return all(list(comp))
+        try:
+            result = all(list(comp))
+        except:
+            print(this, that)
+            raise Exception("HI RYAN")
+        return result
     else:
         return comp
 
@@ -1415,3 +1485,19 @@ def group_modi(pgroup, index):
         return group_modi(pgroup[index % len(pgroup)], index // len(pgroup))
     except(TypeError, AttributeError, ZeroDivisionError):
         return pgroup
+
+def get_avg_if(item1, item2, func = lambda x: x != 0):
+    if isinstance(item1, PGroup):
+        result = item1.avg_if(item2, func)
+    elif isinstance(item2, PGroup):
+        result = item2.avg_if(item1, func)
+    else:
+        result = avg_if_func(item1, item2, func)
+    return result
+
+def avg_if_func(a, b, f):
+    # print("a", a, "b", b, "=> summing is", bool(f(b)))
+    # Don't bother averaging if they are equal
+    if bool(b==a):
+        return a
+    return ((a + b) / 2) if f(b) else (a + b)
