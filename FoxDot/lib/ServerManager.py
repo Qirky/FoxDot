@@ -260,6 +260,7 @@ class SCLangServerManager(ServerManager):
             self.client.send( osc_message )
         
         # If we are sending other messages as well
+        
         if self.forward is not None:
             
             self.forward.send(message)

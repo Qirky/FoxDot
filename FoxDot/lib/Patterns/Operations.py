@@ -26,8 +26,7 @@ class POperand:
         self.operate = func
 
     def __call__(self, A, B):
-        """ A is always a Pattern or PGroup.
-        """
+        """ A is always a Pattern or PGroup."""
 
         # If the first pattern is empty, return the other as a pattern
 
