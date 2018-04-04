@@ -381,6 +381,9 @@ space.add()
 keys = FileSynthDef("keys")
 keys.add()
 
+dbass = FileSynthDef("dbass") 
+dbass.add()
+
 # Get rid of the variable synth
 
 del synth
