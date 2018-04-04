@@ -1263,9 +1263,10 @@ class Player(Repeatable):
 
             attr_value = kwargs.get(attr, self.attr[attr][index])
 
-        except KeyError:
+        except KeyError as e:
 
             print(attr, self.attr[attr], index)
+            raise(e)
 
         except ZeroDivisionError as e:
 
@@ -1284,10 +1285,6 @@ class Player(Repeatable):
 
         prime_funcs = {}
 
-        # Start with degree
-
-        active = []
-
         event_keys = ["degree"] + [key for key in event.keys() if key != "degree"] # hacky?
 
         for key in event_keys:
@@ -1296,18 +1293,10 @@ class Player(Repeatable):
 
             if isinstance(value, PGroup) and value.has_behaviour():
 
-                #size = len(value)
-
-                # if size not in active:
-
-                    # active.append(size)
-
                 func = value.get_behaviour()
 
                 event = func(event, key)
         
-        # print("=================")
-
         return event
 
     def unduplicate_durs(self, event):
