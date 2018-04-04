@@ -245,6 +245,10 @@ class _DefaultScale(ScaleType):
 
             self.scale = Scale.get_scale(new)
 
+            if "tuning" in kwargs:
+
+                self.scale.tuning = kwargs["tuning"]
+
         elif isinstance(new, (list, Pattern)):
 
             self.scale = ScalePattern(new, *args, **kwargs)
