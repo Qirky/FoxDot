@@ -11,7 +11,6 @@
 ##### `__call__(self, A, B)`
 
 A is always a Pattern or PGroup.
-        
 
 ##### `__init__(self, func)`
 
@@ -21,10 +20,14 @@ Initialize self.  See help(type(self)) for accurate signature.
 
 ## Functions
 
-### `DominantPattern(*patterns)`
+### `old_DominantPattern(*patterns)`
 
 Returns the class (and the relative pattern) for the
 type of Pattern to use in a mathematical operation 
+
+### `DominantPattern(*patterns)`
+
+None
 
 ### `Nil(a, b)`
 

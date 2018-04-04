@@ -10,6 +10,10 @@ Abstract base class for Patterns
 
 #### Methods
 
+##### `__bool__(self)`
+
+Returns True if *any* value in the Pattern are greater than zero 
+
 ##### `__eq__(self, other)`
 
 Return self==value.
@@ -342,6 +346,10 @@ is the lowest common multiple of the lengths of the two joining patterns.
 Base type pattern 
 
 #### Methods
+
+##### `__bool__(self)`
+
+Returns True if *any* value in the Pattern are greater than zero 
 
 ##### `__eq__(self, other)`
 
@@ -681,6 +689,10 @@ PGroups should only be found within a Pattern object.
 
 Returns a tuple of information to identify this Pattern 
 
+##### `__bool__(self)`
+
+Returns True if *any* value in the Pattern are greater than zero 
+
 ##### `__eq__(self, other)`
 
 Return self==value.
@@ -760,6 +772,14 @@ Only works in Python 2
 ##### `__str__(self)`
 
 Return str(self).
+
+##### `_update_delay(event, delay)`
+
+Updates the delay value in the event dictionary 
+
+##### `_update_sample(event, sample)`
+
+Updates the sample value in the event dictionary 
 
 ##### `accum(self, *args)`
 
@@ -844,7 +864,7 @@ Returns a nested PGroup as un-nested e.g.
 
 ##### `get_behaviour(self)`
 
-Returns a function that modulates a player event dictionary 
+Returns a function that changes a player event dictionary 
 
 ##### `get_methods(cls)`
 
@@ -1266,6 +1286,10 @@ Abstract base class for Patterns
 
 #### Methods
 
+##### `__bool__(self)`
+
+Returns True if *any* value in the Pattern are greater than zero 
+
 ##### `__eq__(self, other)`
 
 Return self==value.
@@ -1670,6 +1694,14 @@ Returns True if this == that
 ### `group_modi(pgroup, index)`
 
 Returns value from pgroup that modular indexes nested groups 
+
+### `get_avg_if(item1, item2, func=<lambda>)`
+
+None
+
+### `sum_delays(a, b)`
+
+None
 
 ## Data
 

@@ -4,7 +4,12 @@
 
 ### `NumberKey(self, value, reference)`
 
-
+An object that acts like a number but may have dependencies when returing its
+value. These are used when returing Player object attribute values accessed via
+`getattr` e.g. `p1.dur` or `getattr(p1, "dur")`. The parent attribute is the Player
+that contains the key or the referenced key in the case that the value has been
+maniupulated. e.g. if `p1` is using `p2.degree` then `p1.degree.parent == p1` and 
+`p1.degree.value.parent == p2`.
 
 #### Methods
 
@@ -108,6 +113,10 @@ If operating with a pattern, return a pattern of values
 
 Returns a PlayerKey whose function returns an accompanying note 
 
+##### `deepmap(self, mapping, default=0)`
+
+Like map, but nested values are directly mapped 
+
 ##### `index(self, sequence)`
 
 Returns a Player Key that returns the element from sequence indexed using int(self) 
@@ -153,11 +162,20 @@ d1 >> play("x-o-", sample=d1.degree.simple_map( { "-" : -1, "o" : var([0,2]) }))
 
 Returns a child Player Key based on the func 
 
+##### `versus(self)`
+
+e.g. `p1.pitch.versus(*rules)` 
+
 ---
 
 ### `PlayerKey(self, value=None, reference=None, parent=None, attr=None)`
 
-
+An object that acts like a number but may have dependencies when returing its
+value. These are used when returing Player object attribute values accessed via
+`getattr` e.g. `p1.dur` or `getattr(p1, "dur")`. The parent attribute is the Player
+that contains the key or the referenced key in the case that the value has been
+maniupulated. e.g. if `p1` is using `p2.degree` then `p1.degree.parent == p1` and 
+`p1.degree.value.parent == p2`.
 
 #### Methods
 
@@ -261,6 +279,10 @@ If operating with a pattern, return a pattern of values
 
 Returns a PlayerKey whose function returns an accompanying note 
 
+##### `deepmap(self, mapping, default=0)`
+
+Like map, but nested values are directly mapped 
+
 ##### `index(self, sequence)`
 
 Returns a Player Key that returns the element from sequence indexed using int(self) 
@@ -311,6 +333,10 @@ Returns a child Player Key based on the func
 Updates the contents of the PlayerKey *if* the time value is different to self.last_updated.
 If they are the same, the the contents become a PGroup of the two values 
 
+##### `versus(self)`
+
+e.g. `p1.pitch.versus(*rules)` 
+
 ---
 
 ### `Accompany(self, freq=0, rel=[0, 2, 4])`
@@ -330,6 +356,14 @@ Initialize self.  See help(type(self)) for accurate signature.
 ---
 
 ## Functions
+
+### `_wrapper(f)`
+
+Decorator function for forcing functions with a single value to return a Pattern object 
+
+### `_invert(value)`
+
+None
 
 ## Data
 

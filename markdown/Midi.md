@@ -27,7 +27,7 @@ If a beat value has been set, return it, otherwise return None
 
 ### `MidiOut(self, degree=0, **kwargs)`
 
-
+SynthDef proxy for sending midi message via supercollider 
 
 #### Methods
 
@@ -66,26 +66,6 @@ Return str(self).
 ---
 
 ## Functions
-
-### `miditofreq(midinote)`
-
-Converts a midi number to frequency 
-
-### `midi2cps(midinote)`
-
-Converts a midi number to frequency 
-
-### `_log2(num)`
-
-None
-
-### `freqtomidi(freq)`
-
-None
-
-### `midi(scale, octave, degree, root=0, stepsPerOctave=12)`
-
-Calculates a midinote from a scale, octave, degree, and root 
 
 ## Data
 

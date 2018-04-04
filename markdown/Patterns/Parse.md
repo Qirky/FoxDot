@@ -9,9 +9,13 @@ Handles the parsing of Sample Player Object Strings
 
 ## Functions
 
-### `ParsePlayString(string)`
+### `ParsePlayString(string, flat=False)`
 
 Returns the parsed play string used by sample player 
+
+### `convert_to_int(data)`
+
+Recursively calls until all nested data contains only integers 
 
 ### `arrow_zip(pat1, pat2)`
 

@@ -891,14 +891,15 @@ alpha is the scale parameter and beta is the shape parameter.
 
 ---
 
-### `PZ12(self, p, tokens=[0, 1])`
+### `PZ12(self, tokens=[1, 0], p=[1, 0.5])`
 
 Implementation of the PZ12 algorithm for predetermined random numbers. Using
 an irrational value for p, however, results in a non-determined order of values. 
+Experimental, only works with 2 values.
 
 #### Methods
 
-##### `__init__(self, p, tokens=[0, 1])`
+##### `__init__(self, tokens=[1, 0], p=[1, 0.5])`
 
 Initialize an instance.
 
