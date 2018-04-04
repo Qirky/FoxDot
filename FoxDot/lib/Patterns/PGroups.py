@@ -1,13 +1,11 @@
 from __future__ import absolute_import, division, print_function
 
-# TODO NESTED P|(0,2)
-
-from .Main import PGroup, PatternMethod
+from .Main import PGroup, PatternMethod, sum_delays
 from ..Utils import modi, LCM
 
 class PGroupPrime(PGroup):
-    def __len__(self):
-        return PGroup.__len__(self) + self.ignore
+    WEIGHT  = 1
+    """ Base class for PGroups with "behavior" that affect a Player's event dictionary """
     def change_state(self):
         """ To be overridden by any PGroupPrime that changes state after access by a Player """
         return
@@ -21,6 +19,15 @@ class PGroupPrime(PGroup):
     def _get_delay(self, delay):
         return delay
 
+class metaPGroupPrime(PGroupPrime):
+    """ Base class for PGroups that take any extra arguments to be stored """
+    WEIGHT = 3
+    def __init__(self, *args, **kwargs):
+        PGroupPrime.__init__(self, *args, **kwargs)
+        if isinstance(self, PGroup):
+            self.meta = self.data[self.ignore:]
+            self.data = self.data[:self.ignore]
+
 class PGroupStar(PGroupPrime):
     """ Stutters the values over the length of and event's 'dur' """    
     bracket_style="*()"
@@ -32,8 +39,7 @@ class PGroupPlus(PGroupPrime):
         """ Returns a function that modulates a player event dictionary """
         def action(event, key):
             this_delay = self.calculate_time(float(event['sus']))
-            self._update_event(event, key, this_delay)
-            return event
+            return self._update_event(event, key, this_delay)
         return action
 
 class PGroupPow(PGroupPrime):
@@ -57,17 +63,18 @@ class PGroupDiv(PGroupPrime):
             return 0
 
 class PGroupMod(PGroupPlus):
-    """ Useful for when you want many nested groups. This PGroup flattens the original
+    """ OBSOLETE
+        --------
+        Useful for when you want many nested groups. This PGroup flattens the original
         but the delay times are calculated in the same way as if the values were neseted
      """
     bracket_style="%()"
 
-    def __len__(self):        
+    def __len__(self):
         return len([item for item in self])
 
     def getitem(self, index):
-        data = list(self)
-        return data[index % len(data)]
+        return list(self)[index]
 
     def _get_step(self, dur):
         return float(dur) / len(self.data)
@@ -81,7 +88,7 @@ class PGroupMod(PGroupPlus):
             delay = self._get_delay( i * step )
             if hasattr(item, "calculate_time"):
                 delay += item.calculate_time( step )
-            if isinstance(delay, PGroup):                
+            if isinstance(delay, PGroup):
                 values.extend(list(delay))
             else:
                 values.append( delay )
@@ -94,7 +101,7 @@ class PGroupMod(PGroupPlus):
     def get_iter(group):
         """ Recursively unpacks nested PGroup into an un-nested group"""
         for item in group:
-            if isinstance(item, PGroup) and item.ignore == 0:
+            if isinstance(item, PGroup):
                 for sub in PGroupMod.get_iter(item.data):
                     yield sub
             else:
@@ -106,41 +113,29 @@ class PGroupOr(PGroupPrime):
     bracket_style="|()"
     ignore = -1
     def __init__(self, seq=[]):
-        PGroupPrime.__init__(self, seq)
+        metaPGroupPrime.__init__(self, seq)
+
         # May be changed to a Pattern
+        
         if self.__class__ is not PGroupOr:
+        
             return
         
-        self.data = self.data[:2] # Make sure we only have 2 elements
-
-        # If we contain PGroups that modify time, "flip" them -- What if its in a PRand?
-
-        PGroupTypes = (PGroupMod, PGroupPlus, PGroupStar)
-        
-        l = [p for p in self.data if isinstance(p, PGroupTypes)]
-
-        if len(l) > 0:
-
-            new_data = []
-
-            for key in range(LCM(*[len(p) for p in l])):
-
-                new_data.append(self.__class__([item.getitem(key) if isinstance(item, PGroupTypes) else item for item in self.data]))
-
-            self.__class__ = l[0].__class__
-
-            self.data = new_data
-
-    def __eq__(self, other):
-        return self[0] == other
-    def __ne__(self, other):
-        return self[0] != other
+        self.data = self.data[:1] # Make sure we only have 1 element for data
 
     def calculate_sample(self):
-        return self[1]
+        sample = self.meta[0]
+        if isinstance(sample, PGroupPrime):
+            sample = PGroup(sample)
+        return sample
+
     def calculate_time(self, *args, **kwargs):
-        # Must always be "length 1"
-        return PGroupPrime.calculate_time(self, *args, **kwargs)[0]
+        """ Return a single value, as its always "length" 1 """
+        char_delay = PGroupPrime.calculate_time(self, *args, **kwargs)[0]
+        samp_delay = self.meta[0].calculate_time(*args, **kwargs) if isinstance(self.meta[0], PGroup) else 0
+
+        return sum_delays(char_delay, samp_delay)
+
     def _get_delay(self, *args, **kwargs):
         return 0
     def _get_step(self, dur):
@@ -154,15 +149,25 @@ class PGroupOr(PGroupPrime):
 #    """ Unused """
 #    bracket_style="-()"
 
-class PGroupXor(PGroupPrime):
-    """ The delay of this PGroup is s """
+class PGroupXor(metaPGroupPrime):
+    """ The delay of this PGroup is specified by the last value (not included in the data) """
     bracket_style="^()"
     ignore = -1
-    def __init__(self, *args):
-        self.delay = 0
-        PGroupPrime.__init__(self, *args)    
+    def __init__(self, seq=[]):
+        if isinstance(seq, self.__class__):
+            self.data = seq.data
+            self.meta = seq.meta
+            return
+        metaPGroupPrime.__init__(self, seq)
+        # May be changed to a Pattern
+        if self.__class__ is not PGroupXor:
+            return
+        # Make sure we have at least 1 item of data
+        if len(self.data) == 0 and len(self.meta) == 1:
+            self.data = self.meta
+            self.meta = [0]
     def _get_step(self, dur):
-        return self[-1]
+        return self.meta[0]
     def _get_delay(self, delay):
         return delay
 
@@ -182,8 +187,7 @@ class PGroupXor(PGroupPrime):
 
 @PatternMethod
 def offadd(self, value, dur=0.5):
-    #return self + PGroupXor(0, value).set_delay(dur)
-    return self + PGroupXor((0, value, dur))
+    return self + PGroupXor((0, value, dur))    
 
 @PatternMethod
 def offmul(self, value, dur=0.5):

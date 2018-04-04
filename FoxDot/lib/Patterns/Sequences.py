@@ -72,8 +72,6 @@ class __pattern__(object):
 
     def __xor__(self, other):
         """ P^(x1, x2,..., dur) -  Returns a PGroup that delays each value by dur * n """
-        # TODO - deal with nested other[-1]
-        #return PGroupXor(other[:-1]).set_delay(other[-1])
         return PGroupXor(other)
 
     def __or__(self, other):
@@ -90,6 +88,8 @@ class __pattern__(object):
         return PGroupDiv(other)
 
     def __mod__(self, other):
+        if isinstance(other, list):
+            return Pattern().fromString(other[0], flat=True)
         return PGroupMod(other)
 
     def __and__(self, other):

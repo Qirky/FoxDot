@@ -6,18 +6,23 @@ from ..Utils import *
     Module for key operations on Python lists or FoxDot Patterns
 """
 
-PATTERN_WEIGHTS = ["Pattern", "PGroupPrime", "PGroup"]
+# PATTERN_WEIGHTS = ["Pattern", "PGroupPrime", "PGroup", "metaPGroupPrime"]
 
-def DominantPattern(*patterns):
+def old_DominantPattern(*patterns):
     """ Returns the class (and the relative pattern) for the
         type of Pattern to use in a mathematical operation """
     classes =  [p.__class__.__name__ for p in patterns]
+    print(classes, PATTERN_WEIGHTS)
     for i, name in enumerate(PATTERN_WEIGHTS):
         if name in classes:
             break
     pat = patterns[classes.index(name)]
     cls = pat.__class__    
     return cls, pat    
+
+def DominantPattern(*patterns):    
+    return min([p for p in patterns if hasattr(p, "WEIGHT")], key = lambda x: x.WEIGHT)
+
 
 class POperand:
 
@@ -36,7 +41,9 @@ class POperand:
 
         # Get the dominant pattern type and convert B
 
-        cls, key = DominantPattern(A, B)
+        key = DominantPattern(A, B)
+
+        cls = key.__class__
 
         # Instead of coverting the dominant to its own class, make a true_copy?
 
@@ -53,7 +60,13 @@ class POperand:
 
             try:
 
-                val = self.operate(modi(A.data, i), modi(B.data, i))
+                try:
+
+                    val = self.operate(modi(A.data, i), modi(B.data, i))
+
+                except TypeError as e:
+
+                    raise TypeError("Cannot operate on {!r} and {!r}".format(A, B))
 
             except ZeroDivisionError:
 

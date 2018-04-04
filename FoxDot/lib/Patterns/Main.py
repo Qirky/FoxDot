@@ -72,7 +72,7 @@ def ClassPatternMethod(f):
 
 class metaPattern(object):
     """ Abstract base class for Patterns """
-
+    WEIGHT = -1
     data = None
     bracket_style = "[]"
     debugging = False
@@ -82,9 +82,11 @@ class metaPattern(object):
         # Keep track of the names of any Pattern sub-classes that
         # might be created during runtime
 
-        if self.__class__.__name__ not in PATTERN_WEIGHTS:
+        # if self.__class__.__name__ not in PATTERN_WEIGHTS:
+
+        #     # This is hard coded to be insert before PGroup - should probably check the contents of Pattern weights
             
-            PATTERN_WEIGHTS.insert(-1, self.__class__.__name__)
+        #     PATTERN_WEIGHTS.insert(-2, self.__class__.__name__)
         
         if type(data) is str:
             
@@ -951,6 +953,7 @@ class metaPattern(object):
 
 class Pattern(metaPattern):
     """ Base type pattern """
+    WEIGHT = 0
     debug = False
 
 class PGroup(metaPattern):
@@ -959,7 +962,7 @@ class PGroup(metaPattern):
         PGroups should only be found within a Pattern object.
         
     """
-    
+    WEIGHT = 2
     bracket_style = "()"
     # set this value to negative how many trailing values you don't want treated as "normal"
     ignore = 0
@@ -996,10 +999,6 @@ class PGroup(metaPattern):
             self.__class__ = Pattern
 
             self.data = new_data
-
-    def shape(self):
-        """ Returns the lengths of all nested PGroups - not really useful"""
-        return tuple([item.shape() if isinstance(item, PGroup) else 1 for item in self])
 
     def extend(self, item):
         self.data.extend(item)
@@ -1055,7 +1054,7 @@ class PGroup(metaPattern):
             if isinstance(item, PGroup):
                 sample = item.calculate_sample()
             else:
-                sample = None
+                sample = None            
             values.append(sample)
         if all([v is None for v in values]):
             return None
@@ -1072,35 +1071,19 @@ class PGroup(metaPattern):
     def _update_event(self, event, key, delay):
         sample = self.calculate_sample()
         event = self._update_sample(event, sample)
-        # print("Key:", key, event[key])
         event = self._update_delay(event, delay)
         return event
 
-    def _update_delay(self, event, delay):
+    @staticmethod
+    def _update_delay(event, delay):
         """ Updates the delay value in the event dictionary """
 
-        event["delay"] = get_avg_if(delay, event["delay"], lambda x: x != 0)
+        event["delay"] = sum_delays(event["delay"], delay)
 
-        # print("Event delay is now {!r}".format(event["delay"]))
-        
         return event
 
-    def avg_if(self, other, func):
-        """ Averages the values if cmp is satisfied """
-        if not isinstance(other, PGroup):
-            # Return the Group if we have this single value in it
-            return self if other in self else avg_if_func(self, other, func)
-        else:
-            # Go through each element and repeat process
-            data = []
-            size = LCM(len(self), len(other))
-            for i in range(size):
-                # data.append( avg_if_func(self[i], other[i], func) )
-                data.append( get_avg_if(self[i], other[i], func) )
-            return self.__class__(data)
-        return
-
-    def _update_sample(self, event, sample):
+    @staticmethod
+    def _update_sample(event, sample):
         """ Updates the sample value in the event dictionary """
         if isinstance(sample, PGroup):
             new_sample = sample.replace(None, 0)
@@ -1128,7 +1111,7 @@ class PGroup(metaPattern):
         other  = PatternFormat(other)
         if isinstance(other, Pattern):
             return other.ne(self)
-        for i, item in enumerate(self): # possibly LCM
+        for i, item in enumerate(self.data): # possibly LCM?
             item = item != modi(other,i)
             if not isinstance(item, metaPattern):
                 item = int(item)
@@ -1145,7 +1128,7 @@ class PGroup(metaPattern):
         other  = PatternFormat(other) # bad function name
         if isinstance(other, Pattern):
             return other.eq(self)
-        for i, item in enumerate(self): # possibly LCM
+        for i, item in enumerate(self.data): # possibly LCM?
             item = item == modi(other,i)
             if not isinstance(item, metaPattern):
                 item = int(item)
@@ -1465,12 +1448,7 @@ def equal_values(this, that):
     """ Returns True if this == that """
     comp = this == that
     if isinstance(comp, metaPattern):
-        try:
-            result = all(list(comp))
-        except:
-            print(this, that)
-            raise Exception("HI RYAN")
-        return result
+        return all(list(comp))        
     else:
         return comp
 
@@ -1495,9 +1473,26 @@ def get_avg_if(item1, item2, func = lambda x: x != 0):
         result = avg_if_func(item1, item2, func)
     return result
 
-def avg_if_func(a, b, f):
-    # print("a", a, "b", b, "=> summing is", bool(f(b)))
-    # Don't bother averaging if they are equal
-    if bool(b==a):
+def sum_delays(a, b):
+    if bool(a == b):
         return a
-    return ((a + b) / 2) if f(b) else (a + b)
+    
+    if not isinstance(a, PGroup):
+        
+        a = PGroup(a)
+    
+    if not isinstance(b, PGroup):
+        
+        b = PGroup(b)
+
+    sml, lrg = sorted((a, b), key=lambda x: len(x))
+
+    if all([item in lrg for item in sml]):
+
+        value = lrg
+
+    else:
+
+        value = a + b
+
+    return value if len(value) > 1 else value[0]

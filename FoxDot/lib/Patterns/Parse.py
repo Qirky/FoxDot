@@ -11,7 +11,7 @@ import re
 
 from .PlayString import *
 from .Generators import PRand
-from .PGroups    import PGroupMod, PGroupOr, PGroupStar
+from .PGroups    import PGroupMod, PGroupOr, PGroupStar, PGroupPlus
 from .Main       import Pattern, metaPattern, PatternMethod, PGroup, GeneratorPattern
 
 from ..Utils import modi, LCM
@@ -20,11 +20,11 @@ re_nests  = r"\((.*?)\)"
 re_square = r"\[.*?\]"
 re_curly  = r"\{.*?\}"
 re_arrow  = r"<.*?>"
-square_type = PGroupMod
+square_type = PGroupPlus
 braces_type = PRand
 bar_type    = PGroupOr
 
-def ParsePlayString(string):
+def ParsePlayString(string, flat=False):
     """ Returns the parsed play string used by sample player """
     output, _ = feed(string)
     return output
