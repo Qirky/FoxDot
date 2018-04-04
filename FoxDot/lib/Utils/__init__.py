@@ -127,9 +127,30 @@ def get_inverse_op(method):
         return method.replace("__", "__r", 1)
     return method
 
+def isiterable(obj):
+    """ Returns true if an object is iterable by using `iter(obj)`"""
+    try:
+        iter(obj)
+        return True
+    except:
+        return False
+
+def recursive_any(seq):
+    """ Like any but checks lists recursively """
+    for item in seq:
+        if isiterable(item):
+            if recursive_any(item):
+                return True
+        else:
+            if bool(item):
+                return True
+    else:
+        return False
+
 # Classes
 
 class dots:
     """ Class for representing long Patterns in strings """
     def __repr__(self):
         return '...'
+
