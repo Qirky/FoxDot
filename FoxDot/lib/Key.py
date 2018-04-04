@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from .Patterns import *
 from .TimeVar import TimeVar
+from .Utils import recursive_any
 from functools import partial
 
 
@@ -429,7 +430,8 @@ class NumberKey(object):
             value = None
             for func, result in funcs.items():
                 #if bool(func()) is True:
-                if any(asPattern(func())):
+                #print(func(), any(asPattern(func())), "->", result())
+                if recursive_any(asPattern(func())):
                     value = result()
             if value is None:
                 value = default
@@ -774,8 +776,7 @@ Pattern.PlayerKey = PlayerKey
 def _wrapper(f):
     """ Decorator function for forcing functions with a single value to return a Pattern object """
     def new_func(value):
-        #return f(asStream(value))
-        pattern = f(asStream(value))
+        return f(asStream(value))
     return new_func
 
 def _invert(value):
