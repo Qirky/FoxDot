@@ -1,15 +1,35 @@
-FoxDot - Live Coding with Python v0.5
+FoxDot - Live Coding with Python v0.6
 =====================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.5.14 fixes and updates
+### v0.6.0 fixes and updates
 
-- Improved the behaviour of repeatedly calling methods when using the `cycle` keyword:
+- Added functionality to specify samples when using the `play` SynthDef. This can be done from the play string by using the bar character in the form `|<char><sample>|`. These can also be patterns:
 ```python
-# Calls "stutter" on the 6th beat of an 8 beat cycle
-p1 >> pads().every(6, "stutter", cycle=8)
+p1 >> play("|x2|-u-")
+
+p1 >> play("(x )( |x[23]|)u ")
+
+p1 >> play("|x{0123}| u ")
+
+p1 >> play("|[xxxx][23]| u ") 
 ```
+- Improved timing of musical events slightly
+- Added ability to set tunings for scales
+```python
+Scale.default.set("major", tuning=Tuning.just)
+
+Scale.default.set("minor", tuning=Tuning.ET12)
+
+Scale.default.set("mixolyidian", tuning=[0, 1, 2, 3, 4, 5, 6, 7 ,8, 9, 10, 11])
+```
+- You no longer need to specify pattern types in functions used in `PlayerKey.map`. Previously this would have thrown an exception but now does not:
+```python
+p1 >> pluck([0,1])
+p2 >> pluck(p1.pitch.map({1: lambda x: x + (0,2)}))
+```
+
    
 ---
 

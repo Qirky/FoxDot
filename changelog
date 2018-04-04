@@ -1,3 +1,11 @@
+### v0.5.14 fixes and updates
+
+- Improved the behaviour of repeatedly calling methods when using the `cycle` keyword:
+```python
+# Calls "stutter" on the 6th beat of an 8 beat cycle
+p1 >> pads().every(6, "stutter", cycle=8)
+```
+
 ### v0.5.13 fixes and updates
 
 - Improved `TimeVar` algorithm and added `sinvar` class, which is a subclass of `linvar` but calculates it's values using a sinewave as opposed a linear scale.
