@@ -6,7 +6,7 @@ SynthDef.new(\dbass,
 		freq = [freq, freq+fmod] * Line.ar(Rand(0.5,1.5),1,0.02);
 		freq=(freq / 4);
 		amp=(amp * 0.8);
-		osc=( VarSaw.ar(freq, width: LFTri.ar(0.5/sus, iphase:0.9, add:0.8, mul: 0.2), mul: amp));
+		osc=( VarSaw.ar(freq, width: LFTri.ar((0.5 * rate)/sus, iphase:0.9, add:0.8, mul: 0.2), mul: amp));
 		env=EnvGen.ar(Env([0,1,0.8,0.8,0], [0.02, 0.01, sus/2, sus/2]), doneAction: 0);
 		osc=(osc * env);
 		osc = Mix(osc) * 0.5;
