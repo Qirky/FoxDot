@@ -84,7 +84,6 @@ FoxDot\lib\Workspace\tmp\tempfile.txt
 FoxDot\osc\Buffers.scd
 FoxDot\osc\Info.scd
 FoxDot\osc\OscFunc.scd
-FoxDot\osc\test.scd
 FoxDot\osc\sceffects\FilterSwell.scd
 FoxDot\osc\sceffects\FrequencyModulationPulse.scd
 FoxDot\osc\sceffects\FrequencyModulationSaw.scd
@@ -113,6 +112,7 @@ FoxDot\osc\sceffects\trimLength.scd
 FoxDot\osc\sceffects\vibrato.scd
 FoxDot\osc\sceffects\wavesShapeDistortion.scd
 FoxDot\osc\scsyndef\ambi.scd
+FoxDot\osc\scsyndef\angel.scd
 FoxDot\osc\scsyndef\arpy.scd
 FoxDot\osc\scsyndef\audioin.scd
 FoxDot\osc\scsyndef\bass.scd
@@ -124,6 +124,7 @@ FoxDot\osc\scsyndef\charm.scd
 FoxDot\osc\scsyndef\creep.scd
 FoxDot\osc\scsyndef\crunch.scd
 FoxDot\osc\scsyndef\dab.scd
+FoxDot\osc\scsyndef\dbass.scd
 FoxDot\osc\scsyndef\dirt.scd
 FoxDot\osc\scsyndef\donk.scd
 FoxDot\osc\scsyndef\donk1.scd
@@ -135,6 +136,7 @@ FoxDot\osc\scsyndef\glass.scd
 FoxDot\osc\scsyndef\gong.scd
 FoxDot\osc\scsyndef\growl.scd
 FoxDot\osc\scsyndef\karp.scd
+FoxDot\osc\scsyndef\keys.scd
 FoxDot\osc\scsyndef\klank.scd
 FoxDot\osc\scsyndef\lazer.scd
 FoxDot\osc\scsyndef\longsaw.scd
@@ -166,11 +168,13 @@ FoxDot\osc\scsyndef\sitar.scd
 FoxDot\osc\scsyndef\snick.scd
 FoxDot\osc\scsyndef\soft.scd
 FoxDot\osc\scsyndef\soprano.scd
+FoxDot\osc\scsyndef\space.scd
 FoxDot\osc\scsyndef\spark.scd
 FoxDot\osc\scsyndef\spick.scd
 FoxDot\osc\scsyndef\squish.scd
 FoxDot\osc\scsyndef\star.scd
 FoxDot\osc\scsyndef\swell.scd
+FoxDot\osc\scsyndef\test.scd
 FoxDot\osc\scsyndef\twang.scd
 FoxDot\osc\scsyndef\varsaw.scd
 FoxDot\osc\scsyndef\viola.scd
@@ -388,13 +392,9 @@ FoxDot\snd\l\upper\glitch_2.wav
 FoxDot\snd\l\upper\glitch_3.wav
 FoxDot\snd\l\upper\glitch_4.wav
 FoxDot\snd\l\upper\glitch_40.wav
+FoxDot\snd\m\lower\0_tom.wav
 FoxDot\snd\m\lower\tom (1).WAV
-FoxDot\snd\m\lower\tom (2).WAV
 FoxDot\snd\m\lower\tom (3).wav
-FoxDot\snd\m\lower\tom (4).wav
-FoxDot\snd\m\lower\tom (5).wav
-FoxDot\snd\m\lower\tom (6).wav
-FoxDot\snd\m\lower\tom (7).wav
 FoxDot\snd\m\lower\tom (8).WAV
 FoxDot\snd\m\upper\tom (1).wav
 FoxDot\snd\m\upper\tom (2).wav
@@ -458,7 +458,6 @@ FoxDot\snd\r\upper\3_metallic.wav
 FoxDot\snd\r\upper\4_metallic.wav
 FoxDot\snd\s\lower\0_shaker.wav
 FoxDot\snd\s\lower\1_shaker.wav
-FoxDot\snd\s\lower\2_shaker.wav
 FoxDot\snd\s\lower\3_shaker.wav
 FoxDot\snd\s\lower\4_shaker.wav
 FoxDot\snd\s\upper\0_tamborine.wav
