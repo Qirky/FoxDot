@@ -17,6 +17,7 @@ import math
 from .Main import *
 from .PGroups import *
 from .Operations import *
+from .Generators import PRand
 
 MAX_SIZE = 2048
 
