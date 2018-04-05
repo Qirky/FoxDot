@@ -107,7 +107,7 @@ class PGroupMod(PGroupPlus):
             else:
                 yield item
 
-class PGroupOr(PGroupPrime):
+class PGroupOr(metaPGroupPrime):
     """ Used to specify `sample` values, usually from within a play string using values 
         between "bar" signs e.g. "|x2|" """
     bracket_style="|()"
