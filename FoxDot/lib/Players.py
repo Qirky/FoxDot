@@ -2001,7 +2001,7 @@ class rest(object):
     ''' Represents a rest when used with a Player's `dur` keyword
     '''
     def __init__(self, dur=1):
-        self.dur = dur
+        self.dur = dur if not isinstance(dur, self.__class__) else dur.dur
     def __repr__(self):
         return "<rest: {}>".format(self.dur)
     def __add__(self, other):
