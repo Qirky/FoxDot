@@ -271,6 +271,10 @@ class _DefaultScale(ScaleType):
         else:
             return object.__getattribute__(self, attr)
 
+    # Python2
+    def __getattr__(self, attr):
+        return self.__getattribute__(attr)
+
 # Custom made fibonacci tuing
 
 ##fib = [0,1]
