@@ -362,15 +362,15 @@ class __scale__:
             lib.extend([(key, value) for key, value in items if isinstance(value, ScalePattern)])
         return dict(lib)
 
-    def names():
+    def names(self):
         """ Returns a list of all the scale names """
         return sorted(self.library().keys())
 
-    def scales():
+    def scales(self):
         """ Returns a list of all the scales object """
         return sorted(self.library().values(), key=lambda scale: scale.name)
 
-    def choose():
+    def choose(self):
         """ Scale.choose() -> Returns a random scale object """
         return choice(self.scales())
 
