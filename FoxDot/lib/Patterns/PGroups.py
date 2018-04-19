@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-from .Main import PGroup, PatternMethod, sum_delays
+from .Main import PGroup, PatternMethod, GeneratorPattern, sum_delays
 from ..Utils import modi, LCM
 
 class PGroupPrime(PGroup):
@@ -127,13 +127,14 @@ class PGroupOr(metaPGroupPrime):
         sample = self.meta[0]
         if isinstance(sample, PGroupPrime):
             sample = PGroup(sample)
+        elif isinstance(sample, GeneratorPattern):
+            sample = sample.getitem()
         return sample
 
     def calculate_time(self, *args, **kwargs):
         """ Return a single value, as its always "length" 1 """
         char_delay = PGroupPrime.calculate_time(self, *args, **kwargs)[0]
         samp_delay = self.meta[0].calculate_time(*args, **kwargs) if isinstance(self.meta[0], PGroup) else 0
-
         return sum_delays(char_delay, samp_delay)
 
     def _get_delay(self, *args, **kwargs):
