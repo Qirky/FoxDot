@@ -76,6 +76,7 @@ class metaPattern(object):
     data = None
     bracket_style = "[]"
     debugging = False
+    meta = []
 
     def __init__(self, data=[]):
 
@@ -105,6 +106,11 @@ class metaPattern(object):
             
             self.data = data
             self.make()
+
+
+    def new(self, data):
+        """ Returns a new pattern object with this Pattern's class type """
+        return self.__class__(data + self.meta)
 
     @classmethod
     def get_methods(cls):
@@ -175,7 +181,7 @@ class metaPattern(object):
         """ Returns a copy of the Pattern such that alterations to the
             Pattern.data do not affect the original.
         """
-        return self.__class__(self.data[:])
+        return self.new(self.data[:])
 
     def true_copy(self, new_data=None):
         """ Returns a copy of the Pattern such that items within the
@@ -198,7 +204,7 @@ class metaPattern(object):
         """ Called by __getitem__() """
         # We can get multiple values by indexing with a pattern or tuple
         if isinstance(key, (metaPattern, tuple)):
-            val = self.__class__([self.getitem(n) for n in key])
+            val = self.new([self.getitem(n) for n in key])
         # We can get items using a slice
         elif isinstance(key, slice):
             val = self.__getslice__(key.start,  key.stop, key.step)
@@ -343,7 +349,7 @@ class metaPattern(object):
         return PPow2(self, other)
 
     def __abs__(self):
-        return self.__class__([abs(item) for item in self])
+        return self.new([abs(item) for item in self])
 
     def __bool__(self):
         """ Returns True if *any* value in the Pattern are greater than zero """
@@ -388,9 +394,9 @@ class metaPattern(object):
     def __ne__(self, other):
         return PNe(self, other)
     def eq(self, other):
-        return self.__class__([int(value == modi(asStream(other), i)) for i, value in enumerate(self)])
+        return self.new([int(value == modi(asStream(other), i)) for i, value in enumerate(self)])
     def ne(self, other):
-        return self.__class__([int(value != modi(asStream(other), i)) for i, value in enumerate(self)])
+        return self.new([int(value != modi(asStream(other), i)) for i, value in enumerate(self)])
     # def gt(self, other):
     #     return self.__class__([int(value > modi(asStream(other), i)) for i, value in enumerate(self)])
     # def lt(self, other):
@@ -408,7 +414,7 @@ class metaPattern(object):
             if not isinstance(value, PGroup):
                 value = int(value)
             values.append(value)
-        return self.__class__(values)
+        return self.new(values)
 
     def __ge__(self, other):
         #return self.__class__([int(value >= modi(asStream(other), i)) for i, value in enumerate(self)])
@@ -419,7 +425,7 @@ class metaPattern(object):
             if not isinstance(value, PGroup):
                 value = int(value)
             values.append(value)
-        return self.__class__(values)
+        return self.new(values)
 
     def __lt__(self, other):
         #return self.__class__([int(value < modi(asStream(other), i)) for i, value in enumerate(self)])
@@ -430,7 +436,7 @@ class metaPattern(object):
             if not isinstance(value, PGroup):
                 value = int(value)
             values.append(value)
-        return self.__class__(values)
+        return self.new(values)
 
     def __le__(self, other):
         #return self.__class__([int(value <= modi(asStream(other), i)) for i, value in enumerate(self)])
@@ -441,7 +447,7 @@ class metaPattern(object):
             if not isinstance(value, PGroup):
                 value = int(value)
             values.append(value)
-        return self.__class__(values)
+        return self.new(values)
         
     # Methods that return augmented versions of original
 
@@ -456,7 +462,7 @@ class metaPattern(object):
             data = self.data[:]
             shuffle(data)
             items.extend(data)
-        return self.__class__(items)
+        return self.new(items)
 
     def deep_shuffle(self, n=1):
         """ Returns a new Pattern with shuffled contents and shuffles
@@ -468,7 +474,7 @@ class metaPattern(object):
             data = [(item if not isinstance(item, metaPattern) else item) for item in self.data[:]]
             shuffle(data)
             items.extend(data)
-        return self.__class__(items)
+        return self.new(items)
 
     def true_shuffle(self, n=1):
         """ Returns a new Pattern with completely shuffle contents such
@@ -479,20 +485,20 @@ class metaPattern(object):
             data = list(self)
             shuffle(data)
             items.extend(data)
-        return self.__class__(items)
+        return self.new(items)
 
     def reverse(self):
         """ Reverses the contents of the Pattern. Nested patterns are
             not reversed. To reverse the contents of nester patterns
             use `Pattern.mirror()`
         """
-        new = self.__class__(self.data[:])
+        new = self.new(self.data[:])
         new.data.reverse()
         return new
 
     def sort(self):
         """ Used in place of sorted(pattern) to force type """
-        return self.__class__(sorted(self.data))
+        return self.new(sorted(self.data))
 
     def mirror(self):
         """ Reverses the pattern. Differs to `Pattern.reverse()` in that
@@ -508,7 +514,7 @@ class metaPattern(object):
             
             new.append(value)
             
-        return self.__class__(new)
+        return self.new(new)
 
     def stutter(self, n=2):
         """ Returns a new Pattern with each item repeated by `n`. Use
@@ -525,7 +531,7 @@ class metaPattern(object):
         for i in range(lrg):
             for j in range(modi(n,i)):
                 new.append(modi(self.data,i))
-        return self.__class__(new)
+        return self.new(new)
 
     def arp(self, arp_pattern):
         """ Return a new Pattern with each item repeated len(arp_pattern) times
@@ -552,7 +558,7 @@ class metaPattern(object):
         for i in range(size):
             for seq in sequences:
                 new.append(modi(seq, i))
-        return self.__class__(new)
+        return self.new(new)
 
     def invert(self):
         """ Inverts the values with the Pattern.
@@ -564,7 +570,7 @@ class metaPattern(object):
                 new.append(item.invert())
             except:
                 new.append((((item / lrg) * -1) + 1) * lrg)
-        return self.__class__(new)
+        return self.new(new)
 
     def shufflets(self, n):
         """ Returns a Pattern of 'n' number of PGroups made from shuffled
@@ -598,7 +604,7 @@ class metaPattern(object):
         new = [0]
         for i in range(n-1):
             new.append( new[-1] + self[i] )
-        return self.__class__(new)
+        return self.new(new)
 
     @loop_pattern_method
     def stretch(self, size):
@@ -606,7 +612,7 @@ class metaPattern(object):
         new = []
         for n in range(size):
             new.append( modi(self.data, n) )
-        new = self.__class__(new)
+        new = self.new(new)
         return new
 
     @loop_pattern_method
@@ -615,7 +621,7 @@ class metaPattern(object):
         new = []
         for i in range(n):
             new += list(self)
-        return self.__class__(new)
+        return self.new(new)
 
     @loop_pattern_method
     def duplicate(self, n):
@@ -623,7 +629,7 @@ class metaPattern(object):
         new = []
         for i in range(n):
             new += self.data
-        return self.__class__(new)
+        return self.new(new)
 
     @loop_pattern_method
     def iter(self, n):
@@ -640,18 +646,18 @@ class metaPattern(object):
         for pair in [list(val) for val in [reversed(self[i:i+n]) for i in range(0, len(self), n)]]:
             for item in pair:
                 new.append(item)
-        return self.__class__(new)
+        return self.new(new)
 
     @loop_pattern_method
     def rotate(self, n=1):
         n = int(n)
         new = self.data[n:] + self.data[0:n]
-        return self.__class__(new)
+        return self.new(new)
 
     @loop_pattern_method
     def sample(self, n):
         """ Returns an n-length pattern from a sample"""
-        return self.__class__(random.sample(list(self), n))
+        return self.new(random.sample(list(self), n))
 
     @loop_pattern_method
     def palindrome(self, a=0, b=None):
@@ -692,7 +698,7 @@ class metaPattern(object):
             if value != last_val:
                 new.append(value)
             last_val = value                
-        return self.__class__(new)
+        return self.new(new)
 
     def add(self, other):
         return self + other
@@ -713,7 +719,7 @@ class metaPattern(object):
         while func(new) < value:
             new.append(self[i])
             i+=1
-        return self.__class__(new)
+        return self.new(new)
 
     # Methods that take a non number / pattern argument
 
@@ -727,7 +733,7 @@ class metaPattern(object):
                 new.append(repl)
             else:
                 new.append(item)
-        return self.__class__(new)
+        return self.new(new)
 
     def map(self, mapping):
         """ Similar to Pattern.replace, but takes a dictionary of values """
@@ -737,7 +743,7 @@ class metaPattern(object):
                 new.append(item.map(mapping))
             else:
                 new.append(mapping.get(item, 0))
-        return self.__class__(new)
+        return self.new(new)
 
     def layer(self, method, *args, **kwargs):
         """ Zips a pattern with a modified version of itself. Method argument
@@ -760,17 +766,16 @@ class metaPattern(object):
 
     def map(self, func):
         """ Returns a Pattern that calls `func` on each item """
-        return self.__class__([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])       
+        return self.new([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])       
     
     def extend(self, item):
         self[len(self):] = [item]
         return self
 
     def new_extend(self, item):
-        new = self.__class__()
-        new.data = list(self.data)
+        new = list(self.data)
         new.extend(item)
-        return new
+        return self.new(new)
 
     def append(self, item):
         self.data.append(item)
@@ -778,10 +783,9 @@ class metaPattern(object):
         return self
 
     def new_append(self, item):
-        new = self.__class__()
-        new.data = list(self.data)
+        new = list(self.data)
         new.append(item)
-        return new
+        return self.new(new)
     
     def i_rotate(self, n=1):
         self.data = self.data[n:] + self.data[0:n]
@@ -835,7 +839,7 @@ class metaPattern(object):
             item1 = self.data[i % len(self.data)]
             item2 = other.data[i % len(other.data)]
             new.append((item1, item2))
-        return self.__class__(new)
+        return self.new(new)
 
     def zip(self, other, dtype=None):
         """ Zips two patterns together. If one item is a tuple, it extends the tuple / PGroup
@@ -886,7 +890,7 @@ class metaPattern(object):
             else:
                 value = (p1, p2)
             new.append(value)
-        return self.__class__(new)
+        return self.new(new)
 
     def deeprzip(self, other):
         new = []
@@ -901,7 +905,7 @@ class metaPattern(object):
             else:
                 value = (p2, p1)
             new.append(value)
-        return self.__class__(new)
+        return self.new(new)
 
     # Returns individual elements / slices
 
@@ -1010,7 +1014,7 @@ class PGroup(metaPattern):
             new_data = list(value)
         else:
             new_data = [value]
-        return self.__class__(list(self.data) + new_data)
+        return self.new(list(self.data) + new_data)
 
     def flatten(self):
         """ Returns a nested PGroup as un-nested e.g.
@@ -1156,7 +1160,7 @@ class PGroup(metaPattern):
             if not isinstance(item, metaPattern):
                 item = int(item)
             values.append(item)
-        return self.__class__(values)
+        return self.new(values)
 
     def __lt__(self, other):
         values = []
@@ -1168,7 +1172,7 @@ class PGroup(metaPattern):
             if not isinstance(item, metaPattern):
                 item = int(item)
             values.append(item)
-        return self.__class__(values)
+        return self.new(values)
 
     def __ge__(self, other):
         values = []
@@ -1180,7 +1184,7 @@ class PGroup(metaPattern):
             if not isinstance(item, metaPattern):
                 item = int(item)
             values.append(item)
-        return self.__class__(values)
+        return self.new(values)
 
     def __le__(self, other):
         values = []
@@ -1192,7 +1196,7 @@ class PGroup(metaPattern):
             if not isinstance(item, metaPattern):
                 item = int(item)
             values.append(item)
-        return self.__class__(values)
+        return self.new(values)
 
 import random
 
