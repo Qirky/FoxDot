@@ -1216,8 +1216,6 @@ class Player(Repeatable):
 
                 self.update_player_key(item.key, self.now(item.key), 0)
 
-                item = item.now()
-
             elif self.queue_block is not None and item.parent in self.queue_block:
 
                 # Update the parent with an up-to-date value
@@ -1226,11 +1224,9 @@ class Player(Repeatable):
 
                     # This doesn't account for PGroups being separated in time
 
-                    item = item.parent.now(item.key)
+                    item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
 
-                else:
-
-                    item = item.now()
+            item = item.now()
 
         if isinstance(item, GeneratorPattern):
 
