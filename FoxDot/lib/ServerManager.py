@@ -279,10 +279,10 @@ class SCLangServerManager(ServerManager):
         self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
 
-    def get_midi_message(self, synthdef, packet):
+    def get_midi_message(self, synthdef, packet, timestamp):
         """ Prepares an OSC message to trigger midi sent from SuperCollider """
 
-        bundle = OSCBundle()
+        bundle = OSCBundle(time=timestamp)
         bundle.setAddress(OSC_MIDI_ADDRESS) # these need to be variable names at least
 
         msg     = OSCMessage(OSC_MIDI_ADDRESS)
@@ -471,7 +471,7 @@ class SCLangServerManager(ServerManager):
 
         if synthdef == "MidiOut": # this should be in a dict of synthdef to functions maybe? we need a "nudge to sync"
 
-            return self.get_midi_message(synthdef, packet)
+            return self.get_midi_message(synthdef, packet, timestamp)
 
         # Create a bundle
         
