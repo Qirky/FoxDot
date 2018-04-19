@@ -159,6 +159,11 @@ def Master():
     """ Returns a `Group` containing all the players currently active in the Clock """
     return Group(*Clock.playing)
 
+def Ramp(t=32, ramp_time=4):
+    """ Returns a `linvar` that goes from 0 to 1 over the course of the last
+        `ramp_time` bars of every `t` length cycle. """
+    return linvar([0,0,1,0],[t-ramp_time, ramp_time, 0, 0])
+
 def allow_connections(valid = True, *args, **kwargs):
     """ Starts a new instance of ServerManager.TempoServer and connects it with the clock. Default port is 57999 """
     if valid:
