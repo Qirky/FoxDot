@@ -78,7 +78,7 @@ class ScalePattern(ScaleType, Pattern):
 
         self.name = name
 
-        self.semitones = list(semitones)
+        self.semitones = semitones
 
         if not isinstance(tuning, TuningType):
 
@@ -110,7 +110,7 @@ class ScalePattern(ScaleType, Pattern):
         return Pattern(tones)
 
     def get_tuned_note(self, degree):
-        return self.tuning[self[degree]]
+        return self.tuning[int(self[degree])]
 
     def get_midi_note(self, degree, octave=5, root=0):
         """ Calculates a midinote from a scale, octave, degree, and root """
@@ -249,7 +249,7 @@ class _DefaultScale(ScaleType):
 
                 self.scale.tuning = kwargs["tuning"]
 
-        elif isinstance(new, (list, Pattern)):
+        elif isinstance(new, (list, Pattern, TimeVar)):
 
             self.scale = ScalePattern(new, *args, **kwargs)
 
@@ -261,7 +261,7 @@ class _DefaultScale(ScaleType):
 
         else:
 
-            print("Warning: {} is not a valid scale".format(new))
+            print("Warning: {!r} is not a valid scale".format(new))
 
         return self
 
