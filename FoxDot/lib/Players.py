@@ -883,7 +883,9 @@ class Player(Repeatable):
 
             del kwargs["n"]
 
-        if self.metro.solo == self and n > 1:
+        # Only send if n > 1 and the player is playing
+
+        if self.metro.solo == self and n > 1 and self.isplaying:
 
             new_event = {}
         
@@ -1199,7 +1201,7 @@ class Player(Repeatable):
 
     # --- Methods for preparing and sending OSC messages to SuperCollider
 
-    def unpack(self, item, debug=False):
+    def unpack(self, item):
         """ Converts a pgroup to floating point values and updates and time var or playerkey relations """
 
         if isinstance(item, TimeVar):
@@ -1214,6 +1216,8 @@ class Player(Repeatable):
 
                 self.update_player_key(item.key, self.now(item.key), 0)
 
+                item = item.now()
+
             elif self.queue_block is not None and item.parent in self.queue_block:
 
                 # Update the parent with an up-to-date value
@@ -1222,11 +1226,11 @@ class Player(Repeatable):
 
                     # This doesn't account for PGroups being separated in time
 
-                    item.parent.get_event()
+                    item = item.parent.now(item.key)
 
-                    # item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
+                else:
 
-            item = item.now()
+                    item = item.now()
 
         if isinstance(item, GeneratorPattern):
 
@@ -1285,7 +1289,7 @@ class Player(Repeatable):
 
         prime_funcs = {}
 
-        event_keys = ["degree"] + [key for key in event.keys() if key != "degree"] # hacky?
+        event_keys = ["degree", "sample"] + [key for key in event.keys() if key not in ("degree", "sample")] # hacky?
 
         for key in event_keys:
 
@@ -1358,6 +1362,10 @@ class Player(Repeatable):
         self.event = self.unduplicate_durs(self.event)
 
         self.event = self.get_prime_funcs(self.event)
+
+        for key in self.event:
+
+            self.event[key] = self.unpack(self.event[key])
 
         # Update internal player keys / schedule future updates
 
