@@ -278,7 +278,7 @@ class BufferManager(object):
                     return fullpath
                 candidates.append(fullpath)
         if candidates:
-            return candidates[index % len(candidates)]
+            return candidates[int(index) % len(candidates)]
         return None
 
     def _patternSearch(self, filename, index):
