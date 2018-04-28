@@ -175,6 +175,8 @@ class SCLangServerManager(ServerManager):
         self.port = osc_port
         self.SCLang_port = sclang_port
 
+        self.midi_nudge = 0
+
         self.booted = False
         self.wait_time = 5
         self.count = 0
@@ -279,6 +281,10 @@ class SCLangServerManager(ServerManager):
         self.fx_names = {name: fx.synthdef for name, fx in fx_list.items() }
         return
 
+    def set_midi_nudge(self, value):
+        self.midi_nudge = value
+        return
+
     def get_midi_message(self, synthdef, packet, timestamp):
         """ Prepares an OSC message to trigger midi sent from SuperCollider """
 
@@ -291,8 +297,9 @@ class SCLangServerManager(ServerManager):
         vel     = min(127, (packet.get("amp", 1) * 128) - 1)
         sus     = packet.get("sus", 0.5)
         channel = packet.get("channel", 0)
+        nudge   = self.midi_nudge
 
-        msg.append( [synthdef, note, vel, sus, channel] )
+        msg.append( [synthdef, note, vel, sus, channel, nudge] )
 
         bundle.append(msg)
 

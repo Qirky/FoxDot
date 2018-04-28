@@ -117,6 +117,7 @@ class TempoClock(object):
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
         self.sleep_time = 0.0001 # The duration to sleep while continually looping
+        self.midi_nudge = 0
 
         # Debug
         self.debugging = False
@@ -193,6 +194,14 @@ class TempoClock(object):
             if self.tempo_server is not None:
             
                 self.tempo_server.update_tempo(value)
+
+        elif attr == "midi_nudge" and self.__setup:
+
+            # Adjust nudge for midi devices
+
+            self.server.set_midi_nudge(value)
+
+            object.__setattr__(self, "midi_nudge", value)
                 
         else:
             self.__dict__[attr] = value
