@@ -885,7 +885,7 @@ class Player(Repeatable):
 
         # Only send if n > 1 and the player is playing
 
-        if self.metro.solo == self and n > 1 and self.isplaying:
+        if self.metro.solo == self and n > 1:
 
             new_event = {}
         
