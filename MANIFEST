@@ -312,9 +312,9 @@ FoxDot\snd\c\lower\voice_3.wav
 FoxDot\snd\c\upper\0_Choral.wav
 FoxDot\snd\c\upper\hit074.wav
 FoxDot\snd\c\upper\hit085.wav
-FoxDot\snd\d\lower\rimshot_0.wav
-FoxDot\snd\d\lower\rimshot_1.wav
-FoxDot\snd\d\lower\rs01.wav
+FoxDot\snd\d\lower\rimshot_00.wav
+FoxDot\snd\d\lower\rimshot_01.wav
+FoxDot\snd\d\lower\rimshot_02.wav
 FoxDot\snd\d\upper\alt_snare_0.wav
 FoxDot\snd\e\lower\cb0.wav
 FoxDot\snd\e\lower\cb1.wav
@@ -376,7 +376,6 @@ FoxDot\snd\k\upper\misc (1).wav
 FoxDot\snd\k\upper\misc (2).wav
 FoxDot\snd\k\upper\misc (3).wav
 FoxDot\snd\k\upper\misc (5).wav
-FoxDot\snd\k\upper\misc (6).wav
 FoxDot\snd\l\lower\perc_0.wav
 FoxDot\snd\l\lower\perc_1.wav
 FoxDot\snd\l\lower\perc_2.wav
