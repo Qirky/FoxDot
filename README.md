@@ -8,7 +8,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - Fixed play string error when using random characters and random sample numbers
 - Added timestamping to `MidiOut` SynthDef (to be re-named `midi` in future) and a `Clock.midi_nudge` value that can be set to help synchronise FoxDot with an external MIDI synth. A value of around 0.15 - 0.25 is typical.
 
-```
+```python
 # Set up two simple loops and adjust Clock.midi_nudge until they are synchronised
 
 p1 >> MidiOut([0,7])
