@@ -2,6 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 from .Patterns import Pattern, PGroup, asStream
 from .TimeVar import TimeVar
+from .Root import Root
 
 from random import choice
 import math
@@ -178,6 +179,10 @@ class PentatonicScalePattern(ScalePattern):
 
     def __init__(self, scale):
 
+        self.update(scale)
+
+    def update(self, scale):
+
         self.data      = scale
         self.steps     = scale.steps
         self.semitones = scale.semitones
@@ -206,8 +211,7 @@ class PentatonicScalePattern(ScalePattern):
             yield note
 
     def __getitem__(self, key):
-
-        return self.values(self.data)[key]
+        return self.values(self.data)[int(key)]
 
 class FreqScalePattern(ScalePattern):
     def __init__(self):
@@ -231,6 +235,7 @@ class _DefaultScale(ScaleType):
     """ Wrapper for Scale.default """
     def __init__(self, scale):
         self.scale = scale
+        self.pentatonic = self.scale.pentatonic
 
     def __len__(self):
         return len(self.scale)
@@ -249,6 +254,8 @@ class _DefaultScale(ScaleType):
 
                 self.scale.tuning = kwargs["tuning"]
 
+            self.pentatonic.update(self.scale.pentatonic)
+
         elif isinstance(new, (list, Pattern, TimeVar)):
 
             self.scale = ScalePattern(new, *args, **kwargs)
@@ -259,6 +266,8 @@ class _DefaultScale(ScaleType):
 
                 Scale[self.scale.name] = self.scale
 
+            self.pentatonic.update(self.scale.pentatonic)
+
         else:
 
             print("Warning: {!r} is not a valid scale".format(new))
@@ -266,7 +275,7 @@ class _DefaultScale(ScaleType):
         return self
 
     def __getattribute__(self, attr):
-        if attr not in ("scale", "set"):
+        if attr not in ("scale", "set", "pentatonic"):
             return self.scale.__getattribute__(attr)
         else:
             return object.__getattribute__(self, attr)
@@ -376,3 +385,9 @@ class __scale__:
 
 
 Scale = __scale__()
+
+
+# class Chord:
+#     def __init__(self):
+#         self.scale = Scale.default
+#         self.root  = Root.default
