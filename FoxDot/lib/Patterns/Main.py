@@ -685,6 +685,10 @@ class metaPattern(object):
         
         return self | self.mirror()[a:b]
 
+    def alt(self, other):
+        """ Returns Pattern(other) """
+        return self.__class__(other)
+
     def norm(self):
         """ Returns the pattern with all values between 0 and 1 """
         pos = self - min(self)
