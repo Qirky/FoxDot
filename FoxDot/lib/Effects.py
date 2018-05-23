@@ -341,8 +341,8 @@ fx = FxList.new('tremolo', 'tremolo', {'tremolo': 0, 'beat_dur': 1}, order=2)
 fx.add("osc = osc * SinOsc.ar( tremolo / beat_dur, mul:0.5, add:0.5)")
 fx.save()
 
-fx = FxList.new('echo', 'combDelay', {'echo': 0, 'sus': 1, 'decay': 1}, order=2)
-fx.add('osc = osc + CombL.ar(osc, delaytime: echo * sus * 2, maxdelaytime: 2, decaytime: decay)')
+fx = FxList.new('echo', 'combDelay', {'echo': 0, 'beat_dur': 1, 'decay': 1}, order=2)
+fx.add('osc = osc + CombL.ar(osc, delaytime: echo * beat_dur, maxdelaytime: 2, decaytime: decay * beat_dur)')
 fx.save()
 
 fx = FxList.new('spin', 'spinPan', {'spin': 0,'sus': 1}, order=2)
