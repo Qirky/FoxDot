@@ -57,6 +57,22 @@ def midi(scale, octave, degree, root=0, stepsPerOctave=12):
 
     return midival
 
+def get_freq_and_midi(degree, octave, root, scale):
+    """ Returns the frequency and midinote """
+
+    # TODO -- make sure it's always a scale
+
+    if isinstance(scale, ScaleType):
+
+        freq, midinote = scale.get_freq(degree, octave, root, get_midi=True)
+
+    else:
+
+        midinote = midi( scale, octave, degree, root )
+        freq     = miditofreq(midinote)
+
+    return freq, midinote
+
 class ScaleType:
     pass
 

@@ -142,7 +142,7 @@ from .Patterns import *
 
 from .Root import Root
 from .Scale import Scale, ScaleType, ScalePattern
-from .Scale import midi, miditofreq
+from .Scale import midi, miditofreq, get_freq_and_midi
 
 from .Bang import Bang
 
@@ -479,9 +479,8 @@ class Player(Repeatable):
                     if isinstance(self.__dict__[name], PlayerKey):
 
                         self.__dict__[name].update_pattern()
-                else:
 
-                    self.update_player_key(name, self.now(name), 0) # self.now might be an issue
+                self.update_player_key(name, self.now(name), 0) # self.now might be an issue
 
                 return
             
@@ -1216,15 +1215,30 @@ class Player(Repeatable):
 
                 self.update_player_key(item.key, self.now(item.key), 0)
 
+            # If the parent is in the same queue block, make sure its values are up-to-date
+
             elif self.queue_block is not None and item.parent in self.queue_block:
 
                 # Update the parent with an up-to-date value
 
                 if not self.queue_block.already_called(item.parent):
 
-                    # This doesn't account for PGroups being separated in time
+                    if False: #item.key == "freq": # TODO: Make this less hacky
 
-                    item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
+                        freq, midi = get_freq_and_midi(
+                            item.parent.now("degree"), 
+                            item.parent.now("oct"),
+                            item.parent.now("root"), 
+                            item.parent.scale
+                        )
+
+                        item.parent.update_player_key(item.key, freq, 0)
+
+                    else:
+
+                        # This doesn't account for PGroups being separated in time
+
+                        item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
 
             item = item.now()
 
@@ -1407,7 +1421,7 @@ class Player(Repeatable):
 
             given_tempo = group_modi(kwargs.get("tempo", self.event.get("tempo", self.metro.bpm)), index)
 
-            if given_tempo is None:
+            if given_tempo in (None, 0):
 
                 tempo = 1
 
@@ -1447,16 +1461,7 @@ class Player(Repeatable):
 
             scale  = kwargs.get("scale", self.scale)
 
-            # TODO -- make sure it's always a scale
-
-            if isinstance(scale, ScaleType):
-
-                freq, midinote = scale.get_freq(degree, octave, root, get_midi=True)
-
-            else:
-
-                midinote = midi( scale, octave, degree, root )
-                freq     = miditofreq(midinote)
+            freq, midinote = get_freq_and_midi(degree, octave, root, scale)
             
             message.update({'freq':  freq, 'midinote': midinote})
             
@@ -1648,7 +1653,13 @@ class Player(Repeatable):
 
         if self.synthdef == SamplePlayer:
 
-            self.buf = bufnum
+            if len(bufnum) > 0:
+
+                self.buf = bufnum
+
+        elif self.synthdef == LoopPlayer:
+
+            pass
 
         else:
 
