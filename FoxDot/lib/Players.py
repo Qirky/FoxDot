@@ -1410,7 +1410,7 @@ class Player(Repeatable):
  
             buf  = self.samples.getBufferFromSymbol(str(degree), sample).bufnum
             
-            message = {'buf': buf, 'pos': pos}
+            message.update( {'buf': buf,'pos': pos} )
 
         elif self.synthdef == LoopPlayer:
 
@@ -1451,7 +1451,7 @@ class Player(Repeatable):
 
                 pos += self.metro.beat_dur(sus)
 
-            message = {'pos': pos, 'buf': buf, 'rate': rate}
+            message.update( {'pos': pos, 'buf': buf, 'rate': rate} )
 
         else:
 
@@ -1656,6 +1656,8 @@ class Player(Repeatable):
             if len(bufnum) > 0:
 
                 self.buf = bufnum
+
+        # ignore updates for loop player
 
         elif self.synthdef == LoopPlayer:
 
