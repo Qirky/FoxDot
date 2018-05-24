@@ -36,7 +36,7 @@ from .Prompt import TextPrompt
 from .BracketHandler import BracketHandler
 from .TextBox import ThreadedText
 from .LineNumbers import LineNumbers
-from .MenuBar import MenuBar
+from .MenuBar import MenuBar, PopupMenu
 from ..Code import write_to_file
 
 from functools import partial
@@ -127,6 +127,7 @@ class workspace:
         # --- start create menu
 
         self.menu = MenuBar(self, visible = True)
+        self.popup = PopupMenu(self)
        
         # Create y-axis scrollbar
 
@@ -173,11 +174,12 @@ class workspace:
         alt = "Option" if SYSTEM == MAC_OS else "Alt"
 
         self.text.bind("<Return>",          self.newline)
-        self.text.bind("<KP_Enter>",        self.newline)
         self.text.bind("<BackSpace>",       self.backspace)
         self.text.bind("<Delete>",          self.delete)
         self.text.bind("<Tab>",             self.tab)
         self.text.bind("<Key>",             self.keypress)
+
+        self.text.bind("<Button-{}>".format(2 if SYSTEM == MAC_OS else 3), self.popup.show)
 
         self.text.bind("<{}-BackSpace>".format(ctrl),       self.delete_word)
         self.text.bind("<{}-Delete>".format(ctrl),          self.delete_next_word)
@@ -192,7 +194,7 @@ class workspace:
 
         self.text.bind("<Alt_L>",                           lambda event: "break")
 
-        self.text.bind("<{}-a>".format(ctrl),               self.selectall)
+        self.text.bind("<{}-a>".format(ctrl),               self.select_all)
 
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
         self.text.bind("<Alt-period>".format(ctrl),         self.releaseNodes)
@@ -223,12 +225,25 @@ class workspace:
         for event in ["KP_Right", "KP_Left", "KP_Up", "KP_Down", "KP_Delete",
                       "KP_Home",  "KP_End",  "KP_Next", "KP_Prior"]:
 
-            event1 = "<{}>".format(event)
-            event2 = "<{}-{}>".format(ctrl, event)            
+            try:
 
-            self.text.bind(event1, partial(lambda *args: self.text.event_generate(args[0]), event1.replace("KP_", "")))
-            self.text.bind(event2, partial(lambda *args: self.text.event_generate(args[0]), event2.replace("KP_", "")))
+                event1 = "<{}>".format(event)
+                event2 = "<{}-{}>".format(ctrl, event)            
 
+                self.text.bind(event1, partial(lambda *args: self.text.event_generate(args[0]), event1.replace("KP_", "")))
+                self.text.bind(event2, partial(lambda *args: self.text.event_generate(args[0]), event2.replace("KP_", "")))
+
+            except TclError:
+
+                pass
+
+        try:
+
+            self.text.bind("<KP_Enter>", self.newline)
+
+        except TclError:
+
+            pass
 
         # Change ctrl+h on Mac (is used to close)
 
@@ -1066,7 +1081,7 @@ class workspace:
     # Select all: Ctrl+a
     #-------------------
 
-    def selectall(self, event=None):
+    def select_all(self, event=None):
         """ Select the contents of the editor """
         self.text.tag_add(SEL, "1.0", END)
         self.text.mark_set(INSERT, "1.0")

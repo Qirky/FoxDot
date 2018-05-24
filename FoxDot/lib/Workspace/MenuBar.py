@@ -42,7 +42,7 @@ class MenuBar(Menu):
         editmenu.add_command(label="Cut",        command=self.root.edit_cut,   accelerator="Ctrl+X")
         editmenu.add_command(label="Copy",       command=self.root.edit_copy,  accelerator="Ctrl+C")
         editmenu.add_command(label="Paste",      command=self.root.edit_paste, accelerator="Ctrl+V")
-        editmenu.add_command(label="Select All", command=self.root.selectall,  accelerator="Ctrl+A")
+        editmenu.add_command(label="Select All", command=self.root.select_all,  accelerator="Ctrl+A")
         editmenu.add_separator()
         editmenu.add_command(label="Increase Font Size",      command=self.root.zoom_in, accelerator="Ctrl+=")
         editmenu.add_command(label="Decrease Font Size",      command=self.root.zoom_out, accelerator="Ctrl+-")
@@ -144,7 +144,7 @@ class PopupMenu(Menu):
         self.add_command(label="Cut", command=self.root.edit_cut)
         self.add_command(label="Paste", command=self.root.edit_paste)
         self.add_separator()
-        self.add_command(label="Select All", command=self.root.selectall)
+        self.add_command(label="Select All", command=self.root.select_all)
 
     def show(self, event):
         """ Displays the popup menu """
@@ -162,7 +162,7 @@ class ConsolePopupMenu(Menu):
         self.add_command(label="Cut", state=DISABLED)
         self.add_command(label="Paste", state=DISABLED)
         self.add_separator()
-        self.add_command(label="Select All", command=self.root.selectall)
+        self.add_command(label="Select All", command=self.root.select_all)
 
     def show(self, event):
         """ Displays the popup menu """
