@@ -228,10 +228,16 @@ class workspace:
             try:
 
                 event1 = "<{}>".format(event)
-                event2 = "<{}-{}>".format(ctrl, event)            
+                event2 = "<{}-{}>".format(ctrl, event)
+                event3 = "<{}-{}>".format("Shift", event)
+                event4 = "<{}-{}-{}>".format("Shift", ctrl, event)
+                event5 = "<{}-{}-{}>".format(ctrl, "Shift", event)
 
                 self.text.bind(event1, partial(lambda *args: self.text.event_generate(args[0]), event1.replace("KP_", "")))
                 self.text.bind(event2, partial(lambda *args: self.text.event_generate(args[0]), event2.replace("KP_", "")))
+                self.text.bind(event3, partial(lambda *args: self.text.event_generate(args[0]), event3.replace("KP_", "")))
+                self.text.bind(event4, partial(lambda *args: self.text.event_generate(args[0]), event4.replace("KP_", "")))
+                self.text.bind(event5, partial(lambda *args: self.text.event_generate(args[0]), event5.replace("KP_", "")))
 
             except TclError:
 
