@@ -39,6 +39,7 @@ from .LineNumbers import LineNumbers
 from .MenuBar import MenuBar
 from ..Code import write_to_file
 
+from functools import partial
 import webbrowser
 import os
 import re
@@ -172,6 +173,7 @@ class workspace:
         alt = "Option" if SYSTEM == MAC_OS else "Alt"
 
         self.text.bind("<Return>",          self.newline)
+        self.text.bind("<KP_Enter>",        self.newline)
         self.text.bind("<BackSpace>",       self.backspace)
         self.text.bind("<Delete>",          self.delete)
         self.text.bind("<Tab>",             self.tab)
@@ -215,6 +217,18 @@ class workspace:
         self.text.bind("<{}-m>".format(ctrl),               self.toggle_menu)
 
         self.text.bind("<{}-l>".format(ctrl),               self.insert_lambda_symbol)
+
+        # Number pad
+
+        for event in ["KP_Right", "KP_Left", "KP_Up", "KP_Down", "KP_Delete",
+                      "KP_Home",  "KP_End",  "KP_Next", "KP_Prior"]:
+
+            event1 = "<{}>".format(event)
+            event2 = "<{}-{}>".format(ctrl, event)            
+
+            self.text.bind(event1, partial(lambda *args: self.text.event_generate(args[0]), event1.replace("KP_", "")))
+            self.text.bind(event2, partial(lambda *args: self.text.event_generate(args[0]), event2.replace("KP_", "")))
+
 
         # Change ctrl+h on Mac (is used to close)
 

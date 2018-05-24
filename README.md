@@ -3,20 +3,12 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.2 fixes and updates
+### v0.6.3 fixes and updates
 
-- Fixed play string error when using random characters and random sample numbers
-- Added timestamping to `MidiOut` SynthDef (to be re-named `midi` in future) and a `Clock.midi_nudge` value that can be set to help synchronise FoxDot with an external MIDI synth. A value of around 0.15 - 0.25 is typical.
-
-```python
-# Set up two simple loops and adjust Clock.midi_nudge until they are synchronised
-
-p1 >> MidiOut([0,7])
-
-p2 >> play("x * ")
-
-Clock.midi_nudge = 0.175
-```
+- Fixed bug stopping pentatonic versions of scales being updated
+- Moved a few samples around - notably the default "o" snare drum was replaced with the default snare drum assigned to "u"
+- Echo effect now relates to number of beats instead of the value of sustain such that `echo=0.5, sus=4` means you hear the echoed sound after half a beat, not after 2 beats.
+- Added navigation using the numpad
    
 ---
 
