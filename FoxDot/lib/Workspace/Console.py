@@ -7,6 +7,7 @@ except ImportError:
     
 from .Format  import *
 from .AppFunctions import stdout
+from .MenuBar import ConsolePopupMenu
 import math
 import random
 
@@ -29,6 +30,10 @@ class console:
         self.y_scroll.grid(row=2, column=2, sticky='nsew', rowspan=2)
         self.scrollable = False
 
+        # Right-click menu
+
+        self.popup = ConsolePopupMenu(self)
+
         # Create a bar for changing console size
 
         self.drag = Frame( self.root , bg="white", height=2, cursor="sb_v_double_arrow")
@@ -50,6 +55,7 @@ class console:
         self.canvas.bind("<ButtonRelease-1>",   self.canvas_mouserelease)
         self.canvas.bind("<B1-Motion>",         self.canvas_mousedrag)
         self.canvas.bind("<MouseWheel>",        self.on_scroll)
+        self.canvas.bind("<Button-3>",          self.popup.show)
         self.canvas.bind("<{}-c>".format("Command" if SYSTEM == MAC_OS else "Control"),   self.edit_copy)
 
         self.padx = 5
@@ -236,12 +242,17 @@ class console:
         self.text_cursor = None
         return
 
-    def edit_copy(self, event):
+    def edit_copy(self, event=None):
         if self.canvas.select_item() == self.text:
             self.root.clipboard_clear()
             a = self.canvas.index(self.text, SEL_FIRST)
             b = self.canvas.index(self.text, SEL_LAST) + 1
             self.root.clipboard_append(self.canvas.itemcget(self.text, "text")[a:b])
+        return "break"
+
+    def selectall(self, event):
+        self.canvas.select_from(self.text, "1.0")
+        self.canvas.select_to(self.text, "end")
         return "break"
 
     def scroll_text(self, *args):

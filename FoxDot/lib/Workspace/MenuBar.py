@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 try:
-    from Tkinter import Menu, BooleanVar
+    from Tkinter import Menu, BooleanVar, DISABLED
 except ImportError:
-    from tkinter import Menu, BooleanVar
+    from tkinter import Menu, BooleanVar, DISABLED
 
 import os.path
 from functools import partial
@@ -127,7 +127,43 @@ class MenuBar(Menu):
 
     def start_listening(self, **kwargs):
         """ Manual starting of FoxDot tempo server """
-        # TODO - take this out of the menu
+        # TODO - take this method out of the menu
         self.listening_for_connections.set(not self.listening_for_connections.get())
         self.allow_connections(**kwargs)
         return
+
+
+class PopupMenu(Menu):
+    def __init__(self, master, **kwargs):
+        self.root = master
+        Menu.__init__(self, master.root, tearoff=0)
+        self.add_command(label="Undo", command=self.root.undo) 
+        self.add_command(label="Redo", command=self.root.redo)
+        self.add_separator()
+        self.add_command(label="Copy", command=self.root.edit_copy)
+        self.add_command(label="Cut", command=self.root.edit_cut)
+        self.add_command(label="Paste", command=self.root.edit_paste)
+        self.add_separator()
+        self.add_command(label="Select All", command=self.root.selectall)
+
+    def show(self, event):
+        """ Displays the popup menu """
+        self.post(event.x_root, event.y_root)
+
+
+class ConsolePopupMenu(Menu):
+    def __init__(self, master, **kwargs):
+        self.root = master
+        Menu.__init__(self, master.root, tearoff=0)
+        self.add_command(label="Undo", state=DISABLED)
+        self.add_command(label="Redo", state=DISABLED)
+        self.add_separator()
+        self.add_command(label="Copy", command=self.root.edit_copy)
+        self.add_command(label="Cut", state=DISABLED)
+        self.add_command(label="Paste", state=DISABLED)
+        self.add_separator()
+        self.add_command(label="Select All", command=self.root.selectall)
+
+    def show(self, event):
+        """ Displays the popup menu """
+        self.post(event.x_root, event.y_root)
