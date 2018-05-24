@@ -3,6 +3,11 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
+### v0.6.4 fixes and updates
+
+- Fix Tkinter issues with "KP" events and added selection using shift + numpad usage
+- Update setup.py to allow FoxDot to be started from the CLI just using a simple `FoxDot` command.
+
 ### v0.6.3 fixes and updates
 
 - Fixed bug stopping pentatonic versions of scales being updated

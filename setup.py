@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
-from distutils.core import setup
+#from distutils.core import setup
+from setuptools import setup
+
+with open("README.md", "r") as f:
+    long_description=f.read()
 
 setup(name='FoxDot',
-      version='0.6.3',
+      version='0.6.4',
       description='Live coding music with SuperCollider',
       author='Ryan Kirkbride',
       author_email='ryan@foxdot.org',
@@ -18,6 +22,9 @@ setup(name='FoxDot',
                 'FoxDot.lib.SCLang',
                 'FoxDot.lib.Settings',
                 'FoxDot.lib.Utils'],
+      long_description=long_description,
+      long_description_content_type="text/markdown",
+      entry_points={'gui_scripts' : ['FoxDot = FoxDot.__init__:main']},
       package_data = {'FoxDot': ['snd/*/*/*.*',
                                  'snd/_loop_/foxdot.wav',
                                  'snd/_loop_/drums130.wav',
