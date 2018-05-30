@@ -11,9 +11,6 @@ print(SynthDefs)
 # given to Players to play - like giving an instrument to someone in your
 # orchestra.
 
-
-
-
 # Writing your own Synth Definitions
 
 # This is a bit more advanced, but if you have already written SynthDefs in

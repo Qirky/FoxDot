@@ -1,0 +1,7 @@
+foo = Player()
+
+foo >> pluck()
+
+print(Clock.playing)
+
+foo.help()

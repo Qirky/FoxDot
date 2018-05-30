@@ -1,4 +1,4 @@
-# Tutorial 5: Playing Built-In Samples
+# Tutorial 3: Playing Built-In Samples
 
 
 # FoxDot can also be used to sequence and manipulate audio samples.

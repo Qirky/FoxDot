@@ -1,4 +1,4 @@
-# Tutorial 10: Using Patterns
+# Tutorial 4: Using Patterns
 
 
 # Player Objects use Python lists, known more commonly as arrays in other languages,

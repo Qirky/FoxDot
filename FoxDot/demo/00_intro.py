@@ -1,7 +1,7 @@
 # Tutorial 0: Introduction
 
-##############
-# Executing
+################
+# Executing code
 
 # To execute code in FoxDot, make sure your text cursor is in the ‘block’ of code
 # (sections of text not separated by blank lines) and press Ctrl+Return

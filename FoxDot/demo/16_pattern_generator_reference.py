@@ -1,4 +1,4 @@
-# Tutorial 15: Patterns Generators Reference
+# Tutorial 16: Patterns Generators Reference
 
 
 # There are several other Pattern classes in FoxDot that help you generate arrays of numbers but also behave

@@ -1,4 +1,4 @@
-# Tutorial 4: Referencing Player Attributes
+# Tutorial 5: Referencing Player Attributes
 
 # You can set variables outside a player
 pitches = P[0,1,2,3,4]

@@ -1,4 +1,4 @@
-# Tutorial 3: Playing Notes
+# Tutorial 1: Playing Notes
 
 # In FoxDot, all two-character variable names are reserved for player objects, such as 'p1'
 # Creating a Player Object with no arguments will play a single note on middle C, by default, repeatedly until stopped.
@@ -95,17 +95,5 @@ p1.solo(0)
 # Stop (not just mute) the other players
 p1.only()
 
-# You can schedule players to do things
-# This will tell p1 to reverse the notes every 4 beats
-p1 >> pads([0,2,4,6])
-p1.every(4, "reverse")
-
-# Which is the same as:
-p1 >> pads([0,2,4,6]).every(4, "reverse")
-
-# You can change several things at once
-p1.every(4, "stutter", 4, oct=4, pan=[-1,1])
-
-# To stop the every call...
-p1.never("reverse")
-
+# Use Ctrl+. to clear everything for the scheduling clock or run
+Clock.clear()

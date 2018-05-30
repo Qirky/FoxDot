@@ -1,4 +1,4 @@
-# Tutorial 1: Clock Basics
+# Tutorial 7: Clock Basics
 
 
 # To stop all player objects, you can press Ctrl+.  (Hold Ctrl and hit the period)

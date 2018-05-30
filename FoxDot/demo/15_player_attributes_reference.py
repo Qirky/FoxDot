@@ -1,4 +1,4 @@
-# Tutorial 14: Player Attributes Reference
+# Tutorial 15: Player Attributes Reference
 
 
 # To see all attributes:
@@ -33,7 +33,7 @@ d1 >> dirt([0,4,2,1], dur=1/2, hpf=linvar([0,4000],8), hpr=P[1,1,0.3].stretch(8)
 
 
 ####################
-Reference
+# Reference
 ####################
 
 
