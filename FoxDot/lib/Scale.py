@@ -5,6 +5,7 @@ from .TimeVar import TimeVar
 from .Root import Root
 
 from random import choice
+from copy import copy
 import math
 
 def miditofreq(midinote):
@@ -250,8 +251,8 @@ class _DefaultTuning(TuningType):
 class _DefaultScale(ScaleType):
     """ Wrapper for Scale.default """
     def __init__(self, scale):
-        self.scale = scale
-        self.pentatonic = self.scale.pentatonic
+        self.scale = copy(scale)
+        self.pentatonic = copy(self.scale.pentatonic)
 
     def __len__(self):
         return len(self.scale)
