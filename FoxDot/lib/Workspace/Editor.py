@@ -198,6 +198,7 @@ class workspace:
         self.text.bind("<Alt_L>",                           lambda event: "break")
 
         self.text.bind("<{}-a>".format(ctrl),               self.select_all)
+        self.text.bind("<{}-d>".format(ctrl),               self.duplicate_line)
 
         self.text.bind("<{}-period>".format(ctrl),          self.killall)
         self.text.bind("<Alt-period>".format(ctrl),         self.releaseNodes)
@@ -1164,6 +1165,19 @@ class workspace:
 
         return
 
+    def duplicate_line(self, event=None):
+        """ Called using Ctrl+D - duplicates the content of this line and moves the insert to the same place on the line below"""
+        # 1. get contents of line
+        row, col = self.text.row_col(INSERT)
+        line_start = "{}.0".format(row)
+        line_end   = "{}.{}".format(row, END)
+        line = self.text.get(line_start, line_end)
+        # 2. Add new line to end of this row
+        self.text.insert(line_end, "\n{}".format(line))
+        self.text.mark_set(INSERT, "{}.{}".format(row + 1, col))
+        self.update_all()
+        return "break"
+
     """
 
         Methods that view the FoxDot namespace
@@ -1513,37 +1527,6 @@ class workspace:
                 self.text.tag_add(SEL, index,)   
 
         return
-
-
-    def old_invert(self):
-        
-        if self.text.has_selection():
-
-            # if old and new are after sel_last, just add
-
-            if self.text.is_after(index1, SEL_LAST) and self.text.is_after(index2, SEL_LAST):
-
-                self.text.tag_add(SEL, index1, index2)
-
-            # if only new is after sel_last, extend
-
-            elif self.text.is_after(index2, SEL_LAST):
-
-                tmp = self.text.index(SEL_LAST)
-
-                self.text.tag_remove(SEL, index1, SEL_LAST)
-                self.text.tag_add(SEL, tmp, index2)
-
-            # if new is before sel_last, just remove
-            elif self.text.is_before(index2, SEL_LAST):
-                
-                self.text.tag_remove(SEL, index1, index2)
-        else:
-
-            self.text.tag_add(SEL, index1, index2)
-
-        return
-
     
 
     """
@@ -1644,6 +1627,7 @@ class workspace:
         self.text.delete("1.0", END)
         self.text.insert("1.0", text.strip())
         self.update_all()
+        self.text.mark_set("1.0", INSERT)
         return
 
     def get_all(self):
@@ -1654,7 +1638,7 @@ class workspace:
         return
 
     def opendocumentation(self):
-        webbrowser.open("https://github.com/Qirky/FoxDot/tree/master/docs/FoxDot/lib")
+        webbrowser.open("www.docs.foxdot.org")
         return
     
     def set_temp_file(self, text):
