@@ -12,11 +12,10 @@ filename = os.path.join(os.path.dirname(__file__), "conf.txt")
 try:
     
     with open(filename) as f:
-        lines = f.readlines()
-    for line in lines:
-        if not line[0] == "#":
-            code = compile(line.strip(), "FoxDot", "exec")
-            exec(code, globals())
+        for line in f.readlines():
+            if not line[0] == "#":
+                code = compile(line.strip(), "FoxDot", "exec")
+                exec(code, globals())
 
 except FileNotFoundError:
 

@@ -146,7 +146,8 @@ with SynthDef("scratch") as scratch:
 with SynthDef("klank") as klank:
     klank.sus = klank.sus * 1.5
     klank.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, klank.freq)
-    klank.osc = Decimator.ar(klank.osc, bits=klank.rate - 1)
+    if SC3_PLUGINS:
+        klank.osc = Decimator.ar(klank.osc, bits=klank.rate - 1)
     klank.env = Env.env(klank.sus*2)
 
 with SynthDef("feel") as feel:
