@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 try:
-    from Tkinter import Text
+    from Tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST
 except ImportError:
-    from tkinter import Text
+    from tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST
 
 from .Format import *
 
@@ -54,3 +54,65 @@ class ThreadedText(Text):
         # Recursive call
         self.after(10, self.update)
         return
+
+    def has_selection(self):
+        """ Returns True if the selection tag is present in the text box """
+        return bool(self.tag_ranges(SEL))
+
+    def remove_selection(self):
+        """ Removes selection from the entire document """
+        self.tag_remove(SEL, "1.0", END)
+        return 
+
+    def is_selected(self, index):
+        """ Returns True if the character at index has the SEL tag """
+        return self.index(index) in self.char_range(SEL_FIRST, SEL_LAST) if self.has_selection() else False
+
+    def row_col(self, index):
+        return tuple([int(x) for x in self.index(index).split(".")])
+
+    def is_after(self, index1, index2):
+        """ Returns True if index1 is after index2, returns True if they are equal """
+        a_row, a_col = self.row_col(index1)
+        b_row, b_col = self.row_col(index2)
+        return (a_row > b_row) or (a_row == b_row and a_col >= b_col)
+
+    def is_before(self, index1, index2):
+        """ Returns True if index1 is after index2, returns True if they are equal """
+        return not self.is_after(index1, index2)
+
+    def char_range(self, index1, index2):
+        """ Returns a list of indices between two Tk indices"""
+        if self.is_after(index1, index2):
+            
+            index1, index2 = index2, index1
+            reverse = True
+
+        else:
+            
+            reverse = False
+
+        a_row, a_col = self.row_col(index1)
+        b_row, b_col = self.row_col(index2)
+
+        data = []
+        
+        for row in range(a_row, b_row + 1,):
+            if row == a_row:
+                x1_col = a_col
+            else:
+                x1_col = 0
+            if row == b_row:
+                x2_col = b_col
+            else:
+                _, x2_col = self.row_col(self.index("{}.{}".format(row, END)))
+            
+            for col in range(x1_col, x2_col):
+                
+                data.append( "{}.{}".format(row, col) )
+
+        if reverse:
+
+            data = list(reversed(data))
+
+        return data

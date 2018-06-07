@@ -192,6 +192,9 @@ class workspace:
         self.text.bind("<{}-Left>".format(ctrl),            self.move_word_left)
         self.text.bind("<{}-Right>".format(ctrl),           self.move_word_right)
 
+        self.text.bind("<{}-Shift-Right>".format(ctrl),     self.select_word_right)
+        self.text.bind("<{}-Shift-Left>".format(ctrl),      self.select_word_left)
+
         self.text.bind("<Alt_L>",                           lambda event: "break")
 
         self.text.bind("<{}-a>".format(ctrl),               self.select_all)
@@ -1373,7 +1376,11 @@ class workspace:
 
         self.last_word = string
 
-    def move_word_right(self, event=None):
+    def move_word_right(self, event=None, keep_selection=False):
+
+        if not keep_selection:
+
+            self.text.remove_selection()
         
         row, col   = index(self.text.index(INSERT))
         searching = True
@@ -1428,7 +1435,12 @@ class workspace:
         
         return "break"
 
-    def move_word_left(self, event=None):
+    def move_word_left(self, event=None, keep_selection=False):
+
+        if not keep_selection:
+
+            self.text.remove_selection()
+
         row, col   = index(self.text.index(INSERT))
         col -= 1
 
@@ -1475,6 +1487,64 @@ class workspace:
         self.text.mark_set(INSERT, index(new_row, new_col))
         
         return "break"
+
+    def select_word_right(self, event=None):
+        """ Calls self.move_word_right() and also selects the text moved """
+        old, _, new = self.text.index(INSERT), self.move_word_right(keep_selection=True), self.text.index(INSERT)
+        self.invert_selection(old, new)
+        return "break"
+
+    def select_word_left(self, event=None):
+        old, _, new = self.text.index(INSERT), self.move_word_left(keep_selection=True), self.text.index(INSERT)
+        self.invert_selection(old, new)
+        return "break"
+
+    def invert_selection(self, index1, index2=None):
+        """ Given two Tkinter indices, will select non-selected text in the range and de-select the selected text """
+
+        for index in self.text.char_range(index1, index2):
+            
+            if self.text.is_selected(index):
+
+                self.text.tag_remove(SEL, index)
+
+            else:
+
+                self.text.tag_add(SEL, index,)   
+
+        return
+
+
+    def old_invert(self):
+        
+        if self.text.has_selection():
+
+            # if old and new are after sel_last, just add
+
+            if self.text.is_after(index1, SEL_LAST) and self.text.is_after(index2, SEL_LAST):
+
+                self.text.tag_add(SEL, index1, index2)
+
+            # if only new is after sel_last, extend
+
+            elif self.text.is_after(index2, SEL_LAST):
+
+                tmp = self.text.index(SEL_LAST)
+
+                self.text.tag_remove(SEL, index1, SEL_LAST)
+                self.text.tag_add(SEL, tmp, index2)
+
+            # if new is before sel_last, just remove
+            elif self.text.is_before(index2, SEL_LAST):
+                
+                self.text.tag_remove(SEL, index1, index2)
+        else:
+
+            self.text.tag_add(SEL, index1, index2)
+
+        return
+
+    
 
     """
         Generic functions
