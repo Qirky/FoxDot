@@ -1627,7 +1627,7 @@ class workspace:
         self.text.delete("1.0", END)
         self.text.insert("1.0", text.strip())
         self.update_all()
-        self.text.mark_set("1.0", INSERT)
+        self.text.mark_set(INSERT, "1.0")
         return
 
     def get_all(self):
