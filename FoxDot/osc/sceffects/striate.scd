@@ -1,5 +1,5 @@
 SynthDef.new(\striate,
-{|bus, striate, sus, buf, rate|
+{|bus, buf, sus, rate, striate|
 var osc;
 osc = In.kr(bus, 1);
 osc = osc * LFPulse.ar(striate / sus, width:  (BufDur.kr(buf) / rate) / sus);

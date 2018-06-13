@@ -17,7 +17,7 @@ background = colour_map['background']
 class ThreadedText(Text):
     def __init__(self, master, **options):
         Text.__init__(self, master, **options)
-        self.config(highlightbackground=background)
+        self.config(highlightbackground=background, selectbackground="Dodger Blue", selectforeground="White")
         self.height = options.get("height", 20)
         self.queue = Queue.Queue()
         self.update()
