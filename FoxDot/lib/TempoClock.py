@@ -303,7 +303,7 @@ class TempoClock(object):
         return
 
     def get_elapsed_sec(self):
-        return self.dtype( time() - (self.start_time + (self.nudge + self.hard_nudge)) - self.latency )
+        return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
 
     def true_now(self):
         """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """

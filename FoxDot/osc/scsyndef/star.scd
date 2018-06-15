@@ -1,5 +1,5 @@
 SynthDef.new(\star,
-{|pan=0, sus=1, rate=0, vib=0, fmod=0, freq=0, amp=1, bus=0|
+{|amp=1, freq=0, pan=0, rate=0, vib=0, sus=1, fmod=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];

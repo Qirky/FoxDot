@@ -22,7 +22,6 @@ if sys.version_info[0] > 2:
     from .OSC3 import *
 else:
     from .OSC import *
-    
 
 # Keep in sync with Info.scd
 ServerInfo = namedtuple(
@@ -38,8 +37,8 @@ class OSCClientWrapper(OSCClient):
         """ Sends the message given but prints errors instead of raising them """
         try:
             OSCClient.send(*args, **kwargs)
-        except Exception as e:
-            print(e)
+        except OSCClientError as e:
+            print("Error sending message to SuperCollider server instance: make sure FoxDot quark is running and try again.")
 
 
 class OSCConnect(OSCClientWrapper):
@@ -68,6 +67,7 @@ class SCLangBidirectionalClient(OSCServer):
         self.addDefaultHandlers()
         self.addMsgHandler('default', self._handle_message)
         self._response_queue = queue.Queue()
+        self._printed_error = False
 
     def connect(self, addr):
         """ Connect to an address and start the server thread """
@@ -96,8 +96,10 @@ class SCLangBidirectionalClient(OSCServer):
     def send(self, *args, **kwargs):
         try:
             self.client.send(*args, **kwargs)
-        except Exception as e:
-            print(e)
+        except OSCClientError as e:
+            if not self._printed_error:
+                print("Error: No connection made to SuperCollider server instance.")
+                self._printed_error = True
 
     def receive(self, pattern, timeout=2):
         """
