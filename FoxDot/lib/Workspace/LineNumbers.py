@@ -5,6 +5,8 @@ try:
 except ImportError:
     import tkinter as Tk
 
+from ..Settings import LINE_NUMBER_MARKER_OFFSET
+
 class LineNumbers(Tk.Canvas):
     def __init__(self, master, *args, **kwargs):
         Tk.Canvas.__init__(self, *args, **kwargs)
@@ -40,7 +42,7 @@ class LineNumbers(Tk.Canvas):
 
             if linenum == curr_row:
 
-                x1, y1 = 0, y
+                x1, y1 = 0, y + LINE_NUMBER_MARKER_OFFSET
                 x2, y2 = w - 2, y + h
 
                 self.create_rectangle(x1, y1, x2, y2, fill="gray30", outline="gray30")

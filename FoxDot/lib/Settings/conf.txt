@@ -12,9 +12,11 @@ SAMPLES_DIR=""
 GET_SC_INFO=True
 USE_ALPHA=True
 ALPHA_VALUE=0.8
-MENU_ON_STARTUP=True
-TRANSPARENT_ON_STARTUP=False
-RECOVER_WORK=True
+MENU_ON_STARTUP=False
+TRANSPARENT_ON_STARTUP=True
+RECOVER_WORK=False
+LINE_NUMBER_MARKER_OFFSET=-5
+SCROLLBARS=True
 
 # Text colours
 # ------------------
@@ -31,6 +33,7 @@ strings='#eae02a'
 dollar='#ec4e20'
 arrow='#eae02a'
 players='#ec4e20'
+
 
 
 

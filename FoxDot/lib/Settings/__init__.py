@@ -87,18 +87,20 @@ from . import conf
 
 FOXDOT_CONFIG_FILE  = conf.filename
     
-ADDRESS                = conf.ADDRESS
-PORT                   = conf.PORT
-PORT2                  = conf.PORT2
-FONT                   = conf.FONT
-SC3_PLUGINS            = conf.SC3_PLUGINS
-MAX_CHANNELS           = conf.MAX_CHANNELS
-GET_SC_INFO            = conf.GET_SC_INFO
-USE_ALPHA              = conf.USE_ALPHA
-ALPHA_VALUE            = conf.ALPHA_VALUE
-MENU_ON_STARTUP        = conf.MENU_ON_STARTUP
-TRANSPARENT_ON_STARTUP = conf.TRANSPARENT_ON_STARTUP
-RECOVER_WORK           = conf.RECOVER_WORK
+ADDRESS                   = conf.ADDRESS
+PORT                      = conf.PORT
+PORT2                     = conf.PORT2
+FONT                      = conf.FONT
+SC3_PLUGINS               = conf.SC3_PLUGINS
+MAX_CHANNELS              = conf.MAX_CHANNELS
+GET_SC_INFO               = conf.GET_SC_INFO
+USE_ALPHA                 = conf.USE_ALPHA
+ALPHA_VALUE               = conf.ALPHA_VALUE
+MENU_ON_STARTUP           = conf.MENU_ON_STARTUP
+TRANSPARENT_ON_STARTUP    = conf.TRANSPARENT_ON_STARTUP
+RECOVER_WORK              = conf.RECOVER_WORK
+LINE_NUMBER_MARKER_OFFSET = conf.LINE_NUMBER_MARKER_OFFSET
+SCROLLBARS                = conf.SCROLLBARS
 
 if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
 
