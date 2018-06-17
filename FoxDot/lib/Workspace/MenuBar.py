@@ -22,7 +22,7 @@ class MenuBar(Menu):
 
         # Set font
         
-        self.config(font="CodeFont")
+        # self.config(font="CodeFont")
 
         # File menu
 

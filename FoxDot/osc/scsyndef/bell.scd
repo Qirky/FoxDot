@@ -1,5 +1,5 @@
 SynthDef.new(\bell,
-{|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=1, bus=0, verb=0.5, room=0.5|
+{|amp=1, verb=0.5, room=0.5, freq=0, pan=0, rate=1, vib=0, sus=1, fmod=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
