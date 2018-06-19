@@ -668,7 +668,7 @@ class Player(Repeatable):
     def count(self, time=None, event_after=False):
         """ Counts the number of events that will have taken place between 0 and `time`. If
             `time` is not specified the function uses self.metro.now(). Setting `event_after`
-            to `True` will find the next event *after* `time`"""  
+            to `True` will find the next event *after* `time`"""
 
         n = 0
         acc = 0

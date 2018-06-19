@@ -1,5 +1,5 @@
 SynthDef.new(\bandPassFilter,
-{|bus, bpr, sus, bpf, bpnoise|
+{|bus, bpr, sus, bpnoise, bpf|
 var osc;
 osc = In.ar(bus, 2);
 bpnoise = bpnoise / sus;

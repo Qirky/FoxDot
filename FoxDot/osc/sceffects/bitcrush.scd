@@ -1,5 +1,5 @@
 SynthDef.new(\bitcrush,
-{|bus, amp, bits, sus, crush|
+{|bus, sus, amp, bits, crush|
 var osc;
 osc = In.ar(bus, 2);
 osc = Decimator.ar(osc, rate: 44100/crush, bits: bits);

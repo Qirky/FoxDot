@@ -1,5 +1,5 @@
 SynthDef.new(\play2,
-{|amp=1, buf=0, room=0.1, freq=0, pos=0, pan=0, rate=1.0, vib=0, sus=1, fmod=0, bus=0|
+{|vib=0, bus=0, fmod=0, sus=1, amp=1, buf=0, rate=1.0, room=0.1, freq=0, pos=0, pan=0|
 var osc, env;
 rate = In.kr(bus, 1);
 osc=PlayBuf.ar(2, buf, (BufRateScale.ir(buf) * rate), startPos: (BufSampleRate.kr(buf) * pos));
