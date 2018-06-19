@@ -1,5 +1,5 @@
 SynthDef.new(\reverb,
-{|bus, mix, room|
+{|bus, room, mix|
 var osc;
 osc = In.ar(bus, 2);
 osc = FreeVerb.ar(osc, mix, room);

@@ -1,5 +1,5 @@
 SynthDef.new(\donk,
-{|vib=0, bus=0, fmod=0, sus=1, amp=1, rate=0, freq=0, pan=0|
+{|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0|
 var osc, env;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];

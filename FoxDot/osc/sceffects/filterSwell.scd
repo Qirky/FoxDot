@@ -1,5 +1,5 @@
 SynthDef.new(\filterSwell,
-{|bus, sus, swell, hpr|
+{|bus, swell, sus, hpr|
 var osc,env;
 osc = In.ar(bus, 2);
 env = EnvGen.kr(Env([0,1,0], times:[(sus*0.125), (sus*0.25)], curve:4));

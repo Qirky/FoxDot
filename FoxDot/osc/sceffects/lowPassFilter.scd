@@ -1,5 +1,5 @@
 SynthDef.new(\lowPassFilter,
-{|bus, lpr, lpf|
+{|bus, lpf, lpr|
 var osc;
 osc = In.ar(bus, 2);
 osc = RLPF.ar(osc, lpf, lpr);
