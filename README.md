@@ -3,17 +3,14 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.4 fixes and updates
+### v0.6.5 fixes and updates
 
-- Fix Tkinter issues with "KP" events and added selection using shift + numpad usage
-- Update setup.py to allow FoxDot to be started from the CLI just using a simple `FoxDot` command.
-
-### v0.6.3 fixes and updates
-
-- Fixed bug stopping pentatonic versions of scales being updated
-- Moved a few samples around - notably the default "o" snare drum was replaced with the default snare drum assigned to "u"
-- Echo effect now relates to number of beats instead of the value of sustain such that `echo=0.5, sus=4` means you hear the echoed sound after half a beat, not after 2 beats.
-- Added navigation using the numpad
+- Added option to duplicate a line of text using `Ctrl+D` shortcut.
+- Added `Ctrl+Shift+Direction` shortcut to select a word of text.
+- Set menu text for Linux to OS default
+- More config options (transparency / menu / load on startup) added - thanks to [fgonzalez-cespi](https://github.com/fgonzalez-cespi) for these.
+- Add ability to add "swing" to the `Clock` using a `var` object at the clock's "nudge" attribute e.g. `Clock.nudge = var([0,0.1],1/2)` will delay every other half beat by 0.1 seconds.
+- Improve right-click behaviour
    
 ---
 
