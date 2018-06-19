@@ -46,7 +46,7 @@ import re
 
 # Code execution
 from ..Code import execute
-from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA
+from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
 from ..ServerManager import TempoServer
 
 # App object
@@ -126,7 +126,7 @@ class workspace:
 
         # --- start create menu
 
-        self.menu = MenuBar(self, visible = True)
+        self.menu = MenuBar(self, visible = MENU_ON_STARTUP)
         self.popup = PopupMenu(self)
        
         # Create y-axis scrollbar
@@ -309,7 +309,7 @@ class workspace:
         self.text.mark_set(self.origin, INSERT)
         self.text.mark_gravity(self.origin, LEFT)
 
-        # Say Hello to the user
+       # Say Hello to the user
 
         def hello():
 
@@ -352,9 +352,15 @@ class workspace:
                 self.text_as_string = self.get_all()
 
         # Ask after widget loaded
+        if RECOVER_WORK:
+            self.root.after(100, recover_work)
 
-        self.root.after(100, recover_work)
+        # Check transparency on startup
+        if TRANSPARENT_ON_STARTUP:
+            self.transparent.set(True)
+            self.root.after(100, self.toggle_transparency)
 
+ 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
         while True:
