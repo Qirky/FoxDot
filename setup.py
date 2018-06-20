@@ -7,7 +7,7 @@ with open("README.md", "r") as f:
     long_description=f.read()
 
 setup(name='FoxDot',
-      version='0.6.4',
+      version='0.6.5',
       description='Live coding music with SuperCollider',
       author='Ryan Kirkbride',
       author_email='ryan@foxdot.org',

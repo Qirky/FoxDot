@@ -42,7 +42,7 @@ Quarks.install("FoxDot")
 #### Startup
 
 1. Open SuperCollider and type in `FoxDot.start` and evaluate this line. SuperCollider is now listening for messages from FoxDot. 
-2. Start FoxDot by entering `python -m FoxDot` at the command line.
+2. Start FoxDot by entering either `FoxDot` or `python -m FoxDot` at the command line.
 3. If you have installed the SC3 Plugins, use the "Code" drop-down menu to select "Use SC3 Plugins". Restart FoxDot and you'll have access to classes found in the SC3 Plugins.
 4. Check out the [YouTube tutorials](https://www.youtube.com/channel/UCRyrNX07lFcfRSymZEWwl6w) for some in-depth tutorial videos on getting to grips with FoxDot
 
