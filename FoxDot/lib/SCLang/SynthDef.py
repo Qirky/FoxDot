@@ -215,7 +215,7 @@ class SynthDefBaseClass(object):
 
             except IOError:
 
-                print("IOError: Unable to update '{}' SynthDef.".format(self.synthdef))
+                print("Warning: Unable to update '{}' SynthDef.".format(self.name))
 
         return
 
@@ -246,7 +246,7 @@ class SynthDefBaseClass(object):
 
         except Exception as e:
 
-            WarningMsg("Error: SynthDef '{}' could not be added to the server:\n{}".format(self.name, e))
+            WarningMsg("{}: SynthDef '{}' could not be added to the server:\n{}".format(e.__class__.__name__, self.name, e))
 
         return None
 
