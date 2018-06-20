@@ -366,5 +366,9 @@ fx = FxList.new("shape", "wavesShapeDistortion", {"shape":0}, order=2)
 fx.add("osc = (osc * (shape * 50)).fold2(1).distort / 5")
 fx.save()
 
+fx = FxList.new("drive", "overdriveDistortion", {"drive":0}, order=2)
+fx.add("osc = (osc * (drive * 50)).clip(0,0.2).fold2(2)")
+fx.save()
+
 In(); Out()
 Effect.server.setFx(FxList)
