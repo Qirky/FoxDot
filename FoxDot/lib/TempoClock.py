@@ -179,6 +179,11 @@ class TempoClock(object):
         """ Schedules the bpm change at the next bar """
         return self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", bpm))
 
+    def swing(self, amount=0.1):
+        """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
+        self.nudge = TimeVar([0, amount * (self.bpm / 120)], 1/2) if amount != 0 else 0
+        return
+
     def __setattr__(self, attr, value):
         if attr == "bpm" and self.__setup:
 
