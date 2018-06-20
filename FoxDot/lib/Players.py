@@ -877,10 +877,11 @@ class Player(Repeatable):
         # Get the current values (this might be called between events)
 
         n = int(kwargs.get("n", amount if amount is not None else 2))
+        event = int(kwargs.get("event", amount if amount is not None else 0))
 
-        if "n" in kwargs:
-
-            del kwargs["n"]
+        for key in ("event", "n"):
+            if key in kwargs:
+                del kwargs[key]
 
         # Only send if n > 1 and the player is playing
 
@@ -894,7 +895,7 @@ class Player(Repeatable):
 
                 if len(attributes[key]) > 0 and key not in kwargs and key != "buf": # buf will have already been changed
 
-                    new_event[key] = self.now(key)
+                    new_event[key] = self.now(key, event)
 
             new_event = self.unduplicate_durs(new_event)
 
@@ -944,6 +945,58 @@ class Player(Repeatable):
                 
         return self
 
+    def jump(self, amount=None, **kwargs):
+        """ Plays an event ahead of time. """
+
+        timestamp = self.metro.osc_message_time() # when the first item should be sent
+
+        # Get the current values (this might be called between events)
+
+        n = int(kwargs.get("n", amount if amount is not None else 1))
+
+        if "n" in kwargs:
+            del kwargs["n"]
+
+        # Only send if n > 1 and the player is playing
+
+        if self.metro.solo == self:
+
+            new_event = {}
+        
+            attributes = copy(self.attr)
+            
+            for key in attributes:
+
+                if len(attributes[key]) > 0 and key not in kwargs and key != "buf": # buf will have already been changed
+
+                    new_event[key] = self.now(key, n)
+
+            new_event = self.unduplicate_durs(new_event)
+
+            for key, val in kwargs.items():
+
+                stream = asStream(val)
+                
+                stream = [self.unpack(modi(stream, i)) for i in range(n-1)]
+
+                if len(stream) > 1:
+
+                    stream = PGroup(stream)
+
+                else:
+
+                    stream = stream[0]
+
+                new_event[key] = stream
+
+            new_event["delay"] = 0
+
+            new_event = self.get_prime_funcs(new_event)
+
+            self.send(timestamp=timestamp, **new_event)
+                
+        return self
+
     def lshift(self, n=1):
         """ Plays the event behind """
         self.event_n -= (n+1)
@@ -980,6 +1033,23 @@ class Player(Repeatable):
             self.slide=0
             self.slidefrom=0
             self.slidedelay=0
+        return self
+
+    def penta(self, switch=1):
+        """ Shorthand for setting the scale to the pentatonic mode of the default scale """
+        if switch:
+            self.scale = self.__class__.default_scale.pentatonic
+        else:
+            self.scale = self.__class__.default_scale
+        return self
+
+    def alt_dur(self, dur):
+        """ Used to set a duration that changes linearly over time. You should use a `linvar` but
+            any value can be used. This sets the `dur` to 1 and uses the `bpm` attribute to 
+            seemingly alter the durations """
+
+        self.dur = 1
+        self.bpm = self.metro.bpm*(1/(dur))
         return self
 
     def reverse(self):
