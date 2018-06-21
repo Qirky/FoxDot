@@ -945,19 +945,10 @@ class Player(Repeatable):
                 
         return self
 
-    def jump(self, amount=None, **kwargs):
+    def jump(self, ahead=1, **kwargs):
         """ Plays an event ahead of time. """
 
-        timestamp = self.metro.osc_message_time() # when the first item should be sent
-
-        # Get the current values (this might be called between events)
-
-        n = int(kwargs.get("n", amount if amount is not None else 1))
-
-        if "n" in kwargs:
-            del kwargs["n"]
-
-        # Only send if n > 1 and the player is playing
+        timestamp = self.metro.osc_message_time() # when the item should be sent
 
         if self.metro.solo == self:
 
@@ -967,29 +958,17 @@ class Player(Repeatable):
             
             for key in attributes:
 
-                if len(attributes[key]) > 0 and key not in kwargs and key != "buf": # buf will have already been changed
+                if len(attributes[key]) > 0 and key not in kwargs: # and key != "buf": # buf will have already been changed
 
-                    new_event[key] = self.now(key, n)
+                    new_event[key] = self.now(key, ahead)
 
             new_event = self.unduplicate_durs(new_event)
 
             for key, val in kwargs.items():
 
-                stream = asStream(val)
-                
-                stream = [self.unpack(modi(stream, i)) for i in range(n-1)]
-
-                if len(stream) > 1:
-
-                    stream = PGroup(stream)
-
-                else:
-
-                    stream = stream[0]
+                stream = asStream(val)[0]
 
                 new_event[key] = stream
-
-            new_event["delay"] = 0
 
             new_event = self.get_prime_funcs(new_event)
 
