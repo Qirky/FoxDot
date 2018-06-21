@@ -877,9 +877,9 @@ class Player(Repeatable):
         # Get the current values (this might be called between events)
 
         n = int(kwargs.get("n", amount if amount is not None else 2))
-        event = int(kwargs.get("event", amount if amount is not None else 0))
+        ahead = int(kwargs.get("ahead", 0))
 
-        for key in ("event", "n"):
+        for key in ("ahead", "n"):
             if key in kwargs:
                 del kwargs[key]
 
@@ -895,7 +895,7 @@ class Player(Repeatable):
 
                 if len(attributes[key]) > 0 and key not in kwargs and key != "buf": # buf will have already been changed
 
-                    new_event[key] = self.now(key, event)
+                    new_event[key] = self.now(key, ahead)
 
             new_event = self.unduplicate_durs(new_event)
 
