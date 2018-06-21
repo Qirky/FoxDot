@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 try:
-    from Tkinter import Menu, BooleanVar, DISABLED
+    from Tkinter import Menu, BooleanVar, IntVar, DISABLED
 except ImportError:
-    from tkinter import Menu, BooleanVar, DISABLED
+    from tkinter import Menu, BooleanVar, IntVar, DISABLED
 
 import os.path
 from functools import partial
@@ -17,12 +17,13 @@ class MenuBar(Menu):
 
         Menu.__init__(self, master.root)
 
+        # "ticked" menu options
+
         self.sc3_plugins = BooleanVar()
         self.sc3_plugins.set(SC3_PLUGINS)
 
-        # Set font
-        
-        # self.config(font="CodeFont")
+        self.cpu_usage = IntVar()
+        self.cpu_usage.set(CPU_USAGE)
 
         # File menu
 
@@ -55,6 +56,7 @@ class MenuBar(Menu):
         # Code menu
 
         ctrl = "Command" if SYSTEM == MAC_OS else "Ctrl"
+        
         # Note: Alt renders properly to look like Option, so we don't need a
         # conditional for those shortcuts
 
@@ -67,6 +69,13 @@ class MenuBar(Menu):
         codemenu.add_command(label="Export Console Log",     command=self.root.export_console)
         codemenu.add_separator()
         codemenu.add_checkbutton(label="Use SC3 Plugins",    command=self.root.toggle_sc3_plugins, variable=self.sc3_plugins)
+        
+        cpu_menu=Menu(self, tearoff=0)
+        cpu_menu.add_radiobutton(label="Low", variable=self.cpu_usage, value=0, command=self.set_cpu_usage)
+        cpu_menu.add_radiobutton(label="Medium", variable=self.cpu_usage, value=1, command=self.set_cpu_usage)
+        cpu_menu.add_radiobutton(label="High", variable=self.cpu_usage, value=2, command=self.set_cpu_usage)
+        codemenu.add_cascade(label="CPU Usage", menu=cpu_menu)
+        
         codemenu.add_separator()
         codemenu.add_checkbutton(label="Listen for connections", command=self.root.allow_connections, variable=self.root.listening_for_connections)
         self.add_cascade(label="Language", menu=codemenu)
@@ -80,7 +89,6 @@ class MenuBar(Menu):
         helpmenu.add_separator()
         helpmenu.add_command(label="Open Samples Folder",   command=self.root.open_samples_folder)
         helpmenu.add_command(label="Open config file (advanced)",      command=self.root.open_config_file)
-        ##        settingsmenu.add_command(label="Change Colours...",   command=self.root.toggleMenu)
         self.add_cascade(label="Help & Settings", menu=helpmenu)
 
         # Tutorials
@@ -109,6 +117,7 @@ class MenuBar(Menu):
             master.root.config(menu=self)
 
     def toggle(self):
+        """ Hides/shows this menu """
         self.root.root.config(menu=self if not self.visible else 0)
         self.visible = not self.visible
         return
@@ -116,11 +125,11 @@ class MenuBar(Menu):
     def allow_connections(self, **kwargs):
         """ Starts a new instance of ServerManager.TempoServer and connects it with the clock """
         if self.listening_for_connections.get() == True:
-            Clock = self.namespace["Clock"]
+            Clock = self.root.namespace["Clock"]
             Clock.start_tempo_server(TempoServer, **kwargs)
             print("Listening for connections on {}".format(Clock.tempo_server))
         else:
-            Clock = self.namespace["Clock"]
+            Clock = self.root.namespace["Clock"]
             Clock.kill_tempo_server()
             print("Closed connections")
         return
@@ -130,6 +139,11 @@ class MenuBar(Menu):
         # TODO - take this method out of the menu
         self.listening_for_connections.set(not self.listening_for_connections.get())
         self.allow_connections(**kwargs)
+        return
+
+    def set_cpu_usage(self, *args):
+        """ Updates the cpu usage option """
+        self.root.namespace["Clock"].set_cpu_usage(self.cpu_usage.get())
         return
 
 

@@ -57,6 +57,7 @@ from .TimeVar import TimeVar
 from .Midi import MidiIn, MIDIDeviceNotFound
 from .Utils import modi
 from .ServerManager import TempoClient, ServerManager
+from .Settings import CPU_USAGE
 
 from time import sleep, time, clock
 from fractions import Fraction
@@ -116,7 +117,9 @@ class TempoClock(object):
         self.latency    = 0.25 # Time between starting processing osc messages and sending to server
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
-        self.sleep_time = 0.0001 # The duration to sleep while continually looping
+        # The duration to sleep while continually looping
+        self.sleep_values = [0.01, 0.001, 0.0001]
+        self.sleep_time = self.sleep_values[CPU_USAGE]
         self.midi_nudge = 0
 
         # Debug
@@ -182,6 +185,12 @@ class TempoClock(object):
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
         self.nudge = TimeVar([0, amount * (self.bpm / 120)], 1/2) if amount != 0 else 0
+        return
+
+    def set_cpu_usage(self, value):
+        """ Sets the `sleep_time` attribute to values based on desired high/low/medium cpu usage """
+        assert 0 <= value <= 2
+        self.sleep_time = self.sleep_values[value]
         return
 
     def __setattr__(self, attr, value):
