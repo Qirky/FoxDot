@@ -69,13 +69,6 @@ class MenuBar(Menu):
         codemenu.add_command(label="Export Console Log",     command=self.root.export_console)
         codemenu.add_separator()
         codemenu.add_checkbutton(label="Use SC3 Plugins",    command=self.root.toggle_sc3_plugins, variable=self.sc3_plugins)
-        
-        cpu_menu=Menu(self, tearoff=0)
-        cpu_menu.add_radiobutton(label="Low", variable=self.cpu_usage, value=0, command=self.set_cpu_usage)
-        cpu_menu.add_radiobutton(label="Medium", variable=self.cpu_usage, value=1, command=self.set_cpu_usage)
-        cpu_menu.add_radiobutton(label="High", variable=self.cpu_usage, value=2, command=self.set_cpu_usage)
-        codemenu.add_cascade(label="CPU Usage", menu=cpu_menu)
-        
         codemenu.add_separator()
         codemenu.add_checkbutton(label="Listen for connections", command=self.root.allow_connections, variable=self.root.listening_for_connections)
         self.add_cascade(label="Language", menu=codemenu)
@@ -84,8 +77,15 @@ class MenuBar(Menu):
         # Help
 
         helpmenu = Menu(self, tearoff=0)
+        helpmenu.add_command(label="Display help message", comman=self.root.help, accelerator="{}+{}".format(ctrl, self.root.help_key))
         helpmenu.add_command(label="Visit FoxDot Homepage", command=self.root.openhomepage)
         helpmenu.add_command(label="Documentation",   command=self.root.opendocumentation)
+        helpmenu.add_separator()
+        cpu_menu=Menu(self, tearoff=0)
+        cpu_menu.add_radiobutton(label="Low", variable=self.cpu_usage, value=0, command=self.set_cpu_usage)
+        cpu_menu.add_radiobutton(label="Medium", variable=self.cpu_usage, value=1, command=self.set_cpu_usage)
+        cpu_menu.add_radiobutton(label="High", variable=self.cpu_usage, value=2, command=self.set_cpu_usage)
+        helpmenu.add_cascade(label="CPU Usage", menu=cpu_menu)
         helpmenu.add_separator()
         helpmenu.add_command(label="Open Samples Folder",   command=self.root.open_samples_folder)
         helpmenu.add_command(label="Open config file (advanced)",      command=self.root.open_config_file)

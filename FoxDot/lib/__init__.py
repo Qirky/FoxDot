@@ -174,6 +174,9 @@ def allow_connections(valid = True, *args, **kwargs):
         print("Closed connections")
     return
 
+Attributes = Player.get_attributes()
+PatternMethods = Pattern.get_methods()
+
 # Create a clock and define functions
 
 logging.basicConfig(level=logging.ERROR)

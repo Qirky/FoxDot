@@ -124,6 +124,8 @@ class workspace:
         self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
         self.font.configure(family=self.default_font)
 
+        self.help_key = "K" if SYSTEM == MAC_OS else "H"
+
         # --- start create menu
 
         self.menu = MenuBar(self, visible = MENU_ON_STARTUP)
@@ -221,8 +223,8 @@ class workspace:
         self.text.bind("<{}-n>".format(ctrl),               self.newfile)
 
         self.text.bind("<{}-m>".format(ctrl),               self.toggle_menu)
-
         self.text.bind("<{}-l>".format(ctrl),               self.insert_lambda_symbol)
+        self.text.bind("<{}-{}>".format(ctrl, self.help_key.lower()), self.help)
 
         # Number pad
 
@@ -254,18 +256,6 @@ class workspace:
         except TclError:
 
             pass
-
-        # Change ctrl+h on Mac (is used to close)
-
-        if SYSTEM == MAC_OS:
-                       
-            self.text.bind("<{}-k>".format(ctrl), self.help)
-            self.help_key = "K"
-
-        else:
-
-            self.text.bind("<{}-h>".format(ctrl), self.help)
-            self.help_key = "H"
 
         # Toggle console button keybind
 
@@ -573,17 +563,20 @@ class workspace:
             
         print("FoxDot Help:")
         print("-----------------------------------------")
-        print("{}+Return      : Execute code".format(ctrl))
-        print("{}+.           : Stop all sound".format(ctrl))
-        print("{}+=           : Increase font size".format(ctrl))
-        print("{}+-           : Decrease font size".format(ctrl))
-        print("{}+L           : Insert lambda symbol".format(ctrl))
-        print("{}+S           : Save your work".format(ctrl))
-        print("{}+O           : Open a file".format(ctrl))
-        print("{}+M           : Toggle the menu".format(ctrl))
-        print("{}+{}           : Toggle console window".format(ctrl, self.toggle_key))
-        print("print(SynthDefs) : View available SynthDefs")
-        print("print(Samples)   : View character-to-sample mapping")
+        print("{}+Return           : Execute code".format(ctrl))
+        print("{}+.                : Stop all sound".format(ctrl))
+        print("{}+=                : Increase font size".format(ctrl))
+        print("{}+-                : Decrease font size".format(ctrl))
+        print("{}+L                : Insert lambda symbol".format(ctrl))
+        print("{}+S                : Save your work".format(ctrl))
+        print("{}+O                : Open a file".format(ctrl))
+        print("{}+M                : Toggle the menu".format(ctrl))
+        print("{}+{}                : Toggle console window".format(ctrl, self.toggle_key))
+        print("print(SynthDefs)      : View available SynthDefs")
+        print("print(Samples)        : View character-to-sample mapping")
+        print("print(FxList)         : View audio effects")
+        print("print(Attributes)     : View Player attributes")
+        print("print(PatternMethods) : View Pattern methods")
         print("---------------------------------------------------")
         print("Please visit foxdot.org for more information")
         print("---------------------------------------------------")
