@@ -388,7 +388,7 @@ class MethodCall:
 
         self.i, self.next = self.count()
 
-        self.offset = float(modi(self.cycle, self.i)) - 1 if self.cycle is not None else 0
+        self.offset = float(modi(self.cycle, self.i)) if self.cycle is not None else 0
         
         return self
 
