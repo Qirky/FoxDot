@@ -616,6 +616,25 @@ class metaPattern(object):
         return new
 
     @loop_pattern_method
+    def trim(self, size):
+        """ Shortens a pattern until it's length is equal to size - cannot be greater than the length of the current pattern  """
+        new = []
+        for n in range(min(len(self), size)):
+            new.append( modi(self.data, n) )
+        new = self.new(new)
+        return new
+
+    @loop_pattern_method
+    def ltrim(self, size):
+        """ Like trim but removes items from the start of the pattern"""
+        new = []
+        data = self.mirror().data
+        for n in range(min(len(self), size)):
+            new.append( modi(data, n) )
+        new = self.new(new).mirror()
+        return new
+
+    @loop_pattern_method
     def loop(self, n):
         """ Repeats this pattern n times """
         new = []
@@ -773,8 +792,7 @@ class metaPattern(object):
         return self.new([(item.map(func) if isinstance(item, metaPattern) else func(item)) for item in self.data])       
     
     def extend(self, item):
-        self[len(self):] = [item]
-        return self
+        return self.pipe(item)
 
     def new_extend(self, item):
         new = list(self.data)
@@ -917,12 +935,6 @@ class metaPattern(object):
         """ Returns one randomly selected item """
         return choice(self.data)
 
-    def trim(self, size):
-        return self[:size]
-
-    def ltrim(self, size):
-        return self[-size:]
-
     def get_behaviour(self):
         return None
 
@@ -1007,10 +1019,6 @@ class PGroup(metaPattern):
             self.__class__ = Pattern
 
             self.data = new_data
-
-    def extend(self, item):
-        self.data.extend(item)
-        return self
 
     def merge(self, value):
         """ Merge values into one PGroup """
