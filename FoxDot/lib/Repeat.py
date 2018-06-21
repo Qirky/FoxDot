@@ -457,7 +457,7 @@ class MethodCall:
 
         if self.cycle is not None:
             
-            self.offset = float(modi(self.cycle, self.i)) - 1
+            self.offset = float(modi(self.cycle, self.i))
 
         # Re-schedule the method call
 
