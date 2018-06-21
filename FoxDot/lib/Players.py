@@ -935,8 +935,6 @@ class Player(Repeatable):
 
             # Get PGroup delays
 
-            # new_event["delay"] = new_event.get("delay", 0) + PGroup([dur * (i+1) for i in range(n-1)])
-
             new_event["delay"] = PGroup([dur * (i+1) for i in range(n-1)])
 
             new_event = self.get_prime_funcs(new_event)
