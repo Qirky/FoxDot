@@ -1,3 +1,12 @@
+### v0.6.5 fixes and updates
+
+- Added option to duplicate a line of text using `Ctrl+D` shortcut.
+- Added `Ctrl+Shift+Direction` shortcut to select a word of text.
+- Set menu text for Linux to OS default
+- More config options (transparency / menu / load on startup) added - thanks to [fgonzalez-cespi](https://github.com/fgonzalez-cespi) for these.
+- Add ability to add "swing" to the `Clock` using a `var` object at the clock's "nudge" attribute e.g. `Clock.nudge = var([0,0.1],1/2)` will delay every other half beat by 0.1 seconds.
+- Improve right-click behaviour
+
 ### v0.6.4 fixes and updates
 
 - Fix Tkinter issues with "KP" events and added selection using shift + numpad usage

@@ -3,14 +3,17 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.5 fixes and updates
+### v0.6.6 fixes and updates
 
-- Added option to duplicate a line of text using `Ctrl+D` shortcut.
-- Added `Ctrl+Shift+Direction` shortcut to select a word of text.
-- Set menu text for Linux to OS default
-- More config options (transparency / menu / load on startup) added - thanks to [fgonzalez-cespi](https://github.com/fgonzalez-cespi) for these.
-- Add ability to add "swing" to the `Clock` using a `var` object at the clock's "nudge" attribute e.g. `Clock.nudge = var([0,0.1],1/2)` will delay every other half beat by 0.1 seconds.
-- Improve right-click behaviour
+- Added `jump` method to `Player` class: plays an event one step early (can be specifed by using `ahead` keyword) using keyword arguments to specify how the event is played.
+```python
+d1 >> play("x-o-").every(7.5, "jump", cycle=8, sample=2, delay=var([-0.25, 0],8))
+```
+- Added `penta` method to `Player` for quickly switching between pentatonic scales. No arguments turns it on, 0 or `False` turns it off.
+- Added `alt_dur` method to `Player`. This is an alternative way to set the duration of a player, mostly useful if using a `linvar` as a duration. When durations change, the clock position is recalcalculated - so using a `linvar` causes many of these calculations to be made and can lead to delayed messages to SuperCollider. This method manipulates the `bpm` attribute of the player to set the duration which does not require recalculating the clock position and is more efficient but less accurate.
+- Update `trim`, `ltrim`, and `extend` methods for `Pattern` class. These can be looped and used with the `every` method.
+- \* Experimental \* - Added CPU usage menu. Going to `Language` -> `CPU Usage` you can choose low, medium, or high (default) level of CPU usage which is derived from the number of cycles the `Clock` makes each second. Each CPU usage step is 10x more than the previous. Currently this value resets between uses of FoxDot.
+- Fixed `setup.py` to load description from the README.md file
    
 ---
 

@@ -7,7 +7,7 @@ with open("README.md", "r") as f:
     long_description=f.read()
 
 setup(name='FoxDot',
-      version='0.6.5',
+      version='0.6.6',
       description='Live coding music with SuperCollider',
       author='Ryan Kirkbride',
       author_email='ryan@foxdot.org',
@@ -39,6 +39,7 @@ setup(name='FoxDot',
                                  'osc/scsyndef/*.scd',
                                  'demo/*.py',
                                  'lib/Extensions/*.json',
+                                 'README.md',
                                  ],
                       'FoxDot.lib.Workspace': ['img/*', 'tmp/*'],
                       'FoxDot.lib.Settings' : ['conf.txt']})
