@@ -125,6 +125,22 @@ Grouping characters in round brackets laces the pattern so that on each play thr
 d1 >> play("x-o{-[--]o[-o]}")
 ```
 
+There is now the functionality to specify the sample number for an individual sample when using the `play` SynthDef. This can be done from the play string itself by using the bar character in the form `|<char><sample>|`. These can also be patterns created using brackets:
+
+```python
+# Plays the kick drum with sample 2 but the rest with sample 0
+p1 >> play("|x2|-o-")
+
+# You can use square brackets to play multiple samples
+p1 >> play("|x[12]| o ")
+
+# Round brackets alternate which sample is used on each loop through the sequence
+p1 >> play("|x(12)| o ")
+
+# Curly braces will pick a sample at random
+p1 >> play("|x{0123}| o ")
+```
+
 ## Scheduling Player methods
 
 You can perform actions like shuffle, mirror, and rotate on Player Objects just by calling the appropriate method.
