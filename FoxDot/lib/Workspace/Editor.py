@@ -223,7 +223,9 @@ class workspace:
         self.text.bind("<{}-n>".format(ctrl),               self.newfile)
 
         self.text.bind("<{}-m>".format(ctrl),               self.toggle_menu)
-        self.text.bind("<{}-l>".format(ctrl),               self.insert_lambda_symbol)
+        self.text.bind("<{}-l>".format(ctrl),               lambda event: self.insert_char(u"\u03BB")) # insert lambda
+        self.text.bind("<{}-t>".format(ctrl),               lambda event: self.insert_char("~"))
+
         self.text.bind("<{}-{}>".format(ctrl, self.help_key.lower()), self.help)
 
         # Number pad
@@ -525,11 +527,15 @@ class workspace:
         self.text.queue.put((target, args, kwargs))
         return
 
+    def insert_char(self, char):
+        """ Inserts a character into the text editor at the INSERT cursor 
+            then updates the syntax highlighting etc """
+        self.text.insert(INSERT, char)
+        self.update()
+        return "break"
 
     def insert_lambda_symbol(self, event):
-        self.text.insert(INSERT, u"\u03BB")
-        self.update(event)
-        return
+        return self.insert_char( u"\u03BB" )
 
     # Undo action: Ctrl+Z
     #--------------------
@@ -568,6 +574,7 @@ class workspace:
         print("{}+=                : Increase font size".format(ctrl))
         print("{}+-                : Decrease font size".format(ctrl))
         print("{}+L                : Insert lambda symbol".format(ctrl))
+        print("{}+T                : Insert tilde symbol".format(ctrl))
         print("{}+S                : Save your work".format(ctrl))
         print("{}+O                : Open a file".format(ctrl))
         print("{}+M                : Toggle the menu".format(ctrl))
