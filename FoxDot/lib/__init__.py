@@ -1,23 +1,6 @@
-"""
-
-FoxDot is a Python library and programming environment that provides a fast and 
-user-friendly abstraction to the powerful audio-engine, SuperCollider. It comes 
-with its own IDE, which means it can be used straight out of the box; all you need 
-is Python and SuperCollider and you're ready to go!
-
-For more information on installation, check out [the guide](http://foxdot.org/installation), 
-or if you're already set up, you can also find a useful starter guide that introduces the
-key components of FoxDot on [the website](http://foxdot.org/).
-
-Please see the documentation for more detailed information on the FoxDot classes 
-and how to implement them.
-
-Copyright Ryan Kirkbride 2015
-"""
-
 from __future__ import absolute_import, division, print_function
 
-__version__ = "0.6.6"
+__version__ = "0.6.7"
 
 import logging
 
@@ -174,9 +157,6 @@ def allow_connections(valid = True, *args, **kwargs):
         print("Closed connections")
     return
 
-Attributes = Player.get_attributes()
-PatternMethods = Pattern.get_methods()
-
 # Create a clock and define functions
 
 logging.basicConfig(level=logging.ERROR)
@@ -186,3 +166,10 @@ Clock = TempoClock()
 update_foxdot_server(DefaultServer)
 update_foxdot_clock(Clock)
 instantiate_player_objects()
+
+# Create a "now" time variable
+now = var([0]).transform(lambda a: Clock.now())
+
+Attributes = Player.get_attributes()
+PatternMethods = Pattern.get_methods()
+PatternTypes = functions(Patterns.Sequences)
