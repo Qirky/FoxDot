@@ -34,13 +34,15 @@ class TimeVar:
     metro = None
     depth = 128
 
-    def __init__(self, values, dur=None, **kwargs):
+    def __init__(self, values, dur=None, start=0, **kwargs):
 
         if dur is None:
 
             dur = self.metro.bar_length()
 
         self.name     = "un-named"
+
+        self.start_time = float(start) # offset
 
         self.values   = values
         self.dur      = dur
@@ -109,51 +111,6 @@ class TimeVar:
         """ Displays the values and the dependency value - useful for debugging """
         return self.value + [self.dependency]
 
-    # def _bpm_cycle_dur(self):
-    #     """ Returns the time, in seconds, for a var to loop to its original
-    #         value and duration if this var is a bpm value. """
-    #     return sum([(self.dur[i] / self.values[i]) for i in range(LCM(len(self.dur), len(self.values)) )]) * 60
-
-    # def _bpm_to_beats(self, duration, start=0):
-    #     """ If self.values are series of bpm, how many beats occur in
-    #         the time frame 'duration'. Used in TempoClock """
-
-    #     cycle_dur = self._bpm_cycle_dur()
-
-    #     start = start % self.length() # What offset to the start to apply
-
-    #     n = duration // cycle_dur # How many cycles occurred in duration
-
-    #     r = duration % cycle_dur  # How many seconds of the last cycle occurred
-
-    #     total = n * self.length()
-
-    #     i = 0
-
-    #     while r > 0:
-
-    #         # Work out their durations and sub from 'r' until 0
-
-    #         seconds = (self.dur[i]/ self.values[i]) * 60.0
-
-    #         offset  = (start / self.values[i]) * 60.0
-
-    #         seconds = seconds - offset
-
-    #         if seconds > 0:
-
-    #             beats = (self.values[i] * min(seconds, r)) / 60.0
-    #             r    -= seconds
-    #             start = 0
-    #             total += beats
-
-    #         else:
-
-    #             start -= self.dur[i]
-
-    #         i += 1
-    #     return total
-
     # Update methods
 
     def new(self, other):
@@ -162,10 +119,6 @@ class TimeVar:
         new = ChildTimeVar(other)
         new.dependency = self
         return new
-
-    # def length(self):
-    #     """ Returns the duration of one full cycle in beats """
-    #     return self.time[-1][1]
 
     def update(self, values, dur=None, **kwargs):
         """ Updates the TimeVar with new values.
@@ -188,7 +141,7 @@ class TimeVar:
 
         # Get the time value if not from the Clock
 
-        time = self.get_current_time(time)
+        time = self.get_current_time(time) - self.start_time
 
         if time >= self.next_time:
 
@@ -467,6 +420,13 @@ class TimeVar:
     def __iter__(self):
         for item in self.now():
             yield item
+
+    def transform(self, func):
+        """ Returns a new TimeVar based on a func """
+        new = self.new(0)
+        new.dependency = self
+        new.evaluate = fetch(lambda a, b: func(b))
+        return new
 
 class ChildTimeVar(TimeVar):
     """ When a new TimeVar is created using a function such as addition,
