@@ -163,12 +163,14 @@ logging.basicConfig(level=logging.ERROR)
 when.set_namespace(FoxDotCode) # experimental
 
 Clock = TempoClock()
+
 update_foxdot_server(DefaultServer)
 update_foxdot_clock(Clock)
 instantiate_player_objects()
 
 # Create a "now" time variable
 now = var([0]).transform(lambda a: Clock.now())
+nextbar = var([0]).transform(lambda a: Clock.next_bar())
 
 Attributes = Player.get_attributes()
 PatternMethods = Pattern.get_methods()
