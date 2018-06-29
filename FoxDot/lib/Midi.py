@@ -84,6 +84,8 @@ class MidiOut(SynthDefProxy):
     def __init__(self, degree=0, **kwargs):
         SynthDefProxy.__init__(self, self.__class__.__name__, degree, kwargs)
 
+midi = MidiOut # experimental alias
+
 # Midi information exceptions
 
 class MIDIDeviceNotFound(Exception):
