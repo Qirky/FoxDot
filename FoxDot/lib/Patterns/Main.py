@@ -496,9 +496,9 @@ class metaPattern(object):
         new.data.reverse()
         return new
 
-    def sort(self):
+    def sort(self, *args, **kwargs):
         """ Used in place of sorted(pattern) to force type """
-        return self.new(sorted(self.data))
+        return self.new(sorted(self.data, *args, **kwargs))
 
     def mirror(self):
         """ Reverses the pattern. Differs to `Pattern.reverse()` in that
@@ -758,7 +758,7 @@ class metaPattern(object):
                 new.append(item)
         return self.new(new)
 
-    def map(self, mapping):
+    def submap(self, mapping):
         """ Similar to Pattern.replace, but takes a dictionary of values """
         new = []
         for item in self.data:
