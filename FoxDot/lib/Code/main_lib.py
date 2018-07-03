@@ -166,14 +166,14 @@ def get_now(obj):
 
 def get_input():
     """ Similar to `input` but can handle multi-line input. Terminates on a final "\n" """
-    line = " "; text = ""
+    line = " "; text = []
     
     while len(line) > 0:
         
         line = input("")
-        text = text + "\n" + line
+        text.append(line)
 
-    return text
+    return "\n".join(text)
 
 def handle_stdin():
     """ When FoxDot is run with the --pipe added, this function
