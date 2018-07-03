@@ -1232,10 +1232,7 @@ class OSCClient(object):
 		try:
 			self.socket.sendall(msg.getBinary())
 		except socket.error as e:
-			if e[0] in (7, 65):	# 7 = 'no address associated with nodename',  65 = 'no route to host'
-				raise e
-			else:
-				raise OSCClientError("while sending: %s" % str(e))
+			raise OSCClientError("while sending: %s" % str(e))
 
 ######
 #
