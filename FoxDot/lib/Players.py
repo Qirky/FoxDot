@@ -870,13 +870,13 @@ class Player(Repeatable):
         return self
 
     def often(self, *args, **kwargs):
-        return self.every(PRand(8)/2, *args, **kwargs)
+        return self.every(PRand(1, 8)/2, *args, **kwargs)
 
     def sometimes(self, *args, **kwargs):
-        return self.every(PRand(8,32)/2, *args, **kwargs)
+        return self.every(PRand(8, 32)/2, *args, **kwargs)
 
     def rarely(self, *args, **kwargs):
-        return self.every(PRand(32,64)/2, *args, **kwargs)
+        return self.every(PRand(32, 64)/2, *args, **kwargs)
 
     def stutter(self, amount=None, **kwargs):
         """ Plays the current note n-1 times. You can specify keywords. """
