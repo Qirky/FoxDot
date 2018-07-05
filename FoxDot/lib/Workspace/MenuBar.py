@@ -25,6 +25,9 @@ class MenuBar(Menu):
         self.cpu_usage = IntVar()
         self.cpu_usage.set(CPU_USAGE)
 
+        self.latency = IntVar()
+        self.latency.set(CLOCK_LATENCY)
+
         # File menu
 
         filemenu = Menu(self, tearoff=0)
@@ -86,6 +89,11 @@ class MenuBar(Menu):
         cpu_menu.add_radiobutton(label="Medium", variable=self.cpu_usage, value=1, command=self.set_cpu_usage)
         cpu_menu.add_radiobutton(label="High", variable=self.cpu_usage, value=2, command=self.set_cpu_usage)
         helpmenu.add_cascade(label="CPU Usage", menu=cpu_menu)
+        lat_menu=Menu(self, tearoff=0)
+        lat_menu.add_radiobutton(label="Low", variable=self.latency, value=0, command=self.set_latency)
+        lat_menu.add_radiobutton(label="Medium", variable=self.latency, value=1, command=self.set_latency)
+        lat_menu.add_radiobutton(label="High", variable=self.latency, value=2, command=self.set_latency)
+        helpmenu.add_cascade(label="Clock Latency", menu=lat_menu)
         helpmenu.add_separator()
         helpmenu.add_command(label="Open Samples Folder",   command=self.root.open_samples_folder)
         helpmenu.add_command(label="Open config file (advanced)",      command=self.root.open_config_file)
@@ -144,6 +152,11 @@ class MenuBar(Menu):
     def set_cpu_usage(self, *args):
         """ Updates the cpu usage option """
         self.root.namespace["Clock"].set_cpu_usage(self.cpu_usage.get())
+        return
+
+    def set_latency(self, *args):
+        """ Updates the cpu usage option """
+        self.root.namespace["Clock"].set_latency(self.latency.get())
         return
 
 

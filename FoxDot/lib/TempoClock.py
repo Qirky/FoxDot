@@ -57,7 +57,7 @@ from .TimeVar import TimeVar
 from .Midi import MidiIn, MIDIDeviceNotFound
 from .Utils import modi
 from .ServerManager import TempoClient, ServerManager
-from .Settings import CPU_USAGE
+from .Settings import CPU_USAGE, CLOCK_LATENCY
 
 from time import sleep, time, clock
 from fractions import Fraction
@@ -114,6 +114,7 @@ class TempoClock(object):
         self.midi_clock = None
 
         # Can be configured
+        self.latency_values = [0.25, 0.5, 0.75]
         self.latency    = 0.25 # Time between starting processing osc messages and sending to server
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
@@ -191,6 +192,12 @@ class TempoClock(object):
         """ Sets the `sleep_time` attribute to values based on desired high/low/medium cpu usage """
         assert 0 <= value <= 2
         self.sleep_time = self.sleep_values[value]
+        return
+
+    def set_latency(self, value):
+        """ Sets the `latency` attribute to values based on desired high/low/medium latency """
+        assert 0 <= value <= 2
+        self.latency = self.latency_values[value]
         return
 
     def __setattr__(self, attr, value):
