@@ -1640,11 +1640,11 @@ class workspace:
         return self.text.get("1.0", END).strip()
 
     def openhomepage(self):
-        webbrowser.open("www.foxdot.org")
+        webbrowser.open("http://www.foxdot.org/")
         return
 
     def opendocumentation(self):
-        webbrowser.open("www.docs.foxdot.org")
+        webbrowser.open("http://www.docs.foxdot.org/")
         return
     
     def set_temp_file(self, text):
