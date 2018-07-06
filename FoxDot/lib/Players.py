@@ -853,7 +853,7 @@ class Player(Repeatable):
 
             # If we want to update now, set the start point to now
 
-            if kwargs.get("now", False) == True:
+            if kwargs.get("quantise", True) == False:
 
                 start_point = self.metro.now()
 
