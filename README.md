@@ -3,18 +3,24 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.6 fixes and updates
+### v0.6.7 fixes and updates
 
-- Added `jump` method to `Player` class: plays an event one step early (can be specifed by using `ahead` keyword) using keyword arguments to specify how the event is played.
+- Added `often`, `sometimes`, and `rarely` methods that wrap the `every` method but use random durations to decide when to call a method:
 ```python
-d1 >> play("x-o-").every(7.5, "jump", cycle=8, sample=2, delay=var([-0.25, 0],8))
+# Stutter frequently
+d1 >> play("x-o-").often("stutter", 4, dur=1)
+
+# Reverse sometimes
+p1 >> pads([0, 1, 2, 3]).sometimes("reverse")
+
+# Call the solo method, but not frequently
+p2 >> pluck((0,2,4), dur=PDur(3,8)).rarely("solo")
 ```
-- Added `penta` method to `Player` for quickly switching between pentatonic scales. No arguments turns it on, 0 or `False` turns it off.
-- Added `alt_dur` method to `Player`. This is an alternative way to set the duration of a player, mostly useful if using a `linvar` as a duration. When durations change, the clock position is recalcalculated - so using a `linvar` causes many of these calculations to be made and can lead to delayed messages to SuperCollider. This method manipulates the `bpm` attribute of the player to set the duration which does not require recalculating the clock position and is more efficient but less accurate.
-- Update `trim`, `ltrim`, and `extend` methods for `Pattern` class. These can be looped and used with the `every` method.
-- \* Experimental \* - Added CPU usage menu. Going to `Language` -> `CPU Usage` you can choose low, medium, or high (default) level of CPU usage which is derived from the number of cycles the `Clock` makes each second. Each CPU usage step is 10x more than the previous. Currently this value resets between uses of FoxDot.
-- Fixed `setup.py` to load description from the README.md file
-   
+- Added Player keyword `quantise` to start playing as soon as possible when set to `True`. Defaults to `False` such that Players start playing  at the next bar.
+- Added menu options to allow users to set the CPU usage and Clock latency for better performance on individual systems. 
+- Fixed links to webpages from help menu for Linux and Mac OS.
+- Added overdrive effect, which can be added using `drive` keyword
+
 ---
 
 ## Installation and startup
@@ -47,7 +53,8 @@ Quarks.install("FoxDot")
 1. Open SuperCollider and type in `FoxDot.start` and evaluate this line. SuperCollider is now listening for messages from FoxDot. 
 2. Start FoxDot by entering either `FoxDot` or `python -m FoxDot` at the command line.
 3. If you have installed the SC3 Plugins, use the "Code" drop-down menu to select "Use SC3 Plugins". Restart FoxDot and you'll have access to classes found in the SC3 Plugins.
-4. Check out the [YouTube tutorials](https://www.youtube.com/channel/UCRyrNX07lFcfRSymZEWwl6w) for some in-depth tutorial videos on getting to grips with FoxDot
+4. Keep up to date with the latest verion of FoxDot by running `pip install FoxDot --upgrade` every few weeks.
+5. Check out the [YouTube tutorials](https://www.youtube.com/channel/UCRyrNX07lFcfRSymZEWwl6w) for some in-depth tutorial videos on getting to grips with FoxDot
 
 #### Installing with SuperCollider 3.7 or earlier
 
