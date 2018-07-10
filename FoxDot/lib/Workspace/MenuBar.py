@@ -10,6 +10,10 @@ from functools import partial
 from ..Settings import *
 from ..Code import FoxDotCode
 
+# Code menu
+
+ctrl = "Command" if SYSTEM == MAC_OS else "Ctrl"
+
 class MenuBar(Menu):
     def __init__(self, master, visible=True):
 
@@ -55,10 +59,6 @@ class MenuBar(Menu):
         editmenu.add_command(label="Toggle Menu", command=self.root.toggle_menu, accelerator="Ctrl+M")
         editmenu.add_checkbutton(label="Toggle Window Transparency",  command=self.root.toggle_transparency, variable=self.root.transparent)
         self.add_cascade(label="Edit", menu=editmenu)
-
-        # Code menu
-
-        ctrl = "Command" if SYSTEM == MAC_OS else "Ctrl"
         
         # Note: Alt renders properly to look like Option, so we don't need a
         # conditional for those shortcuts
@@ -164,14 +164,14 @@ class PopupMenu(Menu):
     def __init__(self, master, **kwargs):
         self.root = master
         Menu.__init__(self, master.root, tearoff=0)
-        self.add_command(label="Undo", command=self.root.undo) 
-        self.add_command(label="Redo", command=self.root.redo)
+        self.add_command(label="Undo", command=self.root.undo, accelerator="{}+Z".format(ctrl)) 
+        self.add_command(label="Redo", command=self.root.redo, accelerator="{}+Y".format(ctrl))
         self.add_separator()
-        self.add_command(label="Copy", command=self.root.edit_copy)
-        self.add_command(label="Cut", command=self.root.edit_cut)
-        self.add_command(label="Paste", command=self.root.edit_paste)
+        self.add_command(label="Copy", command=self.root.edit_copy, accelerator="{}+C".format(ctrl))
+        self.add_command(label="Cut", command=self.root.edit_cut, accelerator="{}+X".format(ctrl))
+        self.add_command(label="Paste", command=self.root.edit_paste, accelerator="{}+V".format(ctrl))
         self.add_separator()
-        self.add_command(label="Select All", command=self.root.select_all)
+        self.add_command(label="Select All", command=self.root.select_all, accelerator="{}+A".format(ctrl))
 
     def show(self, event):
         """ Displays the popup menu """
@@ -189,14 +189,14 @@ class ConsolePopupMenu(Menu):
     def __init__(self, master, **kwargs):
         self.root = master
         Menu.__init__(self, master.root, tearoff=0)
-        self.add_command(label="Undo", state=DISABLED)
-        self.add_command(label="Redo", state=DISABLED)
+        self.add_command(label="Undo", state=DISABLED, accelerator="{}+Z".format(ctrl))
+        self.add_command(label="Redo", state=DISABLED, accelerator="{}+Y".format(ctrl))
         self.add_separator()
-        self.add_command(label="Copy", command=self.root.edit_copy)
-        self.add_command(label="Cut", state=DISABLED)
-        self.add_command(label="Paste", state=DISABLED)
+        self.add_command(label="Copy", command=self.root.edit_copy, accelerator="{}+C".format(ctrl))
+        self.add_command(label="Cut", state=DISABLED, accelerator="{}+X".format(ctrl))
+        self.add_command(label="Paste", state=DISABLED, accelerator="{}+V".format(ctrl))
         self.add_separator()
-        self.add_command(label="Select All", command=self.root.select_all)
+        self.add_command(label="Select All", command=self.root.select_all, accelerator="{}+A".format(ctrl))
 
     def show(self, event):
         """ Displays the popup menu """

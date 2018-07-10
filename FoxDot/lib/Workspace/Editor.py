@@ -268,8 +268,8 @@ class workspace:
             
         except:
             
-            self.text.bind("<{}-t>".format(ctrl), self.toggle_console)
-            self.toggle_key = "T" 
+            self.text.bind("<{}-G>".format(ctrl), self.toggle_console)
+            self.toggle_key = "G" 
 
         # Save feature variabes
 
