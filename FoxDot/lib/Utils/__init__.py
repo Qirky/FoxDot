@@ -8,8 +8,17 @@
 from __future__ import absolute_import, division, print_function
 
 import sys
+import json
+import urllib.request
 
 # Functions
+
+def get_pypi_version():
+    """ Returns the most up-to-date version number on PyPI """
+    addr = "https://pypi.org/pypi/FoxDot/json"
+    file = urllib.request.urlopen(addr)
+    data = json.loads(file.read())
+    return data["info"]["version"]
 
 def stdout(*args):
     """ Forces prints to stdout and not console """

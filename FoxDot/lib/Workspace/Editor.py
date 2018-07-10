@@ -38,6 +38,7 @@ from .TextBox import ThreadedText
 from .LineNumbers import LineNumbers
 from .MenuBar import MenuBar, PopupMenu
 from ..Code import write_to_file
+from ..Utils import get_pypi_version
 
 from functools import partial
 import webbrowser
@@ -62,9 +63,17 @@ class workspace:
 
         CodeClass.namespace['FoxDot'] = self
         CodeClass.namespace['Player'].widget = self
-        #CodeClass.namespace['Ghost'].widget = self
 
-        version = CodeClass.namespace['__version__']
+        this_version = CodeClass.namespace['__version__']
+        pypi_version = get_pypi_version()
+
+        def check_versions():
+
+            if pypi_version > this_version:
+
+                tkMessageBox.showinfo("New version available", "There is a new version of FoxDot available from PyPI. Upgrade by going to your command prompt and running:\n\npip install FoxDot --upgrade")
+
+            return
 
         # Used for docstring prompt
         
@@ -73,7 +82,7 @@ class workspace:
         # Set up master widget  
 
         self.root = Tk(className='FoxDot')
-        self.root.title("FoxDot v{} - Live Coding with Python and SuperCollider".format(version))
+        self.root.title("FoxDot v{} - Live Coding with Python and SuperCollider".format(this_version))
         self.root.rowconfigure(0, weight=1) # Text box
         self.root.rowconfigure(1, weight=0) # Separator
         self.root.rowconfigure(2, weight=0) # Console
@@ -342,6 +351,10 @@ class workspace:
                     self.clear_temp_file()
 
                 self.text_as_string = self.get_all()
+
+        # Check online if a new version if available
+
+        self.root.after(90, check_versions)
 
         # Ask after widget loaded
         if RECOVER_WORK:
