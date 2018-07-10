@@ -175,7 +175,14 @@ class PopupMenu(Menu):
 
     def show(self, event):
         """ Displays the popup menu """
-        self.post(event.x_root, event.y_root)
+        try:
+            self.post(event.x_root, event.y_root)
+        finally:
+            self.grab_release()
+
+    def hide(self, event):
+        """ Removes menu from sight """
+        self.unpost()
 
 
 class ConsolePopupMenu(Menu):
@@ -193,4 +200,12 @@ class ConsolePopupMenu(Menu):
 
     def show(self, event):
         """ Displays the popup menu """
-        self.post(event.x_root, event.y_root)
+        try:
+            self.post(event.x_root, event.y_root)
+        finally:
+            self.grab_release()
+
+    def hide(self, event):
+        """ Removes menu from sight """
+        self.unpost()
+        

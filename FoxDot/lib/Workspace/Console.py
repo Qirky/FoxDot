@@ -55,7 +55,7 @@ class console:
         self.canvas.bind("<ButtonRelease-1>",   self.canvas_mouserelease)
         self.canvas.bind("<B1-Motion>",         self.canvas_mousedrag)
         self.canvas.bind("<MouseWheel>",        self.on_scroll)
-        self.canvas.bind("<Button-{}>".format(2 if SYSTEM == MAC_OS else 3), self.popup.show)
+        self.canvas.bind("<Button-{}>".format(2 if SYSTEM == MAC_OS else 3), self.show_popup)
         self.canvas.bind("<{}-c>".format("Command" if SYSTEM == MAC_OS else "Control"),   self.edit_copy)
 
         self.padx = 5
@@ -368,3 +368,8 @@ class console:
             x, y = self.draw_arrow(x, y, w, '#1d5335', "up")
             x += step
         return
+
+    def show_popup(self, *args):
+        """ Shows the right-click context menu and hides the text popup """
+        self.popup.show(*args)
+        self.app.popup.hide(*args)

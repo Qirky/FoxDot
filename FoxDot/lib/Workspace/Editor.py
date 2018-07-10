@@ -181,7 +181,7 @@ class workspace:
         self.text.bind("<Tab>",             self.tab)
         self.text.bind("<Key>",             self.keypress)
 
-        self.text.bind("<Button-{}>".format(2 if SYSTEM == MAC_OS else 3), self.popup.show)
+        self.text.bind("<Button-{}>".format(2 if SYSTEM == MAC_OS else 3), self.show_popup)
 
         self.text.bind("<{}-BackSpace>".format(ctrl),       self.delete_word)
         self.text.bind("<{}-Delete>".format(ctrl),          self.delete_next_word)
@@ -294,7 +294,7 @@ class workspace:
         self.console = console(self, self.default_font)
         self.console_visible = True
         sys.stdout = self.console
-        self.text.bind("<Button-1>", lambda e: self.console.canvas.select_clear())
+        self.root.bind("<Button-1>", self.mouse_press)
 
         # Store original location of cursor
         self.origin = "origin"
@@ -1675,4 +1675,19 @@ class workspace:
             Clock = self.namespace["Clock"]
             Clock.kill_tempo_server()
             print("Closed connections")
+        return
+
+    def show_popup(self, *args):
+        """ Shows the context menu when pressing right click """
+        # Show text popup
+        self.popup.show(*args)
+        # Hide console popup
+        self.console.popup.hide(*args)
+        return
+
+    def mouse_press(self, *args):
+        """ De-select etc when pressing mouse 1 """
+        self.console.canvas.select_clear() # Clear select on the console
+        self.popup.hide(*args)
+        self.console.popup.hide(*args)
         return
