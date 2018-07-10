@@ -9,16 +9,21 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 import json
-import urllib.request
+import urllib.request, urllib.error
 
 # Functions
 
 def get_pypi_version():
-    """ Returns the most up-to-date version number on PyPI """
-    addr = "https://pypi.org/pypi/FoxDot/json"
-    file = urllib.request.urlopen(addr)
-    data = json.loads(file.read())
-    return data["info"]["version"]
+    """ Returns the most up-to-date version number on PyPI. Return None on error """
+    try:
+        addr = "https://pypi.org/pypi/FoxDot/json"
+        file = urllib.request.urlopen(addr)
+        data = json.loads(file.read())
+        version = data["info"]["version"]
+    except urllib.error.URLError:
+        version = None
+    return version
+
 
 def stdout(*args):
     """ Forces prints to stdout and not console """
