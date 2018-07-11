@@ -9,7 +9,12 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 import json
-import urllib.request, urllib.error
+
+try:
+    from urllib.request import urlopen
+    from urllib.error import URLError
+except ImportError:
+    from urllib2 import urlopen, URLError
 
 # Functions
 
@@ -17,10 +22,10 @@ def get_pypi_version():
     """ Returns the most up-to-date version number on PyPI. Return None on error """
     try:
         addr = "https://pypi.org/pypi/FoxDot/json"
-        file = urllib.request.urlopen(addr)
-        data = json.loads(file.read())
+        page = urlopen(addr)
+        data = json.loads(page.read().decode("utf-8"))
         version = data["info"]["version"]
-    except urllib.error.URLError:
+    except URLError:
         version = None
     return version
 

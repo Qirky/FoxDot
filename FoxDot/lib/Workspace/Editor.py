@@ -1695,12 +1695,12 @@ class workspace:
         # Show text popup
         self.popup.show(*args)
         # Hide console popup
-        #self.console.popup.hide(*args)
+        self.console.popup.hide(*args)
         return
 
     def mouse_press(self, *args):
         """ De-select etc when pressing mouse 1 """
         self.console.canvas.select_clear() # Clear select on the console
-        #self.popup.hide(*args)
-        #self.console.popup.hide(*args)
+        self.popup.hide(*args)
+        self.console.popup.hide(*args)
         return

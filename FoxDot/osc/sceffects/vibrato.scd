@@ -1,5 +1,5 @@
 SynthDef.new(\vibrato,
-{|bus, vib, vibdepth|
+{|bus, vibdepth, vib|
 var osc;
 osc = In.kr(bus, 1);
 osc = Vibrato.ar(osc, vib, depth: vibdepth);
