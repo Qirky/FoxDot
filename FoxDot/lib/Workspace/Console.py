@@ -372,4 +372,4 @@ class console:
     def show_popup(self, *args):
         """ Shows the right-click context menu and hides the text popup """
         self.popup.show(*args)
-        self.app.popup.hide(*args)
+        #self.app.popup.hide(*args)

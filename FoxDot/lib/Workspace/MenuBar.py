@@ -172,6 +172,8 @@ class PopupMenu(Menu):
         self.add_command(label="Paste", command=self.root.edit_paste, accelerator="{}+V".format(ctrl))
         self.add_separator()
         self.add_command(label="Select All", command=self.root.select_all, accelerator="{}+A".format(ctrl))
+        self.bind("<FocusOut>", self.hide) # hide when clicked off
+
 
     def show(self, event):
         """ Displays the popup menu """
@@ -197,6 +199,7 @@ class ConsolePopupMenu(Menu):
         self.add_command(label="Paste", state=DISABLED, accelerator="{}+V".format(ctrl))
         self.add_separator()
         self.add_command(label="Select All", command=self.root.select_all, accelerator="{}+A".format(ctrl))
+        self.bind("<FocusOut>", self.hide) # hide when clicked off
 
     def show(self, event):
         """ Displays the popup menu """
