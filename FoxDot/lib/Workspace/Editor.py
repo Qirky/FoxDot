@@ -395,6 +395,10 @@ class workspace:
 
         return
 
+    def reload(self):
+        """ Reloads synths / samples """
+        return self.namespace['_reload_synths'].__call__()
+
     def read(self):
         return self.text.get("1.0", END)
 
