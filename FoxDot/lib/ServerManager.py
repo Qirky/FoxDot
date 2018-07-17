@@ -33,12 +33,15 @@ ServerInfo = namedtuple(
 
 
 class OSCClientWrapper(OSCClient):
+    error_printed=False
     def send(*args, **kwargs):
         """ Sends the message given but prints errors instead of raising them """
         try:
             OSCClient.send(*args, **kwargs)
         except OSCClientError as e:
-            print("Error sending message to SuperCollider server instance: make sure FoxDot quark is running and try again.")
+            if not self.error_printed:
+                print("Error sending message to SuperCollider server instance: make sure FoxDot quark is running and try again.")
+                self.error_printed = True
 
 
 class OSCConnect(OSCClientWrapper):
