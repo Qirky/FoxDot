@@ -870,12 +870,15 @@ class Player(Repeatable):
         return self
 
     def often(self, *args, **kwargs):
+        """ Calls a method every 1/2 to 4 beats using `every` """
         return self.every(PRand(1, 8)/2, *args, **kwargs)
 
     def sometimes(self, *args, **kwargs):
+        """ Calls a method every 4 to 16 beats using `every` """
         return self.every(PRand(8, 32)/2, *args, **kwargs)
 
     def rarely(self, *args, **kwargs):
+        """ Calls a method every 16 to 32 beats using `every` """
         return self.every(PRand(32, 64)/2, *args, **kwargs)
 
     def stutter(self, amount=None, **kwargs):
