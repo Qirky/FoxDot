@@ -1,3 +1,22 @@
+### v0.6.7 fixes and updates
+
+- Added `often`, `sometimes`, and `rarely` methods that wrap the `every` method but use random durations to decide when to call a method:
+```python
+# Stutter frequently
+d1 >> play("x-o-").often("stutter", 4, dur=1)
+
+# Reverse sometimes
+p1 >> pads([0, 1, 2, 3]).sometimes("reverse")
+
+# Call the solo method, but not frequently
+p2 >> pluck((0,2,4), dur=PDur(3,8)).rarely("solo")
+```
+- Added Player keyword `quantise` to start playing as soon as possible when set to `True`. Defaults to `False` such that Players start playing  at the next bar.
+- Added menu options to allow users to set the CPU usage and Clock latency for better performance on individual systems. 
+- Fixed links to webpages from help menu for Linux and Mac OS.
+- Added overdrive effect, which can be added using `drive` keyword
+
+
 ### v0.6.6 fixes and updates
 
 - Added `jump` method to `Player` class: plays an event one step early (can be specifed by using `ahead` keyword) using keyword arguments to specify how the event is played.

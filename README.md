@@ -3,23 +3,11 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.7 fixes and updates
+### v0.6.8 fixes and updates
 
-- Added `often`, `sometimes`, and `rarely` methods that wrap the `every` method but use random durations to decide when to call a method:
-```python
-# Stutter frequently
-d1 >> play("x-o-").often("stutter", 4, dur=1)
-
-# Reverse sometimes
-p1 >> pads([0, 1, 2, 3]).sometimes("reverse")
-
-# Call the solo method, but not frequently
-p2 >> pluck((0,2,4), dur=PDur(3,8)).rarely("solo")
-```
-- Added Player keyword `quantise` to start playing as soon as possible when set to `True`. Defaults to `False` such that Players start playing  at the next bar.
-- Added menu options to allow users to set the CPU usage and Clock latency for better performance on individual systems. 
-- Fixed links to webpages from help menu for Linux and Mac OS.
-- Added overdrive effect, which can be added using `drive` keyword
+- Added `FoxDot.reload()` function to reload SynthDefs and samples in SuperCollider if FoxDot was started after having run `FoxDot.start` in SuperCollider. No longer requires you to close and re-open FoxDot. 
+- If SuperCollider is not open and a user tries to send a message from FoxDot, an error message is displayed. This now only happens once instead of after every message. This is to stop the console buffer filling up memory if the user is purposely not using SuperCollider.
+- On bootup, check for newer versions of FoxDot available on PyPI and let the user know that they should update if so.
 
 ---
 
@@ -51,7 +39,7 @@ Quarks.install("FoxDot")
 #### Startup
 
 1. Open SuperCollider and type in `FoxDot.start` and evaluate this line. SuperCollider is now listening for messages from FoxDot. 
-2. Start FoxDot by entering either `FoxDot` or `python -m FoxDot` at the command line.
+2. Start FoxDot by entering `FoxDot` at the command line. If that doesn't work, try `python -m FoxDot`.
 3. If you have installed the SC3 Plugins, use the "Code" drop-down menu to select "Use SC3 Plugins". Restart FoxDot and you'll have access to classes found in the SC3 Plugins.
 4. Keep up to date with the latest verion of FoxDot by running `pip install FoxDot --upgrade` every few weeks.
 5. Check out the [YouTube tutorials](https://www.youtube.com/channel/UCRyrNX07lFcfRSymZEWwl6w) for some in-depth tutorial videos on getting to grips with FoxDot
