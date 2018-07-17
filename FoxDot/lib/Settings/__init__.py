@@ -14,6 +14,10 @@ if PY_VERSION == 2:
     range = xrange
     input = raw_input
 
+else:
+
+    from importlib import reload
+
 # Check for OS -> mac, linux, win
 
 SYSTEM  = 0

@@ -39,9 +39,9 @@ class OSCClientWrapper(OSCClient):
         try:
             OSCClient.send(*args, **kwargs)
         except OSCClientError as e:
-            if not self.error_printed:
+            if not OSCClientWrapper.error_printed:
                 print("Error sending message to SuperCollider server instance: make sure FoxDot quark is running and try again.")
-                self.error_printed = True
+                OSCClientWrapper.error_printed = True
 
 
 class OSCConnect(OSCClientWrapper):
