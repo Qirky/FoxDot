@@ -153,6 +153,14 @@ class BufferManager(object):
     def __repr__(self):
         return '<BufferManager>'
 
+    def _reset_buffers(self):
+        """ Clears the cache of loaded buffers """
+        files = list(self._fn_to_buf.keys())
+        self._fn_to_buf = {}
+        for fn in files:
+            self.loadBuffer(fn)
+        return
+
     def _incr_nextbuf(self):
         self._nextbuf += 1
         if self._nextbuf >= self._max_buffers:
