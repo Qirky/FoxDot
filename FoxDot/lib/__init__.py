@@ -138,6 +138,20 @@ def instantiate_player_objects():
 
     return
 
+def _reload_synths():
+    """ Resends all the synth / sample info to SuperCollider. Useful for times
+        when starting FoxDot before running `FoxDot.start` in SuperCollider. """
+    try:
+        from importlib import reload
+    except ImportError:
+        pass
+    from . import SCLang
+    from . import Effects
+    reload(SCLang._SynthDefs)
+    reload(Effects)
+    Samples._reset_buffers()
+    return
+
 def Master():
     """ Returns a `Group` containing all the players currently active in the Clock """
     return Group(*Clock.playing)
