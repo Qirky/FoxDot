@@ -335,15 +335,21 @@ class SCLangServerManager(ServerManager):
         
         return msg, node
 
-    def get_control_effect_nodes(self, node, bus, group_id, effects):
+    def get_control_effect_nodes(self, node, bus, group_id, packet):
 
         pkg = []
 
+        # Go through effects and put together with child attributes
+
         for fx in self.fxlist.order[0]:
 
-            if fx in effects:
+            if fx in packet and packet[fx] != 0:
 
-                this_effect = effects[fx]
+                # this_effect = effects[fx] # old pre-prepared
+
+                # prepare each effect here
+
+                this_effect = self.prepare_effect(fx, packet)
 
                 # Get next node ID
                 node, last_node = self.nextnodeID(), node
@@ -366,13 +372,13 @@ class SCLangServerManager(ServerManager):
 
         for key in packet:
 
-            if key != "env":
+            if key not in ("env", "degree"): # skip some attr
 
-                try:    
+                try:
 
                     new_message[key] = float(packet[key]) # is this not already the case?
 
-                except TypeError as e:
+                except (TypeError, ValueError) as e:
 
                     WarningMsg( "Could not convert '{}' argument '{}' to float. Set to 0".format( key, packet[key] ))
                     new_message[key] = 0.0
@@ -388,15 +394,15 @@ class SCLangServerManager(ServerManager):
 
         return msg, node
 
-    def get_pre_env_effect_nodes(self, node, bus, group_id, effects):
+    def get_pre_env_effect_nodes(self, node, bus, group_id, packet):
 
         pkg = []
 
         for fx in self.fxlist.order[1]:
 
-            if fx in effects:
+            if fx in packet and packet[fx] != 0:
 
-                this_effect = effects[fx]
+                this_effect = self.prepare_effect(fx, packet)
 
                 # Get next node ID
                 node, last_node = self.nextnodeID(), node
@@ -448,15 +454,15 @@ class SCLangServerManager(ServerManager):
 
         return msg, node
 
-    def get_post_env_effect_nodes(self, node, bus, group_id, effects ):
+    def get_post_env_effect_nodes(self, node, bus, group_id, packet):
 
         pkg = []
 
         for fx in self.fxlist.order[2]:
 
-            if fx in effects:
+            if fx in packet and packet[fx] != 0:
 
-                this_effect = effects[fx]
+                this_effect = self.prepare_effect(fx, packet)
 
                 # Get next node ID
                 node, last_node = self.nextnodeID(), node
@@ -467,6 +473,14 @@ class SCLangServerManager(ServerManager):
 
         return pkg, node
 
+    def prepare_effect(self, name, packet):
+        """ Finds the child attributes in packet and returns an OSC style list """
+        data = []
+        for key in self.fxlist[name].args:
+            data.append(key)
+            data.append(packet.get(key, self.fxlist[name].defaults[key]))
+        return data
+
     def get_exit_node(self, node, bus, group_id, packet):
         
         msg = OSCMessage("/s_new")
@@ -476,7 +490,87 @@ class SCLangServerManager(ServerManager):
 
         return msg, node
 
-    def get_bundle(self, synthdef, packet, effects, timestamp=0):
+    # def old_get_bundle(self, synthdef, packet, effects, timestamp=0):
+    #     """ Returns the OSC Bundle for a notew based on a Player's SynthDef, and event and effects dictionaries """ 
+
+    #     # Create a specific message for midi
+
+    #     if synthdef == "MidiOut": # this should be in a dict of synthdef to functions maybe? we need a "nudge to sync"
+
+    #         return self.get_midi_message(synthdef, packet, timestamp)
+
+    #     # Create a bundle
+        
+    #     bundle = OSCBundle(time=timestamp)
+
+    #     # Get the actual synthdef object
+
+    #     synthdef = self.synthdefs[synthdef]
+
+    #     # Create a group for the note
+    #     group_id = self.nextnodeID()
+    #     msg = OSCMessage("/g_new")
+    #     msg.append( [group_id, 1, 1] )
+        
+    #     bundle.append(msg)
+
+    #     # Get the bus and SynthDef nodes
+    #     this_bus  = self.nextbusID()
+    #     this_node = self.nextnodeID()
+
+    #     synthdef.preprocess_osc(packet)
+
+    #     # First node of the group (control rate)
+
+    #     msg, this_node = self.get_init_node(this_node, this_bus, group_id, synthdef, packet)
+
+    #     # Add effects to control rate e.g. vibrato        
+
+    #     bundle.append( msg )
+
+    #     pkg, this_node = self.get_control_effect_nodes(this_node, this_bus, group_id, effects)
+
+    #     for msg in pkg:
+
+    #         bundle.append(msg)
+
+    #     # trigger synth
+
+    #     msg, this_node = self.get_synth_node(this_node, this_bus, group_id, synthdef, packet)
+
+    #     bundle.append(msg)
+
+    #     # ORDER 1
+
+    #     pkg, this_node = self.get_pre_env_effect_nodes(this_node, this_bus, group_id, effects)
+
+    #     for msg in pkg:
+
+    #         bundle.append(msg)
+
+    #     # ENVELOPE
+
+    #     # msg, this_node = self.get_synth_envelope(this_node, this_bus, group_id, synthdef, packet)
+
+    #     # bundle.append( msg )
+
+    #     # ORDER 2 (AUDIO EFFECTS)
+
+    #     pkg, this_node = self.get_post_env_effect_nodes(this_node, this_bus, group_id, effects)
+    
+    #     for msg in pkg:
+    
+    #         bundle.append(msg)
+
+    #     # OUT
+
+    #     msg, _ = self.get_exit_node(this_node, this_bus, group_id, packet)
+
+    #     bundle.append(msg)
+        
+    #     return bundle  
+
+    def get_bundle(self, synthdef, packet, timestamp=0):
         """ Returns the OSC Bundle for a notew based on a Player's SynthDef, and event and effects dictionaries """ 
 
         # Create a specific message for midi
@@ -504,7 +598,7 @@ class SCLangServerManager(ServerManager):
         this_bus  = self.nextbusID()
         this_node = self.nextnodeID()
 
-        synthdef.preprocess_osc(packet)
+        # synthdef.preprocess_osc(packet) # so far, just "balance" to multiply amp by 1
 
         # First node of the group (control rate)
 
@@ -514,7 +608,7 @@ class SCLangServerManager(ServerManager):
 
         bundle.append( msg )
 
-        pkg, this_node = self.get_control_effect_nodes(this_node, this_bus, group_id, effects)
+        pkg, this_node = self.get_control_effect_nodes(this_node, this_bus, group_id, packet)
 
         for msg in pkg:
 
@@ -528,7 +622,7 @@ class SCLangServerManager(ServerManager):
 
         # ORDER 1
 
-        pkg, this_node = self.get_pre_env_effect_nodes(this_node, this_bus, group_id, effects)
+        pkg, this_node = self.get_pre_env_effect_nodes(this_node, this_bus, group_id, packet)
 
         for msg in pkg:
 
@@ -542,7 +636,7 @@ class SCLangServerManager(ServerManager):
 
         # ORDER 2 (AUDIO EFFECTS)
 
-        pkg, this_node = self.get_post_env_effect_nodes(this_node, this_bus, group_id, effects)
+        pkg, this_node = self.get_post_env_effect_nodes(this_node, this_bus, group_id, packet)
     
         for msg in pkg:
     
@@ -553,7 +647,7 @@ class SCLangServerManager(ServerManager):
         msg, _ = self.get_exit_node(this_node, this_bus, group_id, packet)
 
         bundle.append(msg)
-        
+
         return bundle        
 
     def send(self, address, message):

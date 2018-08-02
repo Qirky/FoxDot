@@ -1448,7 +1448,93 @@ class Player(Repeatable):
 
         return self
 
-    def new_message(self, index=0, **kwargs):
+
+    def send(self, timestamp=None, **kwargs):
+        """ Goes through the  current event and compiles osc messages and sends to server via the tempo clock """
+
+        timestamp = timestamp if timestamp is not None else self.queue_block.time
+
+        length = self.get_event_length(**kwargs)
+
+        for i in range(length):
+
+            self.send_osc_message(self.event, i, timestamp=timestamp, **kwargs)
+
+        return
+
+    def send_osc_message(self, event, index, timestamp=None, **kwargs):
+        """ Compiles and sends an individual OSC message created by recursively unpacking nested PGroups """
+
+        packet = {}
+        nested = False
+
+        for key, value in event.items():
+
+            # If we can index a value, trigger a new OSC message to send OSC messages for each
+
+            if isinstance(value, PGroup):
+
+                new_event = {}
+
+                for new_key, new_value in event.items():
+
+                    if isinstance(new_value, PGroup):
+
+                        new_event[new_key] = new_value[index]
+
+                    else:
+
+                        new_event[new_key] = new_value
+
+                # Recursively unpack and send messages
+
+                for i in range(self.get_event_length(new_event)):
+
+                    self.send_osc_message(new_event, i, timestamp)
+
+                return # experimental
+
+            else:
+
+                # If it is a number, use the numbers
+                
+                packet[key] = value
+
+        # Send compiled messages
+
+        self.push_osc_to_server(packet, timestamp, **kwargs)
+
+        return
+
+    def push_osc_to_server(self, packet, timestamp, **kwargs):
+        """ Adds message head, calculating frequency then sends to server if verbose is True and 
+            amp/bufnum values meet criteria """
+
+        # Do any calculations e.g. frequency
+
+        message = self.new_message_header(packet)
+
+        # Only send if amp > 0 etc
+
+        verbose = kwargs.get("verbose", True)
+
+        if verbose and (message["amp"] > 0) and ((self.synthdef != SamplePlayer) or (self.synthdef == SamplePlayer and message["buf"] > 0)):
+
+            # Need to send delay and synthdef separately
+
+            delay = self.metro.beat_dur(message.get("delay", 0))
+            
+            synthdef = self.get_synth_name(message.get("buf", 0))
+
+            compiled_msg = self.metro.server.get_bundle(synthdef, message, timestamp = timestamp + delay)
+
+            # We can set a condition to only send messages
+
+            self.queue_block.osc_messages.append(compiled_msg)
+
+        return
+
+    def new_message_header(self, event, **kwargs):
         """ Returns the header of an osc message to be added to by osc_message() """
 
         # todo - start with the envelope
@@ -1459,13 +1545,13 @@ class Player(Repeatable):
 
         if self.synthdef == SamplePlayer:
 
-            degree = group_modi(kwargs.get("degree", self.event['degree']), index)
-            sample = group_modi(kwargs.get("sample", self.event["sample"]), index)
-            rate   = group_modi(kwargs.get("rate", self.event["rate"]), index)
+            degree = kwargs.get("degree", event['degree'])
+            sample = kwargs.get("sample", event["sample"])
+            rate   = kwargs.get("rate", event["rate"])
 
             if rate < 0:
 
-                sus = group_modi(kwargs.get("sus", self.event["sus"]), index)
+                sus = kwargs.get("sus", event["sus"])
 
                 pos = self.metro.beat_dur(sus)
 
@@ -1477,14 +1563,20 @@ class Player(Repeatable):
             
             message.update( {'buf': buf,'pos': pos} )
 
+            # Update player key
+
+            if "buf" in self.accessed_keys:
+
+                self.buf = buf
+
         elif self.synthdef == LoopPlayer:
 
-            pos = group_modi(kwargs.get("degree", self.event["degree"]), index)
-            buf = group_modi(kwargs.get("buf", self.event["buf"]), index)
+            pos = kwargs.get("degree", event["degree"])
+            buf = kwargs.get("buf", event["buf"])
 
             # Get a user-specified tempo
 
-            given_tempo = group_modi(kwargs.get("tempo", self.event.get("tempo", self.metro.bpm)), index)
+            given_tempo = kwargs.get("tempo", self.event.get("tempo", self.metro.bpm))
 
             if given_tempo in (None, 0):
 
@@ -1500,7 +1592,7 @@ class Player(Repeatable):
 
             # If there is a negative rate, move the pos forward
 
-            rate = group_modi(kwargs.get("rate", self.event["rate"]), index)
+            rate = kwargs.get("rate", self.event["rate"])
 
             if rate == 0:
 
@@ -1512,7 +1604,7 @@ class Player(Repeatable):
 
             if rate < 0:
 
-                sus = group_modi(kwargs.get("sus", self.event["sus"]), index)
+                sus = kwargs.get("sus", self.event["sus"])
 
                 pos += self.metro.beat_dur(sus)
 
@@ -1520,219 +1612,35 @@ class Player(Repeatable):
 
         else:
 
-            degree = group_modi(kwargs.get("degree", self.event["degree"]), index)
-            octave = group_modi(kwargs.get("oct", self.event["oct"]), index)
-            root   = group_modi(kwargs.get("root", self.event["root"]), index)
+            degree = kwargs.get("degree", event["degree"])
+            octave = kwargs.get("oct", event["oct"])
+            root   = kwargs.get("root", event["root"])
 
             scale  = kwargs.get("scale", self.scale)
 
             freq, midinote = get_freq_and_midi(degree, octave, root, scale)
             
             message.update({'freq':  freq, 'midinote': midinote})
+
+            # Updater player key
+
+            if "freq" in self.accessed_keys:
+
+                self.freq = freq
+
+            if "midinote" in self.accessed_keys:
+    
+               self.midinote = midinote
+
+        # Update the dict with other values from the event
+
+        event.update(message)
+
+        # Remove keys we dont need
+
+        del event["bpm"]
             
-        return message
-
-    def osc_message(self, index=0, **kwargs):
-        """ Creates an OSC packet to play a SynthDef in SuperCollider,
-            use kwargs to force values in the packet, e.g. pan=1 will force ['pan', 1] """
-
-        fx_dict = {}
-        message = self.new_message(index, **kwargs)
-
-        attributes = self.attr.copy()
-
-        # Go through the attr dictionary and add kwargs
-
-        for key in attributes:
-
-            try:
-
-                # Don't use fx keywords or foxdot keywords except "degree"
-
-                if (key not in self.keywords) and (key not in self.fx_attributes or key in self.base_attributes):
-
-                    # Ignore any keys we might already have processed
-
-                    if key in message:
-
-                        continue
-
-                    # Convert to float
-
-                    val = float(group_modi(kwargs.get(key, self.event[key]), index))
-
-                    # Special case modulation
-
-                    if key in self.case_modulation:
-
-                        func = self.case_modulation[key]
-
-                        val = func(val, index, **kwargs)
-
-                    # Only send non-zero values
-
-                    if val != 0 or key in self.required_keys or key in self.envelope_keywords: 
-
-                        message[key] = val
-
-            except KeyError as e:
-
-                WarningMsg("KeyError in function 'osc_message'", key, e)
-
-        # See if any fx_attributes 
-
-        for key in self.fx_keys:
-
-            if key in attributes: 
-
-                # Only use effects where the "title" effect value is not 0
-
-                val = group_modi(kwargs.get(key, self.event[key]), index)
-
-                if val != 0:
-
-                    fx_dict[key] = []
-
-                    # Look for any other attributes require e.g. room and verb
-
-                    for n, sub_key in enumerate(FxList[key].args):
-
-                        if sub_key in self.event:
-
-                            # If the sub_key is another attribute like sus, get it from the message
-
-                            if sub_key in message:
-
-                                val = message[sub_key]
-
-                            # Get the value from the event
-
-                            else:
-
-                                try:
-
-                                    val = group_modi(kwargs.get(sub_key, self.event[sub_key]), index)
-
-                                except TypeError as e:
-
-                                    val = 0
-
-                                except KeyError as e:
-
-                                    del fx_dict[key]
-
-                                    break
-
-                            fx_dict[key] += [sub_key, val]
-
-        return message, fx_dict
-
-
-    def send(self, timestamp=None, **kwargs):
-        """ Sends the current event data to SuperCollder.
-            Use kwargs to overide values in the current event """
-
-        timestamp = timestamp if timestamp is not None else self.queue_block.time
-        verbose   = kwargs.get("verbose", True)
-
-        banged       = False
-        freq, bufnum = [], []
-        
-        last_msg = None
-
-        self.current_event_length = self.get_event_length(**kwargs)
-
-        for i in range(self.current_event_length):
-
-            # Get the basic osc_msg
-
-            osc_msg, effects = self.osc_message(i, **kwargs)
-
-            # Keep track of the frequency
-
-            if "freq" in osc_msg:
-
-                freq_value = osc_msg["freq"]
-
-                if freq_value not in freq:
-
-                    freq.append(freq_value)
-
-            if verbose:
-
-                # Look at delays and schedule events later if need be
-
-                delay = self.__get_current_delay(i, kwargs)
-
-                ### ----
-
-                if 'buf' in osc_msg:
-                        
-                    buf = group_modi(kwargs.get('buf', osc_msg['buf']), i)
-
-                else:
-
-                    buf = 0
-
-                if buf not in bufnum:
-
-                    bufnum.append( buf )
-
-                amp = group_modi(kwargs.get('amp', osc_msg.get('amp',1)), i)
-
-                # Any messages with zero amps or 0 buf are not sent <- maybe change that for "now" classes
-
-                if (self.synthdef != SamplePlayer and amp > 0) or (self.synthdef == SamplePlayer and buf > 0 and amp > 0):
-
-                    synthdef = self.get_synth_name(buf)
-
-                    key = (osc_msg, effects, delay)
-
-                    if key not in self.sent_messages:
-
-                        # Keep note of what messages we are sending
-
-                        self.sent_messages.append(key)
-
-                        # Compile the message with time tag
-
-                        delay = self.metro.beat_dur(delay)
-
-                        compiled_msg = self.metro.server.get_bundle(synthdef, osc_msg, effects, timestamp = timestamp + delay)
-
-                        # We can set a condition to only send messages
-
-                        if self.condition(): 
-
-                            self.queue_block.osc_messages.append(compiled_msg)
-
-                        # "bang" the line
-
-                        if not banged and self.bang_kwargs:
-
-                            self.bang()
-
-                            banged = True
-
-        # Store (and update PlayerKeys) the calculated values
-
-        if self.synthdef == SamplePlayer:
-
-            if len(bufnum) > 0:
-
-                self.buf = bufnum
-
-        # ignore updates for loop player
-
-        elif self.synthdef == LoopPlayer:
-
-            pass
-
-        else:
-
-            self.freq = freq
-        
-        return
+        return event        
 
     def set_queue_block(self, queue_block):
         """ Gives this player object a reference to the other items that are 
