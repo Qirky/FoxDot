@@ -71,6 +71,7 @@ class SynthDefBaseClass(object):
                             "fmod"      : 0, # could be put in an Effect?
                             "rate"      : 0,
                             "bus"       : 0 }
+                            
         # The amp is multiplied by this before being sent to SC
         self.balance = 1
 

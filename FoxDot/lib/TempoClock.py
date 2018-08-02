@@ -835,8 +835,10 @@ class SoloPlayer:
 
     def set(self, player):
         self.data = [player]
+    
     def reset(self):
         self.data = []
+
     def active(self):
         """ Returns true if self.data is not empty """
         return len(self.data) > 0
