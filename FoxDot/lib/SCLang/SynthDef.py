@@ -47,7 +47,7 @@ class SynthDefBaseClass(object):
         # Flag when Synth added to server
         self.synth_added = False
         # Initial behaviour such as amplitude / frequency modulation
-        self.base = []
+        self.base = ["sus = sus * blur * beat_dur;"]
         self.attr = [] # stores custom attributes
 
         # Name of the file to store the SynthDef
@@ -62,16 +62,20 @@ class SynthDefBaseClass(object):
         self.amp         = instance("amp")
         self.pan         = instance("pan")
         self.rate        = instance("rate")
+        self.blur        = instance("blur")
+        self.beat_dur    = instance("beat_dur")
 
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
                             "pan"       : 0,
                             "freq"      : 0,
                             "vib"       : 0,
-                            "fmod"      : 0, # could be put in an Effect?
+                            "fmod"      : 0,
                             "rate"      : 0,
-                            "bus"       : 0 }
-                            
+                            "bus"       : 0,
+                            "blur"      : 1,
+                            "beat_dur"  : 1 }
+
         # The amp is multiplied by this before being sent to SC
         self.balance = 1
 
