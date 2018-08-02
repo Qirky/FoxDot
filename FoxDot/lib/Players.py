@@ -1170,7 +1170,7 @@ class Player(Repeatable):
             value = kwargs.get(attr, value)
             try:
                 l = len(value)
-            except TypeError:
+            except (TypeError, AttributeError):
                 l = 1
             sizes.append(l)
         return max(sizes)
@@ -1523,7 +1523,7 @@ class Player(Repeatable):
             # Need to send delay and synthdef separately
 
             delay = self.metro.beat_dur(message.get("delay", 0))
-            
+
             synthdef = self.get_synth_name(message.get("buf", 0))
 
             compiled_msg = self.metro.server.get_bundle(synthdef, message, timestamp = timestamp + delay)
