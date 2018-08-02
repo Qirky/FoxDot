@@ -1163,11 +1163,17 @@ class Player(Repeatable):
     def get_event_length(self, event=None, **kwargs):
         if event is None:
             event = self.event
+        
         sizes = []
+
         for attr, value in event.items():
             value = kwargs.get(attr, value)
-            sizes.append( get_expanded_len(value) )
-        return LCM(*sizes)
+            try:
+                l = len(value)
+            except TypeError:
+                l = 1
+            sizes.append(l)
+        return max(sizes)
 
     def number_attr(self, attr):
         """ Returns true if the attribute should be a number """
