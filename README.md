@@ -3,11 +3,25 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.8 fixes and updates
+### v0.6.9 fixes and updates
 
-- Added `FoxDot.reload()` function to reload SynthDefs and samples in SuperCollider if FoxDot was started after having run `FoxDot.start` in SuperCollider. No longer requires you to close and re-open FoxDot. 
-- If SuperCollider is not open and a user tries to send a message from FoxDot, an error message is displayed. This now only happens once instead of after every message. This is to stop the console buffer filling up memory if the user is purposely not using SuperCollider.
-- On bootup, check for newer versions of FoxDot available on PyPI and let the user know that they should update if so.
+- Changed the behaviour for composing events sent to SuperCollider. When several `PGroup`s with different sizes are used, events are now the size of the largest `PGroup` as opposed to the lowest common multiple of all of their lengths. This is best demonstrated by the following example. Using a pitch of `(0, 2, 4)` and delay of `(0, 0.5)` would play the whole chord twice whereas now it only delays the second value:
+```python
+# Old behaviour using lowest common multiple
+p1 >> pluck((0, 2, 4), dur=PDur(3, 8), delay=(0, 0.5, 0, 0.5, 0, 0.5))
+
+# New behaviour
+p1 >> pluck((0, 2, 4), dur=PDur(3, 8), delay=(0, 0.5))
+```
+- Improved efficiency of OSC message composition which should improve performance on lower-spec machines i.e. it can run reasonably well on a Rasberry Pi using a high clock latency value.
+- Move the calculation of sustain using `blur` to SuperCollider such that using an effect such as `chop` that makes use of the sustain value no longer relies on `blur` as well:
+```python
+# Old behaviour required adjusting for the blur
+p1 >> pluck(dur=PDur(3, 8), sus=2, blur=1.5, chop=4 * 1.5)
+
+# New behaviour still 'chops' the sound into 4 parts
+p1 >> pluck(dur=PDur(3, 8), sus=2, blur=1.5, chop=4 * 1.5)
+```
 
 ---
 

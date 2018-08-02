@@ -1,3 +1,9 @@
+### v0.6.8 fixes and updates
+
+- Added `FoxDot.reload()` function to reload SynthDefs and samples in SuperCollider if FoxDot was started after having run `FoxDot.start` in SuperCollider. No longer requires you to close and re-open FoxDot. 
+- If SuperCollider is not open and a user tries to send a message from FoxDot, an error message is displayed. This now only happens once instead of after every message. This is to stop the console buffer filling up memory if the user is purposely not using SuperCollider.
+- On bootup, check for newer versions of FoxDot available on PyPI and let the user know that they should update if so.
+
 ### v0.6.7 fixes and updates
 
 - Added `often`, `sometimes`, and `rarely` methods that wrap the `every` method but use random durations to decide when to call a method:

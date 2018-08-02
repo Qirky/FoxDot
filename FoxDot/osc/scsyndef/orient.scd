@@ -1,6 +1,7 @@
 SynthDef.new(\orient,
-{|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0, room=10, verb=0.7|
+{|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0, blur=1, beat_dur=1, room=10, verb=0.7|
 var osc, env;
+sus = sus * blur * beat_dur;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
 osc=(LFPulse.ar(freq, 0.5, 0.25, 0.25) + LFPulse.ar(freq, 1, 0.1, 0.25));

@@ -1,6 +1,7 @@
 SynthDef.new(\dirt,
-{|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0|
+{|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0, blur=1, beat_dur=1|
 var osc, env;
+sus = sus * blur * beat_dur;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
 freq=(freq / 4);
