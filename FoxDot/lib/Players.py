@@ -1500,6 +1500,12 @@ class Player(Repeatable):
                 
                 packet[key] = value
 
+        # Special case modulations
+
+        if ("amp" in packet) and ("amplify" in packet):
+
+            packet["amp"] = packet["amp"] * packet["amplify"]
+
         # Send compiled messages
 
         self.push_osc_to_server(packet, timestamp, **kwargs)
