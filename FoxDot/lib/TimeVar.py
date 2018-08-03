@@ -16,19 +16,15 @@ from time import time
 def fetch(func):
     """ Function to wrap basic lambda operators for TimeVars  """
     def eval_now(a, b):
-        try:
+        if isinstance(a, TimeVar):
             a = a.now()
-        except:
-            pass
-        try:
+        if isinstance(b, TimeVar):
             b = b.now()
-        except:
-            pass
         return func(a, b)
     return eval_now
 
 
-class TimeVar:
+class TimeVar(object):
     """ Var(values [,durs=[4]]) """
 
     metro = None
