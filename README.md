@@ -20,7 +20,7 @@ p1 >> pluck((0, 2, 4), dur=PDur(3, 8), delay=(0, 0.5))
 p1 >> pluck(dur=PDur(3, 8), sus=2, blur=1.5, chop=4 * 1.5)
 
 # New behaviour still 'chops' the sound into 4 parts
-p1 >> pluck(dur=PDur(3, 8), sus=2, blur=1.5, chop=4 * 1.5)
+p1 >> pluck(dur=PDur(3, 8), sus=2, blur=1.5, chop=4)
 ```
 
 ---
