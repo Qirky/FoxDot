@@ -73,21 +73,14 @@ def ClassPatternMethod(f):
 class metaPattern(object):
     """ Abstract base class for Patterns """
     WEIGHT = -1
-    data = None
+    # data = None
     bracket_style = "[]"
     debugging = False
     meta = []
 
-    def __init__(self, data=[]):
+    def __init__(self, *args):
 
-        # Keep track of the names of any Pattern sub-classes that
-        # might be created during runtime
-
-        # if self.__class__.__name__ not in PATTERN_WEIGHTS:
-
-        #     # This is hard coded to be insert before PGroup - should probably check the contents of Pattern weights
-            
-        #     PATTERN_WEIGHTS.insert(-2, self.__class__.__name__)
+        data = args[0] if len(args) else []
         
         if type(data) is str:
             
@@ -801,9 +794,10 @@ class metaPattern(object):
         return self.new(new)
 
     def append(self, item):
+        """ Returns None """
         self.data.append(item)
         self.make()
-        return self
+        return
 
     def new_append(self, item):
         new = list(self.data)
@@ -949,7 +943,7 @@ class metaPattern(object):
 
             self.data = list(self.data)
             
-        if not isinstance(self.data, PatternType): # not sure about PlayString data
+        elif not isinstance(self.data, PatternType): # not sure about PlayString data
     
             self.data = [self.data]
 
@@ -968,7 +962,9 @@ class metaPattern(object):
 
             self.data = self.data[0].data
 
-        self.data = list(self.data)
+        elif not isinstance(self.data,  list):
+
+            self.data = list(self.data)
                 
         return self
 
