@@ -188,7 +188,8 @@ class metaPattern(object):
             Pattern hold the same state as the original.
         """
         new = self.__class__()
-        new.__dict__ = {key: value for key, value in self.__dict__.items()}
+        # new.__dict__ = {key: value for key, value in self.__dict__.items()}
+        new.__dict__ = self.__dict__.copy()
         if new_data is not None:
             new.data = new_data
         return new
@@ -196,7 +197,7 @@ class metaPattern(object):
     # Pattern container methods
  
     def __getitem__(self, key):
-        """ Calls self.getitem. Is overridden in `FoxDot.lib.TimeVar`
+        """ Calls self.getitem(). Is overridden in `FoxDot.lib.TimeVar`
             for indexing with TimeVars """
         return self.getitem(key)
 
