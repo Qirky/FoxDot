@@ -264,9 +264,9 @@ class Player(Repeatable):
         self.synthdef = None
         self.id = name
 
-        self.current_event_size   = 0
-        self.current_event_length = 0
-        self.current_event_depth  = 0
+        #self.current_event_size   = 0
+        #self.current_event_length = 0
+        #self.current_event_depth  = 0
 
         # Stopping flag
         self.stopping = False
@@ -282,13 +282,13 @@ class Player(Repeatable):
         # Information used in generating OSC messages
         self.buf_delay = []
         self.timestamp = 0
-        self.condition = lambda: True
+        # self.condition = lambda: True
         self.sent_messages = []
 
-        self.case_modulation = {
-            "sus"   : lambda val, i, *args, **kwargs: val * float(self.metro.beat_dur()) * float(self.get_key("blur", i, **kwargs)), # this should be done in the SynthDef?
-            "amp"   : lambda val, i, *args, **kwargs: val * float(self.get_key("amplify", i, **kwargs))
-            }
+        #self.case_modulation = {
+        #   "sus"   : lambda val, i, *args, **kwargs: val * float(self.metro.beat_dur()) * float(self.get_key("blur", i, **kwargs)), # this should be done in the SynthDef?
+        #   "amp"   : lambda val, i, *args, **kwargs: val * float(self.get_key("amplify", i, **kwargs))
+        #   }
 
         # Visual feedback information
 
@@ -380,9 +380,11 @@ class Player(Repeatable):
             
                 getattr(self, method).__call__(*args, **kwargs)
             
-            # Add the modifier
+            # Add the modifier (check if not 0 to stop adding 0 to values)
 
-            self + other.mod
+            if (not isinstance(other.mod, (int, float))) or (other.mod != 0):
+
+                self + other.mod
             
             return self
         
@@ -943,13 +945,9 @@ class Player(Repeatable):
 
                     new_event[key] = self.now(key, ahead)
 
+            new_event.update(kwargs)
+
             new_event = self.unduplicate_durs(new_event)
-
-            for key, val in kwargs.items():
-
-                stream = asStream(val)[0]
-
-                new_event[key] = stream
 
             new_event = self.get_prime_funcs(new_event)
 
