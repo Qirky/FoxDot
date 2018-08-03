@@ -908,11 +908,15 @@ class Player(Repeatable):
             
             for key in attributes:
 
-                if len(attributes[key]) > 0 and key not in kwargs and key != "buf": # buf will have already been changed
+                if key in kwargs:
+
+                    new_event[key] = self.unpack(PGroup(kwargs[key]))
+
+                elif len(attributes[key]) > 0:
 
                     new_event[key] = self.now(key, ahead)
 
-            new_event.update(kwargs)
+            # new_event.update(kwargs)
 
             new_event = self.unduplicate_durs(new_event)
 
@@ -920,7 +924,7 @@ class Player(Repeatable):
 
             # Get PGroup delays
 
-            new_event["delay"] = PGroup([dur * (i+1) for i in range(n-1)])
+            new_event["delay"] = PGroup([PGroup([dur * (i+1) for i in range(n-1)]) for x in range(self.get_event_length(new_event))])
 
             new_event = self.get_prime_funcs(new_event)
 
@@ -941,11 +945,13 @@ class Player(Repeatable):
             
             for key in attributes:
 
-                if len(attributes[key]) > 0 and key not in kwargs: # and key != "buf": # buf will have already been changed
+                if key in kwargs:
+
+                    new_event[key] = self.unpack(PGroup(kwargs[key]))
+
+                elif len(attributes[key]) > 0:
 
                     new_event[key] = self.now(key, ahead)
-
-            new_event.update(kwargs)
 
             new_event = self.unduplicate_durs(new_event)
 
