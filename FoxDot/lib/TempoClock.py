@@ -326,7 +326,7 @@ class TempoClock(object):
     def get_elapsed_sec(self):
         return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
 
-    def true_now(self):
+    def __now(self):
         """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
         # Get number of seconds elapsed
         now = self.get_elapsed_sec()
@@ -339,7 +339,7 @@ class TempoClock(object):
     def now(self):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
         if self.ticking is False: # Get the time w/o latency if not ticking
-            self.beat = self.true_now()
+            self.beat = self.__now()
         return self.beat
 
     def osc_message_time(self):
@@ -397,7 +397,7 @@ class TempoClock(object):
 
         while self.ticking:
 
-            beat = self.true_now() # get current time
+            beat = self.__now() # get current time
 
             next_event = self.queue.next()
 
@@ -735,7 +735,7 @@ class QueueBlock(object):
             if item.obj == obj:
                 return item
         else:
-            raise ValueError("{} not found".format(key))
+            raise ValueError("{!r} not found".format(obj))
 
     def players(self):
         return [item for level in self.events[1:3] for item in level]
