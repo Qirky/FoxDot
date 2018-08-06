@@ -23,7 +23,7 @@ def get_pypi_version():
     """ Returns the most up-to-date version number on PyPI. Return None on error """
     try:
         addr = "https://pypi.org/pypi/FoxDot/json"
-        page = urlopen(addr)
+        page = urlopen(addr, timeout=2.5)
         data = json.loads(page.read().decode("utf-8"))
         version = data["info"]["version"]
     except URLError:
