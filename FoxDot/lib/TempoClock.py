@@ -666,6 +666,7 @@ class QueueBlock(object):
         self.events         = [ [] for lvl in self.priority_levels ]
         self.called_events  = []
         self.called_objects = []
+        self.items = {}
 
         self.osc_messages   = []
 
@@ -699,6 +700,8 @@ class QueueBlock(object):
 
                 self.events[i].append(q_obj)
 
+                self.items[q_obj.obj] = q_obj
+
                 break
         return
 
@@ -716,12 +719,8 @@ class QueueBlock(object):
     def all_items(self):
         return [item for level in self.events for item in level]
 
-    def __getitem__(self, key):
-        for event in self:
-            if event == key:
-                return event
-        else:
-            raise ValueError("{} not found".format(key))
+    def __getitem__(self, key): # could this use hashing with Player objects?
+        return self.items[key]
 
     def __iter__(self):
         return (item for level in self.events for item in level)
