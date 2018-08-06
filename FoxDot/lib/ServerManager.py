@@ -7,11 +7,14 @@ if sys.version_info[0] > 2:
     import queue
 else:
     import Queue as queue
+
 import json
 import socket
 import sys
 import threading
 import time
+import itertools
+
 from collections import namedtuple
 from threading import Thread
 
@@ -475,10 +478,11 @@ class SCLangServerManager(ServerManager):
 
     def prepare_effect(self, name, packet):
         """ Finds the child attributes in packet and returns an OSC style list """
-        data = []
-        for key in self.fxlist[name].args:
-            data.append(key)
-            data.append(packet.get(key, self.fxlist[name].defaults[key]))
+        data   = []
+        effect = self.fxlist[name]
+        for key in effect.args:
+             data.append(key)
+             data.append(packet.get(key, effect.defaults[key]))
         return data
 
     def get_exit_node(self, node, bus, group_id, packet):
@@ -489,86 +493,6 @@ class SCLangServerManager(ServerManager):
         msg.append( osc_packet )
 
         return msg, node
-
-    # def old_get_bundle(self, synthdef, packet, effects, timestamp=0):
-    #     """ Returns the OSC Bundle for a notew based on a Player's SynthDef, and event and effects dictionaries """ 
-
-    #     # Create a specific message for midi
-
-    #     if synthdef == "MidiOut": # this should be in a dict of synthdef to functions maybe? we need a "nudge to sync"
-
-    #         return self.get_midi_message(synthdef, packet, timestamp)
-
-    #     # Create a bundle
-        
-    #     bundle = OSCBundle(time=timestamp)
-
-    #     # Get the actual synthdef object
-
-    #     synthdef = self.synthdefs[synthdef]
-
-    #     # Create a group for the note
-    #     group_id = self.nextnodeID()
-    #     msg = OSCMessage("/g_new")
-    #     msg.append( [group_id, 1, 1] )
-        
-    #     bundle.append(msg)
-
-    #     # Get the bus and SynthDef nodes
-    #     this_bus  = self.nextbusID()
-    #     this_node = self.nextnodeID()
-
-    #     synthdef.preprocess_osc(packet)
-
-    #     # First node of the group (control rate)
-
-    #     msg, this_node = self.get_init_node(this_node, this_bus, group_id, synthdef, packet)
-
-    #     # Add effects to control rate e.g. vibrato        
-
-    #     bundle.append( msg )
-
-    #     pkg, this_node = self.get_control_effect_nodes(this_node, this_bus, group_id, effects)
-
-    #     for msg in pkg:
-
-    #         bundle.append(msg)
-
-    #     # trigger synth
-
-    #     msg, this_node = self.get_synth_node(this_node, this_bus, group_id, synthdef, packet)
-
-    #     bundle.append(msg)
-
-    #     # ORDER 1
-
-    #     pkg, this_node = self.get_pre_env_effect_nodes(this_node, this_bus, group_id, effects)
-
-    #     for msg in pkg:
-
-    #         bundle.append(msg)
-
-    #     # ENVELOPE
-
-    #     # msg, this_node = self.get_synth_envelope(this_node, this_bus, group_id, synthdef, packet)
-
-    #     # bundle.append( msg )
-
-    #     # ORDER 2 (AUDIO EFFECTS)
-
-    #     pkg, this_node = self.get_post_env_effect_nodes(this_node, this_bus, group_id, effects)
-    
-    #     for msg in pkg:
-    
-    #         bundle.append(msg)
-
-    #     # OUT
-
-    #     msg, _ = self.get_exit_node(this_node, this_bus, group_id, packet)
-
-    #     bundle.append(msg)
-        
-    #     return bundle  
 
     def get_bundle(self, synthdef, packet, timestamp=0):
         """ Returns the OSC Bundle for a notew based on a Player's SynthDef, and event and effects dictionaries """ 
