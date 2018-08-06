@@ -655,7 +655,7 @@ class Queue(object):
 from types import FunctionType
 class QueueBlock(object):
     priority_levels = [
-                        lambda x: type(x) == FunctionType,   # Any functions are called first
+                        lambda x: type(x) in (FunctionType, MethodType),   # Any functions are called first
                         lambda x: isinstance(x, MethodCall), # Then scheduled player methods
                         lambda x: isinstance(x, Player),     # Then players themselves
                         lambda x: True                       # And anything else
@@ -719,7 +719,7 @@ class QueueBlock(object):
     def __getitem__(self, key):
         for event in self:
             if event == key:
-                return event # Possible need to be key.obj?
+                return event
         else:
             raise ValueError("{} not found".format(key))
 
