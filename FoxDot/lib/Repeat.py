@@ -4,7 +4,7 @@ from .Code import WarningMsg
 from .Patterns import Pattern, asStream
 from .Utils import modi
 
-import threading
+import inspect
 
 class MethodList:
     """ Class for holding information about the order of which methods have been
@@ -192,9 +192,11 @@ class Repeatable(object):
 
         else:
 
-            WarningMsg("{} is not a valid method for type {}".format(cmd, self.__class__))
+            # Raise TypeError if not a method
 
-            return None, None
+            err = "{} is not a valid method for type {}".format(cmd, self.__class__)
+            
+            raise(TypeError(err))
 
         assert callable(method)
         
@@ -261,12 +263,20 @@ class Repeatable(object):
 
         # Collect the cycle length
 
-        cycle = kwargs.get("cycle", None)
-        ident = kwargs.get("ident", None)
+        cycle = None
+        ident = None
 
-        kwargs = {key: value for key, value in kwargs.items() if key not in ("cycle", "ident")}
+        if "cycle" in kwargs:
 
-        # If the method call already exists, just update it
+            cycle = kwargs["cycle"]
+            del kwargs["cycle"]
+
+        if "ident" in kwargs:
+
+            ident = kwargs["ident"]
+            del kwargs["ident"]
+
+        # If the method call already exists, just update it (should be in a function)
 
         if ident is not None:
 
@@ -386,6 +396,12 @@ class MethodCall:
         self.args = args
         self.kwargs = kwargs
 
+        # Check if a method has the _beat_ keyword argument
+
+        if "_beat_" in inspect.getargspec(self.method).args:
+
+            self.kwargs["_beat_"] = None
+
         self.i, self.next = self.count()
 
         self.offset = float(modi(self.cycle, self.i)) if self.cycle is not None else 0
@@ -447,6 +463,10 @@ class MethodCall:
 
             return
 
+        # Give the method a reference to when OSC messages should send
+
+        self.assign_beat()
+
         # Call the method
 
         self.call_method()
@@ -467,6 +487,11 @@ class MethodCall:
         
         self.i += 1
 
+        return
+
+    def assign_beat(self):
+        if "_beat_" in self.kwargs:
+            self.kwargs["_beat_"] = self.next
         return
 
     def call_method(self):
