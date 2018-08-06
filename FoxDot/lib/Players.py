@@ -456,8 +456,6 @@ class Player(Repeatable):
 
                 value = asStream(value)
 
-                # raise a ValueError if trying to reference itself -- doesn't handle indirect references to itself
-
                 for item in value: # maybe use a deepiter method
 
                     self.test_for_circular_reference(name, item)
@@ -484,8 +482,7 @@ class Player(Repeatable):
 
                         self.__dict__[name].update_pattern()
 
-                # self.update_player_key(name, self.now(name), 0) # self.now might be an issue
-                self.update_player_key(name, 0, 0)
+                # self.update_player_key(name, 0, 0)
 
                 return
             
@@ -497,14 +494,30 @@ class Player(Repeatable):
         try:
             # This checks for aliases, not the actual keys
             name = self.alias.get(name, name)
+
+            if name in self.attr and name not in self.__dict__:
+
+                # Return a Player key
+
+                self.update_player_key(name, self.now(name), 0)
+
             item = self.__dict__[name]
+
             # If returning a player key, keep track of which are being accessed
+        
             if isinstance(item, PlayerKey) and name not in self.accessed_keys:                
+        
                 self.accessed_keys.append(name)
+            
             return item
+        
         except KeyError:
+            
             err = "Player Object has no attribute '{}'".format(name)
+            
             raise AttributeError(err)
+
+        return
 
     def __getattribute__(self, name):
         # This checks for aliases, not the actual keys
@@ -1172,65 +1185,67 @@ class Player(Repeatable):
 
         return
 
-    def update_all_player_keys(self, ignore=[], event=None, **kwargs):
-        """ Updates the internal values of player keys that have been accessed e.g. p1.pitch. If there is a delay,
-            then schedule a function to update the values in the future. """
+    # def update_all_player_keys(self, ignore=[], event=None, **kwargs):
+    #     """ Updates the internal values of player keys that have been accessed e.g. p1.pitch. If there is a delay,
+    #         then schedule a function to update the values in the future. """
 
-        # TODO: this can be more efficient?
+    #     # TODO: this can be more efficient?
 
-        # Don't bother if no keys are being accessed
+    #     # Don't bother if no keys are being accessed
 
-        if len(self.accessed_keys) == 0:
+    #     if len(self.accessed_keys) == 0:
 
-            return
+    #         return
 
-        if event is None:
+    #     if event is None:
 
-            event = self.event
+    #         event = self.event
 
-        delays = event.get("delay", 0)
+    #     delays = event.get("delay", 0)
 
-        delays = list(delays) if isinstance(delays, PGroup) else [delays]
+    #     delays = list(delays) if isinstance(delays, PGroup) else [delays]
 
-        if any([d != 0  for d in delays]):
+    #     # if we have any delays, we need to delay updating the player key
 
-            event_size = self.get_event_length(event, **kwargs)
+    #     if any([d != 0  for d in delays]):
 
-            for index in range(event_size):
+    #         event_size = self.get_event_length(event, **kwargs)
 
-                delay = float(group_modi(delays, index))
+    #         for index in range(event_size):
+
+    #             delay = float(group_modi(delays, index))
             
-                if delay > 0:
+    #             if delay > 0:
                 
-                    time  = self.event_index + delay
+    #                 time  = self.event_index + delay
                 
-                    def delay_update(event, i, t):
+    #                 def delay_update(event, i, t):
                 
-                        for key in event:
+    #                     for key in event:
                 
-                            if key in self.accessed_keys and key not in ignore:
+    #                         if key in self.accessed_keys and key not in ignore:
                 
-                                self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), i), float(t))
+    #                             self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), i), float(t))
                 
-                    self.metro.schedule(delay_update, time, args=(event, index, time))
+    #                 self.metro.schedule(delay_update, time, args=(event, index, time))
                 
-                else:
+    #             else:
                 
-                    for key in event.keys():
+    #                 for key in event.keys():
                 
-                        if key in self.accessed_keys and key not in ignore:
+    #                     if key in self.accessed_keys and key not in ignore:
                 
-                            self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), index), self.event_index)
+    #                         self.update_player_key(key, group_modi(kwargs.get(key, event.get(key, 0)), index), self.event_index)
 
-        else:
+    #     else:
 
-            for key in event.keys():
+    #         for key in event.keys():
 
-                if key in self.accessed_keys and key not in ignore:
+    #             if key in self.accessed_keys and key not in ignore:
 
-                    self.update_player_key(key, kwargs.get(key, event.get(key, 0)), self.event_index)
+    #                 self.update_player_key(key, kwargs.get(key, event.get(key, 0)), self.event_index)
 
-        return
+    #     return
 
     def update_player_key_relation(self, item):
         """ Called during 'now' to update any Players that a player key is related to before using that value """
@@ -1243,12 +1258,22 @@ class Player(Repeatable):
 
         # If the parent is in the same queue block, make sure its values are up-to-date
 
-        elif self.queue_block is not None and item.parent in self.queue_block:
+        elif self.queue_block is not None:
+
+            # Try and find the item in the queue block
+
+            try:
+
+                queue_item = self.queue_block[item.parent]
+
+            except ValueError:
+
+                queue_item = None
 
             # Update the parent with an up-to-date value
 
-            if not self.queue_block.already_called(item.parent):
-                
+            if queue_item is not None and queue_item.called is False:
+                    
                 item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
 
         return item.now()
@@ -1456,7 +1481,7 @@ class Player(Repeatable):
 
                     self.send_osc_message(new_event, i, timestamp, verbose)
 
-                return # experimental
+                return
 
             else:
 
@@ -1473,6 +1498,88 @@ class Player(Repeatable):
         # Send compiled messages
 
         self.push_osc_to_server(packet, timestamp, verbose, **kwargs)
+
+        return
+
+    def update_all_player_keys(self, ignore=[], event=None, **kwargs):
+        """ Updates the internal values of player keys that have been accessed e.g. p1.pitch. If there is a delay,
+            then schedule a function to update the values in the future. """
+
+        # Don't bother if no keys are being accessed
+
+        if len(self.accessed_keys) == 0:
+
+            return
+
+        if event is None:
+
+            event = self.event
+
+        delay = event.get("delay", 0)
+
+        if isinstance(delay, PGroup):
+
+            event_size = self.get_event_length(event, **kwargs)
+
+            delays = itertools.cycle(delay)
+
+            for i in range(event_size):
+
+                delay = next(delays)
+
+                # recursively unpack
+                    
+                new_event = {}
+
+                for new_key, new_value in event.items():
+
+                    if new_key in self.accessed_keys:
+
+                        new_value = kwargs.get(new_key, new_value)
+
+                        if isinstance(new_value, PGroup):
+
+                            new_event[new_key]  = new_value[i]
+
+                        else:
+
+                            new_event[new_key] = new_value
+
+                if isinstance(delay, PGroup):
+
+                    # Recursively unpack and send messages
+
+                    for i in range(self.get_event_length(new_event)):
+
+                        self.update_all_player_keys(event=new_event, ignore=ignore, **kwargs)
+
+                else:
+
+                    self.update_player_key_from_event(new_event, time=self.event_index, ignore=ignore, delay=delay, **kwargs)
+
+        else:
+
+            self.update_player_key_from_event(event, time=self.event_index, ignore=ignore, delay=delay, **kwargs)
+
+        return
+
+    def update_player_key_from_event(self, event, time=None, delay=0, ignore=[], **kwargs):
+
+        timestamp = self.event_index if time is None else time
+
+        if delay == 0:
+
+            for key in self.accessed_keys:
+
+                if key not in ignore:
+
+                    self.update_player_key(key, kwargs.get(key, event.get(key, 0)), timestamp)
+
+        else:
+
+            func_args = (event, timestamp + delay, 0, ignore)
+
+            self.metro.schedule(self.update_player_key_from_event, timestamp + delay, args=func_args, kwargs=kwargs)
 
         return
 
