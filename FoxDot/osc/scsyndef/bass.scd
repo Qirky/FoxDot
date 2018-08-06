@@ -1,7 +1,7 @@
 SynthDef.new(\bass,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=8, bus=0, blur=1, beat_dur=1|
 var osc, env;
-sus = sus * blur * beat_dur;
+sus = sus * blur;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
 freq=(freq / 4);

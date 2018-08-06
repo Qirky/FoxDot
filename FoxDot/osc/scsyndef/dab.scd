@@ -1,7 +1,7 @@
 SynthDef.new(\dab,
 {|amp=1, sus=1, pan=0, freq=0, vib=0, fmod=0, rate=0, bus=0, blur=1, beat_dur=1|
 var osc, env;
-sus = sus * blur * beat_dur;
+sus = sus * blur;
 freq = In.kr(bus, 1);
 freq = [freq, freq+fmod];
 osc=(HPF.ar(Saw.ar((freq / 4), mul: (amp / 2)), 2000) + VarSaw.ar((freq / 4), mul: amp, width: EnvGen.ar(Env.perc(attackTime: (sus / 20),releaseTime: (sus / 4),level: 0.5,curve: -5), doneAction: 0)));

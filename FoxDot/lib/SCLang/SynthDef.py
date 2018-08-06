@@ -47,7 +47,7 @@ class SynthDefBaseClass(object):
         # Flag when Synth added to server
         self.synth_added = False
         # Initial behaviour such as amplitude / frequency modulation
-        self.base = ["sus = sus * blur * beat_dur;"]
+        self.base = ["sus = sus * blur;"]
         self.attr = [] # stores custom attributes
 
         # Name of the file to store the SynthDef

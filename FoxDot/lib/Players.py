@@ -1176,6 +1176,8 @@ class Player(Repeatable):
         """ Updates the internal values of player keys that have been accessed e.g. p1.pitch. If there is a delay,
             then schedule a function to update the values in the future. """
 
+        # TODO: this can be more efficient?
+
         # Don't bother if no keys are being accessed
 
         if len(self.accessed_keys) == 0:
@@ -1298,7 +1300,7 @@ class Player(Repeatable):
 
             else:
 
-                attr_value = 0
+                attr_value = 0 # maybe have a dict of defaults?
 
         # Debugging
 
@@ -1503,11 +1505,11 @@ class Player(Repeatable):
     def new_message_header(self, event, **kwargs):
         """ Returns the header of an osc message to be added to by osc_message() """
 
-        # todo - start with the envelope
+        # Let SC know the duration of 1 beat so effects can use it and adjust sustain too
 
-        # Let SC know the duration of 1 beat so effects can use it
+        beat_dur = self.metro.beat_dur()
 
-        message = {"beat_dur": self.metro.beat_dur()}
+        message = {"beat_dur": beat_dur, "sus": kwargs.get("sus", event["sus"]) * beat_dur}
 
         if self.synthdef == SamplePlayer:
 
@@ -1558,7 +1560,7 @@ class Player(Repeatable):
 
             # If there is a negative rate, move the pos forward
 
-            rate = kwargs.get("rate", self.event["rate"])
+            rate = kwargs.get("rate", event["rate"])
 
             if rate == 0:
 
@@ -1570,7 +1572,7 @@ class Player(Repeatable):
 
             if rate < 0:
 
-                sus = kwargs.get("sus", self.event["sus"])
+                sus = kwargs.get("sus", event["sus"])
 
                 pos += self.metro.beat_dur(sus)
 
