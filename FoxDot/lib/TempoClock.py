@@ -340,7 +340,7 @@ class TempoClock(object):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
         if self.ticking is False: # Get the time w/o latency if not ticking
             self.beat = self.__now()
-        return self.beat # + self.beat_dur(self.latency)
+        return float(self.beat)
 
     def osc_message_time(self):
         """ Returns the true time that an osc message should be run i.e. now + latency """
