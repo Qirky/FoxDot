@@ -491,7 +491,7 @@ class MethodCall:
 
     def assign_beat(self):
         if "_beat_" in self.kwargs:
-            self.kwargs["_beat_"] = self.next
+            self.kwargs["_beat_"] = self.get_next()
         return
 
     def call_method(self):
@@ -506,9 +506,13 @@ class MethodCall:
 
         return
 
+    def get_next(self):
+        """ Returns the beat that the next occurrence of this method call is due """
+        return self.next + self.offset
+
     def schedule(self):
         """ Schedules the method to be called in the clock """
-        self.parent.metro.schedule(self, self.next + self.offset)
+        self.parent.metro.schedule(self, self.get_next())
 
     def isScheduled(self):
         """ Returns True if this is in the Tempo Clock """
