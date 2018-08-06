@@ -9,6 +9,7 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 import json
+import itertools
 
 try:
     from urllib.request import urlopen
@@ -108,6 +109,12 @@ def PulsesToDurations(data):
 
     return seq
 
+def get_first_item(array):
+    """ Returns first item from a possibly nested list"""
+    try:
+        return get_first_item(array[0])
+    except TypeError:
+        return array
 
 def modi(array, i, debug=0):
     """ Returns the modulo index i.e. modi([0,1,2],4) will return 1 """
