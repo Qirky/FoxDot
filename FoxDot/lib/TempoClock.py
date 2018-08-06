@@ -340,7 +340,7 @@ class TempoClock(object):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
         if self.ticking is False: # Get the time w/o latency if not ticking
             self.beat = self.__now()
-        return self.beat
+        return self.beat # + self.beat_dur(self.latency)
 
     def osc_message_time(self):
         """ Returns the true time that an osc message should be run i.e. now + latency """
@@ -366,11 +366,11 @@ class TempoClock(object):
 
             # The item might get called by another item in the queue block
 
-            if not block.called(item):
+            if item.called is False:
 
                 try:
 
-                    block.call(item)
+                    item.__call__()
 
                 except SystemExit:
 
@@ -399,9 +399,7 @@ class TempoClock(object):
 
             beat = self.__now() # get current time
 
-            next_event = self.queue.next()
-
-            if beat >= next_event:
+            if self.queue.after_next_event(beat):
 
                 self.current_block = self.queue.pop()
 
@@ -569,7 +567,8 @@ class Queue(object):
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
 
-        if beat < self.next():
+        # if beat < self.next():
+        if self.before_next_event(beat):
 
             self.data.append(QueueBlock(self, item, beat, args, kwargs))
 
@@ -634,6 +633,18 @@ class Queue(object):
                 pass
         return sys.maxsize
 
+    def before_next_event(self, beat):
+        try:
+            return beat < self.data[-1].beat
+        except IndexError:
+            return True
+
+    def after_next_event(self, beat):
+        try:
+            return beat >= self.data[-1].beat
+        except IndexError:
+            return False
+
     def get_server(self):
         """ Returns the `ServerManager` instanced used by this block's parent clock """
         return self.parent.server
@@ -697,45 +708,7 @@ class QueueBlock(object):
 
     def send_osc_messages(self):
         """ Sends all compiled osc messages to the SuperCollider server """
-        for msg in self.osc_messages:
-            self.server.sendOSC(msg)
-        return
-
-    def call(self, item, caller = None):
-        """ Calls an item in queue slot """
-
-        # This item (likely a Player) might be called by another Player
-
-        if caller is not None:
-
-            # Caller will call the actual object, get the queue_item
-
-            item = self.get_queue_item(item)
-
-        if item not in self.called_events:
-
-            self.called_events.append(item)
-
-            item()
-
-        return
-
-    # Remove duplication
-
-    def already_called(self, obj):
-        """ Returns True if the obj (not QueueItem) has been called """
-        return self.get_queue_item(obj) in self.called_events
-
-    def called(self, item):
-        """ Returns True if the item is in this QueueBlock and has already been called """
-        return item in self.called_events
-
-    def get_queue_item(self, obj):
-        for item in self:
-            if item.obj == obj:
-                return item
-        else:
-            raise ValueError("{!r} not found".format(obj))
+        return list(map(self.server.sendOSC, self.osc_messages))
 
     def players(self):
         return [item for level in self.events[1:3] for item in level]
@@ -769,6 +742,7 @@ class QueueObj(object):
         self.obj = obj
         self.args = args
         self.kwargs = kwargs
+        self.called = False # flag to True when called by the block
     def __eq__(self, other):
         return other == self.obj
     def __ne__(self, other):
@@ -777,6 +751,7 @@ class QueueObj(object):
         return repr(self.obj)
     def __call__(self):
         self.obj.__call__(*self.args, **self.kwargs)
+        self.called = True
 
 class History(object):
     """
