@@ -804,21 +804,10 @@ class metaPattern(object):
         self.data.extend(map(convert_nested_data, seq))
         return
 
-    def new_extend(self, item):
-        """ Equivalent to self.concat / self.concat """
-        return self.concat(item)
-
     def append(self, item):
         """ Converts a new item to PGroup etc and appends """
         self.data.append(convert_nested_data(item))
         return
-
-    def new_append(self, item):
-        """ Doesn't append in place, returns a new Pattern object """
-        new = list(self.data)
-        new = self.new(new)
-        new.append(item)
-        return new
     
     def i_rotate(self, n=1):
         self.data = self.data[n:] + self.data[0:n]
@@ -971,22 +960,6 @@ class metaPattern(object):
         elif not isinstance(self.data, PatternType): # not sure about PlayString data
     
             self.data = [self.data]
-
-        # #: Put any data in a tuple into a PGroup
-        # for i, data in enumerate(self.data):
-
-        #     if type(data) is tuple:
-            
-        #         self.data[i] = PGroup(data)
-            
-        #     elif type(data) is list:
-            
-        #         self.data[i] = Pattern(data)
-            
-        #     elif type(data) is str and len(data) > 1:
-            
-        #         self.data[i] = Pattern(data)
-
 
         self.data = list(map(convert_nested_data, self.data))
             
