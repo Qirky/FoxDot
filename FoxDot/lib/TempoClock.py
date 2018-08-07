@@ -700,7 +700,7 @@ class QueueBlock(object):
 
                 self.events[i].append(q_obj)
 
-                self.items[q_obj.obj] = q_obj
+                self.items[q_obj.obj] = q_obj # store the wrapped object as an identifer
 
                 break
         return
@@ -729,7 +729,7 @@ class QueueBlock(object):
         return sum([len(level) for level in self.events])
 
     def __contains__(self, other):
-        return other in self.objects()
+        return other in self.items
 
     def objects(self):
         return [item.obj for level in self.events for item in level]

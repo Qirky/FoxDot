@@ -285,12 +285,7 @@ class Player(Repeatable):
         self.buf_delay = []
         self.timestamp = 0
         # self.condition = lambda: True
-        self.sent_messages = []
-
-        #self.case_modulation = {
-        #   "sus"   : lambda val, i, *args, **kwargs: val * float(self.metro.beat_dur()) * float(self.get_key("blur", i, **kwargs)), # this should be done in the SynthDef?
-        #   "amp"   : lambda val, i, *args, **kwargs: val * float(self.get_key("amplify", i, **kwargs))
-        #   }
+        # self.sent_messages = []
 
         # Visual feedback information
 
@@ -361,7 +356,7 @@ class Player(Repeatable):
         cls.samples = sample_bank
 
     def __hash__(self):
-        return hash(self.id) # might become tricky
+        return hash(self.id) # could be problematic if there are id clashes?
 
     # Player Object Manipulation
     
