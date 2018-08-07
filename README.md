@@ -3,32 +3,19 @@ FoxDot - Live Coding with Python v0.6
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.9 fixes and updates
+### v0.6.10 fixes and updates
 
-- Changed the behaviour for composing events sent to SuperCollider. When several `PGroup`s with different sizes are used, events are now the size of the largest `PGroup` as opposed to the lowest common multiple of all of their lengths. This is best demonstrated by the following example. Using a pitch of `(0, 2, 4)` and delay of `(0, 0.5)` would play the whole chord twice whereas now it only delays the second value:
-```python
-# Old behaviour using lowest common multiple
-p1 >> pluck((0, 2, 4), dur=PDur(3, 8), delay=(0, 0.5, 0, 0.5, 0, 0.5))
-
-# New behaviour
-p1 >> pluck((0, 2, 4), dur=PDur(3, 8), delay=(0, 0.5))
-```
-- Improved efficiency of OSC message composition which should improve performance on lower-spec machines i.e. it can run reasonably well on a Rasberry Pi using a high clock latency value.
-- Move the calculation of sustain using `blur` to SuperCollider such that using an effect such as `chop` that makes use of the sustain value no longer relies on `blur` as well:
-```python
-# Old behaviour required adjusting for the blur
-p1 >> pluck(dur=PDur(3, 8), sus=2, blur=1.5, chop=4 * 1.5)
-
-# New behaviour still 'chops' the sound into 4 parts
-p1 >> pluck(dur=PDur(3, 8), sus=2, blur=1.5, chop=4)
-```
+- Continued work on improving efficiency across the board. Now works fine on Raspberry Pi machines (be careful when using lots of a effects though!).
+- Fixed the `sus` and `blur` issues when using a different tempo.
+- Improved timing on `Player` method calls that send extra OSC messages, such as `stutter` and `jump`.
+- Renamed `Pattern` method `pipe` to `concat`. Also improved efficiency of this method as well as making `Pattern.append()` much more efficient (useful to adding items to a `Pattern` from a loop.
 
 ---
 
 ## Installation and startup
 
 #### Prerequisites
-- [Python 2 or 3](https://www.python.org/) - make sure you say "yes" if you'd like to add Python to your path.
+- [Python 2 or 3](https://www.python.org/) - add Python to your path and install "pip" when prompted during the install.
 - [SuperCollider 3.8 and above](http://supercollider.github.io/download)
 
 #### Recommended
@@ -90,7 +77,7 @@ p1 >> pads([0,1,2,3])
 
 The empty player object, `p1` is now assigned a the 'pads' synth and some playback instructions. `p1` will play the first four notes of the default scale using a SuperCollider `SynthDef` with the name `\pads`. By default, each note lasts for 1 beat at 120 bpm. These defaults can be changed by specifying keyword arguments:
 
-``` python
+```python
 p1 >> pads([0,1,2,3], dur=[1/4,3/4], sus=1, vib=4, scale=Scale.minor)
 ```
 
