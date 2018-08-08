@@ -1139,20 +1139,32 @@ class Player(Repeatable):
         return size
 
     def get_event_length(self, event=None, **kwargs):
+        """ Returns the largest length value in the event dictionary """
         if event is None:
+            
             event = self.event
+
+        event.update(kwargs)
         
-        sizes = []
+        max_val = 0
 
         for attr, value in event.items():
-            value = kwargs.get(attr, value)
-            try:
+            
+            if isinstance(value, PGroup):
+            
                 l = len(value)
-            except (TypeError, AttributeError):
+            
+            else:
+            
                 l = 1
-            sizes.append(l)
 
-        return max(sizes) if len(sizes) else 0
+            if l > max_val:
+                
+                max_val = l
+
+        return max_val
+
+        #return max(sizes) if len(sizes) else 0
 
     def number_attr(self, attr):
         """ Returns true if the attribute should be a number """
@@ -1438,7 +1450,7 @@ class Player(Repeatable):
     def get_event(self):
         """ Returns a dictionary of attr -> now values """
 
-        self.event = dict(map(lambda attr: (attr, self.now(attr)), self.attr.copy()))
+        self.event = dict(map(lambda attr: (attr, self.now(attr)), self.attr.keys()))
 
         self.event = self.unduplicate_durs(self.event)
 
