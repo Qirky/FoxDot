@@ -1144,7 +1144,9 @@ class Player(Repeatable):
             
             event = self.event
 
-        event.update(kwargs)
+        if kwargs:
+
+            event = event.copy().update(kwargs)
         
         max_val = 0
 
