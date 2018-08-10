@@ -116,3 +116,9 @@ class ThreadedText(Text):
             data = list(reversed(data))
 
         return data
+
+    def get_visible_range(self):
+        """ Returns a tuple of integers for the first and last row visible in the editor """
+        a = self.index("@0,0")
+        b = self.index("@0,%d" % self.winfo_height())
+        return (int(s.split(".")[0]) for s in (a, b)) 

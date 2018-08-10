@@ -1655,6 +1655,7 @@ class workspace:
         return
 
     def get_all(self):
+        """ Returns all the text as a string """
         return self.text.get("1.0", END).strip()
 
     def openhomepage(self):

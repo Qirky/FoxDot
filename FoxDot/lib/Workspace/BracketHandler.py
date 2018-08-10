@@ -193,6 +193,7 @@ class BracketHandler:
         return "break"
 
     def delete(self, insert=INSERT):
+        """ """
         line, column = index(self.text.index(insert))
         next_char    = self.text.get(index(line, column))
         prev_char    = self.text.get(index(line, column-1))
@@ -205,12 +206,14 @@ class BracketHandler:
 
     def find_starting_bracket(self, line, column, bracket_style, offset = 0):
         """ Finds the opening bracket to the closing bracket at line, column co-ords.
-            Returns None if not found. """
+            Returns None if not found. Only goes as far as the first line visible on screen"""
         
         line_length = column - 1
         used_br = offset
 
-        for row in range(line, 0, -1):
+        start_row, end_row = self.text.get_visible_range() # returns tuple
+
+        for row in range(line, start_row - 1, -1):
 
             for col in range(line_length, -1, -1):
 
