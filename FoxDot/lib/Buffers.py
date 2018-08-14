@@ -413,3 +413,48 @@ class LoopSynthDef(SampleSynthDef):
         return SampleSynthDef.__call__(self, pos, **kwargs)
 
 loop = LoopSynthDef()
+
+
+
+def vRenderRapGenerator(filename,lyrics,duration,notes,tempo,scale):
+    instruction = './lib/vrender/rap.sh "%s" "%s" "%s" %s "%s" %s' % (str(notes),str(duration),str(lyrics),str(tempo), str(scale), filename)
+    print("Running Rap script")
+    print(instruction)
+    os.system(instruction)
+    print("script finished")
+
+import functools
+
+
+class VRenderSynthDef(SampleSynthDef):
+    def __init__(self):
+        SampleSynthDef.__init__(self, "vrender")
+        self.pos = self.new_attr_instance("pos")
+        self.sample = self.new_attr_instance("sample")
+        self.defaults['pos']   = 0
+        self.defaults['sample']   = 0
+        self.base.append("osc = PlayBuf.ar(2, buf, BufRateScale.kr(buf) * rate, startPos: BufSampleRate.kr(buf) * pos);")
+        self.base.append("osc = osc * EnvGen.ar(Env([0,1,1,0],[0.05, sus-0.05, 0.05]));")
+        self.osc = self.osc * self.amp
+        self.add()
+
+    def __call__(self, filename, pos=0, sample=0, **kwargs):
+        lyrics = kwargs['lyrics']
+        durations = functools.reduce(lambda a, x: a + " " + str(x), kwargs['dur'], "")[1:]
+        notes = functools.reduce(lambda a, x: a + " " + str(x), kwargs['notes'], "")[1:]
+        tempo = kwargs['tempo']
+
+        if "scale" in kwargs:
+            scale = list(kwargs["scale"])
+        else:
+            scale = [0,2,4,5,7,9,11]
+        scale = functools.reduce(lambda a, x: a + " " + str(x), scale, "")[1:]
+
+        vRenderRapGenerator(filename,lyrics,durations,notes,tempo,scale)
+
+        kwargs = {"dur":sum(kwargs['dur'])}
+
+        kwargs["buf"] = Samples.loadBuffer(filename, sample)
+        return SampleSynthDef.__call__(self, pos, **kwargs)
+
+vrender = VRenderSynthDef()

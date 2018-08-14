@@ -4,6 +4,7 @@ __pycache__/
 FoxDot/lib/debug/*
 FoxDot/data/*
 FoxDot/lib/Settings/conf.py
+FoxDot/lib/vrender/tmp/*
 build/*
 dist/*
 FoxDot/snd/_loop_/*
@@ -13,6 +14,7 @@ FoxDot/lib/GhostCoder/*
 FoxDot/lib/Settings/conf.txt
 FoxDot/lib/Workspace/tmp/tempfile.txt
 changed_files.txt
+
 
 # Sphinx build dir
 docs/_build/
