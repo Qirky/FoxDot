@@ -1,5 +1,5 @@
 SynthDef.new(\coarse,
-{|bus, coarse, sus|
+{|bus, sus, coarse|
 var osc;
 osc = In.kr(bus, 1);
 osc = osc * LFPulse.ar(coarse / sus);
