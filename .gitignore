@@ -4,7 +4,7 @@ __pycache__/
 FoxDot/lib/debug/*
 FoxDot/data/*
 FoxDot/lib/Settings/conf.py
-FoxDot/lib/vrender/tmp/*
+FoxDot/lib/VRender/tmp/*
 build/*
 dist/*
 FoxDot/snd/_loop_/*

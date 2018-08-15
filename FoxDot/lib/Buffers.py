@@ -415,16 +415,7 @@ class LoopSynthDef(SampleSynthDef):
 loop = LoopSynthDef()
 
 
-
-def vRenderRapGenerator(filename,lyrics,duration,notes,tempo,scale):
-    instruction = './lib/vrender/rap.sh "%s" "%s" "%s" %s "%s" %s' % (str(notes),str(duration),str(lyrics),str(tempo), str(scale), filename)
-    print("Running Rap script")
-    print(instruction)
-    os.system(instruction)
-    print("script finished")
-
-import functools
-
+from .VRender import renderizeVoice
 
 class VRenderSynthDef(SampleSynthDef):
     def __init__(self):
@@ -440,17 +431,20 @@ class VRenderSynthDef(SampleSynthDef):
 
     def __call__(self, filename, pos=0, sample=0, **kwargs):
         lyrics = kwargs['lyrics']
-        durations = functools.reduce(lambda a, x: a + " " + str(x), kwargs['dur'], "")[1:]
-        notes = functools.reduce(lambda a, x: a + " " + str(x), kwargs['notes'], "")[1:]
-        tempo = kwargs['tempo']
+        durations = kwargs['dur']
+        notes = kwargs['notes']
 
         if "scale" in kwargs:
             scale = list(kwargs["scale"])
         else:
             scale = [0,2,4,5,7,9,11]
-        scale = functools.reduce(lambda a, x: a + " " + str(x), scale, "")[1:]
 
-        vRenderRapGenerator(filename,lyrics,durations,notes,tempo,scale)
+        if "tempo" in kwargs:
+            tempo = kwargs["tempo"]
+        else:
+            tempo = 100
+
+        renderizeVoice(filename,lyrics,notes,durations,tempo,scale)
 
         kwargs = {"dur":sum(kwargs['dur'])}
 
