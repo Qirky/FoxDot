@@ -1,4 +1,4 @@
-from MidiPlayer import createMidi
+from MidiFactory import createMidi
 import os
 
 def extendScale(scale,times):
@@ -16,15 +16,15 @@ def toList(rhythm, melody, scale):
     volume = 100
     baseNote = 60
 
-    lista = []
+    composition = []
     time = 0
     for i in range(len(rhythm)):
         dur = rhythm[i]
         note = scale[melody[i]%scaleSize] + baseNote
-        lista.append([(note,dur,volume,time)])
+        composition.append((note,dur,volume,time))
         time += dur
 
-    return lista
+    return composition
 
 def compose(notes,durations,scale, new_midi_path, new_musicxml_path):
 

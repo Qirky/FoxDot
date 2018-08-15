@@ -1,5 +1,5 @@
-vrender("hola2", lyrics="hola chau", notes=[0,4],dur=[1,1],tempo=160,scale=Scale.major)
+vrender("que", lyrics="hola chau que me decis loco adios", notes=[0,4]*4,dur=[1,1]*4,tempo=160,scale=Scale.major)
 
-p1 >> loop("hola2",dur=4)
+p1 >> loop("que",dur=8)
 
 p1 >> pluck()
