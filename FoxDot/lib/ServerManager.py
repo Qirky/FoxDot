@@ -992,7 +992,8 @@ class TempoClient:
             if "sync" in data:
                 for key in ("start_time", "bpm", "beat", "time"):
                     if key in data["sync"]:
-                        self.metro.set_attr(key, data["sync"][key])
+                        #self.metro.set_attr(key, data["sync"][key])
+                        setattr(self.metro, key, data["sync"][key])
             
             elif "new_bpm" in data:
 

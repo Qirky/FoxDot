@@ -82,7 +82,7 @@ class TempoClock(object):
         self.largest_sleep_time = 0
         self.last_block_dur = 0.0
 
-        self.dtype=Fraction
+        self.dtype=float
 
         # Store time as a rational number
         
@@ -300,10 +300,10 @@ class TempoClock(object):
 
         data = {
             "sync" : {
-                "start_time" : (self.start_time.numerator, self.start_time.denominator),
+                "start_time" : float(self.start_time),
                 "bpm"        : float(self.bpm), # TODO: serialise timevar etc
-                "beat"       : (self.beat.numerator, self.beat.denominator),
-                "time"       : (self.time.numerator, self.time.denominator)
+                "beat"       : float(self.beat),
+                "time"       : float(self.time)
             }
         }
 
@@ -384,9 +384,9 @@ class TempoClock(object):
 
         block.send_osc_messages()
 
-        # Store the osc messages
+        # Store the osc messages -- experimental
 
-        self.history.add(block.beat, block.osc_messages)
+        # self.history.add(block.beat, block.osc_messages)
 
         return
 
