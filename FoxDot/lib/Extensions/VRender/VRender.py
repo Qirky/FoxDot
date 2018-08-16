@@ -1,9 +1,11 @@
+from __future__ import absolute_import, print_function
+
 import os
 
-from Constants import *
-from Composer import compose
-from VoiceSpecificator import generateVoiceSpecification
-from Sinsy import download
+from .Constants import *
+from .Composer import compose
+from .VoiceSpecificator import generateVoiceSpecification
+from .Sinsy import download
 
 def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale):
 
