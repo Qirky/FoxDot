@@ -22,12 +22,13 @@ with SynthDef("audioin") as audioin:
     audioin.osc = AudioIn.ar(1)
     audioin.env = Env.mask()
 
-# with SynthDef("pads") as pads:
-#     pads.amp = pads.amp * 1.5
-#     pads.freq = pads.freq + [0,1]
-#     pads.osc = SinOsc.ar(pads.freq, mul=pads.amp) + Pulse.ar(pads.freq, width=LFTri.kr(pads.sus/16), iphase=0.5, mul=pads.amp/20) 
-#     pads.osc = HPF.ar(pads.osc, 1000);
-#     pads.env = Env.perc()
+# with SynthDef("sinepad") as sinepad:
+#     sinepad.amp = sinepad.amp * 1.5
+#     sinepad.freq = sinepad.freq + [0,2]
+#     sinepad.osc = SinOsc.ar(sinepad.freq, mul=sinepad.amp)
+#     sinepad.osc = HPF.ar(sinepad.osc, 1000);
+#     sinepad.env = Env.perc()
+    # sinepad.env = Env.perc()
 
 with SynthDef("noise") as noise:
     noise.freq  = noise.freq * 2
@@ -384,6 +385,9 @@ keys.add()
 
 dbass = FileSynthDef("dbass") 
 dbass.add()
+
+sinepad = FileSynthDef("sinepad") 
+sinepad.add()
 
 # Get rid of the variable synth
 
