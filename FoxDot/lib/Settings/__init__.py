@@ -89,6 +89,8 @@ def GET_TUTORIAL_FILES():
 
 from . import conf
 
+reload(conf) # incase of a reload
+
 FOXDOT_CONFIG_FILE  = conf.filename
     
 ADDRESS                   = conf.ADDRESS

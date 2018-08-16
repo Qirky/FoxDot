@@ -648,9 +648,10 @@ class Player(Repeatable):
 
         # Play the note
 
-        # self.sent_messages = []
+        # if type(self.event['dur']) != rest:
+        if not isinstance(self.event["dur"], rest):
         
-        self.send(verbose=(self.metro.solo == self and kwargs.get('verbose', True) and type(self.event['dur']) != rest))
+            self.send(verbose=(self.metro.solo == self and kwargs.get('verbose', True)))
         
         # If using custom bpm
 
@@ -1473,7 +1474,7 @@ class Player(Repeatable):
 
         for i in range(self.get_event_length(**kwargs)):
 
-            self.send_osc_message(self.event, i, timestamp=timestamp, **kwargs)
+            self.send_osc_message(self.event, i, timestamp=timestamp, verbose=verbose, **kwargs)
 
         return
 

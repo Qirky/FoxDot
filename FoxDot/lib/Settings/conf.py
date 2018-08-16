@@ -13,7 +13,7 @@ try:
     
     with open(filename) as f:
         for line in f.readlines():
-            if not line[0] == "#":
+            if not line[0] == "#" and line.strip() != "":
                 code = compile(line.strip(), "FoxDot", "exec")
                 exec(code, globals())
 
