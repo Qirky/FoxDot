@@ -20,6 +20,7 @@ There are some dependencies in the code, such as python libraries, shell command
 - shell commands (curl, cp, grep)
 
 # Usage
+
 The feature provides the method vrender which has the following parametrs
 - name: the name of the wav file which is then reproduced with a loop or play method
 - dur: specifies duration of each note
@@ -28,7 +29,7 @@ The feature provides the method vrender which has the following parametrs
 - tempo: singinig velocity in BPM(optional)
 - scale: By default major (optional)
 
-Example:
+### Example
 ```
 vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)
 ```
