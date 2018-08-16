@@ -780,11 +780,14 @@ class TempoServer(ThreadedServer):
         self.ip_pub = self.hostname
         
         try:
-            for info in socket.getaddrinfo(socket.gethostname(), None):
-                if info[0] == 2:
-                    self.ip_pub = info[4][0]
-                    break
-        except socket.gaierror:
+
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            self.ip_pub = s.getsockname()[0]
+            s.close()
+
+        except OSError:
+
             pass
 
         # Instantiate server process
@@ -801,13 +804,12 @@ class TempoServer(ThreadedServer):
 
     def start(self):
         """ Starts listening on the socket """
-
         self.running = True
         self.server_thread.start()
-
         return
 
     def update_tempo(self, bpm):
+        """ Sends information  to all connected peers about changing tempo """
         for peer in self.peers:
             peer.update_tempo(bpm)
         return
@@ -860,6 +862,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
                 elif "new_bpm" in data:
 
                     self.metro.update_tempo(data["new_bpm"])
+
+                elif "latency":
+
+                    send_to_socket(self.request, ["latency"])
+
             
         return
 
@@ -913,6 +920,7 @@ class TempoClient:
         self.start_time = None
         self.stop_time  = None
         self.latency    = None
+        self.recording_latency = False
 
         send_to_socket(self.socket, ["init"])
         
@@ -921,11 +929,24 @@ class TempoClient:
         return self
 
     def start_timing(self):
+        """ Starts an internal timer for calculating latency """
         self.start_time = time.time()
 
     def stop_timing(self):
+        """ Stops the internal timer and calculates latency  """
         self.stop_time = time.time()
-        self.latency = (self.stop_time - self.start_time) * 0.5
+        self.calculate_latency(self.stop_time, self.start_time)
+
+    def calculate_latency(self, start, end):
+        """ Returns (and stores) the latency using the start and end time to send a message to the master server"""
+        self.latency = (end - start) * 0.5
+        return self.latency
+
+    def record_latency(self):
+        self.start_timing()
+        self.recording_latency = True
+        self.send(["latency"])
+        return
 
     def send(self, data):
         """ Sends data to server """
@@ -949,6 +970,14 @@ class TempoClient:
         while self.listening:
             
             data = read_from_socket(self.socket)
+
+            # Might be recording latency
+
+            if self.recording_latency:
+
+                self.stop_timing()
+                self.recording_latency = False
+                print("New latency is", self.latency)
             
             if data is None:
                 break
