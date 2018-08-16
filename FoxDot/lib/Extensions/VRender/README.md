@@ -29,4 +29,6 @@ The feature provides the method vrender which has the following parametrs
 - scale: By default major (optional)
 
 Example:
-```vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)```
+```
+vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)
+```
