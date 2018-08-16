@@ -11,13 +11,13 @@ There are some dependencies in the code, such as python libraries, shell command
 
 ### Libraries
 
-midiutil
-urllib
+- midiutil
+- urllib
 
 ### Shell commands and external software:
 
-musescore (To convert midi to musicXML which is the format expected by sinsy.jp)
-shell commands (curl, cp, grep)
+- musescore (To convert midi to musicXML which is the format expected by sinsy.jp)
+- shell commands (curl, cp, grep)
 
 # Usage
 The feature provides the method vrender which has the following parametrs
@@ -29,4 +29,4 @@ The feature provides the method vrender which has the following parametrs
 - scale: By default major (optional)
 
 Example:
-`vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)`
+```vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)```
