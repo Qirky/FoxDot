@@ -969,8 +969,6 @@ class TempoClient:
 
         self.stop_timing()
 
-        print(time_data["clock_time"], self.stop_time, self.latency)
-
         self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
         
         # Enter loop
@@ -992,7 +990,6 @@ class TempoClient:
             if "sync" in data:
                 for key in ("start_time", "bpm", "beat", "time"):
                     if key in data["sync"]:
-                        #self.metro.set_attr(key, data["sync"][key])
                         setattr(self.metro, key, data["sync"][key])
             
             elif "new_bpm" in data:
