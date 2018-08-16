@@ -1,0 +1,1 @@
+from .VRender import renderizeVoice

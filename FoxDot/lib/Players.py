@@ -1146,7 +1146,8 @@ class Player(Repeatable):
 
         if kwargs:
 
-            event = event.copy().update(kwargs)
+            event = event.copy()
+            event.update(kwargs)
         
         max_val = 0
 
@@ -1465,7 +1466,7 @@ class Player(Repeatable):
         return self
 
 
-    def send(self, timestamp=None, **kwargs):
+    def send(self, timestamp=None, verbose=True, **kwargs):
         """ Goes through the  current event and compiles osc messages and sends to server via the tempo clock """
 
         timestamp = timestamp if timestamp is not None else self.queue_block.time
