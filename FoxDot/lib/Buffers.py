@@ -434,15 +434,13 @@ class VRenderSynthDef(SampleSynthDef):
         durations = kwargs['dur']
         notes = kwargs['notes']
 
+        scale = [0,2,4,5,7,9,11]
         if "scale" in kwargs:
             scale = list(kwargs["scale"])
-        else:
-            scale = [0,2,4,5,7,9,11]
 
+        tempo = 100
         if "tempo" in kwargs:
             tempo = kwargs["tempo"]
-        else:
-            tempo = 100
 
         renderizeVoice(filename,lyrics,notes,durations,tempo,scale)
 
