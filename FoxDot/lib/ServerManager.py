@@ -833,9 +833,15 @@ class RequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         """ Overload """
 
+        print("New connection from {}".format(self.client_address))
+
         # First we get latency
 
-        read_from_socket(self.request)
+        data = read_from_socket(self.request)
+
+        # Should be "init" message
+
+        assert "init" in data
 
         send_to_socket(self.request, {"clock_time": time.time()})
 
@@ -935,7 +941,7 @@ class TempoClient:
     def stop_timing(self):
         """ Stops the internal timer and calculates latency  """
         self.stop_time = time.time()
-        self.calculate_latency(self.stop_time, self.start_time)
+        self.calculate_latency(self.start_time, self.stop_time)
 
     def calculate_latency(self, start, end):
         """ Returns (and stores) the latency using the start and end time to send a message to the master server"""
@@ -963,6 +969,8 @@ class TempoClient:
 
         self.stop_timing()
 
+        print(time_data["clock_time"], self.stop_time, self.latency)
+
         self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
         
         # Enter loop
@@ -977,7 +985,6 @@ class TempoClient:
 
                 self.stop_timing()
                 self.recording_latency = False
-                print("New latency is", self.latency)
             
             if data is None:
                 break
