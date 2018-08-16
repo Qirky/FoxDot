@@ -1,4 +1,4 @@
-SynthDef.new(\loop,
+SynthDef.new(\vrender,
 {|vib=0, bus=0, pos=0, sample=0, rate=1.0, amp=1, freq=0, buf=0, beat_dur=1, room=0.1, sus=1, fmod=0, blur=1, pan=0|
 var osc, env;
 sus = sus * blur;
