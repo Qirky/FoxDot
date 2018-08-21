@@ -398,7 +398,7 @@ class NumberKey(object):
 
                 def val_func(value, func):
                     # Call on current  value (force pattern)
-                    new_value = _wrapper(value).__call__(self.now()) * func()
+                    new_value = (_wrapper(value).__call__(self.now()) * func())[0]
                     
                     # Get the values from default that we want
                     def_value = (default.now() if hasattr(default, "now") else default) * _invert(func())
@@ -411,7 +411,7 @@ class NumberKey(object):
 
                 def val_func(value, func):
                     # Call on current  value (force pattern)
-                    new_value = asStream(value) * func()
+                    new_value = (asStream(value) * func())[0]
                     
                     # Get the values from default that we want
                     def_value = (default.now() if hasattr(default, "now") else default) * _invert(func())
