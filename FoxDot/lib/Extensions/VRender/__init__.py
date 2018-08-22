@@ -1,8 +1,8 @@
 from __future__ import absolute_import, print_function
 
 from .VRender import renderizeVoice
-from ..SCLang import SampleSynthDef
-from ..Buffers import Samples
+from ...SCLang import SampleSynthDef
+from ...Buffers import Samples
 
 class VRenderSynthDef(SampleSynthDef):
     def __init__(self):
