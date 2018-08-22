@@ -1696,6 +1696,7 @@ class Player(Repeatable):
         """ Removes this object from the Clock and resets itself"""
         
         self.isplaying = False
+        self.stopping = True
         
         self.reset()
 
