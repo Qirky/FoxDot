@@ -11,7 +11,7 @@ There are some dependencies in the code, such as python libraries, shell command
 
 ### Libraries
 
-- midiutil
+- MIDIUtil
 - urllib
 
 ### Shell commands and external software:
