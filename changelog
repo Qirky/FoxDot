@@ -1,3 +1,10 @@
+### v0.6.10 fixes and updates
+
+- Continued work on improving efficiency across the board. Now works fine on Raspberry Pi machines (be careful when using lots of a effects though!).
+- Fixed the `sus` and `blur` issues when using a different tempo.
+- Improved timing on `Player` method calls that send extra OSC messages, such as `stutter` and `jump`.
+- Renamed `Pattern` method `pipe` to `concat`. Also improved efficiency of this method as well as making `Pattern.append()` much more efficient (useful to adding items to a `Pattern` from a loop.
+
 ### v0.6.9 fixes and updates
 
 - Changed the behaviour for composing events sent to SuperCollider. When several `PGroup`s with different sizes are used, events are now the size of the largest `PGroup` as opposed to the lowest common multiple of all of their lengths. This is best demonstrated by the following example. Using a pitch of `(0, 2, 4)` and delay of `(0, 0.5)` would play the whole chord twice whereas now it only delays the second value:

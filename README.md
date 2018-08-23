@@ -1,14 +1,15 @@
-FoxDot - Live Coding with Python v0.6
+FoxDot - Live Coding with Python v0.7
 =====================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.6.10 fixes and updates
+### v0.7.1 fixes and updates
 
-- Continued work on improving efficiency across the board. Now works fine on Raspberry Pi machines (be careful when using lots of a effects though!).
-- Fixed the `sus` and `blur` issues when using a different tempo.
-- Improved timing on `Player` method calls that send extra OSC messages, such as `stutter` and `jump`.
-- Renamed `Pattern` method `pipe` to `concat`. Also improved efficiency of this method as well as making `Pattern.append()` much more efficient (useful to adding items to a `Pattern` from a loop.
+- Improved `PlayerKey.map` method e.g. `p1.pitch` to only return one value instead of a Pattern
+- Improved `Clock.clear` to make sure Players don't reset and continue playing, which sometimes happened
+- Use `float` instead of `Fraction` for timing to reduce computation time in the main clock loop. So far this hasn't had any impact on timing but please get in contact if it does. It has improved performance on low spec machines such as a Raspberry Pi.
+- Improve bracket finding in the main interface so it only checks visible portion of the screen so it no longer lags if there is a large amount of text in the editor.
+- Added the `VRender` extension, thanks to [mathigatti](https://github.com/mathigatti), that allows users to add synthesised vocals. Requires Python modules MIDIUtil and urllib and musescore (Linux/Mac only). See the [README](https://github.com/Qirky/FoxDot/blob/master/FoxDot/lib/Extensions/VRender/README.md) for more information.
 
 ---
 
