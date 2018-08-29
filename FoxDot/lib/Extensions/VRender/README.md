@@ -1,5 +1,5 @@
 # Background
-I wanted to add a voice to my LiveCoding compositions so I made some research and I learned about singing synthesis, something not so popular in the occidental world but quite popular in japan, with some really successful brands such as Vocaloid.
+I wanted to add a voice to my Live Coding compositions so I made some research and I learned about singing synthesis, something not so popular in the occidental world but quite popular in japan, with some really successful brands such as Vocaloid.
 
 Looking for open source singing synthezisers, I found sinsy.jp, It is a website made by people from Nagoya Institute of Technology to convert music sheets (In musicXML format) into a singing voice. This is an open source project, I tried to use it locally but it doesn't have as good quality as the web version, probably it needs some configuration or training that I am not aware of.
 
@@ -38,4 +38,4 @@ vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo
 ```
 
 ### Posible problems
-Relative paths are hardcoded at ```FoxDot/FoxDot/lib/Extensions/VRender/constants.py```, they are specified assuming FoxDot is executed with the terminal running over the FoxDot folder (Where lib and snd folders are located), if some file can't be found you can try changing the relative paths for your absolute path to this folder.
+Relative paths are hardcoded at ```FoxDot/FoxDot/lib/Extensions/VRender/constants.py```, they are specified assuming FoxDot is executed with the terminal running on the FoxDot folder (Where lib and snd folders are located), if some file can't be found you can try changing the relative paths for your absolute path to this folder.
