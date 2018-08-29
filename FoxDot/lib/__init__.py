@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function
 
-__version__ = "0.7.1"
+import os.path
+with open((os.path.join(os.path.dirname(__file__), ".version")), "r") as f:
+    __version__ = f.read()
 
 import logging
-
 from .Code import *
 
 FoxDotCode.namespace = globals()

@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
-#from distutils.core import setup
 from setuptools import setup
 
 with open("README.md", "r") as f:
     long_description=f.read()
 
+with open("FoxDot/lib/.version", "r") as f:
+    version = f.read()
+
 setup(name='FoxDot',
-      version='0.7.1',
+      version=version,
       description='Live coding music with SuperCollider',
       author='Ryan Kirkbride',
       author_email='ryan@foxdot.org',
@@ -43,3 +45,5 @@ setup(name='FoxDot',
                                  ],
                       'FoxDot.lib.Workspace': ['img/*', 'tmp/*'],
                       'FoxDot.lib.Settings' : ['conf.txt']})
+
+
