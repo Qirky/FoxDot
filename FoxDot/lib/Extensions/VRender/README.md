@@ -11,8 +11,7 @@ There are some dependencies in the code, such as python libraries, shell command
 
 ### Libraries
 
-- MIDIUtil
-- urllib
+- MIDIUtil (```pip install MIDIUtil```)
 
 ### Shell commands and external software:
 
@@ -21,15 +20,22 @@ There are some dependencies in the code, such as python libraries, shell command
 
 # Usage
 
-The feature provides the method vrender which has the following parametrs
+The feature provides the method vrender which has the following parameters
 - name: the name of the wav file which is then reproduced with a loop or play method
 - dur: specifies duration of each note
 - notes: specifies the notes
 - lyrics: Is a string which is splitted by spaces
-- tempo: singinig velocity in BPM(optional)
+- tempo: singinig velocity in BPM (optional)
 - scale: By default major (optional)
+
+A demonstration video can be found [here](https://youtu.be/cgZuO78tVVE).
 
 ### Example
 ```
+from .Extension.VRender import vrender
+
 vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)
 ```
+
+### Posible problems
+Relative paths are hardcoded at ```FoxDot/FoxDot/lib/Extensions/VRender/constants.py```, they are specified assuming FoxDot is executed with the terminal running over the FoxDot folder (Where lib and snd folders are located), if some file can't be found you can try changing the relative paths for your absolute path to this folder.
