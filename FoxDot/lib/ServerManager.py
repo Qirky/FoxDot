@@ -888,6 +888,8 @@ class TempoClient:
     def __init__(self, clock):
         self.metro = clock
 
+        self.sync_keys = ("start_time", "bpm", "beat", "time") # ,"seed")
+
         self.server_hostname = None
         self.server_port     = None
         self.server_address  = None
@@ -988,7 +990,7 @@ class TempoClient:
                 break
             
             if "sync" in data:
-                for key in ("start_time", "bpm", "beat", "time"):
+                for key in self.sync_keys:
                     if key in data["sync"]:
                         setattr(self.metro, key, data["sync"][key])
             

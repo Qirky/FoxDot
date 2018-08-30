@@ -77,14 +77,14 @@ class TempoClock(object):
         # Flag this when done init
         self.__setup   = False
 
-        # debug
+        # debug information
 
         self.largest_sleep_time = 0
         self.last_block_dur = 0.0
 
-        self.dtype=float
+        # Storing time as a float 
 
-        # Store time as a rational number
+        self.dtype=float
         
         self.time       = self.dtype(0) # Seconds elsapsed
         self.beat       = self.dtype(0) # Beats elapsed
@@ -118,6 +118,7 @@ class TempoClock(object):
         self.latency    = 0.25 # Time between starting processing osc messages and sending to server
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
+
         # The duration to sleep while continually looping
         self.sleep_values = [0.01, 0.001, 0.0001]
         self.sleep_time = self.sleep_values[CPU_USAGE]
@@ -296,7 +297,8 @@ class TempoClock(object):
         return
 
     def get_sync_info(self):
-        """ Returns a serialisable value for Fraction values etc"""
+        """ Returns information for synchronisation across multiple FoxDot instances. To be 
+            stored as a JSON object with a "sync" header """
 
         data = {
             "sync" : {
@@ -310,18 +312,18 @@ class TempoClock(object):
         return data
 
 
-    def set_attr(self, key, value):
-        """ Sets the value of self.key when key is a string """
+    # def set_attr(self, key, value):
+    #     """ Sets the value of self.key when key is a string """
 
-        if key == "bpm":
+    #     if key == "bpm":
 
-            self.bpm = value
+    #         self.bpm = value
 
-        else:
+    #     else:
 
-            setattr(self, key, Fraction(value[0], value[1]))
+    #         setattr(self, key, Fraction(value[0], value[1]))
 
-        return
+    #     return
 
     def get_elapsed_sec(self):
         return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
