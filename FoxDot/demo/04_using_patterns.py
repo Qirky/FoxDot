@@ -135,7 +135,6 @@ print(P[:8].amen())
 
 # Bubble
 # Merges and laces the first and last two items such that a
-# drum pattern "x-o-" would become "(x[xo])-o([-o]-)
+# drum pattern "x-o-" would become "(x[xo])-o([-o]-)"
 d1 >> play(P["x-o-"].bubble())
 print(P[:8].bubble())
-
