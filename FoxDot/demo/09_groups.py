@@ -29,7 +29,7 @@ p_all.amplify=1
 p_all.stop()
 
 # Or...
-P_all.solo()
+p_all.solo()
 
 # To reduce the amount of typing, Player Objects can be grouped together and their attributes modified in a simpler way:
 p1 >> pads([0,2,4,2])
