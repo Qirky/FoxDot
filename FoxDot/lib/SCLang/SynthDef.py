@@ -285,7 +285,6 @@ class SynthDef(SynthDefBaseClass):
         SynthDefBaseClass.add_base_class_behaviour(self)
         self.base.append("freq = In.kr(bus, 1);")
         self.base.append("freq = [freq, freq+fmod];")
-        #freq = Select.kr(freq + fmod > freq,  [freq, ([freq+fmod])]);
         return
 
 class SampleSynthDef(SynthDefBaseClass):
