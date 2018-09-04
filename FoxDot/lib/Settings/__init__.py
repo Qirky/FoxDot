@@ -123,11 +123,11 @@ class _SamplePlayer:
         return other not in self.names
 
 class _LoopPlayer:
-    name = "loop"
+    names = ("loop", "gsynth")
     def __eq__(self, other):
-        return other == self.name
+        return other in self.names
     def __ne__(self, other):
-        return other != self.name
+        return other not in self.names
 
 class _MidiPlayer:
     name = "MidiOut"
