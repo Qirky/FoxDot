@@ -140,6 +140,10 @@ class TempoClock(object):
         cls.server = server
         return
 
+    @classmethod
+    def add_method(cls, func):
+        setattr(cls, func.__name__, func)
+
     def start_tempo_server(self, serv, **kwargs):
         """ Starts listening for FoxDot clients connecting over a network. This uses
             a TempoClient instance from ServerManager.py """
@@ -182,7 +186,7 @@ class TempoClock(object):
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar """
-        return self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", bpm))
+        return self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", self._convert_json_bpm(bpm)))
 
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
@@ -211,6 +215,7 @@ class TempoClock(object):
             json_value = self._convert_bpm_json(value)
 
             # Notify listening clients
+
             if self.tempo_client is not None:
             
                 self.tempo_client.update_tempo(json_value)
