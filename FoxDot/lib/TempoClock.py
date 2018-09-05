@@ -91,7 +91,7 @@ class TempoClock(object):
         self.start_time = self.dtype(time()) # could set to 0?
 
         # Don't start yet...
-        self.ticking = False
+        self.ticking = True
 
         # Player Objects stored here
         self.playing = []
@@ -130,6 +130,8 @@ class TempoClock(object):
 
         # If one object is going to played
         self.solo = SoloPlayer()
+
+        self.start()
 
     @classmethod
     def set_server(cls, server):
@@ -544,7 +546,7 @@ class TempoClock(object):
                 item.stop()             
         
         self.playing = []
-        self.ticking = False
+        #self.ticking = False
 
         return
 
