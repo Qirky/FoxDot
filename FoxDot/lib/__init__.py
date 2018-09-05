@@ -108,7 +108,7 @@ def update_foxdot_clock(clock):
 
     clock.add_method(_convert_json_bpm)
 
-    retrn
+    return
 
 def update_foxdot_server(serv):
     """ Tells the `Effect` and`TempoClock`classes to send OSC messages to
