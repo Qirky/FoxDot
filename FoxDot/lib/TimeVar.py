@@ -68,6 +68,11 @@ class TimeVar(object):
 
             self.metro.start()
 
+    def json_value(self):
+        """ Returns data about this TimeVar that can be sent over a network as JSON  """
+        ## pickle?
+        return [str(self.__class__.__name__), list(self.values), list(self.dur)]
+
     @classmethod
     def set_clock(cls, tempo_clock):
         cls.metro = tempo_clock

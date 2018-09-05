@@ -34,23 +34,14 @@ from .Main  import GeneratorPattern, Pattern, asStream
 import random
 
 class RandomGenerator(GeneratorPattern):
-    """ If a  """
-
     def __init__(self, *args, **kwargs):
-
         GeneratorPattern.__init__(self, *args, **kwargs)
-        
+        self.random = random
         if "seed" in kwargs:
-
-            self.random = random.Random()            
+            self.random = self.random.Random()            
             self.random.seed(kwargs["seed"])
-
-        else:
-
-            self.random = random
-
+            
     # Pseudo-inheritance
-
     def choice(self, *args, **kwargs):
         return self.random.choice(*args, **kwargs)
 

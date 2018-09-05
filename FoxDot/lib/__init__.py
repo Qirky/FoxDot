@@ -149,6 +149,13 @@ def _reload_synths():
     Samples._reset_buffers()
     return
 
+def _timevar_from_json(data):
+    """ Returns a TimeVar object that has been sent across a network using JSON """
+    cls = data[0]
+    val = data[1]
+    dur = data[2]
+    return FoxDotCode.namespace[cls](val, dur)
+
 def Master():
     """ Returns a `Group` containing all the players currently active in the Clock """
     return Group(*Clock.playing)

@@ -296,6 +296,13 @@ class TempoClock(object):
         self.hard_nudge = time2 - (time1 + latency)
         return
 
+    def json_bpm(self):
+        """ Returns the bpm in a data type that can be sent over json"""
+        if isinstance(self.bpm, (int, float)):
+            return float(self.bpm)
+        elif isinstance(self.bpm, TimeVar):
+            return [self.bpm.json_value()]
+
     def get_sync_info(self):
         """ Returns information for synchronisation across multiple FoxDot instances. To be 
             stored as a JSON object with a "sync" header """
@@ -303,7 +310,7 @@ class TempoClock(object):
         data = {
             "sync" : {
                 "start_time" : float(self.start_time),
-                "bpm"        : float(self.bpm), # TODO: serialise timevar etc
+                "bpm"        : self.json_bpm(), # TODO: serialise timevar etc
                 "beat"       : float(self.beat),
                 "time"       : float(self.time)
             }
