@@ -153,7 +153,7 @@ def _reload_synths():
     Samples._reset_buffers()
     return
 
-def _convert_json_bpm(data):
+def _convert_json_bpm(clock, data):
     """ Returns a TimeVar object that has been sent across a network using JSON """
     if isinstance(data, list):
         cls = data[0]
