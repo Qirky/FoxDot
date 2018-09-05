@@ -881,7 +881,7 @@ class Player(Repeatable):
         """ Calls a method every 16 to 32 beats using `every` """
         return self.every(PRand(32, 64)/2, *args, **kwargs)
 
-    def get_timestamp(self, beat):
+    def get_timestamp(self, beat=None):
         if beat is not None:
             timestamp = self.metro.osc_message_time() - self.metro.beat_dur(self.metro.now() - beat)
         else:
@@ -892,7 +892,7 @@ class Player(Repeatable):
         """ Plays the current note n-1 times. You can specify keywords. """
 
         timestamp = self.get_timestamp(_beat_)
-
+        
         # Get the current values (this might be called between events)
 
         n = int(kwargs.get("n", amount if amount is not None else 2))

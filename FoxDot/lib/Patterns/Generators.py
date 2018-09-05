@@ -30,13 +30,41 @@
 from __future__ import absolute_import, division, print_function
 
 from .Main  import GeneratorPattern, Pattern, asStream
+
 import random
 
-class PRand(GeneratorPattern):
+class RandomGenerator(GeneratorPattern):
+    """ If a  """
+
+    def __init__(self, *args, **kwargs):
+
+        GeneratorPattern.__init__(self, *args, **kwargs)
+        
+        if "seed" in kwargs:
+
+            self.random = random.Random()            
+            self.random.seed(kwargs["seed"])
+
+        else:
+
+            self.random = random
+
+    # Pseudo-inheritance
+
+    def choice(self, *args, **kwargs):
+        return self.random.choice(*args, **kwargs)
+
+    def randint(self, *args, **kwargs):
+        return self.random.randint(*args, **kwargs)
+
+    def triangular(self, *args, **kwargs):
+        return self.random.triangular(*args, **kwargs)
+
+class PRand(RandomGenerator):
     ''' Returns a random integer between start and stop. If start is a container-type it returns
         a random item for that container. '''
     def __init__(self, start, stop=None, **kwargs):
-        GeneratorPattern.__init__(self, **kwargs)
+        RandomGenerator.__init__(self, **kwargs)
         # If we're given a list, choose from that list -- TODO always use a list and use range
         self.args = (start, stop)
         self.kwargs = kwargs

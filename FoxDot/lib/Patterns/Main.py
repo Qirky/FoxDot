@@ -1221,7 +1221,7 @@ class PGroup(metaPattern):
 
 import random
 
-class GeneratorPattern(random.Random):
+class GeneratorPattern:
     """
         Used for when a Pattern does not generate a set length pattern,
         e.g. random patterns
@@ -1229,19 +1229,9 @@ class GeneratorPattern(random.Random):
     MAX_SIZE = 65536
     debugging = False
 
-    def __new__(cls, *args, **kwargs):
-        """ Override random.Random using first argument as a seed """
-        return super(GeneratorPattern, cls).__new__ (cls)
-
     def __init__(self, **kwargs):
 
-        random.Random.__init__(self)
-
         # Set the seed if a random pattern
-        
-        if kwargs.get("seed", None) is not None:
-            
-            self.seed(kwargs["seed"])
 
         self.args = tuple()
         self.kwargs = kwargs
