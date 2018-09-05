@@ -5,9 +5,9 @@ import os
 import json
 from subprocess import check_output
 
-from ..Midi import freqtomidi
-from ..SCLang import CompiledSynthDef
-from ..Settings import SYNTHDEF_DIR
+from ...Scale import freqtomidi
+from ...SCLang import CompiledSynthDef
+from ...Settings import SYNTHDEF_DIR
 
 
 try:
