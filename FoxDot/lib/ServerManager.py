@@ -882,7 +882,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
                         value = float(data["new_bpm"])
 
 
-                    self.metro.update_tempo(data["new_bpm"])
+                    self.metro.update_tempo(value)
 
                 elif "latency":
 
