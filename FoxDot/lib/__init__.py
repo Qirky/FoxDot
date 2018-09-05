@@ -181,6 +181,8 @@ def allow_connections(valid = True, *args, **kwargs):
 logging.basicConfig(level=logging.ERROR)
 when.set_namespace(FoxDotCode) # experimental
 
+RequestHandler.add_method(_timevar_from_json)
+
 Clock = TempoClock()
 
 update_foxdot_server(DefaultServer)

@@ -830,6 +830,10 @@ class RequestHandler(socketserver.BaseRequestHandler):
     """
     master = None
 
+    @classmethod
+    def add_method(cls, func):
+        setattr(cls, func.__name__, func)
+
     def handle(self):
         """ Overload """
 
