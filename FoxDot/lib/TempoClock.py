@@ -208,14 +208,16 @@ class TempoClock(object):
 
             self.update_tempo(value)
 
+            json_value = self._convert_bpm_json(value)
+
             # Notify listening clients
             if self.tempo_client is not None:
             
-                self.tempo_client.update_tempo(value)
+                self.tempo_client.update_tempo(json_value)
             
             if self.tempo_server is not None:
             
-                self.tempo_server.update_tempo(value)
+                self.tempo_server.update_tempo(json_value)
 
         elif attr == "midi_nudge" and self.__setup:
 
@@ -296,12 +298,15 @@ class TempoClock(object):
         self.hard_nudge = time2 - (time1 + latency)
         return
 
+    def _convert_bpm_json(self, bpm):
+        if isinstance(bpm, (int, float)):
+            return float(bpm)
+        elif isinstance(bpm, TimeVar):
+            return bpm.json_value()
+
     def json_bpm(self):
         """ Returns the bpm in a data type that can be sent over json"""
-        if isinstance(self.bpm, (int, float)):
-            return float(self.bpm)
-        elif isinstance(self.bpm, TimeVar):
-            return [self.bpm.json_value()]
+        return self._convert_bpm_json(self.bpm)
 
     def get_sync_info(self):
         """ Returns information for synchronisation across multiple FoxDot instances. To be 
@@ -310,7 +315,7 @@ class TempoClock(object):
         data = {
             "sync" : {
                 "start_time" : float(self.start_time),
-                "bpm"        : self.json_bpm(), # TODO: serialise timevar etc
+                "bpm"        : self.json_bpm(),
                 "beat"       : float(self.beat),
                 "time"       : float(self.time)
             }

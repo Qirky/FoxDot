@@ -867,6 +867,17 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                 elif "new_bpm" in data:
 
+                    if isinstance(data["new_bpm"], list):
+
+                        # convert from json to TimeVar
+
+                        value = self._timevar_from_json(data["new_bpm"])
+
+                    else:
+
+                        value = float(data["new_bpm"])
+
+
                     self.metro.update_tempo(data["new_bpm"])
 
                 elif "latency":

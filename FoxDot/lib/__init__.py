@@ -115,6 +115,7 @@ def update_foxdot_server(serv):
 
     TempoClock.set_server(serv)
     SynthDefs.set_server(serv)
+    serv._timevar_from_json = _timevar_from_json # todo// tidy up
 
     return
 
