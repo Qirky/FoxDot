@@ -92,6 +92,18 @@ class PRand(RandomGenerator):
         """ Used in PlayString to show a PRand in curly braces """
         return "{" + self.data.string() + "}"
 
+class PWhite(RandomGenerator):
+    ''' Returns random floating point values between 'lo' and 'hi' '''
+    def __init__(self, lo=0, hi=1, **kwargs):
+        RandomGenerator.__init__(self, **kwargs)
+        self.args = (lo, hi)
+        self.low = float(lo)
+        self.high = float(hi)
+        self.mid = (lo + hi) / 2.0
+        self.data = "{}, {}".format(self.low, self.high)
+    def func(self, index):
+        return self.triangular(self.low, self.high, self.mid)
+
 class PxRand(PRand):
     def func(self, index):
         value = PRand.func(self, index)
@@ -220,18 +232,6 @@ class PWalk(GeneratorPattern):
                 f = self.choice(self.directions)
             self.last_value = f(self.last_value, self.step.choose())
         return self.last_value   
-
-class PWhite(GeneratorPattern):
-    ''' Returns random floating point values between 'lo' and 'hi' '''
-    def __init__(self, lo=0, hi=1, **kwargs):
-        GeneratorPattern.__init__(self, **kwargs)
-        self.args = (lo, hi)
-        self.low = float(lo)
-        self.high = float(hi)
-        self.mid = (lo + hi) / 2.0
-        self.data = "{}, {}".format(self.low, self.high)
-    def func(self, index):
-        return self.triangular(self.low, self.high, self.mid)
 
 class PSquare(GeneratorPattern):
     ''' Returns the square of the index being accessed '''
