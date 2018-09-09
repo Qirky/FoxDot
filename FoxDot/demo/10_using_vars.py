@@ -1,4 +1,4 @@
-# Tutorial 11: Using Vars
+# Tutorial 10: Using Vars
 
 
 # A TimeVar is an abbreviation of “Time Dependent Variable” and is a key feature of FoxDot.
