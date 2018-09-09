@@ -1,4 +1,4 @@
-# Tutorial 12: Playing Custom Samples
+# Tutorial 11: Playing Custom Samples
 
 # You can use your own samples by simply dropping audio files into the existing FoxDot sample directories.
 # These are found in the 'snd' directory in the root of the FoxDot installation
