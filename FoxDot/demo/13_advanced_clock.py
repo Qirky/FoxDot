@@ -1,4 +1,4 @@
-# Tutorial 14: Advanced Clock
+# Tutorial 13: Advanced Clock
 
 # Note: You don't need to run this line, its used for installing FoxDot for Linux users using Python 2.
 
