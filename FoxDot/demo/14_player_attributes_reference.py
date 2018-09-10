@@ -1,4 +1,4 @@
-# Tutorial 15: Player Attributes Reference
+# Tutorial 14: Player Attributes Reference
 
 
 # To see all attributes:
