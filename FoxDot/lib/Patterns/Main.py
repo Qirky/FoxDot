@@ -782,13 +782,14 @@ class metaPattern(object):
             or the name of a Pattern method as a string. """
         
         if callable(method):
-            func = method
-            args = [self.data] + list(args)
+            #func = method
+            #args = [self.data] + list(args)
+            #func = 
+            return self.zip(list(map(method, self.data)))
         else:
             func = getattr(self, method)
             assert callable(func)
-
-        return self.zip(func(*args, **kwargs))
+            return self.zip(func(*args, **kwargs))
 
     def every(self, n, method, *args, **kwargs):
         """ Returns the pattern looped n-1 times then appended with
