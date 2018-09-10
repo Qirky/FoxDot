@@ -1,4 +1,4 @@
-# Tutoral 2: SynthDefs
+# Tutoral 12: SynthDefs
 
 
 # FoxDot creates music by giving player objects a 'digital instrument'
