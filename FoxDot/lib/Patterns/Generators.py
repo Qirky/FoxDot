@@ -112,9 +112,9 @@ class PxRand(PRand):
         self.last_value = value                
         return self.last_value
 
-class PwRand(GeneratorPattern):
+class PwRand(RandomGenerator):
     def __init__(self, values, weights, **kwargs):
-        GeneratorPattern.__init__(self, **kwargs)
+        RandomGenerator.__init__(self, **kwargs)
         self.args = (values, weights)
         try:
             assert(all(type(x) == int for x in weights))
