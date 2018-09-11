@@ -34,13 +34,24 @@ from .Main  import GeneratorPattern, Pattern, asStream
 import random
 
 class RandomGenerator(GeneratorPattern):
+    __seed = None
     def __init__(self, *args, **kwargs):
         GeneratorPattern.__init__(self, *args, **kwargs)
         self.random = random
+
+        # Can use an override to force all random generators to use the same seed
         if "seed" in kwargs:
-            self.random = self.random.Random()            
+            self.random = self.random.Random()
             self.random.seed(kwargs["seed"])
-            
+        elif RandomGenerator.__seed is not None:
+            self.random = self.random.Random()
+            self.random.seed(RandomGenerator.__seed)
+
+    @classmethod
+    def set_override_seed(cls, seed):
+        cls.__seed = seed
+        return
+
     # Pseudo-inheritance
     def choice(self, *args, **kwargs):
         return self.random.choice(*args, **kwargs)
@@ -131,12 +142,12 @@ class PwRand(RandomGenerator):
     def func(self, index):
         return self.choose()
 
-class PChain(GeneratorPattern):
+class PChain(RandomGenerator):
     """ An example of a Markov Chain generator pattern. The mapping argument 
         should be a dictionary of keys whose values are a list/pattern of possible
         destinations.  """
     def __init__(self, mapping, **kwargs):
-        GeneratorPattern.__init__(self, **kwargs)
+        RandomGenerator.__init__(self, **kwargs)
 
         assert isinstance(mapping, dict)
         
@@ -182,14 +193,14 @@ class PZ12(GeneratorPattern):
         self._prev.append(value)
         return value
 
-class PTree(GeneratorPattern):
+class PTree(RandomGenerator):
     """ Takes a starting value and two functions as arguments. The first function, f, must
         take one value and return a container-type of values and the second function, choose,
         must take a container-type and return a single value. In essence you are creating a
         tree based on the f(n) where n is the last value chosen by choose.
     """
     def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x), **kwargs):
-        GeneratorPattern.__init__(self, **kwargs)
+        RandomGenerator.__init__(self, **kwargs)
         
         self.args=(n, f, choose)
 
@@ -201,10 +212,10 @@ class PTree(GeneratorPattern):
         self.values.append( self.choose(self.f( self.values[-1] )) )
         return self.values[-1]
 
-class PWalk(GeneratorPattern):
+class PWalk(RandomGenerator):
     def __init__(self, max=7, step=1, start=0, **kwargs):
 
-        GeneratorPattern.__init__(self, **kwargs)
+        RandomGenerator.__init__(self, **kwargs)
 
         self.args = (max, step, start)
         
