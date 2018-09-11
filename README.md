@@ -3,10 +3,11 @@ FoxDot - Live Coding with Python v0.7
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.7.3 fixes and updates
+### v0.7.6 fixes and updates
 - Include `.version` file in `setup.py` and add extension packages `VRender` and `SonicPi`.
 - Update `Sonic-Pi` extension to work with Python 2.
 - Change `Clock` time measure data type to `float` instead of `Fraction` to improve efficiency but sacrificing accuracy.
+- Add `RandomGenerator.set_override_seed` that forces all random number generator patterns to use the same seed - useful if you want to play the same sequences across multiple machines.
 
 ---
 
