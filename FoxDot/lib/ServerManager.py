@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 import itertools
+import os.path
 
 from collections import namedtuple
 from threading import Thread
@@ -631,18 +632,38 @@ class SCLangServerManager(ServerManager):
     def loadRecorder(self):
         """ Loads an OSCFunc that starts/stops recording to a set path """
         self.loadSynthDef(FOXDOT_RECORD_FILE)
+        self._is_recording = False
         return
 
-    def record(self, path="./recordings/"):
-        msg = OSCMessage('/foxdot-record')
-        msg.append([1, os.path.realpath(path)])
-        self.sclang.send(msg)
+    def record(self, fn=None):
+        """ Starts recording audio from SuperCollider """
+
+        if self._is_recording is False:
+
+            if fn is None:
+                
+                fn = "{}.aiff".format(get_timestamp())
+            
+            path = os.path.join(RECORDING_DIR, fn)
+
+            msg = OSCMessage('/foxdot-record')
+            msg.append([1, path])
+            self.sclang.send(msg)
+
+            self._is_recording = True
+        
         return
 
     def stopRecording(self):
-        msg = OSCMessage('/foxdot-record')
-        msg.append([0, ""]) # flag to start  recording
-        self.sclang.send(msg)
+        """ Stops recording audio from SuperCollider """
+        if self._is_recording is True:
+            
+            msg = OSCMessage('/foxdot-record')
+            msg.append([0, ""]) # flag to stop recording
+            self.sclang.send(msg)
+            
+            self._is_recording = False
+        
         return
 
     def loadCompiled(self, fn):
@@ -724,6 +745,8 @@ class SCLangServerManager(ServerManager):
             self.client.send(OSCMessage("/quit"))
             sleep(1)
             self.daemon.terminate()
+        if self._is_recording:
+            self.stopRecording()
         return
 
 try:

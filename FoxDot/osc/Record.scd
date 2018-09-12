@@ -18,7 +18,7 @@ OSCFunc(
 
 		if (flag==1,
 			{s.record(path)},
-			{s.stopReadFromBus},
+			{s.stopRecording()},
 		);
 
 	},

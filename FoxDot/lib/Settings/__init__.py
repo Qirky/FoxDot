@@ -59,6 +59,7 @@ SYNTHDEF_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
 EFFECTS_DIR   = os.path.realpath(FOXDOT_ROOT + "/osc/sceffects/")
 ENVELOPE_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/scenvelopes/")
 TUTORIAL_DIR  = os.path.realpath(FOXDOT_ROOT + "/demo/")
+RECORDING_DIR = os.path.realpath(FOXDOT_ROOT + "/rec/")
 
 FOXDOT_OSC_FUNC     = os.path.realpath(FOXDOT_ROOT + "/osc/OSCFunc.scd")
 FOXDOT_STARTUP_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Startup.scd")
@@ -113,6 +114,10 @@ CLOCK_LATENCY             = conf.CLOCK_LATENCY
 if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
 
     FOXDOT_SND = os.path.realpath(conf.SAMPLES_DIR)
+
+def get_timestamp():
+    import time
+    return time.strftime("%Y%m%d-%H%M%S")
 
 # Name of SamplePlayer and LoopPlayer SynthDef
 
