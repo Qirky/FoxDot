@@ -153,7 +153,7 @@ class ServerManager(object):
         return msg
 
     def sendOSC(self, osc_message):
-        self.client.send( osc_message )   
+        self.client.send( osc_message )
         return
 
     def get_bundle(self, *args, **kwargs):
@@ -229,6 +229,10 @@ class SCLangServerManager(ServerManager):
         # Clear SuperCollider nodes if any left over from other session etc
 
         self.freeAllNodes()
+
+        # Load recorder OSCFunc
+
+        self.loadRecorder() # move to the quark?
 
         # Toggle debug in SuperCollider
 
@@ -621,6 +625,23 @@ class SCLangServerManager(ServerManager):
         msg = OSCMessage()
         msg.setAddress(cmd)
         msg.append(fn)
+        self.sclang.send(msg)
+        return
+
+    def loadRecorder(self):
+        """ Loads an OSCFunc that starts/stops recording to a set path """
+        self.loadSynthDef(FOXDOT_RECORD_FILE)
+        return
+
+    def record(self, path="./recordings/"):
+        msg = OSCMessage('/foxdot-record')
+        msg.append([1, os.path.realpath(path)])
+        self.sclang.send(msg)
+        return
+
+    def stopRecording(self):
+        msg = OSCMessage('/foxdot-record')
+        msg.append([0, ""]) # flag to start  recording
         self.sclang.send(msg)
         return
 
