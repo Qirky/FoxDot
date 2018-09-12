@@ -42,6 +42,7 @@ setup(name='FoxDot',
                                  'osc/sceffects/*.scd',
                                  'osc/scsyndef/*.scd',
                                  'demo/*.py',
+                                 'rec/.null'
                                  'lib/Extensions/*/*.*',
                                  'lib/.version',
                                  'README.md',
