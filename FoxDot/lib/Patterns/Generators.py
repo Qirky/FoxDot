@@ -39,13 +39,18 @@ class RandomGenerator(GeneratorPattern):
         GeneratorPattern.__init__(self, *args, **kwargs)
         self.random = random
 
-        # Can use an override to force all random generators to use the same seed
         if "seed" in kwargs:
             self.random = self.random.Random()
             self.random.seed(kwargs["seed"])
+        
         elif RandomGenerator.__seed is not None:
             self.random = self.random.Random()
             self.random.seed(RandomGenerator.__seed)
+
+            pattern = self[:5000]
+            
+            self.__class__ = Pattern
+            self.data = pattern.data
 
     @classmethod
     def set_override_seed(cls, seed):
@@ -66,7 +71,6 @@ class PRand(RandomGenerator):
     ''' Returns a random integer between start and stop. If start is a container-type it returns
         a random item for that container. '''
     def __init__(self, start, stop=None, **kwargs):
-        RandomGenerator.__init__(self, **kwargs)
         # If we're given a list, choose from that list -- TODO always use a list and use range
         self.args = (start, stop)
         self.kwargs = kwargs
@@ -88,6 +92,8 @@ class PRand(RandomGenerator):
                 raise AssertionError("{}: Range size must be greater than 1".format(self.name))
             self.data = "{}, {}".format(self.low, self.high)
 
+            RandomGenerator.__init__(self, **kwargs)
+
     def choose(self):
         return self.data[self.choice(range(self.MAX_SIZE))]
             
@@ -106,12 +112,13 @@ class PRand(RandomGenerator):
 class PWhite(RandomGenerator):
     ''' Returns random floating point values between 'lo' and 'hi' '''
     def __init__(self, lo=0, hi=1, **kwargs):
-        RandomGenerator.__init__(self, **kwargs)
         self.args = (lo, hi)
         self.low = float(lo)
         self.high = float(hi)
         self.mid = (lo + hi) / 2.0
         self.data = "{}, {}".format(self.low, self.high)
+        RandomGenerator.__init__(self, **kwargs)
+
     def func(self, index):
         return self.triangular(self.low, self.high, self.mid)
 
@@ -125,7 +132,6 @@ class PxRand(PRand):
 
 class PwRand(RandomGenerator):
     def __init__(self, values, weights, **kwargs):
-        RandomGenerator.__init__(self, **kwargs)
         self.args = (values, weights)
         try:
             assert(all(type(x) == int for x in weights))
@@ -135,6 +141,7 @@ class PwRand(RandomGenerator):
         self.data    = Pattern(values)
         self.weights = Pattern(weights).stretch(len(self.data))
         self.values  = self.data.stutter(self.weights)
+        RandomGenerator.__init__(self, **kwargs)
 
     def choose(self):
         return self.values[self.choice(range(self.MAX_SIZE))]
@@ -147,7 +154,6 @@ class PChain(RandomGenerator):
         should be a dictionary of keys whose values are a list/pattern of possible
         destinations.  """
     def __init__(self, mapping, **kwargs):
-        RandomGenerator.__init__(self, **kwargs)
 
         assert isinstance(mapping, dict)
         
@@ -162,6 +168,8 @@ class PChain(RandomGenerator):
             if i == 0:
                 self.last_value = key
                 i += 1
+
+        RandomGenerator.__init__(self, **kwargs)
                 
     def func(self, index):
         self.last_value = self.choice(self.mapping[self.last_value])
@@ -200,13 +208,14 @@ class PTree(RandomGenerator):
         tree based on the f(n) where n is the last value chosen by choose.
     """
     def __init__(self, n=0, f=lambda x: (x + 1, x - 1), choose=lambda x: random.choice(x), **kwargs):
-        RandomGenerator.__init__(self, **kwargs)
-        
+                
         self.args=(n, f, choose)
 
         self.f  = f
         self.choose = choose
         self.values = [n]
+
+        RandomGenerator.__init__(self, **kwargs)
 
     def func(self, index):
         self.values.append( self.choose(self.f( self.values[-1] )) )
@@ -214,8 +223,6 @@ class PTree(RandomGenerator):
 
 class PWalk(RandomGenerator):
     def __init__(self, max=7, step=1, start=0, **kwargs):
-
-        RandomGenerator.__init__(self, **kwargs)
 
         self.args = (max, step, start)
         
@@ -230,6 +237,8 @@ class PWalk(RandomGenerator):
         self.directions = [lambda x, y: x + y, lambda x, y: x - y]
 
         self.last_value = None
+
+        RandomGenerator.__init__(self, **kwargs)
 
     def func(self, index):
         if self.last_value is None:
