@@ -51,6 +51,7 @@ USER_CWD     = os.path.realpath(".")
 FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../../")
 FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon.ico")
 FOXDOT_ICON_GIF = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon.gif")
+FOXDOT_HELLO = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/hello.txt")
 FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 FOXDOT_LOOP  = os.path.realpath(FOXDOT_ROOT + "/snd/_loop_/")
 

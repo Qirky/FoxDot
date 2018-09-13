@@ -48,7 +48,7 @@ import re
 
 # Code execution
 from ..Code import execute
-from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
+from ..Settings import FONT, FOXDOT_ICON, FOXDOT_HELLO, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
 from ..ServerManager import TempoServer
 
 # App object
@@ -320,8 +320,15 @@ class workspace:
             else:
                 ctrl = "Ctrl"
 
-            hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
+            # with open(FOXDOT_HELLO) as f:
 
+            #     hello = f.read()
+
+            # print()
+            # print(hello)
+            # print()
+            
+            hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
             print(hello)
             print("-" * len(hello))
 

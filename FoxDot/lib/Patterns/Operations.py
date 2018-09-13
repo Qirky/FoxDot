@@ -21,7 +21,7 @@ import itertools
 #     cls = pat.__class__    
 #     return cls, pat    
 
-def DominantPattern(*patterns):    
+def DominantPattern(*patterns):
     return min([p for p in patterns if hasattr(p, "WEIGHT")], key = lambda x: x.WEIGHT)
 
 class POperand:

@@ -501,27 +501,37 @@ class Pvar(TimeVar):
 
             # return a function that transforms the patterns of the root Pvar
 
-            def get_new_pvar(*args, **kwargs):
+            pattern_attr = getattr(self.now(), attr)
 
-                # If this is the root Pvar, change the values
+            if callable(pattern_attr):
 
-                if self.dependency is None:
+                def get_new_pvar(*args, **kwargs):
 
-                    new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
+                    # If this is the root Pvar, change the values
 
-                    return Pvar(new_values, dur=self.dur)
+                    if self.dependency is None:
 
-                else:
+                        new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
 
-                    # Get the "parent" Pvar and re-apply the connecting function
+                        return Pvar(new_values, dur=self.dur)
 
-                    new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
+                    else:
 
-                    new_item = self.func(new_pvar, self.original_value)
+                        # Get the "parent" Pvar and re-apply the connecting function
 
-                    return new_item
+                        new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
 
-            return get_new_pvar
+                        new_item = self.func(new_pvar, self.original_value)
+
+                        return new_item
+
+                return get_new_pvar
+
+            else:
+
+                return pattern_attr
+
+        return
 
     def __getattribute__(self, attr):
         """ Override for accessing pattern methods. Returns a new
@@ -536,27 +546,37 @@ class Pvar(TimeVar):
 
             # return a function that transforms the patterns of the root Pvar
 
-            def get_new_pvar(*args, **kwargs):
+            pattern_attr = getattr(self.now(), attr)
 
-                # If this is the root Pvar, change the values
+            if callable(pattern_attr):
 
-                if self.dependency is None:
+                def get_new_pvar(*args, **kwargs):
 
-                    new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
+                    # If this is the root Pvar, change the values
 
-                    return Pvar(new_values, dur=self.dur)
+                    if self.dependency is None:
 
-                else:
+                        new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
 
-                    # Get the "parent" Pvar and re-apply the connecting function
+                        return Pvar(new_values, dur=self.dur)
 
-                    new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
+                    else:
 
-                    new_item = self.func(new_pvar, self.original_value)
+                        # Get the "parent" Pvar and re-apply the connecting function
 
-                    return new_item
+                        new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
 
-            return get_new_pvar
+                        new_item = self.func(new_pvar, self.original_value)
+
+                        return new_item
+
+                return get_new_pvar
+
+            else:
+
+                return pattern_attr
+
+        return
 
     def new(self, other):
         # new = Pvar([other], dur=self.dur)
