@@ -7,22 +7,8 @@ import itertools
     Module for key operations on Python lists or FoxDot Patterns
 """
 
-# PATTERN_WEIGHTS = ["Pattern", "PGroupPrime", "PGroup", "metaPGroupPrime"]
-
-# def old_DominantPattern(*patterns):
-#     """ Returns the class (and the relative pattern) for the
-#         type of Pattern to use in a mathematical operation """
-#     classes =  [p.__class__.__name__ for p in patterns]
-#     print(classes, PATTERN_WEIGHTS)
-#     for i, name in enumerate(PATTERN_WEIGHTS):
-#         if name in classes:
-#             break
-#     pat = patterns[classes.index(name)]
-#     cls = pat.__class__    
-#     return cls, pat    
-
 def DominantPattern(*patterns):
-    return min([p for p in patterns if hasattr(p, "WEIGHT")], key = lambda x: x.WEIGHT)
+    return min((p for p in patterns if hasattr(p, "WEIGHT")), key = lambda x: x.WEIGHT)
 
 class POperand:
 

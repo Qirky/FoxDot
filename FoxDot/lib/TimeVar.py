@@ -488,6 +488,42 @@ class Pvar(TimeVar):
 
         TimeVar.__init__(self, data, dur, **kwargs)
 
+
+    def __get_pattern_attr(self, attr):
+        """ Returns a function that transforms the patterns of this Pvar if the attr
+            is a Pattern method, if not it returns the attribute  for the current pattern
+        """
+
+        pattern_attr = getattr(self.now(), attr)
+
+        if callable(pattern_attr):
+
+            def get_new_pvar(*args, **kwargs):
+
+                # If this is the root Pvar, change the values
+
+                if self.dependency is None:
+
+                    new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
+
+                    return Pvar(new_values, dur=self.dur)
+
+                else:
+
+                    # Get the "parent" Pvar and re-apply the connecting function
+
+                    new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
+
+                    new_item = self.func(new_pvar, self.original_value)
+
+                    return new_item
+
+            return get_new_pvar
+
+        else:
+
+            return pattern_attr
+
     def __getattr__(self, attr):
         """ (Python 2 compatability) Override for accessing pattern methods. Returns a new
             Pvar that has been "transformed" using the method such that then method also
@@ -499,39 +535,7 @@ class Pvar(TimeVar):
 
         except AttributeError:
 
-            # return a function that transforms the patterns of the root Pvar
-
-            pattern_attr = getattr(self.now(), attr)
-
-            if callable(pattern_attr):
-
-                def get_new_pvar(*args, **kwargs):
-
-                    # If this is the root Pvar, change the values
-
-                    if self.dependency is None:
-
-                        new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
-
-                        return Pvar(new_values, dur=self.dur)
-
-                    else:
-
-                        # Get the "parent" Pvar and re-apply the connecting function
-
-                        new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
-
-                        new_item = self.func(new_pvar, self.original_value)
-
-                        return new_item
-
-                return get_new_pvar
-
-            else:
-
-                return pattern_attr
-
-        return
+            return self.__get_pattern_attr(attr)
 
     def __getattribute__(self, attr):
         """ Override for accessing pattern methods. Returns a new
@@ -544,39 +548,7 @@ class Pvar(TimeVar):
 
         except AttributeError:
 
-            # return a function that transforms the patterns of the root Pvar
-
-            pattern_attr = getattr(self.now(), attr)
-
-            if callable(pattern_attr):
-
-                def get_new_pvar(*args, **kwargs):
-
-                    # If this is the root Pvar, change the values
-
-                    if self.dependency is None:
-
-                        new_values = [getattr(pat, attr)(*args, **kwargs) for pat in self.values]
-
-                        return Pvar(new_values, dur=self.dur)
-
-                    else:
-
-                        # Get the "parent" Pvar and re-apply the connecting function
-
-                        new_pvar = getattr(self.dependency, attr)(*args, **kwargs)
-
-                        new_item = self.func(new_pvar, self.original_value)
-
-                        return new_item
-
-                return get_new_pvar
-
-            else:
-
-                return pattern_attr
-
-        return
+            return self.__get_pattern_attr(attr)
 
     def new(self, other):
         # new = Pvar([other], dur=self.dur)
