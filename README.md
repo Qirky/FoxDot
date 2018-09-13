@@ -9,6 +9,8 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - Change `Clock` time measure data type to `float` instead of `Fraction` to improve efficiency but sacrificing accuracy.
 - Add `RandomGenerator.set_override_seed` that forces all random number generator patterns to use the same seed - useful if you want to play the same sequences across multiple machines.
 - Added `DefaultServer.record(fn)` and `DefaultServer.stopRecording()` to record audio from SuperCollider. Files are recorded into `FoxDot/FoxDot/rec/` directory. If `fn` is not given, a filename is created automatically from a timestamp.
+- Added nested directories to extension modules that were missing, e.g. `VRender/tmp`, to the manifest for PyPI
+- Fixed attribute access for `Pvar` which allows for operations  combining other patterns.
 
 ---
 
