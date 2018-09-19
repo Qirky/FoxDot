@@ -1415,7 +1415,7 @@ class Player(Repeatable):
 
             try:
 
-                if len(event['dur']) > 0:
+                if len(event['dur']) > 1:
 
                     init_dur = event["dur"][0]
 
@@ -1424,6 +1424,10 @@ class Player(Repeatable):
                     event["delay"] = event["delay"] + offset
 
                     event["dur"]   = float(init_dur)
+
+                elif len(event['dur']) == 1:
+
+                    event["dur"] = float(event["dur"][0])
 
             except TypeError:
 
@@ -1435,7 +1439,7 @@ class Player(Repeatable):
 
                 # Also update blur / sus
 
-                if len(event['sus']) > 0:
+                if len(event['sus']) > 1:
 
                     min_sus = min(event['sus'])
 
@@ -1444,6 +1448,10 @@ class Player(Repeatable):
                     event["blur"] = event["blur"] * offset
 
                     event["sus"] = float(min_sus)
+
+                elif len(event['sus']) == 1:
+
+                    event["sus"] = float(event["sus"][0])
 
             except TypeError:
 

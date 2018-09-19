@@ -215,7 +215,7 @@ class metaPattern(object):
             val = self.new([self.getitem(n) for n in key])
         # We can get items using a slice
         elif isinstance(key, slice):
-            val = self.__getslice__(key.start,  key.stop, key.step)
+            val = self.getslice(key.start,  key.stop, key.step)
         else:
             # Get the "nested" single value
             i = key % len(self.data)
@@ -255,7 +255,8 @@ class metaPattern(object):
         for i, value in enumerate(self):
             yield i, value
 
-    def __getslice__(self, start, stop, step=1):
+    def getslice(self, start, stop, step=1):
+        """ Called when using __getitem__ with slice notation """
         start = start if start is not None else 0
         stop  = stop if stop is not None else len(self)
         step  = step if step is not None else 1
