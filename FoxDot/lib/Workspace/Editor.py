@@ -102,6 +102,11 @@ class workspace:
         self.listening_for_connections = BooleanVar()
         self.listening_for_connections.set(False)
 
+        # Boolean for showing auto-complete prompt
+
+        self.show_prompt = BooleanVar()
+        self.show_prompt.set(True)
+
 
         # --- Set icon
         
@@ -782,6 +787,13 @@ class workspace:
         except TclError as e:
             print(e)
         return
+
+    def toggle_prompt(self, event=None):
+        self.prompt.toggle()
+        return "break"
+
+
+    # Copy/paste etc
     
     def edit_paste(self, event=None):
         """ Pastes any text and updates the IDE """

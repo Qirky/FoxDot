@@ -10,7 +10,9 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - Add `RandomGenerator.set_override_seed` that forces all random number generator patterns to use the same seed - useful if you want to play the same sequences across multiple machines.
 - Added `DefaultServer.record(fn)` and `DefaultServer.stopRecording()` to record audio from SuperCollider. Files are recorded into `FoxDot/FoxDot/rec/` directory. If `fn` is not given, a filename is created automatically from a timestamp.
 - Added nested directories to extension modules that were missing, e.g. `VRender/tmp`, to the manifest for PyPI
-- Fixed attribute access for `Pvar` which allows for operations  combining other patterns.
+- Fixed attribute access for `Pvar` which allows for operations combining other patterns.
+- Fixed bug caused when using Python 2 and slicing `Pattern` with no supplied end value e.g. `PDur(3, 8)[1:]` that would create giant arrays and raise a `MemoryError`.
+- Added autocomplete prompt
 
 ---
 

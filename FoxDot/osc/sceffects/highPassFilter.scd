@@ -1,5 +1,5 @@
 SynthDef.new(\highPassFilter,
-{|bus, hpr, hpf|
+{|bus, hpf, hpr|
 var osc;
 osc = In.ar(bus, 2);
 osc = RHPF.ar(osc, hpf, hpr);

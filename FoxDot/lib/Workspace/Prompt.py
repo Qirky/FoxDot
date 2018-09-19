@@ -48,6 +48,8 @@ class TextPrompt:
         
         self.re = re.compile(r"(\w+)$")
 
+        self.__visible = True
+
         self.hide()
 
     def get_start_of_word(self):
@@ -81,7 +83,14 @@ class TextPrompt:
         return self.master.get(INSERT).isalnum()
 
     def show(self):
+        """ Displays the prompt with suggestions """
+        
+        if not self.__visible:
+
+            return
+
         # 1. Get location - start of the word
+
         index, word = self.get_start_of_word()
 
         # If there is a alphanumeric character next, dont show
@@ -177,3 +186,8 @@ class TextPrompt:
             self.root.update()
         self.hide()
         return 
+
+    def toggle(self):
+        """ Flags the prompt to show / not show automatically """
+        self.__visible = not self.__visible
+        return
