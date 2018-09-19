@@ -102,9 +102,11 @@ class TextPrompt:
 
             self.suggestions = self.find_suggestions(word)
 
-            # If there is only 1 suggestion and we're at the end of the word, just hide
+            # If there is only 1 suggestion and we're at the end of the word (or no suggestions), just hide
 
-            if len(self.suggestions) == 1 and (word == self.suggestions[0]):
+            num_suggestions = len(self.suggestions)
+
+            if num_suggestions == 0 or (num_suggestions == 1 and (word == self.suggestions[0])):
 
                 return self.hide()
 
