@@ -162,7 +162,7 @@ class TextPrompt:
         words = []
         i = 0
         for phrase in self.namespace:
-            if phrase.startswith(word):
+            if phrase.lower().startswith(word.lower()):
                 words.append(phrase)
                 i += 1
             if i == self.num_items:
@@ -178,11 +178,12 @@ class TextPrompt:
         return self.move(self.x, self.y)
 
     def autocomplete(self):
-        """ Inserts the remainder of the currently highlted suggestion """
+        """ Inserts the remainder of the currently highlited suggestion """
         if self.anchor is not None:
-            start = (self.anchor[1] - self.anchor[0])
-            word  = self.values[self.selected].get()[start:]
-            self.master.insert(INSERT, word)
+            LENGTH = self.anchor[1] - self.anchor[0]
+            self.master.delete("{}-{}c".format(INSERT, LENGTH), INSERT)
+            WORD  = self.values[self.selected].get()
+            self.master.insert(INSERT, WORD)
             self.root.update()
         self.hide()
         return 
