@@ -48,7 +48,7 @@ import re
 
 # Code execution
 from ..Code import execute
-from ..Settings import FONT, FOXDOT_ICON, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
+from ..Settings import FONT, FOXDOT_ICON, FOXDOT_HELLO, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
 from ..ServerManager import TempoServer
 
 # App object
@@ -101,6 +101,11 @@ class workspace:
 
         self.listening_for_connections = BooleanVar()
         self.listening_for_connections.set(False)
+
+        # Boolean for showing auto-complete prompt
+
+        self.show_prompt = BooleanVar()
+        self.show_prompt.set(True)
 
 
         # --- Set icon
@@ -178,7 +183,7 @@ class workspace:
 
         # Docstring prompt label
 
-        self.prompt = TextPrompt(self.text)        
+        self.prompt = TextPrompt(self)
 
         # Key bindings (Use command key on Mac)
 
@@ -200,6 +205,9 @@ class workspace:
         self.text.bind("<{}-Return>".format(alt),           self.exec_line)
 
         # Directional movement
+
+        self.text.bind("<Up>",                              self.key_up)
+        self.text.bind("<Down>",                            self.key_down)
 
         self.text.bind("<{}-Left>".format(ctrl),            self.move_word_left)
         self.text.bind("<{}-Right>".format(ctrl),           self.move_word_right)
@@ -320,8 +328,15 @@ class workspace:
             else:
                 ctrl = "Ctrl"
 
-            hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
+            # with open(FOXDOT_HELLO) as f:
 
+            #     hello = f.read()
+
+            # print()
+            # print(hello)
+            # print()
+            
+            hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
             print(hello)
             print("-" * len(hello))
 
@@ -414,7 +429,7 @@ class workspace:
 
             self.inbrackets = False
 
-            self.update_prompt()
+            self.update_prompt(visible=False)
 
             return
 
@@ -772,6 +787,13 @@ class workspace:
         except TclError as e:
             print(e)
         return
+
+    def toggle_prompt(self, event=None):
+        self.prompt.toggle()
+        return "break"
+
+
+    # Copy/paste etc
     
     def edit_paste(self, event=None):
         """ Pastes any text and updates the IDE """
@@ -792,6 +814,14 @@ class workspace:
 
     def newline(self, event=None, insert=INSERT):
         """ Adds whitespace to newlines where necessary """
+
+        # Enter from auto prompt
+
+        if self.prompt.visible:
+
+            self.prompt.autocomplete()
+
+            return "break"
 
         # Remove any highlighted text
 
@@ -1210,7 +1240,11 @@ class workspace:
     """
         
 
-    def update_prompt(self):
+    def update_prompt(self, visible=True):
+        if visible:
+            self.prompt.show()
+        else:
+            self.prompt.hide()
         return
 
     def update_prompt2(self):        
@@ -1413,6 +1447,20 @@ class workspace:
                 break
 
         self.last_word = string
+
+        return self.last_word
+
+    def key_up(self, event=None):
+        if self.prompt.visible:
+            self.prompt.cycle_up()
+            return "break"
+        return
+
+    def key_down(self, event=None):
+        if self.prompt.visible:
+            self.prompt.cycle_down()
+            return "break"
+        return
 
     def move_word_right(self, event=None, keep_selection=False):
 

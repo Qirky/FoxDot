@@ -3,13 +3,16 @@ FoxDot - Live Coding with Python v0.7
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.7.1 fixes and updates
-
-- Improved `PlayerKey.map` method e.g. `p1.pitch` to only return one value instead of a Pattern
-- Improved `Clock.clear` to make sure Players don't reset and continue playing, which sometimes happened
-- Use `float` instead of `Fraction` for timing to reduce computation time in the main clock loop. So far this hasn't had any impact on timing but please get in contact if it does. It has improved performance on low spec machines such as a Raspberry Pi.
-- Improve bracket finding in the main interface so it only checks visible portion of the screen so it no longer lags if there is a large amount of text in the editor.
-- Added the `VRender` extension, thanks to [mathigatti](https://github.com/mathigatti), that allows users to add synthesised vocals. Requires Python modules MIDIUtil and urllib and musescore (Linux/Mac only). See the [README](https://github.com/Qirky/FoxDot/blob/master/FoxDot/lib/Extensions/VRender/README.md) for more information.
+### v0.7 fixes and updates
+- Include `.version` file in `setup.py` and add extension packages `VRender` and `SonicPi`.
+- Update `Sonic-Pi` extension to work with Python 2.
+- Change `Clock` time measure data type to `float` instead of `Fraction` to improve efficiency but sacrificing accuracy.
+- Add `RandomGenerator.set_override_seed` that forces all random number generator patterns to use the same seed - useful if you want to play the same sequences across multiple machines.
+- Added `DefaultServer.record(fn)` and `DefaultServer.stopRecording()` to record audio from SuperCollider. Files are recorded into `FoxDot/FoxDot/rec/` directory. If `fn` is not given, a filename is created automatically from a timestamp.
+- Added nested directories to extension modules that were missing, e.g. `VRender/tmp`, to the manifest for PyPI
+- Fixed attribute access for `Pvar` which allows for operations combining other patterns.
+- Fixed bug caused when using Python 2 and slicing `Pattern` with no supplied end value e.g. `PDur(3, 8)[1:]` that would create giant arrays and raise a `MemoryError`.
+- Added autocomplete prompt
 
 ---
 

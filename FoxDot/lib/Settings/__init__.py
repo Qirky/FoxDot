@@ -51,6 +51,7 @@ USER_CWD     = os.path.realpath(".")
 FOXDOT_ROOT  = os.path.realpath(__file__ + "/../../../")
 FOXDOT_ICON  = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon.ico")
 FOXDOT_ICON_GIF = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/icon.gif")
+FOXDOT_HELLO = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/hello.txt")
 FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 FOXDOT_LOOP  = os.path.realpath(FOXDOT_ROOT + "/snd/_loop_/")
 
@@ -59,12 +60,14 @@ SYNTHDEF_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
 EFFECTS_DIR   = os.path.realpath(FOXDOT_ROOT + "/osc/sceffects/")
 ENVELOPE_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/scenvelopes/")
 TUTORIAL_DIR  = os.path.realpath(FOXDOT_ROOT + "/demo/")
+RECORDING_DIR = os.path.realpath(FOXDOT_ROOT + "/rec/")
 
 FOXDOT_OSC_FUNC     = os.path.realpath(FOXDOT_ROOT + "/osc/OSCFunc.scd")
 FOXDOT_STARTUP_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Startup.scd")
 FOXDOT_BUFFERS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Buffers.scd")
 FOXDOT_EFFECTS_FILE = os.path.realpath(FOXDOT_ROOT + "/osc/Effects.scd")
 FOXDOT_INFO_FILE    = os.path.realpath(FOXDOT_ROOT + "/osc/Info.scd")
+FOXDOT_RECORD_FILE  = os.path.realpath(FOXDOT_ROOT + "/osc/Record.scd")
 FOXDOT_TEMP_FILE    = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/tmp/tempfile.txt")
 
 # If the tempfile doesn't exist, create it
@@ -113,6 +116,10 @@ if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
 
     FOXDOT_SND = os.path.realpath(conf.SAMPLES_DIR)
 
+def get_timestamp():
+    import time
+    return time.strftime("%Y%m%d-%H%M%S")
+
 # Name of SamplePlayer and LoopPlayer SynthDef
 
 class _SamplePlayer:
@@ -123,11 +130,11 @@ class _SamplePlayer:
         return other not in self.names
 
 class _LoopPlayer:
-    name = "loop"
+    names = ("loop", "gsynth")
     def __eq__(self, other):
-        return other == self.name
+        return other in self.names
     def __ne__(self, other):
-        return other != self.name
+        return other not in self.names
 
 class _MidiPlayer:
     name = "MidiOut"

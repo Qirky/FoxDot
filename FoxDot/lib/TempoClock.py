@@ -91,7 +91,7 @@ class TempoClock(object):
         self.start_time = self.dtype(time()) # could set to 0?
 
         # Don't start yet...
-        self.ticking = False
+        self.ticking = True
 
         # Player Objects stored here
         self.playing = []
@@ -131,6 +131,8 @@ class TempoClock(object):
         # If one object is going to played
         self.solo = SoloPlayer()
 
+        self.start()
+
     @classmethod
     def set_server(cls, server):
         """ Sets the destination for OSC messages being compiled (the server is also the class
@@ -139,6 +141,10 @@ class TempoClock(object):
         assert isinstance(server, ServerManager)
         cls.server = server
         return
+
+    @classmethod
+    def add_method(cls, func):
+        setattr(cls, func.__name__, func)
 
     def start_tempo_server(self, serv, **kwargs):
         """ Starts listening for FoxDot clients connecting over a network. This uses
@@ -182,7 +188,7 @@ class TempoClock(object):
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar """
-        return self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", bpm))
+        return self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", self._convert_json_bpm(bpm)))
 
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
@@ -208,14 +214,17 @@ class TempoClock(object):
 
             self.update_tempo(value)
 
+            json_value = self._convert_bpm_json(value)
+
             # Notify listening clients
+
             if self.tempo_client is not None:
             
-                self.tempo_client.update_tempo(value)
+                self.tempo_client.update_tempo(json_value)
             
             if self.tempo_server is not None:
             
-                self.tempo_server.update_tempo(value)
+                self.tempo_server.update_tempo(json_value)
 
         elif attr == "midi_nudge" and self.__setup:
 
@@ -296,6 +305,16 @@ class TempoClock(object):
         self.hard_nudge = time2 - (time1 + latency)
         return
 
+    def _convert_bpm_json(self, bpm):
+        if isinstance(bpm, (int, float)):
+            return float(bpm)
+        elif isinstance(bpm, TimeVar):
+            return bpm.json_value()
+
+    def json_bpm(self):
+        """ Returns the bpm in a data type that can be sent over json"""
+        return self._convert_bpm_json(self.bpm)
+
     def get_sync_info(self):
         """ Returns information for synchronisation across multiple FoxDot instances. To be 
             stored as a JSON object with a "sync" header """
@@ -303,7 +322,7 @@ class TempoClock(object):
         data = {
             "sync" : {
                 "start_time" : float(self.start_time),
-                "bpm"        : float(self.bpm), # TODO: serialise timevar etc
+                "bpm"        : self.json_bpm(),
                 "beat"       : float(self.beat),
                 "time"       : float(self.time)
             }
@@ -527,7 +546,7 @@ class TempoClock(object):
                 item.stop()             
         
         self.playing = []
-        self.ticking = False
+        #self.ticking = False
 
         return
 

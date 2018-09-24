@@ -47,7 +47,7 @@ g1.amp=var([1,0],4)
 
 g1.stop()
 
-# You can use functions to group things together
+# You can use functions to group things together. To execute CMD+Return, not ALT+Return. 
 def tune():
     b1 >> bass([0,3], dur=4)
     p1 >> pluck([0,4], dur=1/2)

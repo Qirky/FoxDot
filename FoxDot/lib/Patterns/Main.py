@@ -215,7 +215,7 @@ class metaPattern(object):
             val = self.new([self.getitem(n) for n in key])
         # We can get items using a slice
         elif isinstance(key, slice):
-            val = self.__getslice__(key.start,  key.stop, key.step)
+            val = self.getslice(key.start,  key.stop, key.step)
         else:
             # Get the "nested" single value
             i = key % len(self.data)
@@ -255,7 +255,8 @@ class metaPattern(object):
         for i, value in enumerate(self):
             yield i, value
 
-    def __getslice__(self, start, stop, step=1):
+    def getslice(self, start, stop, step=1):
+        """ Called when using __getitem__ with slice notation """
         start = start if start is not None else 0
         stop  = stop if stop is not None else len(self)
         step  = step if step is not None else 1
@@ -782,13 +783,14 @@ class metaPattern(object):
             or the name of a Pattern method as a string. """
         
         if callable(method):
-            func = method
-            args = [self.data] + list(args)
+            #func = method
+            #args = [self.data] + list(args)
+            #func = 
+            return self.zip(list(map(method, self.data)))
         else:
             func = getattr(self, method)
             assert callable(func)
-
-        return self.zip(func(*args, **kwargs))
+            return self.zip(func(*args, **kwargs))
 
     def every(self, n, method, *args, **kwargs):
         """ Returns the pattern looped n-1 times then appended with
@@ -1221,7 +1223,7 @@ class PGroup(metaPattern):
 
 import random
 
-class GeneratorPattern(random.Random):
+class GeneratorPattern:
     """
         Used for when a Pattern does not generate a set length pattern,
         e.g. random patterns
@@ -1229,19 +1231,9 @@ class GeneratorPattern(random.Random):
     MAX_SIZE = 65536
     debugging = False
 
-    def __new__(cls, *args, **kwargs):
-        """ Override random.Random using first argument as a seed """
-        return super(GeneratorPattern, cls).__new__ (cls)
-
     def __init__(self, **kwargs):
 
-        random.Random.__init__(self)
-
         # Set the seed if a random pattern
-        
-        if kwargs.get("seed", None) is not None:
-            
-            self.seed(kwargs["seed"])
 
         self.args = tuple()
         self.kwargs = kwargs

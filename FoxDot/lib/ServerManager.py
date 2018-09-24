@@ -14,6 +14,7 @@ import sys
 import threading
 import time
 import itertools
+import os.path
 
 from collections import namedtuple
 from threading import Thread
@@ -153,7 +154,7 @@ class ServerManager(object):
         return msg
 
     def sendOSC(self, osc_message):
-        self.client.send( osc_message )   
+        self.client.send( osc_message )
         return
 
     def get_bundle(self, *args, **kwargs):
@@ -229,6 +230,10 @@ class SCLangServerManager(ServerManager):
         # Clear SuperCollider nodes if any left over from other session etc
 
         self.freeAllNodes()
+
+        # Load recorder OSCFunc
+
+        self.loadRecorder() # move to the quark?
 
         # Toggle debug in SuperCollider
 
@@ -624,6 +629,43 @@ class SCLangServerManager(ServerManager):
         self.sclang.send(msg)
         return
 
+    def loadRecorder(self):
+        """ Loads an OSCFunc that starts/stops recording to a set path """
+        self.loadSynthDef(FOXDOT_RECORD_FILE)
+        self._is_recording = False
+        return
+
+    def record(self, fn=None):
+        """ Starts recording audio from SuperCollider """
+
+        if self._is_recording is False:
+
+            if fn is None:
+                
+                fn = "{}.aiff".format(get_timestamp())
+            
+            path = os.path.join(RECORDING_DIR, fn)
+
+            msg = OSCMessage('/foxdot-record')
+            msg.append([1, path])
+            self.sclang.send(msg)
+
+            self._is_recording = True
+        
+        return
+
+    def stopRecording(self):
+        """ Stops recording audio from SuperCollider """
+        if self._is_recording is True:
+            
+            msg = OSCMessage('/foxdot-record')
+            msg.append([0, ""]) # flag to stop recording
+            self.sclang.send(msg)
+            
+            self._is_recording = False
+        
+        return
+
     def loadCompiled(self, fn):
         """ Sends a message to SuperCollider to load a compiled SynthDef file """
         msg = OSCMessage()
@@ -703,6 +745,8 @@ class SCLangServerManager(ServerManager):
             self.client.send(OSCMessage("/quit"))
             sleep(1)
             self.daemon.terminate()
+        if self._is_recording:
+            self.stopRecording()
         return
 
 try:

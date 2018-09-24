@@ -106,6 +106,10 @@ def update_foxdot_clock(clock):
 
         item.set_clock(clock)
 
+    clock.add_method(_convert_json_bpm)
+
+    return
+
 def update_foxdot_server(serv):
     """ Tells the `Effect` and`TempoClock`classes to send OSC messages to
         a new ServerManager instance.
@@ -148,6 +152,16 @@ def _reload_synths():
     reload(Effects)
     Samples._reset_buffers()
     return
+
+def _convert_json_bpm(clock, data):
+    """ Returns a TimeVar object that has been sent across a network using JSON """
+    if isinstance(data, list):
+        cls = data[0]
+        val = data[1]
+        dur = data[2]
+        return FoxDotCode.namespace[cls](val, dur)
+    else:
+        return data
 
 def Master():
     """ Returns a `Group` containing all the players currently active in the Clock """
