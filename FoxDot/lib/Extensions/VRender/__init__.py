@@ -29,11 +29,15 @@ class VRenderSynthDef(SampleSynthDef):
         if "tempo" in kwargs:
             tempo = kwargs["tempo"]
 
-        renderizeVoice(filename,lyrics,notes,durations,tempo,scale)
+        sex = "female"
+        if "sex" in kwargs:
+            sex = kwargs["sex"]
 
-        kwargs = {"dur":sum(kwargs['dur'])}
+        renderizeVoice(filename,lyrics,notes,durations,tempo,scale,sex)
 
-        kwargs["buf"] = Samples.loadBuffer(filename, sample)
-        return SampleSynthDef.__call__(self, pos, **kwargs)
+#        kwargs = {"dur":sum(kwargs['dur'])}
+
+#        kwargs["buf"] = Samples.loadBuffer(filename, sample)
+#        return SampleSynthDef.__call__(self, pos, **kwargs)
 
 vrender = VRenderSynthDef()
