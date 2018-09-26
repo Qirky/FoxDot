@@ -65,7 +65,7 @@ class workspace:
         CodeClass.namespace['FoxDot'] = self
         CodeClass.namespace['Player'].widget = self
 
-        this_version = CodeClass.namespace['__version__']
+        self.version = this_version = CodeClass.namespace['__version__']
         pypi_version = get_pypi_version()
 
         def check_versions():
