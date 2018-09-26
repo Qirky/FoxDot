@@ -186,7 +186,7 @@ class TimeVar(object):
 
         # Flag we have accessed the value
 
-        self.__accessed = True
+        self.flag_accessed()
 
         return self.current_index
 
@@ -202,6 +202,10 @@ class TimeVar(object):
 
     def check_for_inf(self, duration):
         return (self.__accessed and duration == inf)
+
+    def flag_accessed(self):
+        self.__accessed = True
+        return
 
     # Evaluation methods
 
