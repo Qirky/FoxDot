@@ -26,9 +26,10 @@ class TextPrompt:
         attributes = list(self.root.namespace["Player"].get_attributes())
         player_methods = ["every", "often", "sometimes", "rarely"]
         pattern_methods = list(self.root.namespace["Pattern"].get_methods())
+        scales = list(self.root.namespace["Scale"].names())
         other = ["SynthDefs"]
 
-        self.namespace = sorted(list(set(keywords + synthdefs + attributes + player_methods + pattern_methods + other)))
+        self.namespace = sorted(list(set(keywords + synthdefs + attributes + player_methods + pattern_methods + scales + other)))
 
         self.values = [StringVar() for n in range(self.num_items)]
         self.clear()
