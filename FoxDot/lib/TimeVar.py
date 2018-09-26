@@ -10,6 +10,7 @@ from __future__ import absolute_import, division, print_function
 from .Patterns import *
 from .Utils  import *
 from .Patterns.Operations import *
+from .Constants import inf 
 
 from time import time
 
@@ -59,6 +60,11 @@ class TimeVar(object):
         self.next_time     = 0
         self.prev_time     = 0
         self.next_index    = 0
+
+        # Private flags
+
+        self.__accessed = False
+        self.__inf_index = None
 
         self.proportion    = 0
 
@@ -144,11 +150,25 @@ class TimeVar(object):
 
         time = self.get_current_time(time) - self.start_time
 
+        if self.get_inf_index() is not None:
+
+            return self.get_inf_index()
+
         if time >= self.next_time:
 
             while True:
 
-                self.next_time, self.prev_time = self.next_time + self.dur[self.next_index], self.next_time
+                next_dur = self.dur[self.next_index]
+
+                self.next_time, self.prev_time = self.next_time + next_dur, self.next_time
+
+                # If we find an "inf"
+
+                if self.check_for_inf(next_dur):
+
+                    self.set_inf_index(self.next_index)
+
+                    return self.get_inf_index()
 
                 self.next_index += 1
 
@@ -158,13 +178,30 @@ class TimeVar(object):
 
         # Store the % way through this value's time
 
-        self.proportion = (time - self.prev_time) / (self.next_time - self.prev_time)
+        self.proportion = float((time - self.prev_time) / (self.next_time - self.prev_time))
 
         # The current index is the next index minus one
 
         self.current_index = self.next_index - 1
 
+        # Flag we have accessed the value
+
+        self.__accessed = True
+
         return self.current_index
+
+    # Inf
+
+    def set_inf_index(self, value):
+        self.__inf_index = int(value)
+        return
+
+    def get_inf_index(self):
+        self.proportion = 0
+        return self.__inf_index
+
+    def check_for_inf(self, duration):
+        return (self.__accessed and duration == inf)
 
     # Evaluation methods
 
@@ -186,8 +223,10 @@ class TimeVar(object):
 
     def now(self, time=None):
         """ Returns the value currently represented by this TimeVar """
+
         i = self.get_current_index(time)
         self.current_value = self.calculate(self.values[i])
+        
         return self.current_value
 
     def copy(self):
@@ -773,34 +812,6 @@ class mapvar(Pvar):
         i = self.get_current_index(time)
         self.current_value = self.calculate(self.values.get(i, self.default))
         return self.current_value
-
-
-class _inf(int):
-    """ Un-implemented """
-    zero = 0
-    here = 1
-    wait = 2
-    done = 3
-    def __new__(cls):
-        return int.__new__(cls, 0)
-    def __add__(self, other):
-        return self
-    def __radd__(self,other):
-        return self
-    def __sub__(self, other):
-        return self
-    def __rsub__(self, other):
-        return self
-    def __mul__(self, other):
-        return self
-    def __rmul__(self, other):
-        return self
-    def __div__(self, other):
-        return self
-    def __rdiv__(self, other):
-        return 0
-
-inf = _inf()
 
 # Store and updates TimeVars
 
