@@ -12,7 +12,12 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - Added nested directories to extension modules that were missing, e.g. `VRender/tmp`, to the manifest for PyPI
 - Fixed attribute access for `Pvar` which allows for operations combining other patterns.
 - Fixed bug caused when using Python 2 and slicing `Pattern` with no supplied end value e.g. `PDur(3, 8)[1:]` that would create giant arrays and raise a `MemoryError`.
-- Added autocomplete prompt
+- Added autocomplete prompt (work in progress).
+- Added `inf` variable, which can be used as a duration in any `var` object to continually use a value once it has been reached e.g. `var([0,1],[4,inf])`. This can be combined usefully with a special `var` object called `now` which starts the timing cycle for a `var` at the current time in the clock:
+
+```python
+d1 >> play("x-o-", amp=linvar([0,1],[8,inf], start=now))
+```
 
 ---
 
