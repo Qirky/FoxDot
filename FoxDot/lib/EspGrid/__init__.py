@@ -7,7 +7,7 @@ class EspGrid:
 
         self.server_address = address
 
-        self.server = BidirectionalOSCServer()
+        self.server = BidirectionalOSCServer(("0.0.0.0", 0))
         self.server.connect(self.server_address)
 
     #     self.server.addMsgHandler('/test', self.test)
