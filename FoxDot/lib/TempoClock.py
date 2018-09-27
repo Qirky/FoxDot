@@ -133,6 +133,12 @@ class TempoClock(object):
 
         self.start()
 
+    def sync_to_espgrid(self, address=("localhost", 5510)):
+        from .EspGrid import EspGrid
+        s = EspGrid(address)
+        self.start_time = s.get_start_time()
+        return
+
     @classmethod
     def set_server(cls, server):
         """ Sets the destination for OSC messages being compiled (the server is also the class
