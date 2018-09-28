@@ -133,10 +133,16 @@ class TempoClock(object):
 
         self.start()
 
-    def sync_to_espgrid(self, address=("localhost", 5510)):
+    def sync_to_espgrid(self, host="localhost", port=5510):
         from .EspGrid import EspGrid
-        s = EspGrid(address)
+        s = EspGrid((host, port))
         self.start_time = s.get_start_time()
+        self.time = time() - self.start_time
+        self.beat = self.seconds_to_beats(self.time)
+        print("Syncing to EspGrid")
+        print("Start time: {}".format(self.start_time))
+        print("Seconds elsapsed: {}".format(self.time))
+        print("Beats elapsed: {}".format(self.beat))
         return
 
     @classmethod
