@@ -122,22 +122,33 @@ class workspace:
 
         # --- Setup font
 
-        if self.default_font not in tkFont.families():
+        system_fonts = tkFont.families()
 
-            if SYSTEM == WINDOWS:
+        self.codefont = "CodeFont" # name for font
+
+        if self.default_font not in system_fonts:
+
+            if SYSTEM == WINDOWS  and "Consolas" in system_fonts:
 
                 self.default_font = "Consolas"
 
-            elif SYSTEM == MAC_OS:
+            elif SYSTEM == MAC_OS and "Monaco" in system_fonts:
 
                 self.default_font = "Monaco"
 
-            else:
+            elif "Courier New" in system_fonts:
 
                 self.default_font = "Courier New"
+
+            else:
+
+                self.console_font = self.codefont = self.default_font = "TkFixedFont"
+
+        if self.codefont == "CodeFont":
         
-        self.font = tkFont.Font(font=(self.default_font, 12), name="CodeFont")
-        self.font.configure(family=self.default_font)
+            self.font = tkFont.Font(font=(self.default_font, 12), name=self.codefont)
+            self.font.configure(family=self.default_font)
+            self.console_font = (self.default_font, 12)
 
         self.help_key = "K" if SYSTEM == MAC_OS else "H"
 
@@ -158,7 +169,7 @@ class workspace:
                                  bg=colour_map['background'],
                                  fg=colour_map['plaintext'],
                                  insertbackground="White",
-                                 font = "CodeFont",
+                                 font = self.codefont,
                                  yscrollcommand=self.y_scroll.set,
                                  width=100,
                                  height=20,
@@ -174,7 +185,7 @@ class workspace:
 
         # Create box for line numbers
 
-        self.linenumbers = LineNumbers(self.text, width=50,
+        self.linenumbers = LineNumbers(self, width=50,
                                        bg=colour_map['background'],
                                        bd=0, highlightthickness=0 )
         
@@ -309,7 +320,7 @@ class workspace:
 
         # --- Create console
 
-        self.console = console(self, self.default_font)
+        self.console = console(self)
         self.console_visible = True
         sys.stdout = self.console
         self.root.bind("<Button-1>", self.mouse_press)
@@ -1166,7 +1177,7 @@ class workspace:
     def zoom_in(self, event=None):
         """ Ctrl+= increases text size """
         self.root.grid_propagate(False)
-        font = tkFont.nametofont("CodeFont")
+        font = tkFont.nametofont(self.codefont)
         size = font.actual()["size"]+2
         font.configure(size=size)
         # Increase size of line number
@@ -1179,7 +1190,7 @@ class workspace:
     def zoom_out(self, event=None):
         """ Ctrl+- decreases text size (minimum of 8) """
         self.root.grid_propagate(False)
-        font = tkFont.nametofont("CodeFont")
+        font = tkFont.nametofont(self.codefont)
         size = font.actual()["size"]-2
         if size >= 8:
             font.configure(size=size)

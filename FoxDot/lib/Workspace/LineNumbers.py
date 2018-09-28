@@ -10,8 +10,8 @@ from ..Settings import LINE_NUMBER_MARKER_OFFSET
 class LineNumbers(Tk.Canvas):
     def __init__(self, master, *args, **kwargs):
         Tk.Canvas.__init__(self, *args, **kwargs)
-        self.textwidget = master
-        
+        self.root = master
+        self.textwidget = master.text
         self.redraw()
 
     def redraw(self, *args):
@@ -50,7 +50,7 @@ class LineNumbers(Tk.Canvas):
             self.create_text(w - 4, y, anchor="ne",
                              justify=Tk.RIGHT,
                              text=linenum,
-                             font="CodeFont",
+                             font=self.root.codefont,
                              fill="#c9c9c9")
 
             i = self.textwidget.index("{}+1line".format(i))
