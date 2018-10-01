@@ -137,7 +137,7 @@ class TempoClock(object):
         from .EspGrid import EspGrid
         self.espgrid = EspGrid((host, port))
         self.espgrid.subscribe()
-        self.start_time = s.get_start_time()
+        self.start_time = self.espgrid.get_start_time()
         self.time = time() - self.start_time
         self.beat = self.seconds_to_beats(self.time)
         return

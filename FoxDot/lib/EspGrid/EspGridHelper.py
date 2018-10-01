@@ -56,6 +56,7 @@ class EspGrid:
 
     def get_start_time(self):
         data = self.get_tempo()
+        print(data) # debug
         sec, nano = data[2], data[3]
         return float("{}.{}".format(sec, nano))
 
