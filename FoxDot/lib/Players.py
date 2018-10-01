@@ -891,6 +891,8 @@ class Player(Repeatable):
     def stutter(self, amount=None, _beat_=None, **kwargs):
         """ Plays the current note n-1 times. You can specify keywords. """
 
+        # TODO // schedule the stuttered events in the clock instead of timestamping an OSCBundle
+
         timestamp = self.get_timestamp(_beat_)
         
         # Get the current values (this might be called between events)

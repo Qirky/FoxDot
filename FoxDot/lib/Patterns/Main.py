@@ -987,6 +987,10 @@ class Pattern(metaPattern):
     WEIGHT = 0
     debug = False
 
+class Cycle(Pattern):
+    """ Special Case pattern class for cycling values in "every" """
+    pass
+
 class PGroup(metaPattern):
     """
         Class to represent any groupings of notes as denoted by brackets.
