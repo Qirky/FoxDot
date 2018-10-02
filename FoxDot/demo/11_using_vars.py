@@ -7,7 +7,7 @@
 
 # Generates the pattern: 0,0,0,0,3,3,3,3...
 a = var([0,3],4)            # Duration can be single value
-print(int(Clock.now()), a)   # 'a' initally has a value of 0
+print(int(Clock.now()), a)   # 'a' initially has a value of 0
 # >>> 0, 0
 
 print(int(Clock.now()), a)   # After 4 beats, the value changes to 3
@@ -53,7 +53,7 @@ a.update([1,4], 8)
 
 print(int(Clock.now()), (a, b))
 
-# Vars can be nammed ...
+# Vars can be named ...
 var.chords = var([0,4,5,4],4)
 
 # And used later

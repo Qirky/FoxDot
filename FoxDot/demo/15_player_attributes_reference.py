@@ -17,7 +17,7 @@ print(FxList)
 # master argument is non-zero:
 d1 >> dirt([0,4,2,1], dur=1/2, hpf=4000)
 
-# This sets the high pass filter to 4000 Hz so only frequences in the audio
+# This sets the high pass filter to 4000 Hz so only frequencies in the audio
 # signal *above* that are actually heard. Let's change the resonance value. It's
 # default value is 1, so let's make it smaller
 d1 >> dirt([0,4,2,1], dur=1/2, hpf=4000)
@@ -53,7 +53,7 @@ d1 >> play("*", dur=1/2, amp=[1,0,1,1,0])
 
 
 ####################
-# amplify - Chagnes amp, by multiplying agasint the existing value (instead of overwritting)
+# amplify - Changes amp, by multiplying against the existing value (instead of overwritting)
 
 # Creating a pattern with amp
 d1 >> play("*", dur=1/2, amp=[1,0,1,1,0])
@@ -241,7 +241,7 @@ p1 >> pluck(P[:8], echo=.5, decay=.5)
 
 ####################
 # hpf - High Pass Filter
-# Filters out all the frequencies below given value, removing lower freqencies
+# Filters out all the frequencies below given value, removing lower frequencies
 
 # 4000 hertz
 p1 >> pluck(P[:8], dur=1/2, hpf=4000)
@@ -270,7 +270,7 @@ p1 >> pluck(P[:8], dur=1/2, hpf=linvar([0,4000],[8,0]), hpr=linvar([0.1,1],12))
 
 ####################
 # lpf - Low Pass Filter
-# Filters out all the frequencies above given value, removing higher freqencies
+# Filters out all the frequencies above given value, removing higher frequencies
 
 # 4000 hertz
 p1 >> pluck(P[:8], dur=1/2, lpf=400)

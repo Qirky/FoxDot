@@ -12,7 +12,7 @@ print([1, 2, 3] * 2)
 # FoxDot uses a container type called a ‘Pattern’ to help solve this problem.
 # They act like regular lists but any mathematical operation performed on it is done to each item
 # in the list and done so pair-wise if using a second pattern. A basic pattern is created as
-# you would with a normal list or tuple, but with a 'P' preceeding it.
+# you would with a normal list or tuple, but with a 'P' preceding it.
 
 print(P[1,2,3] * 2)
 
@@ -58,10 +58,10 @@ print(PRange(10)) # P[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 print(PRange(10) * [1, 2])           # Pattern class behaviour
 
 # Adding a list (or Pattern) to a Pattern will add the values of the
-# elements to the other where Python lists would be concatonated.
+# elements to the other where Python lists would be concatenated.
 print(PRange(10) + [0,10])
 
-# To concatonate Patterns, use the pipe operator like so:
+# To concatenate Patterns, use the pipe operator like so:
 print(PRange(10) | [0,10])
 # FoxDot automatically converts any object being piped to a Pattern to the base Pattern class
 # so you don’t have to worry about making sure everything is the right type.
