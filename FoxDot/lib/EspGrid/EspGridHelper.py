@@ -38,6 +38,11 @@ class EspGrid:
         self.server.send(OSCMessage("/esp/tempo/q"))
         return self.server.receive("/esp/tempo/r")
 
+    def get_tempo_cpu(self):
+        self.server.send(OSCMessage("/esp/tempoCPU/q"))
+        return self.server.receive("/esp/tempoCPU/r")
+
+
     def toggle_tempo(self, flag):
         message = OSCMessage("/esp/beat/on")
         message.append(flag)
