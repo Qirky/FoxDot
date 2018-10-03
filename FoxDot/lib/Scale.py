@@ -402,6 +402,7 @@ class __scale__:
 
     custom          = ScalePattern([0,2,3,5,6,9,10], name="custom")
 
+    hungarianMinor  = ScalePattern([ 0, 2, 3, 6, 7, 8, 11 ], name="hungarianMinor")
     romanianMinor   = ScalePattern([ 0, 2, 3, 6, 7, 9, 10 ], name="romanianMinor")
     chinese         = ScalePattern([ 0, 4, 6, 7, 11 ], name="chinese")
 
