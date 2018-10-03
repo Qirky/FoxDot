@@ -4,19 +4,22 @@ FoxDot - Live Coding with Python v0.7
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
 ### v0.7 fixes and updates
-- Include `.version` file in `setup.py` and add extension packages `VRender` and `SonicPi`.
-- Update `Sonic-Pi` extension to work with Python 2.
-- Change `Clock` time measure data type to `float` instead of `Fraction` to improve efficiency but sacrificing accuracy.
-- Add `RandomGenerator.set_override_seed` that forces all random number generator patterns to use the same seed - useful if you want to play the same sequences across multiple machines.
-- Added `DefaultServer.record(fn)` and `DefaultServer.stopRecording()` to record audio from SuperCollider. Files are recorded into `FoxDot/FoxDot/rec/` directory. If `fn` is not given, a filename is created automatically from a timestamp.
-- Added nested directories to extension modules that were missing, e.g. `VRender/tmp`, to the manifest for PyPI
-- Fixed attribute access for `Pvar` which allows for operations combining other patterns.
-- Fixed bug caused when using Python 2 and slicing `Pattern` with no supplied end value e.g. `PDur(3, 8)[1:]` that would create giant arrays and raise a `MemoryError`.
-- Added autocomplete prompt (work in progress).
 - Added `inf` variable, which can be used as a duration in any `var` object to continually use a value once it has been reached e.g. `var([0,1],[4,inf])`. This can be combined usefully with a special `var` object called `now` which starts the timing cycle for a `var` at the current time in the clock:
 
 ```python
 d1 >> play("x-o-", amp=linvar([0,1],[8,inf], start=now))
+```
+
+- (Experimental) Added `Cycle` pattern type, which can be used in conjunction with `every` to more effectively iterate over different values used for different calls to the same method. For example, you spread `stutter` over 3 beats in one call, then 2 beats in the other, you would have to use a `var` like so:
+
+```python
+d1 >> play("x-o-").every(4, "stutter", dur=var([3,2],4))
+```
+
+This because problematic when introducting `sometimes` as you would not know the frequency of the call in advance. Now you can just use `Cycle` which will be converted to a `var` with appropriate timing values when used with `every`. Any other use of `Cycle` will be treated as a regular `Pattern` object. Example of how to use `Cycle`:
+
+```python
+d1 >> play("x-o-").sometimes("stutter", dur=Cycle([2,3]))
 ```
 
 ---

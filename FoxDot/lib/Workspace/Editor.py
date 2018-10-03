@@ -107,7 +107,6 @@ class workspace:
         self.show_prompt = BooleanVar()
         self.show_prompt.set(True)
 
-
         # --- Set icon
         
         try:
