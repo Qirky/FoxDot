@@ -86,7 +86,7 @@ class TempoClock(object):
 
         self.dtype=float
 
-        self.dtype=Fraction
+        # self.dtype=Fraction
         
         self.time       = self.dtype(0) # Seconds elsapsed
         self.beat       = self.dtype(0) # Beats elapsed
@@ -380,6 +380,11 @@ class TempoClock(object):
         if self.ticking is False: # Get the time w/o latency if not ticking
             self.beat = self._now()
         return float(self.beat)
+
+    def mod(self, beat, t=0):
+        """ Returns the next time at which `Clock.now() % beat` will equal `t` """
+        n = float(self.now()) // beat
+        return (n + 1) * beat + t 
 
     def osc_message_time(self):
         """ Returns the true time that an osc message should be run i.e. now + latency """
