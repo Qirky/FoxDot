@@ -178,7 +178,13 @@ class TimeVar(object):
 
         # Store the % way through this value's time
 
-        self.proportion = float((time - self.prev_time) / (self.next_time - self.prev_time))
+        try:
+
+            self.proportion = float((time - self.prev_time) / (self.next_time - self.prev_time))
+
+        except ZeroDivisionError:
+
+            self.proportion = 1.0
 
         # The current index is the next index minus one
 
