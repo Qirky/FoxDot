@@ -20,10 +20,6 @@ def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale,sex):
 	urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=english' -F 'SPKR=4' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
 	if sex == "male":
 		urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=english' -F 'SPKR=5' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
-	elif sex == "japfemale":
-		urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=japanese' -F 'SPKR=0' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
-	elif sex == "jammale":
-		urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=japanese' -F 'SPKR=7' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
 
 	download(urlfileName,LAST_VOICE_WAV)
 
