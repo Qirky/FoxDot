@@ -21,7 +21,7 @@ except ImportError:
 
 class console:
 
-    def __init__(self, master, font):
+    def __init__(self, master):
 
         self.app  = master
         self.root = master.root
@@ -75,7 +75,7 @@ class console:
         self.text = self.canvas.create_text((self.padx, self.pady),
                                             anchor=NW,
                                             fill="white",
-                                            font=(font,12) )
+                                            font = self.app.console_font)
 
         self.text_cursor = None
 

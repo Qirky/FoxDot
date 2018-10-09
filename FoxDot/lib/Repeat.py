@@ -1,8 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 from .Code import WarningMsg
-from .Patterns import Pattern, asStream
+from .Patterns import Pattern, Cycle, asStream
 from .Utils import modi
+from .TimeVar import var, Pvar
 
 import inspect
 
@@ -276,6 +277,10 @@ class Repeatable(object):
             ident = kwargs["ident"]
             del kwargs["ident"]
 
+        # Convert `Cycles` to `var`-- should they be Pvar?
+
+        args, kwargs = self.convert_cycles(args, kwargs, occurence)
+
         # If the method call already exists, just update it (should be in a function)
 
         if ident is not None:
@@ -334,8 +339,7 @@ class Repeatable(object):
 
             self.never(method)
 
-        return self
-            
+        return self            
 
     def never(self, cmd, ident=None):
         """ Stops calling cmd on repeat """
@@ -366,6 +370,16 @@ class Repeatable(object):
             raise KeyError(err)
         
         return self
+
+    @staticmethod
+    def convert_cycles(args, kwargs, occurence):
+        """ Converts any values that are instances of `Cycle` to a `var` with the 
+            same duration as the frequency of the every call (occurrence) """
+
+        args = [(var(value, occurence) if isinstance(value, Cycle) else value) for value in args]
+        kwargs = {key: (var(value, occurence) if isinstance(value, Cycle) else value) for key, value in kwargs.items()}
+
+        return args, kwargs
 
 class MethodCall:
     """ Class to represent an object's method call that,

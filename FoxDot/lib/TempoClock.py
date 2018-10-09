@@ -85,6 +85,8 @@ class TempoClock(object):
         # Storing time as a float 
 
         self.dtype=float
+
+        # self.dtype=Fraction
         
         self.time       = self.dtype(0) # Seconds elsapsed
         self.beat       = self.dtype(0) # Beats elapsed
@@ -132,6 +134,22 @@ class TempoClock(object):
         self.solo = SoloPlayer()
 
         self.start()
+
+    def sync_to_espgrid(self, host="localhost", port=5510):
+        from .EspGrid import EspGrid
+        self.espgrid = EspGrid((host, port))
+        self.espgrid.subscribe()
+        self.start_time = self.espgrid.get_start_time()
+        self.time = time() - self.start_time
+        self.beat = self.seconds_to_beats(self.time)
+        return
+
+    def reset(self):
+        self.time = self.dtype(0)
+        self.beat = self.dtype(0)
+        self.start_time = time()
+        print("resetting clock")
+        return
 
     @classmethod
     def set_server(cls, server):
@@ -347,7 +365,7 @@ class TempoClock(object):
     def get_elapsed_sec(self):
         return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
 
-    def __now(self):
+    def _now(self):
         """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
         # Get number of seconds elapsed
         now = self.get_elapsed_sec()
@@ -360,8 +378,13 @@ class TempoClock(object):
     def now(self):
         """ Returns the total elapsed time (in beats as opposed to seconds) """
         if self.ticking is False: # Get the time w/o latency if not ticking
-            self.beat = self.__now()
+            self.beat = self._now()
         return float(self.beat)
+
+    def mod(self, beat, t=0):
+        """ Returns the next time at which `Clock.now() % beat` will equal `t` """
+        n = float(self.now()) // beat
+        return (n + 1) * beat + t 
 
     def osc_message_time(self):
         """ Returns the true time that an osc message should be run i.e. now + latency """
@@ -374,14 +397,17 @@ class TempoClock(object):
         main.start()
         return
 
-    def __run_block(self, block, time):
+    def __run_block(self, block, beat):
         """ Private method for calling all the items in the queue block.
             This means the clock can still 'tick' while a large number of
             events are activated  """
 
         # Set the time to "activate" messages on - adjust in case the block is activated late
 
-        block.time = self.osc_message_time() - self.beat_dur(float(time) - block.beat)
+        # `beat` is the actual beat this is happening, `block.beat` is the desired time. Adjust
+        # the osc_message_time accordingly
+
+        block.time = self.osc_message_time() - self.beat_dur(float(beat) - block.beat)
 
         for item in block:
 
@@ -418,7 +444,7 @@ class TempoClock(object):
 
         while self.ticking:
 
-            beat = self.__now() # get current time
+            beat = self._now() # get current time
 
             if self.queue.after_next_event(beat):
 

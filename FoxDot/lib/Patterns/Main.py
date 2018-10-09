@@ -263,12 +263,12 @@ class metaPattern(object):
 
         if stop < start:
 
-            stop = (len(self.data) + start)
+            stop = (len(self.data) +  stop)
 
         return Pattern([self[i] for i in range(start, stop, step) ])
             
     def __setslice__(self, i, j, item):
-        """ Only works in Python 2 """
+        """ Only works in Python 2 - maybe get rid? """
         self.data[i:j] = Format(item)
 
     # Integer returning
@@ -986,6 +986,10 @@ class Pattern(metaPattern):
     """ Base type pattern """
     WEIGHT = 0
     debug = False
+
+class Cycle(Pattern):
+    """ Special Case pattern class for cycling values in "every" """
+    pass
 
 class PGroup(metaPattern):
     """

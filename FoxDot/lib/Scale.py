@@ -96,7 +96,7 @@ class ScalePattern(ScaleType, Pattern):
 
         self.name = name
 
-        self.semitones = semitones
+        self.semitones = semitones.data if isinstance(semitones, Pattern) else semitones
 
         if not isinstance(tuning, TuningType):
 
@@ -128,7 +128,11 @@ class ScalePattern(ScaleType, Pattern):
         return Pattern(tones)
 
     def get_tuned_note(self, degree):
-        return self.tuning[int(self[degree])]
+        tuning_index = int(self[degree]) % self.steps
+        # tuning_offset = 0
+        # if degree < 0:
+        #     tuning_offset = (((abs(degree) // len(self.tuning)) + 1) * self.steps)
+        return self.tuning[tuning_index]
 
     def get_midi_note(self, degree, octave=5, root=0):
         """ Calculates a midinote from a scale, octave, degree, and root """
@@ -186,6 +190,46 @@ class ScalePattern(ScaleType, Pattern):
             i = pitch % len(self.data)
             n = (pitch // len(self.data)) * self.steps 
         return asStream(self.data)[i] + n
+
+    def getslice(self, start, stop, step=1):
+        """ Called when using __getitem__ with slice notation. Numbers 
+            smaller than 0 and greater than the max value are adjusted. """
+        
+        start = start if start is not None else 0
+        stop  = stop if stop is not None else len(self)
+        step  = step if step is not None else 1
+
+        if stop < start:
+
+            stop = (len(self.data) +  stop)
+
+        semitones = []
+
+        for i in range(start, stop, step):
+
+            # Get the semitone
+
+            tone = self[i]
+
+            # Negative values
+
+            if i < 0:
+
+                sub = (((abs(i) // len(self)) + 1) * self.steps)
+
+                tone -= sub
+
+            # Values past the end
+
+            elif i >= len(self):
+
+                add = ((i // len(self)) * self.steps)
+
+                tone += add
+
+            semitones.append(tone)
+
+        return ScalePattern(semitones)
 
     #def semitone_to_note(self, semitone):
     #    """ Takes a semitone value (midinote) and returns the pitch in this scale """
@@ -358,6 +402,7 @@ class __scale__:
 
     custom          = ScalePattern([0,2,3,5,6,9,10], name="custom")
 
+    hungarianMinor  = ScalePattern([ 0, 2, 3, 6, 7, 8, 11 ], name="hungarianMinor")
     romanianMinor   = ScalePattern([ 0, 2, 3, 6, 7, 9, 10 ], name="romanianMinor")
     chinese         = ScalePattern([ 0, 4, 6, 7, 11 ], name="chinese")
 

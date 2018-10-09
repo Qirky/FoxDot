@@ -59,7 +59,7 @@ class RequestTimeout(Exception):
     """ Raised if expecting a response from the server but received none """
 
 
-class SCLangBidirectionalClient(OSCServer):
+class BidirectionalOSCServer(OSCServer):
     """
     This is a combination client/server
 
@@ -209,7 +209,7 @@ class SCLangServerManager(ServerManager):
 
         # OSC Connection for custom OSCFunc in SuperCollider
         if GET_SC_INFO:
-            self.sclang = SCLangBidirectionalClient()
+            self.sclang = BidirectionalOSCServer()
             self.sclang.connect( (self.addr, self.SCLang_port) )
             self.loadSynthDef(FOXDOT_INFO_FILE)
             try:
