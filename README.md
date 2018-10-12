@@ -16,10 +16,17 @@ d1 >> play("x-o-", amp=linvar([0,1],[8,inf], start=now))
 d1 >> play("x-o-").every(4, "stutter", dur=var([3,2],4))
 ```
 
-This because problematic when introducting `sometimes` as you would not know the frequency of the call in advance. Now you can just use `Cycle` which will be converted to a `var` with appropriate timing values when used with `every`. Any other use of `Cycle` will be treated as a regular `Pattern` object. Example of how to use `Cycle`:
+This became problematic when introducting `sometimes` as you would not know the frequency of the call in advance. Now you can just use `Cycle` which will be converted to a `var` with appropriate timing values when used with `every`. Any other use of `Cycle` will be treated as a regular `Pattern` object. Example of how to use `Cycle`:
 
 ```python
 d1 >> play("x-o-").sometimes("stutter", dur=Cycle([2,3]))
+```
+
+- Fix `Pattern.offlayer` which is similar to `offadd` but requires a second argument specifying a method apply to the second layer as a string *then* the duration to delay the layer before specifying the arguments and keyword arguments to be supplied to the given methods. E.g.
+
+```python
+# Layer with the pattern trimmed to length 3 with a delay of 0.75 beats
+P[0, 1, 2, 3].offlayer("trim", 0.75, 3)
 ```
 
 ---

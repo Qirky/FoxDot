@@ -383,7 +383,7 @@ class TempoClock(object):
 
     def mod(self, beat, t=0):
         """ Returns the next time at which `Clock.now() % beat` will equal `t` """
-        n = float(self.now()) // beat
+        n = self.now() // beat
         return (n + 1) * beat + t 
 
     def osc_message_time(self):

@@ -1482,9 +1482,15 @@ class Player(Repeatable):
 
         timestamp = timestamp if timestamp is not None else self.queue_block.time
 
+        # self.do_bang = False
+
         for i in range(self.get_event_length(**kwargs)):
 
             self.send_osc_message(self.event, i, timestamp=timestamp, verbose=verbose, **kwargs)
+
+        # if self.do_bang:
+
+        #     self.bang()
 
         return
 
@@ -1564,6 +1570,8 @@ class Player(Repeatable):
             # We can set a condition to only send messages
 
             self.queue_block.osc_messages.append(compiled_msg)
+
+            self.do_bang = True
 
         return
 

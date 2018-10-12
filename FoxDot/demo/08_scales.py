@@ -19,6 +19,9 @@ Scale.default.set("minor")
 Scale.default.set(Scale.minor)
 Scale.default.set([0,2,3,5,7,10])
 
+# To save some time you can also do
+Scale.default = "minor"
+
 #This is the same for the root:
 Root.default.set(1)
 Root.default.set("C#")

@@ -13,3 +13,8 @@ print(Clock)
 
 # To see what the latency is
 print(Clock.latency)
+
+# Sometimes you want to know when the start of the next X beat cycle. To
+# do this we use the 'mod' method. For example if we want to see when
+# the start of the next 32 beat cycle is we can do
+print(Clock.mod(32))

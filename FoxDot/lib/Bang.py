@@ -67,7 +67,8 @@ class Bang:
                 clock = player.metro
 
                 duration     = clock.beat_dur( player.dur / 2 )
-                message_time = player.queue_block.time
+                # message_time = player.queue_block.time
+                message_time = player.get_timestamp(player.queue_block.beat) # clock.latency
 
                 self.id = "{}_bang".format(player.id)
 

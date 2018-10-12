@@ -94,5 +94,8 @@ class __root__:
         else:
             self.__dict__[key] = value
         return
+    def reset(self):
+        """ Sets the root to 0 """
+        self.default = 0
 
 Root = __root__()

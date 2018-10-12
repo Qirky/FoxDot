@@ -6,6 +6,7 @@ except ImportError:
     import tkinter as Tk
 
 from ..Settings import LINE_NUMBER_MARKER_OFFSET
+from ..Code import execute
 
 class LineNumbers(Tk.Canvas):
     def __init__(self, master, *args, **kwargs):
@@ -16,6 +17,13 @@ class LineNumbers(Tk.Canvas):
 
     def redraw(self, *args):
         '''redraw line numbers'''
+        
+        # Update player line numbers
+
+        # execute.update_line_numbers(self.textwidget)
+
+        # Clear
+
         self.delete("all")
 
         # Draw a line

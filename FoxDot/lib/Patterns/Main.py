@@ -795,7 +795,7 @@ class metaPattern(object):
     def every(self, n, method, *args, **kwargs):
         """ Returns the pattern looped n-1 times then appended with
             the version returned when method is called on it. """
-        return self.loop(n-1).pipe(getattr(self, method).__call__(*args, **kwargs))
+        return self.loop(n-1).concat(getattr(self, method).__call__(*args, **kwargs))
 
     def map(self, func):
         """ Returns a Pattern that calls `func` on each item """

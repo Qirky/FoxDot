@@ -196,7 +196,7 @@ def offmul(self, value, dur=0.5):
     return self * PGroupXor((1, value, dur))
 
 @PatternMethod
-def offlayer(self, dur, method, *args, **kwargs):
+def offlayer(self, method, dur=0.5, *args, **kwargs):
     """ Zips a pattern with a modified version of itself. Method argument
         can be a function that takes this pattern as its first argument,
         or the name of a Pattern method as a string. """
@@ -208,7 +208,7 @@ def offlayer(self, dur, method, *args, **kwargs):
         func = getattr(self, method)
         assert callable(func)
 
-    return self.zip(func(*args, **kwargs), dtype=lambda a, b: PGroupXor(a, b).set_delay(dur))
+    return self.zip(func(*args, **kwargs), dtype=lambda a, b: PGroupXor([a, b, dur]))
     
 @PatternMethod
 def amen(self, size=2):
