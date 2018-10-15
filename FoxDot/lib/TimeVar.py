@@ -93,8 +93,8 @@ class TimeVar(object):
         return asStream(values)
 
     @staticmethod
-    def CreatePvarGenerator(func, *args):
-        return PvarGenerator(func, *args)
+    def CreatePvarGenerator(func, *args, **kwargs):
+        return PvarGenerator(func, *args, **kwargs)
 
     # Standard dunder methods
     def __str__(self):
@@ -728,9 +728,14 @@ class PvarGenerator(Pvar):
         then a `PvarGenerator` is returned. Each argument is stored as a TimeVar
         and the function is called whenever the arguments are changed
     """
-    def __init__(self, func, *args):
+    def __init__(self, func, *args, pattern=None):
         self.p_func = func # p_func is the Pattern function e.g. PDur but self.func is created when operating on this PvarGenerator
-        self.args = [(arg if isinstance(arg, TimeVar) else TimeVar(arg)) for arg in args]
+        
+        self.args = []
+        if pattern is not None:
+            self.args.append(pattern)
+        self.args.extend( [(arg if isinstance(arg, TimeVar) else TimeVar(arg)) for arg in args] )
+
         self.last_args = []
         self.last_data = []
         self.evaluate = fetch(Nil)
@@ -740,7 +745,7 @@ class PvarGenerator(Pvar):
         return "<{} {}>".format(self.__class__.__name__, self.func.__name__ + str(tuple(self.args)))
 
     def now(self):
-        new_args = [arg.now() for arg in self.args]
+        new_args = [arg.now() if isinstance(arg, TimeVar) else arg for arg in self.args]
         if new_args != self.last_args:
             self.last_args = new_args
             self.last_data = self.p_func(*self.last_args)

@@ -42,14 +42,22 @@ def loop_pattern_func(f):
 def loop_pattern_method(f):
     ''' Decorator for allowing any Pattern method to create
         multiple (or rather, longer) Patterns by using Patterns as arguments '''
+    
     @functools.wraps(f)
     def new_function(self, *args):
+        
+        # Return any functions that use TimeVars as PvarGenerators
+        timevars = [arg for arg in args if isinstance(arg, Pattern.TimeVar)]
+        if len(timevars) > 0:
+            return Pattern.TimeVar.CreatePvarGenerator(f, *args, pattern=self)
+
         pat = Pattern()
         # Force pattern types if using lists/tuples
         args = [PatternFormat(arg) for arg in args]
         for i in range(LCM(*[len(arg) for arg in args if (hasattr(arg, '__len__') and not isinstance(arg, PGroup))])):
             pat |= f(self, *[(modi(arg, i) if not isinstance(arg, PGroup) else arg) for arg in args])
         return pat
+
     new_function.argspec = inspect.getargspec(f)
     return new_function
 
