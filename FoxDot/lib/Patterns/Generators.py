@@ -265,7 +265,7 @@ class PWalk(RandomGenerator):
 
     def func(self, index):
         if self.last_value is None:
-            self.last_value = 0
+            self.last_value = self.start
         else:
             if self.last_value >= self.max: # force subtraction
                 f = self.directions[1]
