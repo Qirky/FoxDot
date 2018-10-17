@@ -32,7 +32,7 @@ A demonstration video can be found [here](https://youtu.be/cgZuO78tVVE).
 
 ### Example
 ```
-from .Extension.VRender import vrender
+from .Extensions.VRender import vrender
 
 vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)
 ```
