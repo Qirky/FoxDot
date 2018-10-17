@@ -1311,25 +1311,29 @@ class workspace:
 
     def on_text_modified(self, event):
 
-        # Get number of lines added / removed
+        self.text.modifying = not self.text.modifying
 
-        old_length, new_length = self.text.lines, self.text.get_num_lines()
+        if self.text.modifying:
+
+            # Get number of lines added / removed
+
+            old_length, new_length = self.text.lines, self.text.get_num_lines()
+            
+            dif = new_length - old_length
+
+            # Get end index of the operation
+
+            row, col = index(self.text.index(INSERT))
+
+            if dif >= 0:
+
+                for x in range(row - dif, row + 1):
+
+                    self.colour_line(x)
+            
+            self.text.edit_modified(False)
         
-        dif = new_length - old_length
-
-        # Get end index of the operation
-
-        row, col = index(self.text.index(INSERT))
-
-        if dif >= 0:
-
-            for x in range(row - dif, row + 1):
-
-                self.colour_line(x)
-        
-        self.text.edit_modified(False)
-        
-        return
+        return "break"
 
     def update(self, event=None, insert=INSERT):
         """ Updates the the colours of the IDE """
@@ -1366,7 +1370,9 @@ class workspace:
 
             for tag_name in self.text.tag_names():
 
-                self.text.tag_remove(tag_name, start_of_line, end_of_line)
+                if tag_name != "tag_open_brackets":
+
+                    self.text.tag_remove(tag_name, start_of_line, end_of_line)
 
             # Re-apply tags
 

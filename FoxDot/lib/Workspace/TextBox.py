@@ -22,6 +22,7 @@ class ThreadedText(Text):
         self.height = options.get("height", 20)
         self.queue = Queue.Queue()
         self.lines = 0 # number of lines in the text
+        self.modifying = False
         self.update()
 
     def on_resize(self, event):
@@ -34,8 +35,9 @@ class ThreadedText(Text):
         self.lines = len(self.get("1.0", END).split("\n"))
         return self.lines
 
-    def insert(self, *args, **kwargs):
-        return Text.insert(self, *args, **kwargs)
+    # def insert(self, *args, **kwargs):
+    #     Text.insert(self, *args, **kwargs)
+    #     return "break"
     
     def update(self):
         """ Recursively called method that monitors as

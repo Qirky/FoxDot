@@ -176,7 +176,9 @@ class BracketHandler:
             
             self.root.colour_line(line)
 
-            # Highlight brackets
+            # Highlight brackets (remove old highlighting first)
+
+            self.text.tag_delete("tag_open_brackets")
 
             if coords is not None:
 
@@ -194,6 +196,10 @@ class BracketHandler:
         # Store the text
 
         self.root.text_as_string = self.root.get_all()
+
+        # Add separator to undo stack
+
+        self.text.edit_separator()
 
         return "break"
 
