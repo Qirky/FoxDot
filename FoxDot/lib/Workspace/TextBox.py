@@ -1,9 +1,9 @@
 from __future__ import absolute_import, division, print_function
 
 try:
-    from Tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST
+    from Tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST, INSERT
 except ImportError:
-    from tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST
+    from tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST, INSERT
 
 from .Format import *
 
@@ -17,9 +17,11 @@ background = colour_map['background']
 class ThreadedText(Text):
     def __init__(self, master, **options):
         Text.__init__(self, master, **options)
+        self.root = master
         self.config(highlightbackground=background, selectbackground="Dodger Blue", selectforeground="White")
         self.height = options.get("height", 20)
         self.queue = Queue.Queue()
+        self.lines = 0 # number of lines in the text
         self.update()
 
     def on_resize(self, event):
@@ -27,6 +29,13 @@ class ThreadedText(Text):
         if line_h is not None:
             self.height = int((self.winfo_height()-2) / line_h[3])
         return
+
+    def get_num_lines(self):
+        self.lines = len(self.get("1.0", END).split("\n"))
+        return self.lines
+
+    def insert(self, *args, **kwargs):
+        return Text.insert(self, *args, **kwargs)
     
     def update(self):
         """ Recursively called method that monitors as
@@ -121,4 +130,4 @@ class ThreadedText(Text):
         """ Returns a tuple of integers for the first and last row visible in the editor """
         a = self.index("@0,0")
         b = self.index("@0,%d" % self.winfo_height())
-        return (int(s.split(".")[0]) for s in (a, b)) 
+        return tuple(int(s.split(".")[0]) for s in (a, b)) 

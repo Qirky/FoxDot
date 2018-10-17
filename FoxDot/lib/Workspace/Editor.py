@@ -200,6 +200,8 @@ class workspace:
         ctrl = "Command" if SYSTEM == MAC_OS else "Control"
         alt = "Option" if SYSTEM == MAC_OS else "Alt"
 
+        self.text.bind("<<Modified>>",      self.on_text_modified)
+
         self.text.bind("<Return>",          self.newline)
         self.text.bind("<BackSpace>",       self.backspace)
         self.text.bind("<Delete>",          self.delete)
@@ -451,7 +453,7 @@ class workspace:
 
             index = self.text.index(INSERT)
 
-            self.text.insert(index, event.char)
+            self.text.insert(index, event.char) # should modified be called?
 
             self.text.edit_separator()
 
@@ -586,7 +588,7 @@ class workspace:
     def undo(self, event=None):
         try:
             self.text.edit_undo()
-            self.update_all()
+            # self.update_all()
         except TclError:
             pass
              
@@ -595,7 +597,7 @@ class workspace:
     def redo(self, event=None):
         try:
             self.text.edit_redo()
-            self.update_all()
+            # self.update_all()
         except TclError:
             pass
         return "break"
@@ -1307,19 +1309,33 @@ class workspace:
 
     """
 
+    def on_text_modified(self, event):
+
+        # Get number of lines added / removed
+
+        old_length, new_length = self.text.lines, self.text.get_num_lines()
+        
+        dif = new_length - old_length
+
+        # Get end index of the operation
+
+        row, col = index(self.text.index(INSERT))
+
+        if dif >= 0:
+
+            for x in range(row - dif, row + 1):
+
+                self.colour_line(x)
+        
+        self.text.edit_modified(False)
+        
+        return
+
     def update(self, event=None, insert=INSERT):
         """ Updates the the colours of the IDE """
-
         # Move the window to view the current line
 
         self.text.see(INSERT)
-
-        # 1. Get the contents of the current line
-
-        cur = self.text.index(insert)
-        line, column = index(cur)
-
-        self.colour_line(line)
 
         self.update_prompt()
 
