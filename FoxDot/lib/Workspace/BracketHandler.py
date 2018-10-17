@@ -11,6 +11,7 @@ from .AppFunctions import *
 whitespace = [" ","\t","\n","\r","\f","\v"]
 
 class BracketHandler:
+    counter = 0
     def __init__(self, master):
 
         self.root = master
@@ -33,7 +34,11 @@ class BracketHandler:
 
             self.text.bind(char, self.handle) # this binds bracket presses to the handle method
 
+        self.visible_range = (0,0)
+
     def handle(self, event=None, insert=INSERT):
+
+        self.visible_range = self.text.get_visible_range()
 
         ret = None
 
@@ -124,7 +129,7 @@ class BracketHandler:
 
             # Get index of the end of the buffer
 
-            end_line, end_col = index(self.text.index(END))
+            end_line, end_col = index(self.text.index("{}.end".format(self.visible_range[1])))
 
             while (new_line, new_col) != (end_line, end_col):
 
@@ -211,7 +216,7 @@ class BracketHandler:
         line_length = column - 1
         used_br = offset
 
-        start_row, end_row = self.text.get_visible_range() # returns tuple
+        start_row, end_row = self.visible_range # returns tuple
 
         for row in range(line, start_row - 1, -1):
 
