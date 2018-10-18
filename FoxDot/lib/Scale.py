@@ -81,7 +81,7 @@ class TuningType(list):
     def __init__(self, data):
         data = list(data)
         list.__init__(self, data[:-1])
-        self.steps = data[-1]
+        self.steps = int(data[-1])
 
 class Tuning:
     ET12          = TuningType([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
