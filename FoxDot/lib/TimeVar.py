@@ -728,12 +728,15 @@ class PvarGenerator(Pvar):
         then a `PvarGenerator` is returned. Each argument is stored as a TimeVar
         and the function is called whenever the arguments are changed
     """
-    def __init__(self, func, *args, pattern=None):
+    def __init__(self, func, *args, **kwargs):
         self.p_func = func # p_func is the Pattern function e.g. PDur but self.func is created when operating on this PvarGenerator
         
         self.args = []
-        if pattern is not None:
-            self.args.append(pattern)
+
+        if "pattern" in kwargs:
+
+            self.args.append(kwargs["pattern"])
+        
         self.args.extend( [(arg if isinstance(arg, TimeVar) else TimeVar(arg)) for arg in args] )
 
         self.last_args = []
