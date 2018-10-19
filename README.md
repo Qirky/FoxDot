@@ -42,7 +42,7 @@ P[0, 1, 2, 3].offlayer("trim", 0.75, 3)
 
 #### Installing FoxDot
 
-- Open up a command prompt and type `pip install FoxDot`. This will download and install the latest stable version of FoxDot from the Python Package Index if you have properly configured Python.
+- Open up a command prompt and type `pip install --user FoxDot`. This will download and install the latest stable version of FoxDot from the Python Package Index if you have properly configured Python.
 - You can update FoxDot to the latest version if it's already installed by adding `-U` or `--upgrade` flag to this command.
 - Alternatively, you can build from source from directly from this repository:
 ``` bash
