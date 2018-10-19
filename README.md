@@ -175,7 +175,7 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 
 ## Documentation
 
-For more information on FoxDot, please see the `docs` folder (although largely unwritten). Please note that FoxDot is still in development and is changing all the time. I do my best to keep the website and README up to date but don't always have the time.
+[Link to documentation website](https://docs.foxdot.org/) (still ongoing)
 
 ## Using alternative editors
 
