@@ -1,4 +1,5 @@
 # Tutorial 14: Player Attributes Reference
+# --- TODO: this needs updating
 
 
 # To see all attributes:

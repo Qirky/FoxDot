@@ -84,7 +84,15 @@ proxy_1 = pads([0,1,2,3], dur=1/2)
 proxy_2 = pads([4,5,6,7], dur=1)
 
 p1 >> proxy_1 # Assign the first to p1
+
 p1 >> proxy_2 # This replaces the instructions being followed by p1
+
+# To play multiple sequences at once, just do the same things with another
+# Player object:
+
+p1 >> pluck([0, 2, 3, 4], dur=1/2)
+
+p2 >> pads([(0, 2, 4), (3, 5, 7)], dur=8)
 
 # Play only this player, muting others
 p1.solo() # defaults to 1

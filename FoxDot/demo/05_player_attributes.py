@@ -17,14 +17,16 @@ p2 >> star(harmony, dur=1/2)
 # It is possible for one player object to play exactly what another player is.
 # To have one player follow another, just use the follow method:
 p1 >> pluck(pitches)
+
 p2 >> star(dur=1/2).follow(p1) + 2
+
+# You can explicitly reference attributes such as pitch or duration too:
+
+p2 >> star(p1.pitch) + 2  # this is the same as .follow(p1)
 
 # Works for other attributes too
 p1 >> pluck(pitches)
 p2 >> star(dur=p1.dur).follow(p1) + 2
-
-p1 >> pluck(pitches)
-p2 >> star(p1.degree).follow(p1) + 2
 
 # You can reference, and test for the current value
 # The == returns a 1 if true and a 0 if false

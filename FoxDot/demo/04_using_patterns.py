@@ -22,9 +22,13 @@ print(P[1,2,3] + 100)
 # [1+3, 2+4, 3+3, 1+4, 2+3, 3+4]
 print(P[1,2,3] + [3,4])
 
-# Slicing syntax works too
+# You can use Python's slicing syntax to generate a series of numbers
+
 print(P[:8])
+
 print(P[0,1,2,3:20])
+
+print(P[2:15:3])
 
 # Try some other mathematical operators and see what results you get.
 print(P[1,2,3] * (1,2))
@@ -48,7 +52,7 @@ print(P(0,2,4) + 2)
 
 # In Python, you can generate a range of integers with the syntax range(start, stop, step).
 # By default, start is 0 and step is 1.
-print(range(10)) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+print(list(range(10))) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 # You can use PRange(start, stop, step) to create a Pattern object with the equivalent values:
 print(PRange(10)) # P[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -129,7 +133,8 @@ print(P[:8].stutter(5))
 
 # Amen
 # Merges and laces the first and last two items such that a
-# drum pattern "x-o-" would become "(x[xo])-o([-o]-)"
+# drum pattern "x-o-" would become "(x[xo])-o([-o]-)" and mimics
+# the rhythm of the famous "amen break"
 d1 >> play(P["x-o-"].amen())
 print(P[:8].amen())
 

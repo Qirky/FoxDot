@@ -22,11 +22,24 @@ p1 >> pads().follow(b1) + [2,4,7]
 p1 >> pads([0,2,4,6])
 p1.every(4, "reverse")
 
-# Which is the same as:
+# You can "chain" methods together by appending them to the end of
+# the original line:
 p1 >> pads([0,2,4,6]).every(4, "reverse")
 
-# You can change several things at once
+# To stop calling "reverse", use 'never':
+
+p1.never("reverse")
+
+# Here are a few other methods you can use:
+
+# Using "stutter" will play the same note 'n' number of times with different attributes specified
+
 p1.every(4, "stutter", 4, oct=4, pan=[-1,1])
 
-# To stop the every call...
-p1.never("reverse")
+# Rotate will move all the values over by 1 in their order
+p1.every(4, "rotate")
+
+# To randomise the order of the notes, use "shuffle"
+p1.every(4, "shuffle")
+
+

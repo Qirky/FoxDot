@@ -81,3 +81,67 @@ p1 >> pads(a, amp=c, dur=1/4) + d
 
 # Change the scale every 16 beats
 Scale.default = Pvar([Scale.major, Scale.minor],16)
+
+# You even set the value to last forever once it is reached using a special value called "inf"
+
+x = var([0, 1, 2, 3], [4, 4, 4, inf])
+
+print(x) # Keep pressing - it will eventually stop at 3
+
+######################
+# Other types of "var"
+
+# There are several sub-classes of "var" that return values between 
+# the numbers specified. For example a "linvar" gradually change
+# values in a linear fashion:
+
+print(linvar([0,1],8)) # keep running to see the value change between 0 and 1
+
+# Example: increase the high-pass filter cutoff over 32 beats
+
+p1 >> play("x-o-", hpf=linvar([0,4000],[32,0]))
+
+# Other types include "sinvar" and "expvar"
+
+print("Linear:", linvar([0, 1], 8))
+print("Sinusoidal:", sinvar([0, 1], 8))
+print("Exponential:", expvar([0, 1], 8))
+
+#################
+# Pattern TimeVar
+
+# Sometimes we might want to store whole patterns within a var but
+# if we try to do so, they are automatically laced:
+
+pattern1 = P[0, 1, 2, 3]
+pattern2 = P[4, 5, 6, 7]
+
+print(var([pattern1, pattern2], 4))
+
+# To store whole patterns, you need to use a "Pvar" which does
+# not lace the values, but stores the patterns instead
+
+print(Pvar([pattern1, pattern2], 4))
+
+p1 >> pluck(Pvar([pattern1, pattern2], 4), dur=1/4)
+
+
+
+###########################
+# Offsetting the start time
+
+# Another useful trick is offsetting the start time for the var. By
+# default it is when the Clock time is 0 but you can specify a different
+# value using the "start" keyword
+
+print(linvar([0, 1], 8))
+print(linvar([0, 1], 8, start=2))
+
+# This can be combined with Clock.mod() to start a ramp at the start of the#
+# next 32 beat cycle:
+
+d1 >> play("x-o-", hpf=linvar([0,4000],[32,inf], start=Clock.mod(32)))
+
+
+
+

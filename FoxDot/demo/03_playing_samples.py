@@ -8,7 +8,7 @@
 # Each character represents a different audio file, which is stored in a buffer in SuperCollider.
 
 # To view which character relates to which audio file, execute
-print(BufferManager())
+print(Samples)
 
 # You can play audio samples in the FoxDot/snd/ sub-directories by using the
 # 'play' Synth and using a string of characters instead of list of notes.
@@ -63,7 +63,7 @@ d1 >> play("(x[--])xu[--]", sample=2)
 # Change the sample for each beat
 d1 >> play("(x[--])xu[--]", sample=[1,2,3])
 
-# You can layer two patterns together
+# You can layer two patterns together - note the "P", look at tutorial 4 for more information.
 d1 >> play(P["x-o-"] & P[" **"])
 
 # And change effects applied to all the layered patterns at the same time
