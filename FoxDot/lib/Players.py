@@ -176,7 +176,10 @@ class EmptyPlayer(object):
         except AttributeError:
             self.__class__ = Player
             self.__init__(self.name)
-            return self.__getattr__(name) # use getattr to make sure we return player key
+            try:
+                return self.__getattribute__(name)
+            except AttributeError:
+                return self.__getattr__(name) # use getattr to make sure we return player key
 
 
 class Player(Repeatable):
@@ -569,6 +572,18 @@ class Player(Repeatable):
             setattr(self, key, value)
 
             reset.append(key)
+
+        # Set SynthDef defaults
+
+        if self.synthdef is not None:
+
+            synth = SynthDefs[self.synthdef]
+            
+            for key in ("atk", "decay", "rel"):
+
+                setattr(self, key, synth.defaults[key])
+
+                reset.append(key)
 
         # Any other attribute that might have been used - set to 0
 

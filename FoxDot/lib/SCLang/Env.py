@@ -12,6 +12,10 @@ class EnvGen(instance):
         args = ",".join(["{}: {}".format(str(key), str(value)) for key, value in self.attr.items()])        
         return self.value + "(" + args + ")"
 
+class adsr: # todo: make this the only one and just put in the synthdef
+    def __str__(self):
+        return "EnvGen.ar(Env([0, peak, level, level, 0], [atk, decay, max((atk + decay + rel), sus - (atk + decay + rel)), rel], curve:\\sin), doneAction: 0)"
+
 class env(EnvGen):
     def __init__(self, sus=None, amp=None, curve="'lin'", doneAction=0):
         self.attr={}

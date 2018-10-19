@@ -65,6 +65,11 @@ class SynthDefBaseClass(object):
         self.blur        = instance("blur")
         self.beat_dur    = instance("beat_dur")
 
+        # Envelope
+        self.atk         = instance("atk")
+        self.decay       = instance("decay")
+        self.rel         = instance("rel") 
+
         self.defaults = {   "amp"       : 1,
                             "sus"       : 1,
                             "pan"       : 0,
@@ -74,7 +79,12 @@ class SynthDefBaseClass(object):
                             "rate"      : 0,
                             "bus"       : 0,
                             "blur"      : 1,
-                            "beat_dur"  : 1 }
+                            "beat_dur"  : 1,
+                            "atk"       : 0.01,
+                            "decay"     : 0.01,
+                            "rel"       : 0.01,
+                            "peak"      : 1,
+                            "level"     : 0.8 }
 
         # The amp is multiplied by this before being sent to SC
         self.balance = 1
@@ -187,6 +197,12 @@ class SynthDefBaseClass(object):
                 if str(arg) != str(self.__dict__[arg]):
                     string += (str(arg) + '=' + str(self.__dict__[arg]) + ';\n')
         return string
+
+    def adsr(self, **kwargs):
+        """ Define the envelope """
+        self.defaults.update(**kwargs)
+        self.env = Env.adsr()
+        return
 
 
     # Adding the SynthDef to the Server

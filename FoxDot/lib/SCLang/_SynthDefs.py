@@ -353,6 +353,20 @@ with SynthDef("star") as synth:
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, 0.07)
 star = synth
 
+with SynthDef("jbass") as jbass:
+    jbass.freq = jbass.freq / 4
+    jbass.amp  = jbass.amp * 0.8
+    jbass.osc  = LFTri.ar(jbass.freq, mul=jbass.amp)
+    jbass.adsr(atk=0.01, decay=0.01, rel=0.01)
+
+# Possible future syntax?
+# -----------------------
+# @SynthDef
+# def jbass(amp = 0.8):
+#     freq = freq / 4
+#     return
+
+
 if SC3_PLUGINS:
 
     piano = SynthDef("piano")
