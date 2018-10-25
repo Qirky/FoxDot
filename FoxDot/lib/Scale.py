@@ -405,7 +405,16 @@ class __scale__:
     hungarianMinor  = ScalePattern([ 0, 2, 3, 6, 7, 8, 11 ], name="hungarianMinor")
     romanianMinor   = ScalePattern([ 0, 2, 3, 6, 7, 9, 10 ], name="romanianMinor")
     chinese         = ScalePattern([ 0, 4, 6, 7, 11 ], name="chinese")
+    
     wholeTone       = ScalePattern([ 0, 2, 4, 6, 8, 10 ], name="wholeTone")
+    diminished      = ScalePattern([  ], name= "")
+
+    # Half-Whole Diminished Scale - halfWhole
+    halfWhole    = ScalePattern([ 0, 1, 3, 4, 6, 7, 9, 10 ], name= "halfWhole")
+    # Whole-Half Diminished Scale - wholeHalf
+    wholeHalf      = ScalePattern([  0, 2, 3, 5, 6, 8, 9, 11 ], name= "wholeHalf")
+
+    scale      = ScalePattern([  ], name= "")
 
     freq            = FreqScalePattern()
 
