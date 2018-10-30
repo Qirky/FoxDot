@@ -419,19 +419,19 @@ class __scale__:
     ### Modes of the Melodic Minor Scale ###
     
     # First mode - Min/Maj chord
-    scale      = ScalePattern([ 0, 2, 3, 5, 7, 9, 11 ], name= "minMaj")
+    minMaj     = ScalePattern([ 0, 2, 3, 5, 7, 9, 11 ], name= "minMaj")
     # Second mode - (x)susb9
-    scale      = ScalePattern([ 0, 1, 3, 5, 7, 9, 10 ], name= "susb9")
+    susb9      = ScalePattern([ 0, 1, 3, 5, 7, 9, 10 ], name= "susb9")
     # Third Mode - Lydian Augmented, (x)Maj7#5
-    scale      = ScalePattern([ 0, 2, 4, 6, 8, 9, 11 ], name= "lydianAug")
+    lydianAug      = ScalePattern([ 0, 2, 4, 6, 8, 9, 11 ], name= "lydianAug")
     # Fourth Mode - Lydian Dominant, (x)7#11
-    scale      = ScalePattern([ 0, 2, 4, 6, 7, 9, 10 ], name= "lydianDom")
+    lydianDom      = ScalePattern([ 0, 2, 4, 6, 7, 9, 10 ], name= "lydianDom")
     # Fifth Mode - seldom used, but it's IMinMaj/V
-    scale      = ScalePattern([ 0, 2, 4, 5, 7, 8, 10 ], name= "melMin5th")
+    lydianDom      = ScalePattern([ 0, 2, 4, 5, 7, 8, 10 ], name= "melMin5th")
     # Sixth Mode - half-diminished (aka Locrian #2), (x)half-diminished
-    scale      = ScalePattern([ 0, 2, 3, 5, 6, 8, 10 ], name= "halfDim")
+    halfDim      = ScalePattern([ 0, 2, 3, 5, 6, 8, 10 ], name= "halfDim")
     # Seventh Mode - altered (diminished whole-tone), (x)7alt
-    scale      = ScalePattern([ 0, 1, 3, 4, 6, 8, 10 ], name= "altered")
+    altered      = ScalePattern([ 0, 1, 3, 4, 6, 8, 10 ], name= "altered")
     
 
 
