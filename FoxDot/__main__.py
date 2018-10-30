@@ -9,8 +9,10 @@
 """
 
 from __future__ import absolute_import, division, print_function
-from .lib import FoxDotCode, handle_stdin
-from .lib.Workspace import workspace
+from lib import FoxDotCode, handle_stdin
+from lib.Workspace import workspace
+#i removed the dots before lib
+
 import sys
 
 # If we are getting command line input
