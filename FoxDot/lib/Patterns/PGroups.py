@@ -203,7 +203,7 @@ def offlayer(self, method, dur=0.5, *args, **kwargs):
     
     if callable(method):
         func = method
-        args = [self.data] + list(args)
+        args = [self] + list(args)
     else:
         func = getattr(self, method)
         assert callable(func)
