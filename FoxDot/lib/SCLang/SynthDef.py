@@ -236,7 +236,8 @@ class SynthDefBaseClass(object):
 
             except IOError:
 
-                print("Warning: Unable to update '{}' SynthDef.".format(self.name))
+                # print("Warning: Unable to update '{}' SynthDef.".format(self.name))
+                pass # TODO - add python -m --verbose to print warnings?
 
         return
 

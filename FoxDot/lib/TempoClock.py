@@ -90,10 +90,11 @@ class TempoClock(object):
         
         self.time       = self.dtype(0) # Seconds elsapsed
         self.beat       = self.dtype(0) # Beats elapsed
-        self.start_time = self.dtype(time()) # could set to 0?
+        self.start_time = self.dtype(time()) # could set to 0? Issues with TimeVar tho
+        # self.start_time = self.dtype(0)
 
         # Don't start yet...
-        self.ticking = True
+        self.ticking = True #?? 
 
         # Player Objects stored here
         self.playing = []

@@ -997,7 +997,10 @@ class Pattern(metaPattern):
 
 class Cycle(Pattern):
     """ Special Case pattern class for cycling values in "every" """
-    pass
+    def __init__(self, *args):
+        Pattern.__init__(self, list(args))
+    def __str__(self):
+        return "Cycle({})".format(Pattern.__str__(self))
 
 class PGroup(metaPattern):
     """
