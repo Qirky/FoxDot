@@ -406,6 +406,39 @@ class __scale__:
     romanianMinor   = ScalePattern([ 0, 2, 3, 6, 7, 9, 10 ], name="romanianMinor")
     chinese         = ScalePattern([ 0, 4, 6, 7, 11 ], name="chinese")
 
+    wholeTone       = ScalePattern([ 0, 2, 4, 6, 8, 10 ], name="wholeTone")
+
+    # Half-Whole Diminished Scale - halfWhole
+    halfWhole       = ScalePattern([ 0, 1, 3, 4, 6, 7, 9, 10 ], name= "halfWhole")
+    # Whole-Half Diminished Scale - wholeHalf
+    wholeHalf       = ScalePattern([ 0, 2, 3, 5, 6, 8, 9, 11 ], name= "wholeHalf")
+    
+    ### Bebop Scales ###
+    bebopMaj        = ScalePattern([ 0, 2, 4, 5, 7, 8, 9, 11 ], name="bebopMaj")
+    bebopDorian     = ScalePattern([ 0, 2, 3, 4, 5, 9, 10 ], name="bebopMin") # aka Bebop Minor
+    bebopDom        = ScalePattern([ 0, 2, 4, 5, 7, 9, 10, 11 ], name="bebopDom") # Bebop Dominant/Mixolydian
+    bebopMelMin     = ScalePattern([ 0, 2, 3, 5, 7, 8, 9, 11 ], name="bebopMelMin") # Bebop Melodic Minor
+    blues           = ScalePattern([ 0, 3, 5, 6, 7, 10 ], name="blues")
+
+    ### Modes of the Melodic Minor Scale ###
+    
+    # First mode - Min/Maj chord
+    minMaj         = ScalePattern([ 0, 2, 3, 5, 7, 9, 11 ], name= "minMaj")
+    # Second mode - (x)susb9
+    susb9          = ScalePattern([ 0, 1, 3, 5, 7, 9, 10 ], name= "susb9")
+    # Third Mode - Lydian Augmented, (x)Maj7#5
+    lydianAug      = ScalePattern([ 0, 2, 4, 6, 8, 9, 11 ], name= "lydianAug")
+    # Fourth Mode - Lydian Dominant, (x)7#11
+    lydianDom      = ScalePattern([ 0, 2, 4, 6, 7, 9, 10 ], name= "lydianDom")
+    # Fifth Mode - seldom used, but it's IMinMaj/V
+    lydianDom      = ScalePattern([ 0, 2, 4, 5, 7, 8, 10 ], name= "melMin5th")
+    # Sixth Mode - half-diminished (aka Locrian #2), (x)half-diminished
+    halfDim      = ScalePattern([ 0, 2, 3, 5, 6, 8, 10 ], name= "halfDim")
+    # Seventh Mode - altered (diminished whole-tone), (x)7alt
+    altered      = ScalePattern([ 0, 1, 3, 4, 6, 8, 10 ], name= "altered")
+    
+
+
     freq            = FreqScalePattern()
 
     def __init__(self):
