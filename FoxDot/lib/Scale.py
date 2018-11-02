@@ -409,19 +409,20 @@ class __scale__:
     wholeTone       = ScalePattern([ 0, 2, 4, 6, 8, 10 ], name="wholeTone")
 
     # Half-Whole Diminished Scale - halfWhole
-    halfWhole    = ScalePattern([ 0, 1, 3, 4, 6, 7, 9, 10 ], name= "halfWhole")
+    halfWhole       = ScalePattern([ 0, 1, 3, 4, 6, 7, 9, 10 ], name= "halfWhole")
     # Whole-Half Diminished Scale - wholeHalf
-    wholeHalf      = ScalePattern([  0, 2, 3, 5, 6, 8, 9, 11 ], name= "wholeHalf")
+    wholeHalf       = ScalePattern([ 0, 2, 3, 5, 6, 8, 9, 11 ], name= "wholeHalf")
     
 # TO ADD: 
 #	bebop (maj+min), blues 
+    bebopMaj        = ScalePattern([ 0, 2, 4, 5, 7, 8, 9, 11 ], name="bebopMaj")
 
     ### Modes of the Melodic Minor Scale ###
     
     # First mode - Min/Maj chord
-    minMaj     = ScalePattern([ 0, 2, 3, 5, 7, 9, 11 ], name= "minMaj")
+    minMaj         = ScalePattern([ 0, 2, 3, 5, 7, 9, 11 ], name= "minMaj")
     # Second mode - (x)susb9
-    susb9      = ScalePattern([ 0, 1, 3, 5, 7, 9, 10 ], name= "susb9")
+    susb9          = ScalePattern([ 0, 1, 3, 5, 7, 9, 10 ], name= "susb9")
     # Third Mode - Lydian Augmented, (x)Maj7#5
     lydianAug      = ScalePattern([ 0, 2, 4, 6, 8, 9, 11 ], name= "lydianAug")
     # Fourth Mode - Lydian Dominant, (x)7#11
