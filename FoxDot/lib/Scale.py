@@ -412,9 +412,6 @@ class __scale__:
     halfWhole    = ScalePattern([ 0, 1, 3, 4, 6, 7, 9, 10 ], name= "halfWhole")
     # Whole-Half Diminished Scale - wholeHalf
     wholeHalf      = ScalePattern([  0, 2, 3, 5, 6, 8, 9, 11 ], name= "wholeHalf")
-    
-# TO ADD: 
-#	bebop (maj+min), blues 
 
     ### Modes of the Melodic Minor Scale ###
     
