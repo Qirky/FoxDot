@@ -128,7 +128,7 @@ class ScalePattern(ScaleType, Pattern):
         return Pattern(tones)
 
     def get_tuned_note(self, degree):
-        tuning_index = int(self[degree]) % self.steps
+        tuning_index = int(self[degree]) % len(self.tuning)
         # tuning_offset = 0
         # if degree < 0:
         #     tuning_offset = (((abs(degree) // len(self.tuning)) + 1) * self.steps)
