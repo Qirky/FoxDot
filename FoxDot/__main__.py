@@ -11,18 +11,42 @@
 from __future__ import absolute_import, division, print_function
 from .lib import FoxDotCode, handle_stdin
 from .lib.Workspace import workspace
-import sys
 
-# If we are getting command line input
+import argparse
 
-if sys.argv[-1] == "--pipe":
+parser = argparse.ArgumentParser(
+    prog="FoxDot", 
+    description="Live coding with Python and SuperCollider", 
+    epilog="More information: https://foxdot.org/")
 
-    # Set up pipe
+parser.add_argument('-p', '--pipe', action='store_true', help="run FoxDot from the command line interface")
+parser.add_argument('-d', '--dir', action='store', help="use an alternate directory for looking up samples")
+
+args = parser.parse_args()
+
+if args.dir:
+
+    try:
+
+        # Use given directory
+
+        FoxDotCode.use_sample_directory(args.dir)
+
+    except OSError as e:
+
+        # Exit with last error
+
+        import sys, traceback
+        sys.exit(traceback.print_exc(limit=1))
+
+if args.pipe:
+
+    # Just take commands from the CLI
 
     handle_stdin()
 
 else:
 
-    # Start the gui
+    # Open the GUI
 
     FoxDot = workspace(FoxDotCode).run()

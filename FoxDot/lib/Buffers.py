@@ -93,21 +93,40 @@ DESCRIPTIONS = { 'a' : "Gameboy hihat",      'A' : "Gameboy kick drum",
                  '3' : 'Vocals (Three)',
                  '4' : 'Vocals (Four)'}
 
+# Function-like class for searching directory for sample based on symbol
 
-def symbolToDir(symbol):
-    """ Return the sample search directory for a symbol """
-    if symbol.isalpha():
-        return join(
-            FOXDOT_SND,
-            symbol.lower(),
-            'upper' if symbol.isupper() else 'lower'
-        )
-    elif symbol in nonalpha:
-        longname = nonalpha[symbol]
-        return join(FOXDOT_SND, '_', longname)
-    else:
-        return None
+class _symbolToDir:
+    
+    def __init__(self, root):
+    
+        self.set_root(root)
+    
+    def set_root(self, root):
+        """ Check if root is a valid directory then points FoxDot to that
+            folder for searching for samples. Raises an OSError if 'root'
+            is not a valid directory """
 
+        if os.path.isdir(root):
+            self.root = os.path.realpath(root)
+        else:
+            raise OSError("{!r} is not a valid directory".format(root))
+        return
+
+    def __call__(self, symbol):
+        """ Return the sample search directory for a symbol """
+        if symbol.isalpha():
+            return join(
+                self.root,
+                symbol.lower(),
+                'upper' if symbol.isupper() else 'lower'
+            )
+        elif symbol in nonalpha:
+            longname = nonalpha[symbol]
+            return join(self.root, '_', longname)
+        else:
+            return None
+
+symbolToDir = _symbolToDir(FOXDOT_SND) # singleton
 
 class Buffer(object):
     def __init__(self, fn, number, channels=1):

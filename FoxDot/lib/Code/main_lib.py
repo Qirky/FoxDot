@@ -83,6 +83,12 @@ class FoxDotCode:
     def _compile(string):
         ''' Returns the bytecode for  '''
         return compile(str(CodeString(string)), "FoxDot", "exec")
+
+    @classmethod
+    def use_sample_directory(cls, directory):
+        ''' Forces FoxDot to look in `directory` instead of the default 
+            directory when using audio samples. '''
+        return cls.namespace['symbolToDir'].set_root( directory )
                  
     def __call__(self, code, verbose=True, verbose_error=None):
         """ Takes a string of FoxDot code and executes as Python """
