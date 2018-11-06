@@ -10,6 +10,7 @@ from __future__ import absolute_import, division, print_function
 import sys
 import json
 import itertools
+from socket import timeout as socket_timeout
 
 try:
     from urllib.request import urlopen
@@ -26,7 +27,7 @@ def get_pypi_version():
         page = urlopen(addr, timeout=2.5)
         data = json.loads(page.read().decode("utf-8"))
         version = data["info"]["version"]
-    except URLError:
+    except (URLError, socket_timeout):
         version = None
     return version
 

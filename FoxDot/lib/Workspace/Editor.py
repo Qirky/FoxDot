@@ -45,6 +45,7 @@ from distutils.version import LooseVersion as VersionNumber
 import webbrowser
 import os
 import re
+import socket
 
 # Code execution
 from ..Code import execute
@@ -66,6 +67,7 @@ class workspace:
         CodeClass.namespace['Player'].widget = self
 
         self.version = this_version = CodeClass.namespace['__version__']
+
         pypi_version = get_pypi_version()
 
         def check_versions():
