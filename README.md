@@ -4,6 +4,7 @@ FoxDot - Live Coding with Python v0.7
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
 ### v0.7 fixes and updates
+- Added `Go()` function to run FoxDot code from within normal Python programs.
 - Added `inf` variable, which can be used as a duration in any `var` object to continually use a value once it has been reached e.g. `var([0,1],[4,inf])`. This can be combined usefully with a special `var` object called `now` which starts the timing cycle for a `var` at the current time in the clock:
 
 ```python
@@ -175,11 +176,24 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 
 ## Documentation
 
-[Link to documentation website](https://docs.foxdot.org/) (still ongoing)
+[Link to documentation website](https://docs.foxdot.org/) (still in progress)
 
 ## Using alternative editors
 
 FoxDot comes pre-packaged with its own basic editor so that you don't have to tinker with config files or download any other tools but if you want to use an existing editor you can. [Koltes](https://github.com/KoltesDigital) has written a plugin for the popular Atom editor. You can install it by going to Settings -> Install -> Searching "foxdot" and pressing install on the plug in. Press Ctrl+Alt+f or go to menu -> Packages -> FoxDot  -> Toggle to start FoxDot running.
+
+## Running Python files with FoxDot code
+
+You can import `FoxDot` into your own Python programs as you would any other module. If you are not writing an interactive program, i.e. only containing FoxDot code, then you need to call a function `Go()` at the end of your program to get playback otherwise the program will terminate immediately. For example your program, `my_file.py`, should look something like this:
+
+```python
+from FoxDot import *
+p1 >> pads([0, 1, 2, 3])
+d1 >> play("x-o-")
+Go()
+```
+
+Then just run like any other Python program: `python my_file.py`
 
 ## Thanks
 
