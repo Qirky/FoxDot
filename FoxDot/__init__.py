@@ -23,3 +23,14 @@ from .lib import *
 def main():
     """ Function for starting the GUI when importing the library """
     FoxDot = Workspace.workspace(FoxDotCode).run()
+
+def Go():
+    """ Function to be called at the end of Python files with FoxDot code in to keep
+        the TempoClock thread alive. """
+    try:
+        import time
+        while 1:
+            time.sleep(100)
+    except KeyboardInterrupt:
+        return
+

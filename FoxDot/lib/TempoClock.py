@@ -134,6 +134,8 @@ class TempoClock(object):
         # If one object is going to played
         self.solo = SoloPlayer()
 
+        self.thread = threading.Thread(target=self.run)
+
         self.start()
 
     def sync_to_espgrid(self, host="localhost", port=5510):
@@ -392,10 +394,9 @@ class TempoClock(object):
         return time() + self.latency
         
     def start(self):
-        """ Starts the clock thread """
-        main = threading.Thread(target=self.run)
-        main.daemon = True
-        main.start()
+        """ Starts the clock thread """ 
+        self.thread.daemon = True
+        self.thread.start()
         return
 
     def __run_block(self, block, beat):
