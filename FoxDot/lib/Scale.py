@@ -431,7 +431,7 @@ class __scale__:
     # Fourth Mode - Lydian Dominant, (x)7#11
     lydianDom      = ScalePattern([ 0, 2, 4, 6, 7, 9, 10 ], name= "lydianDom")
     # Fifth Mode - seldom used, but it's IMinMaj/V
-    lydianDom      = ScalePattern([ 0, 2, 4, 5, 7, 8, 10 ], name= "melMin5th")
+    melMin5th      = ScalePattern([ 0, 2, 4, 5, 7, 8, 10 ], name= "melMin5th")
     # Sixth Mode - half-diminished (aka Locrian #2), (x)half-diminished
     halfDim      = ScalePattern([ 0, 2, 3, 5, 6, 8, 10 ], name= "halfDim")
     # Seventh Mode - altered (diminished whole-tone), (x)7alt
