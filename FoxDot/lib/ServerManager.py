@@ -278,7 +278,7 @@ class SCLangServerManager(ServerManager):
         
         if self.forward is not None:
             
-            self.forward.send(message)
+            self.forward.send(osc_message)
         
         return
 
