@@ -447,4 +447,4 @@ class GranularSynthDef(SampleSynthDef):
         return SampleSynthDef.__call__(self, pos, **kwargs)
 
 loop = LoopSynthDef()
-gsynth = GranularSynthDef()
+# gsynth = GranularSynthDef()
