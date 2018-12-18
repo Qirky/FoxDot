@@ -114,7 +114,7 @@ def get_first_item(array):
     """ Returns first item from a possibly nested list"""
     try:
         return get_first_item(array[0])
-    except TypeError:
+    except (TypeError, IndexError):
         return array
 
 def modi(array, i, debug=0):
