@@ -13,7 +13,7 @@ SynthDef.new(\pads,
 
 		osc = RHPF.ar(osc, [Line.kr(400, 1000, sus), Line.kr(4000,900,sus)], 0.5);
 
-		osc = osc * env * amp;
+		osc = osc * env * amp * Line.ar(0.001,1,sus * 0.05);
 
 		osc = Mix(osc) * 0.5;
 		osc = Pan2.ar(osc, pan);
