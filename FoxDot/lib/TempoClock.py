@@ -105,8 +105,6 @@ class TempoClock(object):
         self.bpm   = bpm
         self.meter = meter
 
-        self.bpm_start = self.start_time
-
         # Create the queue
         self.queue = Queue(self)
         self.current_block = None
@@ -119,6 +117,9 @@ class TempoClock(object):
         self.latency    = 0.25 # Time between starting processing osc messages and sending to server
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
+
+        self.bpm_start = self.start_time + self.latency
+        self.bpm_start_beat = 0
 
         # The duration to sleep while continually looping
         self.sleep_values = [0.01, 0.001, 0.0001]
@@ -211,6 +212,7 @@ class TempoClock(object):
         def func(*args, **kwargs):
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.bpm_start = time()
+            self.bpm_start_beat = self.now()
         return self.schedule(func)
 
     def swing(self, amount=0.1):
@@ -296,7 +298,7 @@ class TempoClock(object):
 
     def get_elapsed_beats(self):
         """ Returns the number of beats that *should* have elapsed since the last tempo change """
-        return float(self.get_elapsed_seconds() * (self.get_bpm() / 60)) - self.get_latency()
+        return float(self.get_elapsed_seconds() * (self.get_bpm() / 60))
 
     def get_elapsed_seconds(self):
         """ Returns the time since the last change in bpm """
