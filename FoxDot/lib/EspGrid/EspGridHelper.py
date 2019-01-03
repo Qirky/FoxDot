@@ -13,6 +13,9 @@ class EspGrid:
         
         self.server.addMsgHandler('/reset', self._reset_clock)
 
+    def __repr__(self):
+        return self.__class__.__name__
+
     def _reset_clock(self, *args):
         self.metro.reset()
         return
@@ -26,7 +29,7 @@ class EspGrid:
         self.server.send(OSCMessage("/esp/clockMode/q"))
         return self.server.receive("/esp/clockMode/r")
 
-    # Tempo information
+    # Retrieve tempo information
 
     def query(self):
         self.server.send(OSCMessage("/esp/clock/q"))
@@ -42,6 +45,7 @@ class EspGrid:
         self.server.send(OSCMessage("/esp/tempoCPU/q"))
         return self.server.receive("/esp/tempoCPU/r")
 
+    # Setting tempo data
 
     def toggle_tempo(self, flag):
         message = OSCMessage("/esp/beat/on")

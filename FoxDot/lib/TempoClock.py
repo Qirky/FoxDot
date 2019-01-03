@@ -85,15 +85,11 @@ class TempoClock(object):
         # Storing time as a float 
 
         self.dtype=float
-
-        # self.dtype=Fraction
         
         self.time       = self.dtype(0) # Seconds elsapsed
         self.beat       = self.dtype(0) # Beats elapsed
-        self.start_time = self.dtype(time()) # could set to 0? Issues with TimeVar tho
-        # self.start_time = self.dtype(0)
+        self.start_time = self.dtype(time()) # Could get from EspGrid
 
-        # Don't start yet...
         self.ticking = True #?? 
 
         # Player Objects stored here
@@ -108,6 +104,8 @@ class TempoClock(object):
         # General set up
         self.bpm   = bpm
         self.meter = meter
+
+        self.bpm_start = self.start_time
 
         # Create the queue
         self.queue = Queue(self)
@@ -209,7 +207,11 @@ class TempoClock(object):
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar """
-        return self.schedule(lambda *args, **kwargs: object.__setattr__(self, "bpm", self._convert_json_bpm(bpm)))
+        # Use object.__setattr__ to avoid infinite bpm setting
+        def func(*args, **kwargs):
+            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+            self.bpm_start = time()
+        return self.schedule(func)
 
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
@@ -292,6 +294,14 @@ class TempoClock(object):
         """ Returns self.latency (which is in seconds) as a fraction of a beat """
         return self.seconds_to_beats(self.latency)
 
+    def get_elapsed_beats(self):
+        """ Returns the number of beats that *should* have elapsed since the last tempo change """
+        return float(self.get_elapsed_seconds() * (self.get_bpm() / 60)) - self.get_latency()
+
+    def get_elapsed_seconds(self):
+        """ Returns the time since the last change in bpm """
+        return time() - self.bpm_start
+
     def sync_to_midi(self, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
             this attempts to follow the tempo of the device. Requies rtmidi """
@@ -350,20 +360,6 @@ class TempoClock(object):
         }
 
         return data
-
-
-    # def set_attr(self, key, value):
-    #     """ Sets the value of self.key when key is a string """
-
-    #     if key == "bpm":
-
-    #         self.bpm = value
-
-    #     else:
-
-    #         setattr(self, key, Fraction(value[0], value[1]))
-
-    #     return
 
     def get_elapsed_sec(self):
         return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
@@ -451,6 +447,8 @@ class TempoClock(object):
             if self.queue.after_next_event(beat):
 
                 self.current_block = self.queue.pop()
+
+                # Do the work in a thread
 
                 if len(self.current_block):
 
