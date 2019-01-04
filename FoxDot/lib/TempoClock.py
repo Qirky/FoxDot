@@ -215,7 +215,7 @@ class TempoClock(object):
             self.bpm_start = time()
             self.bpm_start_beat = next_bar
         # Give next bar value to bpm_start_beat
-        return self.schedule(func)
+        return self.schedule(func, next_bar)
 
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
@@ -399,27 +399,26 @@ class TempoClock(object):
         self.thread.start()
         return
 
-    def _adjust_hard_nudge(self, beat):
+    def _adjust_hard_nudge(self):
         """ Checks for any drift between the current beat value and the value
             expected based on time elapsed and adjusts the hard_nudge value accordingly """
         
-        beats_elapsed = beat - self.bpm_start_beat
+        beats_elapsed = self.now() - self.bpm_start_beat
         expected_beat = self.get_elapsed_beats()
 
         # Account for nudge in the drift
 
-        drift  = self.beat_dur(expected_beat - beats_elapsed) - self.nudge
+        self.drift  = self.beat_dur(expected_beat - beats_elapsed) - self.nudge
 
-        if abs(drift) > 0.001: # value could be reworked / not hard coded
+        if abs(self.drift) > 0.001: # value could be reworked / not hard coded
 
-            self.hard_nudge -= drift
+            self.hard_nudge -= self.drift
 
         return self._schedule_adjust_hard_nudge()
 
     def _schedule_adjust_hard_nudge(self):
         """ Start recursive call to adjust hard-nudge values """
-        beat = self.next_bar()
-        return self.schedule(lambda: self._adjust_hard_nudge(beat), beat)
+        return self.schedule(self._adjust_hard_nudge)
 
     def __run_block(self, block, beat):
         """ Private method for calling all the items in the queue block.
