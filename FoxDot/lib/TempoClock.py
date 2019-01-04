@@ -404,12 +404,13 @@ class TempoClock(object):
         beats_elapsed = self.now() - self.bpm_start_beat
         expected_beat = self.get_elapsed_beats()
 
-        drift  = self.beat_dur(beats_elapsed - expected_beat)
-        adjust = (drift + self.nudge) # Account for nudge in the drift
+        # Account for nudge in the drift
 
-        if abs(adjust) > 0.001: # value could be reworked / not hard coded
+        drift  = self.beat_dur(expected_beat - beats_elapsed) - self.nudge
 
-            self.hard_nudge += adjust
+        if abs(drift) > 0.001: # value could be reworked / not hard coded
+
+            self.hard_nudge -= drift
 
         return self._schedule_adjust_hard_nudge()
 
