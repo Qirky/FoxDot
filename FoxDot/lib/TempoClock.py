@@ -409,8 +409,6 @@ class TempoClock(object):
 
         if abs(adjust) > 0.001: # value could be reworked / not hard coded
 
-            print("Adjusting hard nudge")
-
             self.hard_nudge += adjust
 
         return self._schedule_adjust_hard_nudge()
