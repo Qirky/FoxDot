@@ -208,14 +208,13 @@ class TempoClock(object):
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar """
-        next_bar = self.next_bar()
         # Use object.__setattr__ to avoid infinite bpm setting
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.bpm_start = time()
-            self.bpm_start_beat = next_bar
+            self.bpm_start_beat = int(self.now())
         # Give next bar value to bpm_start_beat
-        return self.schedule(func, next_bar)
+        return self.schedule(func, is_priority=True)
 
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
@@ -403,7 +402,7 @@ class TempoClock(object):
         """ Checks for any drift between the current beat value and the value
             expected based on time elapsed and adjusts the hard_nudge value accordingly """
         
-        beats_elapsed = self.now() - self.bpm_start_beat
+        beats_elapsed = int(self.now()) - self.bpm_start_beat
         expected_beat = self.get_elapsed_beats()
 
         # Account for nudge in the drift
@@ -496,7 +495,7 @@ class TempoClock(object):
         return
 
 
-    def schedule(self, obj, beat=None, args=(), kwargs={}):
+    def schedule(self, obj, beat=None, args=(), kwargs={}, is_priority=False):
         """ TempoClock.schedule(callable, beat=None)
             Add a player / event to the queue """
 
@@ -534,7 +533,7 @@ class TempoClock(object):
 
         # Add to the queue
 
-        self.queue.add(obj, beat, args, kwargs)
+        self.queue.add(obj, beat, args, kwargs, is_priority)
 
         # block.time = self.osc_message_accum
 
@@ -617,7 +616,7 @@ class Queue(object):
     def __repr__(self):
         return "\n".join([str(item) for item in self.data]) if len(self.data) > 0 else "[]"
 
-    def add(self, item, beat, args=(), kwargs={}):
+    def add(self, item, beat, args=(), kwargs={}, is_priority=False):
         """ Adds a callable object to the queue at a specified beat, args and kwargs for the
             callable object must be in a list and dict.
         """
@@ -645,10 +644,9 @@ class Queue(object):
         # If the new event is before the next scheduled event,
         # move it to the 'front' of the queue
 
-        # if beat < self.next():
         if self.before_next_event(beat):
 
-            self.data.append(QueueBlock(self, item, beat, args, kwargs))
+            self.data.append(QueueBlock(self, item, beat, args, kwargs, is_priority))
 
             block = self.data[-1]
 
@@ -665,7 +663,7 @@ class Queue(object):
 
                 if beat == block.beat:
 
-                    block.add(item, args, kwargs)                    
+                    block.add(item, args, kwargs, is_priority)
 
                     break
 
@@ -681,7 +679,7 @@ class Queue(object):
 
                         i = 0
 
-                    self.data.insert(i, QueueBlock(self, item, beat, args, kwargs))
+                    self.data.insert(i, QueueBlock(self, item, beat, args, kwargs, is_priority))
 
                     block = self.data[i]
 
@@ -739,7 +737,7 @@ class QueueBlock(object):
                         lambda x: True                       # And anything else
                       ]
                        
-    def __init__(self, parent, obj, t, args=(), kwargs={}):
+    def __init__(self, parent, obj, t, args=(), kwargs={}, is_priority=False): # Why am I forcing an obj?
 
         self.events         = [ [] for lvl in self.priority_levels ]
         self.called_events  = []
@@ -754,7 +752,7 @@ class QueueBlock(object):
 
         self.beat = t
         self.time = 0
-        self.add(obj, args, kwargs)
+        self.add(obj, args, kwargs, is_priority)
 
     @classmethod
     def set_server(cls, server):
@@ -767,7 +765,7 @@ class QueueBlock(object):
     def __repr__(self):
         return "{}: {}".format(self.beat, self.players())
     
-    def add(self, obj, args=(), kwargs={}):
+    def add(self, obj, args=(), kwargs={}, is_priority=False):
         """ Adds a callable object to the QueueBlock """
 
         q_obj = QueueObj(obj, args, kwargs)
@@ -776,7 +774,15 @@ class QueueBlock(object):
 
             if in_level(obj):
 
-                self.events[i].append(q_obj)
+                # Put at the front if labelled as priority
+
+                if is_priority:
+
+                    self.events[i].insert(0, q_obj)
+
+                else:
+
+                    self.events[i].append(q_obj)
 
                 self.items[q_obj.obj] = q_obj # store the wrapped object as an identifer
 
