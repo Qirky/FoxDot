@@ -1,5 +1,0 @@
-d1 >> play("x * ")
-
-Clock.bpm=160
-
-print(Clock.hard_nudge)
