@@ -200,3 +200,7 @@ nextbar = var([0]).transform(lambda a: Clock.next_bar())
 Attributes = Player.get_attributes()
 PatternMethods = Pattern.get_methods()
 PatternTypes = functions(Patterns.Sequences)
+
+# Start
+
+Clock.start()

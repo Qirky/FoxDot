@@ -135,7 +135,7 @@ class TempoClock(object):
 
         self.thread = threading.Thread(target=self.run)
 
-        self.start()
+        # self.start()
 
     def sync_to_espgrid(self, host="localhost", port=5510):
         from .EspGrid import EspGrid
@@ -397,6 +397,28 @@ class TempoClock(object):
         self.thread.start()
         return
 
+    def _adjust_hard_nudge(self):
+        """ Checks for any drift between the current beat value and the value
+            expected based on time elapsed and adjusts the hard_nudge value accordingly """
+        
+        beats_elapsed = self.now() - self.bpm_start_beat
+        expected_beat = self.get_elapsed_beats()
+
+        drift  = self.beat_dur(beats_elapsed - expected_beat)
+        adjust = (drift + self.nudge) # Account for nudge in the drift
+
+        if abs(adjust) > 0.001: # value could be reworked / not hard coded
+
+            print("Adjusting hard nudge")
+
+            self.hard_nudge += adjust
+
+        return self._schedule_adjust_hard_nudge()
+
+    # Start recursive call to adjust hard-nudge values
+    def _schedule_adjust_hard_nudge(self):
+        return self.schedule(self._adjust_hard_nudge, self.next_bar())
+
     def __run_block(self, block, beat):
         """ Private method for calling all the items in the queue block.
             This means the clock can still 'tick' while a large number of
@@ -441,6 +463,10 @@ class TempoClock(object):
         """ Main loop """
         
         self.ticking = True
+
+        # Start recursive call to adjust hard-nudge values
+        
+        self._schedule_adjust_hard_nudge()
 
         while self.ticking:
 
@@ -575,6 +601,8 @@ class TempoClock(object):
         
         self.playing = []
         #self.ticking = False
+
+        self._schedule_adjust_hard_nudge()
 
         return
 
