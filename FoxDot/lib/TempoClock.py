@@ -119,7 +119,7 @@ class TempoClock(object):
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
 
-        self.bpm_start_time = time() # + self.latency
+        self.bpm_start_time = time()
         self.bpm_start_beat = 0
 
         # The duration to sleep while continually looping
@@ -208,11 +208,10 @@ class TempoClock(object):
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
-        bpm_start_time = time() + self.beat_dur(next_bar - self.now())
+        bpm_start_time = time() + self.beat_dur(next_bar - self.now()) - (self.nudge + self.hard_nudge)
         bpm_start_beat = next_bar
         def func():
             # Only update if necessary
-            # if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:            
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
@@ -223,8 +222,6 @@ class TempoClock(object):
     def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time):
         """ Sets the bpm externally  from another connected instance of FoxDot """
         def func():
-            # Only update if necessary
-            # if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
