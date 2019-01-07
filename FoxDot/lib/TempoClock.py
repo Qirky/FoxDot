@@ -635,9 +635,7 @@ class TempoClock(object):
         
         self.playing = []
         #self.ticking = False
-
-        self._schedule_adjust_hard_nudge()
-
+        # self._schedule_adjust_hard_nudge()
         return
 
 #####
