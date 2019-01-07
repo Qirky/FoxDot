@@ -891,7 +891,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         assert "init" in data
 
-        send_to_socket(self.request, {"clock_time": time.time()})
+        # send_to_socket(self.request, {"clock_time": time.time()})
 
         self.master.peers.append(self)
 
@@ -947,7 +947,7 @@ class TempoClient:
     def __init__(self, clock):
         self.metro = clock
 
-        self.sync_keys = ("bpm", "bpm_start_beat", "bpm_start_time")
+        self.sync_keys = ("bpm_start_beat", "bpm_start_time", "bpm")
 
         self.server_hostname = None
         self.server_port     = None
@@ -1009,11 +1009,11 @@ class TempoClient:
     #     self.latency = (end - start) * 0.5
     #     return self.latency
 
-    def record_latency(self):
-        # self.start_timing()
-        # self.recording_latency = True
-        self.send(["latency"])
-        return
+    # def record_latency(self):
+    #     # self.start_timing()
+    #     # self.recording_latency = True
+    #     self.send(["latency"])
+    #     return
 
     def send(self, data):
         """ Sends data to server """
@@ -1026,7 +1026,7 @@ class TempoClient:
         
         # First message is machine clock time
 
-        time_data = read_from_socket(self.socket)
+        # time_data = read_from_socket(self.socket)
 
         # self.stop_timing()
 

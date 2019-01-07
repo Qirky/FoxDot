@@ -182,7 +182,7 @@ class TempoClock(object):
         try:
             self.tempo_client = TempoClient(self)
             self.tempo_client.connect(ip_address, port)
-            self.tempo_client.send({"request" : ["bpm", "start_time", "beat", "time"]})
+            self.tempo_client.send(["request"])
         except ConnectionRefusedError as e:
             print(e)
         pass
@@ -257,13 +257,13 @@ class TempoClock(object):
 
             json_value = self._convert_bpm_json(value)
 
-            # If this is a client 
+            # If this is a client, send info to server
 
             if self.tempo_client is not None:
             
                 self.tempo_client.update_tempo(json_value, start_beat, start_time)
 
-            # If this is a server
+            # If this is a server, send info to clients
             
             if self.tempo_server is not None:
             
