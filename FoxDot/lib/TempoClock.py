@@ -206,14 +206,17 @@ class TempoClock(object):
         return item in self.items
 
     def update_tempo(self, bpm):
-        """ Schedules the bpm change at the next bar """
-        # Use object.__setattr__ to avoid infinite bpm setting
+        """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
+        next_bar = self.next_bar()
+        start_time = time() + self.beat_dur(next_bar - self.now())
+        start_beat = next_bar
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-            self.last_now_call = self.bpm_start_time = time()
-            self.bpm_start_beat = int(self.now())
+            self.last_now_call = self.bpm_start_time = start_time
+            self.bpm_start_beat = start_beat
         # Give next bar value to bpm_start_beat
-        return self.schedule(func, is_priority=True)
+        self.schedule(func, is_priority=True)
+        return start_beat, start_time
 
     def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time):
         """ Sets the bpm externally  from another connected instance of FoxDot """
@@ -246,7 +249,7 @@ class TempoClock(object):
 
             # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
 
-            self.update_tempo(value)
+            start_beat, start_time = self.update_tempo(value)
 
             json_value = self._convert_bpm_json(value)
 
@@ -254,11 +257,11 @@ class TempoClock(object):
 
             if self.tempo_client is not None:
             
-                self.tempo_client.update_tempo(json_value, self.bpm_start_beat, self.bpm_start_time)
+                self.tempo_client.update_tempo(json_value, start_beat, start_time)
             
             if self.tempo_server is not None:
             
-                self.tempo_server.update_tempo(json_value, self.bpm_start_beat, self.bpm_start_time)
+                self.tempo_server.update_tempo(json_value, start_beat, start_time)
 
         elif attr == "midi_nudge" and self.__setup:
 
