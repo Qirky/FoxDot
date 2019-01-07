@@ -34,10 +34,6 @@ class ThreadedText(Text):
     def get_num_lines(self):
         self.lines = len(self.get("1.0", END).split("\n"))
         return self.lines
-
-    # def insert(self, *args, **kwargs):
-    #     Text.insert(self, *args, **kwargs)
-    #     return "break"
     
     def update(self):
         """ Recursively called method that monitors as

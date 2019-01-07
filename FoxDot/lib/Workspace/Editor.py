@@ -230,6 +230,7 @@ class workspace:
         self.text.bind("<{}-Shift-Left>".format(ctrl),      self.select_word_left)
 
         self.text.bind("<Alt_L>",                           lambda event: "break")
+        self.text.bind("<Alt-n>",                           lambda event: "break") # Fixes a MacOS tilde bug.
 
         self.text.bind("<{}-a>".format(ctrl),               self.select_all)
         self.text.bind("<{}-d>".format(ctrl),               self.duplicate_line)
