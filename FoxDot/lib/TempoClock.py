@@ -205,6 +205,14 @@ class TempoClock(object):
     def __contains__(self, item):
         return item in self.items
 
+    def update_tempo_now(self, bpm):
+        """ emergency override for updating tempo"""
+        object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+        self.last_now_call = self.bpm_start_time = time()
+        self.bpm_start_beat = self.now()
+        # self.update_network_tempo(bpm, start_beat, start_time) -- updates at the bar...
+        return
+
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
@@ -215,17 +223,41 @@ class TempoClock(object):
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
         # Give next bar value to bpm_start_beat
-        self.schedule(func, is_priority=True)
+        self.schedule(func, next_bar, is_priority=True)
         return bpm_start_beat, bpm_start_time
 
-    def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time):
+    def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time, schedule_now=False):
         """ Sets the bpm externally  from another connected instance of FoxDot """
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
-        # Give next bar value to bpm_start_beat
-        return self.schedule(func, is_priority=True)
+        # Might be changing immediately
+        if schedule_now:
+            func()
+        else:
+            self.schedule(func, is_priority=True)
+        return 
+
+    def update_network_tempo(self, bpm, start_beat, start_time):
+        """ Updates connected FoxDot instances (client or servers) tempi """
+
+        json_value = self._convert_bpm_json(bpm)
+
+        # If this is a client, send info to server
+
+        if self.tempo_client is not None:
+        
+            self.tempo_client.update_tempo(json_value, start_beat, start_time)
+
+        # If this is a server, send info to clients
+        
+        if self.tempo_server is not None:
+        
+            self.tempo_server.update_tempo(None, json_value, start_beat, start_time)
+
+        return
+
 
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
@@ -251,19 +283,7 @@ class TempoClock(object):
 
             start_beat, start_time = self.update_tempo(value)
 
-            json_value = self._convert_bpm_json(value)
-
-            # If this is a client, send info to server
-
-            if self.tempo_client is not None:
-            
-                self.tempo_client.update_tempo(json_value, start_beat, start_time)
-
-            # If this is a server, send info to clients
-            
-            if self.tempo_server is not None:
-            
-                self.tempo_server.update_tempo(None, json_value, start_beat, start_time)                
+            self.update_network_tempo(value, start_beat, start_time)
 
         elif attr == "midi_nudge" and self.__setup:
 
