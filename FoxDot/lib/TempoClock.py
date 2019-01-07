@@ -220,6 +220,8 @@ class TempoClock(object):
 
     def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time):
         """ Sets the bpm externally  from another connected instance of FoxDot """
+        # print(self.bpm, self.bpm_start_beat, self.bpm_start_time)
+        # print(bpm, bpm_start_beat, bpm_start_time)
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.last_now_call = self.bpm_start_time = bpm_start_time
@@ -247,21 +249,23 @@ class TempoClock(object):
     def __setattr__(self, attr, value):
         if attr == "bpm" and self.__setup:
 
-            # Schedule for next bar (taking into account latency for any "listening" FoxDot clients)
+            # Schedule for next bar
 
             start_beat, start_time = self.update_tempo(value)
 
             json_value = self._convert_bpm_json(value)
 
-            # Notify listening clients
+            # If this is a client 
 
             if self.tempo_client is not None:
             
                 self.tempo_client.update_tempo(json_value, start_beat, start_time)
+
+            # If this is a server
             
             if self.tempo_server is not None:
             
-                self.tempo_server.update_tempo(json_value, start_beat, start_time)
+                self.tempo_server.update_tempo(json_value, start_beat, start_time)                
 
         elif attr == "midi_nudge" and self.__setup:
 
