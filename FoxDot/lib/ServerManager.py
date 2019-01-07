@@ -891,7 +891,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         assert "init" in data
 
-        # send_to_socket(self.request, {"clock_time": time.time()})
+        send_to_socket(self.request, {"clock_time": time.time()})
 
         self.master.peers.append(self)
 
@@ -923,7 +923,6 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                     send_to_socket(self.request, ["latency"])
 
-            
         return
 
 
@@ -991,29 +990,29 @@ class TempoClient:
 
         send_to_socket(self.socket, ["init"])
         
-        # self.start_timing()
+        self.start_timing()
 
         return self
 
-    # def start_timing(self):
-    #     """ Starts an internal timer for calculating latency """
-    #     self.start_time = time.time()
+    def start_timing(self):
+        """ Starts an internal timer for calculating latency """
+        self.start_time = time.time()
 
-    # def stop_timing(self):
-    #     """ Stops the internal timer and calculates latency  """
-    #     self.stop_time = time.time()
-    #     self.calculate_latency(self.start_time, self.stop_time)
+    def stop_timing(self):
+        """ Stops the internal timer and calculates latency  """
+        self.stop_time = time.time()
+        self.calculate_latency(self.start_time, self.stop_time)
 
-    # def calculate_latency(self, start, end):
-    #     """ Returns (and stores) the latency using the start and end time to send a message to the master server"""
-    #     self.latency = (end - start) * 0.5
-    #     return self.latency
+    def calculate_latency(self, start, end):
+        """ Returns (and stores) the latency using the start and end time to send a message to the master server"""
+        self.latency = (end - start) * 0.5
+        return self.latency
 
-    # def record_latency(self):
-    #     # self.start_timing()
-    #     # self.recording_latency = True
-    #     self.send(["latency"])
-    #     return
+    def record_latency(self):
+        self.start_timing()
+        self.recording_latency = True
+        self.send(["latency"])
+        return
 
     def send(self, data):
         """ Sends data to server """
@@ -1026,11 +1025,11 @@ class TempoClient:
         
         # First message is machine clock time
 
-        # time_data = read_from_socket(self.socket)
+        time_data = read_from_socket(self.socket)
 
-        # self.stop_timing()
+        self.stop_timing()
 
-        # self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
+        self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
         
         # Enter loop
 
@@ -1040,10 +1039,10 @@ class TempoClient:
 
             # Might be recording latency
 
-            # if self.recording_latency:
+            if self.recording_latency:
 
-            #     self.stop_timing()
-            #     self.recording_latency = False
+                self.stop_timing()
+                self.recording_latency = False
             
             if data is None:
                 break
