@@ -208,24 +208,26 @@ class TempoClock(object):
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
-        start_time = time() + self.beat_dur(next_bar - self.now())
-        start_beat = next_bar
+        bpm_start_time = time() + self.beat_dur(next_bar - self.now())
+        bpm_start_beat = next_bar
         def func():
-            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-            self.last_now_call = self.bpm_start_time = start_time
-            self.bpm_start_beat = start_beat
+            # Only update if necessary
+            if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:
+                object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+                self.last_now_call = self.bpm_start_time = bpm_start_time
+                self.bpm_start_beat = bpm_start_beat
         # Give next bar value to bpm_start_beat
         self.schedule(func, is_priority=True)
-        return start_beat, start_time
+        return bpm_start_beat, bpm_start_time
 
     def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time):
         """ Sets the bpm externally  from another connected instance of FoxDot """
-        # print(self.bpm, self.bpm_start_beat, self.bpm_start_time)
-        # print(bpm, bpm_start_beat, bpm_start_time)
         def func():
-            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-            self.last_now_call = self.bpm_start_time = bpm_start_time
-            self.bpm_start_beat = bpm_start_beat
+            # Only update if necessary
+            if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:
+                object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+                self.last_now_call = self.bpm_start_time = bpm_start_time
+                self.bpm_start_beat = bpm_start_beat
         # Give next bar value to bpm_start_beat
         return self.schedule(func, is_priority=True)
 
