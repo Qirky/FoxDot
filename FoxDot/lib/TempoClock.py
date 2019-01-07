@@ -254,11 +254,11 @@ class TempoClock(object):
 
             if self.tempo_client is not None:
             
-                self.tempo_client.update_tempo(json_value, bpm_start_beat, bpm_start_time)
+                self.tempo_client.update_tempo(json_value, self.bpm_start_beat, self.bpm_start_time)
             
             if self.tempo_server is not None:
             
-                self.tempo_server.update_tempo(json_value, bpm_start_beat, bpm_start_time)
+                self.tempo_server.update_tempo(json_value, self.bpm_start_beat, self.bpm_start_time)
 
         elif attr == "midi_nudge" and self.__setup:
 
