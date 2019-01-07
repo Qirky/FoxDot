@@ -208,10 +208,10 @@ class TempoClock(object):
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
-        bpm_start_time = time() + self.beat_dur(next_bar - self.now())
+        bpm_start_time = time() + self.beat_dur(next_bar - self.now()) - self.nudge
         bpm_start_beat = next_bar
         def func():
-            # Only update if necessary
+            # print(time() - self.nudge, bpm_start_time, (time() - self.nudge) - bpm_start_time)
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
@@ -223,6 +223,7 @@ class TempoClock(object):
         """ Sets the bpm externally  from another connected instance of FoxDot """
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+            # print(time() - self.nudge, bpm_start_time, (time() - self.nudge) - bpm_start_time)
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
         # Give next bar value to bpm_start_beat
