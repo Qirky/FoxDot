@@ -213,10 +213,9 @@ class TempoClock(object):
         def func():
             # Only update if necessary
             # if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:            
-            if True:
-                object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-                self.last_now_call = self.bpm_start_time = bpm_start_time
-                self.bpm_start_beat = bpm_start_beat
+            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+            self.last_now_call = self.bpm_start_time = bpm_start_time
+            self.bpm_start_beat = bpm_start_beat
         # Give next bar value to bpm_start_beat
         self.schedule(func, is_priority=True)
         return bpm_start_beat, bpm_start_time
@@ -226,10 +225,9 @@ class TempoClock(object):
         def func():
             # Only update if necessary
             # if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:
-            if True:
-                object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-                self.last_now_call = self.bpm_start_time = bpm_start_time
-                self.bpm_start_beat = bpm_start_beat
+            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+            self.last_now_call = self.bpm_start_time = bpm_start_time
+            self.bpm_start_beat = bpm_start_beat
         # Give next bar value to bpm_start_beat
         return self.schedule(func, is_priority=True)
 
@@ -269,7 +267,7 @@ class TempoClock(object):
             
             if self.tempo_server is not None:
             
-                self.tempo_server.update_tempo(json_value, start_beat, start_time)                
+                self.tempo_server.update_tempo(None, json_value, start_beat, start_time)                
 
         elif attr == "midi_nudge" and self.__setup:
 
