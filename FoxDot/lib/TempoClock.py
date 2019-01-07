@@ -208,7 +208,7 @@ class TempoClock(object):
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
-        bpm_start_time = time() + self.beat_dur(next_bar - self.now()) - (self.nudge + self.hard_nudge)
+        bpm_start_time = time() + self.beat_dur(next_bar - self.now())
         bpm_start_beat = next_bar
         def func():
             # Only update if necessary
