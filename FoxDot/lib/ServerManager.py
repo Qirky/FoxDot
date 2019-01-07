@@ -852,10 +852,10 @@ class TempoServer(ThreadedServer):
         self.server_thread.start()
         return
 
-    def update_tempo(self, bpm):
+    def update_tempo(self, bpm, bpm_start_beat, bpm_start_time):
         """ Sends information  to all connected peers about changing tempo """
         for peer in self.peers:
-            peer.update_tempo(bpm)
+            peer.update_tempo(bpm, bpm_start_beat, bpm_start_time)
         return
 
     def kill(self):
@@ -911,7 +911,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                 elif "new_bpm" in data:
 
-                    self.metro.update_tempo(data["new_bpm"])
+                    self.metro.update_tempo_from_connection(**data["new_bpm"])
 
                 elif "latency":
 
@@ -921,9 +921,18 @@ class RequestHandler(socketserver.BaseRequestHandler):
         return
 
 
-    def update_tempo(self, bpm):
+    def update_tempo(self, bpm, bpm_start_beat, bpm_start_time):
 
-        send_to_socket(self.request, {"new_bpm": bpm })
+        data = {
+            "new_bpm" :
+                {
+                    "bpm" : bpm,
+                    "bpm_start_time" : bpm_start_time,
+                    "bpm_start_beat" : bpm_start_beat
+            }
+        }
+
+        send_to_socket(self.request, data)
 
         return
 
@@ -1040,11 +1049,20 @@ class TempoClient:
             
             elif "new_bpm" in data:
 
-                self.metro.update_tempo(data["new_bpm"])
+                self.metro.update_tempo_from_connection(**data["new_bpm"])
         return
 
-    def update_tempo(self, bpm):
-        send_to_socket(self.socket, {"new_bpm": bpm})
+    def update_tempo(self, bpm, bpm_start_beat, bpm_start_time):
+        """ Sends data to other connected FoxDot instances to update their tempo """
+        data = {
+            "new_bpm" :
+                {
+                    "bpm" : bpm,
+                    "bpm_start_time" : bpm_start_time,
+                    "bpm_start_beat" : bpm_start_beat
+            }
+        }
+        return self.send(data)
 
     def kill(self):
         """ Properly terminates the connection to the server """

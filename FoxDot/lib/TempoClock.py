@@ -215,6 +215,15 @@ class TempoClock(object):
         # Give next bar value to bpm_start_beat
         return self.schedule(func, is_priority=True)
 
+    def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time):
+        """ Sets the bpm externally  from another connected instance of FoxDot """
+        def func():
+            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+            self.last_now_call = self.bpm_start_time = bpm_start_time
+            self.bpm_start_beat = bpm_start_beat
+        # Give next bar value to bpm_start_beat
+        return self.schedule(func, is_priority=True)
+
     def swing(self, amount=0.1):
         """ Sets the nudge attribute to var([0, amount * (self.bpm / 120)],1/2)"""
         self.nudge = TimeVar([0, amount * (self.bpm / 120)], 1/2) if amount != 0 else 0
@@ -245,11 +254,11 @@ class TempoClock(object):
 
             if self.tempo_client is not None:
             
-                self.tempo_client.update_tempo(json_value)
+                self.tempo_client.update_tempo(json_value, bpm_start_beat, bpm_start_time)
             
             if self.tempo_server is not None:
             
-                self.tempo_server.update_tempo(json_value)
+                self.tempo_server.update_tempo(json_value, bpm_start_beat, bpm_start_time)
 
         elif attr == "midi_nudge" and self.__setup:
 
@@ -331,7 +340,9 @@ class TempoClock(object):
         self.start_time = time()
         self.queue.clear()
         self.beat = beat
-        self.time = time() - self.start_time
+        self.bpm_start_beat = beat
+        self.bpm_start_time = time()
+        # self.time = time() - self.start_time
         for player in self.playing:
             player(count=True)
         return
@@ -358,10 +369,9 @@ class TempoClock(object):
 
         data = {
             "sync" : {
-                "start_time" : float(self.start_time),
-                "bpm"        : self.json_bpm(),
-                "beat"       : float(self.beat),
-                "time"       : float(self.time)
+                "bpm_start_time" : float(self.bpm_start_time),
+                "bpm_start_beat" : float(self.bpm_start_beat),
+                "bpm"            : self.json_bpm(),
             }
         }
 
