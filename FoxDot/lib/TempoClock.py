@@ -86,9 +86,10 @@ class TempoClock(object):
 
         self.dtype=float
         
-        self.time       = self.dtype(0) # Seconds elsapsed
+        # self.time       = self.dtype(0) # Seconds elsapsed
         self.beat       = self.dtype(0) # Beats elapsed
-        self.start_time = self.dtype(time()) # Could get from EspGrid
+        # self.start_time = self.dtype(time()) # Could get from EspGrid
+        self.last_now_call = self.dtype(0)
 
         self.ticking = True #?? 
 
@@ -118,7 +119,7 @@ class TempoClock(object):
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
 
-        self.bpm_start = self.start_time + self.latency
+        self.bpm_start_time = time() # + self.latency
         self.bpm_start_beat = 0
 
         # The duration to sleep while continually looping
@@ -134,8 +135,6 @@ class TempoClock(object):
         self.solo = SoloPlayer()
 
         self.thread = threading.Thread(target=self.run)
-
-        # self.start()
 
     def sync_to_espgrid(self, host="localhost", port=5510):
         from .EspGrid import EspGrid
@@ -211,7 +210,7 @@ class TempoClock(object):
         # Use object.__setattr__ to avoid infinite bpm setting
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-            self.bpm_start = time()
+            self.last_now_call = self.bpm_start_time = time()
             self.bpm_start_beat = int(self.now())
         # Give next bar value to bpm_start_beat
         return self.schedule(func, is_priority=True)
@@ -297,13 +296,17 @@ class TempoClock(object):
         """ Returns self.latency (which is in seconds) as a fraction of a beat """
         return self.seconds_to_beats(self.latency)
 
-    def get_elapsed_beats(self):
+    def get_elapsed_beats_from_last_bpm_change(self):
         """ Returns the number of beats that *should* have elapsed since the last tempo change """
-        return float(self.get_elapsed_seconds() * (self.get_bpm() / 60))
+        return float(self.get_elapsed_seconds_from_last_bpm_change() * (self.get_bpm() / 60))
 
-    def get_elapsed_seconds(self):
+    def get_elapsed_seconds_from_last_bpm_change(self):
         """ Returns the time since the last change in bpm """
-        return time() - self.bpm_start
+        return time() - (self.bpm_start_time + float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
+
+    def get_time(self):
+        """ Returns current machine clock time with nudges values added """
+        return time() + float(self.nudge) + float(self.hard_nudge)
 
     def sync_to_midi(self, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
@@ -364,17 +367,29 @@ class TempoClock(object):
 
         return data
 
-    def get_elapsed_sec(self):
-        return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
+    # def get_elapsed_sec(self):
+    #     """ Gets the number of elapsed seconds since beat 0 """
+    #     return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
+
+    # def _now(self):
+    #     """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
+    #     # Get number of seconds elapsed
+    #     now = self.get_elapsed_sec()
+    #     # Increment the beat counter
+    #     self.beat += (now - self.time) * (self.dtype(self.get_bpm()) / 60)
+    #     # Store time
+    #     self.time  = now
+    #     return self.beat
 
     def _now(self):
-        """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
-        # Get number of seconds elapsed
-        now = self.get_elapsed_sec()
-        # Increment the beat counter
-        self.beat += (now - self.time) * (self.dtype(self.get_bpm()) / 60)
-        # Store time
-        self.time  = now
+        """ If the bpm is an int or float, use time since the last bpm change to calculate what the current beat is. 
+            If the bpm is a TimeVar, increase the beat counter by time since last call to _now()"""
+        if isinstance(self.bpm, (int, float)):
+            self.beat = self.bpm_start_beat + self.get_elapsed_beats_from_last_bpm_change()
+        else:
+            now = self.get_time()
+            self.beat += (now - self.last_now_call) * (self.get_bpm() / 60)
+            self.last_now_call = now
         return self.beat
 
     def now(self):
@@ -403,7 +418,7 @@ class TempoClock(object):
             expected based on time elapsed and adjusts the hard_nudge value accordingly """
         
         beats_elapsed = int(self.now()) - self.bpm_start_beat
-        expected_beat = self.get_elapsed_beats()
+        expected_beat = self.get_elapsed_beats_from_last_bpm_change()
 
         # Dont adjust nudge on first bar of tempo change
 
@@ -431,7 +446,7 @@ class TempoClock(object):
         # Set the time to "activate" messages on - adjust in case the block is activated late
 
         # `beat` is the actual beat this is happening, `block.beat` is the desired time. Adjust
-        # the osc_message_time accordingly
+        # the osc_message_time accordingly if this is being called late
 
         block.time = self.osc_message_time() - self.beat_dur(float(beat) - block.beat)
 
@@ -457,7 +472,7 @@ class TempoClock(object):
 
         block.send_osc_messages()
 
-        # Store the osc messages -- experimental
+        # Store the osc messages -- future idea
 
         # self.history.add(block.beat, block.osc_messages)
 
@@ -470,7 +485,7 @@ class TempoClock(object):
 
         # Start recursive call to adjust hard-nudge values
         
-        self._schedule_adjust_hard_nudge()
+        # self._schedule_adjust_hard_nudge()
 
         while self.ticking:
 
