@@ -852,10 +852,11 @@ class TempoServer(ThreadedServer):
         self.server_thread.start()
         return
 
-    def update_tempo(self, bpm, bpm_start_beat, bpm_start_time):
+    def update_tempo(self, source, bpm, bpm_start_beat, bpm_start_time):
         """ Sends information  to all connected peers about changing tempo """
         for peer in self.peers:
-            peer.update_tempo(bpm, bpm_start_beat, bpm_start_time)
+            if peer is not source:
+                peer.update_tempo(bpm, bpm_start_beat, bpm_start_time)
         # Update the master clock tempo
         self.metro.update_tempo_from_connection(bpm, bpm_start_beat, bpm_start_time)
         return
@@ -915,7 +916,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
                 elif "new_bpm" in data:
 
-                    self.master.update_tempo(**data["new_bpm"])
+                    self.master.update_tempo(self, **data["new_bpm"])
 
                 elif "latency":
 

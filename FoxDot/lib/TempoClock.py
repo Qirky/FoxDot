@@ -212,7 +212,7 @@ class TempoClock(object):
         bpm_start_beat = next_bar
         def func():
             # Only update if necessary
-            # if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:
+            # if self.bpm != bpm and self.bpm_start_beat != bpm_start_beat and self.bpm_start_time != bpm_start_time:            
             if True:
                 object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
                 self.last_now_call = self.bpm_start_time = bpm_start_time
