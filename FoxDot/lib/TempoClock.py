@@ -146,6 +146,7 @@ class TempoClock(object):
             print("Unable to reach EspGrid. Make sure the application is running and try again.")
             return
         self.espgrid.start_tempo()
+        self.espgrid.set_clock_mode(5)
         self._espgrid_update_tempo(True)
         return
 
@@ -155,7 +156,7 @@ class TempoClock(object):
         if force or (data[1] != self.bpm):
             self.bpm_start_time = float("{}.{}".format(data[2], data[3]))
             self.bpm_start_beat = data[4]
-            setattr(self, "bpm", data[1])
+            object.__setattr__(self, "bpm", self._convert_json_bpm(data[1]))
         return
 
     def reset(self):
