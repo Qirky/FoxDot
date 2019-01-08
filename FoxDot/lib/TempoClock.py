@@ -56,7 +56,7 @@ from .Patterns import asStream
 from .TimeVar import TimeVar
 from .Midi import MidiIn, MIDIDeviceNotFound
 from .Utils import modi
-from .ServerManager import TempoClient, ServerManager
+from .ServerManager import TempoClient, ServerManager, RequestTimeout
 from .Settings import CPU_USAGE, CLOCK_LATENCY
 
 from time import sleep, time, clock
@@ -137,15 +137,29 @@ class TempoClock(object):
         self.thread = threading.Thread(target=self.run)
 
     def sync_to_espgrid(self, host="localhost", port=5510):
+        """ Connects to an EspGrid instance """
         from .EspGrid import EspGrid
         self.espgrid = EspGrid((host, port))
-        self.espgrid.subscribe()
-        self.start_time = self.espgrid.get_start_time()
-        self.time = time() - self.start_time
-        self.beat = self.seconds_to_beats(self.time)
+        try:
+            self.espgrid.query()
+        except RequestTimeout:
+            print("Unable to reach EspGrid. Make sure the application is running and try again.")
+            return
+        self.espgrid.start_tempo()
+        self._espgrid_update_tempo(True)
+        return
+
+    def _espgrid_update_tempo(self, force=False):
+        """ Retrieves the current tempo from EspGrid and updates internal values """
+        data = self.espgrid.get_tempo()
+        if force or (data[1] != self.bpm):
+            self.bpm_start_time = float("{}.{}".format(data[2], data[3]))
+            self.bpm_start_beat = data[4]
+            setattr(self, "bpm", data[1])
         return
 
     def reset(self):
+        """ Deprecated """
         self.time = self.dtype(0)
         self.beat = self.dtype(0)
         self.start_time = time()
