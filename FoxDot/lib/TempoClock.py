@@ -86,9 +86,7 @@ class TempoClock(object):
 
         self.dtype=float
         
-        # self.time       = self.dtype(0) # Seconds elsapsed
         self.beat       = self.dtype(0) # Beats elapsed
-        # self.start_time = self.dtype(time()) # Could get from EspGrid
         self.last_now_call = self.dtype(0)
 
         self.ticking = True #?? 
@@ -112,6 +110,9 @@ class TempoClock(object):
         
         # Midi Clock In
         self.midi_clock = None
+
+        # EspGrid sync
+        self.espgrid = None
 
         # Can be configured
         self.latency_values = [0.25, 0.5, 0.75]
@@ -157,6 +158,7 @@ class TempoClock(object):
             self.bpm_start_time = float("{}.{}".format(data[2], data[3]))
             self.bpm_start_beat = data[4]
             object.__setattr__(self, "bpm", self._convert_json_bpm(data[1]))
+        self.schedule(self._espgrid_update_tempo)
         return
 
     def reset(self):
@@ -294,11 +296,21 @@ class TempoClock(object):
     def __setattr__(self, attr, value):
         if attr == "bpm" and self.__setup:
 
-            # Schedule for next bar
+            # If connected to EspGrid, just update that
 
-            start_beat, start_time = self.update_tempo(value)
+            if self.espgrid is not None:
 
-            self.update_network_tempo(value, start_beat, start_time)
+                self.espgrid.set_tempo(value)
+
+            else:
+
+                # Schedule for next bar
+
+                start_beat, start_time = self.update_tempo(value)
+
+                # Checks if any peers are connected and updates them also
+
+                self.update_network_tempo(value, start_beat, start_time)
 
         elif attr == "midi_nudge" and self.__setup:
 
@@ -309,7 +321,9 @@ class TempoClock(object):
             object.__setattr__(self, "midi_nudge", value)
                 
         else:
+
             self.__dict__[attr] = value
+
         return
 
     def bar_length(self):
@@ -533,9 +547,7 @@ class TempoClock(object):
         
         self.ticking = True
 
-        # Start recursive call to adjust hard-nudge values
-        
-        # self._schedule_adjust_hard_nudge()
+        self.polled = False
 
         while self.ticking:
 
@@ -556,6 +568,8 @@ class TempoClock(object):
             if self.midi_clock is not None:
 
                 self.midi_clock.update()
+
+            # if using espgrid
 
             if self.sleep_time > 0:
 
@@ -662,15 +676,18 @@ class TempoClock(object):
 
             player.kill()
 
-        for item in self.items:
+        # for item in self.items:
 
-            if hasattr(item, 'stop'):
+        #     if hasattr(item, 'stop'):
 
-                item.stop()             
+        #         item.stop()
         
         self.playing = []
-        #self.ticking = False
-        # self._schedule_adjust_hard_nudge()
+
+        if self.espgrid is not None:
+
+            self.schedule(self._espgrid_update_tempo)
+        
         return
 
 #####
