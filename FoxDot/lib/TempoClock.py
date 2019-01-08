@@ -431,20 +431,6 @@ class TempoClock(object):
 
         return data
 
-    # def get_elapsed_sec(self):
-    #     """ Gets the number of elapsed seconds since beat 0 """
-    #     return self.dtype( time() - (self.start_time + (float(self.nudge) + float(self.hard_nudge))) - self.latency )
-
-    # def _now(self):
-    #     """ Returns the *actual* elapsed time (in beats) when adjusting for latency etc """
-    #     # Get number of seconds elapsed
-    #     now = self.get_elapsed_sec()
-    #     # Increment the beat counter
-    #     self.beat += (now - self.time) * (self.dtype(self.get_bpm()) / 60)
-    #     # Store time
-    #     self.time  = now
-    #     return self.beat
-
     def _now(self):
         """ If the bpm is an int or float, use time since the last bpm change to calculate what the current beat is. 
             If the bpm is a TimeVar, increase the beat counter by time since last call to _now()"""
