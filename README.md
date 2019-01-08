@@ -4,6 +4,7 @@ FoxDot - Live Coding with Python v0.7
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
 ### v0.7 fixes and updates
+- Improved clock timing. If the user is not using a `var` for the tempo, it will be far more accurate and synchronising with other FoxDot instances will be less likely to drift out of time. Also added the function to sync with instances of [EspGrid](https://github.com/d0kt0r0/EspGrid) by simply using `Clock.sync_to_espgrid()` (experimental).
 - Added `Go()` function to run FoxDot code from within normal Python programs.
 - Added `inf` variable, which can be used as a duration in any `var` object to continually use a value once it has been reached e.g. `var([0,1],[4,inf])`. This can be combined usefully with a special `var` object called `now` which starts the timing cycle for a `var` at the current time in the clock:
 
