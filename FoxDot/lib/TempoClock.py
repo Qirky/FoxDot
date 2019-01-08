@@ -144,8 +144,8 @@ class TempoClock(object):
         try:
             self.espgrid.query()
         except RequestTimeout:
-            print("Unable to reach EspGrid. Make sure the application is running and try again.")
-            return
+            err = "Unable to reach EspGrid. Make sure the application is running and try again."
+            raise RequestTimeout(err)
         self.espgrid.start_tempo()
         self.espgrid.set_clock_mode(5)
         self._espgrid_update_tempo(True)
