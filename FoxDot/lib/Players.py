@@ -575,7 +575,7 @@ class Player(Repeatable):
 
         # Set SynthDef defaults
 
-        if self.synthdef is not None:
+        if self.synthdef in SynthDefs:
 
             synth = SynthDefs[self.synthdef]
             
