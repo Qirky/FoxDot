@@ -218,6 +218,8 @@ def handle_stdin():
     """ When FoxDot is run with the --pipe added, this function
         is called and continuosly   """
 
+    load_startup_file()
+
     while True:
 
         try:
@@ -240,6 +242,9 @@ def stdout(code):
 def debug_stdout(*args):
     """ Forces prints to server-side """
     sys.__stdout__.write(" ".join([str(s) for s in args]) + "\n")
+
+def load_startup_file():
+    return execute.load_startup_file()
 
 def WarningMsg(*text):
     print("Warning: {}".format( " ".join(str(s) for s in text) ))
