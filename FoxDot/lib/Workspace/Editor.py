@@ -383,6 +383,10 @@ class workspace:
 
                 self.text_as_string = self.get_all()
 
+            # Execute startup file
+
+            return execute.load_startup_file()
+
         # Check online if a new version if available
 
         self.root.after(90, check_versions)

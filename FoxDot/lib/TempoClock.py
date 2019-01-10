@@ -563,7 +563,6 @@ class TempoClock(object):
 
         return
 
-
     def schedule(self, obj, beat=None, args=(), kwargs={}, is_priority=False):
         """ TempoClock.schedule(callable, beat=None)
             Add a player / event to the queue """
