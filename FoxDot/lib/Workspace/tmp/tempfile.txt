@@ -1,0 +1,14 @@
+from .Extensions.VRender import vrender
+
+vrender([0,1,2,3], lyrics="oo ", dur=[1,1,1,1])
+
+
+a = Samples.getBufferFromSymbol('v1')
+
+print(int(a))
+
+print(int(v1.buf))
+
+v1 >> loop('v1',P[4:8],dur=1)
+
+print(Root.default)

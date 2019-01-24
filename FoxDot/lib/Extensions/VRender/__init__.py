@@ -2,9 +2,9 @@ from __future__ import absolute_import, print_function
 
 from .VRender import renderizeVoice
 from ...SCLang import SynthDef
-#from ...Buffers import Samples
 from ... import Clock, Scale, Root
 from ...Settings import FOXDOT_ROOT
+#from ...Buffers import Samples
 
 
 class VRenderSynthDef(SynthDef):
@@ -38,12 +38,8 @@ class VRenderSynthDef(SynthDef):
         if "sex" in kwargs:
             sex = kwargs["sex"]
 
-        local = False
-
-        print("root default",Root.default)
-
         notes = list(map(lambda x: x + Root.default,notes))
 
-        renderizeVoice(filename,lyrics,notes,durations,tempo,scale,sex,local,FOXDOT_ROOT)
+        renderizeVoice(filename,lyrics,notes,durations,tempo,scale,sex,FOXDOT_ROOT)
 
 vrender = VRenderSynthDef()
