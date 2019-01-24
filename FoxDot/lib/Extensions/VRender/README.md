@@ -21,12 +21,11 @@ There are some dependencies in the code, such as python libraries, shell command
 # Usage
 
 The feature provides the method vrender which has the following parameters
-- name: the name of the wav file which is then reproduced with a loop or play method
-- dur: specifies duration of each note
 - notes: specifies the notes
-- lyrics: Is a string which is splitted by spaces
-- tempo: singinig velocity in BPM (optional)
-- scale: By default major (optional)
+- file: the name of the wav file which is then reproduced with a loop or play method (Optional: Creates a file called "v1.wav" by default)
+- dur: specifies duration of each note (Optional: All notes take 1 BPM by default)
+- lyrics: Is a string which is then splitted by spaces and mapped to each note. (Optional: Just says "oooooo" by default)
+- sex: "female" or "male" (Optional, female by default)
 
 A demonstration video can be found [here](https://youtu.be/cgZuO78tVVE) (The command usage in the video is outdated, the interface is a little bit more simple now).
 
@@ -36,16 +35,16 @@ vrender(NOTES, file="v1", lyrics="o", dur=[1],sex="female")
 
 ```
 
-There might be more notes than words or specified durations, in that case those are extended repeating the string or list respectively.
+There might be more notes than specified words or durations, in that case those are extended repeating the string or list respectively.
 
 
 ### Example using all parameters
 ```
-from .Extensions.VRender import vrender
+from .Extensions.VRender import vrender # Import vrender
 
-vrender([0,2,0,4], file="wavName", lyrics="hey ho lets go", dur=[1,1,1,1],sex="male")
+vrender([0,2,0,4], file="wavName", lyrics="hey ho lets go", dur=[1,1,1,1],sex="male") # Generate voice audio file
 
-v1 >> loop('wavName',P[4:12],dur=1)
+v1 >> loop('wavName',P[4:12],dur=1) # Play it
 
 ```
 
@@ -59,3 +58,21 @@ vrender([3,2,1,0,4,4,4,4])
 v1 >> loop('v1',P[4:12],dur=1)
 
 ```
+
+If you play an audio sample, then overwrite the sample and try to play it again it will probably play the older one. To fix these you can use the command free, to clean the foxdot buffers.
+
+
+```
+from .Extensions.VRender import vrender
+
+vrender([3,2,1,0,4,4,4,4],name="v2")
+v2 >> loop('v2',P[4:12],dur=1)
+
+vrender([3,3,3,4],name="v2")
+Samples.free(int(v2.buf))
+v2 >> loop('v2',P[4:12],dur=1)
+
+
+```
+
+As you may note in the example, the loop command starts playing the audio in the fourth BPM (P[4:12]), it's because the audio is generated with an initial silence of 4 beats. It might be fixed in the future.
