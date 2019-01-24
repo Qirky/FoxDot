@@ -1,7 +1,7 @@
 # Background
 I wanted to add a voice to my Live Coding compositions so I made some research and I learned about singing synthesis, something not so popular in the occidental world but quite popular in japan, with some really successful brands such as Vocaloid.
 
-Looking for open source singing synthezisers, I found sinsy.jp, It is a website made by people from Nagoya Institute of Technology to convert music sheets (In musicXML format) into a singing voice. This is an open source project, I tried to use it locally but it doesn't have as good quality as the web version, probably it needs some configuration or training that I am not aware of.
+Looking for open source singing synthesizers, I found sinsy.jp, It is a website made by people from Nagoya Institute of Technology to convert music sheets (In musicXML format) into a singing voice. This is an open source project, I tried to use it locally but it doesn't have as good quality as the web version, probably it needs some configuration or training that I am not aware of.
 
 # Description
 The feature basically converts the notes and durations into a MIDI file, then converts it to a musicXML with musescore and the lyrics are added with a python script. Finally it makes a request to sinsy.jp to create the WAV file.
@@ -29,7 +29,7 @@ The feature provides the method vrender which has the following parameters
 
 A demonstration video can be found [here](https://youtu.be/cgZuO78tVVE) (The command usage in the video is outdated, the interface is a little bit more simple now).
 
-### Command description, with default values
+### Command description with default values
 ```
 vrender(NOTES, file="v1", lyrics="o", dur=[1],sex="female")
 
@@ -39,6 +39,7 @@ There might be more notes than specified words or durations, in that case those 
 
 
 ### Example using all parameters
+
 ```
 from .Extensions.VRender import vrender # Import vrender
 
@@ -49,7 +50,8 @@ v1 >> loop('wavName',P[4:12],dur=1) # Play it
 ```
 
 
-### Example using only the notes
+### Example specifying only the notes
+
 ```
 from .Extensions.VRender import vrender
 
@@ -59,8 +61,11 @@ v1 >> loop('v1',P[4:12],dur=1)
 
 ```
 
-If you play an audio sample, then overwrite the sample and try to play it again it will probably play the older one. To fix these you can use the command free, to clean the foxdot buffers.
+As you may note in the example, the loop command starts playing the audio in the fourth BPM (P[4:12]), it's because the audio is generated with an initial silence of 4 beats. It might be fixed in the future.
 
+### Cleaning buffers to overwrite audio samples
+
+If you play an audio sample and after that you overwrite the sample and try to play it again it will probably play the older one. To fix these you can use the command free, to clean the foxdot buffers.
 
 ```
 from .Extensions.VRender import vrender
@@ -74,5 +79,3 @@ v2 >> loop('v2',P[4:12],dur=1)
 
 
 ```
-
-As you may note in the example, the loop command starts playing the audio in the fourth BPM (P[4:12]), it's because the audio is generated with an initial silence of 4 beats. It might be fixed in the future.
