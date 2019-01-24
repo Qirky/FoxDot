@@ -22,16 +22,16 @@ There are some dependencies in the code, such as python libraries, shell command
 
 The feature provides the method vrender which has the following parameters
 - notes: specifies the notes
-- file: the name of the wav file which is then reproduced with a loop or play method (Optional: Creates a file called "v1.wav" by default)
-- dur: specifies duration of each note (Optional: All notes take 1 BPM by default)
-- lyrics: Is a string which is then splitted by spaces and mapped to each note. (Optional: Just says "oooooo" by default)
+- file: the name of the wav file which is then reproduced with a loop or play method (Optional, creates a file called "v1.wav" by default)
+- lyrics: Is a string which is then splitted by spaces and mapped to each note. (Optional, just says "oooooo" by default)
+- dur: specifies duration of each note (Optional, all notes take 1 BPM by default)
 - sex: "female" or "male" (Optional, female by default)
 
 A demonstration video can be found [here](https://youtu.be/cgZuO78tVVE) (The command usage in the video is outdated, the interface is a little bit more simple now).
 
 ### Command description with default values
 ```
-vrender(NOTES, file="v1", lyrics="o", dur=[1],sex="female")
+vrender(NOTES, file="v1", lyrics="o", dur=[1], sex="female")
 
 ```
 
@@ -43,9 +43,9 @@ There might be more notes than specified words or durations, in that case those 
 ```
 from .Extensions.VRender import vrender # Import vrender
 
-vrender([0,2,0,4], file="wavName", lyrics="hey ho lets go", dur=[1,1,1,1],sex="male") # Generate voice audio file
+vrender([0,2,0,4], file="wavName", lyrics="hey ho lets go", dur=[1,1,1,1], sex="male") # Generate voice audio file
 
-v1 >> loop('wavName',P[4:12],dur=1) # Play it
+v1 >> loop('wavName', P[4:12], dur=1) # Play it
 
 ```
 
@@ -57,7 +57,7 @@ from .Extensions.VRender import vrender
 
 vrender([3,2,1,0,4,4,4,4])
 
-v1 >> loop('v1',P[4:12],dur=1)
+v1 >> loop('v1', P[4:12], dur=1)
 
 ```
 
