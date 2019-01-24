@@ -28,14 +28,34 @@ The feature provides the method vrender which has the following parameters
 - tempo: singinig velocity in BPM (optional)
 - scale: By default major (optional)
 
-A demonstration video can be found [here](https://youtu.be/cgZuO78tVVE).
+A demonstration video can be found [here](https://youtu.be/cgZuO78tVVE) (The command usage in the video is outdated, the interface is a little bit more simple now).
 
-### Example
+### Command description, with default values
+```
+vrender(NOTES, file="v1", lyrics="o", dur=[1],sex="female")
+
+```
+
+There might be more notes than words or specified durations, in that case those are extended repeating the string or list respectively.
+
+
+### Example using all parameters
 ```
 from .Extensions.VRender import vrender
 
-vrender("wavName", lyrics="hey ho lets go", notes=[0,2,0,4], dur=[1,1,1,1],tempo=120,scale=Scale.minor)
+vrender([0,2,0,4], file="wavName", lyrics="hey ho lets go", dur=[1,1,1,1],sex="male")
+
+v1 >> loop('wavName',P[4:12],dur=1)
+
 ```
 
-### Posible problems
-Relative paths are hardcoded at ```FoxDot/FoxDot/lib/Extensions/VRender/constants.py```, they are specified assuming FoxDot is executed with the terminal running on the FoxDot folder (Where lib and snd folders are located), if some file can't be found you can try changing the relative paths for your absolute path to this folder.
+
+### Example using only the notes
+```
+from .Extensions.VRender import vrender
+
+vrender([3,2,1,0,4,4,4,4])
+
+v1 >> loop('v1',P[4:12],dur=1)
+
+```

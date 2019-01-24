@@ -4,8 +4,6 @@ from .VRender import renderizeVoice
 from ...SCLang import SynthDef
 from ... import Clock, Scale, Root
 from ...Settings import FOXDOT_ROOT
-#from ...Buffers import Samples
-
 
 class VRenderSynthDef(SynthDef):
     def __init__(self):
@@ -13,6 +11,7 @@ class VRenderSynthDef(SynthDef):
         self.add()
 
     def __call__(self, notes, pos=0, sample=0, **kwargs):
+
         if "lyrics" in kwargs:
             lyrics = kwargs['lyrics']
         else:
@@ -27,16 +26,14 @@ class VRenderSynthDef(SynthDef):
             filename = kwargs['file']
         else:
             filename = 'v1'
-#            print(Samples.getBufferFromSymbol('v1'))
-#            Samples.free(int(Samples.getBufferFromSymbol('v1')))
 
+        if "sex" in kwargs:
+            sex = kwargs["sex"]
+        else:
+            sex = "female"
 
         scale = list(Scale.default)
         tempo = int(Clock.bpm)
-
-        sex = "female"
-        if "sex" in kwargs:
-            sex = kwargs["sex"]
 
         notes = list(map(lambda x: x + Root.default,notes))
 
