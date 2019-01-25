@@ -1,43 +1,42 @@
 from __future__ import absolute_import, print_function
 
 from .VRender import renderizeVoice
-from ...SCLang import SampleSynthDef
-from ...Buffers import Samples
+from ...SCLang import SynthDef
+from ... import Clock, Scale, Root
+from ...Settings import FOXDOT_ROOT
 
-class VRenderSynthDef(SampleSynthDef):
+class VRenderSynthDef(SynthDef):
     def __init__(self):
-        SampleSynthDef.__init__(self, "vrender")
-        self.pos = self.new_attr_instance("pos")
-        self.sample = self.new_attr_instance("sample")
-        self.defaults['pos']   = 0
-        self.defaults['sample']   = 0
-        self.base.append("osc = PlayBuf.ar(2, buf, BufRateScale.kr(buf) * rate, startPos: BufSampleRate.kr(buf) * pos);")
-        self.base.append("osc = osc * EnvGen.ar(Env([0,1,1,0],[0.05, sus-0.05, 0.05]));")
-        self.osc = self.osc * self.amp
+        SynthDef.__init__(self, "vrender")
         self.add()
 
-    def __call__(self, filename, pos=0, sample=0, **kwargs):
-        lyrics = kwargs['lyrics']
-        durations = kwargs['dur']
-        notes = kwargs['notes']
+    def __call__(self, notes, pos=0, sample=0, **kwargs):
 
-        scale = [0,2,4,5,7,9,11]
-        if "scale" in kwargs:
-            scale = list(kwargs["scale"])
+        if "lyrics" in kwargs:
+            lyrics = kwargs['lyrics']
+        else:
+            lyrics = "oo "
 
-        tempo = 100
-        if "tempo" in kwargs:
-            tempo = kwargs["tempo"]
+        if "dur" in kwargs:
+            durations = kwargs['dur']
+        else:
+            durations = [1]
 
-        sex = "female"
+        if 'file' in kwargs:
+            filename = kwargs['file']
+        else:
+            filename = 'v1'
+
         if "sex" in kwargs:
             sex = kwargs["sex"]
+        else:
+            sex = "female"
 
-        renderizeVoice(filename,lyrics,notes,durations,tempo,scale,sex)
+        scale = list(Scale.default)
+        tempo = int(Clock.bpm)
 
-#        kwargs = {"dur":sum(kwargs['dur'])}
+        notes = list(map(lambda x: x + Root.default,notes))
 
-#        kwargs["buf"] = Samples.loadBuffer(filename, sample)
-#        return SampleSynthDef.__call__(self, pos, **kwargs)
+        renderizeVoice(filename,lyrics,notes,durations,tempo,scale,sex,FOXDOT_ROOT)
 
 vrender = VRenderSynthDef()

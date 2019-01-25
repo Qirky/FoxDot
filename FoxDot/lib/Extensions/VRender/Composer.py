@@ -2,6 +2,7 @@ from __future__ import absolute_import, print_function
 
 from .MidiFactory import createMidi
 import os
+from math import ceil
 
 def extendScale(scale,times):
     scaleAux = scale[:]
@@ -10,6 +11,16 @@ def extendScale(scale,times):
             scale.append(note+12*i)
     return scale
 
+def matchListsSize(rhythm,melody):
+    n_rhythm =len(rhythm)
+    n_melody = len(melody)
+    if n_rhythm < n_melody:
+        rhythm = (rhythm*int(ceil(n_melody/float(n_rhythm))))[:n_melody]
+    elif n_rhythm != n_melody:
+        melody = (melody*int(ceil(n_rhythm/float(n_melody))))[:n_rhythm]
+
+    return rhythm,melody
+
 def toList(rhythm, melody, scale):
 
     scale = extendScale(scale,2)
@@ -17,6 +28,8 @@ def toList(rhythm, melody, scale):
 
     volume = 100
     baseNote = 60
+
+    rhythm, melody = matchListsSize(rhythm,melody)
 
     composition = []
     time = 0
