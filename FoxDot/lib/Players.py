@@ -1910,8 +1910,8 @@ class Player(Repeatable):
     def offbeat(self, dur=1):
         """ Off sets the next event occurence """
 
-        self.dur = dur
-        self.delay = dur / 2
+        self.dur = abs(dur)
+        self.delay = abs(dur) / 2
 
         return self
 
