@@ -75,7 +75,7 @@ Quarks.install("FoxDot")
 
 #### Installing with SuperCollider 3.7 or earlier
 
-If you are having trouble installing the FoxDot Quark in SuperCollider, it’s usually because the version of SuperCollider you are installing doesn’t have the functionality for installing Quarks or it doesn’t work properly. If this is the case, you can download the contents of the following SuperCollider script: [foxdot.scd](http://foxdot.org/wp-content/uploads/foxdot.scd). Once downloaded, open the file in SuperCollider and press Ctrl+Return to run it. This will make SuperCollider start listening for messages from FoxDot.
+If you are having trouble installing the FoxDot Quark in SuperCollider, it is usually because the version of SuperCollider you are installing doesn’t have the functionality for installing Quarks or it doesn’t work properly. If this is the case, you can download the contents of the following SuperCollider script: [foxdot.scd](http://foxdot.org/wp-content/uploads/foxdot.scd). Once downloaded, open the file in SuperCollider and press Ctrl+Return to run it. This will make SuperCollider start listening for messages from FoxDot.
 
 #### Frequently Asked Questions
 
