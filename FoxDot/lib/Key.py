@@ -645,7 +645,10 @@ class PlayerKey(NumberKey):
         return
 
     def update_pattern(self):
-        self.pattern[:] = asStream(self.parent.attr[self.key])               
+        try:
+            self.pattern[:] = asStream(self.parent.attr[self.key])
+        except TypeError:
+            self.pattern = asStream(self.parent.attr[self.key])
         return
 
     def child(self, other):
