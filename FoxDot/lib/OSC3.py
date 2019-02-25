@@ -717,12 +717,11 @@ def OSCString(next):
 	The length of the resulting string is always a multiple of 4 bytes.
 	The string ends with 1 to 4 zero-bytes ('\x00') 
 	"""
-	
-	OSCstringLength = math.ceil((len(next)+1) / 4.0) * 4
 	if sys.version_info[0] > 2:
 		next = bytes(next.encode("UTF-8"))
 	else:
 		next = str(next)
+	OSCstringLength = math.ceil((len(next)+1) / 4.0) * 4
 	return struct.pack(">%ds" % (OSCstringLength), next)
 
 def OSCBlob(next):

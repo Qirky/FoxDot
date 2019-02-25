@@ -148,7 +148,7 @@ class TempoClock(object):
             raise RequestTimeout(err)
         # self.espgrid.start_tempo()
         # self.espgrid.set_clock_mode(5)
-        self._espgrid_update_tempo(True)
+        # self._espgrid_update_tempo(True)
         return
 
     def _espgrid_update_tempo(self, force=False):

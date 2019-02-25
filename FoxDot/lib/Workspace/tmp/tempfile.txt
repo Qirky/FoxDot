@@ -1,14 +1,12 @@
-from .Extensions.VRender import vrender
+b1 >> bass(dur=PDur(3,8)) + var([0,5],8)
 
-vrender([0,1,2,3], lyrics="oo ", dur=[1,1,1,1])
+d1 >> dirt(dur=1/4, formant=P[0].stutter(8)|P[:8], drive=1).spread() + var([0,-1],P[3,1]/2)
 
+Scale.default="minor"
 
-a = Samples.getBufferFromSymbol('v1')
+d2 >> play("<(x )( x)i( =)><|[--]{1234}|>", sample=2, shape=0.5, drive=0.2, rate=2)
 
-print(int(a))
+my_client = OSCClient()
+my_client.connect(("localhost", 12345))
 
-print(int(v1.buf))
-
-v1 >> loop('v1',P[4:8],dur=1)
-
-print(Root.default)
+DefaultServer.forward = my_client

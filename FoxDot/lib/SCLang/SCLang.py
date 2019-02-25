@@ -168,6 +168,7 @@ Crackle  = cls("Crackle")
 Limiter  = cls("Limiter")
 Ringz    = cls("Ringz")
 Dust     = cls("Dust")
+Formlet  = cls("Formlet")
 ClipNoise = cls("ClipNoise")
 
 BufRateScale  = cls("BufRateScale")

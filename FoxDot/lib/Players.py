@@ -664,8 +664,7 @@ class Player(Repeatable):
         self.get_event() 
 
         # Play the note
-
-        # if type(self.event['dur']) != rest:
+        
         if not isinstance(self.event["dur"], rest):
         
             self.send(verbose=(self.metro.solo == self and kwargs.get('verbose', True)))
@@ -686,7 +685,7 @@ class Player(Repeatable):
 
             dur *= tempo_shift
 
-        # Schedule the next event
+        # Schedule the next event (could move before get_event and use the index for get_event)
 
         self.event_index = self.event_index + dur
 
