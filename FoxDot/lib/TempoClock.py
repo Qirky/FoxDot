@@ -390,7 +390,7 @@ class TempoClock(object):
 
     def get_elapsed_seconds_from_last_bpm_change(self):
         """ Returns the time since the last change in bpm """
-        return time.time() - (self.bpm_start_time + float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
+        return (time.time() - self.bpm_start_time) + (float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
 
     def get_time(self):
         """ Returns current machine clock time with nudges values added """
