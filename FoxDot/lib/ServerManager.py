@@ -1052,9 +1052,9 @@ class TempoClient:
 
                 for key in self.sync_keys:
                     if key in data["sync"]:
-                        setattr(self.metro, key, data["sync"][key])
+                        object.__setattr__(self.metro, key, data["sync"][key])
 
-                self.metro.update_tempo_from_connection(**data["sync"]) # this is stupid
+                self.metro.update_tempo_from_connection(**data["sync"])
             
             elif "new_bpm" in data:
 
