@@ -274,8 +274,20 @@ class PWalk(RandomGenerator):
             else:
                 f = self.choice(self.directions)
             self.last_value = f(self.last_value, self.step.choose())
-        return self.last_value   
+        return self.last_value
 
+class PDelta(GeneratorPattern):
+    def __init__(self, deltas, start=0):
+        GeneratorPattern.__init__(self)
+        self.deltas = asStream(deltas)
+        self.start  = start
+        self.value  = start
+    def func(self, index):  
+        if index == 0:
+            return self.start
+        self.value += self.deltas[index]
+        return self.value
+        
 class PSquare(GeneratorPattern):
     ''' Returns the square of the index being accessed '''
     def func(self, index):
