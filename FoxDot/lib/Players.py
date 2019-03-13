@@ -397,52 +397,51 @@ class Player(Repeatable):
 
         return self
 
-    def test_for_circular_reference(self, attr, value, last_parent=None, last_key=None):
+    def test_for_circular_reference(self, value, attr, last_player=None, last_attr=None):
         """ Used to raise an exception if a player's attribute refers to itself e.g. `p1 >> pads(dur=p1.dur)` """
 
-        # If we are setting a group of values, check each one in turn
+        # We are setting self.attr to value, check if value depends on self.attr
 
         if isinstance(value, PGroup):
-            
+
             for item in value:
-            
-                self.test_for_circular_reference(attr, item, last_parent,  last_key)
+
+                self.test_for_circular_reference(item, attr, last_player, last_attr)
 
         elif isinstance(value, PlayerKey):
-          
-            # If the original Player is *this* player and we are referencing the same attr, throw and exception
-         
-            if value.parent is self and attr == value.key:
 
-                ident_self  = "{}.{}".format(self.id if self.id is not None else str(self), attr)
-                
-                if last_parent is not None:
-                    
-                    ident_other = "{}.{}".format(last_parent.id if last_parent.id is not None else str(last_parent), last_key)
-                
+            # If the Player key relies on this player.attr, raise error
+
+            if value.cmp(self, attr):
+
+                ident_self = value.name()
+
+                if last_player is not None:
+
+                    ident_other = "{}.{}".format(last_player.id, last_attr)
+
                 else:
-                
+
                     ident_other = ident_self
 
                 err = "Circular reference found: {} to itself via {}".format(ident_self, ident_other)
-                
-                raise ValueError(err)
-            
-            # If we get the same parent and key, stop
 
-            elif last_parent == value.parent and last_key == value.key:
-            
+                raise ValueError(err)
+
+            elif last_player == value.player and last_attr == value.attr:
+
                 return
-            
+
             else:
 
-                # Check if other values in the parent might have a circular reference e.g. p1 >> pads([0,1,p2.degree])
+                # Go through the player key's 
+
+                for item in value.get_player_attribute():
             
-                for item in value.parent.attr[value.key]:
-            
-                    self.test_for_circular_reference(attr, item, last_parent=value.parent, last_key=value.key)
+                    self.test_for_circular_reference(item, attr, value.player, value.attr)
+
         return
-       
+
     def __setattr__(self, name, value):
 
         # Possibly replace with slots?
@@ -459,11 +458,11 @@ class Player(Repeatable):
 
                 value = asStream(value)
 
-                for item in value: # maybe use a deepiter method
+                for item in value:
 
-                    self.test_for_circular_reference(name, item)
+                    self.test_for_circular_reference(item, name)
 
-                # Update the attribute dict
+                # Update the attribute dict if no error
                 
                 self.attr[name] = value
 
@@ -1193,7 +1192,7 @@ class Player(Repeatable):
         """
         if (key not in self.__dict__) or (not isinstance(self.__dict__[key], PlayerKey)):
 
-            self.__dict__[key] = PlayerKey(value, parent=self, attr=key) 
+            self.__dict__[key] = PlayerKey(value, player=self, attr=key) 
 
         else:
 
@@ -1296,7 +1295,7 @@ class Player(Repeatable):
 
         if item.parent is self:
 
-            self.update_player_key(item.key, self.now(item.key), 0)
+            self.update_player_key(item.attr, self.now(item.attr), 0)
 
         # If the parent is in the same queue block, make sure its values are up-to-date
 
@@ -1306,7 +1305,7 @@ class Player(Repeatable):
 
             try:
 
-                queue_item = self.queue_block[item.parent]
+                queue_item = self.queue_block[item.player]
 
             except KeyError:
 
@@ -1316,7 +1315,7 @@ class Player(Repeatable):
 
             if queue_item is not None and queue_item.called is False:
                     
-                item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
+                item.player.update_player_key(item.attr, item.player.now(item.attr), 0)
 
         return item.now()
 
