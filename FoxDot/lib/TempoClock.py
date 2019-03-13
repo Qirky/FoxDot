@@ -266,19 +266,23 @@ class TempoClock(object):
 
     def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time, schedule_now=False):
         """ Sets the bpm externally from another connected instance of FoxDot """
-        print(bpm_start_time, self.get_time_at_beat(bpm_start_beat))
+
         def func():
             # self.last_now_call = self.bpm_start_time = bpm_start_time
             self.last_now_call = self.bpm_start_time = self.get_time_at_beat(bpm_start_beat, hard_nudge=False)
-            print(self.bpm_start_time - bpm_start_time)
             self.bpm_start_beat = bpm_start_beat
             # Set bpm
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+        
         # Might be changing immediately
         if schedule_now:
+        
             func()
+        
         else:
+        
             self.schedule(func, is_priority=True)
+        
         return 
 
     def update_network_tempo(self, bpm, start_beat, start_time):
