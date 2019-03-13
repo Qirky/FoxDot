@@ -244,29 +244,36 @@ class TempoClock(object):
 
     def get_time_at_beat(self, beat, hard_nudge=True):
         """ Returns the time that the local computer's clock will be at 'beat' value """
-        return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
+        # return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
+        return self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
-        # bpm_start_time = time.time() + self.beat_dur(next_bar - self.now()) - (self.nudge + self.hard_nudge)
+
         bpm_start_time = self.get_time_at_beat(next_bar)
         bpm_start_beat = next_bar
+
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
+
         # Give next bar value to bpm_start_beat
         self.schedule(func, next_bar, is_priority=True)
+
         return bpm_start_beat, bpm_start_time
 
     def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time, schedule_now=False):
-        """ Sets the bpm externally  from another connected instance of FoxDot """
+        """ Sets the bpm externally from another connected instance of FoxDot """
+        # print(bpm_start_time, self.get_time_at_beat(bpm_start_beat))
         def func():
-            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             # self.last_now_call = self.bpm_start_time = bpm_start_time
             self.last_now_call = self.bpm_start_time = self.get_time_at_beat(bpm_start_beat, hard_nudge=False)
+            #print(self.bpm_start_time - bpm_start_time)
             self.bpm_start_beat = bpm_start_beat
+            # Set bpm
+            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
         # Might be changing immediately
         if schedule_now:
             func()
