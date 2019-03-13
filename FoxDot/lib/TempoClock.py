@@ -242,9 +242,9 @@ class TempoClock(object):
         # self.update_network_tempo(bpm, start_beat, start_time) -- updates at the bar...
         return
 
-    def get_time_at_beat(self, beat):
+    def get_time_at_beat(self, beat, hard_nudge=True):
         """ Returns the time that the local computer's clock will be at 'beat' value """
-        return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + self.hard_nudge)
+        return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
@@ -265,7 +265,7 @@ class TempoClock(object):
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             # self.last_now_call = self.bpm_start_time = bpm_start_time
-            self.last_now_call = self.bpm_start_time = self.get_time_at_beat(bpm_start_beat)
+            self.last_now_call = self.bpm_start_time = self.get_time_at_beat(bpm_start_beat, hard_nudge=False)
             self.bpm_start_beat = bpm_start_beat
         # Might be changing immediately
         if schedule_now:
