@@ -891,7 +891,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         assert "init" in data
 
-        send_to_socket(self.request, {"clock_time": time.time()})
+        send_to_socket(self.request, {"clock_time": time.time()}) # maybe time at a beat?
 
         self.master.peers.append(self)
 
@@ -1029,7 +1029,8 @@ class TempoClient:
 
         self.stop_timing()
 
-        self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
+        # self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
+        self.metro.calculate_nudge(time_data["clock_time"], self.start_time, self.latency)
         
         # Enter loop
 
@@ -1081,3 +1082,5 @@ if __name__ != "__main__":
     from .Settings import ADDRESS, PORT, PORT2
 
     DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
+    # Server = SCLangServerManager(ADDRESS, PORT, PORT2)
+
