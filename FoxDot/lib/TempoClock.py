@@ -242,11 +242,6 @@ class TempoClock(object):
         # self.update_network_tempo(bpm, start_beat, start_time) -- updates at the bar...
         return
 
-    def get_time_at_beat(self, beat, hard_nudge=True):
-        """ Returns the time that the local computer's clock will be at 'beat' value """
-        # return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
-        return self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
-
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
@@ -268,10 +263,8 @@ class TempoClock(object):
         """ Sets the bpm externally from another connected instance of FoxDot """
 
         def func():
-            # self.last_now_call = self.bpm_start_time = bpm_start_time
-            self.last_now_call = self.bpm_start_time = self.get_time_at_beat(bpm_start_beat, hard_nudge=False)
+            self.last_now_call = self.bpm_start_time = self.get_time_at_beat(bpm_start_beat)
             self.bpm_start_beat = bpm_start_beat
-            # Set bpm
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
         
         # Might be changing immediately
@@ -394,11 +387,17 @@ class TempoClock(object):
 
     def get_elapsed_seconds_from_last_bpm_change(self):
         """ Returns the time since the last change in bpm """
-        return (time.time() - self.bpm_start_time) + (float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
+        # return (time.time() - self.bpm_start_time) + (float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
+        return self.get_time() - self.bpm_start_time
 
     def get_time(self):
         """ Returns current machine clock time with nudges values added """
         return time.time() + float(self.nudge) + float(self.hard_nudge)
+
+    def get_time_at_beat(self, beat):
+        """ Returns the time that the local computer's clock will be at 'beat' value """
+        # return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
+        return self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
 
     def sync_to_midi(self, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
