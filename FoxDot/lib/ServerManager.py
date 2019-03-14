@@ -899,11 +899,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
             data = read_from_socket(self.request)
 
+            # If a client disconnects, remove and print message
+
             if data is None:
 
-                print("Client disconnected from {}".format(self.client_address))
-
-                break
+                return self.disconnect()
 
             else:
 
@@ -925,6 +925,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         return
 
+    def disconnect(self):
+        """ Prints a message to the master clock and removes a reference to this client """
+        print("Client disconnected from {}".format(self.client_address))
+        self.master.peers.remove(self)
+        return 0
 
     def update_tempo(self, bpm, bpm_start_beat, bpm_start_time):
 
