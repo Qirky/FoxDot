@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import sys
 import re
 import os.path
+import time
 from traceback import format_exc as error_stack
 from types import CodeType, FunctionType
 
@@ -125,6 +126,11 @@ class FoxDotCode:
                  
     def __call__(self, code, verbose=True, verbose_error=None):
         """ Takes a string of FoxDot code and executes as Python """
+
+        if self.namespace['Clock'].waiting_for_sync:
+
+            time.sleep(0.25)
+            return self.__call__(code, verbose, verbose_error)
 
         if verbose_error is None:
 

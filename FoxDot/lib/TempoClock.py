@@ -71,6 +71,7 @@ class TempoClock(object):
 
     tempo_server = None
     tempo_client = None
+    waiting_for_sync = False
 
     def __init__(self, bpm=120.0, meter=(4,4)):
 
@@ -207,11 +208,15 @@ class TempoClock(object):
             self.tempo_server.kill()
         return
 
+    def flag_wait_for_sync(self, value):
+        self.waiting_for_sync = bool(value)
+
     def connect(self, ip_address, port=57999):
         try:
             self.tempo_client = TempoClient(self)
             self.tempo_client.connect(ip_address, port)
             self.tempo_client.send(["request"])
+            self.flag_wait_for_sync(True)
         except ConnectionRefusedError as e:
             print(e)
         pass
@@ -236,9 +241,9 @@ class TempoClock(object):
 
     def update_tempo_now(self, bpm):
         """ emergency override for updating tempo"""
-        object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
         self.last_now_call = self.bpm_start_time = time.time()
         self.bpm_start_beat = self.now()
+        object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
         # self.update_network_tempo(bpm, start_beat, start_time) -- updates at the bar...
         return
 

@@ -1060,6 +1060,8 @@ class TempoClient:
                         object.__setattr__(self.metro, key, data["sync"][key])
 
                 self.metro.update_tempo_from_connection(**data["sync"])
+
+                self.metro.flag_wait_for_sync(False)
             
             elif "new_bpm" in data:
 
