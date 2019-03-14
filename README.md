@@ -4,39 +4,10 @@ FoxDot - Live Coding with Python v0.7
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
 ### v0.7 fixes and updates
-- Added startup file that loads on boot. Found in `path/to/FoxDot/lib/Custom/startup.py`. To use another startup file, you can run FoxDot with a `--startup` flag like so:
 
-```bash
-$ python -m FoxDot --startup path/to/my_startup.py
-```
-
-- Fix `MidiIn` missing Synth bug
-- Improved clock timing. If the user is not using a `var` for the tempo, it will be far more accurate and synchronising with other FoxDot instances will be less likely to drift out of time. Also added the function to sync with instances of [EspGrid](https://github.com/d0kt0r0/EspGrid) by simply using `Clock.sync_to_espgrid()` (experimental).
-- Added `Go()` function to run FoxDot code from within normal Python programs.
-- Added `inf` variable, which can be used as a duration in any `var` object to continually use a value once it has been reached e.g. `var([0,1],[4,inf])`. This can be combined usefully with a special `var` object called `now` which starts the timing cycle for a `var` at the current time in the clock:
-
-```python
-d1 >> play("x-o-", amp=linvar([0,1],[8,inf], start=now))
-```
-
-- (Experimental) Added `Cycle` pattern type, which can be used in conjunction with `every` to more effectively iterate over different values used for different calls to the same method. For example, you spread `stutter` over 3 beats in one call, then 2 beats in the other, you would have to use a `var` like so:
-
-```python
-d1 >> play("x-o-").every(4, "stutter", dur=var([3,2],4))
-```
-
-This became problematic when introducting `sometimes` as you would not know the frequency of the call in advance. Now you can just use `Cycle` which will be converted to a `var` with appropriate timing values when used with `every`. Any other use of `Cycle` will be treated as a regular `Pattern` object. Example of how to use `Cycle`:
-
-```python
-d1 >> play("x-o-").sometimes("stutter", dur=Cycle([2,3]))
-```
-
-- Fix `Pattern.offlayer` which is similar to `offadd` but requires a second argument specifying a method apply to the second layer as a string *then* the duration to delay the layer before specifying the arguments and keyword arguments to be supplied to the given methods. E.g.
-
-```python
-# Layer with the pattern trimmed to length 3 with a delay of 0.75 beats
-P[0, 1, 2, 3].offlayer("trim", 0.75, 3)
-```
+- Improved in-house synchronisation between FoxDot instances.
+- Add `PDelta` pattern; user supplies the step sizes between each value.
+- Negative `offbeat` fix (thanks zdbm).
 
 ---
 
