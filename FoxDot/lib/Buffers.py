@@ -24,7 +24,7 @@ from os.path import abspath, join, isabs, isfile, isdir, splitext
 from .Code import WarningMsg
 from .Logging import Timing
 from .SCLang import SampleSynthDef
-from .ServerManager import DefaultServer
+from .ServerManager import Server
 from .Settings import FOXDOT_SND, FOXDOT_LOOP
 
 
@@ -154,7 +154,7 @@ nil = Buffer('', 0)
 
 
 class BufferManager(object):
-    def __init__(self, server=DefaultServer, paths=()):
+    def __init__(self, server=Server, paths=()):
         self._server = server
         self._max_buffers = server.max_buffers
         # Keep buffer 0 unallocated because we use it as the "nil" buffer

@@ -63,8 +63,13 @@ PlayerMethod = player_method # Temporary alias
 
 def _futureBarDecorator(n, multiplier=1):
     if callable(n):
-        Clock.schedule(n, Clock.next_bar())
-        return n
+        def switch(*args, **kwargs):
+            Clock.now_flag = True
+            output = n()
+            Clock.now_flag = False
+            return output
+        Clock.schedule(switch, Clock.next_bar())
+        return switch
     def wrapper(f):
         Clock.schedule(f, Clock.next_bar() + (n * multiplier))
         return f
@@ -189,7 +194,7 @@ when.set_namespace(FoxDotCode) # experimental
 
 Clock = TempoClock()
 
-update_foxdot_server(DefaultServer)
+update_foxdot_server(Server)
 update_foxdot_clock(Clock)
 instantiate_player_objects()
 

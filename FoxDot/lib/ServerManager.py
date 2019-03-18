@@ -1091,6 +1091,6 @@ if __name__ != "__main__":
 
     from .Settings import ADDRESS, PORT, PORT2
 
-    DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
-    # Server = SCLangServerManager(ADDRESS, PORT, PORT2)
+    # DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
+    Server = SCLangServerManager(ADDRESS, PORT, PORT2)
 

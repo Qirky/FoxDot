@@ -868,7 +868,15 @@ class Player(Repeatable):
 
             # If we want to update now, set the start point to now
 
-            if kwargs.get("quantise", True) == False:
+            after = True
+
+            if self.metro.now_flag:
+
+                start_point = self.metro.now()
+
+                after = False
+
+            elif kwargs.get("quantise", True) == False:
 
                 start_point = self.metro.now()
 
@@ -878,7 +886,7 @@ class Player(Repeatable):
 
             self.event_n = 0
 
-            self.event_n, self.event_index = self.count(start_point, event_after=True)
+            self.event_n, self.event_index = self.count(start_point, event_after=after)
 
             self.metro.schedule(self, self.event_index)
 
