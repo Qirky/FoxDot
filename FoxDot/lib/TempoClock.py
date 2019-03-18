@@ -115,6 +115,9 @@ class TempoClock(object):
         # EspGrid sync
         self.espgrid = None
 
+        # Flag for next_bar wrapper
+        self.now_flag  = False
+
         # Can be configured
         self.latency_values = [0.25, 0.5, 0.75]
         self.latency    = 0.25 # Time between starting processing osc messages and sending to server
@@ -162,8 +165,6 @@ class TempoClock(object):
         if data[0] == 0:
             self.espgrid.start_tempo()
             data = self.espgrid.get_tempo()
-        
-        print(data, time.time(), time.time() - data[2])
         
         if force or (data[1] != self.bpm):
             self.bpm_start_time = float("{}.{}".format(data[2], data[3]))
