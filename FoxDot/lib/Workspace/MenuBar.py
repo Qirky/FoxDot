@@ -106,14 +106,16 @@ class MenuBar(Menu):
 
         for tutorial in GET_TUTORIAL_FILES():
 
-            filename = os.path.basename(tutorial).replace(".py", "")
+            if filename.endswith(".py"):
 
-            data = filename.split("_")
+                filename = os.path.basename(tutorial).replace(".py", "")
 
-            num  = data[0]
-            name = " ".join(data[1:]).title()
+                data = filename.split("_")
 
-            tutorialmenu.add_command(label="Load Tutorial {}: {}".format(num, name), command=partial(self.root.loadfile, tutorial))
+                num  = data[0]
+                name = " ".join(data[1:]).title()
+
+                tutorialmenu.add_command(label="Load Tutorial {}: {}".format(num, name), command=partial(self.root.loadfile, tutorial))
 
         self.add_cascade(label="Tutorials", menu=tutorialmenu)
 
