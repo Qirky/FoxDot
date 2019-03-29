@@ -169,7 +169,7 @@ def find_multiline(text):
 from ..Patterns import Main, Sequences, Generators
 from ..SCLang import SCLang
 
-foxdot_kw = [ "Clock","Group","Scale","DefaultServer","Root","Samples","var","Pvar",
+foxdot_kw = [ "Clock","Group","Scale","Server","Root","Samples","var","Pvar",
               "Attributes", "PatternMethods", "PatternTypes", "now",
               "linvar","expvar","mapvar","sinvar","inf","when", "lambda", u"λ", decorator]
 
