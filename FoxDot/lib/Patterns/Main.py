@@ -119,6 +119,9 @@ class metaPattern(object):
         """ Returns a new pattern object with this Pattern's class type """
         return self.__class__(data + self.meta)
 
+    def transform(self, func):
+        return self.__class__([(item.transform(func) if isinstance(item, metaPattern) else func(item))for item in self])
+
     @classmethod
     def get_methods(cls):
         """ Returns the methods associated with the `Pattern` class as a list """
