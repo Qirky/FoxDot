@@ -1804,6 +1804,25 @@ class Player(Repeatable):
 
         return self
 
+    def versus(self, other_key, rule=lambda x, y: x > y):
+        """ Sets the `amplify` key for both player to be dependent on the rule """
+
+        # Get the attribute  from the key to versus
+        this_key = getattr(self, other_key.attr)
+
+        # Define transformation function
+
+        # func = lambda z: rule(this_key, z)
+        # self.amplify = other_key.transform(func)
+
+        # Set amplifications
+        
+        
+        self.amplify = other_key < this_key
+        other_key.player.amplify = (self.amplify != 1)
+
+        return self
+
     def only(self):
         """ Stops all players except this one """
         for player in list(self.metro.playing):
@@ -1848,12 +1867,12 @@ class Player(Repeatable):
             self._versus = None
         return self
 
-    def versus(self, other, func = lambda a, b: a > b):
+    # def versus(self, other, func = lambda a, b: a > b):
 
-        self.amp  = self.pitch > other.pitch
-        other.amp = other.pitch > self.pitch
+    #     self.amp  = self.pitch > other.pitch
+    #     other.amp = other.pitch > self.pitch
 
-        return self
+    #     return self
     
 
     # Utils
