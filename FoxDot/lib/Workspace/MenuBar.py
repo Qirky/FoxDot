@@ -106,9 +106,11 @@ class MenuBar(Menu):
 
         for tutorial in GET_TUTORIAL_FILES():
 
+            filename = os.path.basename(tutorial)
+
             if filename.endswith(".py"):
 
-                filename = os.path.basename(tutorial).replace(".py", "")
+                filename = filename.replace(".py", "")
 
                 data = filename.split("_")
 
