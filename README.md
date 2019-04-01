@@ -7,6 +7,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 
 - Update `PlayerKey` class (things like `p1.degree` etc) to behave better with `map` and `transform`
 - Added `transform` method to Patterns
+- Fixed `.pyc` files showing in the tutorials menu - you may have to uninstall and reinstall to see the benefit
 - Improved in-house synchronisation between FoxDot instances.
 - Add `PDelta` pattern; user supplies the step sizes between each value.
 - Negative `offbeat` fix (thanks zdbm).
