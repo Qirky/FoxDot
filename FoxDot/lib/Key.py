@@ -296,10 +296,6 @@ class NumberKey(object):
                 return func(item)
         return self.spawn_child(new_func)
 
-        # new = self.child(0)
-        # new.calculate = lambda a, b: func(b)
-        # return new
-
     def accompany(self, freq=0, rel=[0,2,4]):
         """ Returns a PlayerKey whose function returns an accompanying note """
         return self.transform(Accompany(freq=freq, rel=rel))

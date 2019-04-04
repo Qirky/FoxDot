@@ -1804,22 +1804,21 @@ class Player(Repeatable):
 
         return self
 
-    def versus(self, other_key, rule=lambda x, y: x > y):
-        """ Sets the `amplify` key for both player to be dependent on the rule """
+    def versus(self, other_key, rule=lambda x, y: x > y, attr=None):
+        """ Sets the 'amplify' key for both players to be dependent on the comparison of keys """
 
-        # Get the attribute  from the key to versus
-        this_key = getattr(self, other_key.attr)
+        # Get reference to the second player object
 
-        # Define transformation function
+        other = other_key.player
 
-        # func = lambda z: rule(this_key, z)
-        # self.amplify = other_key.transform(func)
+        # Get the attribute from the key to versus
 
-        # Set amplifications
-        
-        
-        self.amplify = other_key < this_key
-        other_key.player.amplify = (self.amplify != 1)
+        this_key = getattr(self, other_key.attr if attr is None else attr)
+
+        # Set amplifications based on the rule
+
+        self.amplify  = this_key.transform(lambda value: rule(value, other_key.now()))
+        other.amplify = this_key.transform(lambda value: not rule(value, other_key.now()))
 
         return self
 
