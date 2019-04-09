@@ -1666,7 +1666,7 @@ class workspace:
         return
 
     def releaseNodes(self, event=None):
-        execute("DefaultServer.freeAllNodes()")
+        execute("Server.freeAllNodes()")
         return
 
     def replace(self, line, old, new):
