@@ -246,7 +246,7 @@ class BufferManager(object):
         """ Get buffer information from the buffer number """
         return self._buffers[bufnum]
 
-    def _allocateAndLoad(self, filename):
+    def _allocateAndLoad(self, filename, force=False):
         """ Allocates and loads a buffer from a filename, with caching """
         if filename not in self._fn_to_buf:
             bufnum = self._getNextBufnum()
@@ -254,7 +254,16 @@ class BufferManager(object):
             self._server.bufferRead(filename, bufnum)
             self._fn_to_buf[filename] = buf
             self._buffers[bufnum] = buf
+        elif force:
+            buf = self._fn_to_buf[filename]
+            self._server.bufferRead(filename, buf.bufnum)
+            # self._fn_to_buf[filename] = bufnum
+            # self._buffers[bufnum] = buf
         return self._fn_to_buf[filename]
+
+    def reload(self, filename):
+        # symbol = self.getBufferFrom
+        return self.loadBuffer(filename, force=True)
 
     def _getSoundFile(self, filename):
         """ Look for a file with all possible extensions """
@@ -399,13 +408,13 @@ class BufferManager(object):
             WarningMsg("Could not find any sample matching %r" % filename)
             return None
 
-    def loadBuffer(self, filename, index=0):
+    def loadBuffer(self, filename, index=0, force=False):
         """ Load a sample and return the number of a buffer """
         samplepath = self._findSample(filename, index)
         if samplepath is None:
             return 0
         else:
-            buf = self._allocateAndLoad(samplepath)
+            buf = self._allocateAndLoad(samplepath, force=force)
             return buf.bufnum
 
 
@@ -429,7 +438,9 @@ class LoopSynthDef(SampleSynthDef):
         self.add()
     def __call__(self, filename, pos=0, sample=0, **kwargs):
         kwargs["buf"] = Samples.loadBuffer(filename, sample)
-        return SampleSynthDef.__call__(self, pos, **kwargs)
+        proxy = SampleSynthDef.__call__(self, pos, **kwargs)
+        proxy.kwargs["filename"] = filename
+        return proxy
 
 class GranularSynthDef(SampleSynthDef):
     def __init__(self):

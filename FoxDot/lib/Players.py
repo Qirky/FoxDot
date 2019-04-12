@@ -321,6 +321,7 @@ class Player(Repeatable):
         self.attr  = {}
         self.modifier = Pattern()
         self.mod_data = 0
+        self.filename = None
 
         # Keyword arguments that are used internally
 
@@ -790,6 +791,11 @@ class Player(Repeatable):
         self.synthdef = synthdef
 
         # Make sure all values are reset to start
+
+        if "filename" in kwargs:
+
+            self.filename = kwargs["filename"]
+            del kwargs["filename"]
 
         if self.isplaying is False:
 
@@ -1819,6 +1825,15 @@ class Player(Repeatable):
 
         self.amplify  = this_key.transform(lambda value: rule(value, other_key.now()))
         other.amplify = this_key.transform(lambda value: not rule(value, other_key.now()))
+
+        return self
+
+    def reload(self):
+        """ If this is a 'play' or 'loop' SynthDef, reload the filename used"""
+
+        if self.synthdef == LoopPlayer:
+
+            Samples.reload(self.filename)
 
         return self
 
