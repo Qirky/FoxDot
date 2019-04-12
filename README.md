@@ -5,6 +5,7 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 
 ### v0.7 fixes and updates
 
+- Add `.reload()` method for `loop` player to reload the file used, in case it has been overwritten.
 - Update `PlayerKey` class (things like `p1.degree` etc) to behave better with `map` and `transform`
 - Added `transform` method to Patterns
 - Fixed `.pyc` files showing in the tutorials menu - you may have to uninstall and reinstall to see the benefit
