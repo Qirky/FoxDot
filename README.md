@@ -5,6 +5,10 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 
 ```diff
 + Added auto-run of FoxDot along with a custom startup file that only runs when you run the file using FoxDot (python -m FoxDot)
+
+- Does not currently support Linux or Mac (but will be added)
+
+- Currently assumes programs are in default install paths (but this will be improved)
 ```
 
 ### v0.7 fixes and updates
