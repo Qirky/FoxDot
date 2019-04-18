@@ -18,7 +18,42 @@ Copyright Ryan Kirkbride 2015
 """
 
 from __future__ import absolute_import, division, print_function
+
+import os
+
+import subprocess
+
+try:
+    import psutil
+except:
+    os.system("pip install psutil")
+
+try:
+    import getpass
+except:
+    print("Couldn't import getpass library")
+
+username = getpass.getuser()
+
+def is_proc_running(name):
+    for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
+        #print(p);
+        procname = p.info['name'] or \
+             p.info['exe'] and os.path.basename(p.info['exe']) == name or \
+             p.info['cmdline'] and p.info['cmdline'][0] == name
+        if(procname.startswith(name)):
+            return True
+    return False
+
+
+running = (is_proc_running("sclang"))
+
+if(running == False):
+    
+    subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "C:/Users/"+username+"/Desktop/FoxDot-master/startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
+
 from .lib import *
+
 
 def main():
     """ Function for starting the GUI when importing the library """
