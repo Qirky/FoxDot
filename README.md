@@ -196,4 +196,4 @@ FoxDot's audio files have been obtained from a number of sources but I've lost r
 - Many samples have been obtained from http://freesound.org and have been placed in the public domain via the Creative Commons 0 License: http://creativecommons.org/publicdomain/zero/1.0/ - thank you to the original creators
 - Other samples have come from the [Dirt Sample Engine](https://github.com/tidalcycles/Dirt-Samples/tree/c2db9a0dc4ffb911febc613cdb9726cae5175223) which is part of the TidalCycles live coding language created by Yaxu - another huge amount of thanks.
 
-If you feel I've used a sample where I shouldn't have, please get it touch!
+If you feel I've used a sample where I shouldn't have, please get in touch!
