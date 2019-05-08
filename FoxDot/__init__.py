@@ -19,6 +19,11 @@ Copyright Ryan Kirkbride 2015
 
 from __future__ import absolute_import, division, print_function
 
+try:
+    import platform
+except:
+    print("Couldn't import platform library")
+
 import os
 
 import subprocess
@@ -33,24 +38,68 @@ try:
 except:
     print("Couldn't import getpass library")
 
+
+sclangpath = "" #find path to sclang
+
+thispath = "" #find this path
+
+"""
+
+Sclang path and supercollider path are the same but need to go to the actual file for sclang
+
+For CWR (current working directory) need to go to the folder that contains sclang (also contains supercollider (scide.exe))
+
+"""
+
+
+OS = platform.system()
+
 username = getpass.getuser()
 
-def is_proc_running(name):
-    for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
-        #print(p);
-        procname = p.info['name'] or \
-             p.info['exe'] and os.path.basename(p.info['exe']) == name or \
-             p.info['cmdline'] and p.info['cmdline'][0] == name
-        if(procname.startswith(name)):
-            return True
-    return False
+if(OS == "Windows"):
+
+    print("Windows")
+
+    def is_proc_running(name):
+        for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
+            #print(p);
+            procname = p.info['name'] or \
+                 p.info['exe'] and os.path.basename(p.info['exe']) == name or \
+                 p.info['cmdline'] and p.info['cmdline'][0] == name
+            if(procname.startswith(name)):
+                return True
+        return False
 
 
-running = (is_proc_running("sclang"))
+    running = (is_proc_running("sclang"))
 
-if(running == False):
+    if(running == False):
+        subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "C:/Users/"+username+"/Desktop/FoxDot-master/startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
+
+elif(OS == "Linux"):
     
-    subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "C:/Users/"+username+"/Desktop/FoxDot-master/startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
+    print("Linux")
+
+    def is_proc_running(name):
+        for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
+            #print(p);
+            procname = p.info['name'] or \
+                 p.info['exe'] and os.path.basename(p.info['exe']) == name or \
+                 p.info['cmdline'] and p.info['cmdline'][0] == name
+            if(procname.startswith(name)):
+                return True
+        return False
+
+
+    running = (is_proc_running("sclang"))
+
+    if(running == False):
+        subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "C:/Users/"+username+"/Desktop/FoxDot-master/startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
+
+else:
+    print("Operating system unrecognised")
+    #Potentially get the user to choose their OS from a list?
+    #Then run the corresponding functions
 
 from .lib import *
 
