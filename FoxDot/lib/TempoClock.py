@@ -152,12 +152,13 @@ class TempoClock(object):
             raise RequestTimeout(err)
         
         self.espgrid.set_clock_mode(2)
-        self._espgrid_update_tempo(True) # could schedule this for next bar?
+        self.schedule(lambda: self._espgrid_update_tempo(True))
+        # self._espgrid_update_tempo(True) # could schedule this for next bar?
         return
 
     def _espgrid_update_tempo(self, force=False):
         """ Retrieves the current tempo from EspGrid and updates internal values """
-        
+
         data = self.espgrid.get_tempo()
 
         # If the tempo hasn't been started, start it here and get updated data
@@ -171,8 +172,8 @@ class TempoClock(object):
             self.bpm_start_beat = data[4]
             object.__setattr__(self, "bpm", self._convert_json_bpm(data[1]))
 
-        self.schedule(self._espgrid_update_tempo)
-        # self.schedule(self._espgrid_update_tempo, self.now() + 1)
+        # self.schedule(self._espgrid_update_tempo)
+        self.schedule(self._espgrid_update_tempo, int(self.now() + 1))
         
         return
 
