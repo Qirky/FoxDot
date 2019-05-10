@@ -74,7 +74,7 @@ if(OS == "Windows"):
     running = (is_proc_running("sclang"))
 
     if(running == False):
-        subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "C:/Users/"+username+"/Desktop/FoxDot-master/startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
+        subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "./startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
 
 elif(OS == "Linux"):
     
