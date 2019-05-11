@@ -2,22 +2,27 @@
 
 """
 
-FoxDot is a Python library and programming environment that provides a fast and 
-user-friendly abstraction to the powerful audio-engine, SuperCollider. It comes 
-with its own IDE, which means it can be used straight out of the box; all you need 
+FoxDot is a Python library and programming environment that provides a fast and
+user-friendly abstraction to the powerful audio-engine, SuperCollider. It comes
+with its own IDE, which means it can be used straight out of the box; all you need
 is Python and SuperCollider and you're ready to go!
 
-For more information on installation, check out [the guide](http://foxdot.org/installation), 
+For more information on installation, check out [the guide](http://foxdot.org/installation),
 or if you're already set up, you can also find a useful starter guide that introduces the
 key components of FoxDot on [the website](http://foxdot.org/).
 
-Please see the [documentation](http://docs.foxdot.org/) for more detailed information on 
+Please see the [documentation](http://docs.foxdot.org/) for more detailed information on
 the FoxDot classes and how to implement them.
 
 Copyright Ryan Kirkbride 2015
 """
 
 from __future__ import absolute_import, division, print_function
+
+try:
+    import time
+except:
+    print("Couldn't import time")
 
 try:
     import platform
@@ -51,6 +56,7 @@ For CWR (current working directory) need to go to the folder that contains sclan
 
 """
 
+thisdir = os.getcwd()
 
 OS = platform.system()
 
@@ -58,7 +64,7 @@ username = getpass.getuser()
 
 if(OS == "Windows"):
 
-    print("Windows")
+    print("OS: Windows")
 
     def is_proc_running(name):
         for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
@@ -74,27 +80,30 @@ if(OS == "Windows"):
     running = (is_proc_running("sclang"))
 
     if(running == False):
-        subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "./startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
+        startup = thisdir+"/startup.scd"
+        os.system("sclang "+startup+" &")
+        #subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", ".\startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
 
 elif(OS == "Linux"):
-    
-    print("Linux")
+
+    print("OS: Linux")
 
     def is_proc_running(name):
-        for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
+        for p in psutil.process_iter(attrs=["name","cmdline"]):
             #print(p);
             procname = p.info['name'] or \
-                 p.info['exe'] and os.path.basename(p.info['exe']) == name or \
                  p.info['cmdline'] and p.info['cmdline'][0] == name
             if(procname.startswith(name)):
                 return True
-        return False
 
 
     running = (is_proc_running("sclang"))
 
     if(running == False):
-        subprocess.Popen(["C:\Program Files\SuperCollider-3.10.2\sclang.exe", "C:/Users/"+username+"/Desktop/FoxDot-master/startup.scd"], cwd="C:\Program Files\SuperCollider-3.10.2", shell=True)
+        startup = thisdir+"/FoxDot/startup.scd"
+        #os.system('sclang "/home/foxdot/Desktop/FoxDot-Cross-Platform/FoxDot/startup.scd" &') #fuctional
+        os.system("sclang "+startup+" &")
+
 
 else:
     print("Operating system unrecognised")
@@ -117,4 +126,3 @@ def Go():
             time.sleep(100)
     except KeyboardInterrupt:
         return
-
