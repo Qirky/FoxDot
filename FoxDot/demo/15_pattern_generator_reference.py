@@ -177,3 +177,29 @@ print(PWhite()[:8])
 
 # Returns random numbers between 1 and 5
 print(PWhite(1,5)[:8])
+
+
+
+####################
+# Custom Generator Patterns
+
+# Custom generator patterns can be made by subclassing GeneratorPattern
+# and overriding `GeneratorPattern.func`
+
+class CustomGeneratorPattern(GeneratorPattern):
+    def func(self, index):
+        return int(index / 4)
+
+print(CustomGeneratorPattern()[:10])
+
+# This can be done more consisely using `GeneratorPattern.from_func`,
+# passing in a function which takes an index and returns some pattern item.
+
+def some_func(index):
+    return int(index / 4)
+
+print(GeneratorPattern.from_func(some_func)[:10])
+
+# We can use lambdas too
+print(GeneratorPattern.from_func(lambda index: int(index / 4))[:10])
+

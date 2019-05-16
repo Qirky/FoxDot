@@ -1318,6 +1318,17 @@ class GeneratorPattern:
     def func(self, index):
         return index
 
+    @staticmethod
+    def from_func(pattern_generator_func):
+        """ Create a generator which invokes a given function
+            to generate items. The given function should take
+            and integer argument and return a pattern item. """
+        class CustomGeneratorPattern(GeneratorPattern):
+            def func(self, index):
+                return pattern_generator_func(index)
+        return CustomGeneratorPattern()
+
+
     def __int__(self):  
         return int(self.getitem())
 
