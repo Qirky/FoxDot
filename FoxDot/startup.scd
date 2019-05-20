@@ -1,1 +1,1 @@
-Quarks.install("FoxDot"); FoxDot.start
+FoxDot.start
