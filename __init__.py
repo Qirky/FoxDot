@@ -101,6 +101,7 @@ elif(OS == "Linux"):
                  p.info['cmdline'] and p.info['cmdline'][0] == name
             if(procname.startswith(name)):
                 return True
+        return False
 
 
     running = (is_proc_running("sclang"))

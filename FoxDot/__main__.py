@@ -8,9 +8,36 @@
 
 """
 
+
 from __future__ import absolute_import, division, print_function
 from .lib import FoxDotCode, handle_stdin
 from .lib.Workspace import workspace
+
+import time
+
+import argparse
+
+'''def find_procs_by_name(name):
+    "Return a list of processes matching 'name'."
+    ls = []
+    for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
+        #print(p);
+        procname = p.info['name'] or \
+             p.info['exe'] and os.path.basename(p.info['exe']) == name or \
+             p.info['cmdline'] and p.info['cmdline'][0] == name
+        if(procname.startswith(name)):
+            #print(procname)
+
+            else:
+                print("False")
+                try:
+                    os.system("start sclang.exe")
+                except:
+                    print("Couldn't start sclang")
+            
+            ls.append(p)
+    return ls
+'''
 
 import argparse
 
