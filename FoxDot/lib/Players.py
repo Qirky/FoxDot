@@ -1597,7 +1597,7 @@ class Player(Repeatable):
 
             # We can set a condition to only send messages
 
-            self.queue_block.osc_messages.append(compiled_msg)
+            self.queue_block.append_osc_message(compiled_msg)
 
             # self.do_bang = True
 

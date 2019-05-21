@@ -410,7 +410,6 @@ class TempoClock(object):
 
     def get_elapsed_seconds_from_last_bpm_change(self):
         """ Returns the time since the last change in bpm """
-        # return (time.time() - self.bpm_start_time) + (float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
         return self.get_time() - self.bpm_start_time
 
     def get_time(self):
@@ -419,8 +418,11 @@ class TempoClock(object):
 
     def get_time_at_beat(self, beat):
         """ Returns the time that the local computer's clock will be at 'beat' value """
-        # return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
-        return self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
+        if isinstance(self.bpm, TimeVar):
+            t = self.get_time() + self.beat_dur(beat - self.now())        
+        else:
+            t = self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
+        return t
 
     def sync_to_midi(self, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
@@ -556,11 +558,13 @@ class TempoClock(object):
 
             # The item might get called by another item in the queue block
 
+            output = None
+
             if item.called is False:
 
                 try:
 
-                    item.__call__()
+                    output = item.__call__()
 
                 except SystemExit:
 
@@ -569,6 +573,8 @@ class TempoClock(object):
                 except:
 
                     print(error_stack())
+
+                # TODO: Get OSC message from the call, and add to list?
 
         # Send all the message to supercollider together
 
@@ -914,6 +920,12 @@ class QueueBlock(object):
         """ Calls self.osc_messages() """
         self.send_osc_messages()
 
+    def append_osc_message(self, message):
+        """ Adds an OSC bundle if the timetag is not in the past """
+        if message.timetag > self.metro.get_time():
+            self.osc_messages.append(message)
+        return
+
     def send_osc_messages(self):
         """ Sends all compiled osc messages to the SuperCollider server """
         return list(map(self.server.sendOSC, self.osc_messages))
@@ -954,8 +966,9 @@ class QueueObj(object):
     def __repr__(self):
         return repr(self.obj)
     def __call__(self):
-        self.obj.__call__(*self.args, **self.kwargs)
+        value = self.obj.__call__(*self.args, **self.kwargs)
         self.called = True
+        return value
 
 class History(object):
     """
