@@ -20,11 +20,6 @@ Copyright Ryan Kirkbride 2015
 from __future__ import absolute_import, division, print_function
 
 try:
-    import time
-except:
-    print("Couldn't import time")
-
-try:
     import platform
 except:
     print("Couldn't import platform library")
@@ -59,6 +54,8 @@ For CWR (current working directory) need to go to the folder that contains sclan
 thisdir = os.getcwd()
 
 OS = platform.system()
+
+OS = "Linux"
 
 username = getpass.getuser()
 
