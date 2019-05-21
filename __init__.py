@@ -55,8 +55,6 @@ thisdir = os.getcwd()
 
 OS = platform.system()
 
-OS = "Linux"
-
 username = getpass.getuser()
 
 if(OS == "Windows"):
