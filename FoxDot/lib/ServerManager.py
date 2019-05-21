@@ -487,7 +487,7 @@ class SCLangServerManager(ServerManager):
         effect = self.fxlist[name]
         for key in effect.args:
              data.append(key)
-             data.append(packet.get(key, effect.defaults[key]))
+             data.append(float(packet.get(key, effect.defaults[key])))
         return data
 
     def get_exit_node(self, node, bus, group_id, packet):
