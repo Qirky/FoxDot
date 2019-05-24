@@ -1576,3 +1576,12 @@ def sum_delays(a, b):
         value = a + b
 
     return value if len(value) > 1 else value[0]
+
+
+def force_pattern_args(f):
+    """ Wrapper for forcing arguments to be a Pattern """
+    def new_func(*args, **kwargs):
+        new_args = tuple(x if isinstance(x, metaPattern) else PGroup(x) for x in args)
+        new_kwargs = {key: value if isinstance(value, metaPattern) else value for key, value in kwargs.items()}
+        return f(*new_args, **new_kwargs)
+    return new_func
