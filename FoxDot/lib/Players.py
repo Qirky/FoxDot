@@ -2064,14 +2064,14 @@ class Group:
                     setattr(p, name, value)
                 except:
                     WarningMsg("'%s' object has no attribute '%s'" % (str(p), name))
-        except:
+        except KeyError :
             self.__dict__[name] = value 
         return self        
 
     def __getattr__(self, name):
         """ Returns a Pattern object containing the desired attribute for each player in the group  """
         if name == "players":
-            return self.players
+            return self.__dict__["players"]
         attributes = GroupAttr()
         for player in self.players:
             if hasattr(player, name):
