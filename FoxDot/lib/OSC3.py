@@ -383,7 +383,7 @@ class OSCMessage(object):
     def values(self):
         """Returns a list of the arguments appended so far
         """
-        print(self.getBinary().decode())
+        # print(self.getBinary().decode())
         return decodeOSC(self.getBinary())[2:]
     
     def tags(self):
@@ -669,6 +669,7 @@ class OSCBundle(OSCMessage):
         return binary
 
     def _reencapsulate(self, decoded):
+        # print(decoded)
         if decoded[0] == "#bundle":
             msg = OSCBundle()
             msg.setTimeTag(decoded[1])
@@ -686,7 +687,7 @@ class OSCBundle(OSCMessage):
     def values(self):
         """Returns a list of the OSCMessages appended so far
         """
-        print(self.getBinary())
+        # print("Bundle binary:", self.getBinary())
         out = []
         for decoded in decodeOSC(self.getBinary())[2:]:
             out.append(self._reencapsulate(decoded))
@@ -720,7 +721,7 @@ def OSCString(next):
     The string ends with 1 to 4 zero-bytes ('\x00') 
     """
     if sys.version_info[0] > 2:
-        next = bytes(next.encode("UTF-8"))
+        next = bytes(next.encode("UTF-8")) # this could be the problem?
     else:
         next = str(next)
     OSCstringLength = math.ceil((len(next)+1) / 4.0) * 4
@@ -733,9 +734,9 @@ def OSCBlob(next):
     The blob ends with 0 to 3 zero-bytes ('\x00') 
     """
 
-    if type(next) in (str, bytes):
+    if type(next) in (bytes, str):
         OSCblobLength = math.ceil((len(next)) / 4.0) * 4
-        binary = struct.pack(">i%ds" % (OSCblobLength), OSCblobLength, next)
+        binary = struct.pack(">i%ds" % (OSCblobLength), OSCblobLength, next) # TODO RYAN
     else:
         binary = ""
 
@@ -811,7 +812,8 @@ def _readString(data):
     #length = str(data).find("\x00")
     length = data.index(b"\x00")
     nextData = int(math.ceil((length+1) / 4.0) * 4)
-    return (data[0:length], data[nextData:])
+    output = (data[0:length].decode(), data[nextData:])
+    return output
 
 def _readBlob(data):
     """Reads the next (numbered) block of data
@@ -892,12 +894,12 @@ def decodeOSC(data):
     """
     table = {"i":_readInt, "f":_readFloat, "s":_readString, "b":_readBlob, "d":_readDouble, "t":_readTimeTag}
     decoded = []
-    address,  rest = _readString(data)
-    if address.startswith(b","): # .encode("utf-8")):
+    address, rest = _readString(data)
+    if address.startswith(","):
         typetags = address
-        address = b""
+        address = ""
     else:
-        typetags = b""
+        typetags = ""
 
     if address == "#bundle":
         time, rest = _readTimeTag(rest)
@@ -913,8 +915,9 @@ def decodeOSC(data):
             typetags, rest = _readString(rest)
         decoded.append(address)
         decoded.append(typetags)
-        if typetags.startswith(b","): #.encode("utf-8")):
-            for tag in typetags.decode()[1:]:
+        if typetags.startswith(","): #.encode("utf-8")):
+            for tag in typetags[1:]:
+                # print(tag, rest)
                 value, rest = table[tag](rest)
                 decoded.append(value)
         else:
