@@ -239,15 +239,21 @@ class NumberKey(object):
         functions = []
     
         # Convert default output to function
-        if not callable(default):
+        if callable(default):
+            default_func = default
+        else:
             default_func = partial(lambda x, y: x, default)
         
         # Convert input values to functions
         for key, value in mapping.items():
-            if not callable(key):
+            if callable(key):
+                test_func = force_pattern_args(key)
+            else:
                 test_func = partial(lambda x, y: x == y, key)
-                
-            if not callable(value):                
+            
+            if callable(value):
+                result_func = force_pattern_args(value)
+            else:
                 result_func = partial(lambda x, y: x, value)
                 
             functions.append((test_func, result_func))
