@@ -18,9 +18,9 @@ def convert_pattern_args(func):
     def new_method(self, value):
         if isinstance(value, (list, tuple)):
             value = convert_to_pattern(value)
-        if isinstance(value, (metaPattern, GeneratorPattern)):
-            other_op = get_inverse_op(func.__name__)
-            return getattr(value, other_op).__call__(self)
+        # if isinstance(value, (metaPattern, GeneratorPattern)):
+        #     other_op = get_inverse_op(func.__name__)
+        #     return getattr(value, other_op).__call__(self)
         return func(self, value)
     return new_method
 
@@ -295,11 +295,22 @@ class NumberKey(object):
     def transform(self, func):
         """ Returns a child Player Key based on the func. If the value
             returned is a PGroup, that is also transformed by the function """
+        # def new_func(item):
+        #     if isinstance(item, (PGroup, Pattern)):
+        #         return item.transform(func)
+        #     else:
+        #         return func(item)
         def new_func(item):
-            if isinstance(item, (PGroup, Pattern)):
-                return item.transform(func)
-            else:
+            try:
                 return func(item)
+            except AttributeError as e:
+                error = e
+            try:
+                return item.transform(func)
+            except AttributeError:
+                # Raise original error for more information
+                raise error
+
         return self.spawn_child(new_func)
 
     def accompany(self, freq=0, rel=[0,2,4]):
