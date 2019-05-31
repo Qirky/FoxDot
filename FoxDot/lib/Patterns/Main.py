@@ -127,6 +127,11 @@ class metaPattern(object):
         """ Returns the methods associated with the `Pattern` class as a list """
         return [attr for attr in dir(cls) if callable(getattr(cls, attr))]
 
+    def get_data(self):
+        """ Returns self.data if data is not a single instance of this class, in which 
+            case self.data[0].data is returned """
+        return self.data
+
     @classmethod
     def help(cls):
         """ Prints the Pattern class docstring to the console """

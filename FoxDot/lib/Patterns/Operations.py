@@ -38,10 +38,10 @@ class POperand:
 
         # Calculate total length before operations
 
-        i, length = 0, LCM(len(A.data), len(B.data))
+        i, length = 0, LCM(len(A.get_data()), len(B.get_data()))
 
-        gen_a = itertools.cycle(A.data)
-        gen_b = itertools.cycle(B.data)
+        gen_a = itertools.cycle(A.get_data())
+        gen_b = itertools.cycle(B.get_data())
 
         P1 = []
 
