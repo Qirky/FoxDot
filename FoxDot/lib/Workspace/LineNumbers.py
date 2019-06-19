@@ -1,9 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
-try:
-    import Tkinter as Tk
-except ImportError:
-    import tkinter as Tk
+
+from . import tkimport as Tk
 
 from ..Settings import LINE_NUMBER_MARKER_OFFSET
 from ..Code import execute

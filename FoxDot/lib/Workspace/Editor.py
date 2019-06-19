@@ -15,18 +15,7 @@ except:
 
 # Tkinter Interface
 
-try:
-    from Tkinter import *
-    import ttk
-    import tkFont
-    import tkFileDialog
-    import tkMessageBox
-except ImportError:
-    from tkinter import *
-    from tkinter import ttk
-    from tkinter import font as tkFont
-    from tkinter import filedialog as tkFileDialog
-    from tkinter import messagebox as tkMessageBox
+from .tkimport import *
 
 # Custom app modules
 from .Format import *

@@ -1,9 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-try:
-    from Tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST, INSERT
-except ImportError:
-    from tkinter import Text, SEL, END, SEL_FIRST, SEL_LAST, INSERT
+from .tkimport import Text, SEL, END, SEL_FIRST, SEL_LAST, INSERT
 
 from .Format import *
 

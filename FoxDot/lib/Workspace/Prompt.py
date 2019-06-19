@@ -1,11 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-try:
-    from Tkinter import *
-    import tkFont
-except ImportError:
-    from tkinter import *
-    from tkinter import font as tkFont
+from .tkimport import *
 
 from ..Settings import FONT
 from .AppFunctions import index as get_index
