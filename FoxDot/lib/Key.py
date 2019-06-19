@@ -19,8 +19,9 @@ def convert_pattern_args(func):
         if isinstance(value, (list, tuple)):
             value = convert_to_pattern(value)
         # if isinstance(value, (metaPattern, GeneratorPattern)):
-        #     other_op = get_inverse_op(func.__name__)
-        #     return getattr(value, other_op).__call__(self)
+        if isinstance(value, (Pattern, GeneratorPattern)):
+            other_op = get_inverse_op(func.__name__)
+            return getattr(value, other_op).__call__(self)
         return func(self, value)
     return new_method
 
