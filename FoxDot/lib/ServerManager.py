@@ -190,10 +190,6 @@ class SCLangServerManager(ServerManager):
         self.wait_time = 5
         self.count = 0
 
-        # General SuperCollider OSC connection
-        self.client = OSCClientWrapper()
-        self.client.connect( (self.addr, self.port) )
-
         # Assign a valid OSC Client
         self.forward = None
 
@@ -206,6 +202,14 @@ class SCLangServerManager(ServerManager):
 
         self.fx_setup_done = False
         self.fx_names = {}
+
+        self.reset()
+
+    def reset(self):
+
+        # General SuperCollider OSC connection
+        self.client = OSCClientWrapper()
+        self.client.connect( (self.addr, self.port) )
 
         # OSC Connection for custom OSCFunc in SuperCollider
         if GET_SC_INFO:

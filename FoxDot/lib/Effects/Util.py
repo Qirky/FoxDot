@@ -152,11 +152,13 @@ class Effect:
                 print("IOError: Unable to update '{}' effect.".format(self.synthdef))
 
         # 3. Send to server
-        
+
+        self.load()
+
+    def load(self):
+        """ Load the Effect """
         if self.server is not None:
-
             self.server.loadSynthDef(self.filename)
-
         return
 
 class In(Effect):
@@ -234,8 +236,15 @@ class EffectManager(dict):
         return tuple(self.all_kw)
 
     def __iter__(self):
-        for key in self.pre_kw + self.kw:
+        for key in self.kw:
             yield key, self[key]
+
+    def reload(self):
+        """ Re-sends each effect to SC """
+        for kw, effect in self:
+            effect.load()
+        In(); Out();
+        return
 
 
 # -- TODO

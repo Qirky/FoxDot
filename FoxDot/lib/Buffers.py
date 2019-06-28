@@ -180,6 +180,9 @@ class BufferManager(object):
             self.loadBuffer(fn)
         return
 
+    def reset(self):
+        return self._reset_buffers()
+
     def _incr_nextbuf(self):
         self._nextbuf += 1
         if self._nextbuf >= self._max_buffers:
