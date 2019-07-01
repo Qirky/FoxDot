@@ -666,8 +666,14 @@ class Player(Repeatable):
         # Play the note
         
         if not isinstance(self.event["dur"], rest):
+
+            try:
         
-            self.send(verbose=(self.metro.solo == self and kwargs.get('verbose', True)))
+                self.send(verbose=(self.metro.solo == self and kwargs.get('verbose', True)))
+
+            except Exception as err:
+
+                print("Error in Player {}: {}".format(self.id, err))
         
         # If using custom bpm
 
