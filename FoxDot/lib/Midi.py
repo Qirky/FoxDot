@@ -18,7 +18,7 @@ from .SCLang import SynthDefProxy
 
 class MidiIn:
     metro = None
-    def __init__(self, port_id=0):
+    def __init__(self, port_id):
         """ Class for listening for MIDI clock messages
             from a midi device """
         try:
@@ -42,7 +42,7 @@ class MidiIn:
         self.device.open_port(port_id)
         self.device.ignore_types(timing=False)
 
-        self.pulse = 0
+        self.pulse = 1
         self.delta = 0.0
         self.bpm   = 120.0
         self.ppqn  = 24
@@ -62,7 +62,7 @@ class MidiIn:
                 self.delta += delta
                 if self.pulse == self.ppqn:
                     self.bpm = 60.0 / self.delta
-                    self.pulse = 0
+                    self.pulse = 1
                     self.delta = 0.0
             elif SONG_POSITION_POINTER in datatype:
                 self.metro.set_time(datatype[1] / 4)

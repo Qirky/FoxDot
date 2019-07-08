@@ -424,12 +424,12 @@ class TempoClock(object):
             t = self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
         return t
 
-    def sync_to_midi(self, sync=True):
+    def sync_to_midi(self, port=0, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
             this attempts to follow the tempo of the device. Requies rtmidi """
         try:
             if sync:
-                self.midi_clock = MidiIn()
+                self.midi_clock = MidiIn(port)
             elif self.midi_clock:
                 self.midi_clock.close()
                 self.midi_clock = None
