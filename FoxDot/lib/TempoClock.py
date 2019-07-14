@@ -381,6 +381,7 @@ class TempoClock(object):
 
     def beat_dur(self, n=1):
         """ Returns the length of n beats in seconds """
+
         return 0 if n == 0 else (60.0 / self.get_bpm()) * n
 
     def beats_to_seconds(self, beats):
@@ -609,9 +610,9 @@ class TempoClock(object):
 
             # If using a midi-clock, update the values
 
-            if self.midi_clock is not None:
+            # if self.midi_clock is not None:
 
-                self.midi_clock.update()
+                # self.midi_clock.update()
 
             # if using espgrid
 

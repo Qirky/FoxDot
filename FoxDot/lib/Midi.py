@@ -16,9 +16,92 @@ from .Scale    import ScalePattern
 from .TimeVar  import TimeVar
 from .SCLang import SynthDefProxy
 
+import time
+
+class MidiInputHandler(object):
+
+    def __init__(self, midi_ctrl):
+    
+        self.midi_ctrl = midi_ctrl
+        self.bpm_group = []
+
+    def __call__(self, event, data=None):
+    
+        datatype, delta = event
+        
+        if TIMING_CLOCK in datatype:
+                        
+            self.midi_ctrl.pulse += 1
+            self.midi_ctrl.delta += delta
+            
+            if self.midi_ctrl.pulse == self.midi_ctrl.ppqn:
+                
+                t_master = 60.0
+                
+                self.midi_ctrl.bpm = float(int(60.0 / self.midi_ctrl.delta))
+                # self.bpm_group.append(float(int(t_master / self.midi_ctrl.delta)))
+                
+                self.midi_ctrl.pulse = 1
+                self.midi_ctrl.delta = 0.0
+                
+                # if len(self.bpm_group) == 4:
+                    # self.midi_ctrl.bpm = float(int(sum(self.bpm_group) / len(self.bpm_group)))
+                    # self.bpm_group.clear()
+                    
+                
+                
+                print(self.midi_ctrl.bpm)
+
+
 class MidiIn:
     metro = None
-    def __init__(self, port_id):
+    def __init__(self, port_id=0):
+        """ Class for listening for MIDI clock messages
+            from a midi device """
+        try:
+
+            self.device = rtmidi.MidiIn()
+
+        except NameError:
+
+            raise ImportError(_err)
+
+        self.available_ports = self.device.get_ports()
+        
+        if not self.available_ports:
+
+            raise MIDIDeviceNotFound
+
+        else:
+
+            print("MidiIn: Connecting to " + self.available_ports[port_id])
+
+        self.device.open_port(port_id)
+        self.device.ignore_types(timing=False)
+        
+
+        self.pulse = 1
+        self.delta = 0.0
+        self.bpm   = 120.0
+        self.ppqn  = 24
+        self.beat  = 0
+        
+        self.device.set_callback(MidiInputHandler(self))
+
+    @classmethod
+    def set_clock(cls, tempo_clock):
+        cls.metro = tempo_clock
+        return
+
+    def close(self):
+        """ Closes the active port """
+        self.device.close_port()
+        return
+
+        
+class MidiIn2:
+    metro = None
+    def __init__(self, port_id=0):
         """ Class for listening for MIDI clock messages
             from a midi device """
         try:
@@ -56,15 +139,18 @@ class MidiIn:
     def update(self):
         data = self.device.get_message()
         if data is not None:
+            # print(data)
             datatype, delta = data
             if TIMING_CLOCK in datatype:
                 self.pulse += 1
                 self.delta += delta
                 if self.pulse == self.ppqn:
+                    # print(self.delta)
                     self.bpm = 60.0 / self.delta
+                    # print(self.bpm)
                     self.pulse = 1
                     self.delta = 0.0
-            elif SONG_POSITION_POINTER in datatype:
+            elif SONG_POSITION_POINTER in datatype:                
                 self.metro.set_time(datatype[1] / 4)
         return
 
