@@ -21,36 +21,37 @@ import time
 class MidiInputHandler(object):
 
     def __init__(self, midi_ctrl):
-    
+
         self.midi_ctrl = midi_ctrl
         self.bpm_group = []
 
     def __call__(self, event, data=None):
-    
+
         datatype, delta = event
-        
+
         if TIMING_CLOCK in datatype:
-                        
+
             self.midi_ctrl.pulse += 1
             self.midi_ctrl.delta += delta
-            
+
             if self.midi_ctrl.pulse == self.midi_ctrl.ppqn:
-                
+
                 t_master = 60.0
-                
-                self.midi_ctrl.bpm = float(int(60.0 / self.midi_ctrl.delta))
-                # self.bpm_group.append(float(int(t_master / self.midi_ctrl.delta)))
-                
-                self.midi_ctrl.pulse = 1
+                print("Delta : " + repr(self.midi_ctrl.delta))
+
+                self.midi_ctrl.bpm = float(round(int(60.0 / self.midi_ctrl.delta)))
+                # self.bpm_group.append(float(round(int(t_master / self.midi_ctrl.delta))))
+
+                self.midi_ctrl.pulse = 0
                 self.midi_ctrl.delta = 0.0
-                
+                #
                 # if len(self.bpm_group) == 4:
-                    # self.midi_ctrl.bpm = float(int(sum(self.bpm_group) / len(self.bpm_group)))
-                    # self.bpm_group.clear()
-                    
-                
-                
-                print(self.midi_ctrl.bpm)
+                #     self.midi_ctrl.bpm = float(int(sum(self.bpm_group) / len(self.bpm_group)))
+                #     self.bpm_group.clear()
+
+
+
+                print("BPM : " + repr(self.midi_ctrl.bpm))
 
 
 class MidiIn:
@@ -67,7 +68,7 @@ class MidiIn:
             raise ImportError(_err)
 
         self.available_ports = self.device.get_ports()
-        
+
         if not self.available_ports:
 
             raise MIDIDeviceNotFound
@@ -78,14 +79,14 @@ class MidiIn:
 
         self.device.open_port(port_id)
         self.device.ignore_types(timing=False)
-        
 
-        self.pulse = 1
+
+        self.pulse = 0
         self.delta = 0.0
         self.bpm   = 120.0
         self.ppqn  = 24
         self.beat  = 0
-        
+
         self.device.set_callback(MidiInputHandler(self))
 
     @classmethod
@@ -98,7 +99,7 @@ class MidiIn:
         self.device.close_port()
         return
 
-        
+
 class MidiIn2:
     metro = None
     def __init__(self, port_id=0):
@@ -150,7 +151,7 @@ class MidiIn2:
                     # print(self.bpm)
                     self.pulse = 1
                     self.delta = 0.0
-            elif SONG_POSITION_POINTER in datatype:                
+            elif SONG_POSITION_POINTER in datatype:
                 self.metro.set_time(datatype[1] / 4)
         return
 
@@ -163,7 +164,7 @@ class MidiIn2:
         """ Closes the active port """
         self.device.close_port()
         return
-            
+
 
 class MidiOut(SynthDefProxy):
     """ SynthDef proxy for sending midi message via supercollider """
@@ -186,8 +187,3 @@ class rtMidiNotFound(Exception):
 if __name__ == "__main__":
 
     a = MidiIn()
-
-    
-
-
-        
