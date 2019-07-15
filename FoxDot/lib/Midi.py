@@ -8,6 +8,7 @@ try:
     TIMING_CLOCK          = midiconstants.TIMING_CLOCK
     SONG_POSITION_POINTER = midiconstants.SONG_POSITION_POINTER
     SONG_START            = midiconstants.SONG_START
+    SONG_STOP             = midiconstants.SONG_STOP 
 except ImportError as _err:
     pass
 
@@ -24,12 +25,13 @@ class MidiInputHandler(object):
 
         self.midi_ctrl = midi_ctrl
         self.bpm_group = []
+        self.played = False
 
     def __call__(self, event, data=None):
 
         datatype, delta = event
 
-        if TIMING_CLOCK in datatype:
+        if TIMING_CLOCK in datatype and not self.played:
 
             self.midi_ctrl.pulse += 1
             self.midi_ctrl.delta += delta
@@ -37,22 +39,26 @@ class MidiInputHandler(object):
             if self.midi_ctrl.pulse == self.midi_ctrl.ppqn:
 
                 t_master = 60.0
-                print("Delta : " + repr(self.midi_ctrl.delta))
+                # print("Delta : " + repr(self.midi_ctrl.delta))
 
                 self.midi_ctrl.bpm = float(round(int(60.0 / self.midi_ctrl.delta)))
-                # self.bpm_group.append(float(round(int(t_master / self.midi_ctrl.delta))))
 
                 self.midi_ctrl.pulse = 0
                 self.midi_ctrl.delta = 0.0
-                #
-                # if len(self.bpm_group) == 4:
-                #     self.midi_ctrl.bpm = float(int(sum(self.bpm_group) / len(self.bpm_group)))
-                #     self.bpm_group.clear()
-
-
 
                 print("BPM : " + repr(self.midi_ctrl.bpm))
-
+                
+                
+        elif SONG_START in datatype:
+            print ("PLAY !!!!")
+            print("CONSTANT BPM : " + repr(self.midi_ctrl.bpm))
+            self.played = True
+        
+        elif SONG_STOP in datatype:
+            print ("STOP !!!!")
+            print("RECORD BPM : " + repr(self.midi_ctrl.bpm))
+            self.played = False
+            
 
 class MidiIn:
     metro = None
