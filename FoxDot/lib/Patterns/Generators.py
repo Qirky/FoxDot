@@ -285,7 +285,7 @@ class PDelta(GeneratorPattern):
     def func(self, index):  
         if index == 0:
             return self.start
-        self.value += self.deltas[index]
+        self.value += float(self.deltas[index - 1])
         return self.value
         
 class PSquare(GeneratorPattern):
