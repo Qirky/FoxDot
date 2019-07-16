@@ -314,9 +314,9 @@ class NumberKey(object):
 
         return self.spawn_child(new_func)
 
-    def accompany(self, freq=0, rel=[0,2,4]):
+    def accompany(self, rel=[0,2,4]):
         """ Returns a PlayerKey whose function returns an accompanying note """
-        return self.transform(Accompany(freq=freq, rel=rel))
+        return self.transform(Accompany(rel=rel))
 
     def versus(self, rule=lambda x, y: x > y):
         """ p1 >> pads([0, 1, 2, 3])
@@ -430,9 +430,9 @@ class Accompany:
     this_last_value = 0
     keys_last_value = None
 
-    def __init__(self, freq=0, rel=[0,2,4]):
+    def __init__(self, rel=[0,2,4]):
 
-        self.frequency  = freq
+        # self.frequency  = freq
         self.scale_size = 7
         self.relations  = list(rel)
 
