@@ -39,6 +39,7 @@ import socket
 # Code execution
 from ..Code import execute
 from ..Settings import FONT, FOXDOT_ICON, FOXDOT_HELLO, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
+from ..Settings import PY_VERSION
 from ..ServerManager import TempoServer
 
 # App object
@@ -685,8 +686,15 @@ class workspace:
         return "break"
 
     def loadfile(self, path):
-        with open(path, encoding="utf8") as f:
-            self.set_all(f.read())
+        try:
+            if PY_VERSION == 2:
+                f = open(path)
+            else:
+                f = open(path, encoding="utf8")
+        except Exception as e:
+            return print("{} error occurred when loading file:\n    - '{}'".format(e.__class__.__name__, path))
+        self.set_all(f.read())
+        f.close()
         return
 
     def newfile(self, event=None):
