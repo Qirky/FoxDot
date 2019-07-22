@@ -1022,6 +1022,33 @@ class Player(Repeatable):
             self.pshift=0
         return self
 
+    def unison(self, unison=2, detune=0.125):
+        """ Like spread(), but can specify number of voices(unison)  
+        Sets pan to (-1,-0.5,..,0.5,1) and pshift to (-0.125,-0.0625,...,0.0625,0.125)
+        If unison is odd, an unchanged voice is added in the center
+        Eg : p1.unison(4, 0.5) => pshift=(-0.5,-0.25,0.25,0.5), pan=(-1.0,-0.5,0.5,1.0)
+             p1.unison(5, 0.8) => pshift=(-0.8,-0.4,0,0.4,0.8), pan=(-1.0,-0.5,0,0.5,1.0)
+        """
+        if unison != 0:
+            pan=[]
+            pshift=[]
+            uni = int(unison if unison%2==0 else unison-1)
+            for i in range(1,int(uni/2)+1):
+                pan.append(2*i/uni)
+                pan.insert(0, -2*i/uni)
+            for i in range(1, int(uni/2)+1):
+                pshift.append(detune*(i/(uni/2)))
+                pshift.insert(0,detune*-(i/(uni/2)))
+            if unison%2!=0 and unison > 1:
+                pan.insert(int(len(pan)/2), 0)
+                pshift.insert(int(len(pan)/2), 0)              
+            self.pan = tuple(pan)
+            self.pshift = tuple(pshift)
+        else:
+            self.pan=0
+            self.pshift=0
+        return self
+    
     def slider(self, start=0, on=1):
         """ Creates a glissando effect between notes """
         if on:
