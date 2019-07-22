@@ -381,6 +381,7 @@ class TempoClock(object):
 
     def beat_dur(self, n=1):
         """ Returns the length of n beats in seconds """
+
         return 0 if n == 0 else (60.0 / self.get_bpm()) * n
 
     def beats_to_seconds(self, beats):
@@ -424,12 +425,12 @@ class TempoClock(object):
             t = self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
         return t
 
-    def sync_to_midi(self, sync=True):
+    def sync_to_midi(self, port=0, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
             this attempts to follow the tempo of the device. Requies rtmidi """
         try:
             if sync:
-                self.midi_clock = MidiIn()
+                self.midi_clock = MidiIn(port)
             elif self.midi_clock:
                 self.midi_clock.close()
                 self.midi_clock = None
@@ -609,9 +610,9 @@ class TempoClock(object):
 
             # If using a midi-clock, update the values
 
-            if self.midi_clock is not None:
+            # if self.midi_clock is not None:
 
-                self.midi_clock.update()
+                # self.midi_clock.update()
 
             # if using espgrid
 
