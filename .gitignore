@@ -14,29 +14,42 @@ FoxDot/lib/Settings/conf.txt
 FoxDot/lib/Workspace/tmp/tempfile.txt
 changed_files.txt
 
+# To-do list
+
+
+TODO.txt
+
+
+
+
+autodoc.py
+
+snd/mkdir.py
+
+
+
+# PIP Registration file
+
+
+.pypirc
+
+
+# Directory created by pip install -e
+
+
+/*.egg-info
+
+
+
+# Compiled Python file
+
+
+*.pyc
 
 # Sphinx build dir
 docs/_build/
 
 *.txt
-
-# To-do list
-TODO.txt
-
-# Tracks
-FoxDot/Tracks/*
-
-# Make directory and autodoc scripts
-autodoc.py
-snd/mkdir.py
-
-# PIP Registration file
-.pypirc
-# Directory created by pip install -e
-/*.egg-info
-
-# Compiled Python file
-*.pyc
 
 # Windows image file caches
 Thumbs.db

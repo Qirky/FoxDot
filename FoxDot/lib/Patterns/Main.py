@@ -1095,6 +1095,22 @@ class PGroup(metaPattern):
                 values.append(item)
         return PGroup(values)
 
+    def concat(self, data):
+        """ Concatonates this patterns stream with another """
+        new = PGroup()
+        if isinstance(data, PGroup):
+            new.data = self.data + data.data
+        # Creates a pattern
+        elif isinstance(data, Pattern):
+            new = PGroup(*self.data, data)
+        elif isinstance(data, (list, str)):
+            new.data = list(self.data)
+            new.data.extend(map(convert_nested_data, data))
+        else:
+            new.data = list(self.data)
+            new.append(data)
+        return new
+
     def _get_step(self, dur):
         return dur
 
