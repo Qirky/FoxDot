@@ -94,6 +94,9 @@ class workspace:
         self.listening_for_connections = BooleanVar()
         self.listening_for_connections.set(False)
 
+        self.true_fullscreen_toggled = BooleanVar()
+        self.true_fullscreen_toggled.set(False)
+
         # Boolean for showing auto-complete prompt
 
         self.show_prompt = BooleanVar()
@@ -198,6 +201,7 @@ class workspace:
         self.text.bind("<BackSpace>",       self.backspace)
         self.text.bind("<Delete>",          self.delete)
         self.text.bind("<Tab>",             self.tab)
+        self.text.bind("<Escape>",          self.toggle_true_fullscreen)
         self.text.bind("<Key>",             self.keypress)
 
         self.text.bind("<Button-{}>".format(2 if SYSTEM == MAC_OS else 3), self.show_popup)
@@ -418,6 +422,16 @@ class workspace:
 
             self.set_temp_file(self.text_as_string)
 
+        return
+
+    def toggle_true_fullscreen(self, event=None, zoom=False):
+        """ Zoom the screen - close with Escape """
+        if self.root.attributes('-fullscreen'):
+            self.root.attributes('-fullscreen', 0)
+            self.true_fullscreen_toggled.set(False)
+        elif zoom:
+            self.root.attributes('-fullscreen', 1)
+            self.true_fullscreen_toggled.set(True)
         return
 
     def reload(self):
