@@ -162,32 +162,32 @@ class NumberKey(object):
 
     @convert_pattern_args
     def __eq__(self, other):
-        function = lambda value: int(value == other)
+        function = lambda value: value == other
         return self.transform(function)
     
     @convert_pattern_args
     def __ne__(self, other):
-        function = lambda value: int(value != other)
+        function = lambda value: (value != other)
         return self.transform(function)
 
     @convert_pattern_args
     def __gt__(self, other):
-        function = lambda value: int(value > other)
+        function = lambda value: (value > other)
         return self.transform(function)
 
     @convert_pattern_args
     def __ge__(self, other):
-        function = lambda value: int(value >= other)
+        function = lambda value: (value >= other)
         return self.transform(function)
 
     @convert_pattern_args
     def __lt__(self, other):
-        function = lambda value: int(value < other)
+        function = lambda value: (value < other)
         return self.transform(function)
 
     @convert_pattern_args
     def __le__(self, other):
-        function = lambda value: int(value <= other)
+        function = lambda value: (value <= other)
         return self.transform(function)
 
     def __abs__(self):
