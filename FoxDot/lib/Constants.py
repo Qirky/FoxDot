@@ -1,11 +1,25 @@
 from __future__ import absolute_import, division, print_function
 
+from .Patterns import Pattern, PGroup
+
 # Constants and constant values
 
 class const:
     """ A number value that cannot be changed """
     def __init__(self, value):
-        self.value=value
+        
+        if isinstance(value, (list, Pattern)):
+            self.__class__ = Pattern
+            self.__init__([const(x) for x in value])
+        elif isinstance(value, tuple):
+            self.__class__ = PGroup
+            self.__init__([const(x) for x in value])
+        elif isinstance(value, PGroup):
+            self.__class__ = value.__class__
+            self.__init__([const(x) for x in value])
+        else:
+            self.value = value
+
     def __int__(self):
         return int(self.value)
     def __float__(self):
