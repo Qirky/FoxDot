@@ -1102,7 +1102,9 @@ class PGroup(metaPattern):
             new.data = self.data + data.data
         # Creates a pattern
         elif isinstance(data, Pattern):
-            new = PGroup(*self.data, data)
+            args = list(self.data)
+            args.append(data)
+            new = PGroup(*args)
         elif isinstance(data, (list, str)):
             new.data = list(self.data)
             new.data.extend(map(convert_nested_data, data))
