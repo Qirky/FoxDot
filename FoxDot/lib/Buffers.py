@@ -172,6 +172,12 @@ class BufferManager(object):
     def __repr__(self):
         return '<BufferManager>'
 
+    def __getitem__(self, key):
+        """ Short-hand access for getBufferFromSymbol() i.e. Samples['x'] """
+        if isinstance(key, tuple):
+            return self.getBufferFromSymbol(*key)
+        return self.getBufferFromSymbol(key)
+
     def _reset_buffers(self):
         """ Clears the cache of loaded buffers """
         files = list(self._fn_to_buf.keys())
