@@ -257,6 +257,8 @@ class EffectManager(dict):
 
 FxList = EffectManager()
 
+Effects = FxList # Alias - to become default
+
 # Frequency Effects
 
 fx = FxList.new("vib", "vibrato", {"vib": 0, "vibdepth": 0.02}, order=0)
@@ -284,7 +286,9 @@ fx.add("osc = osc * LFPulse.ar(coarse / sus)")
 fx.save()
 
 fx = FxList.new("striate", "striate", {"striate": 0, "sus": 1, "buf": 0, "rate": 1}, order=0)
-fx.add("osc = osc * LFPulse.ar(striate / sus, width:  (BufDur.kr(buf) / rate) / sus)")
+fx.add("rate = (BufDur.kr(buf) / sus)")
+fx.add("rate = Select.kr(rate > 1, [1, rate])")
+fx.add("osc = osc * LFPulse.ar(striate / sus, width:  (BufDur.kr(buf) / rate) / sus) * rate")
 fx.save()
 
 fx = FxList.new("pshift", "pitchShift", {"pshift":0}, order=0)
