@@ -39,6 +39,8 @@ except FileNotFoundError:
     LINE_NUMBER_MARKER_OFFSET=0
     CPU_USAGE=2 # 0=low, 1=medium, 2=high
     CLOCK_LATENCY=0 #0=low, 1=medium, 2=high
+    FORWARD_ADDRESS=''
+    FORWARD_PORT=None
 
     # Text colours
     # ------------------
