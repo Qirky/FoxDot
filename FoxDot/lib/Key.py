@@ -468,7 +468,7 @@ class Accompany:
 
             i = 2
 
-        index = indices[i]
+        index = indices[i % len(indices)]
 
         return values[index]
 
