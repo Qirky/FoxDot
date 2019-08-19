@@ -75,7 +75,8 @@ class workspace:
         # Set up master widget  
 
         self.root = Tk(className='FoxDot')
-        self.root.title("FoxDot v{} - Live Coding with Python and SuperCollider".format(this_version))
+        self.set_window_title()
+        
         self.root.rowconfigure(0, weight=1) # Text box
         self.root.rowconfigure(1, weight=0) # Separator
         self.root.rowconfigure(2, weight=0) # Console
@@ -394,6 +395,8 @@ class workspace:
             self.transparent.set(True)
             self.root.after(100, self.toggle_transparency)
 
+    def set_window_title(self, text="Live Coding with Python and SuperCollider"):
+            return self.root.title("FoxDot v{} - {}".format(self.version, text))
  
     def run(self):
         """ Starts the Tk mainloop for the master widget """
@@ -692,11 +695,13 @@ class workspace:
     #--------------------
 
     def openfile(self, event=None):
-        f = tkFileDialog.askopenfile()
-        if f is not None:
+        path = tkFileDialog.askopenfilename()
+        if path != "":
+            f = open(path)
             text = f.read()
             f.close()
             self.set_all(text)
+            self.set_window_title(path)
         return "break"
 
     def loadfile(self, path):
@@ -713,7 +718,7 @@ class workspace:
 
     def newfile(self, event=None):
         ''' Clears the document and asks if the user wants to save '''
-        answer = tkMessageBox.askyesnocancel("", "Save your work before creating a new document?")
+        answer = tkMessageBox.askyesnocancel("New file", "Save your work before creating a new document?")
         if answer is not None:
             if answer is True:
                 if not self.save():
@@ -721,6 +726,7 @@ class workspace:
             self.saved = False
             self.filename = ''
             self.set_all("")
+            self.set_window_title()
         return "break"
 
     def export_console(self):
