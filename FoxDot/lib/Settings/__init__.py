@@ -112,6 +112,8 @@ RECOVER_WORK              = conf.RECOVER_WORK
 LINE_NUMBER_MARKER_OFFSET = conf.LINE_NUMBER_MARKER_OFFSET
 CPU_USAGE                 = conf.CPU_USAGE
 CLOCK_LATENCY             = conf.CLOCK_LATENCY
+FORWARD_ADDRESS           = conf.FORWARD_ADDRESS
+FORWARD_PORT              = conf.FORWARD_PORT
 
 if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
 

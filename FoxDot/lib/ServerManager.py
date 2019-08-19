@@ -753,6 +753,10 @@ class SCLangServerManager(ServerManager):
             self.stopRecording()
         return
 
+    def add_forward(self, addr, port):
+        self.forward = OSCClientWrapper()
+        self.forward.connect( (addr, port) )
+
 try:
     
     import socketserver
@@ -1093,8 +1097,10 @@ class TempoClient:
 
 if __name__ != "__main__":
 
-    from .Settings import ADDRESS, PORT, PORT2
+    from .Settings import ADDRESS, PORT, PORT2, FORWARD_PORT, FORWARD_ADDRESS
 
     # DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
     Server = SCLangServerManager(ADDRESS, PORT, PORT2)
 
+    if FORWARD_PORT and FORWARD_ADDRESS:
+        Server.add_forward(FORWARD_ADDRESS, FORWARD_PORT)
