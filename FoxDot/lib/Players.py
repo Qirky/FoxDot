@@ -951,7 +951,19 @@ class Player(Repeatable):
 
                 if key in kwargs:
 
-                    new_event[key] = self.unpack(PGroup(kwargs[key]))
+                    item = kwargs[key]
+
+                    if isinstance(item, PGroupPrime):
+
+                        new_event[key] = self.unpack(item)
+
+                    elif isinstance(item, PGroup):
+
+                        new_event[key] = self.unpack(PGroup([item]))
+
+                    else:
+
+                        new_event[key] = self.unpack(PGroup(item))
 
                 elif len(attributes[key]) > 0:
 
@@ -961,9 +973,11 @@ class Player(Repeatable):
 
             dur = float(kwargs.get("dur", new_event["dur"])) / n
 
+            new_event["dur"] = dur
+
             # Get PGroup delays
 
-            new_event["delay"] = PGroup([PGroup([dur * (i+1) for i in range(n-1)]) for x in range(self.get_event_length(new_event))])
+            new_event["delay"] = PGroup([dur * (i+1) for i in range(max(n, self.get_event_length(new_event)))])
 
             new_event = self.get_prime_funcs(new_event)
 
