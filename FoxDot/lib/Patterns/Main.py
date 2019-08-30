@@ -660,11 +660,14 @@ class metaPattern(object):
         return new
 
     @loop_pattern_method
-    def loop(self, n):
+    def loop(self, n, f=None):
         """ Repeats this pattern n times """
-        new = []
-        for i in range(n):
-            new += list(self)
+        assert n > 0, ".loop() parameter must be greater than 0"
+        new = values = list(self)
+        for i in range(n - 1):
+            if callable(f):
+                values = [f(x) for x in values]
+            new += list(values)
         return self.new(new)
 
     @loop_pattern_method
@@ -1091,6 +1094,24 @@ class PGroup(metaPattern):
             else:
                 values.append(item)
         return PGroup(values)
+
+    def concat(self, data):
+        """ Concatonates this patterns stream with another """
+        new = PGroup()
+        if isinstance(data, PGroup):
+            new.data = self.data + data.data
+        # Creates a pattern
+        elif isinstance(data, Pattern):
+            args = list(self.data)
+            args.append(data)
+            new = PGroup(*args)
+        elif isinstance(data, (list, str)):
+            new.data = list(self.data)
+            new.data.extend(map(convert_nested_data, data))
+        else:
+            new.data = list(self.data)
+            new.append(data)
+        return new
 
     def _get_step(self, dur):
         return dur

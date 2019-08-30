@@ -1,9 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-try:
-    from Tkinter import Menu, BooleanVar, IntVar, DISABLED
-except ImportError:
-    from tkinter import Menu, BooleanVar, IntVar, DISABLED
+from .tkimport import Menu, BooleanVar, IntVar, DISABLED
 
 import os.path
 from functools import partial
@@ -59,6 +56,7 @@ class MenuBar(Menu):
         editmenu.add_command(label="Export Console Log",     command=self.root.export_console)
         editmenu.add_command(label="Toggle Console",         command=self.root.toggle_console)
         editmenu.add_separator()
+        editmenu.add_checkbutton(label="Toggle Fullscreen",      command=(lambda: self.root.toggle_true_fullscreen(zoom=True)), variable=self.root.true_fullscreen_toggled)
         editmenu.add_command(label="Toggle Menu",            command=self.root.toggle_menu, accelerator="Ctrl+M")
         editmenu.add_checkbutton(label="Toggle Window Transparency",  command=self.root.toggle_transparency, variable=self.root.transparent)
         editmenu.add_checkbutton(label="Toggle Auto-fill Prompt",     command=self.root.toggle_prompt,       variable=self.root.show_prompt)

@@ -1,23 +1,25 @@
-FoxDot - Live Coding with Python v0.7
+FoxDot - Live Coding with Python v0.8
 =====================================
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-```diff
-+ Added auto-run of FoxDot along with a custom startup file that only runs when you run the file using FoxDot (python -m FoxDot)
+## Important
 
-- Has not been tested for Mac
+If you are having trouble installing using `pip install FoxDot`, try updating Python's `setuptools` and `wheel` libraries using the following code and trying again.
+
+```
+pip install -U setuptools
+pip install -U wheel
 ```
 
-### v0.7 fixes and updates
+### v0.8 Updates
 
-- Add `.reload()` method for `loop` player to reload the file used, in case it has been overwritten.
-- Update `PlayerKey` class (things like `p1.degree` etc) to behave better with `map` and `transform`
-- Added `transform` method to Patterns
-- Fixed `.pyc` files showing in the tutorials menu - you may have to uninstall and reinstall to see the benefit
-- Improved in-house synchronisation between FoxDot instances.
-- Add `PDelta` pattern; user supplies the step sizes between each value.
-- Negative `offbeat` fix (thanks zdbm).
+- Added `stretch` synth for timestretching samples, similar to `loop` but better and only plays the whole file. Stretches the audio's duration to the `sus` attribute without affecting pitch and does not require the tempo to be known.
+
+```python
+# Stretches the audio to 4 beats without affecting pitch
+p1 >> stretch("Basic_Rock_135", dur=4)
+```
 
 ---
 

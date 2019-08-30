@@ -190,10 +190,6 @@ class SCLangServerManager(ServerManager):
         self.wait_time = 5
         self.count = 0
 
-        # General SuperCollider OSC connection
-        self.client = OSCClientWrapper()
-        self.client.connect( (self.addr, self.port) )
-
         # Assign a valid OSC Client
         self.forward = None
 
@@ -206,6 +202,14 @@ class SCLangServerManager(ServerManager):
 
         self.fx_setup_done = False
         self.fx_names = {}
+
+        self.reset()
+
+    def reset(self):
+
+        # General SuperCollider OSC connection
+        self.client = OSCClientWrapper()
+        self.client.connect( (self.addr, self.port) )
 
         # OSC Connection for custom OSCFunc in SuperCollider
         if GET_SC_INFO:
@@ -749,6 +753,10 @@ class SCLangServerManager(ServerManager):
             self.stopRecording()
         return
 
+    def add_forward(self, addr, port):
+        self.forward = OSCClientWrapper()
+        self.forward.connect( (addr, port) )
+
 try:
     
     import socketserver
@@ -1089,8 +1097,10 @@ class TempoClient:
 
 if __name__ != "__main__":
 
-    from .Settings import ADDRESS, PORT, PORT2
+    from .Settings import ADDRESS, PORT, PORT2, FORWARD_PORT, FORWARD_ADDRESS
 
     # DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
     Server = SCLangServerManager(ADDRESS, PORT, PORT2)
 
+    if FORWARD_PORT and FORWARD_ADDRESS:
+        Server.add_forward(FORWARD_ADDRESS, FORWARD_PORT)

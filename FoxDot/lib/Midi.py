@@ -8,6 +8,7 @@ try:
     TIMING_CLOCK          = midiconstants.TIMING_CLOCK
     SONG_POSITION_POINTER = midiconstants.SONG_POSITION_POINTER
     SONG_START            = midiconstants.SONG_START
+    SONG_STOP             = midiconstants.SONG_STOP 
 except ImportError as _err:
     pass
 
@@ -16,6 +17,40 @@ from .Scale    import ScalePattern
 from .TimeVar  import TimeVar
 from .SCLang import SynthDefProxy
 
+import time
+
+class MidiInputHandler(object):
+
+    """Midi Handler CallBack Function"""
+
+    def __init__(self, midi_ctrl):
+
+        self.midi_ctrl = midi_ctrl
+        self.bpm_group = []
+        self.played = False
+
+    def __call__(self, event, data=None):
+
+        datatype, delta = event
+
+        self.midi_ctrl.delta += delta
+        
+        if TIMING_CLOCK in datatype and not self.played:
+
+            self.midi_ctrl.pulse += 1
+            
+
+            if self.midi_ctrl.pulse == self.midi_ctrl.ppqn:
+
+                t_master = 60.0
+                
+                self.midi_ctrl.bpm = round(60.0 / self.midi_ctrl.delta,0)
+
+                self.midi_ctrl.pulse = 0
+                self.midi_ctrl.delta = 0.0
+
+                #print("BPM : " + repr(self.midi_ctrl.bpm))
+            
 class MidiIn:
     metro = None
     def __init__(self, port_id=0):
@@ -42,42 +77,25 @@ class MidiIn:
         self.device.open_port(port_id)
         self.device.ignore_types(timing=False)
 
+
         self.pulse = 0
         self.delta = 0.0
         self.bpm   = 120.0
         self.ppqn  = 24
         self.beat  = 0
 
+        self.device.set_callback(MidiInputHandler(self))
+
     @classmethod
     def set_clock(cls, tempo_clock):
         cls.metro = tempo_clock
         return
 
-    def update(self):
-        data = self.device.get_message()
-        if data is not None:
-            datatype, delta = data
-            if TIMING_CLOCK in datatype:
-                self.pulse += 1
-                self.delta += delta
-                if self.pulse == self.ppqn:
-                    self.bpm = 60.0 / self.delta
-                    self.pulse = 0
-                    self.delta = 0.0
-            elif SONG_POSITION_POINTER in datatype:
-                self.metro.set_time(datatype[1] / 4)
-        return
-
-    def get_beat(self):
-        """ If a beat value has been set, return it, otherwise return None """
-        val, self.beat = self.beat, None
-        return val
-
     def close(self):
         """ Closes the active port """
         self.device.close_port()
         return
-            
+
 
 class MidiOut(SynthDefProxy):
     """ SynthDef proxy for sending midi message via supercollider """
@@ -100,8 +118,3 @@ class rtMidiNotFound(Exception):
 if __name__ == "__main__":
 
     a = MidiIn()
-
-    
-
-
-        

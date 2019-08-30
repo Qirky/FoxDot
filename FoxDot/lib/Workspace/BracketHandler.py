@@ -1,9 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
-try:
-    from Tkinter import *
-except ImportError:
-    from tkinter import *
+from .tkimport import *
     
 from .Format import *
 from .AppFunctions import *

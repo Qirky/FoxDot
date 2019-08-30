@@ -15,18 +15,7 @@ except:
 
 # Tkinter Interface
 
-try:
-    from Tkinter import *
-    import ttk
-    import tkFont
-    import tkFileDialog
-    import tkMessageBox
-except ImportError:
-    from tkinter import *
-    from tkinter import ttk
-    from tkinter import font as tkFont
-    from tkinter import filedialog as tkFileDialog
-    from tkinter import messagebox as tkMessageBox
+from .tkimport import *
 
 # Custom app modules
 from .Format import *
@@ -50,6 +39,7 @@ import socket
 # Code execution
 from ..Code import execute
 from ..Settings import FONT, FOXDOT_ICON, FOXDOT_HELLO, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
+from ..Settings import PY_VERSION
 from ..ServerManager import TempoServer
 
 # App object
@@ -85,7 +75,8 @@ class workspace:
         # Set up master widget  
 
         self.root = Tk(className='FoxDot')
-        self.root.title("FoxDot v{} - Live Coding with Python and SuperCollider".format(this_version))
+        self.set_window_title()
+        
         self.root.rowconfigure(0, weight=1) # Text box
         self.root.rowconfigure(1, weight=0) # Separator
         self.root.rowconfigure(2, weight=0) # Console
@@ -103,6 +94,9 @@ class workspace:
 
         self.listening_for_connections = BooleanVar()
         self.listening_for_connections.set(False)
+
+        self.true_fullscreen_toggled = BooleanVar()
+        self.true_fullscreen_toggled.set(False)
 
         # Boolean for showing auto-complete prompt
 
@@ -208,6 +202,7 @@ class workspace:
         self.text.bind("<BackSpace>",       self.backspace)
         self.text.bind("<Delete>",          self.delete)
         self.text.bind("<Tab>",             self.tab)
+        self.text.bind("<Escape>",          self.toggle_true_fullscreen)
         self.text.bind("<Key>",             self.keypress)
 
         self.text.bind("<Button-{}>".format(2 if SYSTEM == MAC_OS else 3), self.show_popup)
@@ -400,6 +395,8 @@ class workspace:
             self.transparent.set(True)
             self.root.after(100, self.toggle_transparency)
 
+    def set_window_title(self, text="Live Coding with Python and SuperCollider"):
+            return self.root.title("FoxDot v{} - {}".format(self.version, text))
  
     def run(self):
         """ Starts the Tk mainloop for the master widget """
@@ -428,6 +425,16 @@ class workspace:
 
             self.set_temp_file(self.text_as_string)
 
+        return
+
+    def toggle_true_fullscreen(self, event=None, zoom=False):
+        """ Zoom the screen - close with Escape """
+        if self.root.attributes('-fullscreen'):
+            self.root.attributes('-fullscreen', 0)
+            self.true_fullscreen_toggled.set(False)
+        elif zoom:
+            self.root.attributes('-fullscreen', 1)
+            self.true_fullscreen_toggled.set(True)
         return
 
     def reload(self):
@@ -688,21 +695,30 @@ class workspace:
     #--------------------
 
     def openfile(self, event=None):
-        f = tkFileDialog.askopenfile()
-        if f is not None:
+        path = tkFileDialog.askopenfilename()
+        if path != "":
+            f = open(path)
             text = f.read()
             f.close()
             self.set_all(text)
+            self.set_window_title(path)
         return "break"
 
     def loadfile(self, path):
-        with open(path) as f:
-            self.set_all(f.read())
+        try:
+            if PY_VERSION == 2:
+                f = open(path)
+            else:
+                f = open(path, encoding="utf8")
+        except Exception as e:
+            return print("{} error occurred when loading file:\n    - '{}'".format(e.__class__.__name__, path))
+        self.set_all(f.read())
+        f.close()
         return
 
     def newfile(self, event=None):
         ''' Clears the document and asks if the user wants to save '''
-        answer = tkMessageBox.askyesnocancel("", "Save your work before creating a new document?")
+        answer = tkMessageBox.askyesnocancel("New file", "Save your work before creating a new document?")
         if answer is not None:
             if answer is True:
                 if not self.save():
@@ -710,6 +726,7 @@ class workspace:
             self.saved = False
             self.filename = ''
             self.set_all("")
+            self.set_window_title()
         return "break"
 
     def export_console(self):

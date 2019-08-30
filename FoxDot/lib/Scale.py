@@ -304,6 +304,9 @@ class _DefaultScale(ScaleType):
     def __repr__(self):
         return repr(self.scale)
 
+    def __iter__(self):
+        return self.scale.__iter__()
+
     def set(self, new, *args, **kwargs):
         """ Change the contents of the default scale """
 

@@ -152,11 +152,13 @@ class Effect:
                 print("IOError: Unable to update '{}' effect.".format(self.synthdef))
 
         # 3. Send to server
-        
+
+        self.load()
+
+    def load(self):
+        """ Load the Effect """
         if self.server is not None:
-
             self.server.loadSynthDef(self.filename)
-
         return
 
 class In(Effect):
@@ -234,8 +236,15 @@ class EffectManager(dict):
         return tuple(self.all_kw)
 
     def __iter__(self):
-        for key in self.pre_kw + self.kw:
+        for key in self.kw:
             yield key, self[key]
+
+    def reload(self):
+        """ Re-sends each effect to SC """
+        for kw, effect in self:
+            effect.load()
+        In(); Out();
+        return
 
 
 # -- TODO
@@ -247,6 +256,8 @@ class EffectManager(dict):
 # 3. After envelope
 
 FxList = EffectManager()
+
+Effects = FxList # Alias - to become default
 
 # Frequency Effects
 
@@ -262,8 +273,8 @@ fx = FxList.new("slidefrom", "slideFrom", {"slidefrom": 0, "sus": 1, "slidedelay
 fx.add("osc = osc * EnvGen.ar(Env([slidefrom + 1, slidefrom + 1, 1], [sus*slidedelay, sus*(1-slidedelay)]))")
 fx.save()
 
-fx = FxList.new("glide", "glissando", {"glide": 0, "glide_delay": 0.5, "sus": 1}, order=0)
-fx.add("osc = osc * EnvGen.ar(Env([1, 1, (1.059463**glide)], [sus*glide_delay, sus*(1-glide_delay)]))")
+fx = FxList.new("glide", "glissando", {"glide": 0, "glidedelay": 0.5, "sus": 1}, order=0)
+fx.add("osc = osc * EnvGen.ar(Env([1, 1, (1.059463**glide)], [sus*glidedelay, sus*(1-glidedelay)]))")
 fx.save()
 
 fx = FxList.new("bend", "pitchBend", {"bend": 0, "sus": 1, "benddelay": 0}, order=0)
@@ -275,7 +286,9 @@ fx.add("osc = osc * LFPulse.ar(coarse / sus)")
 fx.save()
 
 fx = FxList.new("striate", "striate", {"striate": 0, "sus": 1, "buf": 0, "rate": 1}, order=0)
-fx.add("osc = osc * LFPulse.ar(striate / sus, width:  (BufDur.kr(buf) / rate) / sus)")
+fx.add("rate = (BufDur.kr(buf) / sus)")
+fx.add("rate = Select.kr(rate > 1, [1, rate])")
+fx.add("osc = osc * LFPulse.ar(striate / sus, width:  (BufDur.kr(buf) / rate) / sus) * rate")
 fx.save()
 
 fx = FxList.new("pshift", "pitchShift", {"pshift":0}, order=0)
