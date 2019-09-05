@@ -870,7 +870,11 @@ class _var_dict(object):
         if name in self.__vars:
             value = self.__vars[name]
         else:
-            value = object.__getattr__(self, name)
+            try:
+                value = object.__getattr__(self, name)
+            except AttributeError:
+                err = NameError("'var.{}' does not exist.".format(name))
+                raise err
         return value
 
 var = _var_dict()
