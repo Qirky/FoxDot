@@ -279,7 +279,19 @@ class Repeatable(object):
 
         # Convert `Cycles` to `var`-- should they be Pvar?
 
-        args, kwargs = self.convert_cycles(args, kwargs, occurence)
+        attr_name, method_name = self.get_attr_and_method_name(cmd)
+
+        # Just get the player method if a valid player method
+
+        if self.is_player_method(method_name, attr_name):
+
+            cycle_dur = occurence
+
+        else:
+
+            cycle_dur = occurence * 2
+
+        args, kwargs = self.convert_cycles(args, kwargs, cycle_dur)
 
         # If the method call already exists, just update it (should be in a function)
 
