@@ -250,8 +250,21 @@ class TempoClock(object):
         # self.update_network_tempo(bpm, start_beat, start_time) -- updates at the bar...
         return
 
+    def set_tempo(self, bpm, override=False):
+        """ Short-hand for update_tempo and update_tempo_now """
+        return self.update_tempo_now(bpm) if override else self.update_tempo(bpm)
+
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
+
+        try:
+
+            assert bpm > 0, "Tempo must be a positive number"
+
+        except AssertionError as err:
+
+            raise(ValueError(err))
+
         next_bar = self.next_bar()
 
         bpm_start_time = self.get_time_at_beat(next_bar)
