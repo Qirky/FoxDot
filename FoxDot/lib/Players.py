@@ -1520,7 +1520,7 @@ class Player(Repeatable):
 
                 if len(event['sus']) > 1:
 
-                    min_sus = min(event['sus'])
+                    min_sus = min(event['sus']) if min(event['sus']) else 1
 
                     offset = PGroup([(sus / min_sus) for sus in event["sus"]])
 
