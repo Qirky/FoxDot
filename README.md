@@ -167,7 +167,7 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 
 ## Documentation
 
-[Link to documentation website](https://docs.foxdot.org/) (still in progress)
+[Link to documentation website](https://foxdot.org/docs/) (still in progress)
 
 ## Using alternative editors
 
