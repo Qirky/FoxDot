@@ -1062,6 +1062,11 @@ class Player(Repeatable):
             self.pan=0
             self.pshift=0
         return self
+
+    def seconds(self):
+        """ Sets the player bpm to 60 so duration will be measured in seconds """
+        self.bpm=60
+        return self
     
     def slider(self, start=0, on=1):
         """ Creates a glissando effect between notes """
