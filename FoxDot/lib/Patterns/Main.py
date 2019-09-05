@@ -122,6 +122,15 @@ class metaPattern(object):
     def transform(self, func):
         return self.__class__([(item.transform(func) if isinstance(item, metaPattern) else func(item))for item in self])
 
+    def int(self):
+        return self.transform(int)
+
+    def float(self):
+        return self.transform(float)
+
+    def str(self):
+        return self.transform(str)
+
     @classmethod
     def get_methods(cls):
         """ Returns the methods associated with the `Pattern` class as a list """
