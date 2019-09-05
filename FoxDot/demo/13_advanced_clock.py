@@ -1,8 +1,8 @@
 # Tutorial 13: Advanced Clock
 
-# Note: You don't need to run this line, its used for installing FoxDot for Linux users using Python 2.
-
-from __future__ import print_function 
+# Note: You don't need to run this line if you're using Python 3,
+# it's used for installing FoxDot for Linux users using Python 2.
+from __future__ import print_function
 
 # To see what is scheduled to be played.
 print(Clock)
@@ -13,14 +13,14 @@ print(Clock.latency)
 # The clock can schedule anything with a __call__ method using
 # It takes an absolute time clue to schedule a functions
 # Clock.schedule needs to know the beat to call something on
-Clock.schedule()
+Clock.schedule()   # raises TypeError
 
 # Schedule an event after a certain durations
 # Clock.future needs to know how many beats ahead to call something
-Clock.future()
+Clock.future()     # raises TypeError
 
-# These are equivilent
-Clock.schedule(Clock.now() + 4, lambda: print("hello"))
+# These are equivalent
+Clock.schedule(lambda: print("hello"), Clock.now() + 4)
 Clock.future(4, lambda: print("hello"))
 
 # To schedule something else
@@ -30,7 +30,7 @@ Clock.schedule(lambda: print("hello "))
 Clock.every(4, lambda: print("hello"))
 
 # Get the current clock and add 2.  Useful for scheduling.
-Clock.now() + 2
+print(Clock.now() + 2)
 
 # Issue command on the next bar
 nextBar(Clock.clear)

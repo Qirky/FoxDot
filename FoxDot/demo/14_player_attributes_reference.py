@@ -21,8 +21,6 @@ d1 >> dirt([0,4,2,1], dur=1/2, hpf=4000)
 # This sets the high pass filter to 4000 Hz so only frequences in the audio
 # signal *above* that are actually heard. Let's change the resonance value. It's
 # default value is 1, so let's make it smaller
-d1 >> dirt([0,4,2,1], dur=1/2, hpf=4000)
-
 d1 >> dirt([0,4,2,1], dur=1/2, hpf=4000, hpr=0.3)
 
 
@@ -54,7 +52,7 @@ d1 >> play("*", dur=1/2, amp=[1,0,1,1,0])
 
 
 ####################
-# amplify - Chagnes amp, by multiplying agasint the existing value (instead of overwritting)
+# amplify - Changes amp, by multiplying agasint the existing value (instead of overwritting)
 
 # Creating a pattern with amp
 d1 >> play("*", dur=1/2, amp=[1,0,1,1,0])

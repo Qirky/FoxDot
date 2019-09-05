@@ -50,6 +50,7 @@ d1 >> play("x-o{-=[--][-o]}")
 
 # Angle brackets combine patterns to be play simultaneously
 d1 >> play("<X   ><-   ><#   ><V   >")
+
 d1 >> play("<X   >< -  ><  # ><   V>")
 
 # Each character is mapped to a folder of sound files and you can select different

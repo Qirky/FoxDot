@@ -20,7 +20,7 @@ p2.stop()
 p3.stop()
 
 # You can reference all the members with similar names
-p_all.dur = [1/2,1/4]
+p_all.dur = [1/2,1/4] # Run this while p1, p2... are playing!
 
 # or
 p_all.amplify=1
@@ -29,7 +29,7 @@ p_all.amplify=1
 p_all.stop()
 
 # Or...
-P_all.solo()
+p_all.solo()
 
 # To reduce the amount of typing, Player Objects can be grouped together and their attributes modified in a simpler way:
 p1 >> pads([0,2,4,2])
@@ -47,7 +47,7 @@ g1.amp=var([1,0],4)
 
 g1.stop()
 
-# You can use functions to group things together. To execute CMD+Return, not ALT+Return. 
+# You can use functions to group things together. To execute use CTRL+Return, not ALT+Return.
 def tune():
     b1 >> bass([0,3], dur=4)
     p1 >> pluck([0,4], dur=1/2)
