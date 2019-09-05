@@ -44,10 +44,10 @@ p1 >> pluck([0,0,0], dur=[1,2,3])
 # Or amplitude, the "volume" of each note
 p1 >> pluck([0,0,0], amp=[1,2,3])
 
-# If the second list, the amp in this example, is too long, then the first list, the degree, just loops 1 for each of the other list.
+# If the second list, the amp in this example, is too long, then the first list (the degree) just loops, and are matched with the remaining elements from the second list (the amplitude).
 p1 >> pluck([0,2,4], amp=[1,2,3,1,5])
 
-# More clearly, all the lists, just advance by one regardless of length.
+# More generally, all the lists are traversed regardless of their length.
 p1 >> pluck([0,2,4], dur=[1,2], amp=[1,2,3,1,5])
 
 # Arguments can be integers, floating points, fractions, lists,
@@ -95,7 +95,7 @@ p1 >> pluck([0, 2, 3, 4], dur=1/2)
 p2 >> pads([(0, 2, 4), (3, 5, 7)], dur=8)
 
 # Play only this player, muting others
-p1.solo() # defaults to 1
+p1.solo() # default value is 1 (solo on)
 
 # And turn the solo off
 p1.solo(0)

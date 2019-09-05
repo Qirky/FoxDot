@@ -10,7 +10,7 @@ print(harmony)
 p1 >> pluck(pitches)
 p2 >> star(harmony)
 
-# If you set the duration, of the second, it might not have the desired effect
+# If you set the duration of the second, it might not have the desired effect
 p1 >> pluck(pitches)
 p2 >> star(harmony, dur=1/2)
 

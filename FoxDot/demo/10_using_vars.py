@@ -1,14 +1,14 @@
 # Tutorial 10: Using Vars
 
 
-# A TimeVar is an abbreviation of “Time Dependent Variable” and is a key feature of FoxDot.
+# A TimeVar is an abbreviation of "Time Dependent Variable" and is a key feature of FoxDot.
 # A TimeVar has a series of values that it changes between after a pre-defined number of beats
 # and is created using a var object with the syntax var([list_of_values],[list_of_durations]).
 
 # Generates the pattern: 0,0,0,0,3,3,3,3...
 a = var([0,3],4)            # Duration can be single value
 print(int(Clock.now()), a)   # 'a' initally has a value of 0
-# >>> 0, 0
+# >>> 0, 0                  # The first value may differ...
 
 print(int(Clock.now()), a)   # After 4 beats, the value changes to 3
 # >>> 4, 3
@@ -53,7 +53,7 @@ a.update([1,4], 8)
 
 print(int(Clock.now()), (a, b))
 
-# Vars can be nammed ...
+# Vars can be named ...
 var.chords = var([0,4,5,4],4)
 
 # And used later
@@ -91,7 +91,7 @@ print(x) # Keep pressing - it will eventually stop at 3
 ######################
 # Other types of "var"
 
-# There are several sub-classes of "var" that return values between 
+# There are several sub-classes of "var" that return values between
 # the numbers specified. For example a "linvar" gradually change
 # values in a linear fashion:
 

@@ -2,14 +2,14 @@
 
 
 # Player Objects use Python lists, known more commonly as arrays in other languages,
-# to sequence themselves. You’ve already used these previously, but they aren’t exactly
+# to sequence themselves. You've already used these previously, but they aren't exactly
 # flexible for manipulation. For example, try multiplying a list by two like so:
 
 print([1, 2, 3] * 2)
 
 # Is the result what you expected?
 
-# FoxDot uses a container type called a ‘Pattern’ to help solve this problem.
+# FoxDot uses a container type called a 'Pattern' to help solve this problem.
 # They act like regular lists but any mathematical operation performed on it is done to each item
 # in the list and done so pair-wise if using a second pattern. A basic pattern is created as
 # you would with a normal list or tuple, but with a 'P' preceeding it.
@@ -33,12 +33,13 @@ print(P[2:15:3])
 # Try some other mathematical operators and see what results you get.
 print(P[1,2,3] * (1,2))
 
-# Pattern objects also automatically lace any nested lists
-
+# Pattern objects also automatically interlace any nested list.
+# Compare
 # Normal list:
 for n in [0,1,2,[3,4],5]:
     print(n)
 
+# with
 # Pattern
 for n in P[0,1,2,[3,4],5]:
     print(n)
@@ -48,7 +49,10 @@ for n in P[0,1,2,[3,4],5]:
 for n in P[0,1,2,(3,4)]:
     print(n)
 
+# This is a PGroup:
 print(P(0,2,4) + 2)
+
+print(type(P(0,2,4) + 2))
 
 # In Python, you can generate a range of integers with the syntax range(start, stop, step).
 # By default, start is 0 and step is 1.
@@ -68,7 +72,7 @@ print(PRange(10) + [0,10])
 # To concatonate Patterns, use the pipe operator like so:
 print(PRange(10) | [0,10])
 # FoxDot automatically converts any object being piped to a Pattern to the base Pattern class
-# so you don’t have to worry about making sure everything is the right type.
+# so you don't have to worry about making sure everything is the right type.
 
 # Plays all the values together
 p1 >> pluck(P(4,6,8))

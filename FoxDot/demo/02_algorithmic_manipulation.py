@@ -4,7 +4,7 @@
 p1 >> pads([0,1,2,3])
 
 # It's possible to manipulate this by adding an array of numbers to the Player object
-# This raises the 4 note played by 2 degrees
+# This raises the 4th note played by 2 degrees
 p1 >> pads([0,1,2,3]) + [0,0,0,2]
 
 # And this raises every third note by 2
