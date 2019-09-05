@@ -76,6 +76,14 @@ class _inf(const):
         return _inf(other / self.value)
     def __eq__(self, other):
         return isinstance(other, _inf)
+    def __gt__(self, other):
+        return not isinstance(other, _inf)
+    def __ge__(self, other):
+        return True
+    def __lt__(self, other):
+        return False
+    def __le__(self, other):
+        return isinstance(other, _inf)
 
 inf = _inf(0)
 
