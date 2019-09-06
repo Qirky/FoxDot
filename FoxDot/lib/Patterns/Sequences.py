@@ -217,9 +217,21 @@ def PSum(n, total, **kwargs):
     return Pattern(data)
 
 @loop_pattern_func
-def PRange(start, stop=None, step=None):
+def PRange(start, stop=None, step=1):
     """ Returns a Pattern equivalent to ``Pattern(range(start, stop, step))`` """
-    return Pattern(list(range(*[val for val in (start, stop, step) if val is not None])))
+    if stop is None:
+        
+        start, stop = 0, start
+
+    if start == stop:
+
+        return Pattern(start)
+    
+    if (start > stop and step > 0) or (start < stop and step < 0):
+    
+        step = step*-1
+
+    return Pattern(list(range(start, stop, step)))
 
 @loop_pattern_func
 def PTri(start, stop=None, step=None):
