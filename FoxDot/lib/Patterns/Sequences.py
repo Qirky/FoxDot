@@ -234,9 +234,11 @@ def PRange(start, stop=None, step=1):
     return Pattern(list(range(start, stop, step)))
 
 @loop_pattern_func
-def PTri(start, stop=None, step=None):
+def PTri(start, stop=None, step=1):
     """ Returns a Pattern equivalent to ``Pattern(range(start, stop, step))`` with its reversed form
     appended."""
+    if stop is None: 
+        start, stop = 0, start
     pat = PRange(start, stop, step)
     return pat | pat.reverse()[1:-1]
 
