@@ -19,7 +19,8 @@ with SampleSynthDef("play2") as play:
 # Synth Players
 
 with SynthDef("audioin") as audioin:
-    audioin.osc = AudioIn.ar(1)
+    audioin.defaults.update(channel=1)
+    audioin.osc = AudioIn.ar(audioin.channel)
     audioin.env = Env.mask()
 
 # with SynthDef("sinepad") as sinepad:
