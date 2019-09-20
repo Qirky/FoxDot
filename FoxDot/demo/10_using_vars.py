@@ -5,9 +5,9 @@
 # A TimeVar has a series of values that it changes between after a pre-defined number of beats
 # and is created using a var object with the syntax var([list_of_values],[list_of_durations]).
 
-# Generates the pattern: 0,0,0,0,3,3,3,3...
+# Generates the values: 0,0,0,0,3,3,3,3...
 a = var([0,3],4)            # Duration can be single value
-print(int(Clock.now()), a)   # 'a' initally has a value of 0
+print(int(Clock.now()), a)  # 'a' initally has a value of 0
 # >>> 0, 0                  # The first value may differ...
 
 print(int(Clock.now()), a)   # After 4 beats, the value changes to 3
