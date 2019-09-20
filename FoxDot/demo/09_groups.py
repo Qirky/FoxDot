@@ -20,10 +20,10 @@ p2.stop()
 p3.stop()
 
 # You can reference all the members with similar names
-p_all.dur = [1/2,1/4] # Run this while p1, p2... are playing!
+p_all.dur = [1/2,1/4] # Run this while p1, p2, etc are playing!
 
 # or
-p_all.amplify=1
+p_all.amplify = 1
 
 # Or...
 p_all.stop()
