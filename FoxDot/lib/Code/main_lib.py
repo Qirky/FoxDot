@@ -127,7 +127,7 @@ class FoxDotCode:
     def __call__(self, code, verbose=True, verbose_error=None):
         """ Takes a string of FoxDot code and executes as Python """
 
-        if self.namespace['Clock'].waiting_for_sync:
+        if self.namespace['_Clock'].waiting_for_sync:
 
             time.sleep(0.25)
             return self.__call__(code, verbose, verbose_error)
