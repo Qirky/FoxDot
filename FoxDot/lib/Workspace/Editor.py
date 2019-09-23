@@ -53,7 +53,7 @@ class workspace:
 
         # Configure FoxDot's namespace to include the editor
 
-        CodeClass.namespace['FoxDot'] = self
+        CodeClass.namespace['GUI'] = self
         CodeClass.namespace['Player'].widget = self
 
         self.version = this_version = CodeClass.namespace['__version__']
@@ -413,9 +413,7 @@ class workspace:
             except (KeyboardInterrupt, SystemExit):
 
                 # Clean exit
-                
-                execute("Clock.stop()")
-                execute("Server.quit()")
+                self.terminate()
                 
                 break
 
@@ -819,7 +817,7 @@ class workspace:
                 else:
                     self.root.wm_attributes("-transparent", False)
             else:
-                    self.root.wm_attributes("-alpha", 1)
+                self.root.wm_attributes("-alpha", 1)
         except TclError as e:
             print(e)
         return
@@ -1191,7 +1189,8 @@ class workspace:
 
     def killall(self, event=None):
         """ Stops all player objects """
-        execute("Clock.clear()")
+        execute("_Clock.clear()", verbose=False)
+        print("Clearing the scheduling clock.")
         return "break"
 
     # Zoom in: Ctrl+=
@@ -1678,7 +1677,7 @@ class workspace:
 
     def terminate(self):
         """ Called on window close. Ends Clock thread process """
-        execute("Clock.stop()")
+        execute("_Clock.stop()")
         execute("Server.quit()")
         return
 
@@ -1788,12 +1787,11 @@ class workspace:
 
     def allow_connections(self, **kwargs):
         """ Starts a new instance of ServerManager.TempoServer and connects it with the clock """
+        Clock = self.namespace["_Clock"]
         if self.listening_for_connections.get() == True:
-            Clock = self.namespace["Clock"]
             Clock.start_tempo_server(TempoServer, **kwargs)
             print("Listening for connections on {}".format(Clock.tempo_server))
         else:
-            Clock = self.namespace["Clock"]
             Clock.kill_tempo_server()
             print("Closed connections")
         return

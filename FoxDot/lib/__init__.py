@@ -194,12 +194,29 @@ def allow_connections(valid = True, *args, **kwargs):
         print("Closed connections")
     return
 
+# Util class
+
+class _util:
+    def __repr__(self):
+        return "FoxDot ver. {}".format(__version__)
+    def reload(self):
+        Server.reset()
+        SynthDefs.reload()
+        FxList.reload()
+        Samples.reset()
+        return
+    def reassign_clock(self):
+        FoxDotCode.namespace['Clock'] = _Clock
+        return
+
+FoxDot = _util()
+
 # Create a clock and define functions
 
 logging.basicConfig(level=logging.ERROR)
 when.set_namespace(FoxDotCode) # experimental
 
-Clock = TempoClock()
+_Clock = Clock = TempoClock()
 
 update_foxdot_server(Server)
 update_foxdot_clock(Clock)
