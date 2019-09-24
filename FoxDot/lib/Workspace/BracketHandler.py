@@ -5,6 +5,8 @@ from .tkimport import *
 from .Format import *
 from .AppFunctions import *
 
+from ..Settings import AUTO_COMPLETE_BRACKETS
+
 whitespace = [" ","\t","\n","\r","\f","\v"]
 
 class BracketHandler:
@@ -14,6 +16,8 @@ class BracketHandler:
         self.root = master
         
         self.text = master.text
+
+        self.active = AUTO_COMPLETE_BRACKETS
 
         self.inbrackets = False
 
@@ -27,9 +31,11 @@ class BracketHandler:
 
         self.queue = []
 
-        for char in list(self.left_brackets.keys()) + list(self.right_brackets.keys()):
+        if self.active:
 
-            self.text.bind(char, self.handle) # this binds bracket presses to the handle method
+            for char in list(self.left_brackets.keys()) + list(self.right_brackets.keys()):
+
+                self.text.bind(char, self.handle) # this binds bracket presses to the handle method
 
         self.visible_range = (0,0)
 
@@ -201,15 +207,17 @@ class BracketHandler:
         return "break"
 
     def delete(self, insert=INSERT):
-        """ """
-        line, column = index(self.text.index(insert))
-        next_char    = self.text.get(index(line, column))
-        prev_char    = self.text.get(index(line, column-1))
+        """ Deletes enclosed set of brackets if no contents and returns True, returns False
+            all other times """
+        if self.active:
+            line, column = index(self.text.index(insert))
+            next_char    = self.text.get(index(line, column))
+            prev_char    = self.text.get(index(line, column-1))
 
-        if prev_char in self.left_brackets:
-            if next_char == self.left_brackets[prev_char] and column > 0:
-                self.text.delete(index(line, column-1), index(line, column+1))
-                return True
+            if prev_char in self.left_brackets:
+                if next_char == self.left_brackets[prev_char] and column > 0:
+                    self.text.delete(index(line, column-1), index(line, column+1))
+                    return True
         return False
 
     def find_starting_bracket(self, line, column, bracket_style, offset = 0):
