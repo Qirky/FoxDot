@@ -38,7 +38,8 @@ import socket
 
 # Code execution
 from ..Code import execute
-from ..Settings import FONT, FOXDOT_ICON, FOXDOT_HELLO, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA, MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK
+from ..Settings import FONT, FOXDOT_ICON, FOXDOT_HELLO, SC3_PLUGINS, FOXDOT_CONFIG_FILE, ALPHA_VALUE, USE_ALPHA
+from ..Settings import MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK, CHECK_FOR_UPDATE
 from ..Settings import PY_VERSION
 from ..ServerManager import TempoServer
 
@@ -384,7 +385,9 @@ class workspace:
 
         # Check online if a new version if available
 
-        self.root.after(90, check_versions)
+        if CHECK_FOR_UPDATE:
+
+            self.root.after(90, check_versions)
 
         # Ask after widget loaded
         if RECOVER_WORK:
