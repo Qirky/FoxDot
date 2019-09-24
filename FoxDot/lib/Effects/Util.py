@@ -89,7 +89,10 @@ class Effect:
         cls.server = server
     
     def __repr__(self):
-        return "<Fx '{}' -- args: {}>".format(self.synthdef, ", ".join(self.args))
+        # return "<Fx '{}' -- args: {}>".format(self.synthdef, ", ".join(self.args))
+        other_args = ['{}'.format(arg) for arg in self.args if arg != self.name]
+        other_args = ", other args={}".format(other_args) if other_args else ""
+        return "<'{}': keyword='{}'{}>".format(self.synthdef, self.name, other_args)
 
     def __str__(self):
         s  = "SynthDef.new(\{},\n".format(self.synthdef)
@@ -199,6 +202,13 @@ class EffectManager(dict):
 
     def __repr__(self):
         return "\n".join([repr(value) for value in self.values()])
+
+    def values(self):
+        return [self[key] for key in self.sort_by("synthdef")]
+
+    def sort_by(self, attr):
+        """ Returns the keys sorted by attribute name"""
+        return sorted(self.keys(), key=lambda effect: getattr(self[effect], attr))
 
     def new(self, foxdot_arg_name, synthdef, args, order=2):
         self[foxdot_arg_name] = Effect(foxdot_arg_name, synthdef, args, order==0)
