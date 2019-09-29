@@ -1,6 +1,12 @@
 FoxDot - Live Coding with Python v0.8
 =====================================
 
+## Please note
+
+I will not be actively maintaining FoxDot until January 2020 and will not be making changes to the code in response to issues / pull requests in this time. However, you can still ask questions on the [TOPLAP FoxDot Forum](https://forum.toplap.org/c/communities/foxdot) and I will get back to you when I can. Please do not ask general questions in the "issues" section. Thanks.
+
+---
+
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
 ## Important
