@@ -3,10 +3,6 @@ import inspect
 
 from ..SCLang.SCLang import *
 
-# To be moved to SCLang later
-
-EnvGen = cls("EnvGen")
-Env    = cls("Env")
 
 class _Effect:
     _in = "osc"

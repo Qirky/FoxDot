@@ -248,7 +248,7 @@ with SynthDef("bug") as bug:
     bug.osc = Pulse.ar(bug.freq, width=[0.09,0.16,0.25]) * SinOsc.ar(bug.rate * 4)
     bug.env = Env.perc(bug.sus * 1.5)
 
-with Synthdef("pulse") as pulse:
+with SynthDef("pulse") as pulse:
     pulse.amp = pulse.amp / 8
     pulse.osc = Pulse.ar(pulse.freq)
     pulse.osc = pulse.osc * pulse.amp

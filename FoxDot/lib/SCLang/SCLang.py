@@ -110,6 +110,10 @@ class instance:
         
         return self.__class__(value)
         
+# Environment
+
+EnvGen = cls("EnvGen")
+Env    = cls("Env")
 
 # UGens
 
