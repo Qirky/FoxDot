@@ -342,6 +342,10 @@ with SynthDef("jbass") as jbass:
     jbass.osc  = LFTri.ar(jbass.freq, mul=jbass.amp)
     jbass.adsr(atk=0.01, decay=0.01, rel=0.01)
 
+with SynthDef("whitenoise") as whitenoise:
+    whitenoise.env = Env.hold(whitenoise.sus, doneAction=2)
+    whitenoise.osc = BPF.ar(WhiteNoise.ar(whitenoise.amp), whitenoise.freq)
+
 # Possible future syntax?
 # -----------------------
 # @SynthDef
