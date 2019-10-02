@@ -12,21 +12,24 @@ class SynthDict(dict):
     module = None
     server = None
     def __init__(self, **kwargs):
-        dict.__init__(self, kwargs)
+        super().__init__(kwargs)
+
     def __str__(self):
         return str(list(self.keys()))
+
     def __repr__(self):
         return str(list(self.keys()))
+
     def __call__(self, name):
         return self[name]
+
     def reload(self):
-        for key, item in self.items():
+        for item in self.values():
             item.load()
-        return
+
     def set_server(self, serv):
         self.server = serv
         self.server.synthdefs = self
-        return
 
 # Create container for SynthDefs
 
@@ -299,7 +302,7 @@ class SynthDefBaseClass(object):
 
 class SynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
-        SynthDefBaseClass.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         # add vib depth?
 
     def add_base_class_behaviour(self):
@@ -311,7 +314,7 @@ class SynthDef(SynthDefBaseClass):
 
 class SampleSynthDef(SynthDefBaseClass):
     def __init__(self, *args, **kwargs):
-        SynthDefBaseClass.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.buf = self.new_attr_instance("buf")
         self.pos = self.new_attr_instance("pos")
         self.defaults['buf']   = 0

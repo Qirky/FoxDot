@@ -32,6 +32,13 @@ class mask(EnvGen):
         self.attr['curve']  = curve
         self.doneAction = doneAction
 
+class hold(EnvGen):
+    def __init__(self, duration, doneAction=0):
+        self.duration = duration
+        self.doneAction = doneAction
+    def __str__(self):
+        return "EnvGen.kr(Env.new([1, 0], [{}], \\hold), doneAction={})".format(self.duration, self.doneAction)
+
 class perc(EnvGen):
     value = "Env.perc"
     def __init__(self, atk=0.01, sus=None, amp=None, curve=0, doneAction=0):
