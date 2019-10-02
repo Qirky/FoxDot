@@ -36,27 +36,24 @@ with SynthDef("noise") as noise:
     noise.osc = LFNoise0.ar(noise.freq, noise.amp)
     noise.env = Env.perc()
 
-with SynthDef("dab") as synth:
-     a = HPF.ar(Saw.ar(synth.freq / 4, mul=synth.amp / 2), 2000)
-     b = VarSaw.ar(synth.freq / 4, mul=synth.amp, width=Env.perc(synth.sus / 20, synth.sus / 4, 0.5, -5, doneAction=0))
-     synth.osc = a + b
-     synth.env = Env.env(sus=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
-dab = synth
-del a
-del b
+with SynthDef("dab") as dab:
+     a = HPF.ar(Saw.ar(dab.freq / 4, mul=dab.amp / 2), 2000)
+     b = VarSaw.ar(dab.freq / 4, mul=dab.amp, width=Env.perc(dab.sus / 20, dab.sus / 4, 0.5, -5, doneAction=0))
+     dab.osc = a + b
+     dab.env = Env.env(sus=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
+     del a
+     del b
 
-with SynthDef("varsaw") as synth:
-     synth.freq = synth.freq * [1, 1.005]
-     synth.osc = VarSaw.ar(synth.freq, mul=synth.amp / 4, width=synth.rate)
-     synth.env = Env.env()
-varsaw = synth
+with SynthDef("varsaw") as varsaw:
+     varsaw.freq = varsaw.freq * [1, 1.005]
+     varsaw.osc = VarSaw.ar(varsaw.freq, mul=varsaw.amp / 4, width=varsaw.rate)
+     varsaw.env = Env.env()
 
-with SynthDef("lazer") as synth:
-    synth.freq = synth.freq * [1, 1.005]
-    synth.amp = synth.amp * 0.1
-    synth.osc = VarSaw.ar(synth.freq,  width=(synth.rate-1)/4) + LFSaw.ar(LFNoise0.ar(synth.rate * 20, add=synth.freq * Pulse.ar((synth.rate-2) + 0.1, add=1), mul=0.5))
-    synth.env = Env.perc(0.1)
-lazer = synth
+with SynthDef("lazer") as lazer:
+    lazer.freq = lazer.freq * [1, 1.005]
+    lazer.amp = lazer.amp * 0.1
+    lazer.osc = VarSaw.ar(lazer.freq,  width=(lazer.rate-1)/4) + LFSaw.ar(LFNoise0.ar(lazer.rate * 20, add=lazer.freq * Pulse.ar((lazer.rate-2) + 0.1, add=1), mul=0.5))
+    lazer.env = Env.perc(0.1)
 
 with SynthDef("growl") as growl:
     growl.sus = growl.sus * 1.5
