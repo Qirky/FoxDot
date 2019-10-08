@@ -1,6 +1,8 @@
 import sys
 import urllib
 
+from functools import reduce
+
 def download(output,wavPath):
 	text = reduce(lambda accum,x: accum + x, output, "")
 	index = text.find('./temp/') + len('./temp/')
