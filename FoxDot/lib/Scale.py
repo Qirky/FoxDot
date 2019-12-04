@@ -62,6 +62,9 @@ def get_freq_and_midi(degree, octave, root, scale):
     """ Returns the frequency and midinote """
 
     # TODO -- make sure it's always a scale
+    if hasattr(scale, "now"):
+
+        scale = scale.now()
 
     if isinstance(scale, ScaleType):
 
@@ -69,7 +72,7 @@ def get_freq_and_midi(degree, octave, root, scale):
 
     else:
 
-        midinote = midi( scale, octave, degree, root )
+        midinote = midi(scale, octave, degree, root)
         freq     = miditofreq(midinote)
 
     return freq, midinote
