@@ -1,0 +1,13 @@
+Clock.bpm=120
+
+
+
+d1 >> play("<X{~[~X]}><[--]><..H( [ d])>", dur=1/2, cut=.8, hpf=00)
+
+b1 >> bass(dur=1/2, amp=[0,1], oct=5, drive=0.5, room=0.2, tremolo=1, sus=1).spread() + var([0,5,3],[8,4,4])
+
+p1 >> spark(b1.pitch + (0, P*(_,[P*(4,5),4,4]), 2), dur=[8,4,4], oct=6, tremolo=4)
+
+p2 >> pulse(PRand([4,2,0,6], seed=0)[:16], dur=1/4, oct=4, formant=linvar([0,4],8)).slider().spread()
+
+nextBar(Clock.clear)

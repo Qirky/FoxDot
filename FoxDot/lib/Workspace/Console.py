@@ -24,16 +24,17 @@ class console:
         self.root = master.root
         
         self.y_scroll = Scrollbar(self.root)
-        self.y_scroll.grid(row=2, column=2, sticky='nsew', rowspan=2)
+        self.y_scroll.grid(row=2, column=2, sticky='nsew', rowspan=3)
         self.scrollable = False
 
         # Right-click menu
 
         self.popup = ConsolePopupMenu(self)
 
-        # Create a bar for changing console size
+        # Create a bar for changing console size and displaying info about beat number
 
-        self.drag = Frame( self.root , bg="white", height=2, cursor="sb_v_double_arrow")
+        self.drag = Frame(self.root , bg="white", height=2, cursor="sb_v_double_arrow")
+        self.counter = Counter(self, self.root, bd=0, bg=colour_map['background'], height=25,)
 
         # Create canvas
 
@@ -86,6 +87,7 @@ class console:
 
         self.drag.grid(row=1, column=0, stick="nsew", columnspan=3)
         self.canvas.grid(row=2, column=0, sticky="nsew", columnspan=2)
+        self.counter.grid(row=3, column=0, sticky="nsew", columnspan=2)
     
         self.queue = Queue.Queue()
         self.update()
@@ -370,3 +372,46 @@ class console:
         """ Shows the right-click context menu and hides the text popup """
         self.popup.show(*args)
         self.app.popup.hide(*args)
+
+
+class Counter(Canvas):
+    def __init__(self, parent, *args, **kwargs):
+        Canvas.__init__(self, *args, **kwargs)
+        self.parent = parent
+        self.metro = self.parent.app.namespace['Clock']
+        self.font = self.parent.app.codefont
+        # Use 4 beats for now - will update in future?
+
+    def redraw(self):
+        """
+        Draw boxes and highlight current beat
+        """
+        cycle = self.metro.meter[0]
+
+        # Need to adjust for latency
+
+        beat = int((self.metro.now() - self.metro.get_latency()) % cycle)
+
+        w = self.winfo_width()
+        h = self.winfo_height()
+
+        self.delete("all")
+
+        offset = 10
+        width = 120
+
+        self.create_text(w-offset, 0, anchor="ne",
+                             justify=RIGHT,
+                             text=beat + 1,
+                             font=self.font,
+                             fill="#c9c9c9")
+
+        box_width = width / cycle
+        h_offset = 8
+        box_height = h - h_offset
+
+        for n in range(cycle):
+            x1, x2 = [(val * box_width) + (w - width - 35) for val in [n, (n + 1)]]
+            y1, y2 = h_offset / 2, box_height + (h_offset / 2)
+            bg = "red" if n == beat else "gray30"
+            self.create_rectangle(x1, y1, x2, y2, fill=bg, outline="gray30")
