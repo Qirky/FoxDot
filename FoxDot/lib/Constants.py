@@ -7,7 +7,7 @@ from .Patterns import Pattern, PGroup
 class const:
     """ A number value that cannot be changed """
     def __init__(self, value):
-        
+
         if isinstance(value, (list, Pattern)):
             self.__class__ = Pattern
             self.__init__([const(x) for x in value])
@@ -50,6 +50,10 @@ class const:
         return self.value < other
     def __le__(self, other):
         return self.value <= other
+    def __eq__(self, other):
+        return self.value == other
+    def __ne__(self, other):
+        return self.value != other
 
 class _inf(const):
     def __repr__(self):
@@ -87,4 +91,6 @@ class _inf(const):
 
 inf = _inf(0)
 
-
+class NoneConst(const):
+    def __init__(self):
+        self.value = None

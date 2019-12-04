@@ -213,6 +213,8 @@ FoxDot = _util()
 
 # Create a clock and define functions
 
+_ = None
+
 logging.basicConfig(level=logging.ERROR)
 when.set_namespace(FoxDotCode) # experimental
 

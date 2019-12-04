@@ -1637,7 +1637,7 @@ class Player(Repeatable):
 
         # Only send if amp > 0 etc
 
-        if verbose and (message["amp"] > 0) and ((self.synthdef != SamplePlayer) or (self.synthdef == SamplePlayer and message["buf"] > 0)):
+        if verbose and (message["amp"] > 0) and ((self.synthdef != SamplePlayer and message["freq"] != None) or (self.synthdef == SamplePlayer and message["buf"] > 0)):
 
             # Need to send delay and synthdef separately
 
@@ -1739,8 +1739,14 @@ class Player(Repeatable):
 
             scale  = kwargs.get("scale", self.scale)
 
-            freq, midinote = get_freq_and_midi(degree, octave, root, scale)
-            
+            if degree == None:
+
+                freq, midinote = None, None
+
+            else:
+
+                freq, midinote = get_freq_and_midi(degree, octave, root, scale)
+                
             message.update({'freq':  freq, 'midinote': midinote})
 
             # Updater player key

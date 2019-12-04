@@ -1508,10 +1508,15 @@ Format = PatternFormat ## TODO - Remove this
 
 def convert_nested_data(data):
     """ Converts a piece of data in a pattern to a PGroup/Pattern as appropriate """
+    from ..Constants import NoneConst
 
     if isinstance(data, (int, float)):
 
         return data
+
+    elif data == None:
+
+        return NoneConst()
 
     elif type(data) is tuple:
         
@@ -1617,6 +1622,10 @@ def force_pattern_args(f):
     """ Wrapper for forcing arguments to be a Pattern """
     def new_func(*args, **kwargs):
         new_args = tuple(x if isinstance(x, metaPattern) else PGroup(x) for x in args)
-        new_kwargs = {key: value if isinstance(value, metaPattern) else value for key, value in kwargs.items()}
+        new_kwargs = {
+            key: value if isinstance(value, metaPattern)
+            else value 
+            for key, value in kwargs.items()
+        }
         return f(*new_args, **new_kwargs)
     return new_func

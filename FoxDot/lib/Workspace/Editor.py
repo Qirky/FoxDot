@@ -353,6 +353,8 @@ class workspace:
 
         # Ask after widget loaded
 
+        self.linenumbers.redraw() # TODO: move to generic redraw functions
+
         self.root.after(50, hello)
 
         # Check temporary file
