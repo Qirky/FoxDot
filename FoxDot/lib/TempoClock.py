@@ -182,7 +182,6 @@ class TempoClock(object):
         self.time = self.dtype(0)
         self.beat = self.dtype(0)
         self.start_time = time.time()
-        print("resetting clock")
         return
 
     @classmethod
