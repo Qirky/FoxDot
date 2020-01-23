@@ -16,7 +16,8 @@ class TextPrompt:
 
         # TODO // sort out the name space to check for suggestions
 
-        keywords = list(self.root.namespace["get_keywords"]())
+        # keywords = list(self.root.namespace["get_keywords"]())
+        keywords = list(get_keywords())
         synthdefs = list(self.root.namespace["SynthDefs"])
         attributes = list(self.root.namespace["Player"].get_attributes())
         player_methods = ["every", "often", "sometimes", "rarely"]

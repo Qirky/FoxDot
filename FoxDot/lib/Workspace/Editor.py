@@ -1195,7 +1195,7 @@ class workspace:
     def killall(self, event=None):
         """ Stops all player objects """
         execute("_Clock.clear()", verbose=False)
-        print("Clearing the scheduling clock.")
+        print("Clock.clear()")
         return "break"
 
     # Zoom in: Ctrl+=

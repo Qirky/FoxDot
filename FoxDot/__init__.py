@@ -47,8 +47,6 @@ def boot_supercollider():
 
     if(OS == "Windows"):
 
-        print("OS: Windows")
-
         sclangloc = os.popen('where /R "C:\\Program Files" sclang.exe').read()
 
         thiscwd = str(sclangloc)
@@ -74,8 +72,6 @@ def boot_supercollider():
             subprocess.Popen([sclangloc, startup], cwd=ourcwd, shell=True)
 
     elif(OS == "Linux"):
-
-        print("OS: Linux")
 
         def is_proc_running(name):
             for p in psutil.process_iter(attrs=["name","cmdline"]):
@@ -111,7 +107,7 @@ from .lib import *
 
 def main():
     """ Function for starting the GUI when importing the library """
-    FoxDot = Workspace.workspace(FoxDotCode).run()
+    FoxDot = Workspace.Editor.workspace(FoxDotCode).run()
 
 def Go():
     """ Function to be called at the end of Python files with FoxDot code in to keep
