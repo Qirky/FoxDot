@@ -23,7 +23,6 @@ from .ServerManager import *
 from .SCLang import SynthDefs, Env, SynthDef, CompiledSynthDef
 from .Root import Root
 from .Scale import Scale, Tuning
-from .Workspace import get_keywords
 
 # stdlib imports
 
