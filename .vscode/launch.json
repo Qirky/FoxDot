@@ -1,0 +1,14 @@
+{
+"version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: FoxDot Module",
+            "type": "python",
+            "request": "launch",
+            "module": "FoxDot",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceRoot}",
+            "justMyCode" : false 
+        }
+    ]
+}
