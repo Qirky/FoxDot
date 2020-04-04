@@ -91,9 +91,10 @@ def GET_TUTORIAL_FILES():
 
 # Set Environment Variables
 
-from . import conf
-
-reload(conf) # incase of a reload
+try:
+    reload(conf) # incase of a reload
+except NameError:
+    from . import conf
 
 FOXDOT_CONFIG_FILE  = conf.filename
     
