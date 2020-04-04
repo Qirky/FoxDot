@@ -1,3 +1,4 @@
+import os
 import os.path
 import sys
 
@@ -61,3 +62,10 @@ try:
         exec(code, globals())
 except FileNotFoundError:
     pass
+
+# Loading from env
+# ------------------
+
+for key, value in os.environ.items():
+    if key in globals():
+        globals()[key] = value
