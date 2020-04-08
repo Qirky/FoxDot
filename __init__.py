@@ -35,6 +35,22 @@ def boot_supercollider():
         import sys
         sys.exit("Installed psutil, please start FoxDot again.")
 
+    """
+    def is_proc_running(name):
+        for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
+            #print(p);
+            procname = p.info['name'] or \
+                    p.info['exe'] and os.path.basename(p.info['exe']) == name or \
+                    p.info['cmdline'] and p.info['cmdline'][0] == name
+            if(name in str(procname)):
+                return True
+        return False
+    """
+
+    def is_proc_running(ourcwd):
+            return False
+
+        
     sclangpath = "" #find path to sclang
 
     thispath = "" #find this path
@@ -47,45 +63,26 @@ def boot_supercollider():
 
     if(OS == "Windows"):
 
-        print("OS: Windows")
-
         sclangloc = os.popen('where /R "C:\\Program Files" sclang.exe').read()
 
         thiscwd = str(sclangloc)
 
         ourcwd = thiscwd.replace('\\sclang.exe\n', '')
 
-        def is_proc_running(name):
-            for p in psutil.process_iter(attrs=["name", "exe", "cmdline"]):
-                #print(p);
-                procname = p.info['name'] or \
-                     p.info['exe'] and os.path.basename(p.info['exe']) == name or \
-                     p.info['cmdline'] and p.info['cmdline'][0] == name
-                if(procname.startswith(name)):
-                    return True
-            return False
+        final = ourcwd + "\sclang.exe"
 
+        print(final)
 
-        running = (is_proc_running("sclang"))
+        running = (is_proc_running(final))
 
         if(running == False):
+            print("Booting supercollider background process...")
             startup = thisdir+"/FoxDot/startup.scd"
             #os.system("sclang"+startup+" &")
             subprocess.Popen([sclangloc, startup], cwd=ourcwd, shell=True)
 
+
     elif(OS == "Linux"):
-
-        print("OS: Linux")
-
-        def is_proc_running(name):
-            for p in psutil.process_iter(attrs=["name","cmdline"]):
-                #print(p);
-                procname = p.info['name'] or \
-                     p.info['cmdline'] and p.info['cmdline'][0] == name
-                if(procname.startswith(name)):
-                    return True
-            return False
-
 
         running = (is_proc_running("sclang"))
 
@@ -112,7 +109,7 @@ from .lib import *
 
 def main():
     """ Function for starting the GUI when importing the library """
-    FoxDot = Workspace.workspace(FoxDotCode).run()
+    FoxDot = Workspace.Editor.workspace(FoxDotCode).run()
 
 def Go():
     """ Function to be called at the end of Python files with FoxDot code in to keep
