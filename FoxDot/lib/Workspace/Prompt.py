@@ -29,8 +29,8 @@ class TextPrompt:
 
         self.values = [StringVar() for n in range(self.num_items)]
         self.clear()
-        
-        self.labels = [Label(self.master, textvariable=self.values[n], font="CodeFont", foreground="White", anchor=NW, pady=self.pady) for n in range(self.num_items)]
+
+        self.labels = [Label(self.master, textvariable=self.values[n], font=self.root.codefont, foreground="White", anchor=NW, pady=self.pady) for n in range(self.num_items)]
 
         self.selected = 0
         self.bg = "gray40"
@@ -42,7 +42,7 @@ class TextPrompt:
         self.y = 0
         self.w = 0
         self.h = 0
-        
+
         self.re = re.compile(r"(\w+)$")
 
         self.__visible = True
@@ -81,7 +81,7 @@ class TextPrompt:
 
     def show(self):
         """ Displays the prompt with suggestions """
-        
+
         if not self.__visible:
 
             return
@@ -95,13 +95,13 @@ class TextPrompt:
         if len(word) == 0 or self.in_word():
 
             return self.hide()
-        
+
         bbox = self.master.bbox(index)
-        
+
         if bbox is not None:
 
             self.selected = 0
-        
+
             self.x, self.y, self.w, self.h = bbox
 
             # 3. Find first 4 words
@@ -125,7 +125,7 @@ class TextPrompt:
             self.visible = True
 
         return
-    
+
     def move(self, x, y):
         offset = self.h
         width  = max((len(val.get()) for val in self.values))
@@ -137,7 +137,7 @@ class TextPrompt:
             else:
                 label.place(x=9999, y=9999)
         return
-    
+
     def hide(self):
         self.clear()
         self.move(x=9999, y=9999)
@@ -154,12 +154,13 @@ class TextPrompt:
         for i, word in enumerate(values[:self.num_items]):
             self.values[i].set(word)
         return
-    
+
     def find_suggestions(self, word):
         words = []
         i = 0
         for phrase in self.namespace:
-            if phrase.lower().startswith(word.lower()):
+            # if phrase.lower().startswith(word.lower()):
+            if phrase.startswith(word):
                 words.append(phrase)
                 i += 1
             if i == self.num_items:
@@ -183,7 +184,7 @@ class TextPrompt:
             self.master.insert(INSERT, WORD)
             self.root.update()
         self.hide()
-        return 
+        return
 
     def toggle(self):
         """ Flags the prompt to show / not show automatically """

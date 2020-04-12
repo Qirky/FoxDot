@@ -70,14 +70,14 @@ class workspace:
             return
 
         # Used for docstring prompt
-        
+
         self.namespace = CodeClass.namespace
 
-        # Set up master widget  
+        # Set up master widget
 
         self.root = Tk(className='FoxDot')
         self.set_window_title()
-        
+
         self.root.rowconfigure(0, weight=1) # Text box
         self.root.rowconfigure(1, weight=0) # Separator
         self.root.rowconfigure(2, weight=0) # Console
@@ -105,12 +105,12 @@ class workspace:
         self.show_prompt.set(True)
 
         # --- Set icon
-        
+
         try:
 
             # Use .ico file by default
             self.root.iconbitmap(FOXDOT_ICON)
-            
+
         except TclError:
 
             # Use .gif if necessary
@@ -132,6 +132,10 @@ class workspace:
 
                 self.default_font = "Monaco"
 
+            elif "Ubuntu Mono" in system_fonts:
+
+                self.default_font = "Ubuntu Mono"
+
             elif "Courier New" in system_fonts:
 
                 self.default_font = "Courier New"
@@ -141,7 +145,7 @@ class workspace:
                 self.console_font = self.codefont = self.default_font = "TkFixedFont"
 
         if self.codefont == "CodeFont":
-        
+
             self.font = tkFont.Font(font=(self.default_font, 12), name=self.codefont)
             self.font.configure(family=self.default_font)
             self.console_font = (self.default_font, 12)
@@ -152,7 +156,7 @@ class workspace:
 
         self.menu = MenuBar(self, visible = MENU_ON_STARTUP)
         self.popup = PopupMenu(self)
-       
+
         # Create y-axis scrollbar
 
         self.y_scroll = Scrollbar(self.root)
@@ -184,9 +188,9 @@ class workspace:
         self.linenumbers = LineNumbers(self, width=50,
                                        bg=colour_map['background'],
                                        bd=0, highlightthickness=0 )
-        
+
         self.linenumbers.grid(row=0, column=0, sticky='nsew')
-        
+
 
         # Docstring prompt label
 
@@ -291,14 +295,14 @@ class workspace:
         # Toggle console button keybind
 
         try:
-            
+
             self.text.bind("<{}-#>".format(ctrl), self.toggle_console)
             self.toggle_key = "#"
-            
+
         except:
-            
+
             self.text.bind("<{}-G>".format(ctrl), self.toggle_console)
-            self.toggle_key = "G" 
+            self.toggle_key = "G"
 
         # Save feature variabes
 
@@ -346,7 +350,7 @@ class workspace:
             # print()
             # print(hello)
             # print()
-            
+
             hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
             print(hello)
             print("-" * len(hello))
@@ -402,24 +406,24 @@ class workspace:
 
     def set_window_title(self, text="Live Coding with Python and SuperCollider"):
             return self.root.title("FoxDot v{} - {}".format(self.version, text))
- 
+
     def run(self):
         """ Starts the Tk mainloop for the master widget """
         while True:
             try:
-                
+
                 self.root.mainloop()
                 break
 
             # Temporary fix to unicode issues with Mac OS
             except(UnicodeDecodeError):
                 pass
-            
+
             except (KeyboardInterrupt, SystemExit):
 
                 # Clean exit
                 self.terminate()
-                
+
                 break
 
         # If the work has not been saved, store in a temporary file
@@ -463,7 +467,7 @@ class workspace:
             return
 
         # Add character to text box
-        
+
         else:
 
             self.delete_selection()
@@ -492,7 +496,7 @@ class workspace:
     def exec_line(self, event=None, insert=INSERT):
         """ Highlights a single line and executes """
         line, column = index(self.text.index(insert))
-        
+
         a, b = "%d.0" % line, "%d.end" % line
 
         self.highlight(a, b, "red")
@@ -526,13 +530,13 @@ class workspace:
             lastline   = int(end.split('.')[0]) + 1
 
             # Indicies of block to execute
-            block = [0,0]        
-            
+            block = [0,0]
+
             # 1. Get position of cursor
             cur_x, cur_y = index(self.text.index(insert))
-            
+
             # 2. Go through line by line (back) and see what it's value is
-            
+
             for line in range(cur_x, 0, -1):
                 if not self.text.get("%d.0" % line, "%d.end" % line).strip():
                     break
@@ -549,7 +553,7 @@ class workspace:
             # Now we have the lines of code!
 
             a, b = block
-        
+
         if a == b: b += 1
 
         for line in range(a, b):
@@ -590,7 +594,7 @@ class workspace:
         return
 
     def insert_char(self, char):
-        """ Inserts a character into the text editor at the INSERT cursor 
+        """ Inserts a character into the text editor at the INSERT cursor
             then updates the syntax highlighting etc """
         self.text.insert(INSERT, char)
         self.update()
@@ -608,7 +612,7 @@ class workspace:
             # self.update_all()
         except TclError:
             pass
-             
+
         return "break"
 
     def redo(self, event=None):
@@ -628,7 +632,7 @@ class workspace:
             ctrl = "Cmd"
         else:
             ctrl = "Ctrl"
-            
+
         print("FoxDot Help:")
         print("-----------------------------------------")
         print("{}+Return           : Execute code".format(ctrl))
@@ -657,21 +661,21 @@ class workspace:
     def save(self, event=None):
         """ Saves the contents of the text editor """
         text = self.text.get("0.0",END)
-        
+
         if not self.saved:
             self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py")],
                                                            defaultextension=".py")
         if self.filename:
-            
-            write_to_file(self.filename, text)                
-            
+
+            write_to_file(self.filename, text)
+
             self.saved = True
-            
+
             print("Saved '{}'".format(self.filename))
-            
+
             # Remove tmp file
             self.clear_temp_file()
-                
+
         return bool(self.filename)
 
     # Open save
@@ -681,11 +685,11 @@ class workspace:
         self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py")],
                                                        defaultextension=".py")
         if self.filename is not None:
-            
-            write_to_file(self.filename, text)    
-            
+
+            write_to_file(self.filename, text)
+
             self.saved = True
-            
+
             print("Save successful!")
 
             # Remove tmp file
@@ -746,7 +750,7 @@ class workspace:
 
     def open_samples_folder(self):
         import subprocess
-        
+
         if SYSTEM == WINDOWS:
             cmd = 'explorer'
         elif SYSTEM == MAC_OS:
@@ -758,7 +762,7 @@ class workspace:
         except OSError as e:
             print(e)
             print("Hmm... Looks like we couldn't open the directory but you can find the samples in {}".format(FOXDOT_SND))
-            
+
         return
 
     # Toggle console: Ctrl+#
@@ -833,7 +837,7 @@ class workspace:
 
 
     # Copy/paste etc
-    
+
     def edit_paste(self, event=None):
         """ Pastes any text and updates the IDE """
         self.text.event_generate("<<Paste>>")
@@ -902,7 +906,7 @@ class workspace:
         # Update the IDE colours
 
         self.update(event)
-        
+
         return "break"
 
     # Tab
@@ -917,19 +921,19 @@ class workspace:
                 return "break"
             else:
                 self.delete(event)
-        except: 
+        except:
             pass
-        
+
         # Insert white space
 
         line, column = index(self.text.index(insert))
-        
+
         self.text.insert(index(line, column), self.tabspace())
 
         # Update IDE
 
         self.update(event)
-            
+
         return "break"
 
     # Indent: Ctrl+]
@@ -947,7 +951,7 @@ class workspace:
 
             sel_a = index(index(self.text.index(SEL_FIRST))[0],0)
             sel_b = index(index(self.text.index(SEL_LAST))[0],'end')
-                
+
             start, end = (index(a) for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
             for row in range(start[0], end[0]+1):
                 # Add intentation
@@ -958,7 +962,7 @@ class workspace:
         except:
 
             pass
-            
+
         return "break"
 
     # Un-inden: Ctrl+[
@@ -974,7 +978,7 @@ class workspace:
 
         sel_a = index(index(self.text.index(SEL_FIRST))[0],0)
         sel_b = index(index(self.text.index(SEL_LAST))[0],'end')
-            
+
         start, end = (index(a) for a in (self.text.index(SEL_FIRST), self.text.index(SEL_LAST)))
 
         for row in range(start[0], end[0]+1):
@@ -985,10 +989,10 @@ class workspace:
                     break
 
             if n > 0:
-                
+
                 self.text.delete(index(row,0),index(row,n+1))
 
-        self.text.tag_add(SEL, sel_a, sel_b)    
+        self.text.tag_add(SEL, sel_a, sel_b)
         return "break"
 
     # Deletion
@@ -1011,9 +1015,9 @@ class workspace:
         if self.bracketHandler.delete():
 
             return "break"
-    
+
         # Else, work out if there is a tab to delete
-        
+
         line, column = index(self.text.index(insert))
 
         # If we are at the start of a line, delete that
@@ -1031,9 +1035,9 @@ class workspace:
         else:
 
             tab = index(line, column-tabsize)
-        
+
             # Check if there's a tab
-            
+
             if self.text.get(tab, insert) == self.tabspace():
 
                 self.text.delete(tab, insert)
@@ -1041,7 +1045,7 @@ class workspace:
             else:
 
                 self.text.delete(index(line, column-1), insert)
-                
+
         # Update the IDE
         self.update(event)
 
@@ -1053,7 +1057,7 @@ class workspace:
         if not self.delete_selection():
 
             self.text.delete(self.text.index(insert))
-            
+
         self.update(event)
 
         # execute.update_line_numbers(self.text)
@@ -1065,7 +1069,7 @@ class workspace:
 
         num_words = abs(direction)
         direction = 1 if direction > 0 else -1
-        
+
         end = self.text.index(INSERT)
 
         row, col = index(end)
@@ -1082,7 +1086,7 @@ class workspace:
 
                 row, col = index(self.text.index("%d.end" % (row + direction)))
 
-                end = index(row, col)                
+                end = index(row, col)
 
         # If the left char is whitespace, delete that AND the next word
 
@@ -1152,7 +1156,7 @@ class workspace:
         self.update(event)
 
         return
-        
+
 
     def delete_selection(self):
         """ If an area is selected, it is deleted and returns True """
@@ -1160,7 +1164,7 @@ class workspace:
             text = self.text.get(SEL_FIRST, SEL_LAST)
             a, b = self.text.index(SEL_FIRST), self.text.index(SEL_LAST)
             self.text.delete(SEL_FIRST, SEL_LAST)
-            return True        
+            return True
         except:
             return False
 
@@ -1223,12 +1227,12 @@ class workspace:
             font.configure(size=size)
             self.linenumbers.config(width=self.linenumbers.winfo_width() - 3)
         return  'break'
-    
+
 
     def submit(self, code_str):
         """ Runs the chunk of code through FoxDot processing and execute """
         try:
-                
+
             execute( code_str )
 
         except Exception as e:
@@ -1243,7 +1247,7 @@ class workspace:
         self.text.tag_add("code", start, end)
 
         # Highlight
-        
+
         self.text.tag_config("code", background=colour, foreground="White")
 
         return
@@ -1276,7 +1280,7 @@ class workspace:
         --------------------------------------
 
     """
-        
+
 
     def update_prompt(self, visible=True):
         if visible:
@@ -1285,7 +1289,7 @@ class workspace:
             self.prompt.hide()
         return
 
-    def update_prompt2(self):        
+    def update_prompt2(self):
 
         if self.inbrackets:
 
@@ -1346,7 +1350,7 @@ class workspace:
             # Get number of lines added / removed
 
             old_length, new_length = self.text.lines, self.text.get_num_lines()
-            
+
             dif = new_length - old_length
 
             # Get end index of the operation
@@ -1358,9 +1362,9 @@ class workspace:
                 for x in range(row - dif, row + 1):
 
                     self.colour_line(x)
-            
+
             self.text.edit_modified(False)
-        
+
         return "break"
 
     def update(self, event=None, insert=INSERT):
@@ -1405,12 +1409,12 @@ class workspace:
             # Re-apply tags
 
             for tag_name, start, end in findstyles(thisline):
-                
+
                 self.text.tag_add(tag_name, index(line, start), index(line, end))
 
         except Exception as e:
 
-            print(e)       
+            print(e)
 
         # Find comments (not done with regex)
 
@@ -1525,18 +1529,18 @@ class workspace:
         if not keep_selection:
 
             self.text.remove_selection()
-        
+
         row, col   = index(self.text.index(INSERT))
         searching = True
 
         if col == 0:
 
             _,  line_length = index(self.text.index("{}.end".format(row)))
-            
+
             if line_length == 0:
 
                 new_row, new_col = row + 1, 0
-                
+
                 searching = False
 
         col += 1
@@ -1548,23 +1552,23 @@ class workspace:
             _, line_length = index(self.text.index("{}.end".format(row)))
 
             if line_length > 0:
-            
+
                 for i in range(col, line_length - 1):
-                
+
                     if self.text.get(index(row, i)) in chars:
-                        
+
                         searching = False
-                
+
                     elif index(row, i) == last_index:
-                        
+
                         searching = False
-                
+
                     if searching is False:
-                        
+
                         new_row, new_col = row, i
-                        
+
                         self.text.mark_set(INSERT, index(new_row, new_col))
-                        
+
                         return "break"
 
                 row += 1
@@ -1573,10 +1577,10 @@ class workspace:
             else:
 
                 searching = False
-                new_row, new_col = row, 0    
+                new_row, new_col = row, 0
 
         self.text.mark_set(INSERT, index(new_row, new_col))
-        
+
         return "break"
 
     def move_word_left(self, event=None, keep_selection=False):
@@ -1602,23 +1606,23 @@ class workspace:
         while searching:
 
             if line_length > 0:
-            
+
                 for i in range(col, 0, -1):
-                
+
                     if self.text.get(index(row, i)) in chars:
-                        
+
                         searching = False
-                
+
                     elif index(row, i) == last_index:
-                        
+
                         searching = False
-                
+
                     if searching is False:
-                        
+
                         new_row, new_col = row, i
-                        
+
                         self.text.mark_set(INSERT, index(new_row, new_col))
-                        
+
                         return "break"
 
                 _, line_length = row ,col = index(self.text.index("{}.end".format(row - 1)))
@@ -1626,10 +1630,10 @@ class workspace:
             else:
 
                 searching = False
-                new_row, new_col = row, 0    
+                new_row, new_col = row, 0
 
         self.text.mark_set(INSERT, index(new_row, new_col))
-        
+
         return "break"
 
     def select_word_right(self, event=None):
@@ -1647,24 +1651,24 @@ class workspace:
         """ Given two Tkinter indices, will select non-selected text in the range and de-select the selected text """
 
         for index in self.text.char_range(index1, index2):
-            
+
             if self.text.is_selected(index):
 
                 self.text.tag_remove(SEL, index)
 
             else:
 
-                self.text.tag_add(SEL, index,)   
+                self.text.tag_add(SEL, index,)
 
         return
-    
+
 
     """
         Generic functions
         -----------------
         - Correct exiting
         - Tabspace (todo: customise)
-        
+
 
     """
 
@@ -1676,7 +1680,7 @@ class workspace:
         self.root.destroy()
 
         return
-    
+
     def tabspace(self):
         return " " * tabsize
 
@@ -1706,7 +1710,7 @@ class workspace:
             j = i + len(old)
             a = index(line, i)
             b = index(line, j)
-            
+
             self.text.delete(a, b)
             self.text.insert(a, new)
 
@@ -1739,7 +1743,7 @@ class workspace:
                 j = match.end()
                 a = index(line, i)
                 b = index(line, j)
-                
+
                 self.text.delete(a, b)
                 self.text.insert(a, new)
 
@@ -1771,7 +1775,7 @@ class workspace:
     def opendocumentation(self):
         webbrowser.open("http://www.docs.foxdot.org/")
         return
-    
+
     def set_temp_file(self, text):
         write_to_file(FOXDOT_TEMP_FILE, text)
         return
