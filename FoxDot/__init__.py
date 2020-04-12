@@ -107,7 +107,8 @@ from .lib import *
 
 def main():
     """ Function for starting the GUI when importing the library """
-    FoxDot = Workspace.Editor.workspace(FoxDotCode).run()
+    from .lib.Workspace.Editor import workspace
+    FoxDot = workspace(FoxDotCode).run()
 
 def Go():
     """ Function to be called at the end of Python files with FoxDot code in to keep

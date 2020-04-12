@@ -2,7 +2,7 @@ from __future__ import absolute_import, division, print_function
 
 import os.path
 with open((os.path.join(os.path.dirname(__file__), ".version")), "r") as f:
-    __version__ = f.read()
+    __version__ = f.readline().strip()
 
 import logging
 from .Code import *
@@ -29,7 +29,7 @@ from .Scale import Scale, Tuning
 from random import choice as choose
 
 # Define any custom functions
-    
+
 @PatternMethod
 def __getitem__(self, key):
     """ Overrides the Pattern.__getitem__ to allow indexing
@@ -47,7 +47,7 @@ def __getitem__(self, key):
         return self.getitem(key)
 
 def player_method(f):
-    """ Decorator for assigning functions as Player methods. 
+    """ Decorator for assigning functions as Player methods.
 
     >>> @player_method
     ... def test(self):
@@ -101,7 +101,7 @@ def futureBar(n=0):
     return _futureBarDecorator(n, Clock.bar_length())
 
 def update_foxdot_clock(clock):
-    """ Tells the TimeVar, Player, and MidiIn classes to use 
+    """ Tells the TimeVar, Player, and MidiIn classes to use
         a new instance of TempoClock. """
 
     assert isinstance(clock, TempoClock)
