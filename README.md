@@ -3,7 +3,7 @@ FoxDot - Live Coding with Python v0.8
 
 ## Please note
 
-I am no longer actively maintaining FoxDot and will only be making minor changes to the code in response to issues / pull requests in this time. However, you can still ask questions on the [TOPLAP FoxDot Forum](https://forum.toplap.org/c/communities/foxdot) and I will get back to you when I can. Please do not ask general questions in the "issues" section. Thanks.
+I am no longer actively developing FoxDot and will only be making minor changes to the code in response to issues / pull requests in this time. However, you can still ask questions on the [TOPLAP FoxDot Forum](https://forum.toplap.org/c/communities/foxdot) and I will get back to you when I can. Please do not ask general questions in the "issues" section. Thanks.
 
 ---
 
