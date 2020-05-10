@@ -100,13 +100,14 @@ class console:
         self.drag.grid(row=1, column=0, stick="nsew", columnspan=3)
         self.canvas.grid(row=2, column=0, sticky="nsew", columnspan=2)
         self.counter.grid(row=3, column=0, sticky="nsew", columnspan=2)
+        self.counter.hide()
 
         self.queue = Queue.Queue()
         self.update()
 
     def __str__(self):
         """ str(s) -> string """
-        return self.text.get(1.0, "end")
+        return self.canvas.itemcget(self.text, "text")
 
     def clear(self):
         """ Clears the console """
@@ -393,12 +394,32 @@ class Counter(Canvas):
         self.metro = self.parent.app.namespace['Clock']
         self.font = self.parent.app.console_font
         self.bg = colour_map.get('background', "gray30")
+        self.active = True
         # Use 4 beats for now - will update in future?
+        
+    def hide(self):
+        self.active = False
+        self.grid_remove()        
+
+    def unhide(self):
+        self.active = True
+        self.grid()
+
+    def toggle(self):
+        if self.active:
+            self.hide()
+        else:
+            self.unhide()
 
     def redraw(self):
         """
         Draw boxes and highlight current beat
         """
+        
+        if not self.active:
+            
+            return
+        
         cycle = self.metro.meter[0]
 
         # Need to adjust for latency
@@ -410,14 +431,7 @@ class Counter(Canvas):
 
         self.delete("all")
 
-        offset = 10
         width = 120
-
-        self.create_text(w-offset, 0, anchor="ne",
-                             justify=RIGHT,
-                             text=beat + 1,
-                             font=self.font,
-                             fill="#c9c9c9")
 
         box_width = width / cycle
         h_offset = 8
@@ -427,5 +441,11 @@ class Counter(Canvas):
             x1, x2 = [(val * box_width) + (w - width - 35) for val in [n, (n + 1)]]
             y1, y2 = h_offset / 2, box_height + (h_offset / 2)
             bg = "red" if n == beat else self.bg
-            # self.create_rectangle(x1, y1, x2, y2, fill=bg, outline="gray30", )
-            self.create_rectangle(x1, y1, x2, y2, fill=bg, outline=self.bg, )
+            self.create_rectangle(x1, y1, x2, y2, fill=bg, outline="gray30", )
+            # self.create_rectangle(x1, y1, x2, y2, fill=bg, outline=self.bg, )
+
+        self.create_text(x2 + (w - x2)/2, h / 2,
+                             justify=RIGHT,
+                             text=beat + 1,
+                             font=self.font,
+                             fill="#c9c9c9")
