@@ -98,6 +98,11 @@ class workspace:
 
         self.true_fullscreen_toggled = BooleanVar()
         self.true_fullscreen_toggled.set(False)
+        
+        # Boolean for beat counter
+        
+        self.show_counter = BooleanVar()
+        self.show_counter.set(False)
 
         # Boolean for showing auto-complete prompt
 
@@ -811,7 +816,7 @@ class workspace:
                         if SYSTEM == WINDOWS:
                             self.root.wm_attributes('-transparentcolor', alpha)
                         else:
-                            self.root.wm_attributes("-transparent", True)
+                            self.root.wm_attributes("-transdef toggle_prparent", True)
                     except TclError:
                         self.using_alpha = True
                 if self.using_alpha:
@@ -835,6 +840,9 @@ class workspace:
         self.prompt.toggle()
         return "break"
 
+    def toggle_counter(self, event=None):
+        self.console.counter.toggle()
+        return "break"
 
     # Copy/paste etc
 

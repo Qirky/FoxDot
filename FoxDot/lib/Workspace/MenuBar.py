@@ -60,6 +60,7 @@ class MenuBar(Menu):
         editmenu.add_command(label="Toggle Menu",            command=self.root.toggle_menu, accelerator="Ctrl+M")
         editmenu.add_checkbutton(label="Toggle Window Transparency",  command=self.root.toggle_transparency, variable=self.root.transparent)
         editmenu.add_checkbutton(label="Toggle Auto-fill Prompt",     command=self.root.toggle_prompt,       variable=self.root.show_prompt)
+        editmenu.add_checkbutton(label="Toggle Beat Counter",     command=self.root.toggle_counter,       variable=self.root.show_counter)
         self.add_cascade(label="Edit", menu=editmenu)
         
         # Note: Alt renders properly to look like Option, so we don't need a

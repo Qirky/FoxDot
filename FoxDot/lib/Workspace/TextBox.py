@@ -15,7 +15,12 @@ class ThreadedText(Text):
     def __init__(self, master, **options):
         Text.__init__(self, master, **options)
         self.root = master
-        self.config(highlightbackground=background, selectbackground="Dodger Blue", selectforeground="White")
+        self.config(
+            highlightbackground=background,
+            selectbackground="Dodger Blue",
+            selectforeground="White",
+            highlightthickness=0
+        )
         self.height = options.get("height", 20)
         self.queue = Queue.Queue()
         self.lines = 0 # number of lines in the text
