@@ -1504,6 +1504,11 @@ def PatternFormat(data):
         return PGroup(data)
     return data
 
+def PatternInput(data):
+    if isinstance(data, GeneratorPattern):
+        return data
+    return asStream(data)
+
 Format = PatternFormat ## TODO - Remove this
 
 def convert_nested_data(data):

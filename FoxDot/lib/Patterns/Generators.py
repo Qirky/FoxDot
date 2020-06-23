@@ -29,7 +29,7 @@
 
 from __future__ import absolute_import, division, print_function
 
-from .Main  import GeneratorPattern, Pattern, asStream
+from .Main  import GeneratorPattern, Pattern, asStream, PatternInput
 
 import random
 
@@ -252,7 +252,7 @@ class PWalk(RandomGenerator):
         self.max   = abs(max)
         self.min   = self.max * -1
         
-        self.step  = asStream(step).abs()
+        self.step = PatternInput(step).transform(abs)
         self.start = start
 
         self.data = [self.start, self.step, self.max]
@@ -273,7 +273,7 @@ class PWalk(RandomGenerator):
                 f = self.directions[0]
             else:
                 f = self.choice(self.directions)
-            self.last_value = f(self.last_value, self.step.choose())
+            self.last_value = f(self.last_value, self.step[index])
         return self.last_value
 
 class PDelta(GeneratorPattern):
