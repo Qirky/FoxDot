@@ -182,7 +182,7 @@ class PChain(RandomGenerator):
         self.mapping = {}
         i = 0
         for key, value in mapping.items():
-            self.mapping[key] = asStream(value)
+            self.mapping[key] = self._convert_to_list(value)
             # Use the first key to start with
             if i == 0:
                 self.last_value = key
@@ -190,9 +190,20 @@ class PChain(RandomGenerator):
 
         self.init_random(**kwargs)
                 
-    def func(self, index):
-        self.last_value = self.choice(self.mapping[self.last_value])
+    def func(self, *args, **kwargs):
+        index = self.last_value
+        if isinstance(self.last_value, GeneratorPattern):
+            index = index.CACHE_HEAD
+        if index in self.mapping:
+            self.last_value = self.choice(self.mapping[index])
         return self.last_value
+
+    def _convert_to_list(self, value):
+        if isinstance(value, list):
+            return value
+        elif isinstance(value, Pattern):
+            return value.data
+        return [value]
 
 class PZ12(GeneratorPattern):
     """ Implementation of the PZ12 algorithm for predetermined random numbers. Using

@@ -1338,6 +1338,11 @@ class GeneratorPattern:
             self.cache[index] = value
             return value
 
+    @property
+    def CACHE_HEAD(self):
+        ''' Returns the last value used if it exists '''
+        return self.cache.get(self.index - 1)
+
     def new(self, other, func=Nil):
         """ Creates a new `GeneratorPattern` that references
             this pattern but returns a modified value based on
