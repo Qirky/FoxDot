@@ -287,6 +287,7 @@ class PWalk(RandomGenerator):
             self.last_value = f(self.last_value, self.step[index])
         return self.last_value
 
+
 class PDelta(GeneratorPattern):
     def __init__(self, deltas, start=0):
         GeneratorPattern.__init__(self)

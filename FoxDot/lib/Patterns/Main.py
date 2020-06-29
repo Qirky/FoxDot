@@ -120,7 +120,16 @@ class metaPattern(object):
         return self.__class__(data + self.meta)
 
     def transform(self, func):
-        return self.__class__([(item.transform(func) if isinstance(item, metaPattern) else func(item))for item in self])
+        """
+        Recursively transforms values and nested patterns
+        """
+        output = []
+        for item in self.data:
+            if isinstance(item, (metaPattern, GeneratorPattern)):
+                output.append(item.transform(func))
+            else:
+                output.append(func(item))
+        return self.__class__(output)
 
     def int(self):
         return self.transform(int)
@@ -550,21 +559,27 @@ class metaPattern(object):
             
         return self.new(new)
 
-    def stutter(self, n=2):
-        """ Returns a new Pattern with each item repeated by `n`. Use
-            a list of numbers for stutter different items by different
-            amount. e.g.
-            ```
-            >>> P[0, 1, 2, 3].stutter([1,3])
-            P[0, 1, 1, 1, 2, 3, 3, 3]
-            ```
+    def stutter(self, n=2, strict=False):
+        """ 
+        Returns a new Pattern with each item repeated by `n`. Use
+        a list of numbers for stutter different items by different
+        amount. e.g.
+        ```
+        >>> P[0, 1, 2, 3].stutter([1,3])
+        P[0, 1, 1, 1, 2, 3, 3, 3]
+        ```
+        Use strict=True to force generator patterns to return the
+        same value `n` times in a row.
         """
         n = asStream(n)
         lrg = max(len(self.data), len(n))
         new = []
         for i in range(lrg):
             for j in range(modi(n,i)):
-                new.append(modi(self.data,i))
+                item = modi(self.data,i)
+                if strict and isinstance(item, GeneratorPattern):
+                    item = item.copy()
+                new.append(item)
         return self.new(new)
 
     def arp(self, arp_pattern):
@@ -1433,6 +1448,12 @@ class GeneratorPattern:
 
         """
         return self.transform( lambda value: mapping.get(value, default) )
+
+    def copy(self):
+        '''
+        Returns a new Pattern Generator with same inputs
+        '''
+        return self.__class__(*self.args, **self.kwargs)
 
         # TODO - handle callables
         # funcs = {}
