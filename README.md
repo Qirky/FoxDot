@@ -34,7 +34,11 @@ p1 >> stretch("Basic_Rock_135", dur=4)
 #### Prerequisites
 - [Python 2 or 3](https://www.python.org/) - add Python to your path and install "pip" when prompted during the install.
 - [SuperCollider 3.8 and above](http://supercollider.github.io/download)
-
+- [Tkinter](https://tkdocs.com/tutorial/install.html) - Usually packaged with Python but Linux and MacOS users may need to install using:
+```bash
+$ sudo apt-get install python3-tk (Linux)
+$ sudo port install py-tkinter (MacOS)
+```
 #### Recommended
 - [sc3 plugins](http://sc3-plugins.sourceforge.net/)
 
