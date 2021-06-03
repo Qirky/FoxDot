@@ -912,7 +912,7 @@ class metaPattern(object):
         new = Pattern()
         if isinstance(data, Pattern):
             new.data = self.data + data.data
-        elif isinstance(data, (list, str)):
+        elif isinstance(data, (list, str, range)):
             new.data = list(self.data)
             new.data.extend(map(convert_nested_data, data))
         else:
@@ -1013,7 +1013,7 @@ class metaPattern(object):
         """ This method automatically laces and groups the data """
 
         #: Force data into an iterable form
-        if isinstance(self.data, str):
+        if isinstance(self.data, (str, range)):
 
             self.data = list(self.data)
             
@@ -1129,7 +1129,7 @@ class PGroup(metaPattern):
             args = list(self.data)
             args.append(data)
             new = PGroup(*args)
-        elif isinstance(data, (list, str)):
+        elif isinstance(data, (list, str, range)):
             new.data = list(self.data)
             new.data.extend(map(convert_nested_data, data))
         else:
