@@ -213,7 +213,12 @@ class SCLangServerManager(ServerManager):
 
         # OSC Connection for custom OSCFunc in SuperCollider
         if GET_SC_INFO:
-            self.sclang = BidirectionalOSCServer()
+            # Prevent SocketError when connecting to a remote FoxDot instance
+            server_address=('0.0.0.0', 0)
+            if (self.addr == 'localhost' or self.addr == '127.0.0.1'):
+                server_address=('localhost', 0)
+
+            self.sclang = BidirectionalOSCServer(server_address=server_address)
             self.sclang.connect( (self.addr, self.SCLang_port) )
             self.loadSynthDef(FOXDOT_INFO_FILE)
             try:
