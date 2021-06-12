@@ -33,7 +33,7 @@ ServerInfo = namedtuple(
     ('sample_rate', 'actual_sample_rate', 'num_synths', 'num_groups',
      'num_audio_bus_channels', 'num_control_bus_channels',
      'num_input_bus_channels', 'num_output_bus_channels', 'num_buffers',
-     'max_nodes', 'max_synth_defs', 'foxdot_snd'))
+     'max_nodes', 'max_synth_defs', 'foxdot_root', 'foxdot_snd'))
 
 
 class OSCClientWrapper(OSCClient):
@@ -178,12 +178,14 @@ class SCLangServerManager(ServerManager):
     fxlist    = None
     synthdefs = None
 
-    def __init__(self, addr, osc_port, sclang_port, foxdot_snd):
+    def __init__(self, addr, osc_port, sclang_port, foxdot_root, foxdot_snd):
 
         self.addr = addr
         self.port = osc_port
         self.SCLang_port = sclang_port
+        self.foxdot_root = foxdot_root
         self.foxdot_snd = foxdot_snd
+        self.foxdot_root_remote = ""
         self.foxdot_snd_remote = ""
 
         self.midi_nudge = 0
@@ -234,6 +236,7 @@ class SCLangServerManager(ServerManager):
                 self.num_output_busses = info.num_output_bus_channels
                 self.max_busses = info.num_audio_bus_channels
                 self.bus = self.num_input_busses + self.num_output_busses
+                self.foxdot_root_remote = info.foxdot_root
                 self.foxdot_snd_remote = info.foxdot_snd
         else:
             self.sclang = OSCClientWrapper()
@@ -640,6 +643,11 @@ class SCLangServerManager(ServerManager):
 
     def loadSynthDef(self, fn, cmd='/foxdot'):
         """ Sends a message to the FoxDot class in SuperCollider to load a SynthDef from file """
+
+        # Update path for proper file load in the remote Supercollider
+        if (not(self.addr == 'localhost' or self.addr == '127.0.0.1')):
+            fn = fn.replace(self.foxdot_root, self.foxdot_root_remote)
+
         msg = OSCMessage()
         msg.setAddress(cmd)
         msg.append(fn)
@@ -1110,10 +1118,10 @@ class TempoClient:
 
 if __name__ != "__main__":
 
-    from .Settings import ADDRESS, PORT, PORT2, FORWARD_PORT, FORWARD_ADDRESS, FOXDOT_SND
+    from .Settings import ADDRESS, PORT, PORT2, FORWARD_PORT, FORWARD_ADDRESS, FOXDOT_ROOT, FOXDOT_SND
 
     # DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
-    Server = SCLangServerManager(ADDRESS, PORT, PORT2, FOXDOT_SND)
+    Server = SCLangServerManager(ADDRESS, PORT, PORT2, FOXDOT_ROOT, FOXDOT_SND)
 
     if FORWARD_PORT and FORWARD_ADDRESS:
         Server.add_forward(FORWARD_ADDRESS, FORWARD_PORT)
