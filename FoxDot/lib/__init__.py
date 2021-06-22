@@ -223,6 +223,11 @@ update_foxdot_server(Server)
 update_foxdot_clock(Clock)
 instantiate_player_objects()
 
+# Override help to avoid crashing
+__help = help
+def help(thing):
+    return __help(thing)
+
 # Create a "now" time variable
 now = var([0]).transform(lambda a: Clock.now())
 nextbar = var([0]).transform(lambda a: Clock.next_bar())
