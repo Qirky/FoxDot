@@ -98,9 +98,9 @@ class workspace:
 
         self.true_fullscreen_toggled = BooleanVar()
         self.true_fullscreen_toggled.set(False)
-        
+
         # Boolean for beat counter
-        
+
         self.show_counter = BooleanVar()
         self.show_counter.set(False)
 
@@ -1777,11 +1777,11 @@ class workspace:
         return self.text.get("1.0", END).strip()
 
     def openhomepage(self):
-        webbrowser.open("http://www.foxdot.org/")
+        webbrowser.open("https://foxdot.org/")
         return
 
     def opendocumentation(self):
-        webbrowser.open("http://www.docs.foxdot.org/")
+        webbrowser.open("https://foxdot.org/docs/")
         return
 
     def set_temp_file(self, text):
