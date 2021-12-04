@@ -1,3 +1,10 @@
+### In development
+
+- Added `whitenoise` synth:
+```python
+wn >> whitenoise([0, 10, 20], sus=1/2)
+```
+
 ### 0.8.*
 
 - Added `stretch` synth for timestretching samples, similar to `loop` but better and only plays the whole file. Stretches the audio's duration to the `sus` attribute without affecting pitch and does not require the tempo to be known.

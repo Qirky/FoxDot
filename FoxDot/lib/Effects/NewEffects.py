@@ -3,7 +3,7 @@ import inspect
 
 from ..SCLang.SCLang import *
 
-# To be moved to SCLang later
+# To be added to SCLang later
 
 EnvGen = cls("EnvGen")
 Env    = cls("Env")
@@ -31,7 +31,7 @@ class _Effect:
         """ Returns 'osc', which is where In.ar() is stored """
         return self._in
 
-    def Out(self, output):
+    def Out(self, output=None):
         """ Writes to file and loads synthdef """
         print(";\n".join(self.lines))
         self.lines = []

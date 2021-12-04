@@ -36,27 +36,24 @@ with SynthDef("noise") as noise:
     noise.osc = LFNoise0.ar(noise.freq, noise.amp)
     noise.env = Env.perc()
 
-with SynthDef("dab") as synth:
-     a = HPF.ar(Saw.ar(synth.freq / 4, mul=synth.amp / 2), 2000)
-     b = VarSaw.ar(synth.freq / 4, mul=synth.amp, width=Env.perc(synth.sus / 20, synth.sus / 4, 0.5, -5, doneAction=0))
-     synth.osc = a + b
-     synth.env = Env.env(sus=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
-dab = synth
-del a
-del b
+with SynthDef("dab") as dab:
+     a = HPF.ar(Saw.ar(dab.freq / 4, mul=dab.amp / 2), 2000)
+     b = VarSaw.ar(dab.freq / 4, mul=dab.amp, width=Env.perc(dab.sus / 20, dab.sus / 4, 0.5, -5, doneAction=0))
+     dab.osc = a + b
+     dab.env = Env.env(sus=[Env.sus * 0.25, Env.sus * 1], curve="'lin'")
+     del a
+     del b
 
-with SynthDef("varsaw") as synth:
-     synth.freq = synth.freq * [1, 1.005]
-     synth.osc = VarSaw.ar(synth.freq, mul=synth.amp / 4, width=synth.rate)
-     synth.env = Env.env()
-varsaw = synth
+with SynthDef("varsaw") as varsaw:
+     varsaw.freq = varsaw.freq * [1, 1.005]
+     varsaw.osc = VarSaw.ar(varsaw.freq, mul=varsaw.amp / 4, width=varsaw.rate)
+     varsaw.env = Env.env()
 
-with SynthDef("lazer") as synth:
-    synth.freq = synth.freq * [1, 1.005]
-    synth.amp = synth.amp * 0.1
-    synth.osc = VarSaw.ar(synth.freq,  width=(synth.rate-1)/4) + LFSaw.ar(LFNoise0.ar(synth.rate * 20, add=synth.freq * Pulse.ar((synth.rate-2) + 0.1, add=1), mul=0.5))
-    synth.env = Env.perc(0.1)
-lazer = synth
+with SynthDef("lazer") as lazer:
+    lazer.freq = lazer.freq * [1, 1.005]
+    lazer.amp = lazer.amp * 0.1
+    lazer.osc = VarSaw.ar(lazer.freq,  width=(lazer.rate-1)/4) + LFSaw.ar(LFNoise0.ar(lazer.rate * 20, add=lazer.freq * Pulse.ar((lazer.rate-2) + 0.1, add=1), mul=0.5))
+    lazer.env = Env.perc(0.1)
 
 with SynthDef("growl") as growl:
     growl.sus = growl.sus * 1.5
@@ -219,146 +216,132 @@ with SynthDef("creep") as creep:
 
 # No context manager SynthDef creation
 
-orient = SynthDef("orient")
-orient.defaults.update(room=10, verb=0.7)
-orient.osc = LFPulse.ar(orient.freq, 0.5, 0.25, 1/4) + LFPulse.ar(orient.freq, 1, 0.1, 1/4)
-orient.env = Env.perc()
-orient.add()
+with SynthDef("orient") as orient:
+    orient.defaults.update(room=10, verb=0.7)
+    orient.osc = LFPulse.ar(orient.freq, 0.5, 0.25, 1/4) + LFPulse.ar(orient.freq, 1, 0.1, 1/4)
+    orient.env = Env.perc()
 
-zap = SynthDef("zap")
-zap.defaults.update(room=0, verb=0)
-zap.amp = zap.amp / 10
-zap.osc = Saw.ar( zap.freq * [1, 1.01] + LFNoise2.ar(50).range(-2,2) ) + VarSaw.ar( zap.freq + LFNoise2.ar(50).range(-2,2), 1 )
-zap.env = Env.perc(atk=0.025, curve=-10)
-zap.add()
+with SynthDef("zap") as zap:
+    zap.defaults.update(room=0, verb=0)
+    zap.amp = zap.amp / 10
+    zap.osc = Saw.ar( zap.freq * [1, 1.01] + LFNoise2.ar(50).range(-2,2) ) + VarSaw.ar( zap.freq + LFNoise2.ar(50).range(-2,2), 1 )
+    zap.env = Env.perc(atk=0.025, curve=-10)
 
-marimba = SynthDef("marimba")
-marimba.osc = Klank.ar([[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,1]], PinkNoise.ar([0.007, 0.007]), marimba.freq, [0,2])
-marimba.sus = 1
-marimba.env = Env.perc(atk=0.001, curve=-6)
-marimba.add()
+with SynthDef("marimba") as marimba:
+    marimba.osc = Klank.ar([[1/2, 1, 4, 9], [1/2,1,1,1], [1,1,1,1]], PinkNoise.ar([0.007, 0.007]), marimba.freq, [0,2])
+    marimba.sus = 1
+    marimba.env = Env.perc(atk=0.001, curve=-6)
 
-fuzz = SynthDef("fuzz")
-fuzz.freq = fuzz.freq / 2
-fuzz.amp = fuzz.amp / 6
-fuzz.osc = LFSaw.ar(LFSaw.kr(fuzz.freq,0,fuzz.freq,fuzz.freq * 2))
-fuzz.env = Env.ramp(amp=[1,1,0.01], sus=[fuzz.sus * 0.8, 0.01])
-fuzz.add()
+with SynthDef("fuzz") as fuzz:
+    fuzz.freq = fuzz.freq / 2
+    fuzz.amp = fuzz.amp / 6
+    fuzz.osc = LFSaw.ar(LFSaw.kr(fuzz.freq,0,fuzz.freq,fuzz.freq * 2))
+    fuzz.env = Env.ramp(amp=[1,1,0.01], sus=[fuzz.sus * 0.8, 0.01])
 
-bug = SynthDef("bug")
-bug.defaults.update(rate=1)
-bug.amp = bug.amp / 5
-bug.freq = bug.freq * [1, 1.0001]
-bug.osc = Pulse.ar(bug.freq, width=[0.09,0.16,0.25]) * SinOsc.ar(bug.rate * 4)
-bug.env = Env.perc(bug.sus * 1.5)
-bug.add()
+with SynthDef("bug") as bug:
+    bug.defaults.update(rate=1)
+    bug.amp = bug.amp / 5
+    bug.freq = bug.freq * [1, 1.0001]
+    bug.osc = Pulse.ar(bug.freq, width=[0.09,0.16,0.25]) * SinOsc.ar(bug.rate * 4)
+    bug.env = Env.perc(bug.sus * 1.5)
 
-pulse = SynthDef("pulse")
-pulse.amp = pulse.amp / 8
-pulse.osc = Pulse.ar(pulse.freq)
-pulse.osc = pulse.osc * pulse.amp
-pulse.env = Env.mask()
-pulse.add()
+with SynthDef("pulse") as pulse:
+    pulse.amp = pulse.amp / 8
+    pulse.osc = Pulse.ar(pulse.freq)
+    pulse.osc = pulse.osc * pulse.amp
+    pulse.env = Env.mask()
 
-saw = SynthDef("saw")
-saw.amp = saw.amp / 8
-saw.osc = Saw.ar(saw.freq)
-saw.osc = saw.osc * saw.amp
-saw.env = Env.mask()
-saw.add()
+with SynthDef("saw") as saw:
+    saw.amp = saw.amp / 8
+    saw.osc = Saw.ar(saw.freq)
+    saw.osc = saw.osc * saw.amp
+    saw.env = Env.mask()
 
-snick = SynthDef("snick")
-snick.osc = LFPar.ar(snick.freq, mul=1) * Blip.ar(((snick.rate+1) * 4))
-snick.env = Env.perc()
-snick.add()
+with SynthDef("snick") as snick:
+    snick.osc = LFPar.ar(snick.freq, mul=1) * Blip.ar(((snick.rate+1) * 4))
+    snick.env = Env.perc()
 
-twang = SynthDef("twang")
-twang.freq = twang.freq / 8
-twang.freq = twang.freq + [0, 2]
-twang.osc = LPF.ar(Impulse.ar(twang.freq, 0.1), 4000)
-twang.osc = Env.perc() * CombL.ar(twang.osc, delaytime=twang.rate/(twang.freq * 8), maxdelaytime=0.25);
-twang.add()
+with SynthDef("twang") as twang:
+    twang.freq = twang.freq / 8
+    twang.freq = twang.freq + [0, 2]
+    twang.osc = LPF.ar(Impulse.ar(twang.freq, 0.1), 4000)
+    twang.osc = Env.perc() * CombL.ar(twang.osc, delaytime=twang.rate/(twang.freq * 8), maxdelaytime=0.25)
 
-karp = SynthDef("karp")
-karp.amp = karp.amp * 0.75
-karp.osc = LFNoise0.ar(400 + (400 * karp.rate), karp.amp)
-karp.osc = karp.osc * XLine.ar(1, 0.000001, karp.sus * 0.1)
-karp.freq = (265 / (karp.freq * 0.666)) * 0.005
-karp.osc = CombL.ar(karp.osc, delaytime=karp.freq, maxdelaytime=2)
-karp.env = Env.ramp()
-karp.add()
+with SynthDef("karp") as karp:
+    karp.amp = karp.amp * 0.75
+    karp.osc = LFNoise0.ar(400 + (400 * karp.rate), karp.amp)
+    karp.osc = karp.osc * XLine.ar(1, 0.000001, karp.sus * 0.1)
+    karp.freq = (265 / (karp.freq * 0.666)) * 0.005
+    karp.osc = CombL.ar(karp.osc, delaytime=karp.freq, maxdelaytime=2)
+    karp.env = Env.ramp()
 
-arpy = SynthDef("arpy")
-arpy.freq = arpy.freq / 2
-arpy.amp  = arpy.amp * 2
-arpy.freq = arpy.freq + [0,0.5]
-arpy.osc  = LPF.ar(Impulse.ar(arpy.freq), 3000)
-arpy.env  = Env.perc(sus=arpy.sus * 0.25)
-arpy.add()
+with SynthDef("arpy") as arpy:
+    arpy.freq = arpy.freq / 2
+    arpy.amp  = arpy.amp * 2
+    arpy.freq = arpy.freq + [0,0.5]
+    arpy.osc  = LPF.ar(Impulse.ar(arpy.freq), 3000)
+    arpy.env  = Env.perc(sus=arpy.sus * 0.25)
 
-nylon = SynthDef("nylon")
-nylon.osc = LFPulse.ar(nylon.freq, 0.5, 0.33 * nylon.rate, 0.25) + LFPar.ar(nylon.freq + 0.5, 1, 0.1, 0.25)
-nylon.env = Env.perc(curve=-4, atk=0.000125, sus=Env.sus * 3)
-nylon.add()
+with SynthDef("nylon") as nylon:
+    nylon.osc = LFPulse.ar(nylon.freq, 0.5, 0.33 * nylon.rate, 0.25) + LFPar.ar(nylon.freq + 0.5, 1, 0.1, 0.25)
+    nylon.env = Env.perc(curve=-4, atk=0.000125, sus=Env.sus * 3)
 
-donk = SynthDef("donk")
-donk.freq = (donk.freq / 2) + [0,2]
-donk.amp  = donk.amp / 1.25
-donk.osc = Ringz.ar(Impulse.ar(0, phase=donk.rate) / (donk.rate+1), donk.freq, donk.sus, donk.amp)
-donk.add()
+with SynthDef("donk") as donk:
+    donk.freq = (donk.freq / 2) + [0,2]
+    donk.amp  = donk.amp / 1.25
+    donk.osc = Ringz.ar(Impulse.ar(0, phase=donk.rate) / (donk.rate+1), donk.freq, donk.sus, donk.amp)
 
-squish = SynthDef("squish")
-squish.freq = squish.freq / 4
-squish.osc = Ringz.ar(Pulse.ar(4 * squish.rate), squish.freq, squish.sus, squish.amp)
-squish.osc = squish.osc * XLine.ar(1/2, 0.000001, squish.sus, doneAction=2)
-squish.osc = squish.osc.cos
-squish.amp = squish.amp * 4
-squish.add()
+with SynthDef("squish") as squish:
+    squish.freq = squish.freq / 4
+    squish.osc = Ringz.ar(Pulse.ar(4 * squish.rate), squish.freq, squish.sus, squish.amp)
+    squish.osc = squish.osc * XLine.ar(1/2, 0.000001, squish.sus, doneAction=2)
+    squish.osc = squish.osc.cos
+    squish.amp = squish.amp * 4
 
-swell = SynthDef("swell")
-swell.defaults.update(rate=1)
-swell.amp = swell.amp / 4
-swell.freq = swell.freq + [0,1]
-swell.freq = swell.freq * [1, 0.5]
-swell.osc = VarSaw.ar(swell.freq, width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
-swell.env = Env.perc()
-swell.add()
+with SynthDef("swell") as swell:
+    swell.defaults.update(rate=1)
+    swell.amp = swell.amp / 4
+    swell.freq = swell.freq + [0,1]
+    swell.freq = swell.freq * [1, 0.5]
+    swell.osc = VarSaw.ar(swell.freq, width=SinOsc.ar(swell.rate / (2 * swell.sus / 1.25), add=0.5, mul=[0.5,0.5]), mul=[1,0.5])
+    swell.env = Env.perc()
 
 # Credit to Thor Magnusson for brass
 
-razz = SynthDef("razz")
-razz.defaults.update(rate=0.3)
-razz.freq = razz.freq + [0,1]
-razz.rate = Lag.ar(K2A.ar(razz.freq), razz.rate)
-razz.osc  = Saw.ar(razz.rate * [1,1/2], [1,1/3]) + Saw.ar(razz.rate+LFNoise2.ar(4).range(0.5, 2.5), 1)
-razz.osc  = BPF.ar(razz.osc, razz.freq * 2.5, 0.3)
-razz.osc  = RLPF.ar(razz.osc, 1300, 0.78)
-razz.env = Env.perc(atk=0.125)
-razz.add()
+with SynthDef("razz") as razz:
+    razz.defaults.update(rate=0.3)
+    razz.freq = razz.freq + [0,1]
+    razz.rate = Lag.ar(K2A.ar(razz.freq), razz.rate)
+    razz.osc  = Saw.ar(razz.rate * [1,1/2], [1,1/3]) + Saw.ar(razz.rate+LFNoise2.ar(4).range(0.5, 2.5), 1)
+    razz.osc  = BPF.ar(razz.osc, razz.freq * 2.5, 0.3)
+    razz.osc  = RLPF.ar(razz.osc, 1300, 0.78)
+    razz.env = Env.perc(atk=0.125)
 
-sitar = SynthDef("sitar")
-sitar.amp = sitar.amp * 0.75
-sitar.sus = sitar.sus * 4
-sitar.osc = LFNoise0.ar([8400, 8500], sitar.amp)
-sitar.osc = sitar.osc * XLine.ar(1, 0.000001, sitar.sus * 0.1)
-sitar.freq = (265 / (sitar.freq * [0.666, 0.669])) * 0.005
-sitar.osc = CombL.ar(sitar.osc, delaytime=sitar.freq, maxdelaytime=2)
-sitar.env = Env.ramp()
-sitar.add()
+with SynthDef("sitar") as sitar:
+    sitar.amp = sitar.amp * 0.75
+    sitar.sus = sitar.sus * 4
+    sitar.osc = LFNoise0.ar([8400, 8500], sitar.amp)
+    sitar.osc = sitar.osc * XLine.ar(1, 0.000001, sitar.sus * 0.1)
+    sitar.freq = (265 / (sitar.freq * [0.666, 0.669])) * 0.005
+    sitar.osc = CombL.ar(sitar.osc, delaytime=sitar.freq, maxdelaytime=2)
+    sitar.env = Env.ramp()
 
-with SynthDef("star") as synth:
+with SynthDef("star") as star:
     freq = instance('freq')
-    synth.amp  = (synth.amp * 2)+ 0.00001
-    synth.freq = synth.freq / 2
-    synth.osc  = LFSaw.ar(freq * 1.002, iphase=VarSaw.kr(freq, width=Line.kr(1,0.2,synth.sus))) * 0.3 + LFSaw.ar(freq  + LFNoise2.ar(50).range(-2,2) + 2, iphase=VarSaw.kr(freq + 2, width=Line.kr(1,0.2,synth.sus))) * 0.3
-    synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, 0.07)
-star = synth
+    star.amp  = (star.amp * 2)+ 0.00001
+    star.freq = star.freq / 2
+    star.osc  = LFSaw.ar(freq * 1.002, iphase=VarSaw.kr(freq, width=Line.kr(1,0.2,star.sus))) * 0.3 + LFSaw.ar(freq  + LFNoise2.ar(50).range(-2,2) + 2, iphase=VarSaw.kr(freq + 2, width=Line.kr(1,0.2,star.sus))) * 0.3
+    star.osc  = star.osc * XLine.ar(star.amp, star.amp/10000, star.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, 0.07)
 
 with SynthDef("jbass") as jbass:
     jbass.freq = jbass.freq / 4
     jbass.amp  = jbass.amp * 0.8
     jbass.osc  = LFTri.ar(jbass.freq, mul=jbass.amp)
     jbass.adsr(atk=0.01, decay=0.01, rel=0.01)
+
+with SynthDef("whitenoise") as whitenoise:
+    whitenoise.env = Env.hold(whitenoise.sus, doneAction=2)
+    whitenoise.osc = BPF.ar(WhiteNoise.ar(whitenoise.amp), whitenoise.freq)
 
 # Possible future syntax?
 # -----------------------
@@ -403,7 +386,3 @@ dbass.add()
 
 sinepad = FileSynthDef("sinepad") 
 sinepad.add()
-
-# Get rid of the variable synth
-
-del synth
