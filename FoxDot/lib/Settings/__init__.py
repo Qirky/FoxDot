@@ -122,6 +122,21 @@ if conf.SAMPLES_DIR is not None and conf.SAMPLES_DIR != "":
 
     FOXDOT_SND = os.path.realpath(conf.SAMPLES_DIR)
 
+# Recreate info file from template
+try:
+    with open(FOXDOT_INFO_FILE+".template", "r") as fread:
+        # Delete info file only if template file exists
+        if os.path.isfile(FOXDOT_INFO_FILE):
+            os.remove(FOXDOT_INFO_FILE)
+
+        content = fread.read()
+        content = content.replace("<FOXDOT_ROOT>", f"'{FOXDOT_ROOT}'")
+        content = content.replace("<FOXDOT_SND>", f"'{FOXDOT_SND}'")
+        with open(FOXDOT_INFO_FILE, "w") as f:
+            f.write(content)
+except FileNotFoundError:
+    pass
+
 def get_timestamp():
     import time
     return time.strftime("%Y%m%d-%H%M%S")
