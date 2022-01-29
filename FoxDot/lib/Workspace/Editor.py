@@ -203,8 +203,8 @@ class workspace:
 
         # Key bindings (Use command key on Mac)
 
-        ctrl = "Command" if SYSTEM == MAC_OS else "Control"
-        alt = "Option" if SYSTEM == MAC_OS else "Alt"
+        ctrl = "Mod2" if SYSTEM == MAC_OS else "Control"
+        alt = "Control" if SYSTEM == MAC_OS else "Alt"
 
         self.text.bind("<<Modified>>",      self.on_text_modified)
 
