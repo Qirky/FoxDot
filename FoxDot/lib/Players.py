@@ -977,7 +977,13 @@ class Player(Repeatable):
 
             # Get PGroup delays
 
-            new_event["delay"] = PGroup([dur * (i+1) for i in range(max(n, self.get_event_length(new_event)))])
+            delay = kwargs.get("delay", new_event["delay"])
+
+            max_range = max(n, self.get_event_length(new_event))
+            new_event["delay"] = P([dur * (i+1) for i in range(max_range)])
+            new_event["delay"] += P(delay * PRange(max_range)) # if an additional delay is specified
+            # If delay is specified as a Pattern or a collection, it should be of len 'n',
+            # otherwise new events will be issued...
 
             new_event = self.get_prime_funcs(new_event)
 
