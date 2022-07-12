@@ -48,6 +48,8 @@ def __getitem__(self, key):
 
 def player_method(f):
     """ Decorator for assigning functions as Player methods.
+    If the function name contains "_player" that will be removed while assigning
+    allowing you to a have a function a player method and group method all called the same thing
 
     >>> @player_method
     ... def test(self):
@@ -55,8 +57,9 @@ def player_method(f):
 
     >>> p1.test()
     """
-    setattr(Player, f.__name__, f)
-    return getattr(Player, f.__name__)
+    name = f.__name__.replace("_player", "")
+    setattr(Player, name, f)
+    return getattr(Player, name)
 
 PlayerMethod = player_method # Temporary alias
 
@@ -88,7 +91,7 @@ def next_bar(n=0):
 
 nextBar = next_bar # temporary alias
 
-def futureBar(n=0):
+def future_bar(n=0):
     ''' Schedule functions when you define them with @futureBar
     Functions will run n bars in the future (0 is the next bar)
 
@@ -99,6 +102,43 @@ def futureBar(n=0):
     ...     v1.solo()
     '''
     return _futureBarDecorator(n, Clock.bar_length())
+
+futureBar = future_bar # temporary alias
+
+@player_method
+def soloBars(self,n=2):
+    ''' Solo's the current player from the next bar for the specified amount of bars
+    '''
+    nextBar(self.solo)
+    Clock.schedule(self.metro.solo.reset, Clock.next_bar() + (n * Clock.bar_length()))
+        
+@player_method
+def soloBeats(self,n=8):
+    ''' Solo's the current player from now for the specified amount of beats
+    '''
+    Clock.schedule(self.solo, Clock.now())
+    Clock.schedule(self.metro.solo.reset, Clock.now() + n )
+
+@group_method
+def soloBars_group(self,n=2):
+    ''' Solo's the current group from the next bar for the specified amount of bars
+    '''
+    if self.metro is None:
+        self.__class__.metro = Player.metro
+
+    nextBar(self.solo)
+    Clock.schedule(self.metro.solo.reset, Clock.next_bar() + (n * Clock.bar_length()))
+        
+@group_method
+def soloBeats_group(self,n=8):
+    ''' Solo's the current group from now for the specified amount of beats
+    '''
+    if self.metro is None:
+        self.__class__.metro = Player.metro
+
+    Clock.schedule(self.solo, Clock.now())
+    Clock.schedule(self.metro.solo.reset, Clock.now() + n )
+
 
 def update_foxdot_clock(clock):
     """ Tells the TimeVar, Player, and MidiIn classes to use

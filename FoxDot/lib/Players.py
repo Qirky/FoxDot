@@ -2142,6 +2142,25 @@ class GroupAttr(list):
             if callable(p):
                 p.__call__(*args, **kwargs)
 
+
+
+def group_method(f):
+    """ Decorator for assigning functions as Group methods.
+    If the function name contains "_group" that will be removed while assigning
+    allowing you to a have a function, a player method and group method all called the same thing
+
+    >>> @group_method
+    ... def test(self):
+    ...    print(self)
+
+    >>> p1.test()
+    """
+    name = f.__name__.replace("_group", "")
+    setattr(Group, name, f)
+    return getattr(Group, name)
+
+GroupMethod = group_method # Temporary alias
+
 class rest(object):
     ''' Represents a rest when used with a Player's `dur` keyword
     '''
