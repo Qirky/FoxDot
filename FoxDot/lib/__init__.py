@@ -106,39 +106,59 @@ def future_bar(n=0):
 futureBar = future_bar # temporary alias
 
 @player_method
-def soloBars(self,n=2):
+def soloBars(self,n=2,end=False):
     ''' Solo's the current player from the next bar for the specified amount of bars
     '''
     nextBar(self.solo)
-    Clock.schedule(self.metro.solo.reset, Clock.next_bar() + (n * Clock.bar_length()))
+    soloEnd = Clock.next_bar() + (n * Clock.bar_length())
+    Clock.schedule(self.metro.solo.reset, soloEnd)
+    if(end):
+        Clock.schedule(self.stop, soloEnd)
+        
         
 @player_method
-def soloBeats(self,n=8):
+def soloBeats(self, n=8, end=False):
     ''' Solo's the current player from now for the specified amount of beats
     '''
     Clock.schedule(self.solo, Clock.now())
-    Clock.schedule(self.metro.solo.reset, Clock.now() + n )
+    soloEnd = Clock.now() + n
+    Clock.schedule(self.metro.solo.reset, soloEnd)
+    if(end):
+        Clock.schedule(self.stop, soloEnd)
+    
 
 @group_method
-def soloBars_group(self,n=2):
+def soloBars_group(self,n=2, end=False):
     ''' Solo's the current group from the next bar for the specified amount of bars
     '''
     if self.metro is None:
         self.__class__.metro = Player.metro
 
+    soloEnd = Clock.next_bar() + (n * Clock.bar_length())
+    Clock.schedule(self.metro.solo.reset, soloEnd)
+    if(end):
+        for player in list(self.metro.playing):
+            if player in self.players:
+                Clock.schedule(player.stop, soloEnd)
+
     nextBar(self.solo)
-    Clock.schedule(self.metro.solo.reset, Clock.next_bar() + (n * Clock.bar_length()))
-        
+
 @group_method
-def soloBeats_group(self,n=8):
+def soloBeats_group(self,n=8, end=False):
     ''' Solo's the current group from now for the specified amount of beats
     '''
     if self.metro is None:
         self.__class__.metro = Player.metro
-
+    
+    soloEnd = Clock.now() + n
+    Clock.schedule(self.metro.solo.reset, soloEnd)
+    if(end):
+        for player in list(self.metro.playing):
+            if player in self.players:
+                Clock.schedule(player.stop, soloEnd)
+    
     Clock.schedule(self.solo, Clock.now())
-    Clock.schedule(self.metro.solo.reset, Clock.now() + n )
-
+    
 
 def update_foxdot_clock(clock):
     """ Tells the TimeVar, Player, and MidiIn classes to use
