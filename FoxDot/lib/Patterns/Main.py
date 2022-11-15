@@ -897,7 +897,7 @@ class metaPattern(object):
     
     def all(self, func=(lambda x: bool(x))):
         """ Returns true if all of the patterns contents satisfies func(x) - default is nonzero """
-        if len(self.data) is 0:
+        if len(self.data) == 0:
             return False
         
         for item in self.data:
