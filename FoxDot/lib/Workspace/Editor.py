@@ -667,9 +667,13 @@ class workspace:
         """ Saves the contents of the text editor """
         text = self.text.get("0.0",END)
 
-        if not self.saved:
+        if self.saved:
+            return True
+
+        if not self.filename:
             self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py")],
                                                            defaultextension=".py")
+
         if self.filename:
 
             write_to_file(self.filename, text)
@@ -712,6 +716,8 @@ class workspace:
             f = open(path)
             text = f.read()
             f.close()
+            self.saved = True
+            self.filename = path
             self.set_all(text)
             self.set_window_title(path)
         return "break"
