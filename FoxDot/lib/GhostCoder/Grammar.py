@@ -12,13 +12,13 @@ if __name__ != "__main__":
     patternNames = {name: obj for name, obj in vars(Sequences).items() \
                     if (type(obj) == FunctionType and name.startswith("P"))}
 
-    # To ignore    
+    # To ignore
     del patternNames['PSq']
     del patternNames['PPairs']
     del patternNames['PSine']
 
     synthdefNames = [name for name, obj in vars(SynthDefs).items() \
-                if isinstance(obj, SynthDef.SynthDef)]
+                if isinstance(obj, SynthDef)]
 
 # Grammar
 
@@ -41,13 +41,13 @@ def createPlayer(**kwargs):
 
     player   = kwargs['player']
     synthdef = kwargs['synthdef']
-    
+
     degree   = str(kwargs.get("degree", ""))
     methods  = kwargs.get("methods", "")
     keywords = format_kwargs(kwargs.get("kwargs", ""))
 
     sentence = "{player} >> {synthdef}({degree}" + (", " if (len(degree) > 0 and len(keywords) > 0) else "") + "{keywords}){methods}"
-    
+
     return sentence.format(player=player, synthdef=synthdef, degree=degree, methods=methods, keywords=keywords)
 
 def getArgs(s):
@@ -117,7 +117,7 @@ def GENERATE_PATTERN(keyword=None):
 
         for i in range(n):
 
-            args.append( str(patternInputs[pat.__name__][i](keyword)) )        
+            args.append( str(patternInputs[pat.__name__][i](keyword)) )
 
     return pat.__name__ + "({})".format(", ".join(args))
 
@@ -167,7 +167,7 @@ def GEN_CHANGE_VALUE(value, keyword=None):
     i = 0
     out = []
     for num in match:
-        j = num.start() 
+        j = num.start()
         new_num = str(GENERATE_NUMBER(keyword)) if random() > 0.5 else num.group()
         out += [value[i:j], new_num]
         i = num.end()
@@ -232,7 +232,7 @@ def WeightedList(weights):
     data = []
     for item, weight in weights.items():
         data += ([item] * weight)
-    return data    
+    return data
 
 Players = [ "g1", "g2", "g3", "g4", "g5" ]
 
