@@ -11,6 +11,8 @@ with open("FoxDot/lib/.version", "r") as f:
 setup(name='FoxDot',
       version=version,
       description='Live coding music with SuperCollider',
+      install_requires=['midiutil',
+                        'wxPython'],
       author='Ryan Kirkbride',
       author_email='ryan@foxdot.org',
       license='cc-by-sa-4.0',
