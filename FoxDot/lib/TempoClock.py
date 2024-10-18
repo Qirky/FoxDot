@@ -760,20 +760,20 @@ class Queue(object):
         """ Adds a callable object to the queue at a specified beat, args and kwargs for the
             callable object must be in a list and dict.
         """
-        
+
         # item must be callable to be schedule, so check args and kwargs are appropriate for it
 
         try:
 
-            function = inspect.getargspec(item)
+            function = inspect.getfullargspec(item)
 
         except TypeError:
 
-            function = inspect.getargspec(item.__call__)
+            function = inspect.getfullargspec(item.__call__)
 
         # If the item can't take arbitrary keywords, check any kwargs are valid
 
-        if function.keywords is None: 
+        if function.varkw is None:
 
             for key in list(kwargs.keys()):
 
