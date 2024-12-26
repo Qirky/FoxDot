@@ -322,7 +322,8 @@ def PBase(n, b=2, l=1):
         and  `PBase(5,4)` will return `P[1,1]`
         and  `PBase(5,4,4)` will return `P[0,0,1,1]`
     '''
-    number = 0+n
+
+    number = (0+n) if n>=0 else (abs(n)+b)
 
     from_base10_to_anybase_num = [] # Initialize the number in any base
     while number > 0: # Iterate while the number is greater than zero
