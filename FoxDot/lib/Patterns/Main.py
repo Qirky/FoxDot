@@ -12,6 +12,7 @@ from ..Utils import *
 
 import functools
 import inspect
+from math import floor
 
 # Decorator functions for nested expansion of pattern functions and methods
 
@@ -76,7 +77,7 @@ def ClassPatternMethod(f):
     setattr(metaPattern, f.__name__, classmethod(f))
     return
 
-# Begin Pattern Abstratct Base Class
+# Begin Pattern Abstract Base Class
 
 class metaPattern(object):
     """ Abstract base class for Patterns """
@@ -626,6 +627,126 @@ class metaPattern(object):
             versions of the original Pattern """
         new = self.data[:]
         return Pattern([Pattern(new).shuffle().asGroup() for i in range(n)])
+
+
+    '''
+    bubble_sort  written by Dillon Dawson
+    https://github.com/Dillon-Dawson/MelodyExtFD
+    Part of his A Level Computer Science Project
+    '''
+    def bubble_sort(self, swaps=False, debug = False, palindrome = False):
+        ''' Returns the pattern and each stage of the pattern going through a bubble sort
+            e.g. `P[50,25,5,20,10].bubble_sort()` will return `P[50,25,5,20,10,25,5,20,10,50,5,20,10,25,50,5,10,20,25,50]`
+            and  `P[50,25,5,20,10].bubble_sort(swaps = True)` will add to the output for every number swap returning `P[50,25,5,20,10,25,50,5,20,10,25,5,50,20,10,25,5,20,50,10,25,5,20,10,50,5,25,20,10,50,5,20,25,10,50,5,20,10,25,50,5,10,20,25,50]`
+            and  `P[0.5 ,2.0 ,1 ,1.5].bubble_sort(palindrome=True)` will also undo the change to smoothly return to the orignal pattern P[0.5, 2.0, 1, 1.5, 0.5, 1, 1.5, 2.0, 0.5, 1, 1.5, 2.0, 0.5, 2.0, 1, 1.5]
+        '''
+
+        items = self.data
+        changes = passes = 0 # This sets the changes and passes to 0 every time this section is ran.
+        last = len(items) #lens is a method that returns the length of a list.
+        swapped = True
+        output = []
+        output += items #output = output + items
+        outputP = []
+        outputP = items + outputP
+
+
+        while swapped:
+            swapped = False
+            passes += 1
+            for j in range(1, last):
+                if items[j - 1] > items[j]:
+                    items[j], items[j - 1] = items[j - 1], items[j]  # Swap
+                    if swaps == True:
+                        output += items
+                    changes += 1
+                    swapped = True
+                    last = j
+            if changes == 0:
+                #raise Warning("Data Presorted")
+                print("Data Presorted", self.data)
+            if swapped == True and swaps == False:
+                output += items
+                outputP = items + outputP
+
+        if palindrome:
+            output += outputP
+        if debug == True:
+            print(output)
+        return self.new(output)
+        #return self.__class__(output)
+
+
+    '''
+    Shell_Sort and original tests written by Dillon Dawson
+    https://github.com/Dillon-Dawson/MelodyExtFD
+    Part of his A Level Computer Science Project
+    '''
+
+    def makehalves(self, length):
+        i = length
+        list = []
+        while i>2:
+            i = floor(i/2)
+            if(i>1):
+                list.append(i)
+        return list
+
+    def inssort2(self, items, start, incr):
+        output = []
+        outputP = []
+
+        for  i in range(start+incr, len(items), incr):
+            j=i
+            while (j>=incr) and (items[j] < items[j-incr]):
+                items[j], items[j-incr] = items[j-incr], items[j]
+                #print("Swapping", items)
+                output += items
+                outputP = items + outputP
+                j-=incr
+
+        return(output,outputP)
+
+    def shell_sort(self, swaps=False,debug = False, palindrome = False): #This defines the section of the code that does the
+        ''' Returns the pattern and each stage of the pattern going through a shell sort
+            e.g. `P[50,25,5,20,10].shell_sort()` will return `P[50, 25, 5, 20, 10, 5, 25, 10, 20, 50, 5, 20, 10, 25, 50, 5, 10, 20, 25, 50]`
+            and  `P[50,25,5,20,10].shell_sort(swaps = True)` will add to the output for every number swap returning `P[50,25,5,20,10,5,25,50,20,10,5,25,10,20,50,5,20,10,25,50,5,10,20,25,50]`
+            and  `P[50,25,5,20,10].shell_sort(palindrome=True)` will also undo the change to smoothly return to the orignal pattern P[50, 25, 5, 20, 10, 5, 25, 10, 20, 50, 5, 20, 10, 25, 50, 5, 10, 20, 25, 50,5, 10, 20, 25, 50,5, 20, 10, 25, 50,5, 25, 10, 20, 50,50, 25, 5, 20, 10]
+        '''
+        items = self.data
+        output = []
+        output += items #output = output + items
+        outputP = []
+        outputP = items + outputP
+
+        for i in self.makehalves(len(items)):
+            for j in range(i):
+                sortoutput, sortoutputP = self.inssort2(items, j, i)
+                #print("after inssort2(items, "+str(j)+", "+str(i)+")", items)
+                if swaps == False:
+                    output += items
+                    outputP = items + outputP
+                if swaps == True:
+                    output += sortoutput
+                    outputP = sortoutputP + outputP
+        sortoutput, sortoutputP = self.inssort2(items, 0, 1)
+        #print("After pass at 1", items)
+        if swaps == False:
+            output += items
+            outputP = items + outputP
+        if swaps == True:
+            output += sortoutput
+            outputP = sortoutputP + outputP
+
+        if palindrome:
+            output += outputP
+
+        if debug == True:
+            print("Output",output)
+
+        return self.new(output)
+
+
 
     # Loop methods
 
