@@ -1559,15 +1559,15 @@ class Player(Repeatable):
 
         timestamp = timestamp if timestamp is not None else self.queue_block.time
 
-        # self.do_bang = False
+        self.do_bang = False
 
         for i in range(self.get_event_length(**kwargs)):
 
             self.send_osc_message(self.event, i, timestamp=timestamp, verbose=verbose, **kwargs)
 
-        # if self.do_bang:
+        if self.do_bang:
 
-        #     self.bang()
+            self.bang()
 
         return
 
@@ -1651,7 +1651,7 @@ class Player(Repeatable):
 
             self.queue_block.append_osc_message(compiled_msg)
 
-            # self.do_bang = True
+            self.do_bang = True
 
         return
 
@@ -1961,17 +1961,17 @@ class Player(Repeatable):
 
     def _replace_degree(self, new_degree):
         # Update the GUI if possible
-        #if self.widget:
-        #    if self.synthdef == SamplePlayer:
-        #        if self.playstring is not None:
-        #            # Replace old_string with new string (only works with plain string patterns)
-        #            new_string = new_degree.string()
-        #            self.widget.addTask(target=self.widget.replace, args=(self.line_number, self.playstring, new_string))
-        #            self.playstring = new_string
-        #    else:
-        #        # Replaces the degree pattern in the widget (experimental)
-        #        # self.widget.addTask(target=self.widget.replace_re, args=(self.line_number,), kwargs={'new':str(new_degree)})
-        #        self.playstring = str(new_degree)
+        if self.widget:
+           if self.synthdef == SamplePlayer:
+               if self.playstring is not None:
+                   # Replace old_string with new string (only works with plain string patterns)
+                   new_string = new_degree.string()
+                   self.widget.addTask(target=self.widget.replace, args=(self.line_number, self.playstring, new_string))
+                   self.playstring = new_string
+           else:
+               # Replaces the degree pattern in the widget (experimental)
+               # self.widget.addTask(target=self.widget.replace_re, args=(self.line_number,), kwargs={'new':str(new_degree)})
+               self.playstring = str(new_degree)
         setattr(self, 'degree', new_degree)
         return
 

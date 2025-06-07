@@ -513,7 +513,7 @@ class workspace:
         try:
 
             execute( self.text.get(a, b) )
-            # execute.update_line_numbers(self.text, a, b)
+            execute.update_line_numbers(self.text, a, b)
 
         except:
 
@@ -584,7 +584,7 @@ class workspace:
         try:
 
             execute( self.text.get( a , b ) )
-            # execute.update_line_numbers(self.text, a, b)
+            execute.update_line_numbers(self.text, a, b)
 
         except:
 
@@ -895,7 +895,7 @@ class workspace:
 
         # Update player line numbers
 
-        # execute.update_line_numbers(self.text)
+        execute.update_line_numbers(self.text)
 
         whitespace = get_tabspace(line) # amount of whitespace to add
 
@@ -1018,7 +1018,7 @@ class workspace:
 
             # Update player line numbers
 
-            # execute.update_line_numbers(self.text)
+            execute.update_line_numbers(self.text)
 
             return "break"
 
@@ -1040,7 +1040,7 @@ class workspace:
 
             # Update player line numbers
 
-            # execute.update_line_numbers(self.text, start="%d.0" % (line-1), remove=int(line!=1))
+            execute.update_line_numbers(self.text, start="%d.0" % (line-1), remove=int(line!=1))
 
             self.text.delete(index(line-1, END), insert)
 
@@ -1072,7 +1072,7 @@ class workspace:
 
         self.update(event)
 
-        # execute.update_line_numbers(self.text)
+        execute.update_line_numbers(self.text)
 
         return "break"
 
@@ -1152,7 +1152,7 @@ class workspace:
 
         self.update(event)
 
-        # execute.update_line_numbers(self.text)
+        execute.update_line_numbers(self.text)
 
         return
 

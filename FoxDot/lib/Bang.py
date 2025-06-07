@@ -17,8 +17,11 @@ class Bang:
     duration = 0.1
 
     def __init__(self, player, kwargs):
+        # running out of the FoxDotEditor
+        if not player.widget:
+            return
 
-        self.widget = execute.namespace['FoxDot']
+        self.widget = player.widget
 
         self.func = kwargs.get("func", None)
 
@@ -55,15 +58,11 @@ class Bang:
 
             # Only update visuals if the line is visible
 
-            if player.line_number is None:
-
+            if player.id not in execute.player_line_numbers:
                 return
 
-            if a <= player.line_number <= b:
-                
-                row = player.line_number
-                col = player.whitespace
-                env   = player.envelope
+            row, col = execute.player_line_numbers[player.id]
+            if a <= row <= b:
                 clock = player.metro
 
                 duration     = clock.beat_dur( player.dur / 2 )
