@@ -17,7 +17,7 @@ class LineNumbers(Tk.Canvas):
         
         # Update player line numbers
 
-        # execute.update_line_numbers(self.textwidget)
+        execute.update_line_numbers(self.textwidget)
 
         # Clear
 
