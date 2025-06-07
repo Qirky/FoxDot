@@ -19,6 +19,10 @@ setup(name='FoxDot',
       install_requires=[
           "packaging",
       ],
+      extras_require={
+          "simple": ["wxPython"],
+          "midi": ["midiutil"],
+      },
       packages=['FoxDot',
                 'FoxDot.lib',
                 'FoxDot.lib.Code',
