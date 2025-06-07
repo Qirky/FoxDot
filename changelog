@@ -1,3 +1,7 @@
+### 0.9.*
+
+- Added support for Python >3.11, dropping support for earlier versions.g
+
 ### 0.8.*
 
 - Added `stretch` synth for timestretching samples, similar to `loop` but better and only plays the whole file. Stretches the audio's duration to the `sus` attribute without affecting pitch and does not require the tempo to be known.
