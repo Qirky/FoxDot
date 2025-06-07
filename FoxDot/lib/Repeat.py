@@ -424,7 +424,7 @@ class MethodCall:
 
         # Check if a method has the _beat_ keyword argument
 
-        if "_beat_" in inspect.getargspec(self.method).args:
+        if "_beat_" in inspect.getfullargspec(self.method).args:
 
             self.kwargs["_beat_"] = None
 

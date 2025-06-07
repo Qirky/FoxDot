@@ -97,3 +97,5 @@ Temporary Items
 
 # swp files
 *.swp
+
+.idea/
