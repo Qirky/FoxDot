@@ -30,7 +30,7 @@ from ..Code import write_to_file
 from ..Utils import get_pypi_version
 
 from functools import partial
-from distutils.version import LooseVersion as VersionNumber
+from packaging.version import Version
 import webbrowser
 import os
 import re
@@ -63,9 +63,13 @@ class workspace:
 
         def check_versions():
 
-            if pypi_version is not None and VersionNumber(pypi_version) > VersionNumber(this_version):
+            if pypi_version is not None and Version(pypi_version) > Version(this_version):
 
-                tkMessageBox.showinfo("New version available", "There is a new version of FoxDot available from PyPI. Upgrade by going to your command prompt and running:\n\npip install FoxDot --upgrade")
+                tkMessageBox.showinfo(
+                    "New version available",
+                    "There is a new version of FoxDot available from PyPI. Upgrade by going to your command prompt "
+                    "and running:\n\npip install FoxDot --upgrade"
+                )
 
             return
 
