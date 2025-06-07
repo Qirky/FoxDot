@@ -14,7 +14,7 @@ class _Effect:
         self.lines = []
     def __call__(self, order=0):
         def decorator(effect):
-            effect_data = inspect.getargspec(effect) # Original args and defaults
+            effect_data = inspect.getfullargspec(effect) # Original args and defaults
             
             # Get filename from function name
             filename = "{}.scd".format(effect.__name__)# filename
