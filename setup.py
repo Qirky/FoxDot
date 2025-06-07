@@ -15,6 +15,7 @@ setup(name='FoxDot',
       author_email='ryan@foxdot.org',
       license='cc-by-sa-4.0',
       url='http://foxdot.org/',
+      python_requires=">=3.11.0",
       install_requires=[
           "packaging",
       ],
