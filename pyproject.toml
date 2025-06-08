@@ -1,0 +1,77 @@
+[project]
+name = "FoxDot"
+description = "Live coding music with SuperCollider"
+license = { text = "cc-by-sa-4.0" }
+authors = [
+  { name = "Ryan Kirkbride", email = "ryan@foxdot.org" },
+]
+dynamic = ["version", "readme"]
+
+requires-python = ">=3.11.0"
+dependencies = [
+  "packaging",
+]
+
+[project.optional-dependencies]
+simple = ["wxPython"]
+midi = ["midiutil"]
+
+[project.urls]
+Homepage = "https://foxdot.org/"
+Source = "https://github.com/Qirky/FoxDot"
+Issues = "https://github.com/Qirky/FoxDot/issues"
+
+[project.gui-scripts]
+FoxDot = "FoxDot.__init__:main"
+
+[tool.setuptools]
+include-package-data = true
+packages = [
+  "FoxDot",
+  "FoxDot.lib",
+  "FoxDot.lib.Code",
+  "FoxDot.lib.Custom",
+  "FoxDot.lib.Extensions",
+  "FoxDot.lib.Extensions.VRender",
+  "FoxDot.lib.Extensions.SonicPi",
+  "FoxDot.lib.Workspace",
+  "FoxDot.lib.Workspace.Simple",
+  "FoxDot.lib.EspGrid",
+  "FoxDot.lib.Effects",
+  "FoxDot.lib.Patterns",
+  "FoxDot.lib.SCLang",
+  "FoxDot.lib.Settings",
+  "FoxDot.lib.Utils",
+]
+
+[tool.setuptools.package-data]
+FoxDot = [
+  "snd/*/*/*.*",
+  "snd/_loop_/foxdot.wav",
+  "snd/_loop_/drums130.wav",
+  "snd/_loop_/dirty120.wav",
+  "snd/_loop_/afro105.wav",
+  "snd/_loop_/break170.wav",
+  "snd/_loop_/cowbells110.wav",
+  "snd/_loop_/robot110.wav",
+  "snd/_loop_/techno130.wav",
+  "osc/*.scd",
+  "osc/sceffects/*.scd",
+  "osc/scsyndef/*.scd",
+  "demo/*.py",
+  "rec/.null",
+  "lib/Extensions/*/*.*",
+  "lib/Extensions/*/*/*.*",
+  "lib/.version",
+  "README.md",
+]
+"FoxDot.lib.Workspace" = ["img/*", "tmp/*"]
+"FoxDot.lib.Settings" = ["conf.txt"]
+
+[tool.setuptools.dynamic]
+version = { file = ["FoxDot/lib/.version"] }
+readme = { file = ["README.md"], content-type = "text/markdown" }
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
