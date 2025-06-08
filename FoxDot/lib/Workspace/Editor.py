@@ -394,10 +394,6 @@ class workspace:
 
                 self.text_as_string = self.get_all()
 
-            # Execute startup file
-
-            return execute.load_startup_file()
-
         # Check online if a new version if available
 
         if CHECK_FOR_UPDATE:
@@ -412,6 +408,9 @@ class workspace:
         if TRANSPARENT_ON_STARTUP:
             self.transparent.set(True)
             self.root.after(100, self.toggle_transparency)
+
+        # Execute startup file
+        self.root.after(50, execute.load_startup_file)
 
     def set_window_title(self, text="Live Coding with Python and SuperCollider"):
             return self.root.title("FoxDot v{} - {}".format(self.version, text))
