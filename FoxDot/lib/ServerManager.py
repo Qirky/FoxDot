@@ -647,8 +647,11 @@ class SCLangServerManager(ServerManager):
             if fn is None:
                 
                 fn = "{}.aiff".format(get_timestamp())
-            
-            path = os.path.join(RECORDING_DIR, fn)
+
+            if os.path.isabs(fn):
+                path = fn
+            else:
+                path = os.path.join(RECORDING_DIR, fn)
 
             msg = OSCMessage('/foxdot-record')
             msg.append([1, path])
