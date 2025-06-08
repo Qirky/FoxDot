@@ -84,7 +84,7 @@ def _load_synths(data, create_filename):
 def LoadSonicPiSynthsDev(sonic_pi_dir):
     """ Load the sonic pi synths from a live sonic-pi repo """
     synthinfo = os.path.join(sonic_pi_dir,
-                             'app/server/sonicpi/lib/sonicpi/synths/synthinfo')
+                             'app/server/ruby/lib/sonicpi/synths/synthinfo')
     datastr = check_output(["ruby", RUBY_SCRIPT, synthinfo])
     data = json.loads(datastr)
     _load_synths(
@@ -112,10 +112,10 @@ def LoadSonicPiSynths(metadata_file=SONIC_PI_FILE):
 def GenerateSonicPiData(sonic_pi_dir):
     """ Generate the sonic-pi json metadata from a sonic-pi source repo """
     synthinfo = os.path.join(sonic_pi_dir,
-                             'app/server/sonicpi/lib/sonicpi/synths/synthinfo')
+                             'app/server/ruby/lib/sonicpi/synths/synthinfo')
     datastr = check_output(["ruby", RUBY_SCRIPT, synthinfo])
     ref = check_output(["git", "rev-parse", "HEAD"], cwd=sonic_pi_dir).strip()
     data = json.loads(datastr)
-    data['__ref__'] = ref
+    data['__ref__'] = ref.decode()
     with open(SONIC_PI_FILE, 'w') as ofile:
         json.dump(data, ofile, separators=(',', ':'))

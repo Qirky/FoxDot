@@ -1,4 +1,4 @@
-from FoxDot.lib.Custom.SonicPi import GenerateSonicPiData
+from FoxDot.lib.Extensions.SonicPi import GenerateSonicPiData
 
 if __name__ == '__main__':
     import sys
