@@ -139,11 +139,23 @@ def instantiate_player_objects():
 
             arg = char1 + char2
 
-            FoxDotCode.namespace[arg] = EmptyPlayer(arg)
+            player = EmptyPlayer(arg)
+            under = Underline(player)
+
+            FoxDotCode.namespace[arg] = player
+            for key in [f'_{arg}', f'{arg}_']:
+                FoxDotCode.namespace[key] = under
 
             group.append(arg)
 
-        FoxDotCode.namespace[char1 + "_all"] = Group(*[FoxDotCode.namespace[char1+str(n)] for n in range(10)])
+        arg = f'{char1}_all'
+
+        group_players = Group(*[FoxDotCode.namespace[char1+str(n)] for n in range(10)])
+        under_all = Underline(group_players)
+
+        FoxDotCode.namespace[arg] = group_players
+        for key in [f'_{arg}', f'{arg}_']:
+            FoxDotCode.namespace[key] = under_all
 
     return
 

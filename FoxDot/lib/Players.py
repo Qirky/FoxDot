@@ -2192,3 +2192,56 @@ class rest(object):
 
 class PlayerKeyException(Exception):
     pass
+
+
+class Underline:
+    """ Stop through the underline.
+    Just put a _ before or after the player's name.
+
+    Examples
+    --------
+
+    Stop from the Synth startup
+
+    >>> _d1 >> bass()
+    >>> d1_ >> bass()
+
+    Stop from the change of an attribute
+
+    >>> _d1.oct=5
+    >>> d1_.oct=5
+
+    Stop from the use of a player method
+
+    >>> _d1.every(2, 'jump')
+    >>> d1_.every(2, 'jump')
+
+    Stop a synth that has ~ ahead
+
+    >>> ~_d1 >> bass()
+    >>> ~d1_ >> bass()
+
+    Stop by printing it, turning it into a string or getting for its repr
+
+    >>> print(_d1_all)
+    >>> str(d1_all_)
+    >>> repr(d1_all_)
+
+    """
+
+    def __init__(self, player):
+        super().__setattr__('player', player)
+
+    def _stop(self, *args, **kwargs):  # pylint: disable=unused-argument
+        self.player.stop()
+        return f'{self.player.id}.stop()'
+
+    def __getattr__(self, name):
+        attr = getattr(self.player, name)
+        self._stop()
+        return attr
+
+    def __invert__(self):
+        return self
+
+    __str__ = __repr__ = __rshift__ = __setattr__ = _stop
