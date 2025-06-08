@@ -531,7 +531,10 @@ class SCLangServerManager(ServerManager):
         this_bus  = self.nextbusID()
         this_node = self.nextnodeID()
 
-        # synthdef.preprocess_osc(packet) # so far, just "balance" to multiply amp by 1
+        try:
+            synthdef.preprocess_osc(packet) # so far, just "balance" to multiply amp by 1
+        except:
+            pass
 
         # First node of the group (control rate)
 
