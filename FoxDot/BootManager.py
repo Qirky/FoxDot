@@ -51,13 +51,16 @@ class BaseBooter:
 
     @cached_property
     def BOOT_ON_STARTUP(self):
-        """Boot on startup via CLI/Env/Config."""
+        """Boot on startup via CLI/Env/Config when import."""
         # Loading from cli
         for arg in sys.argv[1:]:
             if arg in ['-b', '--boot']:
                 return True
-            if arg.startswith('-') and 'b' in arg:
-                # like: FoxDot -pbs startup.py
+            if arg.startswith('-') and 'b' in arg.split('=')[0]:
+                # Example
+                #   FoxDot -pbs startup.py
+                #   python -m FoxDot -pbs=startup.py
+                #   python my_file.py -pbs=startup.py
                 return True
 
         # Loading from env
