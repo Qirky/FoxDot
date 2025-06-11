@@ -18,6 +18,7 @@ setup(name='FoxDot',
       python_requires=">=3.11.0",
       install_requires=[
           "packaging",
+          "psutil",
       ],
       extras_require={
           "simple": ["wxPython"],

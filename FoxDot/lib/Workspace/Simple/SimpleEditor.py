@@ -42,7 +42,7 @@ class workspace:
                 
                 execute("Clock.stop()")
                 execute("Server.quit()")
-                
+                execute("Boot.stop()")
                 break
 
 class Editor(wx.Frame):

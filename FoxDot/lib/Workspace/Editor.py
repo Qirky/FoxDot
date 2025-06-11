@@ -35,6 +35,7 @@ import webbrowser
 import os
 import re
 import socket
+from time import sleep
 
 # Code execution
 from ..Code import execute
@@ -267,6 +268,7 @@ class workspace:
         self.text.bind("<{}-m>".format(ctrl),               self.toggle_menu)
         self.text.bind("<{}-l>".format(ctrl),               lambda event: self.insert_char(u"\u03BB")) # insert lambda
         self.text.bind("<{}-t>".format(ctrl),               lambda event: self.insert_char("~"))
+        self.text.bind("<{}-b>".format(ctrl),               lambda event: self.boot())
 
         self.text.bind("<{}-{}>".format(ctrl, self.help_key.lower()), self.help)
 
@@ -442,6 +444,24 @@ class workspace:
             self.set_temp_file(self.text_as_string)
 
         return
+
+    def boot(self):
+        """Boot the SuperCollider after FoxDot is open (experimental)."""
+        Boot = execute.namespace["Boot"]
+        FoxDot = execute.namespace["FoxDot"]
+
+        # Boot supercollider
+        if not Boot.running:
+            print("Booting SuperCollider...")
+            Boot.start()
+
+        # Reloading synthdefs/effects
+        if Boot.running:
+            sleep(5)  # TODO: customize waiting time
+            FoxDot.reload()
+            print("SuperCollider booted and FoxDot synthdefs/effects reloaded")
+
+        return "break"
 
     def toggle_true_fullscreen(self, event=None, zoom=False):
         """ Zoom the screen - close with Escape """
@@ -1700,6 +1720,7 @@ class workspace:
         """ Called on window close. Ends Clock thread process """
         execute("_Clock.stop()")
         execute("Server.quit()")
+        execute("Boot.stop()")
         return
 
     def releaseNodes(self, event=None):
