@@ -12,6 +12,7 @@
 from __future__ import absolute_import, division, print_function
 
 from .lib import FoxDotCode, handle_stdin
+from .BootManager import Boot
 
 import argparse
 
@@ -59,9 +60,8 @@ if args.no_startup:
 
     FoxDotCode.no_startup()
 
-if args.boot:
-
-    FoxDotCode.boot_supercollider()
+if args.boot and not Boot.running:
+    Boot.start()
 
 if args.pipe:
 

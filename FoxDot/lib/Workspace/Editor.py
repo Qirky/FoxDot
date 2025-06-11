@@ -1700,6 +1700,7 @@ class workspace:
         """ Called on window close. Ends Clock thread process """
         execute("_Clock.stop()")
         execute("Server.quit()")
+        execute("Boot.stop()")
         return
 
     def releaseNodes(self, event=None):

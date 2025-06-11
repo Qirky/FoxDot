@@ -23,6 +23,7 @@ from .ServerManager import *
 from .SCLang import SynthDefs, Env, SynthDef, CompiledSynthDef
 from .Root import Root
 from .Scale import Scale, Tuning
+from ..BootManager import Boot
 
 # stdlib imports
 
