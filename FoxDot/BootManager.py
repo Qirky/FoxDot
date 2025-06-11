@@ -32,9 +32,9 @@ $ FoxDot --boot
 import os
 import os.path
 import platform
+import sys
 from subprocess import Popen
 from functools import cached_property
-from argparse import ArgumentParser
 
 import psutil
 
@@ -49,17 +49,16 @@ class BaseBooter:
     process = None
     running = False
 
-    def __init__(self):
-        parser = ArgumentParser()
-        parser.add_argument("-b", "--boot", action="store_true")
-        self.argv = parser.parse_args()
-
     @cached_property
     def BOOT_ON_STARTUP(self):
         """Boot on startup via CLI/Env/Config."""
         # Loading from cli
-        if self.argv.boot:
-            return True
+        for arg in sys.argv[1:]:
+            if arg in ['-b', '--boot']:
+                return True
+            if arg.startswith('-') and 'b' in arg:
+                # like: FoxDot -pbs startup.py
+                return True
 
         # Loading from env
         env = os.getenv("BOOT_ON_STARTUP")

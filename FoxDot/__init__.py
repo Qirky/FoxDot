@@ -19,17 +19,13 @@ Copyright Ryan Kirkbride 2015
 
 from __future__ import absolute_import, division, print_function
 
-from FoxDot.BootManager import Boot
+from .BootManager import Boot
+from .Cli import main
 
 if not Boot.running and Boot.BOOT_ON_STARTUP:
     Boot.start()
 
 from .lib import *
-
-def main():
-    """ Function for starting the GUI when importing the library """
-    from .lib.Workspace.Editor import workspace
-    FoxDot = workspace(FoxDotCode).run()
 
 def Go():
     """ Function to be called at the end of Python files with FoxDot code in to keep
