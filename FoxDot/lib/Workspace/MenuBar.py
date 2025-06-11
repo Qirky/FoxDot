@@ -71,6 +71,8 @@ class MenuBar(Menu):
         codemenu.add_command(label="Evaluate Line",          command=self.root.exec_line,   accelerator="Alt+Return")
         codemenu.add_command(label="Clear Scheduling Clock", command=self.root.killall,     accelerator="{}+.".format(ctrl))
         codemenu.add_separator()
+        codemenu.add_command(label="Boot Server (experimental)", command=self.root.boot,     accelerator="{}+b".format(ctrl))
+        codemenu.add_separator()
         codemenu.add_checkbutton(label="Use SC3 Plugins",    command=self.root.toggle_sc3_plugins, variable=self.sc3_plugins)
         codemenu.add_separator()
         codemenu.add_checkbutton(label="Listen for connections", command=self.root.allow_connections, variable=self.root.listening_for_connections)
