@@ -13,6 +13,8 @@ OSCFunc(
         Server.default.options.numBuffers,
         Server.default.options.maxNodes,
         Server.default.options.maxSynthDefs,
+        <FOXDOT_ROOT>,
+        <FOXDOT_SND>,
     );
     }, '/foxdot/info'
 );
