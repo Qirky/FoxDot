@@ -42,6 +42,7 @@ from ..Settings import FONT, FOXDOT_ICON, FOXDOT_HELLO, SC3_PLUGINS, FOXDOT_CONF
 from ..Settings import MENU_ON_STARTUP, TRANSPARENT_ON_STARTUP, RECOVER_WORK, CHECK_FOR_UPDATE
 from ..Settings import PY_VERSION
 from ..ServerManager import TempoServer
+from ..Translation import _
 
 # App object
 
@@ -66,11 +67,11 @@ class workspace:
             if pypi_version is not None and Version(pypi_version) > Version(this_version):
 
                 tkMessageBox.showinfo(
-                    "New version available",
-                    "There is a new version of FoxDot available from PyPI. Upgrade by going to your command prompt "
-                    "and running:\n\npip install FoxDot --upgrade"
-                )
+                    _("New version available"),
+                    _("""There is a new version of FoxDot available from PyPI. Upgrade by going to your command prompt and running:
 
+pip install FoxDot --upgrade""")
+                )
             return
 
         # Used for docstring prompt
@@ -360,7 +361,7 @@ class workspace:
             # print(hello)
             # print()
 
-            hello = "Welcome to FoxDot! Press {}+{} for help.".format(ctrl, self.help_key)
+            hello = _("Welcome to FoxDot! Press {ctrl}+{help_key} for help.").format(ctrl=ctrl, help_key=self.help_key)
             print(hello)
             print("-" * len(hello))
 
@@ -380,7 +381,7 @@ class workspace:
 
             if len(text):
 
-                loading = tkMessageBox.askyesno("Load unsaved work?", "Your code wasn't saved last time you used FoxDot, do you want to load any unsaved work?")
+                loading = tkMessageBox.askyesno(_("Load unsaved work?"), _("Your code wasn't saved last time you used FoxDot, do you want to load any unsaved work?"))
 
                 self.root.update()
 
@@ -413,8 +414,8 @@ class workspace:
             self.transparent.set(True)
             self.root.after(100, self.toggle_transparency)
 
-    def set_window_title(self, text="Live Coding with Python and SuperCollider"):
-            return self.root.title("FoxDot v{} - {}".format(self.version, text))
+    def set_window_title(self, text=_("Live Coding with Python and SuperCollider")):
+            return self.root.title(_("FoxDot v{version} - {title}").format(version=self.version, title=text))
 
     def run(self):
         """ Starts the Tk mainloop for the master widget """
@@ -642,26 +643,27 @@ class workspace:
         else:
             ctrl = "Ctrl"
 
-        print("FoxDot Help:")
-        print("-----------------------------------------")
-        print("{}+Return           : Execute code".format(ctrl))
-        print("{}+.                : Stop all sound".format(ctrl))
-        print("{}+=                : Increase font size".format(ctrl))
-        print("{}+-                : Decrease font size".format(ctrl))
-        print("{}+L                : Insert lambda symbol".format(ctrl))
-        print("{}+T                : Insert tilde symbol".format(ctrl))
-        print("{}+S                : Save your work".format(ctrl))
-        print("{}+O                : Open a file".format(ctrl))
-        print("{}+M                : Toggle the menu".format(ctrl))
-        print("{}+{}                : Toggle console window".format(ctrl, self.toggle_key))
-        print("print(SynthDefs)      : View available SynthDefs")
-        print("print(Samples)        : View character-to-sample mapping")
-        print("print(FxList)         : View audio effects")
-        print("print(Attributes)     : View Player attributes")
-        print("print(PatternMethods) : View Pattern methods")
-        print("---------------------------------------------------")
-        print("Please visit foxdot.org for more information")
-        print("---------------------------------------------------")
+        help_text = _("""FoxDot Help:
+-----------------------------------------
+{ctrl}+Return           : Execute code
+{ctrl}+.                : Stop all sound
+{ctrl}+=                : Increase font size
+{ctrl}+-                : Decrease font size
+{ctrl}+L                : Insert lambda symbol
+{ctrl}+T                : Insert tilde symbol
+{ctrl}+S                : Save your work
+{ctrl}+O                : Open a file
+{ctrl}+M                : Toggle the menu
+{ctrl}+{toggle_key}                : Toggle console window
+print(SynthDefs)      : View available SynthDefs
+print(Samples)        : View character-to-sample mapping
+print(FxList)         : View audio effects
+print(Attributes)     : View Player attributes
+print(PatternMethods) : View Pattern methods
+---------------------------------------------------
+Please visit foxdot.org for more information
+---------------------------------------------------""")
+        print(help_text.format(ctrl=ctrl, toggle_key=self.toggle_key))
         return "break"
 
     # Save the current text: Ctrl+s
@@ -672,7 +674,7 @@ class workspace:
         text = self.text.get("0.0",END)
 
         if not self.saved:
-            self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py")],
+            self.filename = tkFileDialog.asksaveasfilename(filetypes=[(_("Python files"), ".py")],
                                                            defaultextension=".py")
         if self.filename:
 
@@ -680,7 +682,7 @@ class workspace:
 
             self.saved = True
 
-            print("Saved '{}'".format(self.filename))
+            print(_("Saved '{filename}'").format(filename=self.filename))
 
             # Remove tmp file
             self.clear_temp_file()
@@ -691,7 +693,7 @@ class workspace:
 
     def saveAs(self,event=None):
         text = self.text.get("0.0",END)
-        self.filename = tkFileDialog.asksaveasfilename(filetypes=[("Python files", ".py")],
+        self.filename = tkFileDialog.asksaveasfilename(filetypes=[(_("Python files"), ".py")],
                                                        defaultextension=".py")
         if self.filename is not None:
 
@@ -699,7 +701,7 @@ class workspace:
 
             self.saved = True
 
-            print("Save successful!")
+            print(_("Save successful!"))
 
             # Remove tmp file
 
@@ -727,14 +729,14 @@ class workspace:
             else:
                 f = open(path, encoding="utf8")
         except Exception as e:
-            return print("{} error occurred when loading file:\n    - '{}'".format(e.__class__.__name__, path))
+            return print(_("{} error occurred when loading file:\n    - '{}'").format(e.__class__.__name__, path))
         self.set_all(f.read())
         f.close()
         return
 
     def newfile(self, event=None):
         ''' Clears the document and asks if the user wants to save '''
-        answer = tkMessageBox.askyesnocancel("New file", "Save your work before creating a new document?")
+        answer = tkMessageBox.askyesnocancel(_("New file"), _("Save your work before creating a new document?"))
         if answer is not None:
             if answer is True:
                 if not self.save():
@@ -746,7 +748,7 @@ class workspace:
         return "break"
 
     def export_console(self):
-        fn = tkFileDialog.asksaveasfilename(filetypes=[("Plain Text File", ".txt")],
+        fn = tkFileDialog.asksaveasfilename(filetypes=[(_("Plain Text File"), ".txt")],
                                             defaultextension='.txt')
         with open(fn, 'w') as f:
             f.write(self.console.read())
@@ -770,7 +772,7 @@ class workspace:
             subprocess.Popen([cmd, FOXDOT_SND])
         except OSError as e:
             print(e)
-            print("Hmm... Looks like we couldn't open the directory but you can find the samples in {}".format(FOXDOT_SND))
+            print(_("Hmm... Looks like we couldn't open the directory but you can find the samples in {}").format(FOXDOT_SND))
 
         return
 
@@ -803,7 +805,7 @@ class workspace:
                 else:
                     f.write(line)
         # Pop-up to tell the user a restart is required
-        tkMessageBox.showwarning(title="Just a heads up", message="Restart of FoxDot is required for the changes to take effect")
+        tkMessageBox.showwarning(title=_("Just a heads up"), message=_("Restart of FoxDot is required for the changes to take effect"))
         return "break"
 
     def toggle_transparency(self, event=None):
@@ -1811,10 +1813,10 @@ class workspace:
         Clock = self.namespace["_Clock"]
         if self.listening_for_connections.get() == True:
             Clock.start_tempo_server(TempoServer, **kwargs)
-            print("Listening for connections on {}".format(Clock.tempo_server))
+            print(_("Listening for connections on {server}").format(server=Clock.tempo_server))
         else:
             Clock.kill_tempo_server()
-            print("Closed connections")
+            print(_("Closed connections"))
         return
 
     def show_popup(self, *args):

@@ -1,0 +1,352 @@
+# Portuguese translations for FoxDot package.
+# Copyright (C) 2025
+# This file is distributed under the same license as the FoxDot package.
+# taconi <igor.taconi@protonmail.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: 0.9.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-24 20:18-0300\n"
+"PO-Revision-Date: 2025-09-24 20:22-0300\n"
+"Last-Translator: taconi <igor.taconi@protonmail.com>\n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: FoxDot/lib/Workspace/ConfigFile.py:41
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: FoxDot/lib/Workspace/ConfigFile.py:44
+msgid "Save Changes"
+msgstr "Salvar Alterações"
+
+#: FoxDot/lib/Workspace/ConfigFile.py:65
+msgid "Save changes"
+msgstr "Salvar alterações"
+
+#: FoxDot/lib/Workspace/ConfigFile.py:65
+msgid "Do you want to save your changes?"
+msgstr "Você que salvar suas alterações"
+
+#: FoxDot/lib/Workspace/ConfigFile.py:79 FoxDot/lib/Workspace/Editor.py:808
+msgid "Just a heads up"
+msgstr "Só uma aviso"
+
+#: FoxDot/lib/Workspace/ConfigFile.py:79
+msgid "A restart of FoxDot is required for the changes to take effect"
+msgstr "É necessário reiniciar o FoxDot para que as alterações entrem em vigor"
+
+#: FoxDot/lib/Workspace/Editor.py:70
+msgid "New version available"
+msgstr "Nova versão disponível"
+
+#: FoxDot/lib/Workspace/Editor.py:71
+msgid ""
+"There is a new version of FoxDot available from PyPI. Upgrade by going to "
+"your command prompt and running:\n"
+"\n"
+"pip install FoxDot --upgrade"
+msgstr ""
+"Há uma nova versão do FoxDot dispovível no PyPI. Atualize indo ao "
+"seu prompt de comando e executando:\n"
+"\n"
+"pip install FoxDot --upgrade"
+
+#: FoxDot/lib/Workspace/Editor.py:364
+#, python-brace-format
+msgid "Welcome to FoxDot! Press {ctrl}+{help_key} for help."
+msgstr "Bem-vindo ao FoxDot! Pressione {ctrl}+{help_key} para ajuda."
+
+#: FoxDot/lib/Workspace/Editor.py:384
+msgid "Load unsaved work?"
+msgstr "Carregar backup?"
+
+#: FoxDot/lib/Workspace/Editor.py:384
+msgid ""
+"Your code wasn't saved last time you used FoxDot, do you want to load any "
+"unsaved work?"
+msgstr ""
+"Seu código não foi salva na última vez que você sou o FoxDot, gostaria de carregar "
+"o backup?"
+
+#: FoxDot/lib/Workspace/Editor.py:417
+msgid "Live Coding with Python and SuperCollider"
+msgstr "Live Coding com Python e SuperCollider"
+
+#: FoxDot/lib/Workspace/Editor.py:418
+#, python-brace-format
+msgid "FoxDot v{version} - {title}"
+msgstr ""
+
+#: FoxDot/lib/Workspace/Editor.py:646
+#, python-brace-format
+msgid ""
+"FoxDot Help:\n"
+"-----------------------------------------\n"
+"{ctrl}+Return           : Execute code\n"
+"{ctrl}+.                : Stop all sound\n"
+"{ctrl}+=                : Increase font size\n"
+"{ctrl}+-                : Decrease font size\n"
+"{ctrl}+L                : Insert lambda symbol\n"
+"{ctrl}+T                : Insert tilde symbol\n"
+"{ctrl}+S                : Save your work\n"
+"{ctrl}+O                : Open a file\n"
+"{ctrl}+M                : Toggle the menu\n"
+"{ctrl}+{toggle_key}                : Toggle console window\n"
+"print(SynthDefs)      : View available SynthDefs\n"
+"print(Samples)        : View character-to-sample mapping\n"
+"print(FxList)         : View audio effects\n"
+"print(Attributes)     : View Player attributes\n"
+"print(PatternMethods) : View Pattern methods\n"
+"---------------------------------------------------\n"
+"Please visit foxdot.org for more information\n"
+"---------------------------------------------------"
+msgstr ""
+"FoxDot Help:\n"
+"-----------------------------------------\n"
+"{ctrl}+Enter            : Executar o código\n"
+"{ctrl}+.                : Parar todo som\n"
+"{ctrl}+=                : Aumentar o tamanho da fonte\n"
+"{ctrl}+-                : Diminuir o tamanho da fonte\n"
+"{ctrl}+L                : Inserir o símbolo lambda\n"
+"{ctrl}+T                : Inserir o símbolo tilde\n"
+"{ctrl}+S                : Salvar seu trabalho\n"
+"{ctrl}+O                : Abrir um arquivo\n"
+"{ctrl}+M                : Alterar visibilidade do menu\n"
+"{ctrl}+{toggle_key}                :  Alterar visibilidade do console\n"
+"print(SynthDefs)      : Ver SynthDefs disponíveis\n"
+"print(Samples)        : Ver mapemande de caracter-sample\n"
+"print(FxList)         : Ver efeitos de áudio\n"
+"print(Attributes)     : Ver atributos do Player\n"
+"print(PatternMethods) : Vier métodos do Pattern\n"
+"---------------------------------------------------\n"
+"Por favor, visite foxdot.org para mais informações\n"
+"---------------------------------------------------"
+
+#: FoxDot/lib/Workspace/Editor.py:677 FoxDot/lib/Workspace/Editor.py:696
+msgid "Python files"
+msgstr "Aquivos Python"
+
+#: FoxDot/lib/Workspace/Editor.py:685
+#, python-brace-format
+msgid "Saved '{filename}'"
+msgstr "Salvo '{filename}'"
+
+#: FoxDot/lib/Workspace/Editor.py:704
+msgid "Save successful!"
+msgstr "Salvo com sucesso!"
+
+#: FoxDot/lib/Workspace/Editor.py:732
+#, python-brace-format
+msgid ""
+"{} error occurred when loading file:\n"
+"    - '{}'"
+msgstr ""
+
+#: FoxDot/lib/Workspace/Editor.py:739
+msgid "New file"
+msgstr "Novo arquivo"
+
+#: FoxDot/lib/Workspace/Editor.py:739
+msgid "Save your work before creating a new document?"
+msgstr "Salve seu trabalho antes de criar um novo documento?"
+
+#: FoxDot/lib/Workspace/Editor.py:751
+msgid "Plain Text File"
+msgstr "Arquivos de Texto"
+
+#: FoxDot/lib/Workspace/Editor.py:775
+#, python-brace-format
+msgid ""
+"Hmm... Looks like we couldn't open the directory but you can find the "
+"samples in {}"
+msgstr ""
+
+#: FoxDot/lib/Workspace/Editor.py:808
+msgid "Restart of FoxDot is required for the changes to take effect"
+msgstr "É necessário reiniciar o FoxDot para que as alterações entrem em vigor"
+
+#: FoxDot/lib/Workspace/Editor.py:1816 FoxDot/lib/Workspace/MenuBar.py:143
+#, python-brace-format
+msgid "Listening for connections on {server}"
+msgstr "Ouvindo conexões no {server}"
+
+#: FoxDot/lib/Workspace/Editor.py:1819 FoxDot/lib/Workspace/MenuBar.py:147
+msgid "Closed connections"
+msgstr "Conexões fechadas"
+
+#: FoxDot/lib/Workspace/MenuBar.py:36
+msgid "New Document"
+msgstr "Novo Documento"
+
+#: FoxDot/lib/Workspace/MenuBar.py:37
+msgid "Open"
+msgstr "Abrir"
+
+#: FoxDot/lib/Workspace/MenuBar.py:38
+msgid "Save"
+msgstr "Salvar"
+
+#: FoxDot/lib/Workspace/MenuBar.py:39
+msgid "Save As..."
+msgstr "Salvar Como..."
+
+#: FoxDot/lib/Workspace/MenuBar.py:40
+msgid "File"
+msgstr "Arquivo"
+
+#: FoxDot/lib/Workspace/MenuBar.py:45 FoxDot/lib/Workspace/MenuBar.py:172
+#: FoxDot/lib/Workspace/MenuBar.py:199
+msgid "Undo"
+msgstr ""
+
+#: FoxDot/lib/Workspace/MenuBar.py:46 FoxDot/lib/Workspace/MenuBar.py:173
+#: FoxDot/lib/Workspace/MenuBar.py:200
+msgid "Redo"
+msgstr ""
+
+#: FoxDot/lib/Workspace/MenuBar.py:48 FoxDot/lib/Workspace/MenuBar.py:176
+#: FoxDot/lib/Workspace/MenuBar.py:203
+msgid "Cut"
+msgstr ""
+
+#: FoxDot/lib/Workspace/MenuBar.py:49 FoxDot/lib/Workspace/MenuBar.py:175
+#: FoxDot/lib/Workspace/MenuBar.py:202
+msgid "Copy"
+msgstr "Copiar"
+
+#: FoxDot/lib/Workspace/MenuBar.py:50 FoxDot/lib/Workspace/MenuBar.py:177
+#: FoxDot/lib/Workspace/MenuBar.py:204
+msgid "Paste"
+msgstr "Colar"
+
+#: FoxDot/lib/Workspace/MenuBar.py:51 FoxDot/lib/Workspace/MenuBar.py:179
+#: FoxDot/lib/Workspace/MenuBar.py:206
+msgid "Select All"
+msgstr "Selecionar Tudo"
+
+#: FoxDot/lib/Workspace/MenuBar.py:53
+msgid "Increase Font Size"
+msgstr "Aumentar a Fonte"
+
+#: FoxDot/lib/Workspace/MenuBar.py:54
+msgid "Decrease Font Size"
+msgstr "Diminuir a Fonte"
+
+#: FoxDot/lib/Workspace/MenuBar.py:56
+msgid "Clear Console"
+msgstr "Limpar Console"
+
+#: FoxDot/lib/Workspace/MenuBar.py:57
+msgid "Export Console Log"
+msgstr "Exportar Log do Console"
+
+#: FoxDot/lib/Workspace/MenuBar.py:58
+msgid "Toggle Console"
+msgstr "Console"
+
+#: FoxDot/lib/Workspace/MenuBar.py:60
+msgid "Toggle Fullscreen"
+msgstr "Fullscreen"
+
+#: FoxDot/lib/Workspace/MenuBar.py:61
+msgid "Toggle Menu"
+msgstr "Menu"
+
+#: FoxDot/lib/Workspace/MenuBar.py:62
+msgid "Toggle Window Transparency"
+msgstr "Transparência"
+
+#: FoxDot/lib/Workspace/MenuBar.py:63
+msgid "Toggle Auto-fill Prompt"
+msgstr "Autocomplete"
+
+#: FoxDot/lib/Workspace/MenuBar.py:64
+msgid "Toggle Beat Counter"
+msgstr "Contador de Batidas"
+
+#: FoxDot/lib/Workspace/MenuBar.py:65
+msgid "Edit"
+msgstr "Editor"
+
+#: FoxDot/lib/Workspace/MenuBar.py:71
+msgid "Evaluate Block"
+msgstr "Executar o Código"
+
+#: FoxDot/lib/Workspace/MenuBar.py:72
+msgid "Evaluate Line"
+msgstr "Executar a Linha"
+
+#: FoxDot/lib/Workspace/MenuBar.py:73
+msgid "Clear Scheduling Clock"
+msgstr "Limpar Relógio de Agendamento"
+
+#: FoxDot/lib/Workspace/MenuBar.py:75
+msgid "Use SC3 Plugins"
+msgstr ""
+
+#: FoxDot/lib/Workspace/MenuBar.py:77
+msgid "Listen for connections"
+msgstr "Ouça as conexões"
+
+#: FoxDot/lib/Workspace/MenuBar.py:78
+msgid "Language"
+msgstr "Linguagem"
+
+#: FoxDot/lib/Workspace/MenuBar.py:84
+msgid "Display help message"
+msgstr "Mostrar mensagem de ajuda"
+
+#: FoxDot/lib/Workspace/MenuBar.py:85
+msgid "Visit FoxDot Homepage"
+msgstr "Visite o site do FoxDot"
+
+#: FoxDot/lib/Workspace/MenuBar.py:86
+msgid "Documentation"
+msgstr "Documentação"
+
+#: FoxDot/lib/Workspace/MenuBar.py:89 FoxDot/lib/Workspace/MenuBar.py:94
+msgid "Low"
+msgstr "Baixo"
+
+#: FoxDot/lib/Workspace/MenuBar.py:91 FoxDot/lib/Workspace/MenuBar.py:96
+msgid "High"
+msgstr "Alto"
+
+#: FoxDot/lib/Workspace/MenuBar.py:92
+msgid "CPU Usage"
+msgstr "Uso de CPU"
+
+#: FoxDot/lib/Workspace/MenuBar.py:95
+msgid "Medium"
+msgstr "Médio"
+
+#: FoxDot/lib/Workspace/MenuBar.py:97
+msgid "Clock Latency"
+msgstr "Latência do Relógio"
+
+#: FoxDot/lib/Workspace/MenuBar.py:99
+msgid "Open Samples Folder"
+msgstr "Abrir Diretório de Samples"
+
+#: FoxDot/lib/Workspace/MenuBar.py:100
+msgid "Open config file (advanced)"
+msgstr "Abrir arquivo de configurações (avançado)"
+
+#: FoxDot/lib/Workspace/MenuBar.py:101
+msgid "Help & Settings"
+msgstr "Ajuda & Configurações"
+
+#: FoxDot/lib/Workspace/MenuBar.py:120
+#, python-brace-format
+msgid "Load Tutorial {num}: {name}"
+msgstr "Abrir Tutorial {num}: {name}"
+
+#: FoxDot/lib/Workspace/MenuBar.py:122
+msgid "Tutorials"
+msgstr "Tutoriais"

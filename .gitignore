@@ -1,3 +1,8 @@
+# translations
+# *.mo  # NOTE: including the .mo in the repository to allow simple installation via: pip install git+<url>
+*.pot
+
+
 # demo and debug folders
 myTests/*
 __pycache__/

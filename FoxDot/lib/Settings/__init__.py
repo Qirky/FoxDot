@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+import ctypes
+import locale
 import os
 import sys
 
@@ -55,6 +57,7 @@ FOXDOT_HELLO = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/hello.txt")
 FOXDOT_STARTUP_PATH = os.path.realpath(FOXDOT_ROOT + "/lib/Custom/startup.py")
 FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 FOXDOT_LOOP  = os.path.realpath(FOXDOT_ROOT + "/snd/_loop_/")
+FOXDOT_LOCALE_DIR   = os.path.realpath(FOXDOT_ROOT + "/locale")
 
 SCLANG_EXEC   = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 SYNTHDEF_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
@@ -80,6 +83,16 @@ if not os.path.isfile(FOXDOT_TEMP_FILE):
     except FileNotFoundError:
         pass
 
+def GET_LANG(default='en'):
+    if SYSTEM == WINDOWS:  # TODO: need testing in windows
+        try:
+            lang = locale.windows_locale.get(ctypes.windll.kernel32.GetUserDefaultLCID()) or default
+        except:
+            return default
+    else:
+        lang, encode = locale.getlocale()
+    return lang
+
 def GET_SYNTHDEF_FILES():
     return [os.path.realpath(SYNTHDEF_DIR + "/" + path) for path in os.listdir(SYNTHDEF_DIR)]
 
@@ -87,7 +100,17 @@ def GET_FX_FILES():
     return [os.path.realpath(EFFECTS_DIR + "/" + path) for path in os.listdir(EFFECTS_DIR)]
 
 def GET_TUTORIAL_FILES():
-    return [os.path.realpath(TUTORIAL_DIR + "/" + path) for path in sorted(os.listdir(TUTORIAL_DIR))]
+    lang = GET_LANG()
+    tutorial_dir = os.path.join(TUTORIAL_DIR, lang)
+    default_tutorial_dir = os.path.join(TUTORIAL_DIR, 'en')
+    if '_' in lang and not os.path.exists(tutorial_dir):
+        lang = lang.split('_')[0]
+        tutorial_dir = os.path.join(TUTORIAL_DIR, lang)
+        if not os.path.exists(tutorial_dir):
+            tutorial_dir = default_tutorial_dir
+    elif not os.path.exists(tutorial_dir):
+        tutorial_dir = default_tutorial_dir
+    return [os.path.realpath(tutorial_dir + "/" + path) for path in sorted(os.listdir(tutorial_dir))]
 
 # Set Environment Variables
 
