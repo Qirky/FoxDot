@@ -1,5 +1,6 @@
 ### 0.9.*
 
+- Internationalizing the tutorials and adding translation for pt-BR
 - Internationalizing the editor and adding translation for pt-BR
 - Added support for Python >3.11, dropping support for earlier versions.g
 

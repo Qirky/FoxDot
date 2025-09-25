@@ -14,6 +14,12 @@ Add new phrases to existing locale files:
 
 Create/Update .mo file:
   $ msgfmt -o FoxDot/locale/$FOXDOT_LOCALE/LC_MESSAGES/FoxDot.mo FoxDot/locale/$FOXDOT_LOCALE/LC_MESSAGES/FoxDot.po
+
+Stating a new demo translation:
+  $ cp -r FoxDot/demo/en/ FoxDot/demo/$FOXDOT_LOCALE/
+
+You can translate the file name, as it will be used in the tutorial menu, just be careful to keep the pattern {num}_{name}.py, for example:
+  $ mv FoxDot/demo/$FOXDOT_LOCALE/00_intro.py FoxDot/demo/$FOXDOT_LOCALE/00_introdução.py
 """
 from gettext import translation
 

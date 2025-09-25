@@ -100,7 +100,17 @@ def GET_FX_FILES():
     return [os.path.realpath(EFFECTS_DIR + "/" + path) for path in os.listdir(EFFECTS_DIR)]
 
 def GET_TUTORIAL_FILES():
-    return [os.path.realpath(TUTORIAL_DIR + "/" + path) for path in sorted(os.listdir(TUTORIAL_DIR))]
+    lang = GET_LANG()
+    tutorial_dir = os.path.join(TUTORIAL_DIR, lang)
+    default_tutorial_dir = os.path.join(TUTORIAL_DIR, 'en')
+    if '_' in lang and not os.path.exists(tutorial_dir):
+        lang = lang.split('_')[0]
+        tutorial_dir = os.path.join(TUTORIAL_DIR, lang)
+        if not os.path.exists(tutorial_dir):
+            tutorial_dir = default_tutorial_dir
+    elif not os.path.exists(tutorial_dir):
+        tutorial_dir = default_tutorial_dir
+    return [os.path.realpath(tutorial_dir + "/" + path) for path in sorted(os.listdir(tutorial_dir))]
 
 # Set Environment Variables
 
