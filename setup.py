@@ -60,6 +60,7 @@ setup(name='FoxDot',
                                  'lib/Extensions/*/*/*.*',
                                  'lib/.version',
                                  'README.md',
+                                 'locale/**/**/*.mo',
                                  ],
                       'FoxDot.lib.Workspace': ['img/*', 'tmp/*'],
                       'FoxDot.lib.Settings' : ['conf.txt']})

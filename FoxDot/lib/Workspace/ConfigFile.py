@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 from .tkimport import *
 
 from ..Settings import FOXDOT_ICON, FOXDOT_ICON_GIF
+from ..Translation import _
 
 try:
     import tkMessageBox
@@ -37,10 +38,10 @@ class Config:
         self.textbox.grid(row=0, column=0, columnspan=2)
         self.y_scroll.config(command=self.textbox.yview)
 
-        self.exit = Button(self.root, text="Cancel", command=self.save_and_close)
+        self.exit = Button(self.root, text=_("Cancel"), command=self.save_and_close)
         self.exit.grid(row=1, column=0, stick=N+S+E+W)
 
-        self.save = Button(self.root, text="Save Changes", command=self.save_changes)
+        self.save = Button(self.root, text=_("Save Changes"), command=self.save_changes)
         self.save.grid(row=1, column=1, sticky=N+S+E+W, columnspan=2)
 
         self.unsaved = True
@@ -61,7 +62,7 @@ class Config:
     def save_and_close(self, event=None):
         """ Asks the user if they want to save changes """
         if self.get_text() != self.text:
-            answer = tkMessageBox.askyesno("Save changes", "Do you want to save your changes?")
+            answer = tkMessageBox.askyesno(_("Save changes"), _("Do you want to save your changes?"))
             if answer:
                 return self.save_changes()
         return self.root.destroy()
@@ -75,6 +76,6 @@ class Config:
         f.write(text)
         f.close()
         self.root.destroy()
-        tkMessageBox.showwarning(title="Just a heads up", message="A restart of FoxDot is required for the changes to take effect")
+        tkMessageBox.showwarning(title=_("Just a heads up"), message=_("A restart of FoxDot is required for the changes to take effect"))
         return
 

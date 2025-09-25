@@ -1,5 +1,7 @@
 from __future__ import absolute_import, division, print_function
 
+import ctypes
+import locale
 import os
 import sys
 
@@ -55,6 +57,7 @@ FOXDOT_HELLO = os.path.realpath(FOXDOT_ROOT + "/lib/Workspace/img/hello.txt")
 FOXDOT_STARTUP_PATH = os.path.realpath(FOXDOT_ROOT + "/lib/Custom/startup.py")
 FOXDOT_SND   = os.path.realpath(FOXDOT_ROOT + "/snd/")
 FOXDOT_LOOP  = os.path.realpath(FOXDOT_ROOT + "/snd/_loop_/")
+FOXDOT_LOCALE_DIR   = os.path.realpath(FOXDOT_ROOT + "/locale")
 
 SCLANG_EXEC   = 'sclang.exe' if SYSTEM == WINDOWS else 'sclang'
 SYNTHDEF_DIR  = os.path.realpath(FOXDOT_ROOT + "/osc/scsyndef/")
@@ -79,6 +82,16 @@ if not os.path.isfile(FOXDOT_TEMP_FILE):
             pass
     except FileNotFoundError:
         pass
+
+def GET_LANG(default='en'):
+    if SYSTEM == WINDOWS:  # TODO: need testing in windows
+        try:
+            lang = locale.windows_locale.get(ctypes.windll.kernel32.GetUserDefaultLCID()) or default
+        except:
+            return default
+    else:
+        lang, encode = locale.getlocale()
+    return lang
 
 def GET_SYNTHDEF_FILES():
     return [os.path.realpath(SYNTHDEF_DIR + "/" + path) for path in os.listdir(SYNTHDEF_DIR)]
