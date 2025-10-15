@@ -109,7 +109,7 @@ class SynthDefBaseClass(object):
     # ---------------------
 
     def __str__(self):
-        Def  = "SynthDef.new(\{},\n".format(self.name)
+        Def  = "SynthDef.new(\\{},\n".format(self.name)
         Def += "{}|{}|\n".format("{", format_args(kwargs=self.defaults, delim='='))
         Def += "{}\n".format(self.get_base_class_variables())
         Def += "{}\n".format(self.get_base_class_behaviour())
