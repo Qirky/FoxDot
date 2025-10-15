@@ -19,6 +19,8 @@ Copyright Ryan Kirkbride 2015
 
 from __future__ import absolute_import, division, print_function
 
+import importlib.metadata
+
 def boot_supercollider():
     """ Uses subprocesses to boot supercollider from the cli """
 
@@ -109,6 +111,15 @@ def main():
     """ Function for starting the GUI when importing the library """
     from .lib.Workspace.Editor import workspace
     FoxDot = workspace(FoxDotCode).run()
+
+
+# load plugins
+for _ep in importlib.metadata.entry_points(group="FoxDot.namespace_hooks"):
+    try:
+        _ep.load()(FoxDotCode.namespace)
+    except:
+        pass
+
 
 def Go():
     """ Function to be called at the end of Python files with FoxDot code in to keep
