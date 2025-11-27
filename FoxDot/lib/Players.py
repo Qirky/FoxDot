@@ -1144,15 +1144,63 @@ class Player(Repeatable):
         self.attrmap("degree", "sample", kwargs)
         return self
 
-    def map(self, other, mapping, otherattr="degree"):
-        """ p1 >> pads().map(b1, {0: {oct=[4,5], dur=PDur(3,8), 2: oct})     """
-        # Convert dict to {"oct": {4}}
-        # key is the value of player key, attr is 
-        for key, minimap in mapping.items():
-            for attr, value in minimap.items():
-                setattr(self, attr, mapvar(getattr(other, attr), values))
-        return self
+    def map(self, other=None, /, *, k=None, d=0, **mappings):
+        """Map a value to a given condition.
 
+        Abbreviation of:
+            >>> d1 >> play(PwRand(['-', 'o'], [80, 20]))
+            >>> b1 >> dbass(dur=1/2, oct=d1.degree.map({'-': 5, 'o': 6}))
+
+        Example:
+            map another player
+            >>> d1 >> play(PwRand(['-', 'o'], [80, 20]))
+            >>> b1 >> dbass(dur=1/2).map(d1, oct={'-': 5, 'o': 6})
+
+            or itself
+            >>> s1 >> space(P[:7:2]).map(oct={0: var([6, 5])})
+
+            play by `char`
+            >>> d2 >> play('{xX}').map(sample={'x': 2, 'V': var([2,4], [3,1])})
+            loop by `pshift`
+            >>> l1 >> loop('foxdot', pshift=PWalk(2,3)).map(rate={0: 2}, lpf={3: 5000, 0: 1000}, hpf={-3: 800})
+            synth by `degree`
+            >>> s1 >> space(P[:7]).map(root={0: P(4,5), 3: P^P[:10:3]})
+
+            or define which attr should be used with k=
+            >>> k1 >> saw(tremolo=PSine(4)).map(root={0.0: 1, -1.0: -2}, k='tremolo')
+
+            define the default value (default: 0) with d=
+
+            >>> d1 >> play('xs:h', dur=1)
+            >>> v1 >> donk(pan=PWhite(-1, 1))
+            >>> v1.map(d1, degree={':': P(var([-2,4],8),0,2), 'h': P*(-2,-4,0,1)}, d=var(P[:2]))
+
+            the value of d= can be a function that will receive the current value and should return the new value
+            >>> f1 >> space(dur=1/2).degrade(.1).map(v1, degree={}, d=lambda val: 6 if (val >= 3) else 4)
+
+            in addition to d=, the mapping keys can also be a
+            function that will receive the current value and return True or False
+            >>> f2 >> swell(dur=2).map(v1, degree={lambda val: val >= 3: 6})
+
+            values can also receive functions and, like the functions for d=,
+            will receive the current value and should return the new value
+            >>> f3 >> dirt(cut=.25, dur=PDur(3,8)).map(v1, degree={bool: lambda val: 3 if val > 8 else 9})
+        """
+        other = other or self
+
+        if k is not None:
+            attr = k
+        elif other.synthdef == SamplePlayer:
+            attr = 'char'
+        elif other.synthdef == LoopPlayer:
+            attr = 'pshift'
+        else:
+            attr = 'degree'
+        player_key = getattr(other, attr)
+
+        for attr, mapping in mappings.items():
+            setattr(self, attr, player_key.map(mapping, d))
+        return self
     
     # --- Misc. Standard Object methods
 
