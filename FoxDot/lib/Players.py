@@ -262,9 +262,12 @@ class Player(Repeatable):
 
         Repeatable.__init__(self)
 
-        self.method_synonyms["->"] = "rshift"
-        self.method_synonyms["<-"] = "lshift"
-    
+        self.method_synonyms |= {
+            "->": "rshift",
+            "<-": "lshift",
+            "!": "stutter",
+        }
+
         # General setup
         
         self.synthdef = None
