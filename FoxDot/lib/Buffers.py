@@ -160,8 +160,18 @@ class BufferManager(object):
         self._fn_to_buf = {}
         self._paths = [FOXDOT_LOOP] + list(paths)
         self._ext = ['wav', 'wave', 'aif', 'aiff', 'flac']
-
-        self.loops = [fn.rsplit(".",1)[0] for fn in os.listdir(FOXDOT_LOOP)]
+    
+    @property
+    def loops(self):
+        """Sorted list of available loops."""
+        return sorted(
+            {
+                loop
+                for path in self._paths
+                for filename in os.listdir(path)
+                if (loop := filename.rsplit(".", 1)[0])
+            },
+        )
 
     def __str__(self):
         return "\n".join(["%r: %s" % (k, v) for k, v in sorted(DESCRIPTIONS.items())])
