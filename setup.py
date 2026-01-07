@@ -22,6 +22,7 @@ setup(name='FoxDot',
       extras_require={
           "simple": ["wxPython"],
           "midi": ["midiutil"],
+          "jedi": ["jedi>=0.19.2,<1.0.0"],
       },
       packages=['FoxDot',
                 'FoxDot.lib',
