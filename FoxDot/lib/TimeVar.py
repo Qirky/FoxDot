@@ -853,6 +853,20 @@ class _var_dict(object):
 
     def __init__(self):
         self.__vars = {}
+
+        # Hack to use var.| with jedi complete
+        super().__setattr__('__wrapped__', None)
+        super().__setattr__('__signature__', None)
+        super().__setattr__('__partialmethod__', None)
+        super().__setattr__('__name__', None)
+        super().__setattr__('__code__', None)
+        super().__setattr__('__defaults__', None)
+        super().__setattr__('__kwdefaults__', None)
+        super().__setattr__('__annotations__', None)
+        super().__setattr__('__text_signature__', None)
+    def __dir__(self):
+        return list(self.__vars)
+
     @staticmethod
     def __call__(*args, **kwargs):
         return TimeVar(*args, **kwargs)
