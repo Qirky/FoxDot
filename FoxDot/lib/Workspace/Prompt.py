@@ -9,7 +9,6 @@ from .tkimport import *
 from .AppFunctions import index as get_index
 from .Format import get_keywords
 from ..Effects import FxList
-from ..TimeVar import var
 
 try:
     import jedi
@@ -39,16 +38,19 @@ except (ModuleNotFoundError, ImportError):
 
 
 def replace_player_signature(p: 'type[Player]'):
+    """
+    Function to change a Player's signature so that effects can be used as
+    options in autocomplete.
+    """
     signature = inspect.signature(p)
     parameters = []
 
     params = list(p.fx_attributes)
     for key in p.fx_attributes:
-        default = FxList.defaults[key]
         parameters.append(
             inspect.Parameter(
                 name=key,
-                default=default,
+                default=FxList.defaults[key],
                 kind=inspect.Parameter.KEYWORD_ONLY,
             ),
         )
@@ -77,16 +79,16 @@ class FoxDotComplete:
         return ''
 
 
+@dataclass
 class Timeout:
-    def __init__(self, seconds=1, error_message='Timeout'):
-        self.seconds = seconds
-        self.error_message = error_message
-
-    def handle_timeout(self, signum, frame):
-        raise TimeoutError(self.error_message)
+    seconds: int = 1
+    error_message: str = 'Timeout'
 
     def __enter__(self):
-        signal.signal(signal.SIGALRM, self.handle_timeout)
+        def _handle_timeout(_signum, _frame):
+            raise TimeoutError(self.error_message)
+
+        signal.signal(signal.SIGALRM, _handle_timeout)
         signal.alarm(self.seconds)
 
     def __exit__(self, type, value, traceback):
@@ -95,14 +97,16 @@ class Timeout:
 
 class TextPrompt:
     enable_jedi_complete = enable_jedi_complete  # GUI.prompt.enable_jedi_complete = False
-    timeout = 5  # GUI.prompt.timeout_complete = .5
+    enable_jedi_docstring = False  # GUI.prompt.enable_jedi_docstring = True
     tab_complete = True  # GUI.prompt.tab_complete = False
-    show_docstring = False  # GUI.prompt.show_docstring = True
+    timeout = 5  # GUI.prompt.timeout = 1
 
     visible = True
     docstring_visible = False
 
     selected = 0
+    anchor = None
+
     num_items = 6
     pady = 2
 
@@ -129,15 +133,6 @@ class TextPrompt:
         self.re = re.compile(r"(\w+)$")
 
         self.__visible = True
-        self.anchor = None
-
-        self.hide()
-
-        # Binds
-        self.master.bind('<Tab>', lambda event: self.tab())
-        self.master.bind('<Escape>', lambda event: self.escape())
-        self.master.bind('<Control-space>', lambda event: self.toogle(force=True))
-        self.master.bind('<Control-D>', lambda event: self.toggle_docstring())
 
         # Docstring
         self.docstring_visible = False
@@ -152,24 +147,33 @@ class TextPrompt:
             pady=self.pady,
         )
 
+        # Binds
+        self.master.bind('<Tab>', lambda event: self.tab())
+        self.master.bind('<Escape>', lambda event: self.escape())
+        self.master.bind('<Control-space>', lambda event: self.toogle(force=True))
+        self.master.bind('<Control-D>', lambda event: self.toggle_docstring())
+
+        self.hide()
+
     @property
     def namespace(self):
-        _namespace = set(self.root.namespace)
-        _namespace |= set(get_keywords())
-        _namespace |= set(self.root.namespace["SynthDefs"])
-        _namespace |= set(self.root.namespace["Player"].get_attributes())
-        _namespace |= {"every", "often", "sometimes", "rarely"}
-        _namespace |= set(self.root.namespace["Pattern"].get_methods())
-        _namespace |= set(self.root.namespace["Scale"].names())
-        _namespace |= {"SynthDefs"}
-        return sorted(list(_namespace))
+        ns = set(self.root.namespace)
+        ns = set(self.root.namespace['Samples'].loops)
+        ns |= set(get_keywords())
+        ns |= set(self.root.namespace["SynthDefs"])
+        ns |= set(self.root.namespace["Player"].get_attributes())
+        ns |= {"every", "often", "sometimes", "rarely"}
+        ns |= set(self.root.namespace["Pattern"].get_methods())
+        ns |= set(self.root.namespace["Scale"].names())
+        ns |= {"SynthDefs"}
+
+        return sorted(list(ns))
 
     def get_start_of_word(self):
         """ Returns the TK index and characters directly preceeding the INSERT marker """
         # Get contents of this line up to the INSERT
         row, col = get_index(self.master.index(INSERT))
-        start, end = f"{row}.0", f"{row}.{col}"
-        text = self.master.get(start, end)
+        text = self.master.get(f"{row}.0", f"{row}.{col}")
         match = self.re.search(text)
 
         if match is not None:
@@ -179,77 +183,11 @@ class TextPrompt:
             index, text = "1.0", ""
             self.anchor = None
 
-        return (index, text)
+        return index, text
 
     def in_word(self):
         """ Returns True if the next character is alphanumeric """
         return self.master.get(INSERT).isalnum()
-
-    def clear(self):
-        for value in self.values:
-            value.set("")
-
-    def tab(self):
-        """Tab complete action."""
-        if not self.visible or not self.tab_complete:
-            return self.root.tab()
-        self.autocomplete()
-        return 'break'
-
-    def escape(self):
-        """Hide prompt if visible."""
-        if not self.visible:
-            return self.root.toggle_true_fullscreen()
-        self.hide()
-
-        if self.docstring_visible:
-            self.toggle_docstring()
-
-        return 'break'
-
-    def toogle(self, force=False):
-        """Toggle prompt"""
-        self.hide() if self.visible else self.show(force=force)
-        return 'break'
-
-    def update_docstring(self, helpers):
-        if not helpers or not (doc := helpers[0].docstring()):
-            return
-
-        self.docstring_var.set(doc)
-
-        width = max(len(line) for line in self.docstring_var.get().splitlines())
-        self.docstring.config(width=width, bg=self.fg)
-
-        x = self.x if self.x < 9999 else 200
-        y = self.y if self.y < 9999 else 20
-
-        length  = max((len(val.get()) for val in self.values))
-        base = length * 20 if length else 300
-
-        self.docstring.place(x=x+base, y=y+42)
-        self.docstring_visible = True
-
-    def toggle_docstring(self, helpers=None):
-        self.docstring_var.set('')
-
-        if not self.docstring_visible:
-            line, column = get_index(self.master.index(INSERT))
-            try:
-                return self.update_docstring(helpers or self.interpreter.help(line, column))
-            except AttributeError:
-                print('AttributeError')
-
-        self.docstring.place(x=9999, y=9999)
-        self.docstring_visible = False
-
-    def hide(self):
-        self.clear()
-        self.move(x=9999, y=9999)
-        self.visible = False
-
-        if self.docstring_visible:
-            self.toggle_docstring()
 
     def show(self, force=False):
         """Displays the prompt with suggestions."""
@@ -280,6 +218,51 @@ class TextPrompt:
         self.move(self.x, self.y)
         self.visible = True
 
+    def tab(self):
+        """Tab complete action."""
+        if not self.visible or not self.tab_complete:
+            return self.root.tab()
+        self.autocomplete()
+        return 'break'
+
+    def escape(self):
+        """Hide prompt if visible."""
+        if not self.visible:
+            return self.root.toggle_true_fullscreen()
+        self.hide()
+
+        if self.docstring_visible:
+            self.toggle_docstring()
+
+        return 'break'
+
+    def move(self, x, y):
+        offset = self.h
+        width  = max((len(val.get()) for val in self.values))
+        for i, label in enumerate(self.labels):
+            if self.values[i].get() == "":
+                label.place(x=9999, y=9999)
+                continue
+
+            label.place(x=x, y=y + offset)
+            label.config(width=width, bg=(self.fg if self.selected == i else self.bg),)
+            offset += (self.h + (self.pady * 2))
+            if self.selected == i and self.enable_jedi_docstring:
+                self.docstring_visible = False
+                self.toggle_docstring([self.suggestions[i]])
+
+    def hide(self):
+        self.clear()
+        self.move(x=9999, y=9999)
+        self.visible = False
+
+        if self.docstring_visible:
+            self.toggle_docstring()
+
+    def clear(self):
+        for value in self.values:
+            value.set("")
+
     def update_values(self):
         """Update values."""
         total = len(self.suggestions)
@@ -289,9 +272,27 @@ class TextPrompt:
                 continue
 
             value.set(self.suggestions[row].name)
-            if self.show_docstring and row == self.selected:
+            if self.enable_jedi_docstring and row == self.selected:
                 self.docstring_visible = False
                 self.toggle_docstring([self.suggestions[row]])
+
+    def update_docstring(self, helpers):
+        if not helpers or not (doc := helpers[0].docstring()):
+            return
+
+        self.docstring_var.set(doc)
+
+        width = max(len(line) for line in self.docstring_var.get().splitlines())
+        self.docstring.config(width=width, bg=self.fg)
+
+        x = self.x if self.x < 9999 else 200
+        y = self.y if self.y < 9999 else 20
+
+        length  = max((len(val.get()) for val in self.values))
+        base = length * 20 if length else 300
+
+        self.docstring.place(x=x+base, y=y+42)
+        self.docstring_visible = True
 
     @property
     def interpreter(self):
@@ -312,25 +313,9 @@ class TextPrompt:
     def find_suggestions(self, fuzzy=False):
         line, column = get_index(self.master.index(INSERT))
         if self.enable_jedi_complete and jedi:
-            with suppress(TimeoutError), Timeout(seconds=self.timeout):
+            with suppress(Exception), Timeout(seconds=self.timeout):
                 return self.interpreter.complete(line, column, fuzzy=fuzzy)
         return []
-
-
-    def move(self, x, y):
-        offset = self.h
-        width  = max((len(val.get()) for val in self.values))
-        for i, label in enumerate(self.labels):
-            if self.values[i].get() == "":
-                label.place(x=9999, y=9999)
-                continue
-
-            label.place(x=x, y=y + offset)
-            label.config(width=width, bg=(self.fg if self.selected == i else self.bg),)
-            offset += (self.h + (self.pady * 2))
-            if self.selected == i and self.show_docstring:
-                self.docstring_visible = False
-                self.toggle_docstring([self.suggestions[i]])
 
     def cycle_up(self):
         if self.selected == 0:
@@ -359,3 +344,21 @@ class TextPrompt:
             self.master.insert(INSERT, WORD)
             self.root.update()
         self.hide()
+
+    def toogle(self, force=False):
+        """Toggle prompt"""
+        self.hide() if self.visible else self.show(force=force)
+        return 'break'
+
+    def toggle_docstring(self, helpers=None):
+        self.docstring_var.set('')
+
+        if not self.docstring_visible:
+            line, column = get_index(self.master.index(INSERT))
+            try:
+                return self.update_docstring(helpers or self.interpreter.help(line, column))
+            except AttributeError:
+                print('AttributeError')
+
+        self.docstring.place(x=9999, y=9999)
+        self.docstring_visible = False
